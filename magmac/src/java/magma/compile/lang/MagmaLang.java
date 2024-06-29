@@ -43,41 +43,63 @@ public class MagmaLang {
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("less-than", "<", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
+                Lang.createOperatorRule("less-than-or-equals", "<=", value),
                 Lang.createNotRule(value),
                 new TypeRule("quantity", new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("value", value), ")")))),
                 createConstructionRule(statement)
         ))));
 
         statement.setRule(new ContextRule("Not a statement.", new OrRule(List.of(
-                Lang.createBlockCommentRule(),
-                Lang.createCommentRule(),
+                Lang.createKeywordRule("break"),
+                Lang.createKeywordRule("continue"),
+                Lang.createEmptyStatementRule(),
+                createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
+                createStructRule(definition, statement, value),
                 Lang.createConditionRule("if", value, statement),
                 Lang.createConditionRule("while", value, statement),
                 Lang.createElseRule(statement),
                 Lang.createReturnRule(value),
-                Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
+
+                Lang.createAssignmentRule(value),
                 createFunctionRule(statement, value),
 
                 Lang.createDefinitionRule(definition),
                 Lang.createDeclarationRule(definition, value),
 
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
-                Lang.createEmptyStatementRule(),
-                createStructRule(definition),
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
-                Lang.createKeywordRule("break"),
-                Lang.createKeywordRule("continue"),
-                new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";")))
+                new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";"))),
+                Lang.createStatementRule(value),
+                createObjectRule(statement)
         ))));
 
         return Lang.createBlock(new OrRule(List.of(
                 Lang.createImportRule(Lang.createNamespaceRule()),
                 statement)));
+    }
+
+    private static TypeRule createObjectRule(LazyRule statement) {
+        var name = new ExtractStringRule("name");
+        var child = new ExtractNodeRule("child", Lang.createBlock(statement));
+        var afterKeyword = new FirstRule(name, " {", new RightRule(child, "}"));
+
+        var modifiers = Lang.createModifiersRule();
+
+        return new TypeRule("object", new OrRule(List.of(
+                new FirstRule(modifiers, " object ", afterKeyword),
+                new LeftRule("object ", afterKeyword)
+        )));
+    }
+
+    private static OrRule createCommentRule() {
+        return new OrRule(List.of(
+                Lang.createBlockCommentRule(),
+                Lang.createCommentRule()));
     }
 
     private static TypeRule createConstructionRule(Rule statement) {
@@ -86,10 +108,17 @@ public class MagmaLang {
         return new TypeRule("construction", new StripRule(child));
     }
 
-    private static TypeRule createStructRule(Rule definition) {
+    private static TypeRule createStructRule(Rule definition, Rule statement, Rule value) {
         var modifiers = new SimpleExtractStringListRule("modifiers", " ");
 
-        var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
+        var definition1 = new TypeRule("definition", definition);
+
+        var structMember = new OrRule(List.of(
+                new RightRule(definition1, ";"),
+                createFunctionRule(statement, value),
+                createCommentRule()
+        ));
+        var children = new ExtractNodeRule("child", Lang.createBlock(structMember));
         var name = new ExtractStringRule("name");
 
         var child = new FirstRule(name, " {", new RightRule(children, "}"));

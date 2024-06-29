@@ -1,4 +1,4 @@
 import java.util.Optional;
-public struct Searcher {
-	search : Optional<Integer>;
+export struct Searcher {
+	search : (String) => Optional<Integer>;
 }

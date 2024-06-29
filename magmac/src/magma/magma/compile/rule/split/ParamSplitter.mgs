@@ -5,20 +5,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ParamSplitter() => {
-	public def split(this, input : String) : List<String> => {
-		let mut segments : var = ArrayList();
-		let mut buffer : var = StringBuilder();
-		let mut depth : var = 0;
-		let mut queue : var = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+	public def split(input : String) => {
+		let mut segments = ArrayList();
+		let mut buffer = StringBuilder();
+		let mut depth = 0;
+		let mut queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
 		{
-			let mut c : var = queue.pop();
+			let mut c = queue.pop();
 			if(c=='\"')
 			{
 				buffer.append(c);
 				while(!queue.isEmpty())
 				{
-					let mut next : var = queue.pop();
+					let mut next = queue.pop();
 					buffer.append(next);
 					if(next=='\\')
 					{
@@ -40,7 +40,7 @@ export class def ParamSplitter() => {
 				buffer.append(c);
 				if(!queue.isEmpty())
 				{
-					let mut next : var = queue.peek();
+					let mut next = queue.peek();
 					if(next=='>')
 					{
 						buffer.append(queue.pop());
@@ -54,7 +54,7 @@ export class def ParamSplitter() => {
 			if(c==','&&depth==0)
 			{
 				segments.add(buffer.toString());
-				buffer=StringBuilder();
+				buffer = StringBuilder();
 			}
 			else
 			{
@@ -68,4 +68,5 @@ export class def ParamSplitter() => {
 		segments.add(buffer.toString());
 		return segments.stream().filter(() => !value.isBlank()).toList();
 	}
+	implements Splitter;
 }

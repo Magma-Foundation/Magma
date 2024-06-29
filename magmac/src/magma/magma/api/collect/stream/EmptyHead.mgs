@@ -1,7 +1,6 @@
-import magma.api.option.None;
 import magma.api.option.Option;
-export class def EmptyHead<T>() => {
-	public def head(this) : Option<T> => {
-		return None();
-	}
+import static magma.api.option.None.None;
+export object EmptyHead {
+	public def head() => None();
+	implements Head<T>;
 }

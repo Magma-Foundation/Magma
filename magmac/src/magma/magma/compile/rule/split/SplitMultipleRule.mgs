@@ -1,11 +1,12 @@
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.JoiningCollector;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Result;
-import magma.api.collect.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
-import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
@@ -13,29 +14,25 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-export class def SplitMultipleRule() => {
+import java.util.Optional;
+export object SplitMultipleRule {
 	private final propertyKey : String;
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	def SplitMultipleRule(this, splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
-		this=propertyKey;
-		this=childRule;
-		this=splitter;
-		this=delimiter;
-	}
-	public def toNode(this, input : String) : RuleResult => {
-		let mut split : var = splitter.split(input);
-		let mut members : var = ArrayList();
+	public def toNode(input : String) => {
+		let mut split = splitter.split(input);
+		let mut members = ArrayList();
 		for(childString : String in split){
-			let mut result : var = childRule.toNode(childString);
+			let mut result = childRule.toNode(childString);
 			if(JavaOptionals.toNative(result.findError()).isPresent())
 			return result.mapErr(() => CompileParentError("Cannot process child.", childString, err));
-			let mut optional : var = JavaOptionals.toNative(result.tryCreate());
+			let mut optional = JavaOptionals.toNative(result.tryCreate());
 			if(optional.isEmpty())
 			{
 				return ErrorRuleResult(CompileError("No name present for.", childString));
@@ -44,15 +41,15 @@ export class def SplitMultipleRule() => {
 		}
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
 	}
-	private def joinNodes(this, list : List<Node>) : Result<String, Error_> => {
-		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));
+	def joinNodes(list : List<Node>) => {
+		let mut collector : Collector<String, Optional<String>> = JoiningCollector(delimiter);
+		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(ExceptionalCollector(collector)).mapValue(() => inner.orElse(""));
 	}
-	public def fromNode(this, node : Node) : Result<String, Error_> => {
-		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));
-	}
-	private def createErr(this, node : Node) : Err<String, Error_> => {
-		let mut format : var = "Property '%s' does not exist on node.";
-		let mut message : var = format.formatted(propertyKey);
+	public def fromNode(node : Node) => JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));
+	def createErr(node : Node) => {
+		let mut format = "Property '%s' does not exist on node.";
+		let mut message = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

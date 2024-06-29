@@ -1,0 +1,63 @@
+import magma.api.Tuple;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export class def AdapterNormalizer() => {
+	public def preVisit(node : Node, state : State) => {
+		let mut parentOption = node.findString("parent");
+		if(parentOption.isEmpty())
+		{
+			return Ok(Tuple(node, state));
+		}
+		let mut childrenOption = node.findNodeList("children");
+		if(childrenOption.isEmpty())
+		return Ok(Tuple(node, state));
+		let mut parent = parentOption.orElsePanic();
+		let mut children = childrenOption.orElsePanic();
+		if(parent.equals("BiFunction"))
+		{
+			let mut firstOption = children.get(0);
+			let mut secondOption = children.get(1);
+			if(firstOption.isEmpty()||secondOption.isEmpty())
+			{
+				return Err(CompileError("Parameters required.", node.toString()));
+			}
+			let mut first = firstOption.orElsePanic();
+			let mut second = secondOption.orElsePanic();
+			let mut returnsOption = children.get(2);
+			if(returnsOption.isEmpty())
+			return Err(CompileError("No return type.", node.toString()));
+			let mut returns = returnsOption.orElsePanic();
+			let mut newType = node.clear("function-type").withNodeList("params", JavaList.of(first, second)).withNode("returns", returns);
+			return Ok(Tuple(newType, state));
+		}
+		else if(parent.equals("Predicate")){
+			let mut type = children.get(0);
+			if(type.isEmpty())
+			return Err(CompileError("Predicate requires a type.", node.toString()));
+			let mut reference = node.clear("reference").withString("value", "Bool");
+			let mut newType = node.clear("function-type").withNodeList("params", JavaList.of(type.orElsePanic())).withNode("returns", reference);
+			return Ok(Tuple(newType, state));
+		}
+		else if(parent.equals("Function")){
+			let mut input = children.get(0);
+			if(input.isEmpty())
+			return Err(CompileError("Input type required.", node.toString()));
+			let mut first = input.orElsePanic();
+			let mut returnsOption = children.get(1);
+			if(returnsOption.isEmpty())
+			return Err(CompileError("Return type required.", node.toString()));
+			let mut returns = returnsOption.orElsePanic();
+			let mut newType = node.clear("function-type").withNodeList("params", JavaList.of(first)).withNode("returns", returns);
+			return Ok(Tuple(newType, state));
+		}
+		else return Ok(Tuple(node, state));
+	}
+	implements Visitor;
+}

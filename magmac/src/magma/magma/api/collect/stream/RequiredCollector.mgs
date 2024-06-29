@@ -1,0 +1,7 @@
+import magma.api.option.Option;
+import magma.api.option.Some;
+export class def RequiredCollector<C, T>(collector : Collector<T, C>) => {
+	public def createInitial() => Some(collector.createInitial());
+	public def fold(current : Option<C>, next : Option<T>) => current.and(next).map(() => collector.fold(inner.left(), inner.right()));
+	implements Collector<Option<T>, Option<C>>;
+}

@@ -1,0 +1,44 @@
+import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export class def DeclarationNormalizer() => {
+	public def preVisit(node : Node, state : State) => {
+		let mut newDeclaration = node.mapNode("definition", () => {
+			let mut withoutType = removeType(oldDefinition);
+			let mut oldModifiers = withoutType.findStringList("modifiers").orElse(JavaList.empty());
+			let mut withStatic = attach(oldModifiers, JavaList.empty(), "static", "static");
+			let mut withPublic = attach(oldModifiers, withStatic, "public", "public").addLast("let");
+			let mut newModifiers = oldModifiers.contains("final") ? withPublic : withPublic.addLast("mut");
+			return withoutType.withStringList("modifiers", newModifiers);
+		});
+		return Ok(Tuple(newDeclaration, state));
+	}
+	def removeType(oldDefinition : Node) => {
+		let mut typeOption = oldDefinition.findNode("type");
+		if(typeOption.isPresent())
+		{
+			let mut type = typeOption.orElsePanic();
+			if(type.is("reference"))
+			{
+				let mut valueOption = type.findString("value");
+				if(valueOption.isPresent())
+				{
+					let mut value = valueOption.orElsePanic();
+					if(value.equals("var"))
+					{
+						return oldDefinition.remove("type");
+					}
+				}
+			}
+		}
+		return oldDefinition;
+	}
+	def attach(list : List<String>, initial : List<String>, input : String, output : String) => list.contains(input) ? initial.addLast(output) : initial;
+	implements Visitor;
+}

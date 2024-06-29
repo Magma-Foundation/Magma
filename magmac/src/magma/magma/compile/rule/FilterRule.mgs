@@ -3,19 +3,15 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-export let mut FilterRule = () => class () => {
+export object FilterRule {
 	protected final child : Rule;
-	def FilterRule(this, child : Rule) : public => {
-		this=child;
-	}
-	public def toNode(this, input : String) : RuleResult => {
+	public def toNode(input : String) => {
 		if(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
-	protected abstract computeMessage : String;
-	protected abstract filter : boolean;
-	public def fromNode(this, node : Node) : Result<String, Error_> => {
-		return child.fromNode(node);
-	}
-};
+	def computeMessage : () => String;
+	def filter : (String) => boolean;
+	public def fromNode(node : Node) => child.fromNode(node);
+	implements Rule;
+}

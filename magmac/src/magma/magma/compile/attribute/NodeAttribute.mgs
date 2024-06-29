@@ -1,26 +1,13 @@
-
-	import magma.compile.rule.Node;
-	import java.util.Optional;
-	export class def NodeAttribute(value : Node) => {
-		public static final let Factory : Factory<Node> = Factory((() => {
-			return {
-				public def fromAttribute(this, attribute : Attribute) : Optional<Node> => {
-					return attribute.asNode();
-				}
-				public def toAttribute(this, value : Node) : Attribute => {
-					return NodeAttribute(value);
-				}
-			};
-		})())();
-		
-		;
-		public def asNode(this) : Optional<Node> => {
-			return Optional.of(value);
-		}
-		public def format(this, depth : int) : String => {
-			return value.format(depth);
-		}
-		public static def from(this, node : Node) : Attribute => {
-			return NodeAttribute(node);
-		}
-	}
+import magma.compile.rule.Node;
+import java.util.Optional;
+export object NodeAttribute {
+	public let Factory : Factory<Node> = Factory();
+	public def from(node : Node) => NodeAttribute(node);
+}
+export class def NodeAttribute(value : Node) => {
+	
+	;
+	public def asNode() => Optional.of(value);
+	public def format(depth : int) => value.format(depth);
+	implements Attribute;
+}

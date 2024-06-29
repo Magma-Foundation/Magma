@@ -1,10 +1,8 @@
-import magma.api.Tuple;
 import magma.api.collect.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
-public struct JSONValue {
-	(this, key : String);
-	(this);
-	(this);
-	(this);
+export struct JSONValue {
+	def find(key : String) => None.None();
+	def findValue() => None.None();
+	def stream() => None.None();
 }

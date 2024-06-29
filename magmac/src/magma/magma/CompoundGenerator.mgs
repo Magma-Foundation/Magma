@@ -7,8 +7,9 @@ import magma.compile.lang.Generator;
 import magma.compile.rule.Node;
 import java.util.List;
 export class def CompoundGenerator(children : List<Generator>) => {
-	public def generate(this, root : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
-		let mut initial : var = Tuple(root, state);
+	public def generate(root : Node, state : State) => {
+		let mut initial = Tuple(root, state);
 		return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
 	}
+	implements Generator;
 }

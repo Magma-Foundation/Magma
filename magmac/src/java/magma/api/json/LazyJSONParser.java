@@ -5,7 +5,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 
 public class LazyJSONParser implements JSONParser {
-    private Option<JSONParser> value = new None<>();
+    private Option<JSONParser> value = None.None();
 
     public void setValue(JSONParser value) {
         this.value = new Some<>(value);

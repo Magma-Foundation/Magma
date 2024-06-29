@@ -25,8 +25,8 @@ public record TypeRule(String type, Rule child) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        if (!node.type().equals(type)) {
-            var message = String.format(FORMAT, type, node.type());
+        if (!node.is(type)) {
+            var message = String.format(FORMAT, type, node.findType());
             return new Err<>(new CompileError(message, node.toString()));
         }
 

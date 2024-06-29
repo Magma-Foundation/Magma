@@ -7,6 +7,7 @@ import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
+import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 
 import java.util.function.Function;

@@ -8,19 +8,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-export class def PathUnit() => {
+export object PathUnit {
 	private final root : Path;
 	private final child : Path;
-	def PathUnit(this, root : Path, child : Path) : public => {
-		this=root;
-		this=child;
-	}
-	public def toString(this) : String => {
-		let mut list : var = ArrayList(computeNamespace());
+	public def toString() => {
+		let mut list = ArrayList(computeNamespace());
 		list.add(computeName());
 		return String.join(".", list);
 	}
-	public def read(this) : Result<String, CompileException> => {
+	public def read() => {
 		try 
 		{
 			return Ok(Files.readString(child));
@@ -29,12 +25,13 @@ export class def PathUnit() => {
 			return Err(CompileException(e));
 		}
 	}
-	public def computeNamespace(this) : List<String> => {
-		let mut relativized : var = root.relativize(child.getParent());
+	public def computeNamespace() => {
+		let mut relativized = root.relativize(child.getParent());
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
-	public def computeName(this) : String => {
-		let mut fileName : var = child.getFileName().toString();
+	public def computeName() => {
+		let mut fileName = child.getFileName().toString();
 		return fileName.substring(0, fileName.indexOf('.'));
 	}
+	implements Unit;
 }

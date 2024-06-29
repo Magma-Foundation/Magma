@@ -1,6 +1,7 @@
 import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -10,19 +11,31 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.annotate.State;
-import magma.compile.lang.Generator;
-import magma.compile.lang.JavaAnnotator;
+import magma.compile.annotate.ImmutableState;
+import magma.compile.lang.CompoundVisitor;
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.JavaToMagmaGenerator;
-import magma.compile.lang.MagmaAnnotator;
-import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
+import magma.compile.lang.VisitingGenerator;
+import magma.compile.lang.Visitor;
+import magma.compile.lang.java.AdapterNormalizer;
+import magma.compile.lang.java.DeclarationNormalizer;
+import magma.compile.lang.java.TemplateNormalizer;
+import magma.compile.lang.java.ConstructorNormalizer;
+import magma.compile.lang.java.FilteringVisitor;
+import magma.compile.lang.java.InterfaceNormalizer;
+import magma.compile.lang.java.LambdaNormalizer;
+import magma.compile.lang.java.MethodNormalizer;
+import magma.compile.lang.java.MethodReferenceNormalizer;
+import magma.compile.lang.java.BlockNormalizer;
+import magma.compile.lang.magma.AssignmentFormatter;
+import magma.compile.lang.magma.DeclarationFormatter;
+import magma.compile.lang.magma.FunctionOptimizer;
+import magma.compile.lang.magma.BlockFormatter;
+import magma.compile.lang.magma.TernaryFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,69 +46,65 @@ import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
-export class def Application(config : Configuration) => {
-	static def createDirectory(this, targetParent : Path) : Option<CompileException> => {
+export object Application {
+	def createDirectory(targetParent : Path) => {
 		try 
 		{
 			Files.createDirectories(targetParent);
-			return None();
+			return None.None();
 		}
 		catch (e : IOException){
 			return Some(CompileException("Failed to make parent.", e));
 		}
 	}
-	static def print(this, error : Error_, depth : int) : String => {
-		let mut context : var = formatContext(error, depth);
-		let mut anyMessage : var = error.findMessage();
+	def print(error : Error_, depth : int) => {
+		let mut context = formatContext(error, depth);
+		let mut anyMessage = error.findMessage();
 		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
-		let mut message : var = error.findMessage().orElse("");
-		let mut replaced : var = escape(message);
-		let mut messageAttribute : var = message.isEmpty()?"":" message=\"" + replaced + "\"";
-		let mut causes : var = error.findCauses().orElse(Collections.emptyList());
-		let mut escapedContext : var = escape(error.findContext().orElse(""));
-		let mut formattedContext : var = "\n"+"\t".repeat(depth)+escapedContext;
+		let mut message = error.findMessage().orElse("");
+		let mut replaced = escape(message);
+		let mut messageAttribute = message.isEmpty() ? "" : " message=\"" + replaced + "\"";
+		let mut causes = error.findCauses().orElse(Collections.emptyList());
+		let mut escapedContext = escape(error.findContext().orElse(""));
+		let mut formattedContext = "\n"+"\t".repeat(depth)+escapedContext;
 		if(causes.isEmpty())
 		{
 			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
 		}
-		let mut contextAttribute : var = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
+		let mut contextAttribute = escapedContext.isEmpty() ? "" : " context=\"" + escapedContext + "\"";
 		if(causes.size()==1)
 		{
 			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
 		}
-		let mut list : var = causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
-		let mut builder : var = StringBuilder();
+		let mut list = causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
+		let mut builder = StringBuilder();
 		for(cause : var in list){
-			let mut result : var = print(cause, depth+1);
+			let mut result = print(cause, depth+1);
 			builder.append(result);
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	private static def escape(this, value : String) : String => {
-		return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-	}
-	private static def formatContext(this, e : Error_, depth : int) : String => {
-		let mut actualContext : var = e.findContext().orElse("");
+	def escape(value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	def formatContext(e : Error_, depth : int) => {
+		let mut actualContext = e.findContext().orElse("");
 		if(e.findCauses().isPresent())
 		return actualContext;
-		let mut spacing : var = " ".repeat(depth+1);
-		let mut formatted : var = actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
+		let mut spacing = " ".repeat(depth+1);
+		let mut formatted = actualContext.replace("\n", "\n" + " ".repeat(depth==0 ? 0 : depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
-	static def writeSafely(this, target : Path, csq : String) : Option<CompileException> => {
+	def writeSafely(target : Path, csq : String) => {
 		try 
 		{
 			Files.writeString(target, csq);
-			return None();
+			return None.None();
 		}
 		catch (e : IOException){
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	private static def listGenerators(this) : List<Generator> => {
-		return List.of(JavaAnnotator(), JavaToMagmaGenerator(), MagmaAnnotator(), MagmaFormatter());
-	}
-	private static def findRootRule(this, platform : String) : Result<Rule, CompileException> => {
+	def streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", TemplateNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", TemplateNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer()), FilteringVisitor("generic", AdapterNormalizer()), FilteringVisitor("declaration", DeclarationNormalizer())));
+	def findRootRule(platform : String) => {
 		if(platform.equals("java"))
 		{
 			return Ok(JavaLang.createRootRule());
@@ -106,108 +115,95 @@ export class def Application(config : Configuration) => {
 		}
 		return Err(CompileException("Unknown platform: "+platform));
 	}
-	def run(this) : Option<CompileException> => {
-		return config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
-	}
-	private def compile(this, build : Build) : Option<CompileException> => {
-		return $Void(() => {
-			let mut sources : var = $Result(findSources(build.sourceDirectory()).mapErr(CompileException.new));
-			let mut sourceTrees : var = $Result(parseSources(build, sources));
-			let mut targetTrees : var = $Result(generateTargets(build, sourceTrees));
-			$Option(writeTargets(build, targetTrees));
-		});
-	}
-	def findSources(this, buildSet : BuildSet) : Result<List<Path>, IOException> => {
-		return $(() => {
-			//noinspection resource
-			return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
-		});
-	}
-	def generateTargets(this, build : Build, sourceTrees : Map<Unit, Node>) : Result<Map<Unit, Node>, CompileException> => {
-		return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(Collectors.exceptionally(JavaMap.collecting()));
-	}
-	def generateTarget(this, build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) : Result<Tuple<Unit, Node>, CompileException> => {
-		return $(() => {
-			let mut source : var = entry.left();
-			let mut right : var = entry.right();
-			let mut namespace : var = source.computeNamespace();
-			let mut name : var = source.computeName();
-			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
-			let mut generated : var = $Result(CompoundGenerator(listGenerators()).generate(right, State(sourceTrees.keyStream().collect(JavaSet.collecting()), JavaList())).mapValue(Tuple.left).mapErr(() => writeError(build, error, source)));
-			let mut debug : var = $Result(createDebugDirectory(build, namespace));
-			let mut debugTarget : var = debug.resolve(name+".output.ast");
-			$Option(writeSafely(debugTarget, generated.toString()));
-			return Tuple(source, generated);
-		});
-	}
-	def writeTargets(this, build : Build, targetTrees : Map<Unit, Node>) : Option<CompileException> => {
-		return targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
-	}
-	def writeTarget(this, build : Build, source : Unit, root : Node) : Option<CompileException> => {
-		let mut namespace : var = source.computeNamespace();
-		let mut name : var = source.computeName();
+}
+export class def Application(config : Configuration) => {
+	 run() => config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
+	def compile(build : Build) => $Void(() => {
+		let mut sources = $Result(findSources(build.sourceDirectory()).mapErr(CompileException.new));
+		let mut sourceTrees = $Result(parseSources(build, sources));
+		let mut targetTrees = $Result(generateTargets(build, sourceTrees));
+		$Option(writeTargets(build, targetTrees));
+	});
+	 findSources(buildSet : BuildSet) => $(() => {
+		//noinspection resource
+		return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
+	});
+	 generateTargets(build : Build, sourceTrees : Map<Unit, Node>) => sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
+	 generateTarget(build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) => $(() => {
+		let mut source = entry.left();
+		let mut right = entry.right();
+		let mut namespace = source.computeNamespace();
+		let mut name = source.computeName();
+		System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
+		let mut rootGenerator = CompoundGenerator(List.of(VisitingGenerator(CompoundVisitor(streamNormalizers().collect(JavaList.collecting()))), VisitingGenerator(CompoundVisitor(streamOptimizers().collect(JavaList.collecting()))), VisitingGenerator(CompoundVisitor(streamFormatters().collect(JavaList.collecting())))));
+		let mut generated = $Result(rootGenerator.generate(right, ImmutableState()).mapValue(Tuple.left).mapErr(() => writeError(build, error, source)));
+		let mut debug = $Result(createDebugDirectory(build, namespace));
+		let mut debugTarget = debug.resolve(name+".output.ast");
+		$Option(writeSafely(debugTarget, generated.toString()));
+		return Tuple(source, generated);
+	});
+	def streamOptimizers() => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
+	def streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()), FilteringVisitor("declaration", DeclarationFormatter()), FilteringVisitor("ternary", TernaryFormatter()), FilteringVisitor("assignment", AssignmentFormatter()));
+	 writeTargets(build : Build, targetTrees : Map<Unit, Node>) => targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
+	 writeTarget(build : Build, source : Unit, root : Node) => {
+		let mut namespace = source.computeNamespace();
+		let mut name = source.computeName();
 		System.out.println("Writing target: "+String.join(".", namespace)+"."+name);
-		let mut targetSet : var = build.targetDirectory();
-		let mut targetParent : var = targetSet.location();
+		let mut targetSet = build.targetDirectory();
+		let mut targetParent = targetSet.location();
 		for(segment : String in namespace){
-			targetParent=targetParent.resolve(segment);
+			targetParent = targetParent.resolve(segment);
 		}
 		if(!Files.exists(targetParent))
 		{
-			let mut result : var = createDirectory(targetParent);
+			let mut result = createDirectory(targetParent);
 			if(result.isPresent())
 			{
 				return result;
 			}
 		}
-		let mut target : var = targetParent.resolve(name+"."+targetSet.platform());
+		let mut target = targetParent.resolve(name+"."+targetSet.platform());
 		return findRootRule(targetSet.platform()).mapValue(() => rootRule.fromNode(root).match(() => writeSafely(target, value), () => {
 			print(err, 0);
 			return Some(writeError(build, err, source));
 		})).match(() => inner, Some.new);
 	}
-	def parseSources(this, build : Build, sources : List<Path>) : Result<Map<Unit, Node>, CompileException> => {
-		return JavaList(Collectors.exceptionally(JavaMap.collecting()));
-	}
-	def parseSource(this, build : Build, source : Unit) : Option<Result<Tuple<Unit, Node>, CompileException>> => {
-		let mut namespace : var = source.computeNamespace();
+	 parseSources(build : Build, sources : List<Path>) => JavaList(sources).stream().map(() => PathUnit(build.sourceDirectory().location(), source)).map(() => parseSource(build, unit)).flatMap(Streams.fromOption).collect(ExceptionalCollector(JavaMap.collecting()));
+	 parseSource(build : Build, source : Unit) => {
+		let mut namespace = source.computeNamespace();
 		if(namespace.size()>=2)
 		{
-			let mut slice : var = namespace.subList(0, 2);
+			let mut slice = namespace.subList(0, 2);
 			// Essentially, we want to skip this package.
-			if(slice.equals(List.of("magma", "java")))
+			if(slice.equals(List.of("magma", "java"))||slice.equals(List.of("magma", "lang")))
 			{
-				return None();
+				return None.None();
 			}
 		}
 		System.out.println("Parsing source: "+source);
 		return Some(source.read().mapValue(() => parseWithInput(build, source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
 	}
-	private def parseWithInput(this, build : Build, source : Unit, input : String) : Result<Node, CompileException> => {
-		return $(() => {
-			let mut s : var = $Result(findRootRule(build.sourceDirectory().platform()));
-			return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
-		});
-	}
-	def parse(this, build : Build, unit : Unit, root : Node) : Result<Node, CompileException> => {
-		return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
-	}
-	def writeError(this, build : Build, err : Error_, location : Unit) : CompileException => {
-		let mut result : var = print(err, 0);
+	def parseWithInput(build : Build, source : Unit, input : String) => $(() => {
+		let mut s = $Result(findRootRule(build.sourceDirectory().platform()));
+		return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
+	});
+	 parse(build : Build, unit : Unit, root : Node) => createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
+	 writeError(build : Build, err : Error_, location : Unit) => {
+		let mut result = print(err, 0);
 		return $Void(() => {
-			let mut debugDirectory : var = $Result(createDebugDirectory(build, Collections.emptyList()));
-			let mut errorPath : var = debugDirectory.resolve("error.xml");
+			let mut debugDirectory = $Result(createDebugDirectory(build, Collections.emptyList()));
+			let mut errorPath = debugDirectory.resolve("error.xml");
 			$Option(writeSafely(errorPath, result));
 		}).orElseGet(() => CompileException(location.toString()));
 	}
-	def createDebugDirectory(this, build : Build, namespace : List<String>) : Result<Path, CompileException> => {
-		let mut relativizedDebug : var = build.debugDirectory();
+	 createDebugDirectory(build : Build, namespace : List<String>) => {
+		let mut relativizedDebug = build.debugDirectory();
 		for(s : String in namespace){
-			relativizedDebug=relativizedDebug.resolve(s);
+			relativizedDebug = relativizedDebug.resolve(s);
 		}
 		if(!Files.exists(relativizedDebug))
 		{
-			let mut directoryError : var = createDirectory(relativizedDebug);
+			let mut directoryError = createDirectory(relativizedDebug);
 			if(directoryError.isPresent())
 			{
 				return Err(directoryError.orElsePanic());

@@ -31,7 +31,7 @@ public class JavaResults {
     public static <E extends Throwable> Option<E> $Void(JavaRunnable<E> action) {
         try {
             action.execute();
-            return new None<>();
+            return None.None();
         } catch (Throwable e) {
             //noinspection unchecked
             return new Some<>((E) e);

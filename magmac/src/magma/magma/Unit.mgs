@@ -1,8 +1,8 @@
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import java.util.List;
-public struct Unit {
-	read : Result<String, CompileException>;
-	computeNamespace : List<String>;
-	computeName : String;
+export struct Unit {
+	read : () => Result<String, CompileException>;
+	computeNamespace : () => List<String>;
+	computeName : () => String;
 }

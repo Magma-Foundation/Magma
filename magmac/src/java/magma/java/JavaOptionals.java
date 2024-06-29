@@ -11,7 +11,7 @@ public class JavaOptionals {
     public static <T> Option<T> fromNative(Optional<T> value) {
         return value
                 .<Option<T>>map(Some::new)
-                .orElse(new None<>());
+                .orElse(None.None());
     }
 
     public static <T> Optional<T> toNative(Option<T> value) {

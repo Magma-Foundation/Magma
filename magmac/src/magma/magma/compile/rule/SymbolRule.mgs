@@ -1,17 +1,8 @@
-export class def SymbolRule() => {
-	def SymbolRule(this, child : Rule) : public => {
-		super(child);
-	}
-	private static def isValidDigit(this, i : int, c : char) : boolean => {
-		return i!=0&&Character.isDigit(c);
-	}
-	private static def isUnderscore(this, c : char) : boolean => {
-		return c=='_';
-	}
-	protected def computeMessage(this) : String => {
-		return "Not a symbol.";
-	}
-	protected def filter(this, input : String) : boolean => {
+export object SymbolRule {
+	def isValidDigit(i : int, c : char) => i!=0&&Character.isDigit(c);
+	def isUnderscore(c : char) => c=='_';
+	def computeMessage() => "Not a symbol.";
+	def filter(input : String) => {
 		if(input.isEmpty())
 		{
 			return false;
@@ -19,7 +10,7 @@ export class def SymbolRule() => {
 		let mut i : int = 0;
 		while(i<input.length())
 		{
-			let mut c : var = input.charAt(i);
+			let mut c = input.charAt(i);
 			if(Character.isLetter(c)||isUnderscore(c)||isDollar(c)||isValidDigit(i, c))
 			{
 				i++;
@@ -30,7 +21,5 @@ export class def SymbolRule() => {
 		}
 		return true;
 	}
-	private static def isDollar(this, c : char) : boolean => {
-		return c=='$';
-	}
+	def isDollar(c : char) => c=='$';
 }

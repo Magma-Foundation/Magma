@@ -1,5 +1,6 @@
 package magma.api.collect.stream;
 
+import magma.api.Tuple;
 import magma.api.option.Option;
 import magma.api.result.Result;
 
@@ -23,4 +24,10 @@ public interface Stream<T> extends Head<T> {
     Stream<T> filter(Predicate<T> filter);
 
     <R> Stream<R> flatMap(Function<T, Head<R>> mapper);
+
+    <R> Stream<Tuple<T, R>> extend(Function<T, R> mapper);
+
+    default <R> R into(Function<Stream<T>, R> mapper) {
+        return mapper.apply(this);
+    }
 }

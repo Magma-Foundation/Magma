@@ -7,12 +7,22 @@ import java.util.Optional;
  * as different types. This interface includes default methods to get
  * the attribute value as a string or a list of strings.
  */
-public struct Attribute {
-	(this);
-	(this);
-	;
-	(this);
-	;
-	(this);
-	format : String;
+export struct Attribute {
+	def asNode() => Optional.empty();
+	def asNodeList() => Optional.empty();
+	
+	/**
+     * Retrieves the attribute value as a string.
+     *
+     * @return an Optional containing the string value if present, otherwise empty
+     */
+	def asString() => Optional.empty();
+	
+	/**
+     * Retrieves the attribute value as a list of strings.
+     *
+     * @return an Optional containing the list of string values if present, otherwise empty
+     */
+	def asStringList() => Optional.empty();
+	format : (int) => String;
 }

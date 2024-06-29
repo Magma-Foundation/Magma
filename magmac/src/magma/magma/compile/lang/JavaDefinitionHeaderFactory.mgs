@@ -17,32 +17,31 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-export class def JavaDefinitionHeaderFactory() => {
-	static def createDefinitionHeaderRule(this) : Rule => {
-		let mut type : var = ExtractNodeRule("type", Lang.createTypeRule());
-		let mut name : var = ExtractStringRule("name");
-		let mut generics : var = LeftRule("<", RightRule(Lang.createTypeParamsRule(), ">"));
-		let mut withGenerics : var = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
-		let mut withoutGenerics : var = ContextRule("Without generics.", type);
-		let mut maybeGenerics : var = OrRule(List.of(withGenerics, withoutGenerics));
-		let mut modifiers : var = ModifiersRule();
-		let mut withModifiers : var = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
-		let mut withoutModifiers : var = ContextRule("Without modifiers.", maybeGenerics);
-		let mut maybeModifiers : var = OrRule(List.of(withModifiers, withoutModifiers));
-		let mut annotation : var = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
-		let mut annotations : var = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
-		let mut withAnnotations : var = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
-		let mut withoutAnnotations : var = ContextRule("Without annotations.", maybeModifiers);
-		let mut maybeAnnotations : var = OrRule(List.of(withAnnotations, withoutAnnotations));
-		let mut beforeName : var = ContextRule("Cannot parse before name.", maybeAnnotations);
+export object JavaDefinitionHeaderFactory {
+	def createDefinitionHeaderRule() => {
+		let mut type = ExtractNodeRule("type", Lang.createTypeRule());
+		let mut name = ExtractStringRule("name");
+		let mut generics = LeftRule("<", RightRule(Lang.createTypeParamsRule(), ">"));
+		let mut withGenerics = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
+		let mut withoutGenerics = ContextRule("Without generics.", type);
+		let mut maybeGenerics = OrRule(List.of(withGenerics, withoutGenerics));
+		let mut modifiers = ModifiersRule();
+		let mut withModifiers = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
+		let mut withoutModifiers = ContextRule("Without modifiers.", maybeGenerics);
+		let mut maybeModifiers = OrRule(List.of(withModifiers, withoutModifiers));
+		let mut annotation = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		let mut annotations = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		let mut withAnnotations = ContextRule("With annotations.", LastRule(annotations, "\r\n", maybeModifiers));
+		let mut withoutAnnotations = ContextRule("Without annotations.", maybeModifiers);
+		let mut maybeAnnotations = OrRule(List.of(withAnnotations, withoutAnnotations));
+		let mut beforeName = ContextRule("Cannot parse before name.", maybeAnnotations);
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
-	class def ModifiersRule() => {
-		public static final let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
-		def ModifiersRule(this) : public => {
-			super("modifiers", " ");
-		}
-		protected def qualify(this, child : String) : Optional<Error_> => {
+}
+export class def JavaDefinitionHeaderFactory() => {
+	 object ModifiersRule {
+		public let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		def qualify(child : String) => {
 			if(MODIFIERS.contains(child))
 			{
 				return Optional.empty();
@@ -54,8 +53,7 @@ export class def JavaDefinitionHeaderFactory() => {
 		}
 	}
 	class def SimpleSplitter() => {
-		public def split(this, input : String) : List<String> => {
-			return List.of(input.split("\n"));
-		}
+		public def split(input : String) => List.of(input.split("\r\n"));
+		implements Splitter;
 	}
 }

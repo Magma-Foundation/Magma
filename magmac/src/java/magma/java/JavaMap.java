@@ -42,7 +42,7 @@ public record JavaMap<K, V>(java.util.Map<K, V> internal) implements Map<K, V> {
         if (internal.containsKey(key)) {
             return new Some<>(internal.get(key));
         } else {
-            return new None<>();
+            return None.None();
         }
     }
 

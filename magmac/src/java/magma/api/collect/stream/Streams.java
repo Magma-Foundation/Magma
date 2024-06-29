@@ -4,6 +4,7 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.java.JavaOptionals;
+import magma.java.NativeListHead;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class Streams {
     public static <T> Stream<T> fromOption(Option<T> option) {
         return new HeadedStream<>(option
                 .<Head<T>>map(SingleHead::new)
-                .orElseGet(EmptyHead::new));
+                .orElseGet(EmptyHead::EmptyHead));
     }
 
     public static Stream<Integer> from(int extent) {
@@ -40,7 +41,7 @@ public class Streams {
 
             @Override
             public Option<Integer> head() {
-                if (counter >= extent) return new None<>();
+                if (counter >= extent) return None.None();
                 var value = counter;
                 counter++;
                 return new Some<>(value);
@@ -48,4 +49,12 @@ public class Streams {
         });
     }
 
+    @SafeVarargs
+    public static <T> Stream<T> of(T... values) {
+        return new HeadedStream<>(new NativeListHead<>(List.of(values)));
+    }
+
+    public static Stream<Integer> rangeTo(int extent) {
+        return new HeadedStream<>(new RangeHead(0, extent));
+    }
 }

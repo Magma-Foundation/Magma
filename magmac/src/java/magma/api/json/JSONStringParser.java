@@ -9,6 +9,6 @@ public class JSONStringParser implements JSONParser {
     public Option<JSONValue> parse(String input) {
         return input.startsWith("\"") && input.endsWith("\"")
                 ? new Some<>(new JSONString(input.substring(1, input.length() - 1)))
-                : new None<>();
+                : None.None();
     }
 }

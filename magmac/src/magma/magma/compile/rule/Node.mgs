@@ -1,103 +1,176 @@
-import magma.compile.attribute.Attribute;
-import magma.compile.attribute.Attributes;
-import magma.compile.attribute.MapAttributes;
-import magma.compile.attribute.NodeAttribute;
-import magma.compile.attribute.NodeListAttribute;
-import magma.compile.attribute.StringAttribute;
-import magma.compile.attribute.StringListAttribute;
-import java.util.List;
-import java.util.Optional;
+import magma.api.collect.List;
+import magma.api.collect.stream.Stream;
+import magma.api.option.Option;
 import java.util.function.Function;
-import java.util.function.Supplier;
-export class def Node(type : String, attributes : Attributes) => {
-	def Node(this, type : String) : public => {
-		this(type, MapAttributes());
-	}
-	public def mapNode(this, key : String, nodeNodeFunction : (Node) => Node) : Node => {
-		return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));
-	}
-	public def withString(this, key : String, value : String) : Node => {
-		return with(key, StringAttribute(value));
-	}
-	private def with(this, key : String, value : Attribute) : Node => {
-		return mapAttributes(() => attributes.with(key, value));
-	}
-	public def formatWithDepth(this, depth : int) : String => {
-		return "\t".repeat(depth)+format(depth);
-	}
-	public def format(this, depth : int) : String => {
-		return type+" = "+attributes.format(depth);
-	}
-	public def toString(this) : String => {
-		return formatWithDepth(0);
-	}
-	public def is(this, type : String) : boolean => {
-		return this.type.equals(type);
-	}
-	public def mapAttributes(this, mapper : (Attributes) => Attributes) : Node => {
-		return Node(type, mapper.apply(attributes));
-	}
-	public def retype(this, type : String) : Node => {
-		return Node(type, attributes);
-	}
-	public def withAttributes(this, attributes : Attributes) : Node => {
-		return Node(type, attributes);
-	}
-	public def withNode(this, key : String, value : Node) : Node => {
-		return with(key, NodeAttribute(value));
-	}
-	public def withNodeList(this, key : String, values : List<Node>) : Node => {
-		return with(key, NodeListAttribute(values));
-	}
-	public def withStringList(this, key : String, values : List<String>) : Node => {
-		return with(key, StringListAttribute(values));
-	}
+
+/**
+ * Interface representing a node in a tree structure used in compilation rules.
+ * Provides methods to manipulate and query the node and its children.
+ */
+export struct Node {
 	
-	/*
-    TODO: throw an error if the property requested doesn't exist.
+	/**
+     * Retrieves the type of the node.
+     *
+     * @return the type of the node as a String
      */
-	public def remove(this, key : String) : Node => {
-		return Node(type, attributes.remove(key));
-	}
-	public def has(this, child : String) : boolean => {
-		return attributes.has(child);
-	}
-	public def mapNodes(this, key : String, mapper : (List<Node>) => List<Node>) : Node => {
-		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
-	}
-	public def mapOrSetNodeList(this, key : String, onPresent : (List<Node>) => List<Node>, onEmpty : () => List<Node>) : Node => {
-		if(has(key))
-		{
-			return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, onPresent));
-		}
-		else
-		{
-			return with(key, NodeListAttribute(onEmpty.get()));
-		}
-	}
-	public def mapOrSetStringList(this, key : String, onPresent : (List<String>) => List<String>, onEmpty : () => List<String>) : Node => {
-		if(has(key))
-		{
-			return mapAttributes(() => attributes.mapValue(key, StringListAttribute.Factory, onPresent));
-		}
-		else
-		{
-			return with(key, StringListAttribute(onEmpty.get()));
-		}
-	}
-	public def findNode(this, key : String) : Optional<Node> => {
-		return attributes.apply(key).flatMap(Attribute.asNode);
-	}
-	public def findString(this, key : String) : Optional<String> => {
-		return attributes.apply(key).flatMap(Attribute.asString);
-	}
-	public def findStringList(this, key : String) : Optional<List<String>> => {
-		return attributes.apply(key).flatMap(Attribute.asStringList);
-	}
-	public def clear(this, type : String) : Node => {
-		return Node(type);
-	}
-	public def findNodeList(this, key : String) : Optional<List<Node>> => {
-		return attributes.apply(key).flatMap(Attribute.asNodeList);
-	}
+	findType : () => String;
+	
+	/**
+     * Formats the node with a specified depth, often for printing or debugging.
+     *
+     * @param depth the depth for formatting
+     * @return a formatted String representation of the node
+     */
+	formatWithDepth : (int) => String;
+	
+	/**
+     * Formats the node with a specified depth.
+     *
+     * @param depth the depth for formatting
+     * @return a formatted String representation of the node
+     */
+	format : (int) => String;
+	
+	/**
+     * Checks if the node is of the specified type.
+     *
+     * @param type the type to check against
+     * @return true if the node is of the specified type, false otherwise
+     */
+	is : (String) => boolean;
+	
+	/**
+     * Retypes the node to a new type.
+     *
+     * @param type the new type
+     * @return a new Node with the specified type
+     */
+	retype : (String) => Node;
+	
+	/**
+     * Adds a child node with a specified key.
+     *
+     * @param key   the key for the child node
+     * @param value the child node to add
+     * @return the updated Node
+     */
+	withNode : (String, Node) => Node;
+	
+	/**
+     * Adds a list of child nodes with a specified key.
+     *
+     * @param key    the key for the child nodes
+     * @param values the list of child nodes to add
+     * @return the updated Node
+     */
+	withNodeList : (String, List<Node>) => Node;
+	
+	/**
+     * Checks if the node has a child with the specified key.
+     *
+     * @param child the key of the child to check for
+     * @return true if the node has the specified child, false otherwise
+     */
+	has : (String) => boolean;
+	
+	/**
+     * Maps the list of child nodes associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the child nodes
+     * @param mapper the function to apply to the list of child nodes
+     * @return the updated Node
+     */
+	mapNodes : (String, (List<Node>) => List<Node>) => Node;
+	
+	/**
+     * Finds a child node with a specified key.
+     *
+     * @param key the key of the child node to find
+     * @return an Option containing the child node if present, or an empty Option if not present
+     */
+	findNode : (String) => Option<Node>;
+	
+	/**
+     * Clears the node of all children of a specified type.
+     *
+     * @param type the type of children to clear
+     * @return the updated Node
+     */
+	clear : (String) => Node;
+	
+	/**
+     * Finds a list of child nodes with a specified key.
+     *
+     * @param key the key of the child nodes to find
+     * @return an Option containing the list of child nodes if present, or an empty Option if not present
+     */
+	findNodeList : (String) => Option<List<Node>>;
+	
+	/**
+     * Finds a string value associated with a specified key.
+     *
+     * @param key the key of the string value to find
+     * @return an Option containing the string value if present, or an empty Option if not present
+     */
+	findString : (String) => Option<String>;
+	
+	/**
+     * Finds a list of string values associated with a specified key.
+     *
+     * @param key the key of the string values to find
+     * @return an Option containing the list of string values if present, or an empty Option if not present
+     */
+	findStringList : (String) => Option<List<String>>;
+	
+	/**
+     * Returns a stream of the keys of the node's children.
+     *
+     * @return a Stream of the keys of the node's children
+     */
+	streamKeys : () => Stream<String>;
+	
+	/**
+     * Maps the list of strings associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the strings
+     * @param mapper the function to apply to the list of strings
+     * @return the updated Node
+     */
+	mapStringList : (String, (List<String>) => List<String>) => Node;
+	
+	/**
+     * Adds a string with a specified key.
+     *
+     * @param key   the key for the string
+     * @param value the string to add
+     * @return the updated Node
+     */
+	withString : (String, String) => Node;
+	
+	/**
+     * Adds a string list with a specified key.
+     *
+     * @param key    the key for the string
+     * @param values the string list to add
+     * @return the updated Node
+     */
+	withStringList : (String, List<String>) => Node;
+	
+	/**
+     * Maps the node associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the node
+     * @param mapper the function to apply to the node
+     * @return the updated Node
+     */
+	mapNode : (String, (Node) => Node) => Node;
+	
+	/**
+     * Removes a property.
+     *
+     * @param key The key.
+     * @return Without the property.
+     */
+	remove : (String) => Node;
 }

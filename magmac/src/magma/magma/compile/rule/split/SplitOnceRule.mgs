@@ -9,47 +9,42 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
-export class def SplitOnceRule() => {
+export object SplitOnceRule {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
 	private final searcher : Searcher;
-	def SplitOnceRule(this, leftRule : Rule, slice : String, rightRule : Rule, searcher : Searcher) : public => {
-		this=leftRule;
-		this=slice;
-		this=rightRule;
-		this=searcher;
-	}
-	public def toNode(this, input : String) : RuleResult => {
-		let mut tuple : var = searcher.search(input).map(() => {
-			let mut left1 : var = input.substring(0, keywordIndex);
-			let mut right1 : var = input.substring(keywordIndex+slice.length());
+	public def toNode(input : String) => {
+		let mut tuple = searcher.search(input).map(() => {
+			let mut left1 = input.substring(0, keywordIndex);
+			let mut right1 = input.substring(keywordIndex+slice.length());
 			return Tuple(left1, right1);
 		});
 		return tuple.map(() => {
-			let mut left : var = contentStart.left();
-			let mut right : var = contentStart.right();
-			let mut leftResult : var = leftRule.toNode(left);
+			let mut left = contentStart.left();
+			let mut right = contentStart.right();
+			let mut leftResult = leftRule.toNode(left);
 			if(JavaOptionals.toNative(leftResult.findError()).isPresent())
 			return leftResult;
-			let mut rightResult : var = rightRule.toNode(right);
+			let mut rightResult = rightRule.toNode(right);
 			if(JavaOptionals.toNative(rightResult.findError()).isPresent())
 			return rightResult;
 			return JavaOptionals.toNative(leftResult.findAttributes()).flatMap(() => JavaOptionals.toNative(rightResult.findAttributes()).map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();
 		}).orElseGet(() => {
-			let mut format : var = "Slice '%s' not present.";
-			let mut message : var = format.formatted(slice);
+			let mut format = "Slice '%s' not present.";
+			let mut message = format.formatted(slice);
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
-	public def fromNode(this, node : Node) : Result<String, Error_> => {
-		let mut leftResult : var = leftRule.fromNode(node);
-		let mut rightValue : var = rightRule.fromNode(node);
+	public def fromNode(node : Node) => {
+		let mut leftResult = leftRule.fromNode(node);
+		let mut rightValue = rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
 	}
-	private def createError(this, node : Node, err : Error_) : CompileParentError => {
-		let mut format : var = "Cannot merge node using slice '%s'.";
-		let mut message : var = format.formatted(slice);
+	def createError(node : Node, err : Error_) => {
+		let mut format = "Cannot merge node using slice '%s'.";
+		let mut message = format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);
 	}
+	implements Rule;
 }

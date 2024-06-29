@@ -1,6 +1,5 @@
 package magma.compile.lang;
 
-import magma.api.Tuple;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.ContextRule;
@@ -16,7 +15,6 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
-import magma.compile.rule.split.Searcher;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
@@ -27,15 +25,12 @@ import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Lang {
     static Rule createBlock(Rule member) {
-        return new StripRule(new TypeRule("block", createMembersRule(member)), "before-content", "after-content");
+        return new StripRule(new TypeRule("block", createMembersRule(member)), "before-children", "after-children");
     }
 
     static SplitMultipleRule createMembersRule(Rule member) {
@@ -65,7 +60,7 @@ public class Lang {
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
                 generic,
-                new TypeRule("placeholder", new StripRule(new SymbolRule(new ExtractStringRule("value")))),
+                new TypeRule("reference", new StripRule(new SymbolRule(new ExtractStringRule("value")))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", type), ".", new ExtractStringRule("member"))),
                 createFunctionType(type)
         )));
@@ -162,15 +157,15 @@ public class Lang {
     }
 
     static Rule createAssignmentRule(Rule value) {
-        var reference = new SymbolRule(new ExtractStringRule("reference"));
+        var reference = new StripRule(new SymbolRule(new ExtractStringRule("reference")), "", "");
         var assignable = new OrRule(List.of(
-                new StripRule(reference),
+                reference,
                 new LastRule(reference, ".", new ExtractStringRule("member"))
         ));
 
-        var left = new ExtractNodeRule("assignable", new TypeRule("assignable-parent", assignable));
-        var right = new RightRule(new ExtractNodeRule("value", new StripRule(value)), ";");
-        return new TypeRule("assignment", new FirstRule(left, "=", right));
+        var left = new StripRule(assignable, "", "after-assignable");
+        var right = new RightRule(new ExtractNodeRule("value", value), ";");
+        return new TypeRule("assignment", new FirstRule(left, "=", new StripRule(right, "after-value-separator", "")));
     }
 
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
@@ -202,11 +197,11 @@ public class Lang {
     }
 
     static TypeRule createTernaryRule(LazyRule value) {
-        return new TypeRule("ternary", new FirstRule(
-                new StripRule(new ExtractNodeRule("condition", value)), "?",
-                new FirstRule(
-                        new StripRule(new ExtractNodeRule("true", value)), ":",
-                        new StripRule(new ExtractNodeRule("false", value)))));
+        var condition = new StripRule(new ExtractNodeRule("condition", value), "", "after-condition");
+        var whenTrue = new StripRule(new ExtractNodeRule("true", value), "before-true", "after-true");
+        var whenFalse = new StripRule(new ExtractNodeRule("false", value), "before-false", "");
+
+        return new TypeRule("ternary", new FirstRule(condition, "?", new FirstRule(whenTrue, ":", whenFalse)));
     }
 
     static TypeRule createOperatorRule(String name, String slice, Rule value) {
@@ -270,48 +265,8 @@ public class Lang {
         return new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
     }
 
-    private static class OperatorSearcher implements Searcher {
-        private final String slice;
-
-        public OperatorSearcher(String slice) {
-            this.slice = slice;
-        }
-
-        @Override
-        public Optional<Integer> search(String input) {
-            if (!input.contains(slice)) return Optional.empty();
-
-            var queue = IntStream.range(0, input.length())
-                    .mapToObj(i -> new Tuple<>(i, input.charAt(i)))
-                    .collect(Collectors.toCollection(LinkedList::new));
-
-            var depth = 0;
-            while (!queue.isEmpty()) {
-                var tuple = queue.pop();
-                var i = tuple.left();
-
-                var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
-                if (maybeSlice.equals(slice) && depth == 0) {
-                    return Optional.of(i);
-                } else {
-                    var c = maybeSlice.charAt(0);
-                    if (c == '\'') {
-                        var pop = queue.pop();
-                        if (pop.right() == '\\') queue.pop();
-                        queue.pop();
-                        continue;
-                    }
-
-                    if (c == '(') depth++;
-                    if (c == ')') depth--;
-                }
-            }
-
-        /*
-        TODO: find the operator
-         */
-
-            return Optional.empty();
-        }
+    public static Rule createStatementRule(LazyRule value) {
+        var child = new ExtractNodeRule("child", new StripRule(value));
+        return new TypeRule("statement", new RightRule(child, ";"));
     }
 }

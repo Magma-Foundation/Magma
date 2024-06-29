@@ -1,25 +1,27 @@
 import magma.api.Tuple;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.Map;
+import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;
 export class def JSONObjectParser(valueParser : JSONParser) => {
-	public def parse(this, input : String) : Option<JSONValue> => {
+	public def parse(input : String) => {
 		if(!input.startsWith("{")||!input.endsWith("}"))
-		return None();
-		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(Collectors.required(JavaMap.collecting())).map(JSONObject.new);
+		return None.None();
+		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(RequiredCollector(JavaMap.collecting())).map(JSONObject.new);
 	}
-	private def parseEntry(this, inner : String) : Option<Tuple<String, JSONValue>> => {
-		let mut separator : var = inner.indexOf(':');
+	def parseEntry(inner : String) => {
+		let mut separator = inner.indexOf(':');
 		if(separator==-1)
-		return None();
-		let mut left : var = inner.substring(0, separator).strip();
-		let mut right : var = inner.substring(separator+1).strip();
+		return None.None();
+		let mut left = inner.substring(0, separator).strip();
+		let mut right = inner.substring(separator+1).strip();
 		if(!left.startsWith("\"")||!left.endsWith("\""))
 		{
-			return None();
+			return None.None();
 		}
-		let mut key : var = left.substring(1, left.length()-1);
+		let mut key = left.substring(1, left.length()-1);
 		return valueParser.parse(right).map(() => Tuple(key, value));
 	}
+	implements JSONParser;
 }

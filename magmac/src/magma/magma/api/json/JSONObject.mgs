@@ -1,13 +1,6 @@
-import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
-import magma.api.option.Some;
 export class def JSONObject(entries : Map<String, JSONValue>) => {
-	public def find(this, key : String) : Option<JSONValue> => {
-		return entries.get(key);
-	}
-	public def entryStream(this) : Option<Stream<Tuple<String, JSONValue>>> => {
-		return Some(entries.streamEntries());
-	}
+	public def find(key : String) => entries.get(key);
+	implements JSONValue;
 }

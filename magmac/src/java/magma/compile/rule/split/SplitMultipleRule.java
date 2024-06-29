@@ -1,13 +1,14 @@
 package magma.compile.rule.split;
 
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.JoiningCollector;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Result;
-import magma.api.collect.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
-import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
@@ -15,11 +16,13 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class SplitMultipleRule implements Rule {
     private final String propertyKey;
@@ -55,17 +58,16 @@ public final class SplitMultipleRule implements Rule {
     }
 
     private Result<String, Error_> joinNodes(List<Node> list) {
+        Collector<String, Optional<String>> collector = new JoiningCollector(delimiter);
         return Streams.fromNativeList(list)
                 .map(node -> childRule.fromNode(node))
-                .collect(Collectors.exceptionally(Collectors.joining(delimiter)))
+                .collect(new ExceptionalCollector<Optional<String>, Error_, String>(collector))
                 .mapValue(inner -> inner.orElse(""));
     }
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return node.attributes()
-                .apply(propertyKey)
-                .flatMap(Attribute::asNodeList)
+        return JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList::toNative))
                 .map(this::joinNodes)
                 .orElseGet(() -> createErr(node));
     }

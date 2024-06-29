@@ -1,65 +1,28 @@
 package magma.compile.annotate;
 
-import magma.Unit;
-import magma.api.Tuple;
-import magma.api.collect.LinkedList;
-import magma.api.collect.List;
-import magma.api.result.Err;
-import magma.api.result.Ok;
-import magma.api.result.Result;
-import magma.compile.CompileError;
-import magma.compile.Error_;
-import magma.java.Set;
+/**
+ * Interface representing the state during compilation, with methods to manage and compute depth of the state.
+ */
+public interface State {
 
-public final class State {
-    private final Set<Unit> sources;
-    private final List<List<String>> frames;
+    /**
+     * Enters a new state, often used to represent going deeper in a hierarchical structure.
+     *
+     * @return the new state after entering
+     */
+    State enter();
 
-    public State(Set<Unit> sources, List<List<String>> frames) {
-        this.sources = sources;
-        this.frames = frames;
-    }
+    /**
+     * Computes the depth of the current state, typically representing how deep the state is in a hierarchical structure.
+     *
+     * @return an integer representing the depth of the current state
+     */
+    int computeDepth();
 
-    public State(Set<Unit> sources) {
-        this(sources, new LinkedList<>());
-    }
-
-    public State exit() {
-        return new State(sources, frames.popFirst().map(Tuple::right).orElse(frames));
-    }
-
-    public State enter() {
-        return new State(sources, frames.push(new LinkedList<>()));
-    }
-
-    public boolean isDefined(String value) {
-        if (isDefinedAsLocation(value)) {
-            return true;
-        }
-
-        return frames.stream().anyMatch(frame -> frame.contains(value));
-    }
-
-    private boolean isDefinedAsLocation(String value) {
-        return sources.stream()
-                .map(Unit::computeName)
-                .anyMatch(name -> name.equals(value));
-    }
-
-    public int computeDepth() {
-        return frames.size();
-    }
-
-    public Result<State, Error_> define(String name) {
-        if (frames.isEmpty()) {
-            return new Err<>(new CompileError("No frames present.", frames.toString()));
-        }
-
-        var newFrames = frames.mapLast(last -> last.add(name)).orElse(frames);
-        return new Ok<>(new State(sources, newFrames));
-    }
-
-    public Result<State, Error_> defineAll(List<String> names) {
-        return names.stream().foldLeftToResult(this, State::define);
-    }
+    /**
+     * Exits the current state, often used to represent going up in a hierarchical structure.
+     *
+     * @return the new state after exiting
+     */
+    State exit();
 }

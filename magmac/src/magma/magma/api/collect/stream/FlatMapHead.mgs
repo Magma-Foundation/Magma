@@ -1,0 +1,23 @@
+import magma.api.option.None;
+import magma.api.option.Option;
+import java.util.function.Function;
+ object FlatMapHead {
+	private final outer : Head<T>;
+	private final mapper : (T) => Head<R>;
+	private current : Head<R>;
+	public def head() => while(true){
+		let mut currentHead = current.head();
+		if(currentHead.isPresent())
+		return currentHead;
+		let mut tuple = outer.head().map(mapper).toTuple(current);
+		if(tuple.left())
+		{
+			current = tuple.right();
+		}
+		else
+		{
+			return None.None();
+		}
+	}
+	implements Head<R>;
+}

@@ -7,7 +7,7 @@ import magma.api.collect.stream.Head;
 
 import java.util.List;
 
-class NativeListHead<T> implements Head<T> {
+public class NativeListHead<T> implements Head<T> {
     private final List<T> list;
     private int counter = 0;
 
@@ -17,7 +17,7 @@ class NativeListHead<T> implements Head<T> {
 
     @Override
     public Option<T> head() {
-        if (counter >= list.size()) return new None<>();
+        if (counter >= list.size()) return None.None();
 
         var value = list.get(counter);
         counter++;

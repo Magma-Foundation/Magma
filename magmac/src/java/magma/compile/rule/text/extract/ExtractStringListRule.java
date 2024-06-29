@@ -1,11 +1,14 @@
 package magma.compile.rule.text.extract;
 
+import magma.api.collect.stream.JoiningCollector;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
+import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +23,12 @@ public abstract class ExtractStringListRule extends ExtractRule {
     }
 
     @Override
-    protected Optional<String> fromAttribute(Attribute attribute) {
-        return attribute.asStringList().map(list -> String.join(delimiter, list));
+    protected Optional<String> fromAttribute(Node attribute) {
+        return JavaOptionals.toNative(attribute.findStringList(key).map(this::join));
+    }
+
+    private String join(magma.api.collect.List<String> list) {
+        return list.stream().collect(new JoiningCollector(delimiter)).orElse("");
     }
 
     @Override

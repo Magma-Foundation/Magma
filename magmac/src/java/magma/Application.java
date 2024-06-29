@@ -2,7 +2,8 @@ package magma;
 
 import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -12,19 +13,31 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.annotate.State;
-import magma.compile.lang.Generator;
-import magma.compile.lang.JavaAnnotator;
+import magma.compile.annotate.ImmutableState;
+import magma.compile.lang.CompoundVisitor;
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.JavaToMagmaGenerator;
-import magma.compile.lang.MagmaAnnotator;
-import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
+import magma.compile.lang.VisitingGenerator;
+import magma.compile.lang.Visitor;
+import magma.compile.lang.java.AdapterNormalizer;
+import magma.compile.lang.java.DeclarationNormalizer;
+import magma.compile.lang.java.TemplateNormalizer;
+import magma.compile.lang.java.ConstructorNormalizer;
+import magma.compile.lang.java.FilteringVisitor;
+import magma.compile.lang.java.InterfaceNormalizer;
+import magma.compile.lang.java.LambdaNormalizer;
+import magma.compile.lang.java.MethodNormalizer;
+import magma.compile.lang.java.MethodReferenceNormalizer;
+import magma.compile.lang.java.BlockNormalizer;
+import magma.compile.lang.magma.AssignmentFormatter;
+import magma.compile.lang.magma.DeclarationFormatter;
+import magma.compile.lang.magma.FunctionOptimizer;
+import magma.compile.lang.magma.BlockFormatter;
+import magma.compile.lang.magma.TernaryFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +55,7 @@ public record Application(Configuration config) {
     static Option<CompileException> createDirectory(Path targetParent) {
         try {
             Files.createDirectories(targetParent);
-            return new None<>();
+            return None.None();
         } catch (IOException e) {
             return new Some<>(new CompileException("Failed to make parent.", e));
         }
@@ -109,19 +122,25 @@ public record Application(Configuration config) {
     static Option<CompileException> writeSafely(Path target, String csq) {
         try {
             Files.writeString(target, csq);
-            return new None<>();
+            return None.None();
         } catch (IOException e) {
             return new Some<>(new CompileException("Cannot write.", e));
         }
     }
 
-    private static List<Generator> listGenerators() {
-        return List.of(
-                new JavaAnnotator(),
-                new JavaToMagmaGenerator(),
-                new MagmaAnnotator(),
-                new MagmaFormatter()
-        );
+    private static Stream<Visitor> streamNormalizers() {
+        return Streams.fromNativeList(List.of(
+                new FilteringVisitor("block", new BlockNormalizer()),
+                new FilteringVisitor("record", new TemplateNormalizer()),
+                new FilteringVisitor("interface", new InterfaceNormalizer()),
+                new FilteringVisitor("class", new TemplateNormalizer()),
+                new FilteringVisitor("method", new MethodNormalizer()),
+                new FilteringVisitor("constructor", new ConstructorNormalizer()),
+                new FilteringVisitor("lambda", new LambdaNormalizer()),
+                new FilteringVisitor("method-reference", new MethodReferenceNormalizer()),
+                new FilteringVisitor("generic", new AdapterNormalizer()),
+                new FilteringVisitor("declaration", new DeclarationNormalizer())
+        ));
     }
 
     private static Result<Rule, CompileException> findRootRule(String platform) {
@@ -165,7 +184,7 @@ public record Application(Configuration config) {
     Result<Map<Unit, Node>, CompileException> generateTargets(Build build, Map<Unit, Node> sourceTrees) {
         return sourceTrees.streamEntries()
                 .map(entry -> generateTarget(build, sourceTrees, entry))
-                .collect(Collectors.exceptionally(JavaMap.collecting()));
+                .collect(new ExceptionalCollector<Map<Unit, Node>, CompileException, Tuple<Unit, Node>>(JavaMap.collecting()));
     }
 
     Result<Tuple<Unit, Node>, CompileException> generateTarget(Build build, Map<Unit, Node> sourceTrees, Tuple<Unit, Node> entry) {
@@ -178,8 +197,14 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = $Result(new CompoundGenerator(listGenerators())
-                    .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
+            var rootGenerator = new CompoundGenerator(List.of(
+                    new VisitingGenerator(new CompoundVisitor(streamNormalizers().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamOptimizers().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamFormatters().collect(JavaList.collecting())))
+            ));
+
+            var generated = $Result(rootGenerator
+                    .generate(right, new ImmutableState())
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
 
@@ -189,6 +214,21 @@ public record Application(Configuration config) {
             $Option(writeSafely(debugTarget, generated.toString()));
             return new Tuple<>(source, generated);
         });
+    }
+
+    private Stream<Visitor> streamOptimizers() {
+        return Streams.of(
+                new FilteringVisitor("function", new FunctionOptimizer())
+        );
+    }
+
+    private Stream<Visitor> streamFormatters() {
+        return Streams.of(
+                new FilteringVisitor("block", new BlockFormatter()),
+                new FilteringVisitor("declaration", new DeclarationFormatter()),
+                new FilteringVisitor("ternary", new TernaryFormatter()),
+                new FilteringVisitor("assignment", new AssignmentFormatter())
+        );
     }
 
     Option<CompileException> writeTargets(Build build, Map<Unit, Node> targetTrees) {
@@ -232,7 +272,7 @@ public record Application(Configuration config) {
                 .map(source -> new PathUnit(build.sourceDirectory().location(), source))
                 .map((unit) -> parseSource(build, unit))
                 .flatMap(Streams::fromOption)
-                .collect(Collectors.exceptionally(JavaMap.collecting()));
+                .collect(new ExceptionalCollector<Map<Unit, Node>, CompileException, Tuple<Unit, Node>>(JavaMap.collecting()));
     }
 
     Option<Result<Tuple<Unit, Node>, CompileException>> parseSource(Build build, Unit source) {
@@ -241,8 +281,8 @@ public record Application(Configuration config) {
             var slice = namespace.subList(0, 2);
 
             // Essentially, we want to skip this package.
-            if (slice.equals(List.of("magma", "java"))) {
-                return new None<>();
+            if (slice.equals(List.of("magma", "java")) || slice.equals(List.of("magma", "lang"))) {
+                return None.None();
             }
         }
 

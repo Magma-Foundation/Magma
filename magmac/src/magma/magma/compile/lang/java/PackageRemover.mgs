@@ -1,0 +1,14 @@
+import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export default class def PackageRemover() => {
+	def removeFromChildren(this : Self, children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
+	public def preVisit(this : Self, node : Node, state : State) => Ok(Tuple(node.mapNodes("children", PackageRemover.removeFromChildren), state));
+	implements Visitor;
+}

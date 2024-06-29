@@ -1,0 +1,144 @@
+import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.ResultStream;
+import magma.api.collect.stream.Stream;
+import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export object BlockNormalizer {
+	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
+	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
+		if(node.is("function")||node.is("declaration"))
+		{
+			let mut definitionOptional = node.findNode("definition");
+			if(definitionOptional.isEmpty())
+			return Ok(flattening.withInstanceMember(node));
+			let mut definition = definitionOptional.orElsePanic();
+			let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+			let mut cleanedOptional = cleanup(node, outerName);
+			if(cleanedOptional.isEmpty())
+			return Ok(flattening);
+			let mut cleaned = cleanedOptional.orElsePanic();
+			if(modifiers.contains("static"))
+			{
+				return Ok(flattening.withStaticMember(cleaned));
+			}
+			else
+			{
+				return Ok(flattening.withInstanceMember(cleaned));
+			}
+		}
+		else
+		{
+			return Ok(flattening.withInstanceMember(node));
+		}
+	}
+	def splitIntoObject(node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
+		let mut staticMembers = flattening.staticMembers;
+		let mut instanceMembers = flattening.instanceMembers;
+		if(staticMembers.isEmpty())
+		{
+			return Streams.of(createFunction(node, instanceMembers));
+		}
+		else if(instanceMembers.isEmpty()){
+			return Streams.of(createObject(node, modifiers, name, staticMembers));
+		}
+		else
+		{
+			let mut object = createObject(node, modifiers, name, staticMembers);
+			let mut withChild = createFunction(node, instanceMembers);
+			return Streams.of(object, withChild);
+		}
+	}
+	def createFunction(node : Node, instanceMembers : List<Node>) => {
+		let mut instanceBlock = node.clear("block").withNodeList("children", instanceMembers);
+		return node.withNode("child", instanceBlock);
+	}
+	def createObject(node : Node, oldModifiers : List<String>, name : String, staticMembers : List<Node>) => {
+		let mut staticBlock = node.clear("block").withNodeList("children", staticMembers);
+		let mut newModifiers = oldModifiers.remove("class").remove("def");
+		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
+	}
+	def cleanup(node : Node, outerName : String) => {
+		if(!node.is("function")&&!node.is("declaration"))
+		return Some(node);
+		let mut definitionOptional = node.findNode("definition");
+		if(definitionOptional.isEmpty())
+		return Some(node);
+		let mut definition = definitionOptional.orElsePanic();
+		let mut nameOptional = definition.findString("name");
+		if(nameOptional.isEmpty())
+		return Some(node);
+		if(nameOptional.orElsePanic().equals(outerName))
+		{
+			return None();
+		}
+		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		let mut withNewModifiers = definition.withStringList("modifiers", modifiers.remove("static"));
+		let mut withNewDefinition = node.withNode("definition", withNewModifiers);
+		return Some(withNewDefinition);
+	}
+}
+export class def BlockNormalizer() => {
+	public def postVisit(node : Node, state : State) => {
+		let mut childrenOptional = node.findNodeList("children");
+		if(childrenOptional.isEmpty())
+		return Ok(Tuple(node, state));
+		return flattenChildren(childrenOptional.orElsePanic()).mapValue(() => Tuple(node.withNodeList("children", children), state));
+	}
+	def flattenChildren(nodeList : List<Node>) => nodeList.stream().map(this.flattenChild).into(ResultStream.new).flatMapValue(() => value).collect(ExceptionalCollector(JavaList.collecting()));
+	def flattenChild(node : Node) => {
+		if(!node.is("function"))
+		return Ok(Streams.of(node));
+		let mut definitionOptional = node.findNode("definition");
+		if(definitionOptional.isEmpty())
+		return Ok(Streams.of(node));
+		let mut definition = definitionOptional.orElsePanic();
+		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		if(!modifiers.contains("class"))
+		return Ok(Streams.of(node));
+		let mut nameOptional = definition.findString("name");
+		if(nameOptional.isEmpty())
+		return Ok(Streams.of(node));
+		let mut name = nameOptional.orElsePanic();
+		let mut childOptional = node.findNode("child");
+		if(childOptional.isEmpty())
+		return Ok(Streams.of(node));
+		let mut child = childOptional.orElsePanic();
+		if(!child.is("block"))
+		return Ok(Streams.of(node));
+		let mut oldChildren = child.findNodeList("children").orElse(JavaList.empty());
+		if(hasFactory(oldChildren, name))
+		{
+			let mut children1 = oldChildren.stream().map(() => cleanup(oldChild, name)).flatMap(Streams.fromOption).collect(JavaList.collecting());
+			return Ok(Streams.of(createObject(node, modifiers, name, children1)));
+		}
+		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name, modifiers));
+	}
+	def hasFactory(children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
+		if(!child.is("function"))
+		return false;
+		let mut definition = child.findNode("definition");
+		if(definition.isEmpty())
+		return false;
+		let mut name = definition.orElsePanic().findString("name");
+		if(name.isEmpty())
+		return false;
+		return name.orElsePanic().equals(outerName);
+	});
+	public def preVisit(node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
+	class def Flattening(instanceMembers : List<Node>, staticMembers : List<Node>) => {
+		public def withStaticMember(staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));
+		public def withInstanceMember(instanceMember : Node) => Flattening(instanceMembers.addLast(instanceMember), staticMembers);
+	}
+	implements Visitor;
+}

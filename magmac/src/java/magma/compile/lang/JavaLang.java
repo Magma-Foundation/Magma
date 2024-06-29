@@ -165,6 +165,7 @@ public class JavaLang {
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
+                Lang.createOperatorRule("less-than-or-equals", "<=", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("less-than", "<", value),
@@ -201,7 +202,7 @@ public class JavaLang {
 
         var caller = new ExtractNodeRule("caller", value);
         var withGenerics = new OrRule(List.of(
-                new FirstRule(caller, "<", new ExtractStringRule("temp")),
+                new FirstRule(caller, "<", new RightRule(new ExtractStringRule("generics"), ">")),
                 caller
         ));
 

@@ -1,8 +1,36 @@
 import java.util.List;
 import java.util.Optional;
-public struct Error_ {
-	findMessage : Optional<String>;
-	findCauses : Optional<List<Error_>>;
-	findContext : Optional<String>;
-	calculateDepth : int;
+
+/**
+ * Interface representing an error that may occur during compilation, with methods to retrieve error details.
+ */
+export struct Error_ {
+	
+	/**
+     * Retrieves the error message, if present.
+     *
+     * @return an Optional containing the error message, or an empty Optional if no message is present
+     */
+	findMessage : () => Optional<String>;
+	
+	/**
+     * Retrieves the list of causes for this error, if any.
+     *
+     * @return an Optional containing a list of causes, or an empty Optional if no causes are present
+     */
+	findCauses : () => Optional<List<Error_>>;
+	
+	/**
+     * Retrieves the context in which the error occurred, if present.
+     *
+     * @return an Optional containing the error context, or an empty Optional if no context is present
+     */
+	findContext : () => Optional<String>;
+	
+	/**
+     * Calculates the depth of the error, which may represent the number of nested causes.
+     *
+     * @return an integer representing the depth of the error
+     */
+	calculateDepth : () => int;
 }

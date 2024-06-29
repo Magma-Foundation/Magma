@@ -5,17 +5,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ConditionEndSearcher() => {
-	public def search(this, input : String) : Optional<Integer> => {
-		let mut depth : var = 0;
-		let mut queue : var = IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
+	public def search(input : String) => {
+		let mut depth = 0;
+		let mut queue = IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
 		{
-			let mut tuple : var = queue.pop();
-			let mut i : var = tuple.left();
-			let mut c : var = tuple.right();
+			let mut tuple = queue.pop();
+			let mut i = tuple.left();
+			let mut c = tuple.right();
 			if(c=='\'')
 			{
-				let mut popped : var = queue.pop();
+				let mut popped = queue.pop();
 				if(popped.right()=='\\')
 				{
 					queue.pop();
@@ -38,4 +38,5 @@ export class def ConditionEndSearcher() => {
 		}
 		return Optional.empty();
 	}
+	implements Searcher;
 }

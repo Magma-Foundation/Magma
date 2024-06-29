@@ -1,14 +1,11 @@
-export class def NumberRule() => {
-	def NumberRule(this, child : Rule) : public => {
-		super(child);
-	}
-	private static def allDigits(this, input : String) : boolean => {
+export object NumberRule {
+	def allDigits(input : String) => {
 		if(input.isEmpty())
 		return false;
 		let mut i : int = 0;
 		while(i<input.length())
 		{
-			let mut c : var = input.charAt(i);
+			let mut c = input.charAt(i);
 			if(!Character.isDigit(c))
 			{
 				return false;
@@ -17,10 +14,6 @@ export class def NumberRule() => {
 		}
 		return true;
 	}
-	protected def computeMessage(this) : String => {
-		return "Not a number.";
-	}
-	protected def filter(this, input : String) : boolean => {
-		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
-	}
+	def computeMessage() => "Not a number.";
+	def filter(input : String) => input.startsWith("-") ? allDigits(input.substring(1)) : allDigits(input);
 }

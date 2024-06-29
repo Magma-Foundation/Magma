@@ -1,6 +1,6 @@
 package magma.api.collect.stream;
 
-import magma.api.option.None;
+import magma.api.Tuple;
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -27,7 +27,7 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
     public Stream<T> filter(Predicate<T> filter) {
         return flatMap(value -> new HeadedStream<>(filter.test(value)
                 ? new SingleHead<>(value)
-                : new EmptyHead<>()));
+                : EmptyHead.EmptyHead()));
     }
 
     @Override
@@ -35,7 +35,12 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
         return new HeadedStream<>(head()
                 .map(mapper)
                 .<Head<R>>map(initial -> new FlatMapHead<>(initial, this, mapper))
-                .orElse(new EmptyHead<>()));
+                .orElse(EmptyHead.EmptyHead()));
+    }
+
+    @Override
+    public <R> Stream<Tuple<T, R>> extend(Function<T, R> mapper) {
+        return map(value -> new Tuple<>(value, mapper.apply(value)));
     }
 
     @Override
@@ -65,35 +70,5 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
     @Override
     public Option<T> head() {
         return provider.head();
-    }
-
-    private class FlatMapHead<R> implements Head<R> {
-        private final Head<T> outer;
-        private final Function<T, Head<R>> mapper;
-        private Head<R> current;
-
-        public FlatMapHead(Head<R> initial, HeadedStream<T> outer, Function<T, Head<R>> mapper) {
-            this.outer = outer;
-            this.mapper = mapper;
-            current = initial;
-        }
-
-        @Override
-        public Option<R> head() {
-            while (true) {
-                var currentHead = current.head();
-                if (currentHead.isPresent()) return currentHead;
-
-                var tuple = outer.head()
-                        .map(mapper)
-                        .toTuple(current);
-
-                if (tuple.left()) {
-                    current = tuple.right();
-                } else {
-                    return new None<>();
-                }
-            }
-        }
     }
 }

@@ -38,7 +38,7 @@ public class JavaDefinitionHeaderFactory {
 
         var annotation = new TypeRule("annotation", new LeftRule("@", new ExtractStringRule("value")));
         var annotations = new SplitMultipleRule(new SimpleSplitter(), ", ", "annotations", annotation);
-        var withAnnotations = new ContextRule("With annotations.",new LastRule(annotations, "\n", maybeModifiers));
+        var withAnnotations = new ContextRule("With annotations.",new LastRule(annotations, "\r\n", maybeModifiers));
         var withoutAnnotations = new ContextRule("Without annotations.", maybeModifiers);
         var maybeAnnotations = new OrRule(List.of(withAnnotations, withoutAnnotations));
 
@@ -74,7 +74,7 @@ public class JavaDefinitionHeaderFactory {
     private static class SimpleSplitter implements Splitter {
         @Override
         public List<String> split(String input) {
-            return List.of(input.split("\n"));
+            return List.of(input.split("\r\n"));
         }
     }
 }
