@@ -21,7 +21,7 @@ export object MapAttributes {
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
-	public def apply(key : String) => values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
+	public def apply(key : String) => values.containsKey(key) ? Optional.of(values.get(key)) : Optional.empty();
 	public def merge(other : Attributes) => {
 		let mut entries = other.streamEntries().collect(Collectors.toSet());
 		let mut current : Attributes = this;

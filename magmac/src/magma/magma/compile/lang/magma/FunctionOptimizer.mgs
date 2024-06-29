@@ -25,7 +25,7 @@ export object FunctionOptimizer {
 		if(firstOptional.isPresent())
 		{
 			let mut first = firstOptional.orElsePanic();
-			let mut value = first.is("return")?first.retype("statement"):first;
+			let mut value = first.is("return") ? first.retype("statement") : first;
 			return Ok(node.withNode("child", value));
 		}
 		else

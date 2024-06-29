@@ -12,7 +12,7 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 export object MethodNormalizer {
-	def transpose(oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input)?newModifiers.addLast(output):newModifiers;
+	def transpose(oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input) ? newModifiers.addLast(output) : newModifiers;
 }
 export class def MethodNormalizer() => {
 	public def preVisit(node : Node, state : State) => {

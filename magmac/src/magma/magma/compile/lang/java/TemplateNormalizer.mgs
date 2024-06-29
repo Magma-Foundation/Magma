@@ -13,7 +13,7 @@ export object TemplateNormalizer {
 	def computeNewModifiers(node : Node) => {
 		let mut oldModifiers = node.findStringList("modifiers").orElse(JavaList.empty());
 		let mut newModifiers = JavaList.empty();
-		return oldModifiers.contains("public")?newModifiers.addLast("export"):newModifiers;
+		return oldModifiers.contains("public") ? newModifiers.addLast("export") : newModifiers;
 	}
 	def generateDefinition(name : String, node : Node, state : State) => {
 		let mut classModifiers = JavaList.of("class", "def");

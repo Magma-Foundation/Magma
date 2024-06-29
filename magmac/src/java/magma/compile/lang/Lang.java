@@ -197,11 +197,11 @@ public class Lang {
     }
 
     static TypeRule createTernaryRule(LazyRule value) {
-        return new TypeRule("ternary", new FirstRule(
-                new StripRule(new ExtractNodeRule("condition", value)), "?",
-                new FirstRule(
-                        new StripRule(new ExtractNodeRule("true", value)), ":",
-                        new StripRule(new ExtractNodeRule("false", value)))));
+        var condition = new StripRule(new ExtractNodeRule("condition", value), "", "after-condition");
+        var whenTrue = new StripRule(new ExtractNodeRule("true", value), "before-true", "after-true");
+        var whenFalse = new StripRule(new ExtractNodeRule("false", value), "before-false", "");
+
+        return new TypeRule("ternary", new FirstRule(condition, "?", new FirstRule(whenTrue, ":", whenFalse)));
     }
 
     static TypeRule createOperatorRule(String name, String slice, Rule value) {

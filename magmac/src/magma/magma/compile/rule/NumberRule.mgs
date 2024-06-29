@@ -15,5 +15,5 @@ export object NumberRule {
 		return true;
 	}
 	def computeMessage() => "Not a number.";
-	def filter(input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	def filter(input : String) => input.startsWith("-") ? allDigits(input.substring(1)) : allDigits(input);
 }

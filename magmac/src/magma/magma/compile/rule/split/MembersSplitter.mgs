@@ -56,7 +56,7 @@ export class def MembersSplitter() => {
 			{
 				let mut next = queue.pop();
 				let mut withNext = current.append(next);
-				let mut escaped = next=='\\'?current.append(queue.pop()):withNext;
+				let mut escaped = next=='\\' ? current.append(queue.pop()) : withNext;
 				current=escaped.append(queue.pop());
 				continue
 				;

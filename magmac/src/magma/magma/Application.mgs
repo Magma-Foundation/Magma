@@ -30,6 +30,7 @@ import magma.compile.lang.java.BlockNormalizer;
 import magma.compile.lang.magma.DeclarationFormatter;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
+import magma.compile.lang.magma.TernaryFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -61,7 +62,7 @@ export object Application {
 		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
 		let mut message = error.findMessage().orElse("");
 		let mut replaced = escape(message);
-		let mut messageAttribute = message.isEmpty()?"":" message=\"" + replaced + "\"";
+		let mut messageAttribute = message.isEmpty() ? "" : " message=\"" + replaced + "\"";
 		let mut causes = error.findCauses().orElse(Collections.emptyList());
 		let mut escapedContext = escape(error.findContext().orElse(""));
 		let mut formattedContext = "\n"+"\t".repeat(depth)+escapedContext;
@@ -69,7 +70,7 @@ export object Application {
 		{
 			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
 		}
-		let mut contextAttribute = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
+		let mut contextAttribute = escapedContext.isEmpty() ? "" : " context=\"" + escapedContext + "\"";
 		if(causes.size()==1)
 		{
 			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
@@ -88,7 +89,7 @@ export object Application {
 		if(e.findCauses().isPresent())
 		return actualContext;
 		let mut spacing = " ".repeat(depth+1);
-		let mut formatted = actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
+		let mut formatted = actualContext.replace("\n", "\n" + " ".repeat(depth==0 ? 0 : depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
 	def writeSafely(target : Path, csq : String) => {
@@ -141,7 +142,7 @@ export class def Application(config : Configuration) => {
 		return Tuple(source, generated);
 	});
 	def streamOptimizers() => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
-	def streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()), FilteringVisitor("declaration", DeclarationFormatter()));
+	def streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()), FilteringVisitor("declaration", DeclarationFormatter()), FilteringVisitor("ternary", TernaryFormatter()));
 	 writeTargets(build : Build, targetTrees : Map<Unit, Node>) => targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
 	 writeTarget(build : Build, source : Unit, root : Node) => {
 		let mut namespace = source.computeNamespace();

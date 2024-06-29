@@ -119,7 +119,12 @@ export object Lang {
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
 	def createSymbolRule() => TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
-	def createTernaryRule(value : LazyRule) => TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
+	def createTernaryRule(value : LazyRule) => {
+		let mut condition = StripRule(ExtractNodeRule("condition", value), "", "after-condition");
+		let mut whenTrue = StripRule(ExtractNodeRule("true", value), "before-true", "after-true");
+		let mut whenFalse = StripRule(ExtractNodeRule("false", value), "before-false", "");
+		return TypeRule("ternary", FirstRule(condition, "?", FirstRule(whenTrue, ":", whenFalse)));
+	}
 	def createOperatorRule(name : String, slice : String, value : Rule) => {
 		let mut left = StripRule(ExtractNodeRule("leftRule", value));
 		let mut right = StripRule(ExtractNodeRule("right", value));
