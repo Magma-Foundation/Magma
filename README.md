@@ -1,3 +1,5 @@
+![Logo](logo.png)
+
 # Magma
 
 **Magma** is a multiparadigm programming language that merges the features of Rust and TypeScript, designed primarily for high-performance front-end computing but also suitable for general use.
