@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import static magma.java.JavaResults.$Void;
 export object Main {
+	public let CONFIG_PATH : Path = Paths.get(".", "config.json");
 	public def main(args : String[]) => {
 		let mut result = run();
 		if(result.isPresent())
@@ -74,4 +75,3 @@ export object Main {
 		return BuildSet(Path.of(location), platform);
 	}
 }
-export class def Main() => public let CONFIG_PATH : Path = Paths.get(".", "config.json");

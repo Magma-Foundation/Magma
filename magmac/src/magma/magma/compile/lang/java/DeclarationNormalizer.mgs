@@ -12,7 +12,8 @@ export class def DeclarationNormalizer() => {
 		let mut newDeclaration = node.mapNode("definition", () => {
 			let mut withoutType = removeType(oldDefinition);
 			let mut oldModifiers = withoutType.findStringList("modifiers").orElse(JavaList.empty());
-			let mut withPublic = attach(oldModifiers, JavaList.empty(), "public", "public").addLast("let");
+			let mut withStatic = attach(oldModifiers, JavaList.empty(), "static", "static");
+			let mut withPublic = attach(oldModifiers, withStatic, "public", "public").addLast("let");
 			let mut newModifiers = oldModifiers.contains("final") ? withPublic : withPublic.addLast("mut");
 			return withoutType.withStringList("modifiers", newModifiers);
 		});

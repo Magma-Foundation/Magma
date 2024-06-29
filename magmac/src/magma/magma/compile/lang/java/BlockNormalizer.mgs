@@ -17,24 +17,29 @@ import magma.java.JavaList;
 export object BlockNormalizer {
 	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
-		if(!node.is("function"))
-		return Ok(flattening.withInstanceMember(node));
-		let mut definitionOptional = node.findNode("definition");
-		if(definitionOptional.isEmpty())
-		return Ok(flattening.withInstanceMember(node));
-		let mut definition = definitionOptional.orElsePanic();
-		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
-		let mut cleanedOptional = cleanup(node, outerName);
-		if(cleanedOptional.isEmpty())
-		return Ok(flattening);
-		let mut cleaned = cleanedOptional.orElsePanic();
-		if(modifiers.contains("static"))
+		if(node.is("function")||node.is("declaration"))
 		{
-			return Ok(flattening.withStaticMember(cleaned));
+			let mut definitionOptional = node.findNode("definition");
+			if(definitionOptional.isEmpty())
+			return Ok(flattening.withInstanceMember(node));
+			let mut definition = definitionOptional.orElsePanic();
+			let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+			let mut cleanedOptional = cleanup(node, outerName);
+			if(cleanedOptional.isEmpty())
+			return Ok(flattening);
+			let mut cleaned = cleanedOptional.orElsePanic();
+			if(modifiers.contains("static"))
+			{
+				return Ok(flattening.withStaticMember(cleaned));
+			}
+			else
+			{
+				return Ok(flattening.withInstanceMember(cleaned));
+			}
 		}
 		else
 		{
-			return Ok(flattening.withInstanceMember(cleaned));
+			return Ok(flattening.withInstanceMember(node));
 		}
 	}
 	def splitIntoObject(node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
@@ -64,7 +69,7 @@ export object BlockNormalizer {
 		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
 	def cleanup(node : Node, outerName : String) => {
-		if(!node.is("function"))
+		if(!node.is("function")&&!node.is("declaration"))
 		return Some(node);
 		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())
@@ -99,6 +104,8 @@ export class def BlockNormalizer() => {
 		return Ok(Streams.of(node));
 		let mut definition = definitionOptional.orElsePanic();
 		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		if(!modifiers.contains("class"))
+		return Ok(Streams.of(node));
 		let mut nameOptional = definition.findString("name");
 		if(nameOptional.isEmpty())
 		return Ok(Streams.of(node));

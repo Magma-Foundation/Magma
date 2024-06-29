@@ -25,22 +25,24 @@ public class BlockNormalizer implements Visitor {
     }
 
     private static Result<Flattening, Error_> flattenChild(Flattening flattening, Node node, String outerName) {
-        if (!node.is("function")) return new Ok<>(flattening.withInstanceMember(node));
+        if (node.is("function") || node.is("declaration")) {
+            var definitionOptional = node.findNode("definition");
+            if (definitionOptional.isEmpty()) return new Ok<>(flattening.withInstanceMember(node));
 
-        var definitionOptional = node.findNode("definition");
-        if (definitionOptional.isEmpty()) return new Ok<>(flattening.withInstanceMember(node));
+            var definition = definitionOptional.orElsePanic();
+            var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
 
-        var definition = definitionOptional.orElsePanic();
-        var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+            var cleanedOptional = cleanup(node, outerName);
+            if (cleanedOptional.isEmpty()) return new Ok<>(flattening);
+            var cleaned = cleanedOptional.orElsePanic();
 
-        var cleanedOptional = cleanup(node, outerName);
-        if (cleanedOptional.isEmpty()) return new Ok<>(flattening);
-        var cleaned = cleanedOptional.orElsePanic();
-
-        if (modifiers.contains("static")) {
-            return new Ok<>(flattening.withStaticMember(cleaned));
+            if (modifiers.contains("static")) {
+                return new Ok<>(flattening.withStaticMember(cleaned));
+            } else {
+                return new Ok<>(flattening.withInstanceMember(cleaned));
+            }
         } else {
-            return new Ok<>(flattening.withInstanceMember(cleaned));
+            return new Ok<>(flattening.withInstanceMember(node));
         }
     }
 
@@ -75,7 +77,7 @@ public class BlockNormalizer implements Visitor {
     }
 
     static Option<Node> cleanup(Node node, String outerName) {
-        if (!node.is("function")) return new Some<>(node);
+        if (!node.is("function") && !node.is("declaration")) return new Some<>(node);
 
         var definitionOptional = node.findNode("definition");
         if (definitionOptional.isEmpty()) return new Some<>(node);
@@ -120,6 +122,7 @@ public class BlockNormalizer implements Visitor {
         var definition = definitionOptional.orElsePanic();
 
         var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+        if(!modifiers.contains("class")) return new Ok<>(Streams.of(node));
 
         var nameOptional = definition.findString("name");
         if (nameOptional.isEmpty()) return new Ok<>(Streams.of(node));

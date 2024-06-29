@@ -16,7 +16,8 @@ public class DeclarationNormalizer implements Visitor {
         var newDeclaration = node.mapNode("definition", oldDefinition -> {
             var withoutType = removeType(oldDefinition);
             var oldModifiers = withoutType.findStringList("modifiers").orElse(JavaList.empty());
-            var withPublic = attach(oldModifiers, JavaList.empty(), "public", "public").addLast("let");
+            var withStatic = attach(oldModifiers, JavaList.empty(), "static", "static");
+            var withPublic = attach(oldModifiers, withStatic, "public", "public").addLast("let");
             var newModifiers = oldModifiers.contains("final") ? withPublic : withPublic.addLast("mut");
             return withoutType.withStringList("modifiers", newModifiers);
         });

@@ -6,8 +6,10 @@ import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.java.JavaOptionals;
-export class def TypeRule(type : String, child : Rule) => {
+export object TypeRule {
 	public let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
+}
+export class def TypeRule(type : String, child : Rule) => {
 	public def toNode(input : String) => {
 		let mut result = child.toNode(input);
 		if(JavaOptionals.toNative(result.findError()).isEmpty())
