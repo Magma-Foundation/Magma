@@ -17,6 +17,6 @@ export class def LeftRule(slice : String, child : Rule) => {
 			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));
 		}
 	}
-	public def fromNode(node : Node) => child.fromNode(node).mapValue(() => slice+inner);
+	public def fromNode(node : Node) => child.fromNode(node).mapValue(() => slice + inner);
 	implements Rule;
 }

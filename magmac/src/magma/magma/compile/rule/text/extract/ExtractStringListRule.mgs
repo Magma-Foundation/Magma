@@ -1,4 +1,4 @@
-import magma.api.collect.stream.JoiningCollector;
+import magma.api.contain.collect.JoiningCollector;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -13,7 +13,7 @@ import java.util.Optional;
 export object ExtractStringListRule {
 	protected final delimiter : String;
 	def fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
-	def join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
+	def join(list : magma.api.contain.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
 	def toAttribute(content : String) => {
 		let mut list = split(content);
 		for(format : String in list){
@@ -31,10 +31,10 @@ export object ExtractStringListRule {
 		while(true)
 		{
 			let mut end = content.indexOf(delimiter, start);
-			if(end==-1)
+			if(end == -1)
 			break;
 			result.add(content.substring(start, end));
-			start = end+delimiter.length();
+			start = end + delimiter.length();
 		}
 		result.add(content.substring(start));
 		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();

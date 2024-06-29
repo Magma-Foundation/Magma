@@ -47,6 +47,6 @@ export struct Attributes {
 	format : (int) => String;
 	has : (String) => boolean;
 	isEmpty : () => boolean;
-	streamKeys : () => magma.api.collect.stream.Stream<String>;
+	streamKeys : () => magma.api.contain.stream.Stream<String>;
 	remove : (String) => Attributes;
 }

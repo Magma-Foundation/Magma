@@ -1,6 +1,6 @@
 package magma.api.json;
 
-import magma.api.collect.stream.Stream;
+import magma.api.contain.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 

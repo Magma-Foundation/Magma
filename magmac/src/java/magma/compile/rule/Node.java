@@ -1,7 +1,7 @@
 package magma.compile.rule;
 
-import magma.api.collect.List;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.List;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 
 import java.util.function.Function;

@@ -1,9 +1,9 @@
 package magma.java;
 
-import magma.api.collect.stream.Collector;
-import magma.api.collect.stream.HeadedStream;
-import magma.api.collect.stream.Stream;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.collect.Collector;
+import magma.api.contain.stream.HeadedStream;
+import magma.api.contain.stream.Stream;
+import magma.api.contain.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -18,7 +18,7 @@ import java.util.function.Function;
  *
  * @param <T> the type of elements in the list
  */
-public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
+public record JavaList<T>(List<T> list) implements magma.api.contain.List<T> {
 
     public JavaList() {
         this(Collections.emptyList());
@@ -33,7 +33,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @param mapper the function to apply to each element
      * @return the resulting List
      */
-    public static <T, R> magma.api.collect.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
+    public static <T, R> magma.api.contain.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
         return Streams.fromNativeList(frames)
                 .map(mapper)
                 .collect(collecting());
@@ -45,15 +45,15 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @param <T> the type of elements in the list
      * @return the collector
      */
-    public static <T> Collector<T, magma.api.collect.List<T>> collecting() {
+    public static <T> Collector<T, magma.api.contain.List<T>> collecting() {
         return new Collector<>() {
             @Override
-            public magma.api.collect.List<T> createInitial() {
+            public magma.api.contain.List<T> createInitial() {
                 return new JavaList<>();
             }
 
             @Override
-            public magma.api.collect.List<T> fold(magma.api.collect.List<T> current, T next) {
+            public magma.api.contain.List<T> fold(magma.api.contain.List<T> current, T next) {
                 return current.addLast(next);
             }
         };
@@ -66,7 +66,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @param list the native Java list
      * @return the resulting List
      */
-    public static <T> magma.api.collect.List<T> fromNative(List<T> list) {
+    public static <T> magma.api.contain.List<T> fromNative(List<T> list) {
         return new JavaList<>(list);
     }
 
@@ -77,7 +77,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @param values the List to convert
      * @return the native Java list
      */
-    public static <T> List<T> toNative(magma.api.collect.List<T> values) {
+    public static <T> List<T> toNative(magma.api.contain.List<T> values) {
         return values.stream().foldLeft(new ArrayList<>(), (ts, t) -> {
             ts.add(t);
             return ts;
@@ -90,7 +90,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @param <T> the type of elements in the list
      * @return the empty List
      */
-    public static <T> magma.api.collect.List<T> empty() {
+    public static <T> magma.api.contain.List<T> empty() {
         return new JavaList<>();
     }
 
@@ -102,12 +102,12 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
      * @return the resulting List
      */
     @SafeVarargs
-    public static <T> magma.api.collect.List<T> of(T... values) {
+    public static <T> magma.api.contain.List<T> of(T... values) {
         return new JavaList<>(List.of(values));
     }
 
     @Override
-    public magma.api.collect.List<T> addLast(T next) {
+    public magma.api.contain.List<T> addLast(T next) {
         var copy = new ArrayList<>(list);
         copy.add(next);
         return new JavaList<>(copy);
@@ -143,7 +143,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public Option<magma.api.collect.List<T>> popLastAndDiscard() {
+    public Option<magma.api.contain.List<T>> popLastAndDiscard() {
         if (list.isEmpty()) {
             return None.None();
         }
@@ -153,7 +153,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public magma.api.collect.List<T> pushLast(T element) {
+    public magma.api.contain.List<T> pushLast(T element) {
         var copy = new ArrayList<>(list);
         copy.add(element);
         return new JavaList<>(copy);
@@ -169,8 +169,8 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public magma.api.collect.List<T> addAll(magma.api.collect.List<T> other) {
-        return other.stream().<magma.api.collect.List<T>>foldLeft(this, magma.api.collect.List::addLast);
+    public magma.api.contain.List<T> addAll(magma.api.contain.List<T> other) {
+        return other.stream().<magma.api.contain.List<T>>foldLeft(this, magma.api.contain.List::addLast);
     }
 
     @Override
@@ -180,14 +180,14 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public magma.api.collect.List<T> addFirst(T first) {
+    public magma.api.contain.List<T> addFirst(T first) {
         var copy = new ArrayList<>(list);
         copy.add(0, first);
         return new JavaList<>(copy);
     }
 
     @Override
-    public magma.api.collect.List<T> remove(T element) {
+    public magma.api.contain.List<T> remove(T element) {
         var copy = new ArrayList<>(list);
         copy.remove(element);
         return new JavaList<>(copy);

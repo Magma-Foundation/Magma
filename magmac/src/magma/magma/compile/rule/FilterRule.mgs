@@ -8,7 +8,7 @@ export object FilterRule {
 	public def toNode(input : String) => {
 		if(filter(input))
 		return child.toNode(input);
-		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
+		return ErrorRuleResult(CompileError("Invalid filter: " + computeMessage(), input));
 	}
 	def computeMessage : () => String;
 	def filter : (String) => boolean;

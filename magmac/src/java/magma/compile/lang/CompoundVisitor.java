@@ -1,7 +1,7 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
-import magma.api.collect.List;
+import magma.api.contain.List;
 import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.annotate.State;

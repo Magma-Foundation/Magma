@@ -1,10 +1,10 @@
 package magma.java;
 
 import magma.api.Tuple;
-import magma.api.collect.Map;
-import magma.api.collect.stream.HeadedStream;
-import magma.api.collect.stream.Collector;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.Map;
+import magma.api.contain.stream.HeadedStream;
+import magma.api.contain.collect.Collector;
+import magma.api.contain.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;

@@ -1,0 +1,25 @@
+import magma.api.Tuple;
+import magma.api.contain.collect.Collector;
+import magma.api.option.Option;
+import magma.api.result.Result;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+export struct Stream {
+	
+	map<R> : ((T) => R) => Stream<R>;
+	
+	collect<C> : (Collector<T, C>) => C;
+	
+	foldLeft<C> : (C, (C, T) => C) => C;
+	head : () => Option<T>;
+	
+	foldLeftToResult<R, E> : (R, (R, T) => Result<R, E>) => Result<R, E>;
+	anyMatch : ((T) => Bool) => boolean;
+	filter : ((T) => Bool) => Stream<T>;
+	
+	flatMap<R> : ((T) => Head<R>) => Stream<R>;
+	
+	extend<R> : ((T) => R) => Stream<Tuple<T, R>>;
+	def into<R>(mapper : (Stream<T>) => R) => mapper.apply(this);
+}

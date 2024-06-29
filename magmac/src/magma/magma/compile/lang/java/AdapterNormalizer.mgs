@@ -24,7 +24,7 @@ export class def AdapterNormalizer() => {
 		{
 			let mut firstOption = children.get(0);
 			let mut secondOption = children.get(1);
-			if(firstOption.isEmpty()||secondOption.isEmpty())
+			if(firstOption.isEmpty() || secondOption.isEmpty())
 			{
 				return Err(CompileError("Parameters required.", node.toString()));
 			}

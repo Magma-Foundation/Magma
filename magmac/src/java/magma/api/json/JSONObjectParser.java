@@ -1,8 +1,8 @@
 package magma.api.json;
 
 import magma.api.Tuple;
-import magma.api.collect.Map;
-import magma.api.collect.stream.RequiredCollector;
+import magma.api.contain.Map;
+import magma.api.contain.collect.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;

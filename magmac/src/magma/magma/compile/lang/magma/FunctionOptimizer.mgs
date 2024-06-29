@@ -17,7 +17,7 @@ export object FunctionOptimizer {
 	}
 	def flattenInner(child : Node, node : Node) => {
 		let mut children = child.findNodeList("children").orElse(JavaList.empty());
-		if(children.size()!=1)
+		if(children.size() != 1)
 		{
 			return Ok(node);
 		}

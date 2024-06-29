@@ -1,10 +1,10 @@
 package magma;
 
 import magma.api.Tuple;
-import magma.api.collect.Map;
-import magma.api.collect.stream.ExceptionalCollector;
-import magma.api.collect.stream.Stream;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.Map;
+import magma.api.contain.collect.ExceptionalCollector;
+import magma.api.contain.stream.Stream;
+import magma.api.contain.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -33,6 +33,7 @@ import magma.compile.lang.magma.AssignmentFormatter;
 import magma.compile.lang.magma.DeclarationFormatter;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
+import magma.compile.lang.magma.OperatorFormatter;
 import magma.compile.lang.magma.TernaryFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -227,7 +228,8 @@ public record Application(Configuration config) {
                 new FilteringVisitor("block", new BlockFormatter()),
                 new FilteringVisitor("declaration", new DeclarationFormatter()),
                 new FilteringVisitor("ternary", new TernaryFormatter()),
-                new FilteringVisitor("assignment", new AssignmentFormatter())
+                new FilteringVisitor("assignment", new AssignmentFormatter()),
+                new OperatorFormatter()
         );
     }
 

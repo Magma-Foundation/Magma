@@ -13,20 +13,20 @@ export class def ParamSplitter() => {
 		while(!queue.isEmpty())
 		{
 			let mut c = queue.pop();
-			if(c=='\"')
+			if(c == '\"')
 			{
 				buffer.append(c);
 				while(!queue.isEmpty())
 				{
 					let mut next = queue.pop();
 					buffer.append(next);
-					if(next=='\\')
+					if(next == '\\')
 					{
 						buffer.append(queue.pop());
 						continue
 						;
 					}
-					if(next=='\"')
+					if(next == '\"')
 					{
 						break
 						;
@@ -35,13 +35,13 @@ export class def ParamSplitter() => {
 				continue
 				;
 			}
-			if(c=='-')
+			if(c == '-')
 			{
 				buffer.append(c);
 				if(!queue.isEmpty())
 				{
 					let mut next = queue.peek();
-					if(next=='>')
+					if(next == '>')
 					{
 						buffer.append(queue.pop());
 						continue
@@ -51,16 +51,16 @@ export class def ParamSplitter() => {
 				continue
 				;
 			}
-			if(c==','&&depth==0)
+			if(c == ',' && depth == 0)
 			{
 				segments.add(buffer.toString());
 				buffer = StringBuilder();
 			}
 			else
 			{
-				if(c=='(' || c == '<')
+				if(c == '(' || c == '<')
 				depth++;
-				if(c==')' || c == '>')
+				if(c == ')' || c == '>')
 				depth--;
 				buffer.append(c);
 			}

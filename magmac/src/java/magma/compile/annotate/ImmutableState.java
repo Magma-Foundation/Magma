@@ -1,6 +1,6 @@
 package magma.compile.annotate;
 
-import magma.api.collect.List;
+import magma.api.contain.List;
 import magma.java.JavaList;
 
 public final class ImmutableState implements State {

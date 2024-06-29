@@ -1,11 +1,11 @@
 package magma.compile.lang.java;
 
 import magma.api.Tuple;
-import magma.api.collect.List;
-import magma.api.collect.stream.ExceptionalCollector;
-import magma.api.collect.stream.ResultStream;
-import magma.api.collect.stream.Stream;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.List;
+import magma.api.contain.collect.ExceptionalCollector;
+import magma.api.contain.stream.ResultStream;
+import magma.api.contain.stream.Stream;
+import magma.api.contain.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;

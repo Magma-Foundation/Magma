@@ -1,9 +1,9 @@
 import magma.api.Tuple;
-import magma.api.collect.List;
-import magma.api.collect.stream.ExceptionalCollector;
-import magma.api.collect.stream.ResultStream;
-import magma.api.collect.stream.Stream;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.List;
+import magma.api.contain.collect.ExceptionalCollector;
+import magma.api.contain.stream.ResultStream;
+import magma.api.contain.stream.Stream;
+import magma.api.contain.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -17,7 +17,7 @@ import magma.java.JavaList;
 export object BlockNormalizer {
 	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
-		if(node.is("function")||node.is("declaration"))
+		if(node.is("function") || node.is("declaration"))
 		{
 			let mut definitionOptional = node.findNode("definition");
 			if(definitionOptional.isEmpty())
@@ -69,7 +69,7 @@ export object BlockNormalizer {
 		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
 	def cleanup(node : Node, outerName : String) => {
-		if(!node.is("function")&&!node.is("declaration"))
+		if(!node.is("function") && !node.is("declaration"))
 		return Some(node);
 		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())

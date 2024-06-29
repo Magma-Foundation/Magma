@@ -1,7 +1,7 @@
 package magma.compile.rule;
 
-import magma.api.collect.List;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.List;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
@@ -120,17 +120,17 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     }
 
     @Override
-    public Node withNodeList(String key, magma.api.collect.List<Node> values) {
+    public Node withNodeList(String key, magma.api.contain.List<Node> values) {
         return with(key, new NodeListAttribute(JavaList.toNative(values)));
     }
 
     @Override
-    public Node mapNodes(String key, Function<magma.api.collect.List<Node>, magma.api.collect.List<Node>> mapper) {
+    public Node mapNodes(String key, Function<magma.api.contain.List<Node>, magma.api.contain.List<Node>> mapper) {
         return new ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, nodes -> JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
     }
 
     @Override
-    public Option<magma.api.collect.List<Node>> findNodeList(String key) {
+    public Option<magma.api.contain.List<Node>> findNodeList(String key) {
         return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute::asNodeList)).map(JavaList::fromNative);
     }
 }

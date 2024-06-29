@@ -1,6 +1,6 @@
 package magma.compile.rule.text.extract;
 
-import magma.api.collect.stream.JoiningCollector;
+import magma.api.contain.collect.JoiningCollector;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -27,7 +27,7 @@ public abstract class ExtractStringListRule extends ExtractRule {
         return JavaOptionals.toNative(attribute.findStringList(key).map(this::join));
     }
 
-    private String join(magma.api.collect.List<String> list) {
+    private String join(magma.api.contain.List<String> list) {
         return list.stream().collect(new JoiningCollector(delimiter)).orElse("");
     }
 

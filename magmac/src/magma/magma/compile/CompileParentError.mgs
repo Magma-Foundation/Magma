@@ -5,6 +5,6 @@ export class def CompileParentError(message : String, context : String, parent :
 	public def findMessage() => Optional.of(message);
 	public def findCauses() => Optional.of(Collections.singletonList(parent));
 	public def findContext() => Optional.of(context);
-	public def calculateDepth() => 1+parent.calculateDepth();
+	public def calculateDepth() => 1 + parent.calculateDepth();
 	implements Error_;
 }

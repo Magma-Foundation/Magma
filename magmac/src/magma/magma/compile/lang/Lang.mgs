@@ -126,9 +126,9 @@ export object Lang {
 		return TypeRule("ternary", FirstRule(condition, "?", FirstRule(whenTrue, ":", whenFalse)));
 	}
 	def createOperatorRule(name : String, slice : String, value : Rule) => {
-		let mut left = StripRule(ExtractNodeRule("leftRule", value));
-		let mut right = StripRule(ExtractNodeRule("right", value));
-		return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
+		let mut left = StripRule(ExtractNodeRule("left", value), "", "after-left");
+		let mut right = StripRule(ExtractNodeRule("right", value), "after-operator", "");
+		return TypeRule(name + "-operator", SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
 	}
 	def createNumberRule() => TypeRule("number", NumberRule(ExtractStringRule("value")));
 	def createCharRule() => TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));

@@ -1,6 +1,6 @@
 import magma.api.Tuple;
-import magma.api.collect.List;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.List;
+import magma.api.contain.stream.Streams;
 import magma.api.option.Options;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -14,16 +14,16 @@ export object BlockFormatter {
 	def indentChildren(children : List<Node>, state : State) => Streams.rangeTo(children.size()).extend(children.get).map(Options.invertRight).flatMap(Streams.fromOption).map(() => attachAfterChild(child, state)).collect(JavaList.collecting());
 	def attachAfterChild(child : Tuple<Integer, Node>, state : State) => {
 		let mut depth = state.computeDepth();
-		let mut childIndent = "\n" + "\t".repeat(depth-1);
+		let mut childIndent = "\n" + "\t".repeat(depth - 1);
 		let mut index = child.left();
-		if(index==0&&depth==1)
+		if(index == 0 && depth == 1)
 		return child.right();
 		return child.right().withString(StripRule.DEFAULT_LEFT, childIndent);
 	}
 	def attachAfterChildren(node : Node, depth : int) => {
-		if(depth<=1)
+		if(depth <= 1)
 		return node;
-		let mut count = depth-2;
+		let mut count = depth - 2;
 		let mut endIndent = "\n" + "\t".repeat(count);
 		return node.withString("after-children", endIndent);
 	}
