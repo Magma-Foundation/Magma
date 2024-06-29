@@ -3,7 +3,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 export class def LazyJSONParser() => {
 	let mut value : Option<JSONParser> = None.None();
-	public def setValue(value : JSONParser) => this=Some(value);
+	public def setValue(value : JSONParser) => this = Some(value);
 	public def parse(input : String) => value.flatMap(() => inner.parse(input));
 	implements JSONParser;
 }

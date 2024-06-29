@@ -13,7 +13,7 @@ export object JSON {
 			if(c==','&&depth==0)
 			{
 				list.add(buffer.toString());
-				buffer=StringBuilder();
+				buffer = StringBuilder();
 			}
 			else
 			{

@@ -29,6 +29,7 @@ import magma.compile.lang.java.LambdaNormalizer;
 import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.BlockNormalizer;
+import magma.compile.lang.magma.AssignmentFormatter;
 import magma.compile.lang.magma.DeclarationFormatter;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
@@ -225,7 +226,8 @@ public record Application(Configuration config) {
         return Streams.of(
                 new FilteringVisitor("block", new BlockFormatter()),
                 new FilteringVisitor("declaration", new DeclarationFormatter()),
-                new FilteringVisitor("ternary", new TernaryFormatter())
+                new FilteringVisitor("ternary", new TernaryFormatter()),
+                new FilteringVisitor("assignment", new AssignmentFormatter())
         );
     }
 

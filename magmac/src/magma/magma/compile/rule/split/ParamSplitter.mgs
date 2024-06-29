@@ -54,7 +54,7 @@ export class def ParamSplitter() => {
 			if(c==','&&depth==0)
 			{
 				segments.add(buffer.toString());
-				buffer=StringBuilder();
+				buffer = StringBuilder();
 			}
 			else
 			{

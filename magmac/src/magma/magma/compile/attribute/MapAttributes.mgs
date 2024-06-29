@@ -26,7 +26,7 @@ export object MapAttributes {
 		let mut entries = other.streamEntries().collect(Collectors.toSet());
 		let mut current : Attributes = this;
 		for(entry : var in entries){
-			current=current.with(entry.left(), entry.right());
+			current = current.with(entry.left(), entry.right());
 		}
 		return current;
 	}

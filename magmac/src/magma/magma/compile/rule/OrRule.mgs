@@ -42,7 +42,7 @@ export class def OrRule(rules : List<Rule>) => {
 		for(result : Result<String, Error_> in results){
 			if(result.isOk())
 			{
-				anyOk=Optional.of(result);
+				anyOk = Optional.of(result);
 				break
 				;
 			}

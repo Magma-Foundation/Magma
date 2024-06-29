@@ -22,14 +22,14 @@ export class def MembersSplitter() => {
 					while(!queue.isEmpty())
 					{
 						let mut next = queue.pop();
-						withAfter=withAfter.append(next);
+						withAfter = withAfter.append(next);
 						if(next=='\n')
 						{
 							break
 							;
 						}
 					}
-					current=withAfter.advance();
+					current = withAfter.advance();
 					continue
 					;
 				}
@@ -39,15 +39,15 @@ export class def MembersSplitter() => {
 					while(!queue.isEmpty())
 					{
 						let mut next = queue.pop();
-						withAfter=withAfter.append(next);
+						withAfter = withAfter.append(next);
 						if(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
 						{
-							withAfter=withAfter.append(queue.pop());
+							withAfter = withAfter.append(queue.pop());
 							break
 							;
 						}
 					}
-					current=withAfter.advance();
+					current = withAfter.advance();
 					continue
 					;
 				}
@@ -57,7 +57,7 @@ export class def MembersSplitter() => {
 				let mut next = queue.pop();
 				let mut withNext = current.append(next);
 				let mut escaped = next=='\\' ? current.append(queue.pop()) : withNext;
-				current=escaped.append(queue.pop());
+				current = escaped.append(queue.pop());
 				continue
 				;
 			}
@@ -67,7 +67,7 @@ export class def MembersSplitter() => {
 				while(!queue.isEmpty())
 				{
 					let mut next = queue.pop();
-					withString=withString.append(next);
+					withString = withString.append(next);
 					if(next=='\\')
 					{
 						withString.append(queue.pop());
@@ -80,26 +80,26 @@ export class def MembersSplitter() => {
 						;
 					}
 				}
-				current=withString;
+				current = withString;
 				continue
 				;
 			}
 			if(c==';'&&state.isLevel())
 			{
-				current=state.advance();
+				current = state.advance();
 			}
 			else if(c=='}'&&state.isShallow()){
-				current=state.exit().advance();
+				current = state.exit().advance();
 			}
 			else if(c=='{' || c == '('){
-				current=state.enter();
+				current = state.enter();
 			}
 			else if(c=='}' || c == ')'){
-				current=state.exit();
+				current = state.exit();
 			}
 			else
 			{
-				current=state;
+				current = state;
 			}
 		}
 		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();

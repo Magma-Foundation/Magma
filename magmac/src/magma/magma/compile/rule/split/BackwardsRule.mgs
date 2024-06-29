@@ -57,7 +57,7 @@ export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule
 		while(index>=0)
 		{
 			indexes.add(index);
-			index=input.indexOf(slice, index+1);
+			index = input.indexOf(slice, index+1);
 		}
 		Collections.reverse(indexes);
 		return indexes;

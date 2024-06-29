@@ -98,11 +98,11 @@ export object Lang {
 		return TypeRule("else", OrRule(List.of(anElse, anElse1)));
 	}
 	def createAssignmentRule(value : Rule) => {
-		let mut reference = SymbolRule(ExtractStringRule("reference"));
-		let mut assignable = OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
-		let mut left = ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
-		let mut right = RightRule(ExtractNodeRule("value", StripRule(value)), ";");
-		return TypeRule("assignment", FirstRule(left, "=", right));
+		let mut reference = StripRule(SymbolRule(ExtractStringRule("reference")), "", "");
+		let mut assignable = OrRule(List.of(reference, LastRule(reference, ".", ExtractStringRule("member"))));
+		let mut left = StripRule(assignable, "", "after-assignable");
+		let mut right = RightRule(ExtractNodeRule("value", value), ";");
+		return TypeRule("assignment", FirstRule(left, "=", StripRule(right, "after-value-separator", "")));
 	}
 	def createDeclarationRule(definition : Rule, value : Rule) => {
 		let mut wrappedDefinition = ExtractNodeRule("definition", TypeRule("definition", definition));

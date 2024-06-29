@@ -23,7 +23,7 @@ export class def HeadedStream<T>(provider : Head<T>) => {
 		let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
 		if(tuple.left())
 		{
-			current=tuple.right();
+			current = tuple.right();
 		}
 		else
 		{
@@ -42,7 +42,7 @@ export class def HeadedStream<T>(provider : Head<T>) => {
 			let mut tuple = outer.head().map(mapper).toTuple(current);
 			if(tuple.left())
 			{
-				current=tuple.right();
+				current = tuple.right();
 			}
 			else
 			{

@@ -9,7 +9,7 @@ export object SingleHead {
 		return None.None();
 		else
 		{
-			retrieved=true;
+			retrieved = true;
 			return Some(value);
 		}
 	}
