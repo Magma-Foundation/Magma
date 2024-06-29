@@ -22,7 +22,7 @@ public record StripRule(Rule child, String left, String right) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        var leftIndent = node.findString("left").orElse("");
+        var leftIndent = node.findString(left).orElse("");
         var rightIndent = node.findString(right).orElse("");
 
         return child.fromNode(node)

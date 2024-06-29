@@ -9,8 +9,7 @@ import java.util.function.BiFunction;
 export class def FilteringVisitor(type : String, child : Visitor) => {
 	public def preVisit(node : Node, state : State) => applyFilter(node, state, child.preVisit);
 	def applyFilter(node : Node, state : State, folder : (Node, State) => Result<Tuple<Node, State>, Error_>) => {
-		if
-		(!node.is(type))
+		if(!node.is(type))
 		return Ok(Tuple(node, state));
 		return folder.apply(node, state);
 	}

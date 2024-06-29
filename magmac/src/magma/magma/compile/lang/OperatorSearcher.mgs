@@ -6,62 +6,34 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 class def OperatorSearcher(slice : String) => {
 	public def search(input : String) => {
-		if
-		(!input.contains(slice))
+		if(!input.contains(slice))
 		return Optional.empty();
-		
-		queue : var=
-		
-		IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-		
-		depth : var=
-		
-		0;
-		while
-		(!queue.isEmpty())
+		queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		depth : var=0;
+		while(!queue.isEmpty())
 		{
-			
-			tuple : var=
-			
-			queue.pop();
-			
-			i : var=
-			
-			tuple.left();
-			
-			maybeSlice : var=
-			
-			input.substring(i, Math.min(i+slice.length(), input.length()));
-			if
-			(maybeSlice.equals(slice)&&depth==0)
+			tuple : var=queue.pop();
+			i : var=tuple.left();
+			maybeSlice : var=input.substring(i, Math.min(i+slice.length(), input.length()));
+			if(maybeSlice.equals(slice)&&depth==0)
 			{
 				return Optional.of(i);
 			}
 			else
 			{
-				
-				c : var=
-				
-				maybeSlice.charAt(0);
-				if
-				(c=='\'')
+				c : var=maybeSlice.charAt(0);
+				if(c=='\'')
 				{
-					
-					pop : var=
-					
-					queue.pop();
-					if
-					(pop.right()=='\\')
+					pop : var=queue.pop();
+					if(pop.right()=='\\')
 					queue.pop();
 					queue.pop();
 					continue
 					;
 				}
-				if
-				(c=='(')
+				if(c=='(')
 				depth++;
-				if
-				(c==')')
+				if(c==')')
 				depth--;
 			}
 		}

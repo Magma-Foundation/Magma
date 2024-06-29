@@ -16,93 +16,44 @@ export object MethodNormalizer {
 }
 export class def MethodNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
-		
-		renamed : var=
-		
-		node.retype("function");
-		
-		params : var=
-		
-		node.findNodeList("params").orElse(JavaList.empty());
-		
-		definitionOptional : var=
-		
-		JavaOptionals.toNative(node.findNode("definition"));
-		if
-		(definitionOptional.isEmpty())
+		renamed : var=node.retype("function");
+		params : var=node.findNodeList("params").orElse(JavaList.empty());
+		definitionOptional : var=JavaOptionals.toNative(node.findNode("definition"));
+		if(definitionOptional.isEmpty())
 		{
 			return Err(CompileError("No definition present.", node.toString()));
 		}
-		
-		definition : var=
-		
-		definitionOptional.orElseThrow().mapStringList("modifiers", () => {
-			
-			withPublic : var=
-			
-			transpose(oldModifiers, JavaList.empty(), "public", "public");
-			
-			withStatic : var=
-			
-			transpose(oldModifiers, withPublic, "static", "static");
+		definition : var=definitionOptional.orElseThrow().mapStringList("modifiers", () => {
+			withPublic : var=transpose(oldModifiers, JavaList.empty(), "public", "public");
+			withStatic : var=transpose(oldModifiers, withPublic, "static", "static");
 			return withStatic.addLast("def");
 		});
-		if
-		(node.has("child"))
+		if(node.has("child"))
 		{
-			
-			withParams : var=
-			
-			definition.withNodeList("params", params);
+			withParams : var=definition.withNodeList("params", params);
 			return Ok(Tuple(renamed.withNode("definition", withParams), state));
 		}
 		else
 		{
-			
-			returnsOptional : var=
-			
-			JavaOptionals.toNative(definition.findNode("type"));
-			if
-			(returnsOptional.isEmpty())
+			returnsOptional : var=JavaOptionals.toNative(definition.findNode("type"));
+			if(returnsOptional.isEmpty())
 			{
 				return Err(CompileError("No return type present.", node.toString()));
 			}
-			
-			returns : var=
-			
-			returnsOptional.orElseThrow();
-			
-			paramTypes : var=
-			
-			ArrayList();
+			returns : var=returnsOptional.orElseThrow();
+			paramTypes : var=ArrayList();
 			for(param : Node in JavaList.toNative(params)){
-				
-				paramTypeOptional : var=
-				
-				JavaOptionals.toNative(param.findNode("type"));
-				if
-				(paramTypeOptional.isEmpty())
+				paramTypeOptional : var=JavaOptionals.toNative(param.findNode("type"));
+				if(paramTypeOptional.isEmpty())
 				{
 					return Err(CompileError("No parameter type present.", node.toString()));
 				}
-				
-				type : var=
-				
-				paramTypeOptional.orElseThrow();
+				type : var=paramTypeOptional.orElseThrow();
 				paramTypes.add(type);
 			}
-			
-			node1 : Node=
-			
-			node.clear("function-type");
-			
-			functionType : var=
-			
-			node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
-			
-			withType : var=
-			
-			definition.withNode("type", functionType);
+			node1 : Node=node.clear("function-type");
+			functionType : var=node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
+			withType : var=definition.withNode("type", functionType);
 			return Ok(Tuple(withType, state));
 		}
 	}

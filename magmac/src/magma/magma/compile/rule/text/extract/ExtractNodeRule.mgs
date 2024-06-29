@@ -12,34 +12,20 @@ import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
 export class def ExtractNodeRule(propertyKey : String, child : Rule) => {
 	public def toNode(input : String) => {
-		
-		node : var=
-		
-		child.toNode(input);
-		if
-		(JavaOptionals.toNative(node.findError()).isPresent())
+		node : var=child.toNode(input);
+		if(JavaOptionals.toNative(node.findError()).isPresent())
 		return node;
 		return JavaOptionals.toNative(node.tryCreate()).map(NodeAttribute.new).map(() => MapAttributes().with(propertyKey, attribute)).map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));
 	}
 	public def fromNode(node : Node) => {
-		
-		asNode : var=
-		
-		JavaOptionals.toNative(node.findNode(propertyKey));
-		if
-		(asNode.isEmpty())
+		asNode : var=JavaOptionals.toNative(node.findNode(propertyKey));
+		if(asNode.isEmpty())
 		return createErr(node);
 		return child.fromNode(asNode.get());
 	}
 	def createErr(node : Node) => {
-		
-		format : var=
-		
-		"Node did not have attribute '%s' as a node.";
-		
-		message : var=
-		
-		format.formatted(propertyKey);
+		format : var="Node did not have attribute '%s' as a node.";
+		message : var=format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
 	implements Rule;

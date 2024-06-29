@@ -11,56 +11,23 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 export object TemplateNormalizer {
 	def computeNewModifiers(node : Node) => {
-		
-		oldModifiers : var=
-		
-		node.findStringList("modifiers").orElse(JavaList.empty());
-		
-		newModifiers : var=
-		
-		JavaList.empty();
+		oldModifiers : var=node.findStringList("modifiers").orElse(JavaList.empty());
+		newModifiers : var=JavaList.empty();
 		return oldModifiers.contains("public")?newModifiers.addLast("export"):newModifiers;
 	}
 	def generateDefinition(name : String, node : Node, state : State) => {
-		
-		classModifiers : var=
-		
-		JavaList.of("class", "def");
-		
-		stringList : var=
-		
-		computeNewModifiers(node).addAll(classModifiers);
-		
-		params : var=
-		
-		node.findNodeList("params").orElse(JavaList.empty());
-		
-		definition : var=
-		
-		node.clear("definition").withString("name", name).withStringList("modifiers", stringList).withNodeList("params", params);
-		
-		withTypeParams : var=
-		
-		node.findNodeList("type-params").map(() => definition.withNodeList("type-params", typeParams)).orElse(definition);
-		
-		function : var=
-		
-		node.retype("function").withNode("definition", withTypeParams);
-		
-		withImplements : var=
-		
-		function.findNode("interface").map(() => moveImplements(function, interfaceType)).orElse(function);
-		
-		tuple : var=
-		
-		Tuple(withImplements, state);
+		classModifiers : var=JavaList.of("class", "def");
+		stringList : var=computeNewModifiers(node).addAll(classModifiers);
+		params : var=node.findNodeList("params").orElse(JavaList.empty());
+		definition : var=node.clear("definition").withString("name", name).withStringList("modifiers", stringList).withNodeList("params", params);
+		withTypeParams : var=node.findNodeList("type-params").map(() => definition.withNodeList("type-params", typeParams)).orElse(definition);
+		function : var=node.retype("function").withNode("definition", withTypeParams);
+		withImplements : var=function.findNode("interface").map(() => moveImplements(function, interfaceType)).orElse(function);
+		tuple : var=Tuple(withImplements, state);
 		return Ok(tuple);
 	}
 	def moveImplements(function : Node, interfaceType : Node) => {
-		
-		implementsStatement : var=
-		
-		function.clear("implements").withNode("type", interfaceType);
+		implementsStatement : var=function.clear("implements").withNode("type", interfaceType);
 		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.addLast(implementsStatement))).orElse(implementsStatement));
 	}
 }

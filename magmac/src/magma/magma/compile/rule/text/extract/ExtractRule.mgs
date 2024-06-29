@@ -19,14 +19,8 @@ export object ExtractRule {
 	public def fromNode(node : Node) => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
 	def getStringErrorOk(value : String) => Ok(value);
 	def createErr(node : Node) => {
-		
-		format : var=
-		
-		"Property '%s' does not exist.";
-		
-		message : var=
-		
-		format.formatted(key);
+		format : var="Property '%s' does not exist.";
+		message : var=format.formatted(key);
 		return Err(CompileError(message, node.toString()));
 	}
 	implements Rule;

@@ -10,8 +10,7 @@ import magma.compile.rule.result.UntypedRuleResult;
 export class def EmptyRule(name : String) => {
 	public def toNode(input : String) => input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));
 	public def fromNode(node : Node) => {
-		if
-		(node.has(name))
+		if(node.has(name))
 		{
 			return Err(CompileError("Node has property '" + name + "'.", node.toString()));
 		}

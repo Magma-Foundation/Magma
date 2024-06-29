@@ -6,38 +6,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ConditionEndSearcher() => {
 	public def search(input : String) => {
-		
-		depth : var=
-		
-		0;
-		
-		queue : var=
-		
-		IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
-		while
-		(!queue.isEmpty())
+		depth : var=0;
+		queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
+		while(!queue.isEmpty())
 		{
-			
-			tuple : var=
-			
-			queue.pop();
-			
-			i : var=
-			
-			tuple.left();
-			
-			c : var=
-			
-			tuple.right();
-			if
-			(c=='\'')
+			tuple : var=queue.pop();
+			i : var=tuple.left();
+			c : var=tuple.right();
+			if(c=='\'')
 			{
-				
-				popped : var=
-				
-				queue.pop();
-				if
-				(popped.right()=='\\')
+				popped : var=queue.pop();
+				if(popped.right()=='\\')
 				{
 					queue.pop();
 				}
@@ -45,18 +24,15 @@ export class def ConditionEndSearcher() => {
 				continue
 				;
 			}
-			if
-			(c==')'&&depth==1)
+			if(c==')'&&depth==1)
 			{
 				return Optional.of(i);
 			}
 			else
 			{
-				if
-				(c=='(')
+				if(c=='(')
 				depth++;
-				if
-				(c==')')
+				if(c==')')
 				depth--;
 			}
 		}

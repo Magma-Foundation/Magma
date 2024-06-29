@@ -10,116 +10,51 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 export class def AdapterNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
-		
-		parentOption : var=
-		
-		node.findString("parent");
-		if
-		(parentOption.isEmpty())
+		parentOption : var=node.findString("parent");
+		if(parentOption.isEmpty())
 		{
 			return Ok(Tuple(node, state));
 		}
-		
-		childrenOption : var=
-		
-		node.findNodeList("children");
-		if
-		(childrenOption.isEmpty())
+		childrenOption : var=node.findNodeList("children");
+		if(childrenOption.isEmpty())
 		return Ok(Tuple(node, state));
-		
-		parent : var=
-		
-		parentOption.orElsePanic();
-		
-		children : var=
-		
-		childrenOption.orElsePanic();
-		if
-		(parent.equals("BiFunction"))
+		parent : var=parentOption.orElsePanic();
+		children : var=childrenOption.orElsePanic();
+		if(parent.equals("BiFunction"))
 		{
-			
-			firstOption : var=
-			
-			children.get(0);
-			
-			secondOption : var=
-			
-			children.get(1);
-			if
-			(firstOption.isEmpty()||secondOption.isEmpty())
+			firstOption : var=children.get(0);
+			secondOption : var=children.get(1);
+			if(firstOption.isEmpty()||secondOption.isEmpty())
 			{
 				return Err(CompileError("Parameters required.", node.toString()));
 			}
-			
-			first : var=
-			
-			firstOption.orElsePanic();
-			
-			second : var=
-			
-			secondOption.orElsePanic();
-			
-			returnsOption : var=
-			
-			children.get(2);
-			if
-			(returnsOption.isEmpty())
+			first : var=firstOption.orElsePanic();
+			second : var=secondOption.orElsePanic();
+			returnsOption : var=children.get(2);
+			if(returnsOption.isEmpty())
 			return Err(CompileError("No return type.", node.toString()));
-			
-			returns : var=
-			
-			returnsOption.orElsePanic();
-			
-			newType : var=
-			
-			node.clear("function-type").withNodeList("params", JavaList.of(first, second)).withNode("returns", returns);
+			returns : var=returnsOption.orElsePanic();
+			newType : var=node.clear("function-type").withNodeList("params", JavaList.of(first, second)).withNode("returns", returns);
 			return Ok(Tuple(newType, state));
 		}
 		else if(parent.equals("Predicate")){
-			
-			type : var=
-			
-			children.get(0);
-			if
-			(type.isEmpty())
+			type : var=children.get(0);
+			if(type.isEmpty())
 			return Err(CompileError("Predicate requires a type.", node.toString()));
-			
-			reference : var=
-			
-			node.clear("reference").withString("value", "Bool");
-			
-			newType : var=
-			
-			node.clear("function-type").withNodeList("params", JavaList.of(type.orElsePanic())).withNode("returns", reference);
+			reference : var=node.clear("reference").withString("value", "Bool");
+			newType : var=node.clear("function-type").withNodeList("params", JavaList.of(type.orElsePanic())).withNode("returns", reference);
 			return Ok(Tuple(newType, state));
 		}
 		else if(parent.equals("Function")){
-			
-			input : var=
-			
-			children.get(0);
-			if
-			(input.isEmpty())
+			input : var=children.get(0);
+			if(input.isEmpty())
 			return Err(CompileError("Input type required.", node.toString()));
-			
-			first : var=
-			
-			input.orElsePanic();
-			
-			returnsOption : var=
-			
-			children.get(1);
-			if
-			(returnsOption.isEmpty())
+			first : var=input.orElsePanic();
+			returnsOption : var=children.get(1);
+			if(returnsOption.isEmpty())
 			return Err(CompileError("Return type required.", node.toString()));
-			
-			returns : var=
-			
-			returnsOption.orElsePanic();
-			
-			newType : var=
-			
-			node.clear("function-type").withNodeList("params", JavaList.of(first)).withNode("returns", returns);
+			returns : var=returnsOption.orElsePanic();
+			newType : var=node.clear("function-type").withNodeList("params", JavaList.of(first)).withNode("returns", returns);
 			return Ok(Tuple(newType, state));
 		}
 		else return Ok(Tuple(node, state));

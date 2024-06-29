@@ -7,47 +7,24 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.java.JavaOptionals;
 export class def TypeRule(type : String, child : Rule) => {
-	
-	public static final FORMAT : String=
-	
-	"Node was not of type '%s', but rather '%s'.";
+	public static final FORMAT : String="Node was not of type '%s', but rather '%s'.";
 	public def toNode(input : String) => {
-		
-		result : var=
-		
-		child.toNode(input);
-		if
-		(JavaOptionals.toNative(result.findError()).isEmpty())
+		result : var=child.toNode(input);
+		if(JavaOptionals.toNative(result.findError()).isEmpty())
 		return result.withType(type);
-		
-		format : var=
-		
-		"Cannot attach type '%s' because of child failure.";
-		
-		message : var=
-		
-		format.formatted(type);
+		format : var="Cannot attach type '%s' because of child failure.";
+		message : var=format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, JavaOptionals.toNative(result.findError()).get()));
 	}
 	public def fromNode(node : Node) => {
-		if
-		(!node.is(type))
+		if(!node.is(type))
 		{
-			
-			message : var=
-			
-			String.format(FORMAT, type, node.findType());
+			message : var=String.format(FORMAT, type, node.findType());
 			return Err(CompileError(message, node.toString()));
 		}
 		return child.fromNode(node).mapErr(() => {
-			
-			format : var=
-			
-			"Cannot generate '%s' from node.";
-			
-			message : var=
-			
-			format.formatted(type);
+			format : var="Cannot generate '%s' from node.";
+			message : var=format.formatted(type);
 			return CompileParentError(message, node.toString(), err);
 		});
 	}

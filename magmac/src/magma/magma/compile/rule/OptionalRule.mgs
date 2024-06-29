@@ -9,8 +9,7 @@ export object OptionalRule {
 	private final orRule : OrRule;
 	public def toNode(input : String) => orRule.toNode(input);
 	public def fromNode(node : Node) => {
-		if
-		(node.has(key))
+		if(node.has(key))
 		{
 			return onPresent.fromNode(node);
 		}

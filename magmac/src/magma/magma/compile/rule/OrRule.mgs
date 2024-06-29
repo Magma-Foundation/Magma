@@ -14,24 +14,16 @@ export object OrRule {
 }
 export class def OrRule(rules : List<Rule>) => {
 	public def toNode(input : String) => {
-		
-		errors : var=
-		
-		ArrayList();
+		errors : var=ArrayList();
 		for(rule : Rule in rules()){
-			
-			result : var=
-			
-			rule.toNode(input);
-			if
-			(JavaOptionals.toNative(result.findAttributes()).isPresent())
+			result : var=rule.toNode(input);
+			if(JavaOptionals.toNative(result.findAttributes()).isPresent())
 			{
 				return result;
 			}
 			JavaOptionals.toNative(result.findError()).ifPresent(errors.add);
 		}
-		if
-		(errors.isEmpty())
+		if(errors.isEmpty())
 		{
 			return ErrorRuleResult(CompileError("No rules were present.", input));
 		}
@@ -41,24 +33,14 @@ export class def OrRule(rules : List<Rule>) => {
 		}
 	}
 	public def fromNode(node : Node) => {
-		
-		results : var=
-		
-		ArrayList();
+		results : var=ArrayList();
 		for(rule : var in rules){
-			
-			result : var=
-			
-			rule.fromNode(node);
+			result : var=rule.fromNode(node);
 			results.add(result);
 		}
-		
-		anyOk : Optional<Result<String, Error_>>=
-		
-		Optional.empty();
+		anyOk : Optional<Result<String, Error_>>=Optional.empty();
 		for(result : Result<String, Error_> in results){
-			if
-			(result.isOk())
+			if(result.isOk())
 			{
 				anyOk=Optional.of(result);
 				break

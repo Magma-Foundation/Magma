@@ -4,10 +4,7 @@ export object NodeAttribute {
 	public def from(node : Node) => NodeAttribute(node);
 }
 export class def NodeAttribute(value : Node) => {
-	
-	public static final Factory : Factory<Node>=
-	
-	Factory();
+	public static final Factory : Factory<Node>=Factory();
 	
 	;
 	public def asNode() => Optional.of(value);

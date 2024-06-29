@@ -1,21 +1,12 @@
 export object NumberRule {
 	def allDigits(input : String) => {
-		if
-		(input.isEmpty())
+		if(input.isEmpty())
 		return false;
-		
-		i : int=
-		
-		0;
-		while
-		(i<input.length())
+		i : int=0;
+		while(i<input.length())
 		{
-			
-			c : var=
-			
-			input.charAt(i);
-			if
-			(!Character.isDigit(c))
+			c : var=input.charAt(i);
+			if(!Character.isDigit(c))
 			{
 				return false;
 			}

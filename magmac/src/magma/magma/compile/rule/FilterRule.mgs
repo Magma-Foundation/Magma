@@ -6,8 +6,7 @@ import magma.compile.rule.result.RuleResult;
 export object FilterRule {
 	protected final child : Rule;
 	public def toNode(input : String) => {
-		if
-		(filter(input))
+		if(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}

@@ -3,13 +3,9 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 export object SingleHead {
 	private final value : T;
-	
-	private retrieved : boolean=
-	
-	false;
+	private retrieved : boolean=false;
 	public def head() => {
-		if
-		(retrieved)
+		if(retrieved)
 		return None.None();
 		else
 		{

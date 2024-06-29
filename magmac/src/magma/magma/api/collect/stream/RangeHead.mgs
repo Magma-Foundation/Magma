@@ -5,13 +5,9 @@ export object RangeHead {
 	private final extent : int;
 	private counter : int;
 	public def head() => {
-		if
-		(counter>=extent)
+		if(counter>=extent)
 		return None.None();
-		
-		value : var=
-		
-		counter;
+		value : var=counter;
 		counter++;
 		return Some(value);
 	}

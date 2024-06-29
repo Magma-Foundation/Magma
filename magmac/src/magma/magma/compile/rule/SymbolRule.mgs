@@ -3,24 +3,15 @@ export object SymbolRule {
 	def isUnderscore(c : char) => c=='_';
 	def computeMessage() => "Not a symbol.";
 	def filter(input : String) => {
-		if
-		(input.isEmpty())
+		if(input.isEmpty())
 		{
 			return false;
 		}
-		
-		i : int=
-		
-		0;
-		while
-		(i<input.length())
+		i : int=0;
+		while(i<input.length())
 		{
-			
-			c : var=
-			
-			input.charAt(i);
-			if
-			(Character.isLetter(c)||isUnderscore(c)||isDollar(c)||isValidDigit(i, c))
+			c : var=input.charAt(i);
+			if(Character.isLetter(c)||isUnderscore(c)||isDollar(c)||isValidDigit(i, c))
 			{
 				i++;
 				continue

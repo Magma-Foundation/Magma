@@ -6,50 +6,24 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def MembersSplitter() => {
 	public def split(input : String) => {
-		
-		current : var=
-		
-		State();
-		
-		queue : var=
-		
-		IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
-		while
-		(!queue.isEmpty())
+		current : var=State();
+		queue : var=IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		while(!queue.isEmpty())
 		{
-			
-			c : var=
-			
-			queue.pop();
-			
-			state : var=
-			
-			current.append(c);
-			if
-			(c=='/'&&state.isLevel()&&!queue.isEmpty())
+			c : var=queue.pop();
+			state : var=current.append(c);
+			if(c=='/'&&state.isLevel()&&!queue.isEmpty())
 			{
-				
-				after : var=
-				
-				queue.peek();
-				if
-				(after=='/')
+				after : var=queue.peek();
+				if(after=='/')
 				{
 					// We are in a single-line comment.
-					
-					withAfter : var=
-					
-					state.append(queue.pop());
-					while
-					(!queue.isEmpty())
+					withAfter : var=state.append(queue.pop());
+					while(!queue.isEmpty())
 					{
-						
-						next : var=
-						
-						queue.pop();
+						next : var=queue.pop();
 						withAfter=withAfter.append(next);
-						if
-						(next=='\n')
+						if(next=='\n')
 						{
 							break
 							;
@@ -61,20 +35,12 @@ export class def MembersSplitter() => {
 				}
 				else if(after=='*'){
 					// We are in a block comment.
-					
-					withAfter : var=
-					
-					state.append(queue.pop());
-					while
-					(!queue.isEmpty())
+					withAfter : var=state.append(queue.pop());
+					while(!queue.isEmpty())
 					{
-						
-						next : var=
-						
-						queue.pop();
+						next : var=queue.pop();
 						withAfter=withAfter.append(next);
-						if
-						(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
+						if(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
 						{
 							withAfter=withAfter.append(queue.pop());
 							break
@@ -86,49 +52,29 @@ export class def MembersSplitter() => {
 					;
 				}
 			}
-			if
-			(c=='\'')
+			if(c=='\'')
 			{
-				
-				next : var=
-				
-				queue.pop();
-				
-				withNext : var=
-				
-				current.append(next);
-				
-				escaped : var=
-				
-				next=='\\'?current.append(queue.pop()):withNext;
+				next : var=queue.pop();
+				withNext : var=current.append(next);
+				escaped : var=next=='\\'?current.append(queue.pop()):withNext;
 				current=escaped.append(queue.pop());
 				continue
 				;
 			}
-			if
-			(c=='\"')
+			if(c=='\"')
 			{
-				
-				withString : var=
-				
-				current;
-				while
-				(!queue.isEmpty())
+				withString : var=current;
+				while(!queue.isEmpty())
 				{
-					
-					next : var=
-					
-					queue.pop();
+					next : var=queue.pop();
 					withString=withString.append(next);
-					if
-					(next=='\\')
+					if(next=='\\')
 					{
 						withString.append(queue.pop());
 						continue
 						;
 					}
-					if
-					(next=='\"')
+					if(next=='\"')
 					{
 						break
 						;
@@ -138,8 +84,7 @@ export class def MembersSplitter() => {
 				continue
 				;
 			}
-			if
-			(c==';'&&state.isLevel())
+			if(c==';'&&state.isLevel())
 			{
 				current=state.advance();
 			}
@@ -161,10 +106,7 @@ export class def MembersSplitter() => {
 	}
 	 object State {
 		def advance() => {
-			
-			copy : var=
-			
-			ArrayList(this.tokens);
+			copy : var=ArrayList(this.tokens);
 			copy.add(this.buffer.toString());
 			return State(copy, StringBuilder(), depth);
 		}

@@ -15,17 +15,10 @@ export object ExtractStringListRule {
 	def fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
 	def join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
 	def toAttribute(content : String) => {
-		
-		list : var=
-		
-		split(content);
+		list : var=split(content);
 		for(format : String in list){
-			
-			qualified : var=
-			
-			qualify(format);
-			if
-			(qualified.isPresent())
+			qualified : var=qualify(format);
+			if(qualified.isPresent())
 			{
 				return Err(qualified.get());
 			}
@@ -33,23 +26,12 @@ export object ExtractStringListRule {
 		return Ok(StringListAttribute(list));
 	}
 	def split(content : String) => {
-		
-		result : List<String>=
-		
-		ArrayList();
-		
-		start : int=
-		
-		0;
-		while
-		(true)
+		result : List<String>=ArrayList();
+		start : int=0;
+		while(true)
 		{
-			
-			end : var=
-			
-			content.indexOf(delimiter, start);
-			if
-			(end==-1)
+			end : var=content.indexOf(delimiter, start);
+			if(end==-1)
 			break;
 			result.add(content.substring(start, end));
 			start=end+delimiter.length();
