@@ -11,7 +11,7 @@ export class def TypedRuleResult(name : String, attributes : Attributes) => {
 	def tryCreate0() => Optional.of(ImmutableNode(name, attributes));
 	def findError0() => Optional.empty();
 	public def withType(type : String) => this;
-	public def mapErr(mapper : Function<Error_, Error_>) => this;
+	public def mapErr(mapper : (Error_) => Error_) => this;
 	public def findError() => JavaOptionals.fromNative(findError0());
 	public def findAttributes() => JavaOptionals.fromNative(findAttributes0());
 	public def tryCreate() => JavaOptionals.fromNative(tryCreate0());

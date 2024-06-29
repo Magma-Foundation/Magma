@@ -93,6 +93,35 @@ export class def AdapterNormalizer() => {
 			node.clear("function-type").withNodeList("params", JavaList.of(type.orElsePanic())).withNode("returns", reference);
 			return Ok(Tuple(newType, state));
 		}
+		else if(parent.equals("Function")){
+			
+			input : var=
+			
+			children.get(0);
+			if
+			(input.isEmpty())
+			return Err(CompileError("Input type required.", node.toString()));
+			
+			first : var=
+			
+			input.orElsePanic();
+			
+			returnsOption : var=
+			
+			children.get(1);
+			if
+			(returnsOption.isEmpty())
+			return Err(CompileError("Return type required.", node.toString()));
+			
+			returns : var=
+			
+			returnsOption.orElsePanic();
+			
+			newType : var=
+			
+			node.clear("function-type").withNodeList("params", JavaList.of(first)).withNode("returns", returns);
+			return Ok(Tuple(newType, state));
+		}
 		else return Ok(Tuple(node, state));
 	}
 	implements Visitor;

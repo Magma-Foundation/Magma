@@ -7,7 +7,7 @@ import magma.compile.rule.Node;
 import java.util.function.Function;
 export class def UntypedRuleResult(attributes : Attributes) => {
 	public def withType(type : String) => TypedRuleResult(type, attributes);
-	public def mapErr(mapper : Function<Error_, Error_>) => this;
+	public def mapErr(mapper : (Error_) => Error_) => this;
 	public def findError() => None.None();
 	public def findAttributes() => Some(attributes);
 	public def tryCreate() => None.None();

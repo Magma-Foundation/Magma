@@ -33,7 +33,7 @@ export struct Result {
      * @return the Result returned by applying the function, or the original error if the result is a failure
      */
 	
-	flatMapValue<R> : (Function<T, Result<R, E>>) => Result<R, E>;
+	flatMapValue<R> : ((T) => Result<R, E>) => Result<R, E>;
 	
 	/**
      * Applies a function to the contained value if the result is successful, returning a new Result with the transformed value.
@@ -43,7 +43,7 @@ export struct Result {
      * @return a new Result containing the transformed value, or the original error if the result is a failure
      */
 	
-	mapValue<R> : (Function<T, R>) => Result<R, E>;
+	mapValue<R> : ((T) => R) => Result<R, E>;
 	
 	/**
      * Checks if the result is successful (contains a value).
@@ -60,7 +60,7 @@ export struct Result {
      * @return a new Result containing the transformed error, or the original value if the result is successful
      */
 	
-	mapErr<R> : (Function<E, R>) => Result<T, R>;
+	mapErr<R> : ((E) => R) => Result<T, R>;
 	
 	/**
      * Matches the result, applying one of two functions depending on whether it is successful or failed,
@@ -72,5 +72,5 @@ export struct Result {
      * @return the result of applying the appropriate function
      */
 	
-	match<R> : (Function<T, R>, Function<E, R>) => R;
+	match<R> : ((T) => R, (E) => R) => R;
 }

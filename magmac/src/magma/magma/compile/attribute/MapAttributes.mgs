@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 export object MapAttributes {
-	public def mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) => {
+	public def mapValue<T>(key : String, factory : Factory<T>, mapper : (T) => T) => {
 		if
 		(!values.containsKey(key))
 		return this;

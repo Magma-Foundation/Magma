@@ -81,7 +81,7 @@ export struct Node {
      * @param mapper the function to apply to the list of child nodes
      * @return the updated Node
      */
-	mapNodes : (String, Function<List<Node>, List<Node>>) => Node;
+	mapNodes : (String, (List<Node>) => List<Node>) => Node;
 	
 	/**
      * Finds a child node with a specified key.
@@ -137,7 +137,7 @@ export struct Node {
      * @param mapper the function to apply to the list of strings
      * @return the updated Node
      */
-	mapStringList : (String, Function<List<String>, List<String>>) => Node;
+	mapStringList : (String, (List<String>) => List<String>) => Node;
 	
 	/**
      * Adds a string with a specified key.
@@ -164,7 +164,7 @@ export struct Node {
      * @param mapper the function to apply to the node
      * @return the updated Node
      */
-	mapNode : (String, Function<Node, Node>) => Node;
+	mapNode : (String, (Node) => Node) => Node;
 	
 	/**
      * Removes a property.

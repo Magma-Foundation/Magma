@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 export struct Stream {
 	
-	map<R> : (Function<T, R>) => Stream<R>;
+	map<R> : ((T) => R) => Stream<R>;
 	
 	collect<C> : (Collector<T, C>) => C;
 	
@@ -17,8 +17,8 @@ export struct Stream {
 	anyMatch : ((T) => Bool) => boolean;
 	filter : ((T) => Bool) => Stream<T>;
 	
-	flatMap<R> : (Function<T, Head<R>>) => Stream<R>;
+	flatMap<R> : ((T) => Head<R>) => Stream<R>;
 	
-	extend<R> : (Function<T, R>) => Stream<Tuple<T, R>>;
-	def into<R>(mapper : Function<Stream<T>, R>) => mapper.apply(this);
+	extend<R> : ((T) => R) => Stream<Tuple<T, R>>;
+	def into<R>(mapper : (Stream<T>) => R) => mapper.apply(this);
 }

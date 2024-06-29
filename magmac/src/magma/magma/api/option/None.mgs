@@ -3,13 +3,13 @@ import magma.lang.Instantiator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 export object None {
-	public def map<R>(mapper : Function<T, R>) => None();
+	public def map<R>(mapper : (T) => R) => None();
 	public def orElseGet(supplier : Supplier<T>) => supplier.get();
 	public def orElse(other : T) => other;
 	public def isPresent() => false;
 	public def toTuple(other : T) => Tuple(false, other);
 	public def isEmpty() => true;
-	public def flatMap<R>(mapper : Function<T, Option<R>>) => None();
+	public def flatMap<R>(mapper : (T) => Option<R>) => None();
 	public def orElsePanic() => throw RuntimeException("Option was empty!");
 	public def and<R>(other : Option<R>) => None();
 	implements Option<T>;

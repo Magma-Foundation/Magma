@@ -6,11 +6,11 @@ export object Ok {
 	public def from<E, R>(value : R) => Ok(value);
 }
 export class def Ok<T, E>(value : T) => {
-	public def flatMapValue<R>(mapper : Function<T, Result<R, E>>) => mapper.apply(value);
-	public def mapValue<R>(mapper : Function<T, R>) => Ok(mapper.apply(value));
+	public def flatMapValue<R>(mapper : (T) => Result<R, E>) => mapper.apply(value);
+	public def mapValue<R>(mapper : (T) => R) => Ok(mapper.apply(value));
 	public def isOk() => true;
-	public def mapErr<R>(mapper : Function<E, R>) => Ok(value);
-	public def match<R>(onOk : Function<T, R>, onErr : Function<E, R>) => onOk.apply(value);
+	public def mapErr<R>(mapper : (E) => R) => Ok(value);
+	public def match<R>(onOk : (T) => R, onErr : (E) => R) => onOk.apply(value);
 	public def findValue() => Some(value);
 	public def findErr() => None.None();
 	implements Result<T, E>;
