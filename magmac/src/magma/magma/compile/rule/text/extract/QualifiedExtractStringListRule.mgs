@@ -6,7 +6,7 @@ import java.util.Optional;
 export object QualifiedExtractStringListRule {
 	private final qualifier : Rule;
 	def qualify(child : String) => {
-		ruleResult : RuleResult=qualifier.toNode(child);
+		let mut ruleResult : RuleResult = qualifier.toNode(child);
 		return JavaOptionals.toNative(ruleResult.findError());
 	}
 }

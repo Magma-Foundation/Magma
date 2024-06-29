@@ -15,12 +15,12 @@ export class def HeadedStream<T>(provider : Head<T>) => {
 	public def extend<R>(mapper : (T) => R) => map(() => Tuple(value, mapper.apply(value)));
 	public def map<R>(mapper : (T) => R) => HeadedStream(() => this.provider.head().map(mapper));
 	public def collect<C>(collector : Collector<T, C>) => {
-		current : var=collector.createInitial();
+		let mut current = collector.createInitial();
 		return foldLeft(current, collector.fold);
 	}
 	public def foldLeft<C>(current : C, folder : (C, T) => C) => while(true){
-		finalCurrent : C=current;
-		tuple : var=JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+		let mut finalCurrent : C = current;
+		let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
 		if(tuple.left())
 		{
 			current=tuple.right();
@@ -36,10 +36,10 @@ export class def HeadedStream<T>(provider : Head<T>) => {
 		private final mapper : (T) => Head<R>;
 		private current : Head<R>;
 		public def head() => while(true){
-			currentHead : var=current.head();
+			let mut currentHead = current.head();
 			if(currentHead.isPresent())
 			return currentHead;
-			tuple : var=outer.head().map(mapper).toTuple(current);
+			let mut tuple = outer.head().map(mapper).toTuple(current);
 			if(tuple.left())
 			{
 				current=tuple.right();

@@ -19,15 +19,15 @@ export object BlockNormalizer {
 	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
 		if(!node.is("function"))
 		return Ok(flattening.withInstanceMember(node));
-		definitionOptional : var=node.findNode("definition");
+		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())
 		return Ok(flattening.withInstanceMember(node));
-		definition : var=definitionOptional.orElsePanic();
-		modifiers : var=definition.findStringList("modifiers").orElse(JavaList.empty());
-		cleanedOptional : var=cleanup(node, outerName);
+		let mut definition = definitionOptional.orElsePanic();
+		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		let mut cleanedOptional = cleanup(node, outerName);
 		if(cleanedOptional.isEmpty())
 		return Ok(flattening);
-		cleaned : var=cleanedOptional.orElsePanic();
+		let mut cleaned = cleanedOptional.orElsePanic();
 		if(modifiers.contains("static"))
 		{
 			return Ok(flattening.withStaticMember(cleaned));
@@ -38,8 +38,8 @@ export object BlockNormalizer {
 		}
 	}
 	def splitIntoObject(node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
-		staticMembers : var=flattening.staticMembers;
-		instanceMembers : var=flattening.instanceMembers;
+		let mut staticMembers = flattening.staticMembers;
+		let mut instanceMembers = flattening.instanceMembers;
 		if(staticMembers.isEmpty())
 		{
 			return Streams.of(createFunction(node, instanceMembers));
@@ -49,43 +49,43 @@ export object BlockNormalizer {
 		}
 		else
 		{
-			object : var=createObject(node, modifiers, name, staticMembers);
-			withChild : var=createFunction(node, instanceMembers);
+			let mut object = createObject(node, modifiers, name, staticMembers);
+			let mut withChild = createFunction(node, instanceMembers);
 			return Streams.of(object, withChild);
 		}
 	}
 	def createFunction(node : Node, instanceMembers : List<Node>) => {
-		instanceBlock : var=node.clear("block").withNodeList("children", instanceMembers);
+		let mut instanceBlock = node.clear("block").withNodeList("children", instanceMembers);
 		return node.withNode("child", instanceBlock);
 	}
 	def createObject(node : Node, oldModifiers : List<String>, name : String, staticMembers : List<Node>) => {
-		staticBlock : var=node.clear("block").withNodeList("children", staticMembers);
-		newModifiers : var=oldModifiers.remove("class").remove("def");
+		let mut staticBlock = node.clear("block").withNodeList("children", staticMembers);
+		let mut newModifiers = oldModifiers.remove("class").remove("def");
 		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
 	def cleanup(node : Node, outerName : String) => {
 		if(!node.is("function"))
 		return Some(node);
-		definitionOptional : var=node.findNode("definition");
+		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())
 		return Some(node);
-		definition : var=definitionOptional.orElsePanic();
-		nameOptional : var=definition.findString("name");
+		let mut definition = definitionOptional.orElsePanic();
+		let mut nameOptional = definition.findString("name");
 		if(nameOptional.isEmpty())
 		return Some(node);
 		if(nameOptional.orElsePanic().equals(outerName))
 		{
 			return None();
 		}
-		modifiers : var=definition.findStringList("modifiers").orElse(JavaList.empty());
-		withNewModifiers : var=definition.withStringList("modifiers", modifiers.remove("static"));
-		withNewDefinition : var=node.withNode("definition", withNewModifiers);
+		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		let mut withNewModifiers = definition.withStringList("modifiers", modifiers.remove("static"));
+		let mut withNewDefinition = node.withNode("definition", withNewModifiers);
 		return Some(withNewDefinition);
 	}
 }
 export class def BlockNormalizer() => {
 	public def postVisit(node : Node, state : State) => {
-		childrenOptional : var=node.findNodeList("children");
+		let mut childrenOptional = node.findNodeList("children");
 		if(childrenOptional.isEmpty())
 		return Ok(Tuple(node, state));
 		return flattenChildren(childrenOptional.orElsePanic()).mapValue(() => Tuple(node.withNodeList("children", children), state));
@@ -94,25 +94,25 @@ export class def BlockNormalizer() => {
 	def flattenChild(node : Node) => {
 		if(!node.is("function"))
 		return Ok(Streams.of(node));
-		definitionOptional : var=node.findNode("definition");
+		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())
 		return Ok(Streams.of(node));
-		definition : var=definitionOptional.orElsePanic();
-		modifiers : var=definition.findStringList("modifiers").orElse(JavaList.empty());
-		nameOptional : var=definition.findString("name");
+		let mut definition = definitionOptional.orElsePanic();
+		let mut modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+		let mut nameOptional = definition.findString("name");
 		if(nameOptional.isEmpty())
 		return Ok(Streams.of(node));
-		name : var=nameOptional.orElsePanic();
-		childOptional : var=node.findNode("child");
+		let mut name = nameOptional.orElsePanic();
+		let mut childOptional = node.findNode("child");
 		if(childOptional.isEmpty())
 		return Ok(Streams.of(node));
-		child : var=childOptional.orElsePanic();
+		let mut child = childOptional.orElsePanic();
 		if(!child.is("block"))
 		return Ok(Streams.of(node));
-		oldChildren : var=child.findNodeList("children").orElse(JavaList.empty());
+		let mut oldChildren = child.findNodeList("children").orElse(JavaList.empty());
 		if(hasFactory(oldChildren, name))
 		{
-			children1 : var=oldChildren.stream().map(() => cleanup(oldChild, name)).flatMap(Streams.fromOption).collect(JavaList.collecting());
+			let mut children1 = oldChildren.stream().map(() => cleanup(oldChild, name)).flatMap(Streams.fromOption).collect(JavaList.collecting());
 			return Ok(Streams.of(createObject(node, modifiers, name, children1)));
 		}
 		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name, modifiers));
@@ -120,10 +120,10 @@ export class def BlockNormalizer() => {
 	def hasFactory(children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
 		if(!child.is("function"))
 		return false;
-		definition : var=child.findNode("definition");
+		let mut definition = child.findNode("definition");
 		if(definition.isEmpty())
 		return false;
-		name : var=definition.orElsePanic().findString("name");
+		let mut name = definition.orElsePanic().findString("name");
 		if(name.isEmpty())
 		return false;
 		return name.orElsePanic().equals(outerName);

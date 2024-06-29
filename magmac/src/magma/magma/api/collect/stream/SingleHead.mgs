@@ -3,7 +3,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 export object SingleHead {
 	private final value : T;
-	private retrieved : boolean=false;
+	let mut retrieved : boolean = false;
 	public def head() => {
 		if(retrieved)
 		return None.None();

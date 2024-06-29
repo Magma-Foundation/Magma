@@ -12,7 +12,7 @@ export object InterfaceNormalizer {
 }
 export class def InterfaceNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
-		struct : var=node.retype("struct").mapStringList("modifiers", InterfaceNormalizer.normalizeModifiers);
+		let mut struct = node.retype("struct").mapStringList("modifiers", InterfaceNormalizer.normalizeModifiers);
 		return Ok(Tuple(struct, state));
 	}
 	implements Visitor;

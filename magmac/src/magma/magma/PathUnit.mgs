@@ -12,7 +12,7 @@ export object PathUnit {
 	private final root : Path;
 	private final child : Path;
 	public def toString() => {
-		list : var=ArrayList(computeNamespace());
+		let mut list = ArrayList(computeNamespace());
 		list.add(computeName());
 		return String.join(".", list);
 	}
@@ -26,11 +26,11 @@ export object PathUnit {
 		}
 	}
 	public def computeNamespace() => {
-		relativized : var=root.relativize(child.getParent());
+		let mut relativized = root.relativize(child.getParent());
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
 	public def computeName() => {
-		fileName : var=child.getFileName().toString();
+		let mut fileName = child.getFileName().toString();
 		return fileName.substring(0, fileName.indexOf('.'));
 	}
 	implements Unit;

@@ -9,7 +9,7 @@ export class def LeftRule(slice : String, child : Rule) => {
 	public def toNode(input : String) => {
 		if(input.startsWith(slice))
 		{
-			content : var=input.substring(slice.length());
+			let mut content = input.substring(slice.length());
 			return child.toNode(content);
 		}
 		else

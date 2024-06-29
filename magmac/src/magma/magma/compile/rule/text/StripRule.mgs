@@ -5,12 +5,12 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 export object StripRule {
-	public static final DEFAULT_LEFT : String="left";
-	public static final DEFAULT_RIGHT : String="right";
+	public let DEFAULT_LEFT : String = "left";
+	public let DEFAULT_RIGHT : String = "right";
 	public def toNode(input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
 	public def fromNode(node : Node) => {
-		leftIndent : var=node.findString(left).orElse("");
-		rightIndent : var=node.findString(right).orElse("");
+		let mut leftIndent = node.findString(left).orElse("");
+		let mut rightIndent = node.findString(right).orElse("");
 		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
 	implements Rule;

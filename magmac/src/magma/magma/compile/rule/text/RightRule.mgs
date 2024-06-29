@@ -9,8 +9,8 @@ export class def RightRule(child : Rule, slice : String) => {
 	public def toNode(input : String) => {
 		if(input.endsWith(slice))
 		{
-			contentEnd : var=input.length()-slice.length();
-			content : var=input.substring(0, contentEnd);
+			let mut contentEnd = input.length()-slice.length();
+			let mut content = input.substring(0, contentEnd);
 			return child.toNode(content);
 		}
 		else

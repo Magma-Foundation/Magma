@@ -3,13 +3,13 @@ import magma.java.JavaList;
 import java.util.ArrayList;
 export object JSON {
 	public def split(input : String) => {
-		list : var=ArrayList();
-		buffer : var=StringBuilder();
-		depth : var=0;
-		i : int=0;
+		let mut list = ArrayList();
+		let mut buffer = StringBuilder();
+		let mut depth = 0;
+		let mut i : int = 0;
 		while(i<input.length())
 		{
-			c : var=input.charAt(i);
+			let mut c = input.charAt(i);
 			if(c==','&&depth==0)
 			{
 				list.add(buffer.toString());

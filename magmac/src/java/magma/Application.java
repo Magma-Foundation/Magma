@@ -20,6 +20,7 @@ import magma.compile.lang.MagmaLang;
 import magma.compile.lang.VisitingGenerator;
 import magma.compile.lang.Visitor;
 import magma.compile.lang.java.AdapterNormalizer;
+import magma.compile.lang.java.DeclarationNormalizer;
 import magma.compile.lang.java.TemplateNormalizer;
 import magma.compile.lang.java.ConstructorNormalizer;
 import magma.compile.lang.java.FilteringVisitor;
@@ -28,6 +29,7 @@ import magma.compile.lang.java.LambdaNormalizer;
 import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.BlockNormalizer;
+import magma.compile.lang.magma.DeclarationFormatter;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
 import magma.compile.rule.Node;
@@ -134,7 +136,8 @@ public record Application(Configuration config) {
                 new FilteringVisitor("constructor", new ConstructorNormalizer()),
                 new FilteringVisitor("lambda", new LambdaNormalizer()),
                 new FilteringVisitor("method-reference", new MethodReferenceNormalizer()),
-                new FilteringVisitor("generic", new AdapterNormalizer())
+                new FilteringVisitor("generic", new AdapterNormalizer()),
+                new FilteringVisitor("declaration", new DeclarationNormalizer())
         ));
     }
 
@@ -219,7 +222,8 @@ public record Application(Configuration config) {
 
     private Stream<Visitor> streamFormatters() {
         return Streams.of(
-                new FilteringVisitor("block", new BlockFormatter())
+                new FilteringVisitor("block", new BlockFormatter()),
+                new FilteringVisitor("declaration", new DeclarationFormatter())
         );
     }
 

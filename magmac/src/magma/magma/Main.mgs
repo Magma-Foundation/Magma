@@ -19,7 +19,7 @@ import java.util.List;
 import static magma.java.JavaResults.$Void;
 export object Main {
 	public def main(args : String[]) => {
-		result : var=run();
+		let mut result = run();
 		if(result.isPresent())
 		{
 			//noinspection CallToPrintStackTrace
@@ -27,13 +27,13 @@ export object Main {
 		}
 	}
 	def run() => $Void(() => {
-		configuration : var=JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
+		let mut configuration = JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
 		JavaResults.$Option(Application(configuration).run());
 	});
 	def buildConfiguration() => {
 		try 
 		{
-			absolutePath : var=CONFIG_PATH.toAbsolutePath();
+			let mut absolutePath = CONFIG_PATH.toAbsolutePath();
 			if(Files.exists(CONFIG_PATH))
 			{
 				System.out.printf("Found configuration file at '%s'.%n", absolutePath);
@@ -43,22 +43,22 @@ export object Main {
 				System.out.printf("Configuration file did not exist and will be created at '%s'.%n", absolutePath);
 				Files.writeString(CONFIG_PATH, "{}");
 			}
-			configurationString : var=Files.readString(CONFIG_PATH);
-			valueParser : var=LazyJSONParser();
+			let mut configurationString = Files.readString(CONFIG_PATH);
+			let mut valueParser = LazyJSONParser();
 			valueParser.setValue(CompoundJSONParser(JavaList(List.of(JSONStringParser(), JSONArrayParser(valueParser), JSONObjectParser(valueParser)))));
-			parsedOption : var=valueParser.parse(configurationString);
+			let mut parsedOption = valueParser.parse(configurationString);
 			if(parsedOption.isEmpty())
 			{
 				return Err(IOException("Failed to parse configuration: "+configurationString));
 			}
-			parsed : var=parsedOption.orElsePanic();
+			let mut parsed = parsedOption.orElsePanic();
 			System.out.println("Parsed configuration.");
 			System.out.println(parsed);
-			builds : var=parsed.find("builds").orElsePanic();
-			map : var=builds.stream().orElsePanic().map(() => {
-				sources : var=buildSet(build, "sources");
-				targets : var=buildSet(build, "targets");
-				debug : var=Path.of(build.find("debug").orElsePanic().findValue().orElsePanic());
+			let mut builds = parsed.find("builds").orElsePanic();
+			let mut map = builds.stream().orElsePanic().map(() => {
+				let mut sources = buildSet(build, "sources");
+				let mut targets = buildSet(build, "targets");
+				let mut debug = Path.of(build.find("debug").orElsePanic().findValue().orElsePanic());
 				return Build(sources, targets, debug);
 			}).collect(JavaList.collecting());
 			return Ok(Configuration(map));
@@ -68,10 +68,10 @@ export object Main {
 		}
 	}
 	def buildSet(build : JSONValue, key : String) => {
-		root : var=build.find(key).orElsePanic();
-		location : var=root.find("location").orElsePanic().findValue().orElsePanic();
-		platform : var=root.find("platform").orElsePanic().findValue().orElsePanic();
+		let mut root = build.find(key).orElsePanic();
+		let mut location = root.find("location").orElsePanic().findValue().orElsePanic();
+		let mut platform = root.find("platform").orElsePanic().findValue().orElsePanic();
 		return BuildSet(Path.of(location), platform);
 	}
 }
-export class def Main() => public static final CONFIG_PATH : Path=Paths.get(".", "config.json");
+export class def Main() => public let CONFIG_PATH : Path = Paths.get(".", "config.json");

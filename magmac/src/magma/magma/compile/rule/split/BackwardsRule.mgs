@@ -17,26 +17,26 @@ export object BackwardsRule {
 }
 export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
 	public def toNode(input : String) => {
-		allIndexes : var=findAllIndexesReverse(input);
-		errors : var=ArrayList();
+		let mut allIndexes = findAllIndexesReverse(input);
+		let mut errors = ArrayList();
 		for(index : Integer in allIndexes){
-			leftSlice : var=input.substring(0, index);
-			rightSlice : var=input.substring(index+slice.length());
-			leftResult : var=leftRule.toNode(leftSlice);
+			let mut leftSlice = input.substring(0, index);
+			let mut rightSlice = input.substring(index+slice.length());
+			let mut leftResult = leftRule.toNode(leftSlice);
 			if(JavaOptionals.toNative(leftResult.findError()).isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, JavaOptionals.toNative(leftResult.findError()).get()));
 				continue
 				;
 			}
-			rightResult : var=rightRule.toNode(rightSlice);
+			let mut rightResult = rightRule.toNode(rightSlice);
 			if(JavaOptionals.toNative(rightResult.findError()).isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, JavaOptionals.toNative(rightResult.findError()).get()));
 				continue
 				;
 			}
-			optional : var=JavaOptionals.toNative(leftResult.findAttributes()).flatMap(() => JavaOptionals.toNative(rightResult.findAttributes()).map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			let mut optional = JavaOptionals.toNative(leftResult.findAttributes()).flatMap(() => JavaOptionals.toNative(rightResult.findAttributes()).map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if(optional.isPresent())
 			{
 				return optional.get();
@@ -52,8 +52,8 @@ export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule
 		}
 	}
 	def findAllIndexesReverse(input : String) => {
-		indexes : List<Integer>=ArrayList();
-		index : int=input.indexOf(slice);
+		let mut indexes : List<Integer> = ArrayList();
+		let mut index : int = input.indexOf(slice);
 		while(index>=0)
 		{
 			indexes.add(index);

@@ -16,16 +16,16 @@ export object FunctionOptimizer {
 		return Ok(Tuple(node, state));
 	}
 	def flattenInner(child : Node, node : Node) => {
-		children : var=child.findNodeList("children").orElse(JavaList.empty());
+		let mut children = child.findNodeList("children").orElse(JavaList.empty());
 		if(children.size()!=1)
 		{
 			return Ok(node);
 		}
-		firstOptional : var=children.first();
+		let mut firstOptional = children.first();
 		if(firstOptional.isPresent())
 		{
-			first : var=firstOptional.orElsePanic();
-			value : var=first.is("return")?first.retype("statement"):first;
+			let mut first = firstOptional.orElsePanic();
+			let mut value = first.is("return")?first.retype("statement"):first;
 			return Ok(node.withNode("child", value));
 		}
 		else
@@ -36,7 +36,7 @@ export object FunctionOptimizer {
 }
 export class def FunctionOptimizer() => {
 	public def preVisit(node : Node, state : State) => {
-		withoutType : var=node.mapNode("definition", () => definition.remove("type"));
+		let mut withoutType = node.mapNode("definition", () => definition.remove("type"));
 		return withoutType.findNode("child").map(() => flattenChild(child, withoutType, state)).orElseGet(() => Err(CompileError("No child is present.", withoutType.toString())));
 	}
 	implements Visitor;

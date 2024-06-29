@@ -16,44 +16,44 @@ export object MethodNormalizer {
 }
 export class def MethodNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
-		renamed : var=node.retype("function");
-		params : var=node.findNodeList("params").orElse(JavaList.empty());
-		definitionOptional : var=JavaOptionals.toNative(node.findNode("definition"));
+		let mut renamed = node.retype("function");
+		let mut params = node.findNodeList("params").orElse(JavaList.empty());
+		let mut definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
 		if(definitionOptional.isEmpty())
 		{
 			return Err(CompileError("No definition present.", node.toString()));
 		}
-		definition : var=definitionOptional.orElseThrow().mapStringList("modifiers", () => {
-			withPublic : var=transpose(oldModifiers, JavaList.empty(), "public", "public");
-			withStatic : var=transpose(oldModifiers, withPublic, "static", "static");
+		let mut definition = definitionOptional.orElseThrow().mapStringList("modifiers", () => {
+			let mut withPublic = transpose(oldModifiers, JavaList.empty(), "public", "public");
+			let mut withStatic = transpose(oldModifiers, withPublic, "static", "static");
 			return withStatic.addLast("def");
 		});
 		if(node.has("child"))
 		{
-			withParams : var=definition.withNodeList("params", params);
+			let mut withParams = definition.withNodeList("params", params);
 			return Ok(Tuple(renamed.withNode("definition", withParams), state));
 		}
 		else
 		{
-			returnsOptional : var=JavaOptionals.toNative(definition.findNode("type"));
+			let mut returnsOptional = JavaOptionals.toNative(definition.findNode("type"));
 			if(returnsOptional.isEmpty())
 			{
 				return Err(CompileError("No return type present.", node.toString()));
 			}
-			returns : var=returnsOptional.orElseThrow();
-			paramTypes : var=ArrayList();
+			let mut returns = returnsOptional.orElseThrow();
+			let mut paramTypes = ArrayList();
 			for(param : Node in JavaList.toNative(params)){
-				paramTypeOptional : var=JavaOptionals.toNative(param.findNode("type"));
+				let mut paramTypeOptional = JavaOptionals.toNative(param.findNode("type"));
 				if(paramTypeOptional.isEmpty())
 				{
 					return Err(CompileError("No parameter type present.", node.toString()));
 				}
-				type : var=paramTypeOptional.orElseThrow();
+				let mut type = paramTypeOptional.orElseThrow();
 				paramTypes.add(type);
 			}
-			node1 : Node=node.clear("function-type");
-			functionType : var=node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
-			withType : var=definition.withNode("type", functionType);
+			let mut node1 : Node = node.clear("function-type");
+			let mut functionType = node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
+			let mut withType = definition.withNode("type", functionType);
 			return Ok(Tuple(withType, state));
 		}
 	}

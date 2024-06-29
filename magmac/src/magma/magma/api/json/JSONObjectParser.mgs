@@ -11,16 +11,16 @@ export class def JSONObjectParser(valueParser : JSONParser) => {
 		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(RequiredCollector(JavaMap.collecting())).map(JSONObject.new);
 	}
 	def parseEntry(inner : String) => {
-		separator : var=inner.indexOf(':');
+		let mut separator = inner.indexOf(':');
 		if(separator==-1)
 		return None.None();
-		left : var=inner.substring(0, separator).strip();
-		right : var=inner.substring(separator+1).strip();
+		let mut left = inner.substring(0, separator).strip();
+		let mut right = inner.substring(separator+1).strip();
 		if(!left.startsWith("\"")||!left.endsWith("\""))
 		{
 			return None.None();
 		}
-		key : var=left.substring(1, left.length()-1);
+		let mut key = left.substring(1, left.length()-1);
 		return valueParser.parse(right).map(() => Tuple(key, value));
 	}
 	implements JSONParser;

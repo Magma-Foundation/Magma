@@ -1,5 +1,4 @@
 import magma.api.Tuple;
-import magma.lang.Instantiator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 export object None {

@@ -17,14 +17,14 @@ export object MapAttributes {
 		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map(() => with(key, inner)).orElse(this);
 	}
 	public def with(key : String, value : Attribute) => {
-		copy : var=HashMap(values);
+		let mut copy = HashMap(values);
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
 	public def apply(key : String) => values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
 	public def merge(other : Attributes) => {
-		entries : var=other.streamEntries().collect(Collectors.toSet());
-		current : Attributes=this;
+		let mut entries = other.streamEntries().collect(Collectors.toSet());
+		let mut current : Attributes = this;
 		for(entry : var in entries){
 			current=current.with(entry.left(), entry.right());
 		}
@@ -35,7 +35,7 @@ export object MapAttributes {
 	public def has(name : String) => this.values.containsKey(name);
 	public def isEmpty() => values.isEmpty();
 	public def remove(key : String) => {
-		copy : var=HashMap(values);
+		let mut copy = HashMap(values);
 		copy.remove(key);
 		return MapAttributes(copy);
 	}

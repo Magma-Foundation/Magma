@@ -6,16 +6,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ConditionEndSearcher() => {
 	public def search(input : String) => {
-		depth : var=0;
-		queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
+		let mut depth = 0;
+		let mut queue = IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
 		{
-			tuple : var=queue.pop();
-			i : var=tuple.left();
-			c : var=tuple.right();
+			let mut tuple = queue.pop();
+			let mut i = tuple.left();
+			let mut c = tuple.right();
 			if(c=='\'')
 			{
-				popped : var=queue.pop();
+				let mut popped = queue.pop();
 				if(popped.right()=='\\')
 				{
 					queue.pop();
