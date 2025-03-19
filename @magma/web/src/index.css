@@ -3,4 +3,17 @@ html, body, #root {
   padding: 0;
   width: 100vw;
   height: 100vh;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+div {
+  margin: 0;
+  padding: 0;
+  
+  position: absolute;
+  top: 0;
+  left: 0;
 }

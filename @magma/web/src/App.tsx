@@ -1,10 +1,18 @@
 import axios from 'axios'
 import './App.css'
+import { createSignal, onMount } from 'solid-js'
 
 function App() {
-  axios({
-    url: "http://localhost:3000"
-  })
+  const [content, setContent] = createSignal("");
+
+  onMount(async () => {
+    const response = await axios({
+      method: "get",
+      url: "http://localhost:3000"
+    });
+
+    setContent(response.data);
+  });
 
   return (
     <div style={{
@@ -12,6 +20,11 @@ function App() {
       width: "100vw",
       height: "100vh"
     }}>
+      <pre style={{color: "white"}}>
+        <code>
+          {content()}
+        </code>
+      </pre>
     </div>
   )
 }
