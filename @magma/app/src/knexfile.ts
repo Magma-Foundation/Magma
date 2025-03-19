@@ -5,31 +5,12 @@ dotenv.config();
 
 const config: { [key: string]: Knex.Config } = {
   development: {
-    client: "sqlite3",
+    client: "better-sqlite3",
     connection: {
       filename: "./database.sqlite",
     },
-    useNullAsDefault: true,
-    migrations: {
-      directory: "./migrations",
-    },
-    seeds: {
-      directory: "./seeds",
-    },
-  },
-  production: {
-    client: "sqlite3",
-    connection: {
-      filename: "./database.sqlite",
-    },
-    useNullAsDefault: true,
-    migrations: {
-      directory: "./migrations",
-    },
-    seeds: {
-      directory: "./seeds",
-    },
-  },
+    useNullAsDefault: true
+  }
 };
 
 export default config;
