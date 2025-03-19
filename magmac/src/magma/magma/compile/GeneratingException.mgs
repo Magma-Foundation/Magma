@@ -1,3 +1,0 @@
-export object GeneratingException {
-	public final content : String;
-}

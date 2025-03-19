@@ -1,6 +1,0 @@
-import magma.api.contain.List;
-import magma.api.contain.stream.Stream;
-export object Configuration {
-	private final builds : List<Build>;
-	public def streamBuilds() => builds.stream();
-}

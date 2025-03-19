@@ -1,7 +1,0 @@
-import java.util.Optional;
-export class def StringAttribute(value : String) => {
-	public def asString() => Optional.of(value);
-	public def format(depth : int) => "\"" + escape() + "\"";
-	def escape() => value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");
-	implements Attribute;
-}

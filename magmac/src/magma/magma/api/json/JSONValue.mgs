@@ -1,8 +1,0 @@
-import magma.api.contain.stream.Stream;
-import magma.api.option.None;
-import magma.api.option.Option;
-export struct JSONValue {
-	def find(key : String) => None.None();
-	def findValue() => None.None();
-	def stream() => None.None();
-}
