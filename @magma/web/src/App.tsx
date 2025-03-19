@@ -20,11 +20,9 @@ function App() {
       width: "100vw",
       height: "100vh"
     }}>
-      <pre style={{color: "white"}}>
-        <code>
-          {content()}
-        </code>
-      </pre>
+      <textarea style={{width: "100%", height: "100%"}}>
+        {content()}
+      </textarea>
     </div>
   )
 }
