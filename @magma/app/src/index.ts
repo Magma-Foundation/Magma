@@ -1,6 +1,8 @@
 import express from "express";
 import knex from "./db";
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 app.use(express.json());
 
@@ -13,7 +15,6 @@ app.get("/users", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}.`);
 });
