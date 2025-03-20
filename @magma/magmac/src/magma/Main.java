@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,51 +67,72 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         final var stripped = input.strip();
-        if(stripped.isEmpty()) return "";
+        if (stripped.isEmpty()) return "";
         if (stripped.startsWith("import ")) {
             final var withoutImport = stripped.substring("import ".length());
-            if (withoutImport.startsWith("default ")) {
-                final var right = withoutImport.substring("default ".length());
-                if (right.endsWith(";")) {
-                    final var substring = right.substring(0, right.length() - ";".length());
-                    final var asIndex = substring.indexOf(" as ");
-                    if (asIndex >= 0) {
-                        final var left0 = substring.substring(0, asIndex).strip();
-                        final var right0 = substring.substring(asIndex + "as ".length()).strip();
-                        final var dependency = left0.startsWith("\"") && left0.endsWith("\"")
-                                ? left0
-                                : "\"" + left0 + "\"";
-
-                        return generateImport(right0, dependency);
-                    } else {
-                        return generateImport(substring, "\"" + substring + "\"");
+            if (withoutImport.startsWith("extern ")) {
+                final var withoutExtern = withoutImport.substring("extern ".length());
+                if (withoutExtern.startsWith("default ")) {
+                    final var right = withoutExtern.substring("default ".length());
+                    if (right.endsWith(";")) {
+                        final var substring = right.substring(0, right.length() - ";".length());
+                        final var asIndex = substring.indexOf(" as ");
+                        if (asIndex >= 0) {
+                            final var left0 = substring.substring(0, asIndex).strip();
+                            final var right0 = substring.substring(asIndex + "as ".length()).strip();
+                            final var dependency = wrapUsingDoubleQuotes(left0);
+                            return generateImport(right0, dependency);
+                        } else {
+                            return generateImport(substring, wrap(substring));
+                        }
+                    }
+                } else {
+                    if (withoutExtern.endsWith(";")) {
+                        final var substring = withoutExtern.substring(0, withoutExtern.length() - ";".length());
+                        final var asIndex = substring.indexOf(" as ");
+                        if (asIndex >= 0) {
+                            final var left0 = substring.substring(0, asIndex).strip();
+                            final var right0 = substring.substring(asIndex + "as ".length()).strip();
+                            final var left1 = String.join("/", left0.split(Pattern.quote(".")));
+                            final var dependency = wrapUsingDoubleQuotes(left1);
+                            return generateImport(right0, dependency);
+                        } else {
+                            final var substring1 = generateImportFromNamespace(substring, "");
+                            if (substring1.isPresent()) return substring1.get();
+                        }
                     }
                 }
             } else {
                 if (withoutImport.endsWith(";")) {
                     final var substring = withoutImport.substring(0, withoutImport.length() - ";".length());
-                    final var asIndex = substring.indexOf(" as ");
-                    if (asIndex >= 0) {
-                        final var left0 = substring.substring(0, asIndex).strip();
-                        final var right0 = substring.substring(asIndex + "as ".length()).strip();
-                        final var left1 = String.join("/", left0.split(Pattern.quote(".")));
-                        final var dependency = left1.startsWith("\"") && left1.endsWith("\"")
-                                ? left1
-                                : "\"" + left1 + "\"";
-
-                        return generateImport(right0, dependency);
-                    } else {
-                        final var separator = substring.lastIndexOf(".");
-                        final var left = substring.substring(0, separator);
-                        final var substring1 = substring.substring(separator + 1);
-
-                        return generateImport("{ " + substring1 + " } ", "\"" + left + "\"");
-                    }
+                    final var substring1 = generateImportFromNamespace(substring, "./");
+                    if (substring1.isPresent()) return substring1.get();
                 }
             }
         }
-        if(stripped.startsWith("declare ")) return "";
+        if (stripped.startsWith("declare ")) return "";
+
+        System.err.println("Unknown import: " + stripped);
         return stripped + "\n";
+    }
+
+    private static Optional<String> generateImportFromNamespace(String namespace, String prefix) {
+        final var separator = namespace.lastIndexOf(".");
+        if (separator < 0) return Optional.empty();
+
+        final var left = namespace.substring(0, separator);
+        final var substring1 = namespace.substring(separator + 1);
+        return Optional.of(generateImport("{ " + substring1 + " } ", wrap(prefix + left)));
+    }
+
+    private static String wrapUsingDoubleQuotes(String left0) {
+        return left0.startsWith("\"") && left0.endsWith("\"")
+                ? left0
+                : wrap(left0);
+    }
+
+    private static String wrap(String left0) {
+        return "\"" + left0 + "\"";
     }
 
     private static String generateImport(String item, String dependency) {

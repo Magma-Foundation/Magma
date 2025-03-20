@@ -1,14 +1,14 @@
-import default "body-parser" as bodyParser;
-import default dotenv as dotenv;
+import extern default "body-parser" as bodyParser;
+import extern default dotenv as dotenv;
 
-import default cors;
-import default express;
-import default knex;
+import extern default cors;
+import extern default express;
+import extern default knex;
 
-import fs.promises as fs;
-import path as paths;
-import knex.Knex;
-
+import extern fs.promises as fs;
+import extern path as paths;
+import extern knex.Knex;
+import actual.env;
 
 dotenv.config();
 

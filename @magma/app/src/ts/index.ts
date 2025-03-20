@@ -6,8 +6,8 @@ import knex from "knex";
 import fs from "fs/promises";
 import paths from "path";
 import { Knex }  from "knex";
+import { env }  from "./actual";
 dotenv.config();
-declare process.env : Map<&str, &str>;
 const environment = process.env("NODE_ENV").orElse("development");
 let knexConfig: Knex.Config = {
     client: "better-sqlite3",
