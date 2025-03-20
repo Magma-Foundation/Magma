@@ -1,42 +1,45 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import knex, {Knex} from "knex";
-import * as fs from "fs/promises";
-import * as dotenv from "dotenv";
-import * as paths from "path";
+import knex from "knex";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const envConfig: { [key: string]: Knex.Config } = {
-    development: {
-        client: "better-sqlite3",
-        connection: {
-            filename: "./database.sqlite",
-        },
-        useNullAsDefault: true
-    }
+import fs.promises as fs;
+import path as paths;
+
+import knex.Knex;
+declare process.env : Map<&str, &str>;
+const environment = process.env("NODE_ENV").orElse("development");
+
+let knexConfig: Knex.Config = {
+    client: "better-sqlite3",
+    connection: {
+        filename: "./data.sqlite",
+    },
+    useNullAsDefault: true
 };
 
-const environment = process.env.NODE_ENV || "development";
-const knexConfig = envConfig[environment];
-const connection = knex(knexConfig);
+let connection = knex(knexConfig);
+let port = process.env("PORT")
+    .map(I32.tryInto)
+    .flatMap(Result.findValue)
+    .orElse(3000);
 
-const PORT = process.env.PORT || 3000;
-
-const app = express();
+let app = express();
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get("/", async (req, res) => {
-    const path = paths.join(process.cwd(), "src", "index.mgs"); // Adjust as needed
+app.get("/", (req, res) => {
+    const path = paths.join(process.cwd(), "src", "index.mgs");
     const buffer = await fs.readFile(path, {encoding: "utf-8"});
 
-    res.setHeader("Content-Type", "text/plain"); // ✅ Correct MIME type
+    res.setHeader("Content-Type", "text/plain");
     res.send(buffer);
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}.`);
 });

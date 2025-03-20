@@ -3,7 +3,7 @@ import default cors;
 import default express;
 import default knex;
 
-import dotenv as dotenv;
+import default dotenv as dotenv;
 dotenv.config();
 
 import fs.promises as fs;

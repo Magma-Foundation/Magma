@@ -64,40 +64,29 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.startsWith("import extern ")) {
-            final var right = input.substring("import extern ".length());
-            if (right.endsWith(";")) {
-                final var content = right.substring(0, right.length() - ";".length());
-                return "import " + content + " from \"" + content + "\";\n";
-            }
-        }
         final var stripped = input.strip();
-        if (stripped.startsWith("import ")) {
-            final var afterKeyword = stripped.substring("import ".length());
-            if (afterKeyword.endsWith(";")) {
-                final var content = afterKeyword.substring(0, afterKeyword.length() - ";".length());
-                final var asIndex = content.indexOf(" as ");
+        if (stripped.startsWith("import default ")) {
+            final var right = stripped.substring("import default ".length());
+            if (right.endsWith(";")) {
+                final var substring = right.substring(0, right.length() - ";".length());
+                final var asIndex = substring.indexOf(" as ");
                 if (asIndex >= 0) {
-                    final var left = content.substring(0, asIndex);
-                    final var right = content.substring(asIndex + " as ".length());
-                    return "import " + right + " from \"./" + left + "\";\n";
+                    final var left0 = substring.substring(0, asIndex).strip();
+                    final var right0 = substring.substring(asIndex + "as ".length()).strip();
+                    final var dependency = left0.startsWith("\"") && left0.endsWith("\"")
+                            ? left0
+                            : "\"" + left0 + "\"";
+
+                    return generateImport(right0, dependency);
+                } else {
+                    return generateImport(substring, "\"" + substring + "\"");
                 }
             }
         }
-        if (stripped.endsWith(";")) {
-            final var inner = stripped.substring(0, stripped.length() - 1);
-
-            final var equalsSeparator = inner.indexOf("=");
-            if (equalsSeparator >= 0) {
-                final var definition = inner.substring(0, equalsSeparator).strip();
-                final var newDefinition = definition.startsWith("let ")
-                        ? "const " + definition.substring("let ".length())
-                        : definition;
-
-                final var value = inner.substring(equalsSeparator + 1).strip();
-                return newDefinition + " = " + value + ";\n";
-            }
-        }
         return input;
+    }
+
+    private static String generateImport(String item, String dependency) {
+        return "import " + item + " from " + dependency + ";\n";
     }
 }
