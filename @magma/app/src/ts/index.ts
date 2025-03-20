@@ -6,14 +6,9 @@ import knex from "knex";
 import fs from "fs/promises";
 import paths from "path";
 import { Knex }  from "knex";
-
-
-
 dotenv.config();
-
 declare process.env : Map<&str, &str>;
 const environment = process.env("NODE_ENV").orElse("development");
-
 let knexConfig: Knex.Config = {
     client: "better-sqlite3",
     connection: {
@@ -21,26 +16,21 @@ let knexConfig: Knex.Config = {
     },
     useNullAsDefault: true
 };
-
 let connection = knex(knexConfig);
 let port = process.env("PORT")
     .map(I32.tryInto)
     .flatMap(Result.findValue)
     .orElse(3000);
-
 let app = express();
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
-
 app.get("/", (req, res) => {
     const path = paths.join(process.cwd(), "src", "index.mgs");
-    const buffer = await fs.readFile(path, {encoding: "utf-8"});
-
-    res.setHeader("Content-Type", "text/plain");
-    res.send(buffer);
+const buffer = await fs.readFile(path, {encoding: "utf-8"});
+res.setHeader("Content-Type", "text/plain");
+res.send(buffer);
 });
-
 app.listen(port, () => {
     console.log(`Server is running on port ${port}.`);
 });

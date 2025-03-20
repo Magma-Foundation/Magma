@@ -66,6 +66,7 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         final var stripped = input.strip();
+        if(stripped.isEmpty()) return "";
         if (stripped.startsWith("import ")) {
             final var withoutImport = stripped.substring("import ".length());
             if (withoutImport.startsWith("default ")) {
@@ -108,7 +109,8 @@ public class Main {
                 }
             }
         }
-        return input;
+        if(stripped.startsWith("declare ")) return "";
+        return stripped + "\n";
     }
 
     private static String generateImport(String item, String dependency) {
