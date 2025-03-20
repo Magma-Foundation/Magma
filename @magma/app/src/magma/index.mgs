@@ -1,15 +1,17 @@
 import default "body-parser" as bodyParser;
+import default dotenv as dotenv;
+
 import default cors;
 import default express;
 import default knex;
 
-import default dotenv as dotenv;
-dotenv.config();
-
 import fs.promises as fs;
 import path as paths;
-
 import knex.Knex;
+
+
+dotenv.config();
+
 declare process.env : Map<&str, &str>;
 const environment = process.env("NODE_ENV").orElse("development");
 

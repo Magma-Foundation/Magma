@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,21 +66,45 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         final var stripped = input.strip();
-        if (stripped.startsWith("import default ")) {
-            final var right = stripped.substring("import default ".length());
-            if (right.endsWith(";")) {
-                final var substring = right.substring(0, right.length() - ";".length());
-                final var asIndex = substring.indexOf(" as ");
-                if (asIndex >= 0) {
-                    final var left0 = substring.substring(0, asIndex).strip();
-                    final var right0 = substring.substring(asIndex + "as ".length()).strip();
-                    final var dependency = left0.startsWith("\"") && left0.endsWith("\"")
-                            ? left0
-                            : "\"" + left0 + "\"";
+        if (stripped.startsWith("import ")) {
+            final var withoutImport = stripped.substring("import ".length());
+            if (withoutImport.startsWith("default ")) {
+                final var right = withoutImport.substring("default ".length());
+                if (right.endsWith(";")) {
+                    final var substring = right.substring(0, right.length() - ";".length());
+                    final var asIndex = substring.indexOf(" as ");
+                    if (asIndex >= 0) {
+                        final var left0 = substring.substring(0, asIndex).strip();
+                        final var right0 = substring.substring(asIndex + "as ".length()).strip();
+                        final var dependency = left0.startsWith("\"") && left0.endsWith("\"")
+                                ? left0
+                                : "\"" + left0 + "\"";
 
-                    return generateImport(right0, dependency);
-                } else {
-                    return generateImport(substring, "\"" + substring + "\"");
+                        return generateImport(right0, dependency);
+                    } else {
+                        return generateImport(substring, "\"" + substring + "\"");
+                    }
+                }
+            } else {
+                if (withoutImport.endsWith(";")) {
+                    final var substring = withoutImport.substring(0, withoutImport.length() - ";".length());
+                    final var asIndex = substring.indexOf(" as ");
+                    if (asIndex >= 0) {
+                        final var left0 = substring.substring(0, asIndex).strip();
+                        final var right0 = substring.substring(asIndex + "as ".length()).strip();
+                        final var left1 = String.join("/", left0.split(Pattern.quote(".")));
+                        final var dependency = left1.startsWith("\"") && left1.endsWith("\"")
+                                ? left1
+                                : "\"" + left1 + "\"";
+
+                        return generateImport(right0, dependency);
+                    } else {
+                        final var separator = substring.lastIndexOf(".");
+                        final var left = substring.substring(0, separator);
+                        final var substring1 = substring.substring(separator + 1);
+
+                        return generateImport("{ " + substring1 + " } ", "\"" + left + "\"");
+                    }
                 }
             }
         }

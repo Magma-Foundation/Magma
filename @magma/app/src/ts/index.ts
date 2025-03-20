@@ -1,15 +1,16 @@
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
 import knex from "knex";
-import dotenv from "dotenv";
+import fs from "fs/promises";
+import paths from "path";
+import { Knex }  from "knex";
+
+
 
 dotenv.config();
 
-import fs.promises as fs;
-import path as paths;
-
-import knex.Knex;
 declare process.env : Map<&str, &str>;
 const environment = process.env("NODE_ENV").orElse("development");
 
