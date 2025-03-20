@@ -28,7 +28,7 @@ function App() {
           </button>
         </div>
         <div style={{ padding: "0.5rem" }}>
-          <Text value="index.ts" />
+          <Text value="index.mgs" />
         </div>
         <textarea style={{
           width: "100%",

@@ -1,10 +1,13 @@
-import bodyParser from "body-parser";
-import cors from "cors";
-import express from "express";
-import knex, {Knex} from "knex";
-import * as fs from "fs/promises";
-import * as dotenv from "dotenv";
-import * as paths from "path";
+import default "body-parser" as bodyParser;
+import default cors;
+import default express;
+import default knex;
+
+import dotenv as dotenv;
+import fs.promises as fs;
+import path as paths;
+
+import knex.Knex;
 
 dotenv.config();
 
