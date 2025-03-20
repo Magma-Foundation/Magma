@@ -21,13 +21,13 @@ let knexConfig: Knex.Config = {
     useNullAsDefault: true
 };
 
-const connection = knex(knexConfig);
-const port = process.env("PORT")
+let connection = knex(knexConfig);
+let port = process.env("PORT")
     .map(I32.tryInto)
     .flatMap(Result.findValue)
     .orElse(3000);
 
-const app = express();
+let app = express();
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
