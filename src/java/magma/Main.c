@@ -10,23 +10,23 @@
 #include <java/util/stream/IntStream.h>
 void main(){
 }
-void compileRoot(){
+String compileRoot(){
 }
-void compile(){
+Optional<String> compile(){
 }
-void compileRootSegment(){
+Optional<String> compileRootSegment(){
 }
-void invalidate(){
+Optional<String> invalidate(){
 }
-void printError(){
+Optional<String> printError(){
 }
-void compileClassSegment(){
+Optional<String> compileClassSegment(){
 }
-void compileMethod(){
+Optional<String> compileMethod(){
 }
-void truncateRight(){
+Optional<String> truncateRight(){
 }
-void split(){
+Optional<String> split(){
 }
 struct Main {
 };

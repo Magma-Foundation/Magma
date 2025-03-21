@@ -124,7 +124,13 @@ public class Main {
     private static Optional<String> compileMethod(String input) {
         return split(input, new IndexSplitter("(", new FirstLocator()), tuple -> {
             return split(tuple.left().strip(), new IndexSplitter(" ", new LastLocator()), tuple0 -> {
-                return Optional.of("void " + tuple0.right() + "(){\n}\n");
+                final var beforeName = tuple0.left();
+                final var name = tuple0.right();
+
+                return split(beforeName, new IndexSplitter(" ", new LastLocator()), tuple1 -> {
+                    final var type = tuple1.right();
+                    return Optional.of(type + " " + name + "(){\n}\n");
+                });
             });
         });
     }
@@ -137,9 +143,9 @@ public class Main {
 
     private static Optional<String> split(
             String input,
-            Splitter firstLocator,
+            Splitter splitter,
             Function<Tuple<String, String>, Optional<String>> mapper
     ) {
-        return firstLocator.split(input).flatMap(mapper);
+        return splitter.split(input).flatMap(mapper);
     }
 }
