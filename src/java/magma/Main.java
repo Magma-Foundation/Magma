@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -26,12 +28,25 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compile(input, Main::compileRootSegment)
+        return compileAllStatements(input, Main::compileRootSegment)
                 .map(output -> output + "int main(){\n\treturn 0;\n}\n")
                 .orElse("");
     }
 
-    private static Optional<String> compile(String input, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compileAllStatements(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(divideByStatements(input), compiler);
+    }
+
+    private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler) {
+        var maybeOutput = Optional.of(new StringBuilder());
+        for (var segment : segments) {
+            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
+        }
+
+        return maybeOutput.map(StringBuilder::toString);
+    }
+
+    private static List<String> divideByStatements(String input) {
         final var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -68,13 +83,7 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        var maybeOutput = Optional.of(new StringBuilder());
-        for (var segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
-        }
-
-        return maybeOutput.map(StringBuilder::toString);
+        return segments;
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -90,19 +99,21 @@ public class Main {
             });
         }
 
-        final var maybeClass = split(input, new IndexSplitter("class", new FirstLocator()), tuple -> {
+        return compileClass(input).or(() -> invalidate("root segment", input));
+    }
+
+    private static Optional<String> compileClass(String input) {
+        return split(input, new IndexSplitter("class", new FirstLocator()), tuple -> {
             return split(tuple.right(), new IndexSplitter("{", new FirstLocator()), tuple0 -> {
                 final var name = tuple0.left().strip();
                 final var withEnd = tuple0.right().strip();
                 return truncateRight(withEnd, "}", inputContent -> {
-                    return compile(inputContent, Main::compileClassSegment).flatMap(outputContent -> {
-                        return Optional.of( "struct " + name + " {\n};\n" + outputContent);
+                    return compileAllStatements(inputContent, Main::compileClassSegment).flatMap(outputContent -> {
+                        return Optional.of("struct " + name + " {\n};\n" + outputContent);
                     });
                 });
             });
         });
-
-        return maybeClass.or(() -> invalidate("root segment", input));
     }
 
     private static Optional<String> invalidate(String type, String input) {
@@ -123,15 +134,25 @@ public class Main {
 
     private static Optional<String> compileMethod(String input) {
         return split(input, new IndexSplitter("(", new FirstLocator()), tuple -> {
-            return split(tuple.left().strip(), new IndexSplitter(" ", new LastLocator()), tuple0 -> {
-                final var beforeName = tuple0.left();
-                final var name = tuple0.right();
-
-                return split(beforeName, new IndexSplitter(" ", new LastLocator()), tuple1 -> {
-                    final var type = tuple1.right();
-                    return Optional.of(type + " " + name + "(){\n}\n");
+            return compileDefinition(tuple.left().strip()).flatMap(outputDefinition -> {
+                return split(tuple.right(), new IndexSplitter(")", new FirstLocator()), tuple1 -> {
+                    return compileAll(Arrays.asList(tuple1.left().split(Pattern.quote(","))), Main::compileDefinition).flatMap(outputParams -> {
+                        return Optional.of(outputDefinition + "(" +
+                                outputParams +
+                                "){\n}\n");
+                    });
                 });
             });
+        });
+    }
+
+    private static Optional<String> compileDefinition(String input) {
+        return split(input, new IndexSplitter(" ", new LastLocator()), tuple -> {
+            final var beforeName = tuple.left();
+            final var name = tuple.right();
+
+            final var s = split(beforeName, new IndexSplitter(" ", new LastLocator()), tuple1 -> Optional.of(tuple1.right())).orElse(beforeName);
+            return Optional.of(s + " " + name);
         });
     }
 
