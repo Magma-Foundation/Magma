@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) {
@@ -46,7 +47,17 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+
+        final var stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            final var right = stripped.substring("import ".length());
+            if (right.endsWith(";")) {
+                final var content = right.substring(0, right.length() - ";".length());
+                final var namespace = content.split(Pattern.quote("."));
+                return "#include <" + String.join("/", namespace) + ".h>\n";
+            }
+        }
+
         if (input.contains("class ")) return "struct Temp {\n};\n";
 
         System.err.println("Invalid root segment: " + input);
