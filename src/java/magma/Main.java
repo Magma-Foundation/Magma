@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -32,9 +35,26 @@ public class Main {
         final var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
-        for (var i = 0; i < input.length(); i++) {
-            final var c = input.charAt(i);
+
+        final var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            final var c = queue.pop();
             buffer.append(c);
+            if (c == '\'') {
+                final var maybeEscape = queue.pop();
+                buffer.append(maybeEscape);
+
+                if (maybeEscape == '\\') {
+                    buffer.append(queue.pop());
+                }
+
+                buffer.append(queue.pop());
+                continue;
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -58,9 +78,10 @@ public class Main {
     }
 
     private static Optional<String> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return Optional.of("");
-
         final var stripped = input.strip();
+        if (stripped.isEmpty()) return Optional.of("");
+
+        if (stripped.startsWith("package ")) return Optional.of("");
         if (stripped.startsWith("import ")) {
             final var right = stripped.substring("import ".length());
             return truncateRight(right, ";", content -> {
@@ -73,10 +94,10 @@ public class Main {
             return split(tuple.right(), "{", tuple0 -> {
                 final var name = tuple0.left().strip();
                 final var withEnd = tuple0.right().strip();
-                return truncateRight(withEnd, "}", content -> {
-                    compile(content, Main::compileClassSegment);
-
-                    return Optional.of("struct " + name + " {\n};\n");
+                return truncateRight(withEnd, "}", inputContent -> {
+                    return compile(inputContent, Main::compileClassSegment).flatMap(outputContent -> {
+                        return Optional.of(outputContent + "struct " + name + " {\n};\n");
+                    });
                 });
             });
         });
@@ -85,11 +106,18 @@ public class Main {
     }
 
     private static Optional<String> invalidate(String type, String input) {
-        System.err.println("Invalid " + type + ": " + input);
+        return printError("Invalid " + type + ": " + input);
+    }
+
+    private static Optional<String> printError(String message) {
+        System.err.println(message);
         return Optional.empty();
     }
 
     private static Optional<String> compileClassSegment(String input) {
+        if (input.isBlank()) return Optional.of("");
+        if (input.contains("(")) return Optional.of("void temp(){\n}\n");
+
         return invalidate("class segment", input);
     }
 
