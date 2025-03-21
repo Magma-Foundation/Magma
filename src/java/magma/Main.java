@@ -42,7 +42,7 @@ public class Main {
             output.append(compileRootSegment(segment));
         }
 
-        return output.toString();
+        return output.toString() + "int main(){\n\treturn 0;\n}\n";
     }
 
     private static String compileRootSegment(String input) {

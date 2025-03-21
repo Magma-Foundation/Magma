@@ -5,3 +5,6 @@
 #include <java/util/regex/Pattern.h>
 struct Main {
 };
+int main(){
+	return 0;
+}
