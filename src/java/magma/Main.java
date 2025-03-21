@@ -225,8 +225,21 @@ public class Main {
 
         final var maybeGeneric = truncateRight(input, ">", withoutEnd -> {
             return split(withoutEnd, new IndexSplitter("<", new FirstLocator()), tuple -> {
-                return compileAllValues(tuple.right(), Main::compileType, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> {
-                    return tuple.left().strip() + "_" + outputParams;
+                List<String> segments = divideByValues(tuple.right());
+                return parseAll(segments, Main::compileType).flatMap(compiled -> {
+                    final var name = tuple.left().strip();
+                    if (name.equals("Function")) {
+                        final var left = compiled.get(0);
+                        final var right = compiled.get(1);
+                        return generateFunctionalType(right, left);
+                    } else if(name.equals("BiFunction")) {
+                        final var leftValue = compiled.get(0);
+                        final var rightValue = compiled.get(1);
+                        final var s = compiled.get(2);
+                        return generateFunctionalType(s, leftValue + ", " + rightValue);
+                    }
+
+                    return generateAll(compiled, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> name + "_" + outputParams);
                 });
             });
         });
@@ -235,6 +248,10 @@ public class Main {
         final var stripped = input.strip();
         if (isSymbol(stripped)) return Optional.of(stripped);
         return invalidate("type", input);
+    }
+
+    private static Optional<String> generateFunctionalType(String s, String params) {
+        return Optional.of(s + " (*)(" + params + ")");
     }
 
     private static boolean isSymbol(String input) {

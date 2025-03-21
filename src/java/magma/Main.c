@@ -16,15 +16,19 @@ void main(String* args){
 }
 String compileRoot(String input){
 }
-Optional_String compileAllStatements(String input, Function_String_Optional_String compiler){
+Optional_String compileAllStatements(String input, Optional_String (*)(String) compiler){
 }
-Optional_String compileAll(List_String segments, Function_String_Optional_String compiler, BiFunction_StringBuilder_String_StringBuilder merger){
+Optional_String compileAll(List_String segments, Optional_String (*)(String) compiler, StringBuilder (*)(StringBuilder, String) merger){
+}
+Optional_String generateAll(List_String output, StringBuilder (*)(StringBuilder, String) merger){
+}
+Optional_List_String parseAll(List_String segments, Optional_String (*)(String) compiler){
 }
 StringBuilder mergeStatements(StringBuilder buffer, String element){
 }
-List_String divide(String input, BiFunction_State_Character_State applier){
+List_String divide(String input, State (*)(State, Character) applier){
 }
-Optional_State divideWithEscapes(State current, BiFunction_State_Character_State applicator){
+Optional_State divideWithEscapes(State current, State (*)(State, Character) applicator){
 }
 Optional_State divideAtSingleQuotes(State current, char next){
 }
@@ -42,9 +46,9 @@ Optional_String compileClassSegment(String input){
 }
 Optional_String compileMethod(String input){
 }
-Optional_String compileAllValues(String input, Function_String_Optional_String compiler){
+Optional_String compileAllValues(String input, Optional_String (*)(String) compiler){
 }
-Optional_String compileAllValues(String input, Function_String_Optional_String compiler, BiFunction_StringBuilder_String_StringBuilder merger){
+Optional_String compileAllValues(String input, Optional_String (*)(String) compiler, StringBuilder (*)(StringBuilder, String) merger){
 }
 StringBuilder mergeDelimited(StringBuilder buffer, String element, String delimiter){
 }
@@ -54,11 +58,13 @@ Optional_String compileDefinition(String input){
 }
 Optional_String compileType(String input){
 }
+Optional_String generateFunctionalType(String s, String params){
+}
 boolean isSymbol(String input){
 }
-Optional_String truncateRight(String input, String suffix, Function_String_Optional_String mapper){
+Optional_String truncateRight(String input, String suffix, Optional_String (*)(String) mapper){
 }
-Optional_String split(String input, Splitter splitter, Function_Tuple_String_String_Optional_String mapper){
+Optional_String split(String input, Splitter splitter, Optional_String (*)(Tuple_String_String) mapper){
 }
 int main(){
 	return 0;
