@@ -90,8 +90,8 @@ public class Main {
             });
         }
 
-        final var maybeClass = split(input, "class", tuple -> {
-            return split(tuple.right(), "{", tuple0 -> {
+        final var maybeClass = split(input, new IndexSplitter("class", new FirstLocator()), tuple -> {
+            return split(tuple.right(), new IndexSplitter("{", new FirstLocator()), tuple0 -> {
                 final var name = tuple0.left().strip();
                 final var withEnd = tuple0.right().strip();
                 return truncateRight(withEnd, "}", inputContent -> {
@@ -116,9 +116,17 @@ public class Main {
 
     private static Optional<String> compileClassSegment(String input) {
         if (input.isBlank()) return Optional.of("");
-        if (input.contains("(")) return Optional.of("void temp(){\n}\n");
 
-        return invalidate("class segment", input);
+        return compileMethod(input)
+                .or(() -> invalidate("class segment", input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        return split(input, new IndexSplitter("(", new FirstLocator()), tuple -> {
+            return split(tuple.left().strip(), new IndexSplitter(" ", new LastLocator()), tuple0 -> {
+                return Optional.of("void " + tuple0.right() + "(){\n}\n");
+            });
+        });
     }
 
     private static Optional<String> truncateRight(String input, String suffix, Function<String, Optional<String>> mapper) {
@@ -127,10 +135,11 @@ public class Main {
                 : Optional.empty();
     }
 
-    private static Optional<String> split(String input, String slice, Function<Tuple<String, String>, Optional<String>> mapper) {
-        final var index = input.indexOf(slice);
-        return index >= 0
-                ? mapper.apply(new Tuple<>(input.substring(0, index), input.substring(index + slice.length())))
-                : Optional.empty();
+    private static Optional<String> split(
+            String input,
+            Splitter firstLocator,
+            Function<Tuple<String, String>, Optional<String>> mapper
+    ) {
+        return firstLocator.split(input).flatMap(mapper);
     }
 }

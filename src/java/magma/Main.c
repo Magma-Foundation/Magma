@@ -8,23 +8,25 @@
 #include <java/util/regex/Pattern.h>
 #include <java/util/stream/Collectors.h>
 #include <java/util/stream/IntStream.h>
-void temp(){
+void main(){
 }
-void temp(){
+void compileRoot(){
 }
-void temp(){
+void compile(){
 }
-void temp(){
+void compileRootSegment(){
 }
-void temp(){
+void invalidate(){
 }
-void temp(){
+void printError(){
 }
-void temp(){
+void compileClassSegment(){
 }
-void temp(){
+void compileMethod(){
 }
-void temp(){
+void truncateRight(){
+}
+void split(){
 }
 struct Main {
 };
