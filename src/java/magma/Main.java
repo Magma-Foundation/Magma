@@ -229,14 +229,14 @@ public class Main {
                 return parseAll(segments, Main::compileType).flatMap(compiled -> {
                     final var name = tuple.left().strip();
                     if (name.equals("Function")) {
-                        final var left = compiled.get(0);
-                        final var right = compiled.get(1);
-                        return generateFunctionalType(right, left);
-                    } else if(name.equals("BiFunction")) {
-                        final var leftValue = compiled.get(0);
-                        final var rightValue = compiled.get(1);
-                        final var s = compiled.get(2);
-                        return generateFunctionalType(s, leftValue + ", " + rightValue);
+                        final var paramType = compiled.get(0);
+                        final var returns = compiled.get(1);
+                        return generateFunctionalType(returns, List.of(paramType));
+                    } else if (name.equals("BiFunction")) {
+                        final var leftType = compiled.get(0);
+                        final var rightType = compiled.get(1);
+                        final var returns = compiled.get(2);
+                        return generateFunctionalType(returns, List.of(leftType, rightType));
                     }
 
                     return generateAll(compiled, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> name + "_" + outputParams);
@@ -250,8 +250,8 @@ public class Main {
         return invalidate("type", input);
     }
 
-    private static Optional<String> generateFunctionalType(String s, String params) {
-        return Optional.of(s + " (*)(" + params + ")");
+    private static Optional<String> generateFunctionalType(String returns, List<String> params) {
+        return Optional.of(returns + " (*)(" + params + ")");
     }
 
     private static boolean isSymbol(String input) {
