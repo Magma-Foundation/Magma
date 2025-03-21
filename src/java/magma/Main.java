@@ -3,6 +3,7 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -37,14 +38,29 @@ public class Main {
     }
 
     private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var maybeOutput = Optional.of(new StringBuilder());
-        for (var segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(str -> merger.apply(output, str));
-            });
+        return parseAll(segments, compiler).flatMap(output -> generateAll(output, merger));
+    }
+
+    private static Optional<String> generateAll(List<String> output, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var buffer = new StringBuilder();
+        for (var element : output) {
+            buffer = merger.apply(buffer, element);
         }
 
-        return maybeOutput.map(StringBuilder::toString);
+        return Optional.of(buffer.toString());
+    }
+
+    private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
+        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
+        for (var segment : segments) {
+            maybeCompiled = maybeCompiled.flatMap(output -> {
+                return compiler.apply(segment).map(str -> {
+                    output.add(str);
+                    return output;
+                });
+            });
+        }
+        return maybeCompiled;
     }
 
     private static StringBuilder mergeStatements(StringBuilder buffer, String element) {
