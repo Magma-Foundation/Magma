@@ -71,10 +71,10 @@ public class Main {
             }
 
             if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
+                advance(segments, buffer);
                 buffer = new StringBuilder();
             } else if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
+                advance(segments, buffer);
                 buffer = new StringBuilder();
                 depth--;
             } else {
@@ -82,8 +82,12 @@ public class Main {
                 if (c == '}') depth--;
             }
         }
-        segments.add(buffer.toString());
+        advance(segments, buffer);
         return segments;
+    }
+
+    private static void advance(ArrayList<String> segments, StringBuilder buffer) {
+        segments.add(buffer.toString());
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -136,7 +140,7 @@ public class Main {
         return split(input, new IndexSplitter("(", new FirstLocator()), tuple -> {
             return compileDefinition(tuple.left().strip()).flatMap(outputDefinition -> {
                 return split(tuple.right(), new IndexSplitter(")", new FirstLocator()), tuple1 -> {
-                    return compileAll(Arrays.asList(tuple1.left().split(Pattern.quote(","))), Main::compileDefinition).flatMap(outputParams -> {
+                    return compileAllValues(tuple1.left(), Main::compileDefinition).flatMap(outputParams -> {
                         return Optional.of(outputDefinition + "(" +
                                 outputParams +
                                 "){\n}\n");
@@ -146,14 +150,50 @@ public class Main {
         });
     }
 
+    private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(divideByValues(input), compiler);
+    }
+
+    private static List<String> divideByValues(String input) {
+        return Arrays.asList(input.split(Pattern.quote(",")));
+    }
+
     private static Optional<String> compileDefinition(String input) {
         return split(input, new IndexSplitter(" ", new LastLocator()), tuple -> {
             final var beforeName = tuple.left();
             final var name = tuple.right();
 
-            final var s = split(beforeName, new IndexSplitter(" ", new LastLocator()), tuple1 -> Optional.of(tuple1.right())).orElse(beforeName);
-            return Optional.of(s + " " + name);
+            final var inputType = split(beforeName, new IndexSplitter(" ", new LastLocator()),
+                    tuple1 -> Optional.of(tuple1.right())).orElse(beforeName);
+
+            return compileType(inputType).map(outputType -> outputType + " " + name);
         });
+    }
+
+    private static Optional<String> compileType(String input) {
+        final var maybeArray = truncateRight(input, "[]", array -> Optional.of(array + "*"));
+        if (maybeArray.isPresent()) return maybeArray;
+
+        final var maybeGeneric = truncateRight(input, ">", withoutEnd -> {
+            return split(withoutEnd, new IndexSplitter("<", new FirstLocator()), tuple -> {
+                return compileAllValues(tuple.right(), Main::compileType).map(outputParams -> {
+                    return tuple.left() + "_" + outputParams;
+                });
+            });
+        });
+        if (maybeGeneric.isPresent()) return maybeGeneric;
+
+        if (isSymbol(input)) return Optional.of(input);
+        return invalidate("type", input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            final var c = input.charAt(i);
+            if (!Character.isLetter(c)) return false;
+        }
+
+        return true;
     }
 
     private static Optional<String> truncateRight(String input, String suffix, Function<String, Optional<String>> mapper) {
