@@ -96,7 +96,7 @@ public class Main {
                 final var withEnd = tuple0.right().strip();
                 return truncateRight(withEnd, "}", inputContent -> {
                     return compile(inputContent, Main::compileClassSegment).flatMap(outputContent -> {
-                        return Optional.of(outputContent + "struct " + name + " {\n};\n");
+                        return Optional.of( "struct " + name + " {\n};\n" + outputContent);
                     });
                 });
             });

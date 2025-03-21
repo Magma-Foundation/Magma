@@ -8,6 +8,8 @@
 #include <java/util/regex/Pattern.h>
 #include <java/util/stream/Collectors.h>
 #include <java/util/stream/IntStream.h>
+struct Main {
+};
 void main(){
 }
 String compileRoot(){
@@ -28,8 +30,6 @@ Optional<String> truncateRight(){
 }
 Optional<String> split(){
 }
-struct Main {
-};
 int main(){
 	return 0;
 }
