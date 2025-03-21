@@ -13,7 +13,7 @@ public final class IndexSplitter implements Splitter {
 
     @Override
     public Optional<Tuple<String, String>> split(String input) {
-        return locator.locate(slice, input).map(index -> {
+        return locator.locate(input, slice).map(index -> {
             final var left = input.substring(0, index);
             final var right = input.substring(index + slice.length());
             return new Tuple<>(left, right);

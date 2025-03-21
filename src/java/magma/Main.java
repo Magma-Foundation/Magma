@@ -3,10 +3,10 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class Main {
     }
 
     private static Optional<String> compileAllStatements(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(divideByStatements(input), compiler);
+        return compileAll(divide(input, Main::divideAtStatementChar), compiler);
     }
 
     private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler) {
@@ -45,19 +45,15 @@ public class Main {
         return maybeOutput.map(StringBuilder::toString);
     }
 
-    private static List<String> divideByStatements(String input) {
+    private static List<String> divide(String input, BiFunction<State, Character, State> applier) {
         final var queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
         final var state = new State(queue);
-        return getStrings(state);
-    }
-
-    private static List<String> getStrings(State state) {
         var current = state;
         while (true) {
-            final var maybeNextState = divideAtStatementChar(current);
+            final var maybeNextState = divideWithEscapes(current, applier);
             if (maybeNextState.isPresent()) {
                 current = maybeNextState.get();
             } else {
@@ -68,45 +64,38 @@ public class Main {
         return current.advance().segments();
     }
 
-    private static Optional<State> divideAtStatementChar(State current) {
+    private static Optional<State> divideWithEscapes(
+            State current,
+            BiFunction<State, Character, State> applicator
+    ) {
         final var maybeNext = current.pop();
         if (maybeNext.isEmpty()) return Optional.empty();
 
         final char next = maybeNext.orElse('\0');
-        final var appended = current.append(next);
-
-        return Optional.of(divideAtSingleQuotes(appended, next)
-                .orElseGet(() -> getState(appended, next)));
+        return Optional.of(divideAtSingleQuotes(current, next)
+                .orElseGet(() -> applicator.apply(current, next)));
     }
 
     private static Optional<State> divideAtSingleQuotes(State current, char next) {
         if (next != '\'') return Optional.empty();
 
-        final var maybeValue = current.pop();
-        if (maybeValue.isEmpty()) return Optional.empty();
+        return current.append(next).pop().flatMap(value -> {
+            final State withValue = current.append(value);
+            final Optional<State> withEscaped = value == '\\'
+                    ? withValue.popAndAppend()
+                    : Optional.of(withValue);
 
-        final char value = maybeValue.orElse('\0');
-        final var withValue = current.append(value);
-
-        final State withEscaped = value == '\\'
-                ? withValue.popAndAppend()
-                : withValue;
-
-        return Optional.of(withEscaped.popAndAppend());
+            return withEscaped.flatMap(State::popAndAppend);
+        });
     }
 
-    private static State getState(State current, char next) {
-        if (next == ';' && current.isLevel()) {
-            current.advance();
-        } else if (next == '}' && current.isShallow()) {
-            current.advance();
-            current.exit();
-        } else {
-            if (next == '{') current.enter();
-            if (next == '}') current.exit();
-        }
-
-        return current;
+    private static State divideAtStatementChar(State current, char next) {
+        final var appended = current.append(next);
+        if (next == ';' && appended.isLevel()) return appended.advance();
+        if (next == '}' && appended.isShallow()) return appended.advance().exit();
+        if (next == '{') return appended.enter();
+        if (next == '}') return appended.exit();
+        return appended;
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -174,7 +163,15 @@ public class Main {
     }
 
     private static List<String> divideByValues(String input) {
-        return Arrays.asList(input.split(Pattern.quote(",")));
+        final var divide = divide(input, (state, c) -> {
+            if (c == ',' && state.isLevel()) return state.advance();
+
+            final var appended = state.append(c);
+            if (c == '<') return appended.enter();
+            if (c == '>') return appended.exit();
+            return appended;
+        });
+        return divide;
     }
 
     private static Optional<String> compileDefinition(String input) {
@@ -182,7 +179,7 @@ public class Main {
             final var beforeName = tuple.left();
             final var name = tuple.right();
 
-            final var inputType = split(beforeName, new IndexSplitter(" ", new LastLocator()),
+            final var inputType = split(beforeName, new IndexSplitter(" ", new TypeSeparatorLocator()),
                     tuple1 -> Optional.of(tuple1.right())).orElse(beforeName);
 
             return compileType(inputType).map(outputType -> outputType + " " + name);
@@ -202,7 +199,8 @@ public class Main {
         });
         if (maybeGeneric.isPresent()) return maybeGeneric;
 
-        if (isSymbol(input)) return Optional.of(input);
+        final var stripped = input.strip();
+        if (isSymbol(stripped)) return Optional.of(stripped);
         return invalidate("type", input);
     }
 

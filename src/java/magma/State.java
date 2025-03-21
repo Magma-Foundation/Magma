@@ -22,6 +22,10 @@ public class State {
         this(queue, new LinkedList<>(), new StringBuilder(), 0);
     }
 
+    Optional<State> popAndAppend() {
+        return pop().map(this::append);
+    }
+
     State exit() {
         this.depth = depth - 1;
         return this;
@@ -30,10 +34,6 @@ public class State {
     State enter() {
         this.depth = depth + 1;
         return this;
-    }
-
-    State popAndAppend() {
-        return append(pop().orElse('\0'));
     }
 
     Optional<Character> pop() {
