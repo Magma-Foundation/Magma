@@ -3,7 +3,6 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,47 +46,67 @@ public class Main {
     }
 
     private static List<String> divideByStatements(String input) {
-        final var segments = new ArrayList<String>();
-        var buffer = new StringBuilder();
-        var depth = 0;
-
         final var queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        while (!queue.isEmpty()) {
-            final var c = queue.pop();
-            buffer.append(c);
-            if (c == '\'') {
-                final var maybeEscape = queue.pop();
-                buffer.append(maybeEscape);
-
-                if (maybeEscape == '\\') {
-                    buffer.append(queue.pop());
-                }
-
-                buffer.append(queue.pop());
-                continue;
-            }
-
-            if (c == ';' && depth == 0) {
-                advance(segments, buffer);
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                advance(segments, buffer);
-                buffer = new StringBuilder();
-                depth--;
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
-        }
-        advance(segments, buffer);
-        return segments;
+        final var state = new State(queue);
+        return getStrings(state);
     }
 
-    private static void advance(ArrayList<String> segments, StringBuilder buffer) {
-        segments.add(buffer.toString());
+    private static List<String> getStrings(State state) {
+        var current = state;
+        while (true) {
+            final var maybeNextState = divideAtStatementChar(current);
+            if (maybeNextState.isPresent()) {
+                current = maybeNextState.get();
+            } else {
+                break;
+            }
+        }
+
+        return current.advance().segments();
+    }
+
+    private static Optional<State> divideAtStatementChar(State current) {
+        final var maybeNext = current.pop();
+        if (maybeNext.isEmpty()) return Optional.empty();
+
+        final char next = maybeNext.orElse('\0');
+        final var appended = current.append(next);
+
+        return Optional.of(divideAtSingleQuotes(appended, next)
+                .orElseGet(() -> getState(appended, next)));
+    }
+
+    private static Optional<State> divideAtSingleQuotes(State current, char next) {
+        if (next != '\'') return Optional.empty();
+
+        final var maybeValue = current.pop();
+        if (maybeValue.isEmpty()) return Optional.empty();
+
+        final char value = maybeValue.orElse('\0');
+        final var withValue = current.append(value);
+
+        final State withEscaped = value == '\\'
+                ? withValue.popAndAppend()
+                : withValue;
+
+        return Optional.of(withEscaped.popAndAppend());
+    }
+
+    private static State getState(State current, char next) {
+        if (next == ';' && current.isLevel()) {
+            current.advance();
+        } else if (next == '}' && current.isShallow()) {
+            current.advance();
+            current.exit();
+        } else {
+            if (next == '{') current.enter();
+            if (next == '}') current.exit();
+        }
+
+        return current;
     }
 
     private static Optional<String> compileRootSegment(String input) {
