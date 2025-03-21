@@ -3,5 +3,5 @@
 #include <java/nio/file/Paths.h>
 #include <java/util/ArrayList.h>
 #include <java/util/regex/Pattern.h>
-struct Temp {
+struct Main {
 };

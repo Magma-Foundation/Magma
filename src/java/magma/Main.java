@@ -58,7 +58,15 @@ public class Main {
             }
         }
 
-        if (input.contains("class ")) return "struct Temp {\n};\n";
+        final var classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            final var afterKeyword = input.substring(classIndex + "class ".length());
+            final var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                final var name = afterKeyword.substring(0, contentStart).strip();
+                return "struct " + name + " {\n};\n";
+            }
+        }
 
         System.err.println("Invalid root segment: " + input);
         return input;
