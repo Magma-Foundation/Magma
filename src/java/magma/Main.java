@@ -33,16 +33,22 @@ public class Main {
     }
 
     private static Optional<String> compileAllStatements(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(divide(input, Main::divideAtStatementChar), compiler);
+        return compileAll(divide(input, Main::divideAtStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
         var maybeOutput = Optional.of(new StringBuilder());
         for (var segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
+            maybeOutput = maybeOutput.flatMap(output -> {
+                return compiler.apply(segment).map(str -> merger.apply(output, str));
+            });
         }
 
         return maybeOutput.map(StringBuilder::toString);
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder buffer, String element) {
+        return buffer.append(element);
     }
 
     private static List<String> divide(String input, BiFunction<State, Character, State> applier) {
@@ -159,11 +165,22 @@ public class Main {
     }
 
     private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(divideByValues(input), compiler);
+        return compileAllValues(input, compiler, (buffer, element) -> {
+            return mergeDelimited(buffer, element, ", ");
+        });
+    }
+
+    private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return compileAll(divideByValues(input), compiler, merger);
+    }
+
+    private static StringBuilder mergeDelimited(StringBuilder buffer, String element, String delimiter) {
+        if (buffer.isEmpty()) return buffer.append(element);
+        return buffer.append(delimiter).append(element);
     }
 
     private static List<String> divideByValues(String input) {
-        final var divide = divide(input, (state, c) -> {
+        return divide(input, (state, c) -> {
             if (c == ',' && state.isLevel()) return state.advance();
 
             final var appended = state.append(c);
@@ -171,11 +188,11 @@ public class Main {
             if (c == '>') return appended.exit();
             return appended;
         });
-        return divide;
     }
 
     private static Optional<String> compileDefinition(String input) {
-        return split(input, new IndexSplitter(" ", new LastLocator()), tuple -> {
+        final var stripped = input.strip();
+        return split(stripped, new IndexSplitter(" ", new LastLocator()), tuple -> {
             final var beforeName = tuple.left();
             final var name = tuple.right();
 
@@ -192,8 +209,8 @@ public class Main {
 
         final var maybeGeneric = truncateRight(input, ">", withoutEnd -> {
             return split(withoutEnd, new IndexSplitter("<", new FirstLocator()), tuple -> {
-                return compileAllValues(tuple.right(), Main::compileType).map(outputParams -> {
-                    return tuple.left() + "_" + outputParams;
+                return compileAllValues(tuple.right(), Main::compileType, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> {
+                    return tuple.left().strip() + "_" + outputParams;
                 });
             });
         });
