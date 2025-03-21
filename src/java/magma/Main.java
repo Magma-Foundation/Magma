@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class Main {
@@ -11,7 +13,7 @@ public class Main {
         try {
             final var source = Paths.get(".", "src", "java", "magma", "Main.java");
             final var input = Files.readString(source);
-            final var output = compile(input);
+            final var output = compileRoot(input);
             final var target = source.resolveSibling("Main.c");
             Files.writeString(target, output);
         } catch (IOException e) {
@@ -20,7 +22,11 @@ public class Main {
         }
     }
 
-    private static String compile(String input) {
+    private static String compileRoot(String input) {
+        return compile(input, Main::compileRootSegment).orElse("");
+    }
+
+    private static Optional<String> compile(String input, Function<String, Optional<String>> compiler) {
         final var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -37,16 +43,16 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        final var output = new StringBuilder();
+        var maybeOutput = Optional.of(new StringBuilder());
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
         }
 
-        return output.toString() + "int main(){\n\treturn 0;\n}\n";
+        return maybeOutput.map(output -> output + "int main(){\n\treturn 0;\n}\n");
     }
 
-    private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) return "";
+    private static Optional<String> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return Optional.of("");
 
         final var stripped = input.strip();
         if (stripped.startsWith("import ")) {
@@ -54,21 +60,44 @@ public class Main {
             if (right.endsWith(";")) {
                 final var content = right.substring(0, right.length() - ";".length());
                 final var namespace = content.split(Pattern.quote("."));
-                return "#include <" + String.join("/", namespace) + ".h>\n";
+                return Optional.of("#include <" + String.join("/", namespace) + ".h>\n");
             }
         }
 
-        final var classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            final var afterKeyword = input.substring(classIndex + "class ".length());
-            final var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                final var name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
-            }
-        }
+        final var maybeClass = split(input, "class", tuple -> {
+            return split(tuple.right(), "{", tuple0 -> {
+                final var name = tuple0.left();
+                final var withEnd = tuple0.right().strip();
+                return truncateRight(withEnd, "}", content -> {
+                    compile(content, Main::compileClassSegment);
 
-        System.err.println("Invalid root segment: " + input);
-        return input;
+                    return Optional.of("struct " + name + " {\n};\n");
+                });
+            });
+        });
+
+        return maybeClass.or(() -> invalidate("root segment", input));
+    }
+
+    private static Optional<String> invalidate(String type, String input) {
+        System.err.println("Invalid " + type + ": " + input);
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileClassSegment(String input) {
+        return invalidate("class segment", input);
+    }
+
+    private static Optional<String> truncateRight(String input, String suffix, Function<String, Optional<String>> mapper) {
+        return input.endsWith(suffix)
+                ? mapper.apply(input.substring(0, input.length() - suffix.length()))
+                : Optional.empty();
+    }
+
+    private static Optional<String> split(String input, String slice, Function<Tuple<String, String>, Optional<String>> mapper) {
+        final var index = input.indexOf(slice);
+        return index >= 0
+                ? mapper.apply(new Tuple<>(input.substring(0, index), input.substring(index + slice.length())))
+                : Optional.empty();
     }
 }
