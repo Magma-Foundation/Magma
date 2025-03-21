@@ -23,7 +23,9 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compile(input, Main::compileRootSegment).orElse("");
+        return compile(input, Main::compileRootSegment)
+                .map(output -> output + "int main(){\n\treturn 0;\n}\n")
+                .orElse("");
     }
 
     private static Optional<String> compile(String input, Function<String, Optional<String>> compiler) {
@@ -36,6 +38,10 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -48,7 +54,7 @@ public class Main {
             maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
         }
 
-        return maybeOutput.map(output -> output + "int main(){\n\treturn 0;\n}\n");
+        return maybeOutput.map(StringBuilder::toString);
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -57,16 +63,15 @@ public class Main {
         final var stripped = input.strip();
         if (stripped.startsWith("import ")) {
             final var right = stripped.substring("import ".length());
-            if (right.endsWith(";")) {
-                final var content = right.substring(0, right.length() - ";".length());
+            return truncateRight(right, ";", content -> {
                 final var namespace = content.split(Pattern.quote("."));
                 return Optional.of("#include <" + String.join("/", namespace) + ".h>\n");
-            }
+            });
         }
 
         final var maybeClass = split(input, "class", tuple -> {
             return split(tuple.right(), "{", tuple0 -> {
-                final var name = tuple0.left();
+                final var name = tuple0.left().strip();
                 final var withEnd = tuple0.right().strip();
                 return truncateRight(withEnd, "}", content -> {
                     compile(content, Main::compileClassSegment);
