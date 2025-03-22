@@ -129,8 +129,8 @@ public class Main {
         final var appended = current.append(next);
         if (next == ';' && appended.isLevel()) return appended.advance();
         if (next == '}' && appended.isShallow()) return appended.advance().exit();
-        if (next == '{') return appended.enter();
-        if (next == '}') return appended.exit();
+        if (next == '{' || next == '(') return appended.enter();
+        if (next == '}' || next == ')') return appended.exit();
         return appended;
     }
 
@@ -203,6 +203,13 @@ public class Main {
     }
 
     private static Optional<String> compileStatement(String input) {
+        final var stripped = input.strip();
+        if (stripped.isEmpty()) return Optional.of("");
+        if (input.contains("=")) return Optional.of("\tint temp = temp;\n");
+        if (stripped.startsWith("return ")) return Optional.of("\nreturn temp;\n");
+        if (stripped.startsWith("if ")) return Optional.of("if (temp) {\n\t}\n");
+        if (stripped.endsWith(");")) return Optional.of("\ttemp();\n");
+
         return invalidate("statement", input);
     }
 
