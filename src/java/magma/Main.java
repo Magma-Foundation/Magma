@@ -82,7 +82,7 @@ public class Main {
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        var current = new State(queue);
+        var current = new MutableDivideState(queue);
         while (true) {
             final var maybeNextState = divideWithEscapes(current, applier);
             if (maybeNextState.isPresent()) {
@@ -95,8 +95,8 @@ public class Main {
         return current.advance().segments();
     }
 
-    private static Optional<State> divideWithEscapes(
-            State current,
+    private static Optional<DivideState> divideWithEscapes(
+            DivideState current,
             Divider applicator
     ) {
         final var maybeNext = current.pop();
@@ -108,7 +108,7 @@ public class Main {
                 .orElseGet(() -> applicator.apply(current, next)));
     }
 
-    private static Optional<State> divideAtDoubleQuotes(State initial, char c) {
+    private static Optional<DivideState> divideAtDoubleQuotes(DivideState initial, char c) {
         if (c != '"') return Optional.empty();
 
         var current = initial.append(c);
@@ -132,16 +132,16 @@ public class Main {
         return Optional.of(current);
     }
 
-    private static Optional<State> divideAtSingleQuotes(State current, char next) {
+    private static Optional<DivideState> divideAtSingleQuotes(DivideState current, char next) {
         if (next != '\'') return Optional.empty();
 
         return current.append(next).pop().flatMap(value -> {
-            final State withValue = current.append(value);
-            final Optional<State> withEscaped = value == '\\'
+            final DivideState withValue = current.append(value);
+            final Optional<DivideState> withEscaped = value == '\\'
                     ? withValue.popAndAppend()
                     : Optional.of(withValue);
 
-            return withEscaped.flatMap(State::popAndAppend);
+            return withEscaped.flatMap(DivideState::popAndAppend);
         });
     }
 

@@ -1,5 +1,5 @@
 package magma;
 
 public interface Divider {
-    State apply(State state, char next);
+    DivideState apply(DivideState state, char next);
 }
