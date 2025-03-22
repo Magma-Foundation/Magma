@@ -109,7 +109,32 @@ public class Main {
 
         final char next = maybeNext.orElse('\0');
         return Optional.of(divideAtSingleQuotes(current, next)
+                .or(() -> divideAtDoubleQuotes(current, next))
                 .orElseGet(() -> applicator.apply(current, next)));
+    }
+
+    private static Optional<State> divideAtDoubleQuotes(State initial, char c) {
+        if (c != '"') return Optional.empty();
+
+        var current = initial.append(c);
+        while (true) {
+            final var popped = current.pop();
+            if (popped.isEmpty()) break;
+
+            final char next = popped.orElse('\0');
+            current = current.append(next);
+
+            if (next == '\\') {
+                final var state = current.popAndAppend();
+                if (state.isEmpty()) break;
+                current = state.get();
+            }
+            if (next == '"') {
+                break;
+            }
+        }
+
+        return Optional.of(current);
     }
 
     private static Optional<State> divideAtSingleQuotes(State current, char next) {
@@ -206,8 +231,8 @@ public class Main {
         final var stripped = input.strip();
         if (stripped.isEmpty()) return Optional.of("");
         if (input.contains("=")) return Optional.of("\tint temp = temp;\n");
-        if (stripped.startsWith("return ")) return Optional.of("\nreturn temp;\n");
-        if (stripped.startsWith("if ")) return Optional.of("if (temp) {\n\t}\n");
+        if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
+        if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
         if (stripped.endsWith(");")) return Optional.of("\ttemp();\n");
 
         return invalidate("statement", input);
