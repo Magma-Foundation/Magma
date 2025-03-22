@@ -223,24 +223,24 @@ public class Main {
         final var stripped = input.strip();
         if (stripped.isEmpty()) return Optional.of("");
 
+        if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
+
+        if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
+
+        if (stripped.startsWith("while ")) return Optional.of("\twhile (temp) {\n\t}\n");
+
         final var maybeInitialization = truncateRight(stripped, ";", left -> {
             return split(left, new IndexSplitter("=", new FirstLocator()), tuple -> {
                 final var header = tuple.left();
                 return compileDefinition(header).map(definition -> {
                     return computeValue(tuple.right()).map(value -> {
-                        return "\t" + definition + " = " + value + ";";
+                        return "\t" + definition + " = " + value + ";\n";
                     });
                 });
             });
         });
 
         if (maybeInitialization.isPresent()) return maybeInitialization.get();
-
-        if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
-
-        if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
-
-        if (stripped.startsWith("while ")) return Optional.of("\twhile (temp) {\n\t}\n");
 
         if (stripped.endsWith(");")) return Optional.of("\ttemp();\n");
 
@@ -377,12 +377,9 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            final var c = input.charAt(i);
-            if (!Character.isLetter(c)) return false;
-        }
-
-        return true;
+        return IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .allMatch(Character::isLetter);
     }
 
     private static <T> Optional<T> truncateRight(String input, String suffix, Function<String, Optional<T>> mapper) {
