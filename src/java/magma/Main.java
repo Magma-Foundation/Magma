@@ -3,6 +3,9 @@ package magma;
 import magma.locate.FirstLocator;
 import magma.locate.LastLocator;
 import magma.locate.TypeSeparatorLocator;
+import magma.merge.DelimitedMerger;
+import magma.merge.Merger;
+import magma.merge.StatementMerger;
 import magma.result.Result;
 import magma.result.Results;
 import magma.split.IndexSplitter;
@@ -17,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,15 +54,15 @@ public class Main {
     }
 
     private static Optional<String> compileAllStatements(String input, StringRule compiler) {
-        return compileAll(divide(input, new StatementDivider()), compiler, Main::mergeStatements);
+        return compileAll(divide(input, new StatementDivider()), compiler, new StatementMerger());
     }
 
-    private static Optional<String> compileAll(List<String> segments, StringRule compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return parseAll(segments, compiler).flatMap(output -> generateAll(output, merger));
+    private static Optional<String> compileAll(List<String> segments, StringRule compiler, Merger merger) {
+        return parseAll(segments, compiler).flatMap(output -> mergeAll(output, merger));
     }
 
-    private static Optional<String> generateAll(List<String> output, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        final var reduced = output.stream().reduce(new StringBuilder(), merger, (_, next) -> next);
+    private static Optional<String> mergeAll(List<String> output, Merger merger) {
+        final var reduced = output.stream().reduce(new StringBuilder(), merger::merge, (_, next) -> next);
         return Optional.of(reduced.toString());
     }
 
@@ -73,16 +75,12 @@ public class Main {
         }), (_, next) -> next);
     }
 
-    private static StringBuilder mergeStatements(StringBuilder buffer, String element) {
-        return buffer.append(element);
-    }
-
     private static List<String> divide(String input, Divider applier) {
         final var queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        var current = new MutableDivideState(queue);
+        DivideState current = new MutableDivideState(queue);
         while (true) {
             final var maybeNextState = divideWithEscapes(current, applier);
             if (maybeNextState.isPresent()) {
@@ -288,18 +286,11 @@ public class Main {
     }
 
     private static Optional<String> compileAllValues(String input, StringRule compiler) {
-        return compileAllValues(input, compiler, (buffer, element) -> {
-            return mergeDelimited(buffer, element, ", ");
-        });
+        return compileAllValues(input, compiler, new DelimitedMerger(", "));
     }
 
-    private static Optional<String> compileAllValues(String input, StringRule compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Optional<String> compileAllValues(String input, StringRule compiler, Merger merger) {
         return compileAll(divideByValues(input), compiler, merger);
-    }
-
-    private static StringBuilder mergeDelimited(StringBuilder buffer, String element, String delimiter) {
-        if (buffer.isEmpty()) return buffer.append(element);
-        return buffer.append(delimiter).append(element);
     }
 
     private static List<String> divideByValues(String input) {
@@ -388,7 +379,7 @@ public class Main {
     }
 
     private static Optional<MapNode> generateGeneric(String name, List<String> paramTypes) {
-        return generateAll(paramTypes, (buffer, element) -> mergeDelimited(buffer, element, "_"))
+        return mergeAll(paramTypes, new DelimitedMerger("_"))
                 .map(outputParams -> name + "_" + outputParams)
                 .map(Main::wrapAsSymbol);
     }
