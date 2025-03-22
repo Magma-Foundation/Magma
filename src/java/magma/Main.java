@@ -26,11 +26,15 @@ import java.util.stream.IntStream;
 public class Main {
     public static void main(String[] args) {
         final var source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readSafe(source).match(input -> {
-            final var output = compileRoot(input);
-            final var target = source.resolveSibling("Main.c");
-            return writeSafe(target, output);
-        }, Optional::of).ifPresent(Throwable::printStackTrace);
+        readSafe(source)
+                .match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> runWithInput(Path source, String input) {
+        final var output = compileRoot(input);
+        final var target = source.resolveSibling("Main.c");
+        return writeSafe(target, output);
     }
 
     private static Optional<IOException> writeSafe(Path target, String output) {
