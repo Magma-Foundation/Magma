@@ -178,13 +178,31 @@ public class Main {
             return compileDefinition(tuple.left().strip()).flatMap(outputDefinition -> {
                 return split(tuple.right(), new IndexSplitter(")", new FirstLocator()), tuple1 -> {
                     return compileAllValues(tuple1.left(), Main::compileDefinition).flatMap(outputParams -> {
-                        return Optional.of(outputDefinition + "(" +
-                                outputParams +
-                                "){\n}\n");
+                        return truncateLeft(tuple1.right().strip(), "{", right -> {
+                            return truncateRight(right, "}", content -> {
+                                return compileAllStatements(content, Main::compileStatement).map(compiled -> {
+                                    return outputDefinition + "(" +
+                                            outputParams +
+                                            "){\n" +
+                                            compiled +
+                                            "}\n";
+                                });
+                            });
+                        });
                     });
                 });
             });
         });
+    }
+
+    private static Optional<String> compileStatement(String input) {
+        return invalidate("statement", input);
+    }
+
+    private static Optional<String> truncateLeft(String input, String prefix, Function<String, Optional<String>> compiler) {
+        return input.startsWith(prefix)
+                ? compiler.apply(input.substring(prefix.length()))
+                : Optional.empty();
     }
 
     private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler) {
