@@ -3,11 +3,14 @@ package magma;
 import magma.locate.FirstLocator;
 import magma.locate.LastLocator;
 import magma.locate.TypeSeparatorLocator;
+import magma.result.Result;
+import magma.result.Results;
 import magma.split.IndexSplitter;
 import magma.split.Splitter;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,16 +25,20 @@ import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            final var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            final var input = Files.readString(source);
+        final var source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readSafe(source).match(input -> {
             final var output = compileRoot(input);
             final var target = source.resolveSibling("Main.c");
-            Files.writeString(target, output);
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
+            return writeSafe(target, output);
+        }, Optional::of).ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> writeSafe(Path target, String output) {
+        return Results.wrapRunnable(() -> Files.writeString(target, output));
+    }
+
+    private static Result<String, IOException> readSafe(Path source) {
+        return Results.wrapSupplier(() -> Files.readString(source));
     }
 
     private static String compileRoot(String input) {
