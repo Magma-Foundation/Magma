@@ -249,6 +249,9 @@ public class Main {
     }
 
     private static Optional<String> compileValue(String input) {
+        final var maybeString = compileString(input);
+        if (maybeString.isPresent()) return maybeString;
+
         final var maybeInvocation = compileInvocation(input);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
@@ -259,6 +262,14 @@ public class Main {
         if (isSymbol(stripped)) return Optional.of(stripped);
 
         return invalidate("value", input);
+    }
+
+    private static Optional<String> compileString(String input) {
+        return truncateLeft(input.strip(), "\"", right -> {
+            return truncateRight(right, "\"", content -> {
+                return Optional.of("\"" + content + "\"");
+            });
+        });
     }
 
     private static Optional<String> compileDataAccess(String input) {
