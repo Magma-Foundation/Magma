@@ -61,16 +61,12 @@ public class Main {
     }
 
     private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
-        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
-        for (var segment : segments) {
-            maybeCompiled = maybeCompiled.flatMap(output -> {
-                return compiler.apply(segment).map(str -> {
-                    output.add(str);
-                    return output;
-                });
+        return segments.stream().reduce(Optional.of(new ArrayList<>()), (strings, segment) -> strings.flatMap(output -> {
+            return compiler.apply(segment).map(str -> {
+                output.add(str);
+                return output;
             });
-        }
-        return maybeCompiled;
+        }), (_, next) -> next);
     }
 
     private static StringBuilder mergeStatements(StringBuilder buffer, String element) {
@@ -241,7 +237,11 @@ public class Main {
         if (maybeInitialization.isPresent()) return maybeInitialization.get();
 
         if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
+
         if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
+
+        if (stripped.startsWith("while ")) return Optional.of("\twhile (temp) {\n\t}\n");
+
         if (stripped.endsWith(");")) return Optional.of("\ttemp();\n");
 
         return invalidate("statement", input);
@@ -249,6 +249,10 @@ public class Main {
 
     private static Optional<String> computeValue(String input) {
         if (input.endsWith(")")) return Optional.of("temp()");
+
+        final var stripped = input.strip();
+        if (isSymbol(stripped)) return Optional.of(stripped);
+
         return invalidate("value", input);
     }
 
