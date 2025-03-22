@@ -324,7 +324,11 @@ public class Main {
         if (maybeGeneric.isPresent()) return maybeGeneric;
 
         final var stripped = input.strip();
-        if (isSymbol(stripped)) return Optional.of(wrapAsSymbol(stripped));
+        if (isSymbol(stripped)) {
+            final var stripped1 = stripped.equals("var") ? "auto" : stripped;
+            return Optional.of(wrapAsSymbol(stripped1));
+        }
+
         return invalidate("type", input);
     }
 

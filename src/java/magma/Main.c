@@ -22,8 +22,8 @@
 struct Main {
 };
 void main(String* args){
-	var source = temp();
-	var output = temp();
+	auto source = temp();
+	auto output = temp();
 }
 Optional_IOException writeSafe(Path target, String output){
 	return temp;
@@ -41,7 +41,7 @@ Optional_String compileAll(List_String segments, Optional_String (*compiler)(Str
 	return temp;
 }
 Optional_String generateAll(List_String output, StringBuilder (*merger)(StringBuilder, String)){
-	var reduced = temp();
+	auto reduced = temp();
 	return temp;
 }
 Optional_List_String parseAll(List_String segments, Optional_String (*compiler)(String)){
@@ -51,15 +51,15 @@ StringBuilder mergeStatements(StringBuilder buffer, String element){
 	return temp;
 }
 List_String divide(String input, State (*applier)(State, Character)){
-	var queue = temp();
-	var state = temp();
-	var current = state;
+	auto queue = temp();
+	auto state = temp();
+	auto current = state;
 	while (temp) {
 	}
 	return temp;
 }
 Optional_State divideWithEscapes(State current, State (*applicator)(State, Character)){
-	var maybeNext = temp();
+	auto maybeNext = temp();
 	if (temp) {
 	}
 	char next = temp();
@@ -68,7 +68,7 @@ Optional_State divideWithEscapes(State current, State (*applicator)(State, Chara
 Optional_State divideAtDoubleQuotes(State initial, char c){
 	if (temp) {
 	}
-	var current = temp();
+	auto current = temp();
 	while (temp) {
 	}
 	return temp;
@@ -79,7 +79,7 @@ Optional_State divideAtSingleQuotes(State current, char next){
 	return temp;
 }
 State divideAtStatementChar(State current, char next){
-	var appended = temp();
+	auto appended = temp();
 	if (temp) {
 	}
 	if (temp) {
@@ -91,7 +91,7 @@ State divideAtStatementChar(State current, char next){
 	return temp;
 }
 Optional_String compileRootSegment(String input){
-	var stripped = temp();
+	auto stripped = temp();
 	if (temp) {
 	}
 	if (temp) {
@@ -119,7 +119,7 @@ Optional_String compileMethod(String input){
 	return temp;
 }
 Optional_String compileStatement(String input){
-	var stripped = temp();
+	auto stripped = temp();
 	if (temp) {
 	}
 	if (temp) {
@@ -128,7 +128,7 @@ Optional_String compileStatement(String input){
 	}
 	if (temp) {
 	}
-	var maybeInitialization = temp();
+	auto maybeInitialization = temp();
 	if (temp) {
 	}
 	if (temp) {
@@ -138,7 +138,7 @@ Optional_String compileStatement(String input){
 Optional_String computeValue(String input){
 	if (temp) {
 	}
-	var stripped = temp();
+	auto stripped = temp();
 	if (temp) {
 	}
 	return temp;
@@ -161,20 +161,20 @@ List_String divideByValues(String input){
 	return temp;
 }
 Optional_String compileDefinition(String input){
-	var stripped = temp();
+	auto stripped = temp();
 	return temp;
 }
 Optional_String generateType(MapNode node){
 	return temp;
 }
 Optional_MapNode parseType(String input){
-	var maybeArray = temp();
+	auto maybeArray = temp();
 	if (temp) {
 	}
-	var maybeGeneric = temp();
+	auto maybeGeneric = temp();
 	if (temp) {
 	}
-	var stripped = temp();
+	auto stripped = temp();
 	if (temp) {
 	}
 	return temp;
@@ -196,9 +196,9 @@ MapNode wrapAsSymbol(String value){
 	return temp;
 }
 Optional_String generateFunctionalType(MapNode mapNode, String name){
-	var returns = temp();
-	var params = temp();
-	var joinedParams = temp();
+	auto returns = temp();
+	auto params = temp();
+	auto joinedParams = temp();
 	return temp;
 }
 boolean isSymbol(String input){
