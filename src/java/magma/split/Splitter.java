@@ -1,4 +1,6 @@
-package magma;
+package magma.split;
+
+import magma.Tuple;
 
 import java.util.Optional;
 

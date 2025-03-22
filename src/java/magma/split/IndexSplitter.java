@@ -1,4 +1,7 @@
-package magma;
+package magma.split;
+
+import magma.Tuple;
+import magma.locate.Locator;
 
 import java.util.Optional;
 

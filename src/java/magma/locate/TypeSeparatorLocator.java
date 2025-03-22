@@ -1,8 +1,8 @@
-package magma;
+package magma.locate;
 
 import java.util.Optional;
 
-class TypeSeparatorLocator implements Locator {
+public class TypeSeparatorLocator implements Locator {
     @Override
     public Optional<Integer> locate(String input, String slice) {
         var depth = 0;

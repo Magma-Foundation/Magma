@@ -1,5 +1,11 @@
 package magma;
 
+import magma.locate.FirstLocator;
+import magma.locate.LastLocator;
+import magma.locate.TypeSeparatorLocator;
+import magma.split.IndexSplitter;
+import magma.split.Splitter;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
