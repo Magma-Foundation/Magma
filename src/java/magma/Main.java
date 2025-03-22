@@ -194,7 +194,7 @@ public class Main {
             return compileDefinition(tuple.left().strip()).flatMap(outputDefinition -> {
                 return split(tuple.right(), new IndexSplitter(")", new FirstLocator()), tuple1 -> {
                     return compileAllValues(tuple1.left(), Main::compileDefinition).flatMap(outputParams -> {
-                        return truncateLeft(tuple1.right().strip(), "{", right -> {
+                        return new PrefixRule("{", right -> {
                             return truncateRight(right, "}", content -> {
                                 return compileAllStatements(content, Main::compileStatement).map(compiled -> {
                                     return outputDefinition + "(" +
@@ -204,7 +204,7 @@ public class Main {
                                             "}\n";
                                 });
                             });
-                        });
+                        }).apply(tuple1.right().strip());
                     });
                 });
             });
@@ -254,11 +254,11 @@ public class Main {
     }
 
     private static Optional<String> compileString(String input) {
-        return truncateLeft(input.strip(), "\"", right -> {
+        return new PrefixRule("\"", right -> {
             return truncateRight(right, "\"", content -> {
                 return Optional.of("\"" + content + "\"");
             });
-        });
+        }).apply(input.strip());
     }
 
     private static Optional<String> compileDataAccess(String input) {
@@ -277,12 +277,6 @@ public class Main {
                 });
             });
         });
-    }
-
-    private static Optional<String> truncateLeft(String input, String prefix, StringRule compiler) {
-        return input.startsWith(prefix)
-                ? compiler.apply(input.substring(prefix.length()))
-                : Optional.empty();
     }
 
     private static Optional<String> compileAllValues(String input, StringRule compiler) {
