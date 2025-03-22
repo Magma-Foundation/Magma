@@ -45,8 +45,10 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) {
-            final var right = input.strip().substring("import ".length());
+
+        final var stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            final var right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
                 final var namespaceString = right.substring(0, right.length() - ";".length());
                 final var namespace = namespaceString.split(Pattern.quote("."));
@@ -55,7 +57,17 @@ public class Main {
             }
         }
 
-        if (input.contains("class ")) return "struct Temp {\n};\n";
+        final var classKeyword = input.indexOf("class ");
+        if (classKeyword >= 0) {
+            final var right = input.substring(classKeyword + "class ".length());
+            final var contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                final var name = right.substring(0, contentStart).strip();
+                return "struct " +
+                        name +
+                        " {\n};\n";
+            }
+        }
 
         System.err.println("Invalid root segment: " + input);
         return input;
