@@ -52,7 +52,7 @@ public class Main {
     }
 
     private static Optional<String> compileAllStatements(String input, StringRule compiler) {
-        return compileAll(divide(input, Main::divideAtStatementChar), compiler, Main::mergeStatements);
+        return compileAll(divide(input, new StatementDivider()), compiler, Main::mergeStatements);
     }
 
     private static Optional<String> compileAll(List<String> segments, StringRule compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
@@ -77,7 +77,7 @@ public class Main {
         return buffer.append(element);
     }
 
-    private static List<String> divide(String input, BiFunction<State, Character, State> applier) {
+    private static List<String> divide(String input, Divider applier) {
         final var queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -97,7 +97,7 @@ public class Main {
 
     private static Optional<State> divideWithEscapes(
             State current,
-            BiFunction<State, Character, State> applicator
+            Divider applicator
     ) {
         final var maybeNext = current.pop();
         if (maybeNext.isEmpty()) return Optional.empty();
@@ -143,15 +143,6 @@ public class Main {
 
             return withEscaped.flatMap(State::popAndAppend);
         });
-    }
-
-    private static State divideAtStatementChar(State current, char next) {
-        final var appended = current.append(next);
-        if (next == ';' && appended.isLevel()) return appended.advance();
-        if (next == '}' && appended.isShallow()) return appended.advance().exit();
-        if (next == '{' || next == '(') return appended.enter();
-        if (next == '}' || next == ')') return appended.exit();
-        return appended;
     }
 
     private static Optional<String> compileRootSegment(String input) {
