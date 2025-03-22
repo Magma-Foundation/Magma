@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -226,21 +227,7 @@ public class Main {
         final var maybeGeneric = truncateRight(input, ">", withoutEnd -> {
             return split(withoutEnd, new IndexSplitter("<", new FirstLocator()), tuple -> {
                 List<String> segments = divideByValues(tuple.right());
-                return parseAll(segments, Main::compileType).flatMap(compiled -> {
-                    final var name = tuple.left().strip();
-                    if (name.equals("Function")) {
-                        final var paramType = compiled.get(0);
-                        final var returns = compiled.get(1);
-                        return generateFunctionalType(returns, List.of(paramType));
-                    } else if (name.equals("BiFunction")) {
-                        final var leftType = compiled.get(0);
-                        final var rightType = compiled.get(1);
-                        final var returns = compiled.get(2);
-                        return generateFunctionalType(returns, List.of(leftType, rightType));
-                    }
-
-                    return generateAll(compiled, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> name + "_" + outputParams);
-                });
+                return parseAll(segments, Main::compileType).flatMap(compiled -> modifyGeneric(tuple.left().strip(), compiled));
             });
         });
         if (maybeGeneric.isPresent()) return maybeGeneric;
@@ -250,8 +237,25 @@ public class Main {
         return invalidate("type", input);
     }
 
-    private static Optional<String> generateFunctionalType(String returns, List<String> params) {
-        return Optional.of(returns + " (*)(" + params + ")");
+    private static Optional<String> modifyGeneric(String name, List<String> genericTypes) {
+        if (name.equals("Function")) {
+            final var paramType = genericTypes.get(0);
+            final var returns = genericTypes.get(1);
+            final var node = new MapNode().withString("return", returns).withStringList("params", List.of(paramType));
+            return generateFunctionalType(node);
+        }
+        if (name.equals("BiFunction")) {
+            final var leftType = genericTypes.get(0);
+            final var rightType = genericTypes.get(1);
+            final var returns = genericTypes.get(2);
+            final var node = new MapNode().withString("return", returns).withStringList("params", List.of(leftType, rightType));
+            return generateFunctionalType(node);
+        }
+        return generateAll(genericTypes, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> name + "_" + outputParams);
+    }
+
+    private static Optional<String> generateFunctionalType(MapNode mapNode) {
+        return Optional.of(mapNode.findString("return").orElse("") + " (*)(" + mapNode.findStringList("params").orElse(Collections.emptyList()) + ")");
     }
 
     private static boolean isSymbol(String input) {
