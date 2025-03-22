@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -44,7 +45,16 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+        if (input.strip().startsWith("import ")) {
+            final var right = input.strip().substring("import ".length());
+            if (right.endsWith(";")) {
+                final var namespaceString = right.substring(0, right.length() - ";".length());
+                final var namespace = namespaceString.split(Pattern.quote("."));
+                final var joinedNamespace = String.join("/", namespace);
+                return "#include <%s.h>\n".formatted(joinedNamespace);
+            }
+        }
+
         if (input.contains("class ")) return "struct Temp {\n};\n";
 
         System.err.println("Invalid root segment: " + input);
