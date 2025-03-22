@@ -6,14 +6,16 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class MapNode {
+    private final Optional<String> type;
     private final Map<String, String> strings;
     private final Map<String, List<String>> stringLists;
 
     public MapNode() {
-        this(new HashMap<>(), new HashMap<>());
+        this(Optional.empty(), new HashMap<>(), new HashMap<>());
     }
 
-    public MapNode(Map<String, List<String>> stringLists, Map<String, String> strings) {
+    public MapNode(Optional<String> type, Map<String, String> strings, Map<String, List<String>> stringLists) {
+        this.type = type;
         this.stringLists = stringLists;
         this.strings = strings;
     }
@@ -34,5 +36,13 @@ public final class MapNode {
 
     public Optional<List<String>> findStringList(String propertyKey) {
         return Optional.ofNullable(stringLists.get(propertyKey));
+    }
+
+    public MapNode withType(String type) {
+        return new MapNode(Optional.of(type), strings, stringLists);
+    }
+
+    public boolean is(String type) {
+        return this.type.isPresent() && this.type.get().equals(type);
     }
 }

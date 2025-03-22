@@ -151,11 +151,11 @@ public class Main {
         });
     }
 
-    private static Optional<String> invalidate(String type, String input) {
+    private static <T> Optional<T> invalidate(String type, String input) {
         return printError("Invalid " + type + ": " + input);
     }
 
-    private static Optional<String> printError(String message) {
+    private static <T> Optional<T> printError(String message) {
         System.err.println(message);
         return Optional.empty();
     }
@@ -216,46 +216,83 @@ public class Main {
             final var inputType = split(beforeName, new IndexSplitter(" ", new TypeSeparatorLocator()),
                     tuple1 -> Optional.of(tuple1.right())).orElse(beforeName);
 
-            return compileType(inputType).map(outputType -> outputType + " " + name);
+            return parseType(inputType).flatMap(type -> {
+                if (type.is("functional")) {
+                    return generateFunctionalType(type, name);
+                } else {
+                    return generateSymbol(type).map(inner -> inner + " " + name);
+                }
+            });
         });
     }
 
-    private static Optional<String> compileType(String input) {
+    private static Optional<String> generateType(MapNode node) {
+        return node.is("functional") ? generateFunctionalType(node, "") : generateSymbol(node);
+    }
+
+    private static Optional<MapNode> parseType(String input) {
         final var maybeArray = truncateRight(input, "[]", array -> Optional.of(array + "*"));
-        if (maybeArray.isPresent()) return maybeArray;
+        if (maybeArray.isPresent()) return maybeArray.map(Main::wrapAsSymbol);
 
         final var maybeGeneric = truncateRight(input, ">", withoutEnd -> {
             return split(withoutEnd, new IndexSplitter("<", new FirstLocator()), tuple -> {
                 List<String> segments = divideByValues(tuple.right());
-                return parseAll(segments, Main::compileType).flatMap(compiled -> modifyGeneric(tuple.left().strip(), compiled));
+                return parseAll(segments, input1 -> parseType(input1).flatMap(Main::generateType)).flatMap(compiled -> modifyGeneric(tuple.left().strip(), compiled));
             });
         });
         if (maybeGeneric.isPresent()) return maybeGeneric;
 
         final var stripped = input.strip();
-        if (isSymbol(stripped)) return Optional.of(stripped);
+        if (isSymbol(stripped)) return Optional.of(wrapAsSymbol(stripped));
         return invalidate("type", input);
     }
 
-    private static Optional<String> modifyGeneric(String name, List<String> genericTypes) {
-        if (name.equals("Function")) {
-            final var paramType = genericTypes.get(0);
-            final var returns = genericTypes.get(1);
-            final var node = new MapNode().withString("return", returns).withStringList("params", List.of(paramType));
-            return generateFunctionalType(node);
-        }
-        if (name.equals("BiFunction")) {
-            final var leftType = genericTypes.get(0);
-            final var rightType = genericTypes.get(1);
-            final var returns = genericTypes.get(2);
-            final var node = new MapNode().withString("return", returns).withStringList("params", List.of(leftType, rightType));
-            return generateFunctionalType(node);
-        }
-        return generateAll(genericTypes, (buffer, element) -> mergeDelimited(buffer, element, "_")).map(outputParams -> name + "_" + outputParams);
+    private static Optional<String> generateSymbol(MapNode node) {
+        return node.findString("value");
     }
 
-    private static Optional<String> generateFunctionalType(MapNode mapNode) {
-        return Optional.of(mapNode.findString("return").orElse("") + " (*)(" + mapNode.findStringList("params").orElse(Collections.emptyList()) + ")");
+    private static Optional<MapNode> modifyGeneric(String name, List<String> paramTypes) {
+        if (name.equals("Function")) {
+            final var paramType = paramTypes.get(0);
+            final var returns = paramTypes.get(1);
+            final var node = new MapNode()
+                    .withType("functional")
+                    .withString("return", returns)
+                    .withStringList("params", List.of(paramType));
+
+            return Optional.of(node);
+        }
+        if (name.equals("BiFunction")) {
+            final var leftType = paramTypes.get(0);
+            final var rightType = paramTypes.get(1);
+            final var returns = paramTypes.get(2);
+            final var node = new MapNode()
+                    .withType("functional")
+                    .withString("return", returns)
+                    .withStringList("params", List.of(leftType, rightType));
+
+            return Optional.of(node);
+        }
+
+        return generateGeneric(name, paramTypes);
+    }
+
+    private static Optional<MapNode> generateGeneric(String name, List<String> paramTypes) {
+        return generateAll(paramTypes, (buffer, element) -> mergeDelimited(buffer, element, "_"))
+                .map(outputParams -> name + "_" + outputParams)
+                .map(Main::wrapAsSymbol);
+    }
+
+    private static MapNode wrapAsSymbol(String value) {
+        return new MapNode().withType("symbol").withString("value", value);
+    }
+
+    private static Optional<String> generateFunctionalType(MapNode mapNode, String name) {
+        final var returns = mapNode.findString("return").orElse("");
+        final var params = mapNode.findStringList("params").orElse(Collections.emptyList());
+        final var joinedParams = String.join(", ", params);
+
+        return Optional.of(returns + " (*" + name + ")(" + joinedParams + ")");
     }
 
     private static boolean isSymbol(String input) {
@@ -267,16 +304,16 @@ public class Main {
         return true;
     }
 
-    private static Optional<String> truncateRight(String input, String suffix, Function<String, Optional<String>> mapper) {
+    private static <T> Optional<T> truncateRight(String input, String suffix, Function<String, Optional<T>> mapper) {
         return input.endsWith(suffix)
                 ? mapper.apply(input.substring(0, input.length() - suffix.length()))
                 : Optional.empty();
     }
 
-    private static Optional<String> split(
+    private static <T> Optional<T> split(
             String input,
             Splitter splitter,
-            Function<Tuple<String, String>, Optional<String>> mapper
+            Function<Tuple<String, String>, Optional<T>> mapper
     ) {
         return splitter.split(input).flatMap(mapper);
     }
