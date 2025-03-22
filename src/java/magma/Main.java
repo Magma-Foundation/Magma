@@ -51,11 +51,11 @@ public class Main {
                 .orElse("");
     }
 
-    private static Optional<String> compileAllStatements(String input, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compileAllStatements(String input, StringRule compiler) {
         return compileAll(divide(input, Main::divideAtStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Optional<String> compileAll(List<String> segments, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Optional<String> compileAll(List<String> segments, StringRule compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
         return parseAll(segments, compiler).flatMap(output -> generateAll(output, merger));
     }
 
@@ -64,7 +64,7 @@ public class Main {
         return Optional.of(reduced.toString());
     }
 
-    private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
+    private static Optional<List<String>> parseAll(List<String> segments, StringRule compiler) {
         return segments.stream().reduce(Optional.of(new ArrayList<>()), (strings, segment) -> strings.flatMap(output -> {
             return compiler.apply(segment).map(str -> {
                 output.add(str);
@@ -290,19 +290,19 @@ public class Main {
         });
     }
 
-    private static Optional<String> truncateLeft(String input, String prefix, Function<String, Optional<String>> compiler) {
+    private static Optional<String> truncateLeft(String input, String prefix, StringRule compiler) {
         return input.startsWith(prefix)
                 ? compiler.apply(input.substring(prefix.length()))
                 : Optional.empty();
     }
 
-    private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compileAllValues(String input, StringRule compiler) {
         return compileAllValues(input, compiler, (buffer, element) -> {
             return mergeDelimited(buffer, element, ", ");
         });
     }
 
-    private static Optional<String> compileAllValues(String input, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Optional<String> compileAllValues(String input, StringRule compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
         return compileAll(divideByValues(input), compiler, merger);
     }
 
