@@ -230,12 +230,30 @@ public class Main {
     private static Optional<String> compileStatement(String input) {
         final var stripped = input.strip();
         if (stripped.isEmpty()) return Optional.of("");
-        if (input.contains("=")) return Optional.of("\tint temp = temp;\n");
+
+        final var maybeInitialization = truncateRight(stripped, ";", left -> {
+            return split(left, new IndexSplitter("=", new FirstLocator()), tuple -> {
+                final var header = tuple.left();
+                return compileDefinition(header).map(definition -> {
+                    return computeValue(tuple.right()).map(value -> {
+                        return "\t" + definition + " = " + value + ";";
+                    });
+                });
+            });
+        });
+
+        if (maybeInitialization.isPresent()) return maybeInitialization.get();
+
         if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
         if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
         if (stripped.endsWith(");")) return Optional.of("\ttemp();\n");
 
         return invalidate("statement", input);
+    }
+
+    private static Optional<String> computeValue(String input) {
+        if (input.endsWith(")")) return Optional.of("temp()");
+        return invalidate("value", input);
     }
 
     private static Optional<String> truncateLeft(String input, String prefix, Function<String, Optional<String>> compiler) {
