@@ -280,7 +280,7 @@ public class Main {
 
     private static Optional<String> compileInvocation(String input) {
         return truncateRight(input, ")", left -> {
-            return split(left, new IndexSplitter("(", new FirstLocator()), tuple -> {
+            return split(left, new IndexSplitter("(", new LastLocator()), tuple -> {
                 return compileValue(tuple.left()).flatMap(value -> {
                     return compileAllValues(tuple.right(), Main::compileValue).map(arguments -> {
                         return value + "(" + arguments + ")";
@@ -417,7 +417,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         return IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
-                .allMatch(Character::isLetter);
+                .allMatch(ch -> ch == '_' || Character.isLetter(ch));
     }
 
     private static <T> Optional<T> truncateRight(String input, String suffix, Function<String, Optional<T>> mapper) {
