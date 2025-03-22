@@ -78,8 +78,7 @@ public class Main {
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        final var state = new State(queue);
-        var current = state;
+        var current = new State(queue);
         while (true) {
             final var maybeNextState = divideWithEscapes(current, applier);
             if (maybeNextState.isPresent()) {
@@ -224,16 +223,14 @@ public class Main {
         if (stripped.isEmpty()) return Optional.of("");
 
         if (stripped.startsWith("return ")) return Optional.of("\treturn temp;\n");
-
         if (stripped.startsWith("if ")) return Optional.of("\tif (temp) {\n\t}\n");
-
         if (stripped.startsWith("while ")) return Optional.of("\twhile (temp) {\n\t}\n");
 
         final var maybeInitialization = truncateRight(stripped, ";", left -> {
             return split(left, new IndexSplitter("=", new FirstLocator()), tuple -> {
                 final var header = tuple.left();
                 return compileDefinition(header).map(definition -> {
-                    return computeValue(tuple.right()).map(value -> {
+                    return compileValue(tuple.right()).map(value -> {
                         return "\t" + definition + " = " + value + ";\n";
                     });
                 });
@@ -247,13 +244,35 @@ public class Main {
         return invalidate("statement", input);
     }
 
-    private static Optional<String> computeValue(String input) {
-        if (input.endsWith(")")) return Optional.of("temp()");
+    private static Optional<String> compileValue(String input) {
+        final var maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) return maybeInvocation;
+
+        final var maybeDataAccess = compileDataAccess(input);
+        if (maybeDataAccess.isPresent()) return maybeDataAccess;
 
         final var stripped = input.strip();
         if (isSymbol(stripped)) return Optional.of(stripped);
 
         return invalidate("value", input);
+    }
+
+    private static Optional<String> compileDataAccess(String input) {
+        return split(input, new IndexSplitter(".", new LastLocator()), tuple -> {
+            return compileValue(tuple.left()).map(inner -> inner + "." + tuple.right());
+        });
+    }
+
+    private static Optional<String> compileInvocation(String input) {
+        return truncateRight(input, ")", left -> {
+            return split(input, new IndexSplitter("(", new FirstLocator()), tuple -> {
+                return compileValue(tuple.left()).flatMap(value -> {
+                    return compileAllValues(tuple.right(), Main::compileValue).map(arguments -> {
+                        return value + "(" + arguments + ")";
+                    });
+                });
+            });
+        });
     }
 
     private static Optional<String> truncateLeft(String input, String prefix, Function<String, Optional<String>> compiler) {
