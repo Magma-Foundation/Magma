@@ -56,12 +56,8 @@ public class Main {
     }
 
     private static Optional<String> generateAll(List<String> output, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var buffer = new StringBuilder();
-        for (var element : output) {
-            buffer = merger.apply(buffer, element);
-        }
-
-        return Optional.of(buffer.toString());
+        final var reduced = output.stream().reduce(new StringBuilder(), merger, (_, next) -> next);
+        return Optional.of(reduced.toString());
     }
 
     private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
