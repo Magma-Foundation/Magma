@@ -93,7 +93,25 @@ public class Main {
             Optional<String> maybeClass = compileClass(input);
             if (maybeClass.isPresent()) return maybeClass.get();
 
-            if (input.contains("interface ") || input.contains("record ")) return generateStruct("Temp");
+            int interfaceIndex = input.indexOf("interface ");
+            if (interfaceIndex >= 0) {
+                String right = input.substring(interfaceIndex + "interface ".length());
+                int contentStart = right.indexOf("{");
+                if (contentStart >= 0) {
+                    String beforeContent = right.substring(0, contentStart).strip();
+                    if (beforeContent.endsWith(">")) {
+                        if (beforeContent.contains("<")) {
+                            return "";
+                        }
+                    }
+
+                    return generateStruct("Temp");
+                }
+            }
+
+            if (input.contains("record ")) {
+                return generateStruct("Temp");
+            }
 
             throw new CompileException("Invalid root segment", input);
         });
