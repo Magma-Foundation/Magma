@@ -1,2 +1,2 @@
-struct None<T> implements Option<T> {
+struct None {
 };

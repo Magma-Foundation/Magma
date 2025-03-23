@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -89,20 +90,41 @@ public class Main {
                 }
             }
 
-            int classIndex = input.indexOf("class ");
-            if (classIndex >= 0) {
-                String right = input.substring(classIndex + "class ".length());
-                int contentStart = right.indexOf("{");
-                if (contentStart >= 0) {
-                    String name = right.substring(0, contentStart).strip();
-                    return generateStruct(name);
-                }
-            }
+            Optional<String> maybeClass = compileClass(input);
+            if (maybeClass.isPresent()) return maybeClass.get();
 
             if (input.contains("interface ") || input.contains("record ")) return generateStruct("Temp");
 
             throw new CompileException("Invalid root segment", input);
         });
+    }
+
+    private static Optional<String> compileClass(String input) {
+        int classIndex = input.indexOf("class ");
+        if (classIndex < 0) return Optional.empty();
+
+        String right = input.substring(classIndex + "class ".length());
+        int contentStart = right.indexOf("{");
+        if (contentStart < 0) return Optional.empty();
+
+        String beforeContent = right.substring(0, contentStart).strip();
+
+        String name = computeName(beforeContent);
+        return Optional.of(generateStruct(name));
+    }
+
+    private static String computeName(String beforeContent) {
+        int implementsIndex = beforeContent.indexOf(" implements ");
+        if (implementsIndex < 0) return beforeContent;
+
+        String beforeImplements = beforeContent.substring(0, implementsIndex).strip();
+        if (!beforeImplements.endsWith(">")) return beforeImplements;
+
+        String withoutEnd = beforeImplements.substring(0, beforeImplements.length() - ">".length());
+        int typeParamStart = withoutEnd.indexOf("<");
+        if (typeParamStart < 0) return beforeImplements;
+
+        return withoutEnd.substring(0, typeParamStart).strip();
     }
 
     private static String generateStruct(String name) {
