@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,7 +80,10 @@ public class Main {
                 String right = input.strip().substring("import ".length());
                 if (right.endsWith(";")) {
                     String content = right.substring(0, right.length() - ";".length());
-                    String[] segments = content.split(Pattern.quote("."));
+                    List<String> segments = Arrays.asList(content.split(Pattern.quote(".")));
+                    if (segments.size() >= 3 && segments.subList(0, 3).equals(List.of("java", "util", "function")))
+                        return "";
+
                     String joined = String.join("/", segments);
                     return "#include <" + joined + ".h>\n";
                 }
