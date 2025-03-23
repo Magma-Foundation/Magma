@@ -1,6 +1,5 @@
 package magma;
 
-import magma.java.result.JavaResults;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -67,9 +66,11 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        StringBuilder output = new StringBuilder();
+        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            output.append(JavaResults.unwrap(compileRootSegment(segment)));
+            output = output
+                    .and(() -> compileRootSegment(segment))
+                    .map(tuple -> tuple.left().append(tuple.right()));
         }
 
         return output.toString();
