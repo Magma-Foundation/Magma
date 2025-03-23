@@ -43,4 +43,9 @@ public record Err<T, X>(X error) implements Result<T, X> {
     public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
         return whenErr.apply(error);
     }
+
+    @Override
+    public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+        return new Err<>(error);
+    }
 }

@@ -1,2 +1,3 @@
 struct Error {
+	void (*display)();
 };

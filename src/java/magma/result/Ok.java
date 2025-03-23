@@ -52,4 +52,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
         return whenOk.apply(value);
     }
+
+    @Override
+    public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+        return mapper.apply(value);
+    }
 }

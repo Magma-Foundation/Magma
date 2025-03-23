@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,6 +110,10 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
+        return divideAndCompile(input, Main::compileRootSegment);
+    }
+
+    private static Result<String, CompileError> divideAndCompile(String input, Function<String, Result<String, CompileError>> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -127,8 +132,7 @@ public class Main {
 
         Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            output = output
-                    .and(() -> compileRootSegment(segment))
+            output = output.and(() -> compiler.apply(segment))
                     .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
 
@@ -159,13 +163,19 @@ public class Main {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String beforeContent = right.substring(0, contentStart).strip();
+                String withEnd = right.substring(contentStart + "{".length()).strip();
+
                 if (beforeContent.contains(">")) {
                     if (beforeContent.contains("<")) {
                         return generateWhitespace();
                     }
                 }
 
-                return generateStruct(beforeContent);
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return divideAndCompile(inputContent, Main::compileClassSegment)
+                            .flatMapValue(outputContent -> generateStruct(beforeContent, outputContent));
+                }
             }
         }
 
@@ -180,15 +190,34 @@ public class Main {
                         return generateWhitespace();
                     }
                 }
-                return generateStruct(beforeContent);
+                return generateStruct(beforeContent, "");
             }
         }
 
-        return new Err<>(new CompileError("Invalid root segment", input));
+        return invalidate("root segment", input);
     }
 
-    private static Result<String, CompileError> generateStruct(String name) {
-        return new Ok<>("struct " + name + " {\n};\n");
+    private static Err<String, CompileError> invalidate(String type, String input) {
+        return new Err<>(new CompileError("Invalid " + type, input));
+    }
+
+    private static Result<String, CompileError> compileClassSegment(String input) {
+        if (input.isBlank()) return new Ok<>("");
+
+        int definitionSeparator = input.indexOf("(");
+        if (definitionSeparator >= 0) {
+            String definition = input.substring(0, definitionSeparator).strip();
+            int nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String name = definition.substring(nameSeparator + " ".length()).strip();
+                return new Ok<>("\tvoid (*" + name + ")();\n");
+            }
+        }
+        return invalidate("class segment", input);
+    }
+
+    private static Result<String, CompileError> generateStruct(String name, String content) {
+        return new Ok<>("struct " + name + " {\n" + content + "};\n");
     }
 
     private static Result<String, CompileError> generateWhitespace() {
@@ -224,7 +253,7 @@ public class Main {
             }
         }
 
-        return generateStruct(name);
+        return generateStruct(name, "");
     }
 
     private static Err<String, CompileError> createInfixError(String input, String infix) {
