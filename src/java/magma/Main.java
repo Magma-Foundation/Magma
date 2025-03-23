@@ -1,5 +1,8 @@
 package magma;
 
+import magma.result.Result;
+import magma.result.Results;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,26 +63,29 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(Results.unwrap(compileRootSegment(segment)));
         }
 
         return output.toString();
     }
 
-    private static String compileRootSegment(String segment) throws CompileException {
-        if (segment.startsWith("package ")) return "";
-        if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
+    private static Result<String, CompileException> compileRootSegment(String segment) {
+        return Results.wrap(() -> {
+            if (segment.startsWith("package ")) return "";
+            if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
 
-        int classIndex = segment.indexOf("class ");
-        if (classIndex >= 0) {
-            String right = segment.substring(classIndex + "class ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+            int classIndex = segment.indexOf("class ");
+            if (classIndex >= 0) {
+                String right = segment.substring(classIndex + "class ".length());
+                int contentStart = right.indexOf("{");
+                if (contentStart >= 0) {
+                    String name = right.substring(0, contentStart).strip();
+                    return "struct " + name + " {\n};\n";
+                }
             }
-        }
 
-        throw new CompileException("Invalid root segment", segment);
+            throw new CompileException("Invalid root segment", segment);
+        });
     }
+
 }
