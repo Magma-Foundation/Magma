@@ -1,7 +1,7 @@
 package magma;
 
 import magma.result.Result;
-import magma.result.Results;
+import magma.java.result.JavaResults;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,14 +64,14 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(Results.unwrap(compileRootSegment(segment)));
+            output.append(JavaResults.unwrap(compileRootSegment(segment)));
         }
 
         return output.toString();
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
-        return Results.wrap(() -> {
+        return JavaResults.wrap(() -> {
             if (input.startsWith("package ")) return "";
             if (input.strip().startsWith("import ")) {
                 String right = input.strip().substring("import ".length());

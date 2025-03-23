@@ -1,10 +1,13 @@
-package magma.result;
+package magma.java.result;
 
-import magma.option.JavaOptions;
+import magma.java.option.JavaOptions;
+import magma.result.Err;
+import magma.result.Ok;
+import magma.result.Result;
 
 import java.util.Optional;
 
-public class Results {
+public class JavaResults {
     public static <T, X extends Throwable> Result<T, X> wrap(ThrowableSupplier<T, X> supplier) {
         try {
             return new Ok<>(supplier.get());
