@@ -140,22 +140,22 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRootSegment(String input) {
-        Result<String, CompileError> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isOk()) return maybeWhitespace;
+        List<Compiler> compilers = List.of(
+                Main::compileWhitespace,
+                Main::compileImport,
+                Main::compileClass,
+                Main::compileInterface,
+                Main::compileRecord
+        );
 
-        Result<String, CompileError> maybeImport = compileImport(input);
-        if (maybeImport.isOk()) return maybeImport;
+        ArrayList<CompileError> errors = new ArrayList<>();
+        for (Compiler compiler : compilers) {
+            Result<String, CompileError> compiled = compiler.compile(input);
+            if (compiled.isOk()) return compiled;
+            compiled.findError().ifPresent(errors::add);
+        }
 
-        Result<String, CompileError> maybeClass = compileClass(input);
-        if (maybeClass.isOk()) return maybeClass;
-
-        Result<String, CompileError> maybeInterface = compileInterface(input);
-        if(maybeInterface.isOk()) return maybeInterface;
-
-        Result<String, CompileError> maybeRecord = compileRecord(input);
-        if(maybeRecord.isOk()) return maybeRecord;
-
-        return invalidate("root segment", input);
+        return new Err<>(new CompileError("Invalid " + "root segment", input, errors));
     }
 
     private static Result<String, CompileError> compileRecord(String input) {
