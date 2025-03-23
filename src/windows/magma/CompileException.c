@@ -1,2 +1,2 @@
-struct Temp {
+struct CompileException extends Throwable {
 };
