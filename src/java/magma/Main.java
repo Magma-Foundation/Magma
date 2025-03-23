@@ -165,7 +165,7 @@ public class Main {
                     }
                 }
 
-                return generateStruct("Temp");
+                return generateStruct(beforeContent);
             }
         }
 
