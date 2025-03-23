@@ -10,11 +10,13 @@
 #include <java/util/stream/IntStream.h>
 struct Main {
 };
-int SOURCE_FILE = temp;
-int input = temp;
-int segments = temp;
-int stripped = temp;
+Path SOURCE_FILE = temp;
+var input = temp;
+var segments = temp;
+var stripped = temp;
 void temp(){
 }
-int valueSeparator = temp;
-int i = temp;
+var valueSeparator = temp;
+void temp(){
+}
+(int i = temp;

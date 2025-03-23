@@ -120,14 +120,29 @@ public class Main {
             final var definition = input.substring(0, valueSeparator).strip();
             final var nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                final var beforeName = definition.substring(0, nameSeparator).strip();
+                final var typeSeparator = beforeName.lastIndexOf(" ");
+                final var type = typeSeparator == -1
+                        ? beforeName
+                        : beforeName.substring(typeSeparator + " ".length());
+
+                final var outputType = compileType(type);
+
                 final var name = definition.substring(nameSeparator + " ".length()).strip();
                 if (isSymbol(name)) {
-                    return "int " + name + " = temp;\n";
+                    return outputType + " " + name + " = temp;\n";
                 }
             }
         }
         if (input.contains(")")) return "void temp(){\n}\n";
         return invalidate("class segment", input);
+    }
+
+    private static String compileType(String input) {
+        if (isSymbol(input)) {
+            return input;
+        }
+        return invalidate("type", input);
     }
 
     private static boolean isSymbol(String input) {
