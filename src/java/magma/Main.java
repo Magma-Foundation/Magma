@@ -109,8 +109,19 @@ public class Main {
                 }
             }
 
-            if (input.contains("record ")) {
-                return generateStruct("Temp");
+            int recordKeyword = input.indexOf("record ");
+            if (recordKeyword >= 0) {
+                String right = input.substring(recordKeyword + "record ".length());
+                int contentStart = right.indexOf("{");
+                if (contentStart >= 0) {
+                    String beforeContent = right.substring(0, contentStart).strip();
+                    if (beforeContent.endsWith(">")) {
+                        if (beforeContent.contains("<")) {
+                            return "";
+                        }
+                    }
+                    return generateStruct(beforeContent);
+                }
             }
 
             throw new CompileException("Invalid root segment", input);
