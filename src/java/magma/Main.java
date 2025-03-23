@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,7 +73,14 @@ public class Main {
     private static Result<String, CompileException> compileRootSegment(String input) {
         return Results.wrap(() -> {
             if (input.startsWith("package ")) return "";
-            if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+            if (input.strip().startsWith("import ")) {
+                String right = input.strip().substring("import ".length());
+                if (right.endsWith(";")) {
+                    String[] segments = right.split(Pattern.quote("."));
+                    String joined = String.join("/", segments);
+                    return "#include <" + joined + ".h>\n";
+                }
+            }
 
             int classIndex = input.indexOf("class ");
             if (classIndex >= 0) {
