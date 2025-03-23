@@ -14,4 +14,9 @@ public record Err<T, X>(X error) implements Result<T, X> {
     public Option<X> findError() {
         return new Some<>(error);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
 }

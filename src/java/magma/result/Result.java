@@ -6,4 +6,6 @@ public interface Result<T, X> {
     Option<T> findValue();
 
     Option<X> findError();
+
+    boolean isOk();
 }

@@ -1,6 +1,8 @@
 package magma;
 
 import magma.java.result.JavaResults;
+import magma.result.Err;
+import magma.result.Ok;
 import magma.result.Result;
 
 import java.io.IOException;
@@ -10,7 +12,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,66 +76,72 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
-        return JavaResults.wrap(() -> {
-            if (input.startsWith("package ")) return "";
-            if (input.strip().startsWith("import ")) {
-                String right = input.strip().substring("import ".length());
-                if (right.endsWith(";")) {
-                    String content = right.substring(0, right.length() - ";".length());
-                    List<String> segments = Arrays.asList(content.split(Pattern.quote(".")));
-                    if (segments.size() >= 3 && segments.subList(0, 3).equals(List.of("java", "util", "function")))
-                        return "";
+        if (input.startsWith("package ")) return generateWhitespace();
+        if (input.strip().startsWith("import ")) {
+            String right = input.strip().substring("import ".length());
+            if (right.endsWith(";")) {
+                String content = right.substring(0, right.length() - ";".length());
+                List<String> segments = Arrays.asList(content.split(Pattern.quote(".")));
+                if (segments.size() >= 3 && segments.subList(0, 3).equals(List.of("java", "util", "function")))
+                    return generateWhitespace();
 
-                    String joined = String.join("/", segments);
-                    return "#include <" + joined + ".h>\n";
-                }
+                String joined = String.join("/", segments);
+                return new Ok<>("#include <" + joined + ".h>\n");
             }
+        }
 
-            Optional<String> maybeClass = compileClass(input);
-            if (maybeClass.isPresent()) return maybeClass.get();
+        Result<String, CompileException> maybeClass = compileClass(input);
+        if (maybeClass.isOk()) return maybeClass;
 
-            int interfaceIndex = input.indexOf("interface ");
-            if (interfaceIndex >= 0) {
-                String right = input.substring(interfaceIndex + "interface ".length());
-                int contentStart = right.indexOf("{");
-                if (contentStart >= 0) {
-                    String beforeContent = right.substring(0, contentStart).strip();
-                    if (beforeContent.endsWith(">")) {
-                        if (beforeContent.contains("<")) {
-                            return "";
-                        }
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            String right = input.substring(interfaceIndex + "interface ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String beforeContent = right.substring(0, contentStart).strip();
+                if (beforeContent.endsWith(">")) {
+                    if (beforeContent.contains("<")) {
+                        return generateWhitespace();
                     }
-
-                    return generateStruct("Temp");
                 }
-            }
 
-            int recordKeyword = input.indexOf("record ");
-            if (recordKeyword >= 0) {
-                String right = input.substring(recordKeyword + "record ".length());
-                int contentStart = right.indexOf("{");
-                if (contentStart >= 0) {
-                    String beforeContent = right.substring(0, contentStart).strip();
-                    if (beforeContent.endsWith(">")) {
-                        if (beforeContent.contains("<")) {
-                            return "";
-                        }
+                return generateStruct("Temp");
+            }
+        }
+
+        int recordKeyword = input.indexOf("record ");
+        if (recordKeyword >= 0) {
+            String right = input.substring(recordKeyword + "record ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String beforeContent = right.substring(0, contentStart).strip();
+                if (beforeContent.endsWith(">")) {
+                    if (beforeContent.contains("<")) {
+                        return generateWhitespace();
                     }
-                    return generateStruct(beforeContent);
                 }
+                return generateStruct(beforeContent);
             }
+        }
 
-            throw new CompileException("Invalid root segment", input);
-        });
+        return new Err<>(new CompileException("Invalid root segment", input));
     }
 
-    private static Optional<String> compileClass(String input) {
+    private static Result<String, CompileException> generateStruct(String name) {
+        return new Ok<>("struct " + name + " {\n};\n");
+    }
+
+    private static Result<String, CompileException> generateWhitespace() {
+        return new Ok<>("");
+    }
+
+    private static Result<String, CompileException> compileClass(String input) {
         int classIndex = input.indexOf("class ");
-        if (classIndex < 0) return Optional.empty();
+        if (classIndex < 0) return createInfixError(input, "class ");
 
         String right = input.substring(classIndex + "class ".length());
         int contentStart = right.indexOf("{");
-        if (contentStart < 0) return Optional.empty();
+        if (contentStart < 0) return createInfixError(right, "{");
 
         String beforeContent = right.substring(0, contentStart).strip();
 
@@ -152,16 +159,16 @@ public class Main {
                 if (typeParamStart < 0) {
                     name = beforeImplements;
                 } else {
-                    return Optional.of("");
+                    return new Ok<>("");
                 }
             }
         }
 
-        return Optional.of(generateStruct(name));
+        return generateStruct(name);
     }
 
-    private static String generateStruct(String name) {
-        return "struct " + name + " {\n};\n";
+    private static Err<String, CompileException> createInfixError(String input, String infix) {
+        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
     }
 
 }

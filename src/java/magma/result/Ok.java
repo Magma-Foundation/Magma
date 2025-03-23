@@ -24,4 +24,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public Option<X> findError() {
         return findError0().<Option<X>>map(Some::new).orElseGet(None::new);
     }
+
+    @Override
+    public boolean isOk() {
+        return true;
+    }
 }
