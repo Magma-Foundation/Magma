@@ -140,61 +140,88 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return generateWhitespace();
-        if (input.strip().startsWith("import ")) {
-            String right = input.strip().substring("import ".length());
-            if (right.endsWith(";")) {
-                String content = right.substring(0, right.length() - ";".length());
-                List<String> segments = Arrays.asList(content.split(Pattern.quote(".")));
-                if (segments.size() >= 3 && segments.subList(0, 3).equals(List.of("java", "util", "function")))
-                    return generateWhitespace();
+        Result<String, CompileError> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isOk()) return maybeWhitespace;
 
-                String joined = String.join("/", segments);
-                return new Ok<>("#include <" + joined + ".h>\n");
-            }
-        }
+        Result<String, CompileError> maybeImport = compileImport(input);
+        if (maybeImport.isOk()) return maybeImport;
 
         Result<String, CompileError> maybeClass = compileClass(input);
         if (maybeClass.isOk()) return maybeClass;
 
-        int interfaceIndex = input.indexOf("interface ");
-        if (interfaceIndex >= 0) {
-            String right = input.substring(interfaceIndex + "interface ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String beforeContent = right.substring(0, contentStart).strip();
-                String withEnd = right.substring(contentStart + "{".length()).strip();
+        Result<String, CompileError> maybeInterface = compileInterface(input);
+        if(maybeInterface.isOk()) return maybeInterface;
 
-                if (beforeContent.contains(">")) {
-                    if (beforeContent.contains("<")) {
-                        return generateWhitespace();
-                    }
-                }
-
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return divideAndCompile(inputContent, Main::compileClassSegment)
-                            .flatMapValue(outputContent -> generateStruct(beforeContent, outputContent));
-                }
-            }
-        }
-
-        int recordKeyword = input.indexOf("record ");
-        if (recordKeyword >= 0) {
-            String right = input.substring(recordKeyword + "record ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String beforeContent = right.substring(0, contentStart).strip();
-                if (beforeContent.endsWith(">")) {
-                    if (beforeContent.contains("<")) {
-                        return generateWhitespace();
-                    }
-                }
-                return generateStruct(beforeContent, "");
-            }
-        }
+        Result<String, CompileError> maybeRecord = compileRecord(input);
+        if(maybeRecord.isOk()) return maybeRecord;
 
         return invalidate("root segment", input);
+    }
+
+    private static Result<String, CompileError> compileRecord(String input) {
+        int recordKeyword = input.indexOf("record ");
+        if (recordKeyword < 0) return createInfixError(input, "record ");
+
+        String right = input.substring(recordKeyword + "record ".length());
+        int contentStart = right.indexOf("{");
+        if (contentStart < 0) return createInfixError(right, "{");
+
+        String beforeContent = right.substring(0, contentStart).strip();
+        if (beforeContent.endsWith(">")) {
+            if (beforeContent.contains("<")) {
+                return generateWhitespace();
+            }
+        }
+        return generateStruct(beforeContent, "");
+    }
+
+    private static Result<String, CompileError> compileInterface(String input) {
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex < 0) return createInfixError(input, "interface ");
+
+        String right = input.substring(interfaceIndex + "interface ".length());
+        int contentStart = right.indexOf("{");
+        if (contentStart < 0) return createInfixError(right, "{");
+
+        String beforeContent = right.substring(0, contentStart).strip();
+        String withEnd = right.substring(contentStart + "{".length()).strip();
+
+        if (beforeContent.contains(">")) {
+            if (beforeContent.contains("<")) {
+                return generateWhitespace();
+            }
+        }
+
+        if (!withEnd.endsWith("}")) return createInfixError(input, "interface ");
+
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        return divideAndCompile(inputContent, Main::compileClassSegment)
+                .flatMapValue(outputContent -> generateStruct(beforeContent, outputContent));
+    }
+
+    private static Result<String, CompileError> compileWhitespace(String input) {
+        if (input.startsWith("package ")) return generateWhitespace();
+        return createPrefixError(input, "package ");
+    }
+
+    private static Err<String, CompileError> createPrefixError(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
+    }
+
+    private static Result<String, CompileError> compileImport(String input) {
+        String stripped = input.strip();
+        if (!stripped.startsWith("import ")) return createPrefixError(input, "import ");
+
+        String right = stripped.substring("import ".length());
+        if (!right.endsWith(";")) return createSuffixError(right, ";");
+
+        String content = right.substring(0, right.length() - ";".length());
+        List<String> segments = Arrays.asList(content.split(Pattern.quote(".")));
+        if (segments.size() >= 3 && segments.subList(0, 3).equals(List.of("java", "util", "function")))
+            return generateWhitespace();
+
+        String joined = String.join("/", segments);
+        return new Ok<>("#include <" + joined + ".h>\n");
     }
 
     private static Err<String, CompileError> invalidate(String type, String input) {
@@ -257,12 +284,16 @@ public class Main {
             }
         }
 
-        if (!withEnd.endsWith("}")) return new Err<>(new CompileError("Suffix '}' not present", withEnd));
+        if (!withEnd.endsWith("}")) return createSuffixError(withEnd, "}");
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         return divideAndCompile(inputContent, Main::compileClassSegment).flatMapValue(outputContent -> {
             return generateStruct(name, outputContent);
         });
+    }
+
+    private static Err<String, CompileError> createSuffixError(String input, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
     private static Err<String, CompileError> createInfixError(String input, String infix) {
