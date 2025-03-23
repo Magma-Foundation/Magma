@@ -140,22 +140,24 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRootSegment(String input) {
-        List<Compiler> compilers = List.of(
-                Main::compileWhitespace,
+        return compileDisjunction("root segment", input, List.of(
+                Main::compilePackage,
                 Main::compileImport,
                 Main::compileClass,
                 Main::compileInterface,
                 Main::compileRecord
-        );
+        ));
+    }
 
-        ArrayList<CompileError> errors = new ArrayList<>();
+    private static Result<String, CompileError> compileDisjunction(String type, String input, List<Compiler> compilers) {
+        List<CompileError> errors = new ArrayList<>();
         for (Compiler compiler : compilers) {
             Result<String, CompileError> compiled = compiler.compile(input);
             if (compiled.isOk()) return compiled;
             compiled.findError().ifPresent(errors::add);
         }
 
-        return new Err<>(new CompileError("Invalid " + "root segment", input, errors));
+        return new Err<>(new CompileError("Invalid " + type, input, errors));
     }
 
     private static Result<String, CompileError> compileRecord(String input) {
@@ -199,7 +201,7 @@ public class Main {
                 .flatMapValue(outputContent -> generateStruct(beforeContent, outputContent));
     }
 
-    private static Result<String, CompileError> compileWhitespace(String input) {
+    private static Result<String, CompileError> compilePackage(String input) {
         if (input.startsWith("package ")) return generateWhitespace();
         return createPrefixError(input, "package ");
     }
@@ -229,8 +231,18 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileClassSegment(String input) {
-        if (input.isBlank()) return new Ok<>("");
+        return compileDisjunction("class segment", input, List.of(
+                Main::compileWhitespace,
+                Main::compileMethod
+        ));
+    }
 
+    private static Result<String, CompileError> compileWhitespace(String input1) {
+        if (input1.isBlank()) return generateWhitespace();
+        return new Err<>(new CompileError("Input is not blank", input1));
+    }
+
+    private static Result<String, CompileError> compileMethod(String input) {
         int definitionSeparator = input.indexOf("(");
         if (definitionSeparator >= 0) {
             String definition = input.substring(0, definitionSeparator).strip();
@@ -243,7 +255,7 @@ public class Main {
                         " (*" + name + ")();\n");
             }
         }
-        return invalidate("class segment", input);
+        return createInfixError(input, "(");
     }
 
     private static Result<String, CompileError> generateStruct(String name, String content) {
