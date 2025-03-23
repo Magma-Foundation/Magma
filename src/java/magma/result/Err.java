@@ -1,15 +1,17 @@
 package magma.result;
 
-import java.util.Optional;
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 
 public record Err<T, X>(X error) implements Result<T, X> {
     @Override
-    public Optional<T> findValue() {
-        return Optional.empty();
+    public Option<T> findValue() {
+        return new None<>();
     }
 
     @Override
-    public Optional<X> findError() {
-        return Optional.of(error);
+    public Option<X> findError() {
+        return new Some<>(error);
     }
 }
