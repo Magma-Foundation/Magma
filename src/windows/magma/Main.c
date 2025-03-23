@@ -20,4 +20,6 @@
 #include <java/util/stream/Collectors.h>
 #include <java/util/stream/Stream.h>
 struct Main {
+	public static final Path SOURCE_DIRECTORY = (*Paths.get)();
+	public static void (*main)();
 };

@@ -233,7 +233,17 @@ public class Main {
     private static Result<String, CompileError> compileClassSegment(String input) {
         return compileDisjunction("class segment", input, List.of(
                 Main::compileWhitespace,
-                Main::compileMethod
+                Main::compileMethod,
+                new Compiler() {
+                    @Override
+                    public Result<String, CompileError> compile(String input) {
+                        if (input.endsWith(";")) {
+                            return new Ok<>("\tint value;\n");
+                        } else {
+                            return createSuffixError(input, ";");
+                        }
+                    }
+                }
         ));
     }
 
