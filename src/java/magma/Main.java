@@ -236,6 +236,7 @@ public class Main {
         if (contentStart < 0) return createInfixError(right, "{");
 
         String beforeContent = right.substring(0, contentStart).strip();
+        String withEnd = right.substring(contentStart + "{".length()).strip();
 
         String name;
         int implementsIndex = beforeContent.indexOf(" implements ");
@@ -256,11 +257,15 @@ public class Main {
             }
         }
 
-        return generateStruct(name, "");
+        if (!withEnd.endsWith("}")) return new Err<>(new CompileError("Suffix '}' not present", withEnd));
+
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        return divideAndCompile(inputContent, Main::compileClassSegment).flatMapValue(outputContent -> {
+            return generateStruct(name, outputContent);
+        });
     }
 
     private static Err<String, CompileError> createInfixError(String input, String infix) {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
-
 }
