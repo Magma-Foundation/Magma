@@ -1,7 +1,7 @@
 package magma;
 
-import magma.result.Result;
 import magma.java.result.JavaResults;
+import magma.result.Result;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,11 +24,12 @@ public class Main {
                     .collect(Collectors.toSet());
 
             for (Path source : sources) {
-                String input = Files.readString(source);
-                String output = compile(input);
-
                 Path relative = SOURCE_DIRECTORY.relativize(source);
                 Path parent = relative.getParent();
+                if (parent.startsWith(Paths.get("magma", "java"))) continue;
+
+                String input = Files.readString(source);
+                String output = compile(input);
 
                 String nameWithExt = relative.getFileName().toString();
                 String name = nameWithExt.substring(0, nameWithExt.lastIndexOf('.'));
