@@ -120,7 +120,7 @@ public class Main {
             final var definition = input.substring(0, valueSeparator).strip();
             final var nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                final var name = definition.substring(0, nameSeparator).strip();
+                final var name = definition.substring(nameSeparator + " ".length()).strip();
                 if (isSymbol(name)) {
                     return "int " + name + " = temp;\n";
                 }
@@ -133,7 +133,8 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             final var c = input.charAt(i);
-            if (!Character.isLetter(c)) return false;
+            if (c == '_' || Character.isLetter(c)) continue;
+            return false;
         }
         return true;
     }

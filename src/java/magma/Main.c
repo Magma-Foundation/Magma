@@ -10,17 +10,11 @@
 #include <java/util/stream/IntStream.h>
 struct Main {
 };
+int SOURCE_FILE = temp;
+int input = temp;
+int segments = temp;
+int stripped = temp;
 void temp(){
 }
-void temp(){
-}
-void temp(){
-}
-void temp(){
-}
-void temp(){
-}
-void temp(){
-}
-void temp(){
-}
+int valueSeparator = temp;
+int i = temp;
