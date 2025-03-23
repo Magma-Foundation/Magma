@@ -1,6 +1,6 @@
 #include <java/io/PrintWriter.h>
 #include <java/io/StringWriter.h>
 struct ThrowableError {
-	int throwable;
+	Throwable throwable;
 	public (*ThrowableError)();
 };

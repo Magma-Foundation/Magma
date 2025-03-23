@@ -246,8 +246,14 @@ public class Main {
         String stripped = input.strip();
         int separator = stripped.lastIndexOf(" ");
         if (separator >= 0) {
+            String beforeName = stripped.substring(0, separator);
+            int typeSeparator = beforeName.lastIndexOf(" ");
+            String type = typeSeparator >= 0
+                    ? beforeName.substring(typeSeparator + " ".length())
+                    : beforeName;
+
             String name = stripped.substring(separator + " ".length());
-            return new Ok<>("int " + name);
+            return new Ok<>(type + " " + name);
         } else {
             return createInfixError(input, " ");
         }

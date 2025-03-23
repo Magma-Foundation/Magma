@@ -1,4 +1,4 @@
 struct ApplicationError {
-	int error;
+	Error error;
 	public (*ApplicationError)();
 };
