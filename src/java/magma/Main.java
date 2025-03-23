@@ -77,7 +77,8 @@ public class Main {
             if (input.strip().startsWith("import ")) {
                 String right = input.strip().substring("import ".length());
                 if (right.endsWith(";")) {
-                    String[] segments = right.split(Pattern.quote("."));
+                    String content = right.substring(0, right.length() - ";".length());
+                    String[] segments = content.split(Pattern.quote("."));
                     String joined = String.join("/", segments);
                     return "#include <" + joined + ".h>\n";
                 }
