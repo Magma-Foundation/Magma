@@ -74,9 +74,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        final var stripped = input.strip();
+        if (stripped.isEmpty()) return "";
         if (input.startsWith("package ")) return "";
 
-        final var stripped = input.strip();
         if (stripped.startsWith("import ")) {
             final var right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
@@ -113,6 +114,9 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
+        if (input.isBlank()) return "";
+        if (input.contains("=")) return "int value = temp;\n";
+        if (input.contains(")")) return "void temp(){\n}\n";
         return invalidate("class segment", input);
     }
 }
