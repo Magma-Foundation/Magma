@@ -3,8 +3,11 @@
 #include <java/nio/file/Path.h>
 #include <java/nio/file/Paths.h>
 #include <java/util/ArrayList.h>
+#include <java/util/LinkedList.h>
 #include <java/util/function/Function.h>
 #include <java/util/regex/Pattern.h>
+#include <java/util/stream/Collectors.h>
+#include <java/util/stream/IntStream.h>
 struct Main {
 };
 public static final Path SOURCE_FILE = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -26,9 +29,26 @@ public static final Path SOURCE_FILE = Paths.get(".", "src", "java", "magma", "M
         final var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
-        for (var i = 0; i < input.length(); i++) {
-            final var c = input.charAt(i);
+
+        final var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            final var c = queue.pop();
             buffer.append(c);
+
+            if (c == '\'') {
+                final var maybeSlash = queue.pop();
+                buffer.append(maybeSlash);
+
+                if (maybeSlash == '\\') {
+                    buffer.append(queue.pop());
+                }
+
+                buffer.append(queue.pop());
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -48,10 +68,25 @@ public static final Path SOURCE_FILE = Paths.get(".", "src", "java", "magma", "M
             output.append(compiler.apply(segment));
         }
         return output.toString();
-    struct ");
+    }
+
+    private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) return "";
+
+        final var stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            final var right = stripped.substring("import ".length());
+            if (right.endsWith(";")) {
+                final var namespaceString = right.substring(0, right.length() - ";".length());
+                final var namespace = namespaceString.split(Pattern.quote("."));
+                final var joinedNamespace = String.join("/", namespace);
+                return "#include <%s.h>\n".formatted(joinedNamespace);
+            }
+        }
+
+        final var classKeyword = input.indexOf("class ");
         if (classKeyword >= 0) {
-};
-final var right = input.substring(classKeyword + "class ".length());
+            final var right = input.substring(classKeyword + "class ".length());
             final var contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 final var name = right.substring(0, contentStart).strip();
@@ -67,7 +102,7 @@ final var right = input.substring(classKeyword + "class ".length());
         }
 
         return invalidate("root segment", input);
-    
+    }
 
     private static String invalidate(String type, String input) {
         System.err.println("Invalid " + type + ": " + input);
@@ -77,4 +112,4 @@ final var right = input.substring(classKeyword + "class ".length());
     private static String compileClassSegment(String input) {
         return invalidate("class segment", input);
     }
-}
+
