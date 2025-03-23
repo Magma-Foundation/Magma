@@ -69,23 +69,29 @@ public class Main {
         return output.toString();
     }
 
-    private static Result<String, CompileException> compileRootSegment(String segment) {
+    private static Result<String, CompileException> compileRootSegment(String input) {
         return Results.wrap(() -> {
-            if (segment.startsWith("package ")) return "";
-            if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
+            if (input.startsWith("package ")) return "";
+            if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
 
-            int classIndex = segment.indexOf("class ");
+            int classIndex = input.indexOf("class ");
             if (classIndex >= 0) {
-                String right = segment.substring(classIndex + "class ".length());
+                String right = input.substring(classIndex + "class ".length());
                 int contentStart = right.indexOf("{");
                 if (contentStart >= 0) {
                     String name = right.substring(0, contentStart).strip();
-                    return "struct " + name + " {\n};\n";
+                    return generateStruct(name);
                 }
             }
 
-            throw new CompileException("Invalid root segment", segment);
+            if (input.contains("interface ") || input.contains("record ")) return generateStruct("Temp");
+
+            throw new CompileException("Invalid root segment", input);
         });
+    }
+
+    private static String generateStruct(String name) {
+        return "struct " + name + " {\n};\n";
     }
 
 }
