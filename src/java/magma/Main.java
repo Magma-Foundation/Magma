@@ -1,5 +1,12 @@
 package magma;
 
+import magma.error.ApplicationError;
+import magma.error.CompileError;
+import magma.error.ThrowableError;
+import magma.java.result.JavaResults;
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -21,35 +28,87 @@ public class Main {
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
     public static void main(String[] args) {
-        try (Stream<Path> paths = Files.walk(SOURCE_DIRECTORY)) {
-            Set<Path> sources = paths.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".java"))
-                    .collect(Collectors.toSet());
+        collect()
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(Main::runWithSources, Some::new)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
 
-            for (Path source : sources) {
-                Path relative = SOURCE_DIRECTORY.relativize(source);
-                Path parent = relative.getParent();
-                if (parent.startsWith(Paths.get("magma", "java"))) continue;
+    private static Option<ApplicationError> runWithSources(Set<Path> paths) {
+        Set<Path> sources = paths.stream()
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".java"))
+                .collect(Collectors.toSet());
 
-                String input = Files.readString(source);
-                String output = compile(input);
+        for (Path source : sources) {
+            Option<ApplicationError> maybeError = runWithSource(source);
+            if (maybeError.isPresent()) return maybeError;
+        }
 
-                String nameWithExt = relative.getFileName().toString();
-                String name = nameWithExt.substring(0, nameWithExt.lastIndexOf('.'));
+        return new None<>();
+    }
 
-                Path targetParent = Paths.get(".", "src", "windows").resolve(parent);
-                if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
+    private static Option<ApplicationError> runWithSource(Path source) {
+        Path relative = SOURCE_DIRECTORY.relativize(source);
+        Path parent = relative.getParent();
+        if (parent.startsWith(Paths.get("magma", "java"))) return new None<>();
 
-                Path target = targetParent.resolve(name + ".c");
-                Files.writeString(target, output);
-            }
-        } catch (CompileException | IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+        return readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(input -> runWithSource(input, parent, relative), Some::new);
+    }
+
+    private static Option<ApplicationError> runWithSource(String input, Path parent, Path relative) {
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> writeOutputSafe(output, parent, computeName(relative)), Some::new);
+    }
+
+    private static Option<ApplicationError> writeOutputSafe(String output, Path parent, String name) {
+        return writeOutput(output, parent, name)
+                .map(ThrowableError::new)
+                .map(ApplicationError::new);
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        return JavaResults.wrap(() -> Files.readString(source));
+    }
+
+    private static Result<Set<Path>, IOException> collect() {
+        try (Stream<Path> stream = Files.walk(SOURCE_DIRECTORY)) {
+            return new Ok<>(stream.collect(Collectors.toSet()));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
-    private static String compile(String input) throws CompileException {
+    private static Option<IOException> writeOutput(String output, Path parent, String name) {
+        Path targetParent = Paths.get(".", "src", "windows").resolve(parent);
+        if (!Files.exists(targetParent)) {
+            try {
+                Files.createDirectories(targetParent);
+            } catch (IOException e) {
+                return new Some<>(e);
+            }
+        }
+
+        Path target = targetParent.resolve(name + ".c");
+        try {
+            Files.writeString(target, output);
+            return new None<>();
+        } catch (IOException e) {
+            return new Some<>(e);
+        }
+    }
+
+    private static String computeName(Path relative) {
+        String nameWithExt = relative.getFileName().toString();
+        return nameWithExt.substring(0, nameWithExt.lastIndexOf('.'));
+    }
+
+    private static Result<String, CompileError> compile(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -66,17 +125,17 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
+        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
             output = output
                     .and(() -> compileRootSegment(segment))
-                    .map(tuple -> tuple.left().append(tuple.right()));
+                    .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
 
-        return output.toString();
+        return output.mapValue(StringBuilder::toString);
     }
 
-    private static Result<String, CompileException> compileRootSegment(String input) {
+    private static Result<String, CompileError> compileRootSegment(String input) {
         if (input.startsWith("package ")) return generateWhitespace();
         if (input.strip().startsWith("import ")) {
             String right = input.strip().substring("import ".length());
@@ -91,7 +150,7 @@ public class Main {
             }
         }
 
-        Result<String, CompileException> maybeClass = compileClass(input);
+        Result<String, CompileError> maybeClass = compileClass(input);
         if (maybeClass.isOk()) return maybeClass;
 
         int interfaceIndex = input.indexOf("interface ");
@@ -125,18 +184,18 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileException("Invalid root segment", input));
+        return new Err<>(new CompileError("Invalid root segment", input));
     }
 
-    private static Result<String, CompileException> generateStruct(String name) {
+    private static Result<String, CompileError> generateStruct(String name) {
         return new Ok<>("struct " + name + " {\n};\n");
     }
 
-    private static Result<String, CompileException> generateWhitespace() {
+    private static Result<String, CompileError> generateWhitespace() {
         return new Ok<>("");
     }
 
-    private static Result<String, CompileException> compileClass(String input) {
+    private static Result<String, CompileError> compileClass(String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex < 0) return createInfixError(input, "class ");
 
@@ -168,8 +227,8 @@ public class Main {
         return generateStruct(name);
     }
 
-    private static Err<String, CompileException> createInfixError(String input, String infix) {
-        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
+    private static Err<String, CompileError> createInfixError(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
 }

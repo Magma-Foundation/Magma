@@ -1,4 +1,10 @@
+#include <magma/error/ApplicationError.h>
+#include <magma/error/CompileError.h>
+#include <magma/error/ThrowableError.h>
 #include <magma/java/result/JavaResults.h>
+#include <magma/option/None.h>
+#include <magma/option/Option.h>
+#include <magma/option/Some.h>
 #include <magma/result/Err.h>
 #include <magma/result/Ok.h>
 #include <magma/result/Result.h>

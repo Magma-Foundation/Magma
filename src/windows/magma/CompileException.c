@@ -1,2 +1,0 @@
-struct CompileException extends Throwable {
-};

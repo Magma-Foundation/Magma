@@ -6,7 +6,7 @@ import magma.option.Option;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Result<T, X> {
+public sealed interface Result<T, X> permits Ok, Err {
     Option<T> findValue();
 
     Option<X> findError();
@@ -15,5 +15,10 @@ public interface Result<T, X> {
 
     <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier);
 
-    <R> Result<R, X> map(Function<T, R> mapper);
+    <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+    <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+    <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
 }
+
