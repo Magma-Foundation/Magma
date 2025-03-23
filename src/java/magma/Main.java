@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -105,12 +106,12 @@ public class Main {
             }
         }
 
-        return invalidate("root segment", input);
+        return invalidate("root segment", input).orElse(input);
     }
 
-    private static String invalidate(String type, String input) {
+    private static Optional<String> invalidate(String type, String input) {
         System.err.println("Invalid " + type + ": " + input);
-        return input;
+        return Optional.empty();
     }
 
     private static String compileClassSegment(String input) {
@@ -126,21 +127,22 @@ public class Main {
                         ? beforeName
                         : beforeName.substring(typeSeparator + " ".length());
 
-                final var outputType = compileType(type);
-
-                final var name = definition.substring(nameSeparator + " ".length()).strip();
-                if (isSymbol(name)) {
-                    return outputType + " " + name + " = temp;\n";
+                final var maybeOutputType = compileType(type);
+                if (maybeOutputType.isPresent()) {
+                    final var name = definition.substring(nameSeparator + " ".length()).strip();
+                    if (isSymbol(name)) {
+                        return maybeOutputType.get() + " " + name + " = temp;\n";
+                    }
                 }
             }
         }
         if (input.contains(")")) return "void temp(){\n}\n";
-        return invalidate("class segment", input);
+        return invalidate("class segment", input).orElse(input);
     }
 
-    private static String compileType(String input) {
+    private static Optional<String> compileType(String input) {
         if (isSymbol(input)) {
-            return input;
+            return Optional.of(input);
         }
         return invalidate("type", input);
     }

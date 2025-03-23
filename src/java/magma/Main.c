@@ -4,6 +4,7 @@
 #include <java/nio/file/Paths.h>
 #include <java/util/ArrayList.h>
 #include <java/util/LinkedList.h>
+#include <java/util/Optional.h>
 #include <java/util/function/Function.h>
 #include <java/util/regex/Pattern.h>
 #include <java/util/stream/Collectors.h>
@@ -19,4 +20,5 @@ void temp(){
 var valueSeparator = temp;
 void temp(){
 }
-(int i = temp;
+void temp(){
+}
