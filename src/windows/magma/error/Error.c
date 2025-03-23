@@ -1,3 +1,3 @@
 struct Error {
-	void (*display)();
+	String (*display)();
 };

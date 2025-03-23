@@ -209,8 +209,11 @@ public class Main {
             String definition = input.substring(0, definitionSeparator).strip();
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String type = definition.substring(0, nameSeparator);
                 String name = definition.substring(nameSeparator + " ".length()).strip();
-                return new Ok<>("\tvoid (*" + name + ")();\n");
+                return new Ok<>("\t" +
+                        type +
+                        " (*" + name + ")();\n");
             }
         }
         return invalidate("class segment", input);
