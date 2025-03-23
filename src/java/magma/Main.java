@@ -234,17 +234,31 @@ public class Main {
         return compileDisjunction("class segment", input, List.of(
                 Main::compileWhitespace,
                 Main::compileMethod,
-                new Compiler() {
-                    @Override
-                    public Result<String, CompileError> compile(String input) {
-                        if (input.endsWith(";")) {
-                            return new Ok<>("\tint value;\n");
-                        } else {
-                            return createSuffixError(input, ";");
-                        }
-                    }
-                }
+                input1 -> compileStatement(input1, Main::compileDefinition)
         ));
+    }
+
+    private static Result<String, CompileError> compileStatement(String input1, Compiler content) {
+        return truncateRight(input1, ";", content).mapValue(output -> "\t" + output + ";\n");
+    }
+
+    private static Result<String, CompileError> compileDefinition(String input) {
+        String stripped = input.strip();
+        int separator = stripped.lastIndexOf(" ");
+        if (separator >= 0) {
+            String name = stripped.substring(separator + " ".length());
+            return new Ok<>("int " + name);
+        } else {
+            return createInfixError(input, " ");
+        }
+    }
+
+    private static Result<String, CompileError> truncateRight(String input, String suffix, Compiler compiler) {
+        if (input.endsWith(suffix)) {
+            return compiler.compile(input.substring(0, input.length() - suffix.length()));
+        } else {
+            return createSuffixError(input, suffix);
+        }
     }
 
     private static Result<String, CompileError> compileWhitespace(String input1) {

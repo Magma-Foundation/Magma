@@ -4,8 +4,8 @@
 #include <java/util/stream/Collectors.h>
 #include <java/util/stream/IntStream.h>
 struct CompileError {
-	int value;
-	int value;
-	int value;
+	int message;
+	int context;
+	int children;
 	public (*CompileError)();
 };
