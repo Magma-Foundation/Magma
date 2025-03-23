@@ -109,22 +109,26 @@ public class Main {
 
         String beforeContent = right.substring(0, contentStart).strip();
 
-        String name = computeName(beforeContent);
-        return Optional.of(generateStruct(name));
-    }
-
-    private static String computeName(String beforeContent) {
+        String name;
         int implementsIndex = beforeContent.indexOf(" implements ");
-        if (implementsIndex < 0) return beforeContent;
+        if (implementsIndex < 0) {
+            name = beforeContent;
+        } else {
+            String beforeImplements = beforeContent.substring(0, implementsIndex).strip();
+            if (!beforeImplements.endsWith(">")) {
+                name = beforeImplements;
+            } else {
+                String withoutEnd = beforeImplements.substring(0, beforeImplements.length() - ">".length());
+                int typeParamStart = withoutEnd.indexOf("<");
+                if (typeParamStart < 0) {
+                    name = beforeImplements;
+                } else {
+                    return Optional.of("");
+                }
+            }
+        }
 
-        String beforeImplements = beforeContent.substring(0, implementsIndex).strip();
-        if (!beforeImplements.endsWith(">")) return beforeImplements;
-
-        String withoutEnd = beforeImplements.substring(0, beforeImplements.length() - ">".length());
-        int typeParamStart = withoutEnd.indexOf("<");
-        if (typeParamStart < 0) return beforeImplements;
-
-        return withoutEnd.substring(0, typeParamStart).strip();
+        return Optional.of(generateStruct(name));
     }
 
     private static String generateStruct(String name) {
