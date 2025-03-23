@@ -10,10 +10,17 @@
 #include <java/util/stream/IntStream.h>
 struct Main {
 };
-int value = temp;
-int value = temp;
-int value = temp;
-int value = temp;
 void temp(){
 }
-int value = temp;
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}

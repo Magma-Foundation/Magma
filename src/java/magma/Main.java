@@ -115,8 +115,26 @@ public class Main {
 
     private static String compileClassSegment(String input) {
         if (input.isBlank()) return "";
-        if (input.contains("=")) return "int value = temp;\n";
+        final var valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            final var definition = input.substring(0, valueSeparator).strip();
+            final var nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                final var name = definition.substring(0, nameSeparator).strip();
+                if (isSymbol(name)) {
+                    return "int " + name + " = temp;\n";
+                }
+            }
+        }
         if (input.contains(")")) return "void temp(){\n}\n";
         return invalidate("class segment", input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            final var c = input.charAt(i);
+            if (!Character.isLetter(c)) return false;
+        }
+        return true;
     }
 }
