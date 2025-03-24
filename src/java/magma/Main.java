@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,16 +23,42 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compile(input, Main::compileRootSegment);
+        return compile(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}";
     }
 
     private static String compile(String input, Function<String, String> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            Character c = queue.pop();
             buffer.append(c);
+
+            if (c == '\'') {
+                Character popped = queue.pop();
+                buffer.append(popped);
+
+                if (popped == '\\') buffer.append(queue.pop());
+                buffer.append(queue.pop());
+                continue;
+            }
+
+            if (c == '"') {
+                while (!queue.isEmpty()) {
+                    Character popped = queue.pop();
+                    buffer.append(popped);
+
+                    if (popped == '\\') buffer.append(queue.pop());
+                    if (popped == '"') break;
+                }
+                continue;
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -45,13 +75,17 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compiler.apply(segment));
+            String compiled = compiler.apply(segment);
+            output.append(compiled);
         }
 
-        return output + "int main(){\n\treturn 0;\n}";
+        return output.toString();
     }
 
     private static String compileRootSegment(String input) {
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
+
         if (input.startsWith("package ")) return "";
         if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
 
@@ -79,8 +113,15 @@ public class Main {
     }
 
     private static String compileClassMember(String input) {
-        if(input.contains("(")) return "void temp(){\n}\n";
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
 
+        if (input.contains("(")) return "void temp(){\n}\n";
         return invalidate("class segment", input);
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) return Optional.of("");
+        return Optional.empty();
     }
 }
