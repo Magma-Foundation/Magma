@@ -121,12 +121,19 @@ public class Main {
             String definition = input.substring(0, paramStart).strip();
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String beforeName = definition.substring(0, nameSeparator).strip();
+
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                String type = typeSeparator == -1
+                        ? beforeName
+                        : beforeName.substring(typeSeparator + " ".length());
+
                 String oldName = definition.substring(nameSeparator + " ".length());
                 String newName = oldName.equals("main")
                         ? "__main__"
                         : oldName;
 
-                return "void " + newName + "(){\n}\n";
+                return type + " " + newName + "(){\n}\n";
             }
         }
         return invalidate("class segment", input);
