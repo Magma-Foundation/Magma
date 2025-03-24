@@ -23,10 +23,22 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compile(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
+        return divideAndCompile(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
     }
 
-    private static String compile(String input, Function<String, String> compiler) {
+    private static String divideAndCompile(String input, Function<String, Optional<String>> compiler) {
+        ArrayList<String> segments = divideStatements(input);
+
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            Optional<String> compiled = compiler.apply(segment);
+            output.append(compiled.orElse(""));
+        }
+
+        return output.toString();
+    }
+
+    private static ArrayList<String> divideStatements(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -72,22 +84,15 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            String compiled = compiler.apply(segment);
-            output.append(compiled);
-        }
-
-        return output.toString();
+        return segments;
     }
 
-    private static String compileRootSegment(String input) {
+    private static Optional<String> compileRootSegment(String input) {
         Optional<String> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
+        if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
-        if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+        if (input.startsWith("package ")) return Optional.of("");
+        if (input.strip().startsWith("import ")) return Optional.of("#include <temp.h>\n");
 
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
@@ -98,8 +103,8 @@ public class Main {
                 String withEnd = right.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compile(inputContent, Main::compileClassMember);
-                    return "struct " + name + " {\n};\n" + outputContent;
+                    String outputContent = divideAndCompile(inputContent, Main::compileClassMember);
+                    return Optional.of("struct " + name + " {\n};\n" + outputContent);
                 }
             }
         }
@@ -107,36 +112,53 @@ public class Main {
         return invalidate("root segment", input);
     }
 
-    private static String invalidate(String type, String input) {
+    private static Optional<String> invalidate(String type, String input) {
         System.err.println("Invalid " + type + ": " + input);
-        return "";
+        return Optional.empty();
     }
 
-    private static String compileClassMember(String input) {
+    private static Optional<String> compileClassMember(String input) {
         Optional<String> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
+        if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
-            String definition = input.substring(0, paramStart).strip();
-            int nameSeparator = definition.lastIndexOf(" ");
+            String inDefinition = input.substring(0, paramStart).strip();
+            String withParams = input.substring(paramStart + "(".length());
+
+            int nameSeparator = inDefinition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                String beforeName = definition.substring(0, nameSeparator).strip();
+                Optional<String> outDefinition = compileDefinition(inDefinition, nameSeparator).flatMap(definition -> {
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd >= 0) {
+                        String params = withParams.substring(0, paramEnd);
 
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                String type = typeSeparator == -1
-                        ? beforeName
-                        : beforeName.substring(typeSeparator + " ".length());
+                        return Optional.of(definition + "(){\n}\n");
+                    } else {
+                        return Optional.empty();
+                    }
+                });
 
-                String oldName = definition.substring(nameSeparator + " ".length());
-                String newName = oldName.equals("main")
-                        ? "__main__"
-                        : oldName;
-
-                return type + " " + newName + "(){\n}\n";
+                if (outDefinition.isPresent()) return outDefinition;
             }
         }
         return invalidate("class segment", input);
+    }
+
+    private static Optional<String> compileDefinition(String definition, int nameSeparator) {
+        String beforeName = definition.substring(0, nameSeparator).strip();
+
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        String type = typeSeparator == -1
+                ? beforeName
+                : beforeName.substring(typeSeparator + " ".length());
+
+        String oldName = definition.substring(nameSeparator + " ".length());
+        String newName = oldName.equals("main")
+                ? "__main__"
+                : oldName;
+
+        return Optional.of(type + " " + newName);
     }
 
     private static Optional<String> compileWhitespace(String input) {
