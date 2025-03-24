@@ -1,0 +1,1 @@
+clang ./out/main.c
