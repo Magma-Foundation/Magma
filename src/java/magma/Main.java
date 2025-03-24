@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -23,12 +26,14 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return divideAndCompile(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
+        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
     }
 
-    private static String divideAndCompile(String input, Function<String, Optional<String>> compiler) {
-        ArrayList<String> segments = divideStatements(input);
+    private static String compileStatements(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(divideStatements(input), compiler);
+    }
 
+    private static String compileAll(List<String> segments, Function<String, Optional<String>> compiler) {
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
             Optional<String> compiled = compiler.apply(segment);
@@ -103,7 +108,7 @@ public class Main {
                 String withEnd = right.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = divideAndCompile(inputContent, Main::compileClassMember);
+                    String outputContent = compileStatements(inputContent, Main::compileClassMember);
                     return Optional.of("struct " + name + " {\n};\n" + outputContent);
                 }
             }
@@ -126,26 +131,32 @@ public class Main {
             String inDefinition = input.substring(0, paramStart).strip();
             String withParams = input.substring(paramStart + "(".length());
 
-            int nameSeparator = inDefinition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                Optional<String> outDefinition = compileDefinition(inDefinition, nameSeparator).flatMap(definition -> {
-                    int paramEnd = withParams.indexOf(")");
-                    if (paramEnd >= 0) {
-                        String params = withParams.substring(0, paramEnd);
+            Optional<String> outDefinition = compileDefinition(inDefinition).flatMap(definition -> {
+                int paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    String params = withParams.substring(0, paramEnd);
+                    String s = compileAll(splitByValues(params), Main::compileDefinition);
+                    return Optional.of(definition + "(" +
+                            s +
+                            "){\n}\n");
+                } else {
+                    return Optional.empty();
+                }
+            });
 
-                        return Optional.of(definition + "(){\n}\n");
-                    } else {
-                        return Optional.empty();
-                    }
-                });
-
-                if (outDefinition.isPresent()) return outDefinition;
-            }
+            if (outDefinition.isPresent()) return outDefinition;
         }
         return invalidate("class segment", input);
     }
 
-    private static Optional<String> compileDefinition(String definition, int nameSeparator) {
+    private static List<String> splitByValues(String params) {
+        return Arrays.asList(params.split(Pattern.quote(",")));
+    }
+
+    private static Optional<String> compileDefinition(String definition) {
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator < 0) return Optional.empty();
+
         String beforeName = definition.substring(0, nameSeparator).strip();
 
         int typeSeparator = beforeName.lastIndexOf(" ");
