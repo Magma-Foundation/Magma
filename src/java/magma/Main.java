@@ -23,7 +23,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compile(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}";
+        return compile(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
     }
 
     private static String compile(String input, Function<String, String> compiler) {
@@ -121,8 +121,12 @@ public class Main {
             String definition = input.substring(0, paramStart).strip();
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                String name = definition.substring(nameSeparator + " ".length());
-                return "void " + name + "(){\n}\n";
+                String oldName = definition.substring(nameSeparator + " ".length());
+                String newName = oldName.equals("main")
+                        ? "__main__"
+                        : oldName;
+
+                return "void " + newName + "(){\n}\n";
             }
         }
         return invalidate("class segment", input);
