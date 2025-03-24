@@ -1,1 +1,1 @@
-clang ./out/main.c
+clang ./out/main.c -o magmac.exe
