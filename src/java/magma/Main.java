@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class Main {
     public static void main(String[] args) {
@@ -18,6 +19,10 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compile(input, Main::compileRootSegment);
+    }
+
+    private static String compile(String input, Function<String, String> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -27,6 +32,10 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -36,7 +45,7 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output + "int main(){\n\treturn 0;\n}";
@@ -52,11 +61,26 @@ public class Main {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                String withEnd = right.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compile(inputContent, Main::compileClassMember);
+                    return "struct " + name + " {\n};\n" + outputContent;
+                }
             }
         }
 
-        System.err.println("Invalid root segment: " + input);
+        return invalidate("root segment", input);
+    }
+
+    private static String invalidate(String type, String input) {
+        System.err.println("Invalid " + type + ": " + input);
         return "";
+    }
+
+    private static String compileClassMember(String input) {
+        if(input.contains("(")) return "void temp(){\n}\n";
+
+        return invalidate("class segment", input);
     }
 }
