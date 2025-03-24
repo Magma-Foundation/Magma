@@ -1,3 +1,0 @@
-struct Error {
-	String (*display)();
-};
