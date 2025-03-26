@@ -126,12 +126,18 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileClassSegment(String input) {
-        if (input.isBlank()) return new Ok<>("");
+        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isOk()) return maybeWhitespace;
 
         Result<String, CompileException> maybeMethod = compileMethod(input);
         if (maybeMethod.isOk()) return maybeMethod;
 
         return invalidateInput("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileWhitespace(String input) {
+        if (input.isBlank()) return new Ok<>("");
+        return new Err<>(new CompileException("Input not blank.", input));
     }
 
     private static Result<String, CompileException> compileMethod(String input) {
