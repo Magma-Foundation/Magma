@@ -11,13 +11,13 @@ struct Main {
 };
 void main(){
 }
-void compile(){
+CompileException> compile(){
 }
-void compileAll(){
+CompileException> compileAll(){
 }
-void compileRootSegment(){
+CompileException> compileRootSegment(){
 }
-void invalidateInput(){
+CompileException> invalidateInput(){
 }
-void compileClassSegment(){
+CompileException> compileClassSegment(){
 }

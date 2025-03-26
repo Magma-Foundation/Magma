@@ -108,8 +108,14 @@ public class Main {
             String definition = input.substring(0, paramStart).strip();
             int separator = definition.lastIndexOf(" ");
             if (separator >= 0) {
+                String beforeName = definition.substring(0, separator);
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                String type = typeSeparator == -1
+                        ? beforeName
+                        : beforeName.substring(typeSeparator + " ".length());
+
                 String name = definition.substring(separator + " ".length());
-                return new Ok<>("void " + name + "(){\n}\n");
+                return new Ok<>(type + " " + name + "(){\n}\n");
             }
         }
         return invalidateInput("class segment", input);
