@@ -109,7 +109,20 @@ public class Main {
             int separator = definition.lastIndexOf(" ");
             if (separator >= 0) {
                 String beforeName = definition.substring(0, separator);
-                int typeSeparator = beforeName.lastIndexOf(" ");
+
+                int typeSeparator = -1;
+                int depth = 0;
+                for (int i = beforeName.length() - 1; i >= 0; i--) {
+                    char c = beforeName.charAt(i);
+                    if (c == ' ' && depth == 0) {
+                        typeSeparator = i;
+                        break;
+                    } else {
+                        if (c == '>') depth++;
+                        if (c == '<') depth--;
+                    }
+                }
+
                 String type = typeSeparator == -1
                         ? beforeName
                         : beforeName.substring(typeSeparator + " ".length());
