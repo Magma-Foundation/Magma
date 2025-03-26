@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
@@ -52,33 +48,29 @@ public class Main {
     }
 
     private static List<String> divideByStatements(String input) {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
+        return divideUsing(input, Main::divideStatementChar);
+    }
 
+    private static List<String> divideUsing(String input, BiFunction<State, Character, State> divider) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        return getStrings(new State(queue, segments, buffer, depth)).toList();
-    }
-
-    private static Stream<String> getStrings(State state) {
-        State current = state;
+        State current = new State(queue);
         while (true) {
             Optional<Character> maybeNext = current.pop();
             if (maybeNext.isEmpty()) break;
 
             char next = maybeNext.orElse('\0');
-            current = divide(current, next);
+            current = divideCharUsing(current, next, divider);
         }
 
-        return current.advance().stream();
+        return current.advance().stream().toList();
     }
 
-    private static State divide(State state, char next) {
+    private static State divideCharUsing(State state, char next, BiFunction<State, Character, State> divider) {
         return divideSingleQuotesChar(state, next)
-                .orElseGet(() -> divideStatementChar(state, next));
+                .orElseGet(() -> divider.apply(state, next));
     }
 
     private static State divideStatementChar(State state, char next) {
@@ -91,9 +83,9 @@ public class Main {
     }
 
     private static Optional<State> divideSingleQuotesChar(State state, char next) {
-        State current = state.append(next);
         if (next != '\'') return Optional.empty();
 
+        State current = state.append(next);
         char maybeSlash = current.pop().orElse('\0');
         State appended = current.append(maybeSlash);
 
@@ -159,7 +151,16 @@ public class Main {
     }
 
     private static List<String> divideByValues(String paramString) {
-        return Arrays.asList(paramString.split(Pattern.quote(",")));
+        return divideUsing(paramString, Main::divideValueChar);
+    }
+
+    private static State divideValueChar(State state, Character c) {
+        if (c == ',' && state.isLevel()) return state.advance();
+
+        State appended = state.append(c);
+        if (c == '<') return appended.enter();
+        if (c == '>') return appended.exit();
+        return appended;
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {

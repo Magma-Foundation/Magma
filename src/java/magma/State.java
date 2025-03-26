@@ -1,5 +1,6 @@
 package magma;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,10 @@ public class State {
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
+    }
+
+    public State(Deque<Character> queue) {
+        this(queue, new ArrayList<>(), new StringBuilder(), 0);
     }
 
     boolean isLevel() {
