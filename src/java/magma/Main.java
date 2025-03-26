@@ -51,27 +51,32 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRootSegment(String segment) {
-        return Results.wrap(() -> {
-            if (segment.startsWith("package ")) return "";
-            if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
+        if (segment.startsWith("package ")) return new Ok<>("");
+        if (segment.strip().startsWith("import ")) return new Ok<>("#include <temp.h>\n");
 
-            int classIndex = segment.indexOf("class ");
-            if (classIndex >= 0) {
-                String right = segment.substring(classIndex + "class ".length());
-                int contentStart = right.indexOf("{");
-                if (contentStart >= 0) {
-                    String name = right.substring(0, contentStart).strip();
-                    String withEnd = right.substring(contentStart + "{".length()).strip();
-                    if (withEnd.endsWith("}")) {
-                        String content = withEnd.substring(0, withEnd.length() - "}".length());
-                        // TODO: parse content
-                        return "struct " + name + " {\n};\n";
-                    }
+        int classIndex = segment.indexOf("class ");
+        if (classIndex >= 0) {
+            String right = segment.substring(classIndex + "class ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                String withEnd = right.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return compileAll(inputContent, Main::compileClassSegment)
+                            .mapValue(outputContent -> "struct " + name + " {\n};\n" + outputContent);
                 }
             }
+        }
 
-            throw new CompileException("Invalid root segment", segment);
-        });
+        return getRootSegment("root segment", segment);
     }
 
+    private static Err<String, CompileException> getRootSegment(String type, String segment) {
+        return new Err<>(new CompileException("Invalid " + type, segment));
+    }
+
+    private static Result<String, CompileException> compileClassSegment(String input) {
+        return getRootSegment("class segment", input);
+    }
 }
