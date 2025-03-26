@@ -172,20 +172,23 @@ public class Main {
         return cache.append(", ").append(element);
     }
 
-    private static Result<String, CompileException> compileDefinition(String definition) {
-        int separator = definition.lastIndexOf(" ");
-        if (separator < 0) return createMissingInfixError(definition, " ");
+    private static Result<String, CompileException> compileDefinition(String input) {
+        return parseSplit(input, " ").flatMapValue(Main::generateDefinition);
+    }
 
-        String beforeName = definition.substring(0, separator).strip();
+    private static Result<Node, CompileException> parseSplit(String input, String infix) {
+        int separator = input.lastIndexOf(infix);
+        if (separator < 0) return createMissingInfixError(input, infix);
+
+        String beforeName = input.substring(0, separator).strip();
+        String name = input.substring(separator + infix.length());
 
         String type = locateTypeSeparator(beforeName)
-                .map(typeSeparator -> beforeName.substring(typeSeparator + " ".length()))
+                .map(typeSeparator -> beforeName.substring(typeSeparator + infix.length()))
                 .orElse(beforeName);
 
-        String name = definition.substring(separator + " ".length());
-        return generateDefinition(new MapNode()
-                .withString("type", type)
-                .withString("name", name));
+        Node withType = new MapNode().withString("type", type);
+        return new Ok<>(withType.merge(new MapNode().withString("name", name)));
     }
 
     private static Optional<Integer> locateTypeSeparator(String input) {
@@ -208,7 +211,7 @@ public class Main {
         });
     }
 
-    private static Err<String, CompileException> createMissingInfixError(String input, String infix) {
+    private static <T> Result<T, CompileException> createMissingInfixError(String input, String infix) {
         return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
     }
 }
