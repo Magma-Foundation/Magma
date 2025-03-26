@@ -197,8 +197,10 @@ public class Main {
                 .withString("name", name));
     }
 
-    private static Result<String, CompileException> generateDefinition(MapNode mapNode) {
-        return new Ok<>(mapNode.find("type").orElse("") + " " + mapNode.find("name").orElse(""));
+    private static Result<String, CompileException> generateDefinition(Node node) {
+        return new StringRule("type").generate(node).and(() -> new StringRule("name").generate(node)).mapValue(tuple -> {
+            return tuple.left() + " " + tuple.right();
+        });
     }
 
     private static Err<String, CompileException> createMissingInfixError(String input, String infix) {

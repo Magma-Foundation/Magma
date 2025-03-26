@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class MapNode {
+public final class MapNode implements Node {
     private final Map<String, String> strings;
 
     public MapNode(Map<String, String> strings) {
@@ -15,11 +15,13 @@ public final class MapNode {
         this(new HashMap<>());
     }
 
-    public MapNode withString(String propertyKey, String propertyValue) {
+    @Override
+    public Node withString(String propertyKey, String propertyValue) {
         strings.put(propertyKey, propertyValue);
         return this;
     }
 
+    @Override
     public Optional<String> find(String propertyKey) {
         return Optional.ofNullable(strings.get(propertyKey));
     }
