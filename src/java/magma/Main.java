@@ -53,7 +53,12 @@ public class Main {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                String withEnd = right.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    // TODO: parse content
+                    return "struct " + name + " {\n};\n";
+                }
             }
         }
 
