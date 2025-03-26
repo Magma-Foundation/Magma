@@ -45,5 +45,7 @@ StringBuilder mergeValues(StringBuilder cache, String element){
 }
 Result<String, CompileException> compileDefinition(String definition){
 }
+Result<String, CompileException> generateDefinition(Node node){
+}
 Err<String, CompileException> createMissingInfixError(String input, String infix){
 }
