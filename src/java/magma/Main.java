@@ -5,7 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -28,12 +31,30 @@ public class Main {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            char c = queue.pop();
             buffer.append(c);
+
+            if (c == '\'') {
+                char popped = queue.pop();
+                buffer.append(popped);
+                if (popped == '\\') buffer.append(queue.pop());
+
+                buffer.append(queue.pop());
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -51,8 +72,11 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRootSegment(String segment) {
+        String stripped = segment.strip();
+        if (stripped.isEmpty()) return new Ok<>("");
+
         if (segment.startsWith("package ")) return new Ok<>("");
-        if (segment.strip().startsWith("import ")) return new Ok<>("#include <temp.h>\n");
+        if (stripped.startsWith("import ")) return new Ok<>("#include <temp.h>\n");
 
         int classIndex = segment.indexOf("class ");
         if (classIndex >= 0) {
@@ -69,14 +93,25 @@ public class Main {
             }
         }
 
-        return getRootSegment("root segment", segment);
+        return invalidateInput("root segment", segment);
     }
 
-    private static Err<String, CompileException> getRootSegment(String type, String segment) {
-        return new Err<>(new CompileException("Invalid " + type, segment));
+    private static Result<String, CompileException> invalidateInput(String type, String input) {
+        return new Err<>(new CompileException("Invalid " + type, input));
     }
 
     private static Result<String, CompileException> compileClassSegment(String input) {
-        return getRootSegment("class segment", input);
+        if (input.isBlank()) return new Ok<>("");
+
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = input.substring(0, paramStart).strip();
+            int separator = definition.lastIndexOf(" ");
+            if (separator >= 0) {
+                String name = definition.substring(separator + " ".length());
+                return new Ok<>("void " + name + "(){\n}\n");
+            }
+        }
+        return invalidateInput("class segment", input);
     }
 }
