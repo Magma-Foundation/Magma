@@ -45,11 +45,13 @@ State divideValueChar(State state, Character c){
 }
 StringBuilder mergeValues(StringBuilder cache, String element){
 }
-Result<String, CompileException> compileDefinition(String definition){
+Result<String, CompileException> compileDefinition(String input){
+}
+Result<Node, CompileException> parseSplit(String input, String infix){
 }
 Optional<Integer> locateTypeSeparator(String input){
 }
 Result<String, CompileException> generateDefinition(Node node){
 }
-Err<String, CompileException> createMissingInfixError(String input, String infix){
+Result<T, CompileException> createMissingInfixError(String input, String infix){
 }
