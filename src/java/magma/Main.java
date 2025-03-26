@@ -128,26 +128,30 @@ public class Main {
     private static Result<String, CompileException> compileClassSegment(String input) {
         if (input.isBlank()) return new Ok<>("");
 
-        int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String inputDefinition = input.substring(0, paramStart).strip();
-            String withParams = input.substring(paramStart + 1);
-            return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
-                int paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    String paramString = withParams.substring(0, paramEnd);
-                    List<String> inputParams = divideByValues(paramString);
-                    return compileAll(inputParams, Main::compileDefinition, Main::mergeValues).flatMapValue(outputParams -> {
-                        return new Ok<>(outputDefinition + "(" +
-                                outputParams +
-                                "){\n}\n");
-                    });
-                } else {
-                    return createMissingInfixError(withParams, ")");
-                }
-            });
-        }
+        Result<String, CompileException> maybeMethod = compileMethod(input);
+        if (maybeMethod.isOk()) return maybeMethod;
+
         return invalidateInput("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart < 0) return createMissingInfixError(input, "(");
+
+        String inputDefinition = input.substring(0, paramStart).strip();
+        String withParams = input.substring(paramStart + 1);
+        return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) return createMissingInfixError(withParams, ")");
+
+            String paramString = withParams.substring(0, paramEnd);
+            List<String> inputParams = divideByValues(paramString);
+            return compileAll(inputParams, Main::compileDefinition, Main::mergeValues).flatMapValue(outputParams -> {
+                return new Ok<>(outputDefinition + "(" +
+                        outputParams +
+                        "){\n}\n");
+            });
+        });
     }
 
     private static List<String> divideByValues(String paramString) {
