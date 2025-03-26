@@ -5,8 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +31,20 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileAll(String input, Function<String, Result<String, CompileException>> compiler) {
+        return compileAll(divideByStatements(input), compiler);
+    }
+
+    private static Result<String, CompileException> compileAll(List<String> segments, Function<String, Result<String, CompileException>> compiler) {
+        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
+        for (String segment : segments) {
+            output = output.and(() -> compiler.apply(segment))
+                    .mapValue(tuple -> tuple.left().append(tuple.right()));
+        }
+
+        return output.mapValue(StringBuilder::toString);
+    }
+
+    private static List<String> divideByStatements(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -61,14 +78,7 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
-        for (String segment : segments) {
-            output = output.and(() -> compiler.apply(segment))
-                    .mapValue(tuple -> tuple.left().append(tuple.right()));
-        }
-
-        return output.mapValue(StringBuilder::toString);
+        return segments;
     }
 
     private static Result<String, CompileException> compileRootSegment(String segment) {
@@ -105,32 +115,53 @@ public class Main {
 
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
-            String definition = input.substring(0, paramStart).strip();
-            int separator = definition.lastIndexOf(" ");
-            if (separator >= 0) {
-                String beforeName = definition.substring(0, separator);
-
-                int typeSeparator = -1;
-                int depth = 0;
-                for (int i = beforeName.length() - 1; i >= 0; i--) {
-                    char c = beforeName.charAt(i);
-                    if (c == ' ' && depth == 0) {
-                        typeSeparator = i;
-                        break;
-                    } else {
-                        if (c == '>') depth++;
-                        if (c == '<') depth--;
-                    }
+            String inputDefinition = input.substring(0, paramStart).strip();
+            String withParams = input.substring(paramStart + 1);
+            return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
+                int paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    String paramString = withParams.substring(0, paramEnd);
+                    List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
+                    return compileAll(inputParams, Main::compileDefinition).flatMapValue(outputParams -> {
+                        return new Ok<>(outputDefinition + "(" +
+                                outputParams +
+                                "){\n}\n");
+                    });
+                } else {
+                    return createMissingInfixError(withParams, ")");
                 }
-
-                String type = typeSeparator == -1
-                        ? beforeName
-                        : beforeName.substring(typeSeparator + " ".length());
-
-                String name = definition.substring(separator + " ".length());
-                return new Ok<>(type + " " + name + "(){\n}\n");
-            }
+            });
         }
         return invalidateInput("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileDefinition(String definition) {
+        int separator = definition.lastIndexOf(" ");
+        if (separator < 0) return createMissingInfixError(definition, " ");
+
+        String beforeName = definition.substring(0, separator);
+        int typeSeparator = -1;
+        int depth = 0;
+        for (int i = beforeName.length() - 1; i >= 0; i--) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
+            } else {
+                if (c == '>') depth++;
+                if (c == '<') depth--;
+            }
+        }
+
+        String type = typeSeparator == -1
+                ? beforeName
+                : beforeName.substring(typeSeparator + " ".length());
+
+        String name = definition.substring(separator + " ".length());
+        return new Ok<>(type + " " + name);
+    }
+
+    private static Err<String, CompileException> createMissingInfixError(String input, String infix) {
+        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
     }
 }
