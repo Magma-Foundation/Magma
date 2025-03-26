@@ -37,6 +37,8 @@ Result<String, CompileException> invalidateInput(String type, String input){
 }
 Result<String, CompileException> compileClassSegment(String input){
 }
+Result<String, CompileException> compileMethod(String input){
+}
 List<String> divideByValues(String paramString){
 }
 State divideValueChar(State state, Character c){
@@ -44,6 +46,8 @@ State divideValueChar(State state, Character c){
 StringBuilder mergeValues(StringBuilder cache, String element){
 }
 Result<String, CompileException> compileDefinition(String definition){
+}
+Optional<Integer> locateTypeSeparator(String input){
 }
 Result<String, CompileException> generateDefinition(Node node){
 }

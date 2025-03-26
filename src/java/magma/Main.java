@@ -178,27 +178,28 @@ public class Main {
 
         String beforeName = definition.substring(0, separator).strip();
 
-        int typeSeparator = -1;
-        int depth = 0;
-        for (int i = beforeName.length() - 1; i >= 0; i--) {
-            char c = beforeName.charAt(i);
-            if (c == ' ' && depth == 0) {
-                typeSeparator = i;
-                break;
-            } else {
-                if (c == '>') depth++;
-                if (c == '<') depth--;
-            }
-        }
-
-        String type = typeSeparator == -1
-                ? beforeName
-                : beforeName.substring(typeSeparator + " ".length());
+        String type = locateTypeSeparator(beforeName)
+                .map(typeSeparator -> beforeName.substring(typeSeparator + " ".length()))
+                .orElse(beforeName);
 
         String name = definition.substring(separator + " ".length());
         return generateDefinition(new MapNode()
                 .withString("type", type)
                 .withString("name", name));
+    }
+
+    private static Optional<Integer> locateTypeSeparator(String input) {
+        int depth = 0;
+        for (int index = input.length() - 1; index >= 0; index--) {
+            char c = input.charAt(index);
+            if (c == ' ' && depth == 0) {
+                return Optional.of(index);
+            } else {
+                if (c == '>') depth++;
+                if (c == '<') depth--;
+            }
+        }
+        return Optional.empty();
     }
 
     private static Result<String, CompileException> generateDefinition(Node node) {
