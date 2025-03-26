@@ -5,13 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class Main {
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
-            String output = compile(input);
+            String output = Results.unwrap(compile(input));
             Files.writeString(source.resolveSibling("Main.c"), output);
         } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
@@ -19,7 +20,11 @@ public class Main {
         }
     }
 
-    private static String compile(String input) throws CompileException {
+    private static Result<String, CompileException> compile(String input) {
+        return compileAll(input, Main::compileRootSegment);
+    }
+
+    private static Result<String, CompileException> compileAll(String input, Function<String, Result<String, CompileException>> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -36,32 +41,37 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        StringBuilder output = new StringBuilder();
+        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output = output.and(() -> compiler.apply(segment))
+                    .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
-        return output.toString();
+
+        return output.mapValue(StringBuilder::toString);
     }
 
-    private static String compileRootSegment(String input) throws CompileException {
-        if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+    private static Result<String, CompileException> compileRootSegment(String segment) {
+        return Results.wrap(() -> {
+            if (segment.startsWith("package ")) return "";
+            if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
 
-        int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String right = input.substring(classIndex + "class ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                String withEnd = right.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    // TODO: parse content
-                    return "struct " + name + " {\n};\n";
+            int classIndex = segment.indexOf("class ");
+            if (classIndex >= 0) {
+                String right = segment.substring(classIndex + "class ".length());
+                int contentStart = right.indexOf("{");
+                if (contentStart >= 0) {
+                    String name = right.substring(0, contentStart).strip();
+                    String withEnd = right.substring(contentStart + "{".length()).strip();
+                    if (withEnd.endsWith("}")) {
+                        String content = withEnd.substring(0, withEnd.length() - "}".length());
+                        // TODO: parse content
+                        return "struct " + name + " {\n};\n";
+                    }
                 }
             }
-        }
 
-        throw new CompileException("Invalid root segment", input);
+            throw new CompileException("Invalid root segment", segment);
+        });
     }
+
 }
