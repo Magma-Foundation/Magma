@@ -192,7 +192,13 @@ public class Main {
                 : beforeName.substring(typeSeparator + " ".length());
 
         String name = definition.substring(separator + " ".length());
-        return new Ok<>(type + " " + name);
+        return generateDefinition(new MapNode()
+                .withString("type", type)
+                .withString("name", name));
+    }
+
+    private static Result<String, CompileException> generateDefinition(MapNode mapNode) {
+        return new Ok<>(mapNode.find("type").orElse("") + " " + mapNode.find("name").orElse(""));
     }
 
     private static Err<String, CompileException> createMissingInfixError(String input, String infix) {
