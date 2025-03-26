@@ -64,32 +64,44 @@ public class Main {
     }
 
     private static Stream<String> getStrings(State state) {
+        State current = state;
         while (true) {
-            Optional<Character> maybeNext = state.pop();
+            Optional<Character> maybeNext = current.pop();
             if (maybeNext.isEmpty()) break;
 
             char next = maybeNext.orElse('\0');
-            state.append(next);
-
-            if (next == '\'') {
-                char popped = state.pop().orElse('\0');
-                state.append(popped);
-                if (popped == '\\') state.popAndAppend();
-                state.popAndAppend();
-            }
-
-            if (next == ';' && state.isLevel()) {
-                state.advance();
-            } else if (next == '}' && state.isShallow()) {
-                state.advance();
-                state.exit();
-            } else {
-                if (next == '{') state.enter();
-                if (next == '}') state.exit();
-            }
+            current = divide(current, next);
         }
-        state.advance();
-        return state.stream();
+
+        return current.advance().stream();
+    }
+
+    private static State divide(State state, char next) {
+        return divideSingleQuotesChar(state, next)
+                .orElseGet(() -> divideStatementChar(state, next));
+    }
+
+    private static State divideStatementChar(State state, char next) {
+        State current = state.append(next);
+        if (next == ';' && current.isLevel()) return current.advance();
+        if (next == '}' && current.isShallow()) return current.advance().exit();
+        if (next == '{') return current.enter();
+        if (next == '}') return current.exit();
+        return current;
+    }
+
+    private static Optional<State> divideSingleQuotesChar(State state, char next) {
+        State current = state.append(next);
+        if (next != '\'') return Optional.empty();
+
+        char maybeSlash = current.pop().orElse('\0');
+        State appended = current.append(maybeSlash);
+
+        Optional<State> withSlash = maybeSlash == '\\'
+                ? appended.popAndAppend()
+                : Optional.of(appended);
+
+        return withSlash.flatMap(State::popAndAppend);
     }
 
     private static Result<String, CompileException> compileRootSegment(String segment) {

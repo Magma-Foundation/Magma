@@ -26,25 +26,29 @@ public class State {
         return depth == 1;
     }
 
-    void advance() {
+    State advance() {
         segments.add(buffer.toString());
         this.buffer = new StringBuilder();
+        return this;
     }
 
-    void exit() {
+    State exit() {
         this.depth = depth - 1;
+        return this;
     }
 
-    void enter() {
+    State enter() {
         this.depth = depth + 1;
+        return this;
     }
 
-    void popAndAppend() {
-        buffer.append(pop().orElse('\0'));
+    Optional<State> popAndAppend() {
+        return pop().map(this::append);
     }
 
-    void append(char popped) {
+    State append(char popped) {
         buffer.append(popped);
+        return this;
     }
 
     public Optional<Character> pop() {
