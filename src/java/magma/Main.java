@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
@@ -58,32 +60,36 @@ public class Main {
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        while (!queue.isEmpty()) {
-            char c = queue.pop();
-            buffer.append(c);
+        return getStrings(new State(queue, segments, buffer, depth)).toList();
+    }
 
-            if (c == '\'') {
-                char popped = queue.pop();
-                buffer.append(popped);
-                if (popped == '\\') buffer.append(queue.pop());
+    private static Stream<String> getStrings(State state) {
+        while (true) {
+            Optional<Character> maybeNext = state.pop();
+            if (maybeNext.isEmpty()) break;
 
-                buffer.append(queue.pop());
+            char next = maybeNext.orElse('\0');
+            state.append(next);
+
+            if (next == '\'') {
+                char popped = state.pop().orElse('\0');
+                state.append(popped);
+                if (popped == '\\') state.popAndAppend();
+                state.popAndAppend();
             }
 
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
+            if (next == ';' && state.isLevel()) {
+                state.advance();
+            } else if (next == '}' && state.isShallow()) {
+                state.advance();
+                state.exit();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (next == '{') state.enter();
+                if (next == '}') state.exit();
             }
         }
-        segments.add(buffer.toString());
-        return segments;
+        state.advance();
+        return state.stream();
     }
 
     private static Result<String, CompileException> compileRootSegment(String segment) {
@@ -126,7 +132,7 @@ public class Main {
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     String paramString = withParams.substring(0, paramEnd);
-                    List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
+                    List<String> inputParams = divideByValues(paramString);
                     return compileAll(inputParams, Main::compileDefinition, Main::mergeValues).flatMapValue(outputParams -> {
                         return new Ok<>(outputDefinition + "(" +
                                 outputParams +
@@ -138,6 +144,10 @@ public class Main {
             });
         }
         return invalidateInput("class segment", input);
+    }
+
+    private static List<String> divideByValues(String paramString) {
+        return Arrays.asList(paramString.split(Pattern.quote(",")));
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
