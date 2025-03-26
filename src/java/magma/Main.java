@@ -46,7 +46,17 @@ public class Main {
     private static String compileRootSegment(String input) throws CompileException {
         if (input.startsWith("package ")) return "";
         if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
-        if(input.contains("class ")) return "struct Temp {\n};\n";
+
+        int classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            String right = input.substring(classIndex + "class ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                return "struct " + name + " {\n};\n";
+            }
+        }
+
         throw new CompileException("Invalid root segment", input);
     }
 }
