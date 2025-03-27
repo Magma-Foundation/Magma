@@ -1,6 +1,5 @@
 package magma;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,24 +14,35 @@ import java.util.stream.IntStream;
 public class Main {
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        Result<Result<Optional<IOException>, CompileException>, IOException> resultIOExceptionResult = Results.wrapSupplier(() -> Files.readString(source))
-                .mapValue(input -> {
-                    return compile(input).mapValue(output -> {
-                        return Results.wrapRunnable(() -> Files.writeString(source.resolveSibling("Main.c"), output));
-                    });
-                });
+        Results.wrapSupplier(() -> Files.readString(source))
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(input -> compileWithSource(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Result<String, CompileException> compile(String input) {
+    private static Optional<ApplicationError> compileWithSource(Path source, String input) {
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> writeToTarget(source, output), Optional::of);
+    }
+
+    private static Optional<ApplicationError> writeToTarget(Path source, String output) {
+        return Results.wrapRunnable(() -> Files.writeString(source.resolveSibling("Main.c"), output))
+                .map(ThrowableError::new)
+                .map(ApplicationError::new);
+    }
+
+    private static Result<String, CompileError> compile(String input) {
         return compileAll(input, Main::compileRootSegment);
     }
 
-    private static Result<String, CompileException> compileAll(String input, Function<String, Result<String, CompileException>> compiler) {
+    private static Result<String, CompileError> compileAll(String input, Function<String, Result<String, CompileError>> compiler) {
         return compileAll(divideByStatements(input), compiler, Main::mergeStatements);
     }
 
-    private static Result<String, CompileException> compileAll(List<String> segments, Function<String, Result<String, CompileException>> compiler, BiFunction<StringBuilder, String, StringBuilder> getAppend) {
-        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
+    private static Result<String, CompileError> compileAll(List<String> segments, Function<String, Result<String, CompileError>> compiler, BiFunction<StringBuilder, String, StringBuilder> getAppend) {
+        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
             output = output.and(() -> compiler.apply(segment))
                     .mapValue(tuple -> getAppend.apply(tuple.left(), tuple.right()));
@@ -94,7 +104,7 @@ public class Main {
         return withSlash.flatMap(State::popAndAppend);
     }
 
-    private static Result<String, CompileException> compileRootSegment(String segment) {
+    private static Result<String, CompileError> compileRootSegment(String segment) {
         String stripped = segment.strip();
         if (stripped.isEmpty()) return new Ok<>("");
 
@@ -119,26 +129,26 @@ public class Main {
         return invalidateInput("root segment", segment);
     }
 
-    private static Result<String, CompileException> invalidateInput(String type, String input) {
-        return new Err<>(new CompileException("Invalid " + type, input));
+    private static Result<String, CompileError> invalidateInput(String type, String input) {
+        return new Err<>(new CompileError("Invalid " + type, input));
     }
 
-    private static Result<String, CompileException> compileClassSegment(String input) {
-        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
+    private static Result<String, CompileError> compileClassSegment(String input) {
+        Result<String, CompileError> maybeWhitespace = compileWhitespace(input);
         if (maybeWhitespace.isOk()) return maybeWhitespace;
 
-        Result<String, CompileException> maybeMethod = compileMethod(input);
+        Result<String, CompileError> maybeMethod = compileMethod(input);
         if (maybeMethod.isOk()) return maybeMethod;
 
         return invalidateInput("class segment", input);
     }
 
-    private static Result<String, CompileException> compileWhitespace(String input) {
+    private static Result<String, CompileError> compileWhitespace(String input) {
         if (input.isBlank()) return new Ok<>("");
-        return new Err<>(new CompileException("Input not blank.", input));
+        return new Err<>(new CompileError("Input not blank.", input));
     }
 
-    private static Result<String, CompileException> compileMethod(String input) {
+    private static Result<String, CompileError> compileMethod(String input) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return createMissingInfixError(input, "(");
 
@@ -176,11 +186,11 @@ public class Main {
         return cache.append(", ").append(element);
     }
 
-    private static Result<String, CompileException> compileDefinition(String input) {
+    private static Result<String, CompileError> compileDefinition(String input) {
         return parseSplit(input, " ").flatMapValue(Main::generateDefinition);
     }
 
-    private static Result<Node, CompileException> parseSplit(String input, String infix) {
+    private static Result<Node, CompileError> parseSplit(String input, String infix) {
         int separator = input.lastIndexOf(infix);
         if (separator < 0) return createMissingInfixError(input, infix);
 
@@ -209,13 +219,13 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Result<String, CompileException> generateDefinition(Node node) {
+    private static Result<String, CompileError> generateDefinition(Node node) {
         return new StringRule("type").generate(node).and(() -> new StringRule("name").generate(node)).mapValue(tuple -> {
             return tuple.left() + " " + tuple.right();
         });
     }
 
-    private static <T> Result<T, CompileException> createMissingInfixError(String input, String infix) {
-        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
+    private static <T> Result<T, CompileError> createMissingInfixError(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 }
