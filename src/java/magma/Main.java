@@ -5,18 +5,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+
+    public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "windows");
+    public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
+
     public static void main(String[] args) {
-        Path sourceDirectory = Paths.get(".", "src", "java");
-        try (Stream<Path> stream = Files.walk(sourceDirectory)) {
+        try (Stream<Path> stream = Files.walk(SOURCE_DIRECTORY)) {
             Set<Path> sources = stream.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".java"))
                     .collect(Collectors.toSet());
 
+            List<Path> relativePaths = new ArrayList<>();
             for (Path source : sources) {
                 String input = Files.readString(source);
 
@@ -41,10 +46,9 @@ public class Main {
                     output.append(compileRootSegment(segment));
                 }
 
-                Path relative = sourceDirectory.relativize(source);
+                Path relative = SOURCE_DIRECTORY.relativize(source);
                 Path parent = relative.getParent();
-                Path targetDirectory = Paths.get(".", "src", "windows");
-                Path targetParent = targetDirectory.resolve(parent);
+                Path targetParent = TARGET_DIRECTORY.resolve(parent);
                 if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
 
                 String nameWithExt = relative.getFileName().toString();
@@ -52,7 +56,17 @@ public class Main {
                 Path target = targetParent.resolve(name + ".c");
 
                 Files.writeString(target, output.toString());
+                relativePaths.add(TARGET_DIRECTORY.relativize(target));
             }
+
+            Path build = TARGET_DIRECTORY.resolve("build.bat");
+            String joinedPaths = relativePaths.stream()
+                    .map(Path::toString)
+                    .map(path -> ".\\" + path)
+                    .collect(Collectors.joining(" "));
+
+            String output = "clang " + joinedPaths + " -o main.exe";
+            Files.writeString(build, output);
         } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
