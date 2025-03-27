@@ -154,13 +154,20 @@ public class Main {
 
         String inputDefinition = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + 1);
-        return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
+        return parseDefinition(inputDefinition)
+                .mapValue(node -> {
+                    String oldName = node.find("name").orElse("");
+                    String newName = oldName.equals("main") ? "__main__" : oldName;
+                    return node.withString("name", newName);
+                })
+                .flatMapValue(Main::generateDefinition).flatMapValue(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd < 0) return createMissingInfixError(withParams, ")");
 
             String paramString = withParams.substring(0, paramEnd);
             List<String> inputParams = divideByValues(paramString);
-            return compileAll(inputParams, Main::compileDefinition, Main::mergeValues).flatMapValue(outputParams -> {
+            return compileAll(inputParams, input1 -> parseDefinition(input1)
+                    .flatMapValue(Main::generateDefinition), Main::mergeValues).flatMapValue(outputParams -> {
                 return new Ok<>(outputDefinition + "(" +
                         outputParams +
                         "){\n}\n");
@@ -186,8 +193,8 @@ public class Main {
         return cache.append(", ").append(element);
     }
 
-    private static Result<String, CompileError> compileDefinition(String input) {
-        return parseSplit(input, " ").flatMapValue(Main::generateDefinition);
+    private static Result<Node, CompileError> parseDefinition(String input) {
+        return parseSplit(input, " ");
     }
 
     private static Result<Node, CompileError> parseSplit(String input, String infix) {

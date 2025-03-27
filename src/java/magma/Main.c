@@ -10,7 +10,7 @@
 #include <temp.h>
 struct Main {
 };
-void main(String[] args){
+void __main__(String[] args){
 }
 Optional<ApplicationError> compileWithSource(Path source, String input){
 }
@@ -50,7 +50,7 @@ State divideValueChar(State state, Character c){
 }
 StringBuilder mergeValues(StringBuilder cache, String element){
 }
-Result<String, CompileError> compileDefinition(String input){
+Result<Node, CompileError> parseDefinition(String input){
 }
 Result<Node, CompileError> parseSplit(String input, String infix){
 }
