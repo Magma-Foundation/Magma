@@ -62,7 +62,7 @@ public class Main {
             Path build = TARGET_DIRECTORY.resolve("build.bat");
             String joinedPaths = relativePaths.stream()
                     .map(Path::toString)
-                    .map(path -> ".\\" + path)
+                    .map(path -> ".\\" + path + "^\n\t")
                     .collect(Collectors.joining(" "));
 
             String output = "clang " + joinedPaths + " -o main.exe";
