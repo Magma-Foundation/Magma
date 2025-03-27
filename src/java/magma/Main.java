@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +18,22 @@ public class Main {
 
             for (Path source : sources) {
                 String input = Files.readString(source);
-                throw new CompileException("Invalid root", input);
+
+                ArrayList<String> segments = new ArrayList<>();
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < input.length(); i++) {
+                    char c = input.charAt(i);
+                    buffer.append(c);
+                    if (c == ';') {
+                        segments.add(buffer.toString());
+                        buffer = new StringBuilder();
+                    }
+                }
+                segments.add(buffer.toString());
+
+                for (String segment : segments) {
+                    throw new CompileException("Invalid root segment", segment);
+                }
             }
         } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
