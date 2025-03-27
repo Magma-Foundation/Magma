@@ -14,15 +14,13 @@ import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            String output = Results.unwrap(compile(input));
-            Files.writeString(source.resolveSibling("Main.c"), output);
-        } catch (IOException | CompileException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        Result<Result<Optional<IOException>, CompileException>, IOException> resultIOExceptionResult = Results.wrapSupplier(() -> Files.readString(source))
+                .mapValue(input -> {
+                    return compile(input).mapValue(output -> {
+                        return Results.wrapRunnable(() -> Files.writeString(source.resolveSibling("Main.c"), output));
+                    });
+                });
     }
 
     private static Result<String, CompileException> compile(String input) {

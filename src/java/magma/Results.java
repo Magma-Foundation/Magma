@@ -3,7 +3,7 @@ package magma;
 import java.util.Optional;
 
 public class Results {
-    public static <T, X extends Throwable> Result<T, X> wrap(ThrowableSupplier<T, X> supplier) {
+    public static <T, X extends Throwable> Result<T, X> wrapSupplier(ThrowableSupplier<T, X> supplier) {
         try {
             return new Ok<>(supplier.get());
         } catch (Throwable e) {
@@ -21,5 +21,15 @@ public class Results {
         if (maybeError.isPresent()) throw maybeError.get();
 
         throw new RuntimeException("Neither a value nor an error is present.");
+    }
+
+    public static <T extends Throwable> Optional<T> wrapRunnable(ThrowableRunnable<T> runnable) {
+        try {
+            runnable.run();
+            return Optional.empty();
+        } catch (Throwable e) {
+            //noinspection unchecked
+            return Optional.of((T) e);
+        }
     }
 }
