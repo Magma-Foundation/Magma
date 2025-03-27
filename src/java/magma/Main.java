@@ -204,12 +204,17 @@ public class Main {
         String beforeName = input.substring(0, separator).strip();
         String name = input.substring(separator + infix.length());
 
+        return new StringRule("name").parse(name)
+                .and(() -> getNode(infix, beforeName))
+                .mapValue(tuple -> tuple.left().merge(tuple.right()));
+    }
+
+    private static Result<Node, CompileError> getNode(String infix, String beforeName) {
         String type = locateTypeSeparator(beforeName)
                 .map(typeSeparator -> beforeName.substring(typeSeparator + infix.length()))
                 .orElse(beforeName);
 
-        Node withType = new MapNode().withString("type", type);
-        return new Ok<>(withType.merge(new MapNode().withString("name", name)));
+        return new StringRule("type").parse(type);
     }
 
     private static Optional<Integer> locateTypeSeparator(String input) {
