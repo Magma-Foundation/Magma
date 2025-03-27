@@ -67,7 +67,14 @@ public class Main {
 
             String output = "clang " + joinedPaths + " -o main.exe";
             Files.writeString(build, output);
-        } catch (IOException | CompileException e) {
+
+            Process process = new ProcessBuilder("cmd.exe", "/c", "build")
+                    .directory(TARGET_DIRECTORY.toFile())
+                    .inheritIO()
+                    .start();
+
+            process.waitFor();
+        } catch (IOException | CompileException | InterruptedException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
