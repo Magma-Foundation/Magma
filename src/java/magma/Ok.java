@@ -34,4 +34,14 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public boolean isOk() {
         return true;
     }
+
+    @Override
+    public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+        return new Ok<>(value);
+    }
+
+    @Override
+    public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+        return whenOk.apply(value);
+    }
 }

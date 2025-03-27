@@ -8,4 +8,9 @@ public class CompileError implements Error {
         this.message = message;
         this.context = context;
     }
+
+    @Override
+    public String display() {
+        return message + ": " + context;
+    }
 }
