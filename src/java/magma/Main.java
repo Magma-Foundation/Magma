@@ -1,6 +1,7 @@
 package magma;
 
 import magma.compile.ImmutableState;
+import magma.compile.PathSource;
 import magma.compile.Source;
 import magma.compile.State;
 import magma.error.ApplicationError;
@@ -30,7 +31,7 @@ public class Main {
     public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "windows");
 
     public static void main(String[] args) {
-        JavaFiles.walk(Source.SOURCE_DIRECTORY)
+        JavaFiles.walk(PathSource.SOURCE_DIRECTORY)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .match(Main::runWithFiles, Optional::of)
@@ -77,7 +78,7 @@ public class Main {
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
         Result<List<Path>, ApplicationError> relativePaths = new Ok<>(new ArrayList<>());
         for (Path source : sources) {
-            final Source wrapped = new Source(source);
+            final Source wrapped = new PathSource(source);
             List<String> namespace = wrapped.computeNamespace();
             if (namespace.equals(List.of("magma", "java"))) {
                 continue;
@@ -101,7 +102,7 @@ public class Main {
     }
 
     private static Result<Path, ApplicationError> compileWithInput(String input, List<String> namespace, String name) {
-        State state = new ImmutableState(namespace, name);
+        State state = new ImmutableState(JavaLists.wrap(namespace), name);
         return compile(state, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
