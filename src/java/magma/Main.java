@@ -124,10 +124,10 @@ public class Main {
     }
 
     private static String attachSource(State state, Tuple<String, String> tuple) {
-        String source = tuple.right();
         String name = state.name();
+        String source = generateImport(name) + tuple.right();
         if (state.namespace().equals(List.of("magma")) && name.equals("Main")) {
-            return generateImport(name) + source + "int main(){\n\treturn 0;\n}\n";
+            return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
         }
