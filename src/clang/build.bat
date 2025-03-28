@@ -1,5 +1,4 @@
 clang .\magma\api\collect\Map_.c^
-	 .\magma\app\compile\rule\Generation.c^
 	 .\magma\api\result\Result.c^
 	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^

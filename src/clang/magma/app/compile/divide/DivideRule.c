@@ -9,9 +9,3 @@ void divideStatementChar(){
 }
 void apply(){
 }
-void parse(){
-}
-void transform(){
-}
-void generate(){
-}
