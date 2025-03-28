@@ -1,9 +1,10 @@
-package magma;
+package magma.app;
 
 import jvm.api.collect.Lists;
 import jvm.api.collect.Sets;
 import jvm.api.io.Paths;
 import jvm.api.process.Processes;
+import magma.api.compile.Compiler;
 import magma.app.compile.PathSource;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
@@ -18,7 +19,6 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
-import magma.app.ApplicationError;
 import magma.app.compile.ImmutableParseState;
 import magma.app.compile.Source;
 import magma.app.compile.ParseState;
@@ -117,7 +117,7 @@ public class Application {
         return targetParent.createDirectoriesSafe().map(ApplicationError::new);
     }
 
-    static Option<ApplicationError> run() {
+    public static Option<ApplicationError> run() {
         return SOURCE_DIRECTORY.walk()
                 .mapErr(ApplicationError::new)
                 .match(Application::runWithFiles, Some::new);

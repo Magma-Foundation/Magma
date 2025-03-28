@@ -1,8 +1,9 @@
-package magma;
+package magma.api.compile;
 
 import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
+import magma.api.compile.divide.DivideRule;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -13,17 +14,15 @@ import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.ParseState;
 
-import java.util.function.BiFunction;
-
 public class Compiler {
 
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
     public static final String NAME = "name";
-    public static final String LEFT = "left";
-    public static final String RIGHT = "right";
+    public static final String HEADER = "header";
+    public static final String TARGET = "target";
 
-    static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
-        return compileRoot(input, parseState).mapValue(tuple -> {
+    public static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
+        return createRootRule().apply(parseState, input).mapValue(tuple -> {
             return new Tuple<String, String>(wrapHeader(tuple, parseState), wrapTarget(parseState, tuple));
         });
     }
@@ -56,62 +55,8 @@ public class Compiler {
         return "#include \"" + content + ".h" + "\"\n";
     }
 
-    static Result<Tuple<String, String>, CompileError> compileRoot(String input, ParseState parseState) {
-        return divideAndCompile(input, parseState, Compiler::compileRootSegment);
-    }
-
-    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, ParseState parseState, BiFunction<String, ParseState, Result<Tuple<String, String>, CompileError>> compiler) {
-        List_<Character> queue = Lists.fromString(input);
-
-        DivideState current = new DivideState(queue);
-        while (true) {
-            Option<Tuple<DivideState, Character>> maybeNext = current.pop();
-            if (maybeNext.isEmpty()) break;
-
-            Tuple<DivideState, Character> tuple1 = maybeNext.orElse(new Tuple<>(current, '\0'));
-            current = divideText(tuple1.left(), tuple1.right());
-        }
-
-        return current.advance().stream()
-                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compiler.apply(segment, parseState).mapValue(result -> appendBuilders(output, result)))
-                .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
-    }
-
-    private static DivideState divideText(DivideState state, char c) {
-        DivideState appended = state.appendChar(c);
-
-        return divideSingleQuotes(appended, c)
-                .orElseGet(() -> divideStatementChar(appended, c));
-    }
-
-    private static Option<DivideState> divideSingleQuotes(DivideState state, char c) {
-        if (c != '\'') return new None<>();
-
-        return state.append().flatMap(maybeSlash -> {
-            Option<DivideState> divideStateOption;
-            DivideState oldState = maybeSlash.left();
-            if (maybeSlash.right() == '\\') {
-                divideStateOption = oldState.appendAndDiscard();
-            } else {
-                divideStateOption = new Some<>(oldState);
-            }
-
-            return divideStateOption.flatMap(DivideState::appendAndDiscard);
-        });
-    }
-
-    private static DivideState divideStatementChar(DivideState appended, char c) {
-        if (c == ';' && appended.isLevel()) return appended.advance();
-        if (c == '}' && appended.isShallow()) return appended.advance().exit();
-        if (c == '{') return appended.enter();
-        if (c == '}') return appended.exit();
-        return appended;
-    }
-
-    static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<StringBuilder, StringBuilder> builders, Tuple<String, String> elements) {
-        StringBuilder newLeft = builders.left().append(elements.left());
-        StringBuilder newRight = builders.right().append(elements.right());
-        return new Tuple<>(newLeft, newRight);
+    private static DivideRule createRootRule() {
+        return new DivideRule((parseState1, input1) -> compileRootSegment(input1, parseState1));
     }
 
     static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, ParseState parseState) {
@@ -185,11 +130,11 @@ public class Compiler {
 
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return divideAndCompile(inputContent, parseState, (s, parseState2) -> compileClassMember(s))
+                    return new DivideRule((parseState2, s) -> compileClassMember(s)).apply(parseState, inputContent)
                             .flatMapValue(tuple -> generateStruct(new MapNode()
                                     .withString(NAME, name1)
-                                    .withString(LEFT, tuple.left())
-                                    .withString(RIGHT, tuple.right())));
+                                    .withString(HEADER, tuple.left())
+                                    .withString(TARGET, tuple.right())));
                 }
             }
         }
@@ -213,12 +158,12 @@ public class Compiler {
                     if (name.endsWith(">")) return generateEmpty();
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                        return divideAndCompile(inputContent, parseState, (s, parseState1) -> compileClassMember(s)).flatMapValue(content -> {
+                        return new DivideRule((parseState1, s) -> compileClassMember(s)).apply(parseState, inputContent).flatMapValue(content -> {
                             return generateStruct(new MapNode()
                                     .withString(NAME, name)
                                     .merge(new MapNode()
-                                            .withString(LEFT, content.left())
-                                            .withString(RIGHT, content.right())));
+                                            .withString(HEADER, content.left())
+                                            .withString(TARGET, content.right())));
                         });
                     }
                 }
@@ -245,8 +190,8 @@ public class Compiler {
 
                 final Tuple<String, String> content = new Tuple<>("", "");
                 MapNode other = new MapNode()
-                        .withString(LEFT, content.left())
-                        .withString(RIGHT, content.right());
+                        .withString(HEADER, content.left())
+                        .withString(TARGET, content.right());
 
                 return generateStruct(new MapNode()
                         .withString(NAME, name)
@@ -297,8 +242,8 @@ public class Compiler {
 
     static Result<Tuple<String, String>, CompileError> generateStruct(MapNode node) {
         String name = node.find(NAME).orElse("");
-        String left = node.find(LEFT).orElse("");
-        String right = node.find(RIGHT).orElse("");
+        String left = node.find(HEADER).orElse("");
+        String right = node.find(TARGET).orElse("");
 
         return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + left, right));
     }

@@ -1,4 +1,4 @@
-package magma;
+package magma.api.compile.divide;
 
 import jvm.api.collect.Lists;
 import magma.api.collect.List_;
@@ -13,11 +13,11 @@ public record DivideState(List_<Character> queue, List_<String> segments, String
         this(queue, Lists.empty(), new StringBuilder(), 0);
     }
 
-    boolean isLevel() {
+    public boolean isLevel() {
         return depth == 0;
     }
 
-    boolean isShallow() {
+    public boolean isShallow() {
         return depth == 1;
     }
 
@@ -31,19 +31,19 @@ public record DivideState(List_<Character> queue, List_<String> segments, String
         return new Some<>(new Tuple<>(state, left));
     }
 
-    DivideState advance() {
+    public DivideState advance() {
         return new DivideState(queue, segments.add(buffer.toString()), new StringBuilder(), depth);
     }
 
-    DivideState exit() {
+    public DivideState exit() {
         return new DivideState(queue, segments, buffer, depth - 1);
     }
 
-    DivideState enter() {
+    public DivideState enter() {
         return new DivideState(queue, segments, buffer, depth + 1);
     }
 
-    DivideState appendChar(char c) {
+    public DivideState appendChar(char c) {
         return new DivideState(queue, segments, buffer.append(c), depth);
     }
 

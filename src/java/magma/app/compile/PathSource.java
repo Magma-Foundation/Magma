@@ -1,7 +1,7 @@
 package magma.app.compile;
 
 import jvm.api.collect.Lists;
-import magma.Application;
+import magma.app.Application;
 import magma.api.collect.List_;
 import magma.api.io.IOError;
 import magma.api.io.Path_;
