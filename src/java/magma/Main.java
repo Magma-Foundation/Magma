@@ -1,20 +1,20 @@
 package magma;
 
-import magma.app.ApplicationError;
-import magma.app.compile.ImmutableState;
-import jv.app.compile.PathSource;
-import magma.app.compile.Source;
-import magma.app.compile.State;
-import magma.app.compile.CompileError;
+import jv.api.JavaOptions;
+import jv.api.collect.JavaLists;
 import jv.api.error.ThrowableError;
 import jv.api.io.JavaFiles;
-import jv.api.collect.JavaLists;
-import jv.api.JavaOptions;
+import jv.api.result.JavaResults;
+import jv.app.compile.PathSource;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import jv.api.result.JavaResults;
 import magma.api.result.Tuple;
+import magma.app.ApplicationError;
+import magma.app.compile.CompileError;
+import magma.app.compile.ImmutableState;
+import magma.app.compile.Source;
+import magma.app.compile.State;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,7 +80,7 @@ public class Main {
         for (Path source : sources) {
             final Source wrapped = new PathSource(source);
             List<String> namespace = JavaLists.toNative(wrapped.computeNamespace());
-            if (namespace.equals(List.of("magma", "java"))) {
+            if (namespace.subList(0, 1).equals(List.of("jv"))) {
                 continue;
             }
 

@@ -1,2 +1,0 @@
-struct CompileError implements Error {
-};
