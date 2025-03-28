@@ -1,30 +1,34 @@
 clang .\magma\api\collect\Map_.c^
 	 .\magma\app\compile\rule\Generation.c^
 	 .\magma\api\result\Result.c^
+	 .\magma\app\compile\RecordRule.c^
 	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^
 	 .\magma\api\collect\Stream.c^
 	 .\magma\api\result\Tuple.c^
 	 .\magma\app\Application.c^
 	 .\magma\api\concurrent\InterruptedError.c^
+	 .\magma\app\compile\MyRule0.c^
 	 .\magma\app\compile\divide\DivideRule.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\error\Error.c^
 	 .\magma\app\compile\ParseState.c^
 	 .\magma\api\collect\Equator.c^
+	 .\magma\app\compile\ClassMemberRule.c^
 	 .\magma\app\compile\rule\Rule.c^
 	 .\magma\api\option\Option.c^
+	 .\magma\app\compile\MyRule.c^
 	 .\magma\api\collect\RangeHead.c^
 	 .\magma\app\compile\Source.c^
 	 .\magma\api\collect\Head.c^
-	 .\magma\app\compile\CompileError.c^
 	 .\magma\app\compile\divide\DivideState.c^
+	 .\magma\app\compile\CompileError.c^
 	 .\magma\api\collect\SingleHead.c^
 	 .\magma\api\collect\Equatable.c^
 	 .\magma\app\compile\rule\OrState.c^
+	 .\magma\app\compile\rule\Output.c^
 	 .\magma\app\compile\Compiler.c^
 	 .\magma\app\compile\rule\EmptyRule.c^
-	 .\magma\app\compile\rule\Output.c^
 	 .\magma\api\collect\EmptyHead.c^
 	 .\magma\api\option\None.c^
 	 .\magma\api\process\Process_.c^
@@ -34,8 +38,10 @@ clang .\magma\api\collect\Map_.c^
 	 .\magma\app\compile\rule\OrRule.c^
 	 .\magma\api\collect\Set_.c^
 	 .\magma\app\compile\PathSource.c^
+	 .\magma\app\compile\ClassRule.c^
 	 .\magma\api\option\Some.c^
 	 .\magma\api\collect\Collector.c^
+	 .\magma\app\compile\InterfaceRule.c^
 	 .\magma\app\compile\rule\StripRule.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\io\Path_.c^

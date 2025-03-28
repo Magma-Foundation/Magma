@@ -31,23 +31,23 @@ class InterfaceRule implements Rule {
 
         final Tuple<String, String> content = new Tuple<>("", "");
         MapNode other = new MapNode()
-                .withString(Compiler.HEADER, content.left())
-                .withString(Compiler.TARGET, content.right());
+                .withString("header", content.left())
+                .withString("target", content.right());
 
         return Compiler.generateStruct(new MapNode()
-                .withString(Compiler.NAME, name)
+                .withString("name", name)
                 .merge(other));
     }
 
     @Override
     public Result<Output, CompileError> generate(MapNode node) {
-        return new Ok<>(new MapOutput().with("header", node.find(Compiler.HEADER).orElse("")));
+        return new Ok<>(new MapOutput().with("header", node.find("header").orElse("")));
     }
 
     @Override
     public Result<MapNode, CompileError> parse(ParseState state, String input) {
         return apply(state, input).mapValue(tuple -> {
-            return new MapNode().withString(Compiler.HEADER, tuple.left()).withString(Compiler.TARGET, tuple.right());
+            return new MapNode().withString("header", tuple.left()).withString("target", tuple.right());
         });
     }
 

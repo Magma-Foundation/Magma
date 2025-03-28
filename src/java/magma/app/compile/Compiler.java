@@ -17,11 +17,7 @@ import magma.app.compile.rule.StripRule;
 import magma.app.compile.rule.SuffixRule;
 
 public class Compiler {
-
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
-    public static final String NAME = "name";
-    public static final String HEADER = "header";
-    public static final String TARGET = "target";
 
     public static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
         Rule rule = createRootRule();
@@ -104,9 +100,9 @@ public class Compiler {
     }
 
     static Result<Tuple<String, String>, CompileError> generateStruct(MapNode node) {
-        String name = node.find(NAME).orElse("");
-        String left = node.find(HEADER).orElse("");
-        String right = node.find(TARGET).orElse("");
+        String name = node.find("name").orElse("");
+        String left = node.find("header").orElse("");
+        String right = node.find("target").orElse("");
 
         return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + left, right));
     }

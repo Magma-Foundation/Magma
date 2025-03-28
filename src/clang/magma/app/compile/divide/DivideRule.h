@@ -14,8 +14,6 @@
 #include "../../../../magma/api/result/Tuple.h"
 #include "../../../../magma/app/compile/CompileError.h"
 #include "../../../../magma/app/compile/ParseState.h"
-#include "../../../../static magma/app/compile/Compiler/HEADER.h"
-#include "../../../../static magma/app/compile/Compiler/TARGET.h"
 struct DivideRule {
 };
 #endif
