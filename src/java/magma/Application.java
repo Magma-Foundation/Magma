@@ -1,11 +1,12 @@
 package magma;
 
-import jv.api.JavaOptions;
 import jv.api.collect.JavaLists;
 import jv.api.error.ThrowableError;
 import jv.api.io.JavaFiles;
 import jv.api.result.JavaResults;
 import jv.app.compile.PathSource;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -28,16 +29,16 @@ public class Application {
     public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "windows");
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
-    public static Optional<ApplicationError> runWithFiles(Set<Path> files) {
+    public static Option<ApplicationError> runWithFiles(Set<Path> files) {
         Set<Path> sources = files.stream()
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".java"))
                 .collect(Collectors.toSet());
 
-        return runWithSources(sources).match(Application::build, Optional::of);
+        return runWithSources(sources).match(Application::build, Some::new);
     }
 
-    private static Optional<ApplicationError> build(List<Path> relativePaths) {
+    private static Option<ApplicationError> build(List<Path> relativePaths) {
         Path build = TARGET_DIRECTORY.resolve("build.bat");
         String joinedPaths = relativePaths.stream()
                 .map(Path::toString)
@@ -51,18 +52,18 @@ public class Application {
                 .or(Application::build);
     }
 
-    private static Optional<ApplicationError> build() {
+    private static Option<ApplicationError> build() {
         ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "build")
                 .directory(TARGET_DIRECTORY.toFile())
                 .inheritIO();
 
-        return JavaResults.wrap(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
-            Result<Integer, InterruptedException> awaited = JavaResults.wrap(process::waitFor);
-            JavaOptions.unwrap(awaited.findValue()).ifPresent(exitCode -> {
+        return JavaResults.wrapSupplier(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
+            Result<Integer, InterruptedException> awaited = JavaResults.wrapSupplier(process::waitFor);
+            awaited.findValue().ifPresent(exitCode -> {
                 if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
             });
-            return JavaOptions.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
-        }, Optional::of);
+            return awaited.findError().map(ThrowableError::new).map(ApplicationError::new);
+        }, Some::new);
     }
 
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
@@ -124,10 +125,10 @@ public class Application {
                 .map(ApplicationError::new);
     }
 
-    static Optional<ApplicationError> run() {
+    static Option<ApplicationError> run() {
         return JavaFiles.walk(SOURCE_DIRECTORY)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
-                .match(Application::runWithFiles, Optional::of);
+                .match(Application::runWithFiles, Some::new);
     }
 }

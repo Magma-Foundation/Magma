@@ -18,7 +18,7 @@ public record PathSource(Path source) implements Source {
     @Override
     public Result<String, IOError> read() {
         return JavaResults
-                .wrap(() -> Files.readString(this.source()))
+                .wrapSupplier(() -> Files.readString(this.source()))
                 .mapErr(JavaIOError::new);
     }
 

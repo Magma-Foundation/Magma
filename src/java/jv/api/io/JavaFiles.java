@@ -1,6 +1,7 @@
 package jv.api.io;
 
 import jv.api.result.JavaResults;
+import magma.api.option.Option;
 import magma.api.result.Result;
 
 import java.io.IOException;
@@ -12,17 +13,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JavaFiles {
-    public static Optional<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
+    public static Option<IOException> writeString(Path target, String output) {
+       return JavaResults.wrapRunnable(() -> {
+           Files.writeString(target, output);
+       });
     }
 
     public static Result<Set<Path>, IOException> walk(Path directory) {
-        return JavaResults.wrap(() -> {
+        return JavaResults.wrapSupplier(() -> {
             try (Stream<Path> stream = Files.walk(directory)) {
                 return stream.collect(Collectors.toSet());
             }

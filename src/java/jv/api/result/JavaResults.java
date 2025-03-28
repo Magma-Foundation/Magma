@@ -1,6 +1,9 @@
 package jv.api.result;
 
 import jv.api.JavaOptions;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -11,7 +14,7 @@ import java.io.StringWriter;
 import java.util.Optional;
 
 public class JavaResults {
-    public static <T, X extends Throwable> Result<T, X> wrap(ThrowableSupplier<T, X> supplier) {
+    public static <T, X extends Throwable> Result<T, X> wrapSupplier(ThrowableSupplier<T, X> supplier) {
         try {
             return new Ok<>(supplier.get());
         } catch (Throwable e) {
@@ -34,5 +37,15 @@ public class JavaResults {
         StringWriter writer = new StringWriter();
         exception.printStackTrace(new PrintWriter(writer));
         return writer.toString();
+    }
+
+    public static <X extends Throwable> Option<X> wrapRunnable(ThrowableRunnable<X> runnable) {
+        try {
+            runnable.run();
+            return new None<>();
+        } catch (Throwable error) {
+            //noinspection unchecked
+            return new Some<>((X) error);
+        }
     }
 }
