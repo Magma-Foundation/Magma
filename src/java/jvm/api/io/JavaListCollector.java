@@ -3,7 +3,7 @@ package jvm.api.io;
 import magma.api.collect.Collector;
 import magma.api.collect.List_;
 
-class JavaListCollector<T> implements Collector<T, List_<T>> {
+public class JavaListCollector<T> implements Collector<T, List_<T>> {
     @Override
     public List_<T> initial() {
         return new JavaList<>();

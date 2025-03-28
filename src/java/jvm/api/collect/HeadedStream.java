@@ -72,7 +72,8 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     }
 
     private <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
-        return foldWithInitial(Streams.empty(), (rStream, t) -> rStream.concat(mapper.apply(t)));
+        return this.<Stream<R>>foldWithInitial(new HeadedStream<>(new EmptyHead<>()),
+                (rStream, t) -> rStream.concat(mapper.apply(t)));
     }
 
     @Override

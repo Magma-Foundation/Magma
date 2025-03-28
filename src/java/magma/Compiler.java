@@ -1,7 +1,7 @@
 package magma;
 
 import jvm.api.collect.Lists;
-import jvm.api.io.JavaList;
+import jvm.api.collect.Streams;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
 import magma.api.option.None;
@@ -14,7 +14,6 @@ import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.State;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Compiler {
@@ -56,7 +55,7 @@ public class Compiler {
     }
 
     static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state) {
-        List_<String> segments = new JavaList<>();
+        List_<String> segments = Lists.empty();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
         for (int i = 0; i < input.length(); i++) {
@@ -90,12 +89,15 @@ public class Compiler {
             String right = input.strip().substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                List_<String> namespace = new JavaList<>(Arrays.asList(left.split(Pattern.quote("."))));
+                String[] array = left.split(Pattern.quote("."));
+
+                List_<String> namespace = Streams.stream(array).collect(Lists.collectToList());
+
                 if (isFunctionalImport(namespace)) {
                     return generateEmpty();
                 }
 
-                List_<String> copy = new JavaList<>();
+                List_<String> copy = Lists.empty();
                 List_<String> thisNamespace = state.namespace();
 
                 for (int i = 0; i < thisNamespace.size(); i++) {
@@ -176,7 +178,7 @@ public class Compiler {
     }
 
     private static boolean isFunctionalImport(List_<String> namespace) {
-        List_<String> slice = namespace.subList(0, 3).orElse(new JavaList<>());
+        List_<String> slice = namespace.subList(0, 3).orElse(Lists.empty());
         return Lists.equalsTo(slice, FUNCTIONAL_NAMESPACE, String::equals);
     }
 

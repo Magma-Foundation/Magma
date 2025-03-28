@@ -1,6 +1,8 @@
 package jvm.api.collect;
 
 import jvm.api.io.JavaList;
+import jvm.api.io.JavaListCollector;
+import magma.api.collect.Collector;
 import magma.api.collect.Equator;
 import magma.api.collect.List_;
 
@@ -32,5 +34,9 @@ public class Lists {
 
     public static <T> List_<T> empty() {
         return new JavaList<>();
+    }
+
+    public static <T> Collector<T, List_<T>> collectToList() {
+        return new JavaListCollector<T>();
     }
 }

@@ -1,6 +1,5 @@
 package jvm.api.collect;
 
-import magma.api.collect.EmptyHead;
 import magma.api.collect.RangeHead;
 import magma.api.collect.Stream;
 
@@ -11,7 +10,7 @@ public class Streams {
         return new HeadedStream<>(new RangeHead(list.size())).map(list::get);
     }
 
-    public static <T> Stream<T> empty() {
-        return new HeadedStream<>(new EmptyHead<>());
+    public static <T> Stream<T> stream(T[] array) {
+        return new HeadedStream<>(new RangeHead(array.length)).map(index -> array[index]);
     }
 }
