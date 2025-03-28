@@ -1,4 +1,4 @@
-package jv.api.collect;
+package jvm.api.collect;
 
 import magma.api.collect.Collector;
 import magma.api.collect.Head;

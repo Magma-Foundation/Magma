@@ -1,6 +1,6 @@
 package magma;
 
-import jv.api.collect.JavaLists;
+import jvm.api.collect.JavaLists;
 import magma.api.collect.Joiner;
 import magma.api.result.Err;
 import magma.api.result.Ok;

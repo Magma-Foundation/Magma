@@ -1,6 +1,6 @@
-package jv.api.io;
+package jvm.api.io;
 
-import jv.api.collect.HeadedStream;
+import jvm.api.collect.HeadedStream;
 import magma.api.collect.List_;
 import magma.api.collect.RangeHead;
 import magma.api.collect.Stream;

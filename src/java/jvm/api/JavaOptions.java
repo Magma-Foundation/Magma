@@ -1,4 +1,4 @@
-package jv.api;
+package jvm.api;
 
 import magma.api.option.None;
 import magma.api.option.Option;

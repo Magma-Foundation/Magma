@@ -1,6 +1,6 @@
-package jv.api.io;
+package jvm.api.io;
 
-import jv.api.result.JavaResults;
+import jvm.api.result.JavaResults;
 import magma.api.io.IOError;
 
 import java.io.IOException;

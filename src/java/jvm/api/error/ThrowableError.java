@@ -1,4 +1,4 @@
-package jv.api.error;
+package jvm.api.error;
 
 import magma.api.error.Error;
 

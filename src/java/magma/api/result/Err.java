@@ -1,6 +1,6 @@
 package magma.api.result;
 
-import jv.api.JavaOptions;
+import jvm.api.JavaOptions;
 import magma.api.option.Option;
 
 import java.util.Optional;

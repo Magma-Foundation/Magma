@@ -1,10 +1,10 @@
 #ifndef magma_Application
 #define magma_Application
-#include "../jv/api/collect/JavaLists.h"
-#include "../jv/api/error/ThrowableError.h"
-#include "../jv/api/io/JavaFiles.h"
-#include "../jv/api/result/JavaResults.h"
-#include "../jv/app/compile/PathSource.h"
+#include "../jvm/api/collect/JavaLists.h"
+#include "../jvm/api/error/ThrowableError.h"
+#include "../jvm/api/io/JavaFiles.h"
+#include "../jvm/api/result/JavaResults.h"
+#include "../jvm/app/compile/PathSource.h"
 #include "../magma/api/collect/List_.h"
 #include "../magma/api/option/Option.h"
 #include "../magma/api/option/Some.h"

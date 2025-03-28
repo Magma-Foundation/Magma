@@ -1,10 +1,10 @@
 package magma;
 
-import jv.api.collect.JavaLists;
-import jv.api.error.ThrowableError;
-import jv.api.io.JavaFiles;
-import jv.api.result.JavaResults;
-import jv.app.compile.PathSource;
+import jvm.api.collect.JavaLists;
+import jvm.api.error.ThrowableError;
+import jvm.api.io.JavaFiles;
+import jvm.api.result.JavaResults;
+import jvm.app.compile.PathSource;
 import magma.api.collect.List_;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -73,7 +73,7 @@ public class Application {
             final Source wrapped = new PathSource(source);
             List_<String> namespace = wrapped.computeNamespace();
             List_<String> slice = namespace.subList(0, 1).orElse(JavaLists.empty());
-            if (JavaLists.equalsTo(slice, JavaLists.of("jv"), String::equals)) {
+            if (JavaLists.equalsTo(slice, JavaLists.of("jvm"), String::equals)) {
                 continue;
             }
 

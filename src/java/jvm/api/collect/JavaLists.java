@@ -1,6 +1,6 @@
-package jv.api.collect;
+package jvm.api.collect;
 
-import jv.api.io.JavaList;
+import jvm.api.io.JavaList;
 import magma.api.collect.Equator;
 import magma.api.collect.List_;
 

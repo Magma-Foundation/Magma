@@ -1,6 +1,6 @@
 #ifndef magma_Compiler
 #define magma_Compiler
-#include "../jv/api/collect/JavaLists.h"
+#include "../jvm/api/collect/JavaLists.h"
 #include "../magma/api/collect/Joiner.h"
 #include "../magma/api/result/Err.h"
 #include "../magma/api/result/Ok.h"

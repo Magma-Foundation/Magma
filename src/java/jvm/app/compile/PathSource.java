@@ -1,8 +1,8 @@
-package jv.app.compile;
+package jvm.app.compile;
 
-import jv.api.collect.JavaLists;
-import jv.api.io.JavaIOError;
-import jv.api.result.JavaResults;
+import jvm.api.collect.JavaLists;
+import jvm.api.io.JavaIOError;
+import jvm.api.result.JavaResults;
 import magma.Application;
 import magma.api.collect.List_;
 import magma.api.io.IOError;
