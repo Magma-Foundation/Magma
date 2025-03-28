@@ -29,4 +29,8 @@ public class JavaLists {
 
         return first.stream().zip(second.stream()).allMatch(tuple -> equator.equalsTo(tuple.left(), tuple.right()));
     }
+
+    public static <T> List_<T> empty() {
+        return new JavaList<>();
+    }
 }

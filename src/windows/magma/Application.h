@@ -3,7 +3,6 @@
 #include "../jv/api/collect/JavaLists.h"
 #include "../jv/api/error/ThrowableError.h"
 #include "../jv/api/io/JavaFiles.h"
-#include "../jv/api/io/JavaList.h"
 #include "../jv/api/result/JavaResults.h"
 #include "../jv/app/compile/PathSource.h"
 #include "../magma/api/collect/List_.h"

@@ -1,6 +1,5 @@
 package magma.api.option;
 
-import jv.api.io.JavaList;
 import magma.api.result.Tuple;
 
 import java.util.function.Consumer;
