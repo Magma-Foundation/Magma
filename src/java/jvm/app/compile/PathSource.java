@@ -1,6 +1,6 @@
 package jvm.app.compile;
 
-import jvm.api.collect.JavaLists;
+import jvm.api.collect.Lists;
 import jvm.api.io.JavaIOError;
 import jvm.api.result.JavaResults;
 import magma.Application;
@@ -39,6 +39,6 @@ public record PathSource(Path source) implements Source {
 
     @Override
     public List_<String> computeNamespace() {
-        return JavaLists.fromNative(computeNamespace0());
+        return Lists.fromNative(computeNamespace0());
     }
 }

@@ -1,6 +1,6 @@
 package magma;
 
-import jvm.api.collect.JavaLists;
+import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.result.Err;
 import magma.api.result.Ok;
@@ -98,7 +98,7 @@ public class Compiler {
 
                 List<String> copy = new ArrayList<String>();
 
-                List<String> namespace1 = JavaLists.toNative(state.namespace());
+                List<String> namespace1 = Lists.toNative(state.namespace());
                 for (int i = 0; i < namespace1.size(); i++) {
                     copy.add("..");
                 }
@@ -177,7 +177,7 @@ public class Compiler {
     public static String wrapTarget(State state, Tuple<String, String> tuple) {
         String name = state.name();
         String source = generateImport(name) + tuple.right();
-        if (JavaLists.toNative(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
+        if (Lists.toNative(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
             return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;

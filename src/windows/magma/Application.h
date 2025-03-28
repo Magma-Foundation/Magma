@@ -1,6 +1,6 @@
 #ifndef magma_Application
 #define magma_Application
-#include "../jvm/api/collect/JavaLists.h"
+#include "../jvm/api/collect/Lists.h"
 #include "../jvm/api/error/ThrowableError.h"
 #include "../jvm/api/io/JavaFiles.h"
 #include "../jvm/api/result/JavaResults.h"
