@@ -1,2 +1,2 @@
-struct ApplicationError(Error error) implements Error {
+struct ApplicationError {
 };

@@ -187,7 +187,7 @@ public class Main {
     }
 
     private static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, State state) {
-        if (input.startsWith("package ")) return new Ok<>(new Tuple<>("", ""));
+        if (input.startsWith("package ")) return generateEmpty();
 
         if (input.strip().startsWith("import ")) {
             String right = input.strip().substring("import ".length());
@@ -195,7 +195,7 @@ public class Main {
                 String left = right.substring(0, right.length() - ";".length());
                 List<String> namespace = new ArrayList<>(Arrays.asList(left.split(Pattern.quote("."))));
                 if (namespace.size() >= 3 && namespace.subList(0, 3).equals(List.of("java", "util", "function"))) {
-                    return new Ok<>(new Tuple<>("", ""));
+                    return generateEmpty();
                 }
 
                 List<String> copy = new ArrayList<>();
@@ -228,8 +228,16 @@ public class Main {
             String right = input.substring(recordIndex + "record ".length());
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                return generateStruct(name);
+                String beforeContent = right.substring(0, contentStart).strip();
+                int paramStart = beforeContent.indexOf("(");
+                if (paramStart >= 0) {
+                    String maybeWithTypeParams = beforeContent.substring(0, paramStart).strip();
+                    if (maybeWithTypeParams.endsWith(">")) {
+                        return generateEmpty();
+                    } else {
+                        return generateStruct(maybeWithTypeParams);
+                    }
+                }
             }
         }
 
@@ -244,6 +252,10 @@ public class Main {
         }
 
         return new Err<>(new CompileError("Invalid root segment", input));
+    }
+
+    private static Ok<Tuple<String, String>, CompileError> generateEmpty() {
+        return new Ok<>(new Tuple<>("", ""));
     }
 
     private static Ok<Tuple<String, String>, CompileError> generateStruct(String name) {

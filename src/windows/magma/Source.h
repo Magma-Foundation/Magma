@@ -5,5 +5,5 @@
 #include "../java/nio/file/Paths.h"
 #include "../java/util/ArrayList.h"
 #include "../java/util/List.h"
-struct Source(Path source) {
+struct Source {
 };
