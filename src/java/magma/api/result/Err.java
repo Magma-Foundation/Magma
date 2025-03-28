@@ -1,21 +1,13 @@
 package magma.api.result;
 
-import jvm.api.Options;
+import magma.api.option.None;
 import magma.api.option.Option;
+import magma.api.option.Some;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Err<T, X>(X error) implements Result<T, X> {
-    private Optional<T> findValue1() {
-        return Optional.empty();
-    }
-
-    private Optional<X> findError0() {
-        return Optional.of(error);
-    }
-
     @Override
     public <R> Result<R, X> mapValue(Function<T, R> mapper) {
         return new Err<>(error);
@@ -43,11 +35,11 @@ public record Err<T, X>(X error) implements Result<T, X> {
 
     @Override
     public Option<T> findValue() {
-        return Options.wrap(findValue1());
+        return new None<>();
     }
 
     @Override
     public Option<X> findError() {
-        return Options.wrap(findError0());
+        return new Some<>(error);
     }
 }
