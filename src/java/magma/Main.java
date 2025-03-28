@@ -9,7 +9,6 @@ import magma.result.Ok;
 import magma.result.Result;
 import magma.result.Results;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -90,13 +89,25 @@ public class Main {
     private static Result<Path, ApplicationError> compileWithInput(Path source, String input) {
         return compile(input)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(output -> writeOutputWrapped(source, output));
+                .flatMapValue(output -> writeOutput(source, output));
     }
 
-    private static Result<Path, ApplicationError> writeOutputWrapped(Path source, String output) {
-        return writeOutput(source, output)
-                .mapErr(ThrowableError::new)
-                .mapErr(ApplicationError::new);
+    private static Result<Path, ApplicationError> writeOutput(Path source, String output) {
+        Path relative = SOURCE_DIRECTORY.relativize(source);
+        Path parent = relative.getParent();
+        Path targetParent = TARGET_DIRECTORY.resolve(parent);
+        Optional<Result<Path, ApplicationError>> maybeError = ensureDirectories(targetParent).map(Err::new);
+        if (maybeError.isPresent()) return maybeError.get();
+
+        String nameWithExt = relative.getFileName().toString();
+        String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
+        Path target = targetParent.resolve(name + ".c");
+
+        return JavaFiles.writeString(target, output)
+                .map(ThrowableError::new)
+                .map(ApplicationError::new)
+                .<Result<Path, ApplicationError>>map(Err::new)
+                .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
     private static Result<String, CompileError> compile(String input) {
@@ -123,23 +134,15 @@ public class Main {
                     .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
 
-        Result<String, CompileError> stringCompileErrorResult = output.mapValue(StringBuilder::toString);
-        return stringCompileErrorResult;
+        return output.mapValue(StringBuilder::toString);
     }
 
-    private static Result<Path, IOException> writeOutput(Path source, String output) {
-        Path relative = SOURCE_DIRECTORY.relativize(source);
-        Path parent = relative.getParent();
-        Path targetParent = TARGET_DIRECTORY.resolve(parent);
-        if (!Files.exists(targetParent)) JavaFiles.createDirectoriesSafe(targetParent);
+    private static Optional<ApplicationError> ensureDirectories(Path targetParent) {
+        if (Files.exists(targetParent)) return Optional.empty();
 
-        String nameWithExt = relative.getFileName().toString();
-        String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
-        Path target = targetParent.resolve(name + ".c");
-
-        return JavaFiles.writeString(target, output)
-                .<Result<Path, IOException>>map(Err::new)
-                .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
+        return JavaFiles.createDirectoriesSafe(targetParent)
+                .map(ThrowableError::new)
+                .map(ApplicationError::new);
     }
 
     private static Result<String, CompileError> compileRootSegment(String segment) {
