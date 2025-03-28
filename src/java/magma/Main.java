@@ -260,7 +260,7 @@ public class Main {
                 String name;
                 int extendsKeyword = beforeContent.indexOf(" extends ");
                 if (extendsKeyword >= 0) {
-                    name = beforeContent.substring(extendsKeyword + " extends ".length()).strip();
+                    name = beforeContent.substring(0, extendsKeyword).strip();
                 } else {
                     name = beforeContent;
                 }
