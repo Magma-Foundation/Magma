@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Application {
-    public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "windows");
+    public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "clang");
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
     public static Option<ApplicationError> runWithFiles(Set<Path> files) {
