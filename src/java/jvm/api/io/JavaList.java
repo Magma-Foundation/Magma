@@ -1,6 +1,7 @@
 package jvm.api.io;
 
 import jvm.api.collect.HeadedStream;
+import magma.api.collect.Collector;
 import magma.api.collect.List_;
 import magma.api.collect.RangeHead;
 import magma.api.collect.Stream;
@@ -14,6 +15,10 @@ import java.util.List;
 public record JavaList<T>(List<T> list) implements List_<T> {
     public JavaList() {
         this(new ArrayList<>());
+    }
+
+    public static <T> Collector<T, List_<T>> collector() {
+        return new JavaListCollector<>();
     }
 
     @Override

@@ -1,7 +1,8 @@
 #ifndef magma_Application
 #define magma_Application
 #include "../windows/api/collect/Lists.h"
-#include "../windows/api/io/JavaFiles.h"
+#include "../windows/api/io/JavaPaths.h"
+#include "../magma/api/io/Path_.h"
 #include "../magma/api/process/Process_.h"
 #include "../windows/api/process/Processes.h"
 #include "../windows/app/compile/PathSource.h"
@@ -18,9 +19,6 @@
 #include "../magma/api/concurrent/InterruptedError.h"
 #include "../magma/app/compile/Source.h"
 #include "../magma/app/compile/State.h"
-#include "../java/nio/file/Files.h"
-#include "../java/nio/file/Path.h"
-#include "../java/nio/file/Paths.h"
 #include "../java/util/ArrayList.h"
 #include "../java/util/List.h"
 #include "../java/util/Set.h"

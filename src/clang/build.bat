@@ -14,6 +14,7 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\concurrent\InterruptedError.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\io\IOError.c^
+	 .\magma\api\io\Path_.c^
 	 .\magma\api\error\Error.c^
 	 .\magma\Compiler.c^
 	 .\magma\api\collect\Equator.c^

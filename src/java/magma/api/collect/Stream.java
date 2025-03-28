@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Stream<T> {
-    <R> R fold(R initial, BiFunction<R, T, R> folder);
+    <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
 
     <R> Stream<R> map(Function<T, R> mapper);
 
@@ -19,4 +19,6 @@ public interface Stream<T> {
     Option<T> next();
 
     boolean allMatch(Predicate<T> predicate);
+
+    <R> Option<R> foldWithMapper(Function<T, R> mapper, BiFunction<R, T, R> folder);
 }

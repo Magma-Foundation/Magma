@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     @Override
-    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+    public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
         R current = initial;
         while (true) {
             R finalCurrent = current;
@@ -37,7 +37,7 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
 
     @Override
     public <R> R collect(Collector<T, R> collector) {
-        return fold(collector.initial(), collector::fold);
+        return foldWithInitial(collector.initial(), collector::fold);
     }
 
     @Override
@@ -52,6 +52,11 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
 
     @Override
     public boolean allMatch(Predicate<T> predicate) {
-        return fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+        return foldWithInitial(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+    }
+
+    @Override
+    public <R> Option<R> foldWithMapper(Function<T, R> mapper, BiFunction<R, T, R> folder) {
+        return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));
     }
 }
