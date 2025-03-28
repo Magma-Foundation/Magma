@@ -1,49 +1,49 @@
 package magma;
 
+import jvm.api.collect.JavaSetCollector;
 import jvm.api.collect.Lists;
+import jvm.api.io.JavaList;
 import jvm.api.io.Paths;
-import magma.api.io.Path_;
-import magma.api.process.Process_;
 import jvm.api.process.Processes;
 import jvm.app.compile.PathSource;
+import magma.api.collect.Joiner;
 import magma.api.collect.List_;
+import magma.api.collect.Set_;
+import magma.api.concurrent.InterruptedError;
+import magma.api.io.Path_;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.process.Process_;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.ApplicationError;
 import magma.app.compile.ImmutableState;
-import magma.api.concurrent.InterruptedError;
 import magma.app.compile.Source;
 import magma.app.compile.State;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Application {
     public static final Path_ TARGET_DIRECTORY = Paths.get(".", "src", "clang");
     public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
-    public static Option<ApplicationError> runWithFiles(Set<Path_> files) {
-        Set<Path_> sources = files.stream()
+    public static Option<ApplicationError> runWithFiles(Set_<Path_> files) {
+        Set_<Path_> sources = files.stream()
                 .filter(Path_::isRegularFile)
                 .filter(path -> path.asString().endsWith(".java"))
-                .collect(Collectors.toSet());
+                .collect(new JavaSetCollector<>());
 
         return runWithSources(sources).match(Application::build, Some::new);
     }
 
-    private static Option<ApplicationError> build(List<Path_> relativePaths) {
+    private static Option<ApplicationError> build(List_<Path_> relativePaths) {
         Path_ build = TARGET_DIRECTORY.resolve("build.bat");
         String joinedPaths = relativePaths.stream()
                 .map(Path_::asString)
                 .map(path -> ".\\" + path + "^\n\t")
-                .collect(Collectors.joining(" "));
+                .collect(new Joiner(" "))
+                .orElse("");
 
         String output = "clang " + joinedPaths + " -o main.exe";
         return build.writeString(output).map(ApplicationError::new).or(Application::build);
@@ -65,24 +65,21 @@ public class Application {
         return awaited.findError().map(ApplicationError::new);
     }
 
-    private static Result<List<Path_>, ApplicationError> runWithSources(Set<Path_> sources) {
-        Result<List<Path_>, ApplicationError> relativePaths = new Ok<>(new ArrayList<>());
-        for (Path_ source : sources) {
-            final Source wrapped = new PathSource(source);
-            List_<String> namespace = wrapped.computeNamespace();
-            List_<String> slice = namespace.subList(0, 1).orElse(Lists.empty());
-            if (Lists.equalsTo(slice, Lists.of("jvm"), String::equals)) {
-                continue;
-            }
+    private static Result<List_<Path_>, ApplicationError> runWithSources(Set_<Path_> sources) {
+        return sources.stream()
+                .map(PathSource::new)
+                .filter(Application::isPlatformIndependent)
+                .foldToResult(new JavaList<>(), Application::foldTargets);
+    }
 
-            relativePaths = relativePaths.and(() -> {
-                return runWithSource(wrapped, namespace, wrapped.computeName());
-            }).mapValue(tuple -> {
-                tuple.left().add(tuple.right());
-                return tuple.left();
-            });
-        }
-        return relativePaths;
+    private static boolean isPlatformIndependent(Source source) {
+        List_<String> slice = source.computeNamespace().subList(0, 1).orElse(Lists.empty());
+        return !Lists.equalsTo(slice, Lists.of("jvm"), String::equals);
+    }
+
+    private static Result<List_<Path_>, ApplicationError> foldTargets(List_<Path_> pathList, Source source) {
+        return runWithSource(source, source.computeNamespace(), source.computeName())
+                .mapValue(pathList::add);
     }
 
     private static Result<Path_, ApplicationError> runWithSource(Source source, List_<String> namespace, String name) {

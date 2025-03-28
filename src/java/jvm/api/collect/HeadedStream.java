@@ -1,9 +1,13 @@
 package jvm.api.collect;
 
 import magma.api.collect.Collector;
+import magma.api.collect.EmptyHead;
 import magma.api.collect.Head;
+import magma.api.collect.SingleHead;
 import magma.api.collect.Stream;
 import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 import magma.api.result.Tuple;
 
 import java.util.function.BiFunction;
@@ -58,5 +62,26 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     @Override
     public <R> Option<R> foldWithMapper(Function<T, R> mapper, BiFunction<R, T, R> folder) {
         return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));
+    }
+
+    @Override
+    public Stream<T> filter(Predicate<T> predicate) {
+        return flatMap(element -> new HeadedStream<>(predicate.test(element)
+                ? new SingleHead<>(element)
+                : new EmptyHead<>()));
+    }
+
+    private <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
+        return foldWithInitial(Streams.empty(), (rStream, t) -> rStream.concat(mapper.apply(t)));
+    }
+
+    @Override
+    public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+        return this.<Result<R, X>>foldWithInitial(new Ok<>(initial), (current, t) -> current.flatMapValue(inner -> folder.apply(inner, t)));
+    }
+
+    @Override
+    public Stream<T> concat(Stream<T> other) {
+        return new HeadedStream<>(() -> head.next().or(other::next));
     }
 }

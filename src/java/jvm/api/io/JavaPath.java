@@ -1,6 +1,8 @@
 package jvm.api.io;
 
+import jvm.api.collect.JavaSet;
 import jvm.api.result.JavaResults;
+import magma.api.collect.Set_;
 import magma.api.collect.Stream;
 import magma.api.io.IOError;
 import magma.api.io.Path_;
@@ -74,8 +76,10 @@ public record JavaPath(Path path) implements Path_ {
     }
 
     @Override
-    public Result<Set<Path_>, IOError> walk() {
-        return JavaResults.wrapSupplier(this::walkExceptionally).mapErr(JavaIOError::new);
+    public Result<Set_<Path_>, IOError> walk() {
+        return JavaResults.wrapSupplier(this::walkExceptionally)
+                .<Set_<Path_>>mapValue(JavaSet::new)
+                .mapErr(JavaIOError::new);
     }
 
     @Override

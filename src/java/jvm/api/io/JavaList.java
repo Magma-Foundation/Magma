@@ -1,9 +1,8 @@
 package jvm.api.io;
 
-import jvm.api.collect.HeadedStream;
+import jvm.api.collect.Streams;
 import magma.api.collect.Collector;
 import magma.api.collect.List_;
-import magma.api.collect.RangeHead;
 import magma.api.collect.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -23,8 +22,7 @@ public record JavaList<T>(List<T> list) implements List_<T> {
 
     @Override
     public Stream<T> stream() {
-        return new HeadedStream<>(new RangeHead(list.size()))
-                .map(list::get);
+        return Streams.stream(list);
     }
 
     @Override

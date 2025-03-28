@@ -1,15 +1,14 @@
 package magma.api.io;
 
+import magma.api.collect.Set_;
 import magma.api.collect.Stream;
 import magma.api.option.Option;
 import magma.api.result.Result;
 
-import java.util.Set;
-
 public interface Path_ {
     Option<IOError> createDirectoriesSafe();
 
-    Result<Set<Path_>, IOError> walk();
+    Result<Set_<Path_>, IOError> walk();
 
     Option<IOError> writeString(String output);
 

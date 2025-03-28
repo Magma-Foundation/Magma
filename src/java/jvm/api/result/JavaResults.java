@@ -1,6 +1,6 @@
 package jvm.api.result;
 
-import jvm.api.JavaOptions;
+import jvm.api.Options;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -8,7 +8,6 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
@@ -24,10 +23,10 @@ public class JavaResults {
     }
 
     public static <T, X extends Throwable> T unwrap(Result<T, X> result) throws X {
-        Optional<T> maybeValue = JavaOptions.unwrap(result.findValue());
+        Optional<T> maybeValue = Options.unwrap(result.findValue());
         if (maybeValue.isPresent()) return maybeValue.get();
 
-        Optional<X> maybeError = JavaOptions.unwrap(result.findError());
+        Optional<X> maybeError = Options.unwrap(result.findError());
         if (maybeError.isPresent()) throw maybeError.get();
 
         throw new RuntimeException("Neither a value nor an error is present.");

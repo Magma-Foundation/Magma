@@ -1,29 +1,32 @@
 clang .\magma\app\compile\ImmutableState.c^
+	 .\magma\api\result\Result.c^
+	 .\magma\app\ApplicationError.c^
+	 .\magma\api\collect\Stream.c^
+	 .\magma\api\result\Tuple.c^
+	 .\magma\api\concurrent\InterruptedError.c^
+	 .\magma\api\collect\List_.c^
+	 .\magma\api\error\Error.c^
+	 .\magma\api\collect\Equator.c^
+	 .\magma\api\option\Option.c^
+	 .\magma\Application.c^
+	 .\magma\api\collect\RangeHead.c^
+	 .\magma\app\compile\Source.c^
 	 .\magma\api\collect\Head.c^
 	 .\magma\app\compile\CompileError.c^
-	 .\magma\api\result\Result.c^
+	 .\magma\api\collect\SingleHead.c^
 	 .\magma\api\collect\Equatable.c^
+	 .\magma\api\collect\EmptyHead.c^
 	 .\magma\api\option\None.c^
 	 .\magma\api\process\Process_.c^
 	 .\magma\api\result\Err.c^
-	 .\magma\app\ApplicationError.c^
+	 .\magma\api\collect\Set_.c^
 	 .\magma\api\option\Some.c^
-	 .\magma\api\collect\Stream.c^
-	 .\magma\api\result\Tuple.c^
 	 .\magma\api\collect\Collector.c^
-	 .\magma\api\concurrent\InterruptedError.c^
-	 .\magma\api\collect\List_.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\io\Path_.c^
-	 .\magma\api\error\Error.c^
 	 .\magma\Compiler.c^
-	 .\magma\api\collect\Equator.c^
 	 .\magma\Main.c^
 	 .\magma\app\compile\State.c^
-	 .\magma\api\option\Option.c^
-	 .\magma\Application.c^
 	 .\magma\api\collect\Joiner.c^
-	 .\magma\api\collect\RangeHead.c^
-	 .\magma\app\compile\Source.c^
 	 .\magma\api\result\Ok.c^
 	 -o main.exe
