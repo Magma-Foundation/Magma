@@ -90,10 +90,7 @@ public class Main {
         List<String> namespace = source.computeNamespace();
         String name = source.computeName();
 
-        List<String> copy = new ArrayList<>(namespace);
-        copy.add(name);
-
-        return compile(input, copy)
+        return compile(input, namespace, name)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
     }
@@ -117,16 +114,18 @@ public class Main {
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compile(String input, List<String> namespace) {
+    private static Result<Tuple<String, String>, CompileError> compile(String input, List<String> namespace, String name) {
         return divideAndCompile(input).mapValue(tuple -> {
-            String newSource = attachSource(namespace, tuple.right());
+            String newSource = attachSource(tuple.right(), namespace, name);
             return new Tuple<>(tuple.left(), newSource);
         });
     }
 
-    private static String attachSource(List<String> namespace, String source) {
-        if (namespace.equals(List.of("magma", "Main"))) {
-            return source + "int main(){\n\treturn 0;\n}\n";
+    private static String attachSource(String source, List<String> namespace, String name) {
+        if (namespace.equals(List.of("magma")) && name.equals("Main")) {
+            return "#include \"" +
+                    name + ".h" +
+                    "\"\n" + source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
         }
