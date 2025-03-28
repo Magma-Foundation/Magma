@@ -1,2 +1,1 @@
-struct Option<T> {
-};
+#include "../../magma/result/Tuple.h"

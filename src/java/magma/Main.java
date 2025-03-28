@@ -1,9 +1,13 @@
 package magma;
 
+import magma.compile.ImmutableState;
+import magma.compile.Source;
+import magma.compile.State;
 import magma.error.ApplicationError;
 import magma.error.CompileError;
 import magma.error.ThrowableError;
 import magma.java.JavaFiles;
+import magma.java.JavaLists;
 import magma.java.Options;
 import magma.result.Err;
 import magma.result.Ok;
@@ -97,7 +101,7 @@ public class Main {
     }
 
     private static Result<Path, ApplicationError> compileWithInput(String input, List<String> namespace, String name) {
-        State state = new State(namespace, name);
+        State state = new ImmutableState(namespace, name);
         return compile(state, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
@@ -132,7 +136,7 @@ public class Main {
     private static String attachSource(State state, Tuple<String, String> tuple) {
         String name = state.name();
         String source = generateImport(name) + tuple.right();
-        if (state.namespace().equals(List.of("magma")) && name.equals("Main")) {
+        if (JavaLists.unwrap(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
             return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
@@ -200,7 +204,7 @@ public class Main {
 
                 List<String> copy = new ArrayList<>();
 
-                List<String> namespace1 = state.namespace();
+                List<String> namespace1 = JavaLists.unwrap(state.namespace());
                 for (int i = 0; i < namespace1.size(); i++) {
                     copy.add("..");
                 }
@@ -219,6 +223,9 @@ public class Main {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
+                if (name.endsWith(">")) {
+                    return generateEmpty();
+                }
                 return generateStruct(name);
             }
         }
@@ -246,8 +253,11 @@ public class Main {
             String right = input.substring(interfaceIndex + "interface ".length());
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                return generateStruct(name);
+                String beforeContent = right.substring(0, contentStart).strip();
+                if (beforeContent.endsWith(">")) {
+                    return generateEmpty();
+                }
+                return generateStruct(beforeContent);
             }
         }
 

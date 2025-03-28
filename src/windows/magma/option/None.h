@@ -1,2 +1,1 @@
-struct None<T> implements Option<T> {
-};
+#include "../../magma/result/Tuple.h"

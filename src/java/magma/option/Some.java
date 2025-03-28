@@ -1,5 +1,7 @@
 package magma.option;
 
+import magma.result.Tuple;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -12,5 +14,10 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public T orElseGet(Supplier<T> other) {
         return value;
+    }
+
+    @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(true, value);
     }
 }
