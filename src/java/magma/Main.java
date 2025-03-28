@@ -257,7 +257,15 @@ public class Main {
                 if (beforeContent.endsWith(">")) {
                     return generateEmpty();
                 }
-                return generateStruct(beforeContent);
+                String name;
+                int extendsKeyword = beforeContent.indexOf(" extends ");
+                if (extendsKeyword >= 0) {
+                    name = beforeContent.substring(extendsKeyword + " extends ".length()).strip();
+                } else {
+                    name = beforeContent;
+                }
+
+                return generateStruct(name);
             }
         }
 
