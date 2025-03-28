@@ -61,8 +61,8 @@ public class Compiler {
     private static Rule createRootSegmentRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                Compiler::compilePackage,
-                Compiler::compileImport,
+                createPackageRule(),
+                createImportRule(),
                 Compiler::compileClass,
                 Compiler::compileRecord,
                 Compiler::compileInterface
@@ -73,13 +73,8 @@ public class Compiler {
         return new StripRule(new EmptyRule());
     }
 
-    private static Result<Tuple<String, String>, CompileError> compilePackage(ParseState state, String input) {
-        if (input.startsWith("package ")) return generateEmpty();
-        return createPrefixErr(input, "package ");
-    }
-
-    private static Err<Tuple<String, String>, CompileError> createPrefixErr(String input, String prefix) {
-        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
+    private static StripRule createPackageRule() {
+        return createNamespaceRule("package  ", (state1, input1) -> generateEmpty());
     }
 
     private static Result<Tuple<String, String>, CompileError> compileClass(ParseState state, String input) {
@@ -113,7 +108,7 @@ public class Compiler {
 
     }
 
-    private static Err<Tuple<String, String>, CompileError> createSuffixErr(String input, String suffix) {
+    public static Err<Tuple<String, String>, CompileError> createSuffixErr(String input, String suffix) {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
@@ -185,27 +180,16 @@ public class Compiler {
                 .merge(other));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileImport(ParseState parseState, String input) {
-        String stripped = input.strip();
+    private static StripRule createImportRule() {
+        return createNamespaceRule("import ", Compiler::compileSegments);
+    }
 
-        if (!stripped.startsWith("import ")) return createPrefixErr(input, "import ");
+    private static StripRule createNamespaceRule(String prefix, Rule rule) {
+        return new StripRule(new PrefixRule(prefix, new SuffixRule(rule, ";")));
+    }
 
-        String right = stripped.substring("import ".length());
-        if (!right.endsWith(";")) return createSuffixErr(input, "import ");
-
-        String left = right.substring(0, right.length() - ";".length());
-        List_<String> namespace = Lists.empty();
-        StringBuilder buffer = new StringBuilder();
-        for (int i = 0; i < left.length(); i++) {
-            char c = left.charAt(i);
-            if (c == '.') {
-                namespace = namespace.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                buffer.append(c);
-            }
-        }
-        namespace = namespace.add(buffer.toString());
+    private static Result<Tuple<String, String>, CompileError> compileSegments(ParseState parseState, String input) {
+        List_<String> namespace = computeNamespace(input);
 
         if (isFunctionalImport(namespace)) {
             return generateEmpty();
@@ -233,6 +217,22 @@ public class Compiler {
                 .orElse("");
 
         return new Ok<>(new Tuple<>(generateImport(stringList), ""));
+    }
+
+    private static List_<String> computeNamespace(String left) {
+        List_<String> namespace = Lists.empty();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < left.length(); i++) {
+            char c = left.charAt(i);
+            if (c == '.') {
+                namespace = namespace.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                buffer.append(c);
+            }
+        }
+        namespace = namespace.add(buffer.toString());
+        return namespace;
     }
 
     private static Result<Tuple<String, String>, CompileError> compileClassMember(String input) {
