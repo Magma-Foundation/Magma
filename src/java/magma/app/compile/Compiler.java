@@ -23,7 +23,6 @@ public class Compiler {
     public static final String NAME = "name";
     public static final String HEADER = "header";
     public static final String TARGET = "target";
-    public static final String INPUT = "input";
 
     public static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
         Rule rule = createRootRule();
@@ -121,7 +120,7 @@ public class Compiler {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
-    private static Result<Tuple<String, String>, CompileError> createInfixErr(ParseState input, String infix) {
+    private static Err<Tuple<String, String>, CompileError> createInfixErr(String input, String infix) {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 

@@ -5,7 +5,6 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
-import magma.app.compile.Compiler;
 import magma.app.compile.MapNode;
 import magma.app.compile.ParseState;
 
@@ -23,12 +22,12 @@ public record OrRule(List_<Rule> rules) implements Rule {
 
     @Override
     public Result<MapNode, CompileError> parse(String input) {
-        return new Ok<>(new MapNode().withString(Compiler.INPUT, input));
+        return new Ok<>(new MapNode().withString(INPUT, input));
     }
 
     @Override
     public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-        return apply(state, input.find(Compiler.INPUT).orElse("")).mapValue(tuple -> {
+        return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
             return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
         });
     }
