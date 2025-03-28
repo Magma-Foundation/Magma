@@ -9,4 +9,8 @@
 #include "../magma/api/result/Tuple.h"
 struct DivideState {
 };
+	int value;
+	int value;
+	int value;
+	int value;
 #endif

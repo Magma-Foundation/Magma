@@ -5,4 +5,6 @@
 #include "../../../magma/api/option/Some.h"
 struct RangeHead {
 };
+	int value;
+	int value;
 #endif

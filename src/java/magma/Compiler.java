@@ -169,6 +169,7 @@ public class Compiler {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
+                String withEnd = right.substring(contentStart + "{".length()).strip();
 
                 int implementsIndex = name.indexOf(" implements ");
                 String name1 = implementsIndex >= 0
@@ -179,7 +180,11 @@ public class Compiler {
                     return generateEmpty();
                 }
 
-                return generateStruct(name1, new Tuple<>("", ""));
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return divideAndCompile(inputContent, parseState, (s, parseState2) -> compileClassMember(s))
+                            .flatMapValue(tuple -> generateStruct(name1, tuple));
+                }
             }
         }
 
@@ -238,13 +243,16 @@ public class Compiler {
     private static Result<Tuple<String, String>, CompileError> compileClassMember(String input) {
         if (input.isBlank()) return generateEmpty();
 
+        if (input.endsWith(";")) return new Ok<>(new Tuple<>("\tint value;\n", ""));
+
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                String name = definition.substring(nameSeparator + " ".length()).strip();
-                return new Ok<>(new Tuple<>("", "void " + name + "(){\n}\n"));
+                String oldName = definition.substring(nameSeparator + " ".length()).strip();
+                String newName = oldName.equals("main") ? "__main__" : oldName;
+                return new Ok<>(new Tuple<>("", "void " + newName + "(){\n}\n"));
             }
         }
 

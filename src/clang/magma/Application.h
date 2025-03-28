@@ -24,4 +24,6 @@
 #include "../magma/app/compile/ParseState.h"
 struct Application {
 };
+	int value;
+	int value;
 #endif
