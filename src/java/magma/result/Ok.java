@@ -1,21 +1,13 @@
 package magma.result;
 
-import magma.java.Options;
+import magma.option.None;
 import magma.option.Option;
+import magma.option.Some;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Ok<T, X>(T value) implements Result<T, X> {
-    private Optional<T> findValue1() {
-        return Optional.of(value);
-    }
-
-    private Optional<X> findError0() {
-        return Optional.empty();
-    }
-
     @Override
     public <R> Result<R, X> mapValue(Function<T, R> mapper) {
         return new Ok<>(mapper.apply(value));
@@ -43,11 +35,11 @@ public record Ok<T, X>(T value) implements Result<T, X> {
 
     @Override
     public Option<T> findValue() {
-        return Options.wrap(findValue1());
+        return new Some<>(value);
     }
 
     @Override
     public Option<X> findError() {
-        return Options.wrap(findError0());
+        return new None<>();
     }
 }
