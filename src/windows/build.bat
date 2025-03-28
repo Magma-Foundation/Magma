@@ -5,6 +5,7 @@ clang .\magma\list\RangeHead.c^
 	 .\magma\error\ApplicationError.c^
 	 .\magma\result\Tuple.c^
 	 .\magma\error\ThrowableError.c^
+	 .\magma\compile\PathSource.c^
 	 .\magma\option\None.c^
 	 .\magma\option\Option.c^
 	 .\magma\compile\Source.c^

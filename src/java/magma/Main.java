@@ -1,20 +1,20 @@
 package magma;
 
-import magma.compile.ImmutableState;
-import magma.compile.PathSource;
-import magma.compile.Source;
-import magma.compile.State;
-import magma.error.ApplicationError;
-import magma.error.CompileError;
-import magma.error.ThrowableError;
-import magma.java.JavaFiles;
-import magma.java.JavaLists;
-import magma.java.Options;
-import magma.result.Err;
-import magma.result.Ok;
-import magma.result.Result;
-import magma.result.Results;
-import magma.result.Tuple;
+import magma.app.ApplicationError;
+import magma.app.compile.ImmutableState;
+import jv.app.compile.PathSource;
+import magma.app.compile.Source;
+import magma.app.compile.State;
+import magma.app.compile.CompileError;
+import jv.api.error.ThrowableError;
+import jv.api.io.JavaFiles;
+import jv.api.collect.JavaLists;
+import jv.api.JavaOptions;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import jv.api.result.JavaResults;
+import magma.api.result.Tuple;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,12 +66,12 @@ public class Main {
                 .directory(TARGET_DIRECTORY.toFile())
                 .inheritIO();
 
-        return Results.wrap(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
-            Result<Integer, InterruptedException> awaited = Results.wrap(process::waitFor);
-            Options.unwrap(awaited.findValue()).ifPresent(exitCode -> {
+        return JavaResults.wrap(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
+            Result<Integer, InterruptedException> awaited = JavaResults.wrap(process::waitFor);
+            JavaOptions.unwrap(awaited.findValue()).ifPresent(exitCode -> {
                 if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
             });
-            return Options.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
+            return JavaOptions.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
         }, Optional::of);
     }
 
@@ -79,7 +79,7 @@ public class Main {
         Result<List<Path>, ApplicationError> relativePaths = new Ok<>(new ArrayList<>());
         for (Path source : sources) {
             final Source wrapped = new PathSource(source);
-            List<String> namespace = wrapped.computeNamespace();
+            List<String> namespace = JavaLists.toNative(wrapped.computeNamespace());
             if (namespace.equals(List.of("magma", "java"))) {
                 continue;
             }
@@ -102,7 +102,7 @@ public class Main {
     }
 
     private static Result<Path, ApplicationError> compileWithInput(String input, List<String> namespace, String name) {
-        State state = new ImmutableState(JavaLists.wrap(namespace), name);
+        State state = new ImmutableState(JavaLists.fromNative(namespace), name);
         return compile(state, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
@@ -137,7 +137,7 @@ public class Main {
     private static String attachSource(State state, Tuple<String, String> tuple) {
         String name = state.name();
         String source = generateImport(name) + tuple.right();
-        if (JavaLists.unwrap(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
+        if (JavaLists.toNative(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
             return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
@@ -205,7 +205,7 @@ public class Main {
 
                 List<String> copy = new ArrayList<>();
 
-                List<String> namespace1 = JavaLists.unwrap(state.namespace());
+                List<String> namespace1 = JavaLists.toNative(state.namespace());
                 for (int i = 0; i < namespace1.size(); i++) {
                     copy.add("..");
                 }

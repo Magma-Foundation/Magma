@@ -1,4 +1,5 @@
 #include "../magma/compile/ImmutableState.h"
+#include "../magma/compile/PathSource.h"
 #include "../magma/compile/Source.h"
 #include "../magma/compile/State.h"
 #include "../magma/error/ApplicationError.h"
