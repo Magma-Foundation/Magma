@@ -1,7 +1,5 @@
 package magma.api.collect;
 
-import jvm.api.io.JavaList;
-import magma.api.io.Path_;
 import magma.api.option.Option;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
