@@ -18,7 +18,7 @@ public record PathSource(Path source) implements Source {
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
     @Override
-    public Result<String, IOError> read0() {
+    public Result<String, IOError> read() {
         return JavaResults
                 .wrap(() -> Files.readString(this.source()))
                 .mapErr(JavaIOError::new);

@@ -95,7 +95,7 @@ public class Main {
     }
 
     private static Result<Path, ApplicationError> runWithSource(Source source, List<String> namespace, String name) {
-        return source.read0()
+        return source.read()
                 .mapErr(ApplicationError::new)
                 .flatMapValue(input -> compileWithInput(input, namespace, name));
     }
