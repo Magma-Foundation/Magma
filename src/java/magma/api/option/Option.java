@@ -20,4 +20,6 @@ public interface Option<T> {
     T orElse(T other);
 
     <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
+
+    <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty);
 }

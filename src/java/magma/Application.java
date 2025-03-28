@@ -1,11 +1,13 @@
 package magma;
 
 import jvm.api.collect.Lists;
-import jvm.api.error.ThrowableError;
+import jvm.api.concurrent.JavaInterruptedError;
 import jvm.api.io.JavaFiles;
+import jvm.api.io.JavaIOError;
 import jvm.api.result.JavaResults;
 import jvm.app.compile.PathSource;
 import magma.api.collect.List_;
+import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Err;
@@ -14,6 +16,7 @@ import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.ApplicationError;
 import magma.app.compile.ImmutableState;
+import magma.api.concurrent.InterruptedError;
 import magma.app.compile.Source;
 import magma.app.compile.State;
 
@@ -22,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,24 +49,33 @@ public class Application {
                 .collect(Collectors.joining(" "));
 
         String output = "clang " + joinedPaths + " -o main.exe";
-        return JavaFiles.writeString(build, output)
-                .map(ThrowableError::new)
-                .map(ApplicationError::new)
-                .or(Application::build);
+        return JavaFiles.writeString(build, output).map(ApplicationError::new).or(Application::build);
     }
 
     private static Option<ApplicationError> build() {
+        return startBuildCommand()
+                .mapErr(ApplicationError::new)
+                .match(Application::awaitProcess, Some::new);
+    }
+
+    private static Option<ApplicationError> awaitProcess(Process process) {
+        Result<Integer, InterruptedError> awaited = JavaResults
+                .wrapSupplier(process::waitFor)
+                .mapErr(JavaInterruptedError::new);
+
+        awaited.findValue().ifPresent(exitCode -> {
+            if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
+        });
+
+        return awaited.findError().map(ApplicationError::new);
+    }
+
+    private static Result<Process, JavaIOError> startBuildCommand() {
         ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "build")
                 .directory(TARGET_DIRECTORY.toFile())
                 .inheritIO();
 
-        return JavaResults.wrapSupplier(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
-            Result<Integer, InterruptedException> awaited = JavaResults.wrapSupplier(process::waitFor);
-            awaited.findValue().ifPresent(exitCode -> {
-                if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
-            });
-            return awaited.findError().map(ThrowableError::new).map(ApplicationError::new);
-        }, Some::new);
+        return JavaResults.wrapSupplier(builder::start).mapErr(JavaIOError::new);
     }
 
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
@@ -90,43 +101,41 @@ public class Application {
     private static Result<Path, ApplicationError> runWithSource(Source source, List_<String> namespace, String name) {
         return source.read()
                 .mapErr(ApplicationError::new)
-                .flatMapValue(input -> compileWithInput(input, namespace, name));
+                .flatMapValue(input -> compileWithInput(namespace, name, input));
     }
 
-    private static Result<Path, ApplicationError> compileWithInput(String input, List_<String> namespace, String name) {
+    private static Result<Path, ApplicationError> compileWithInput(List_<String> namespace, String name, String input) {
         State state = new ImmutableState(namespace, name);
         return Compiler.compile(state, input)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(output -> writeOutput(output, namespace, name));
+                .flatMapValue(output -> writeOutput(namespace, name, output));
     }
 
-    private static Result<Path, ApplicationError> writeOutput(Tuple<String, String> output, List_<String> namespace, String name) {
+    private static Result<Path, ApplicationError> writeOutput(List_<String> namespace, String name, Tuple<String, String> output) {
         Path targetParent = namespace.stream().fold(TARGET_DIRECTORY, Path::resolve);
 
-        Optional<Result<Path, ApplicationError>> maybeError = ensureDirectories(targetParent).map(Err::new);
-        if (maybeError.isPresent()) return maybeError.get();
+        return ensureDirectories(targetParent)
+                .<Result<Path, ApplicationError>>map(Err::new)
+                .orElseGet(() -> getPathApplicationErrorResult(targetParent, name, output));
+    }
 
-        Path header = targetParent.resolve(name + ".h");
-        Path target = targetParent.resolve(name + ".c");
+    private static Result<Path, ApplicationError> getPathApplicationErrorResult(Path parent, String name, Tuple<String, String> output) {
+        Path header = parent.resolve(name + ".h");
+        Path target = parent.resolve(name + ".c");
         return JavaFiles.writeString(header, output.left())
                 .or(() -> JavaFiles.writeString(target, output.right()))
-                .map(ThrowableError::new)
                 .map(ApplicationError::new)
                 .<Result<Path, ApplicationError>>map(Err::new)
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
-    private static Optional<ApplicationError> ensureDirectories(Path targetParent) {
-        if (Files.exists(targetParent)) return Optional.empty();
-
-        return JavaFiles.createDirectoriesSafe(targetParent)
-                .map(ThrowableError::new)
-                .map(ApplicationError::new);
+    private static Option<ApplicationError> ensureDirectories(Path targetParent) {
+        if (Files.exists(targetParent)) return new None<>();
+        return JavaFiles.createDirectoriesSafe(targetParent).map(ApplicationError::new);
     }
 
     static Option<ApplicationError> run() {
         return JavaFiles.walk(SOURCE_DIRECTORY)
-                .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .match(Application::runWithFiles, Some::new);
     }

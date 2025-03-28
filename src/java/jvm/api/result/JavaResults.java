@@ -33,7 +33,7 @@ public class JavaResults {
         throw new RuntimeException("Neither a value nor an error is present.");
     }
 
-    public static String convertThrowableToString(IOException exception) {
+    public static String convertThrowableToString(Throwable exception) {
         StringWriter writer = new StringWriter();
         exception.printStackTrace(new PrintWriter(writer));
         return writer.toString();
