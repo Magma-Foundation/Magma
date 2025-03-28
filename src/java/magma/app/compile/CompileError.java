@@ -13,7 +13,7 @@ public record CompileError(String message, String context, List_<CompileError> e
     @Override
     public String display() {
         String joined = errors.stream()
-                .map(CompileError::display)
+                .map(compileError -> "\n" + compileError.display())
                 .collect(new Joiner(""))
                 .orElse("");
 

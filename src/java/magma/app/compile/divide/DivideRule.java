@@ -1,7 +1,7 @@
 package magma.app.compile.divide;
 
 import jvm.api.collect.Lists;
-import magma.app.compile.Rule;
+import magma.app.compile.rule.Rule;
 import magma.api.collect.List_;
 import magma.api.option.None;
 import magma.api.option.Option;

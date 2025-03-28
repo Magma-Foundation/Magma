@@ -6,7 +6,6 @@ import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.Compiler;
 import magma.app.compile.ParseState;
-import magma.app.compile.Rule;
 
 public class EmptyRule implements Rule {
     @Override

@@ -1,6 +1,5 @@
 clang .\magma\api\collect\Map_.c^
 	 .\magma\api\result\Result.c^
-	 .\magma\app\compile\Rule.c^
 	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^
 	 .\magma\api\collect\Stream.c^
@@ -8,11 +7,11 @@ clang .\magma\api\collect\Map_.c^
 	 .\magma\app\Application.c^
 	 .\magma\api\concurrent\InterruptedError.c^
 	 .\magma\app\compile\divide\DivideRule.c^
-	 .\magma\app\compile\OrRule.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\error\Error.c^
 	 .\magma\app\compile\ParseState.c^
 	 .\magma\api\collect\Equator.c^
+	 .\magma\app\compile\rule\Rule.c^
 	 .\magma\api\option\Option.c^
 	 .\magma\api\collect\RangeHead.c^
 	 .\magma\app\compile\Source.c^
@@ -21,20 +20,25 @@ clang .\magma\api\collect\Map_.c^
 	 .\magma\app\compile\divide\DivideState.c^
 	 .\magma\api\collect\SingleHead.c^
 	 .\magma\api\collect\Equatable.c^
+	 .\magma\app\compile\rule\OrState.c^
 	 .\magma\app\compile\Compiler.c^
+	 .\magma\app\compile\rule\EmptyRule.c^
 	 .\magma\api\collect\EmptyHead.c^
 	 .\magma\api\option\None.c^
 	 .\magma\api\process\Process_.c^
+	 .\magma\app\compile\rule\PrefixRule.c^
 	 .\magma\api\result\Err.c^
+	 .\magma\app\compile\rule\OrRule.c^
 	 .\magma\api\collect\Set_.c^
 	 .\magma\app\compile\PathSource.c^
 	 .\magma\api\option\Some.c^
 	 .\magma\api\collect\Collector.c^
-	 .\magma\app\compile\OrState.c^
+	 .\magma\app\compile\rule\StripRule.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\io\Path_.c^
 	 .\magma\app\compile\MapNode.c^
 	 .\magma\Main.c^
+	 .\magma\app\compile\rule\SuffixRule.c^
 	 .\magma\api\collect\Joiner.c^
 	 .\magma\api\result\Ok.c^
 	 -o main.exe

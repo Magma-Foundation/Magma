@@ -12,6 +12,11 @@ import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.compile.divide.DivideRule;
 import magma.app.compile.rule.EmptyRule;
+import magma.app.compile.rule.OrRule;
+import magma.app.compile.rule.PrefixRule;
+import magma.app.compile.rule.Rule;
+import magma.app.compile.rule.StripRule;
+import magma.app.compile.rule.SuffixRule;
 
 public class Compiler {
 
@@ -74,7 +79,7 @@ public class Compiler {
     }
 
     private static StripRule createPackageRule() {
-        return createNamespaceRule("package  ", (state1, input1) -> generateEmpty());
+        return createNamespaceRule("package ", (state1, input1) -> generateEmpty());
     }
 
     private static Result<Tuple<String, String>, CompileError> compileClass(ParseState state, String input) {

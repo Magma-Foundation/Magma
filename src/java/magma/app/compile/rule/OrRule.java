@@ -1,8 +1,10 @@
-package magma.app.compile;
+package magma.app.compile.rule;
 
 import magma.api.collect.List_;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
+import magma.app.compile.CompileError;
+import magma.app.compile.ParseState;
 
 public record OrRule(List_<Rule> rules) implements Rule {
     @Override

@@ -1,7 +1,7 @@
 #ifndef magma_app_compile_divide_DivideRule
 #define magma_app_compile_divide_DivideRule
 #include "../../../../windows/api/collect/Lists.h"
-#include "../../../../magma/app/compile/Rule.h"
+#include "../../../../magma/app/compile/rule/Rule.h"
 #include "../../../../magma/api/collect/List_.h"
 #include "../../../../magma/api/option/None.h"
 #include "../../../../magma/api/option/Option.h"

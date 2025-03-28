@@ -1,4 +1,4 @@
-package magma.app.compile;
+package magma.app.compile.rule;
 
 import jvm.api.collect.Lists;
 import magma.api.collect.List_;
@@ -9,6 +9,7 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
+import magma.app.compile.CompileError;
 
 public record OrState(Option<Tuple<String, String>> maybeValue, List_<CompileError> errors) {
     public OrState() {

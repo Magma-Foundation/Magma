@@ -1,7 +1,10 @@
-package magma.app.compile;
+package magma.app.compile.rule;
 
 import magma.api.result.Result;
 import magma.api.result.Tuple;
+import magma.app.compile.CompileError;
+import magma.app.compile.Compiler;
+import magma.app.compile.ParseState;
 
 public record SuffixRule(Rule child, String suffix) implements Rule {
     @Override

@@ -15,11 +15,9 @@ void createRootRule(){
 }
 void createRootSegmentRule(){
 }
-void compileWhitespace(){
+void createWhitespaceRule(){
 }
-void compilePackage(){
-}
-void createPrefixErr(){
+void createPackageRule(){
 }
 void compileClass(){
 }
