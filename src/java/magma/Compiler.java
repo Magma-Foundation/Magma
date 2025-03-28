@@ -135,10 +135,17 @@ public class Compiler {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
-                if (name.endsWith(">")) {
+
+                int implementsIndex = name.indexOf(" implements ");
+                String name1 = implementsIndex >= 0
+                        ? name.substring(0, implementsIndex).strip()
+                        : name;
+
+                if (name1.endsWith(">")) {
                     return generateEmpty();
                 }
-                return generateStruct(name);
+
+                return generateStruct(name1);
             }
         }
 
@@ -169,6 +176,7 @@ public class Compiler {
                 if (beforeContent.endsWith(">")) {
                     return generateEmpty();
                 }
+
                 String name;
                 int extendsKeyword = beforeContent.indexOf(" extends ");
                 if (extendsKeyword >= 0) {
