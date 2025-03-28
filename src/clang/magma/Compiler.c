@@ -11,7 +11,7 @@ void generateDirectiveWithSuffix(){
 }
 void generateImport(){
 }
-void divideAndCompile(){
+void compileRoot(){
 }
 void divideAndCompile(){
 }

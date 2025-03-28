@@ -3,7 +3,7 @@ void runWithFiles(){
 }
 void build(){
 }
-void build(){
+void executeBuildCommand(){
 }
 void awaitProcess(){
 }

@@ -45,10 +45,10 @@ public class Application {
                 .orElse("");
 
         String output = "clang " + joinedPaths + " -o main.exe";
-        return build.writeString(output).map(ApplicationError::new).or(Application::build);
+        return build.writeString(output).map(ApplicationError::new).or(Application::executeBuildCommand);
     }
 
-    private static Option<ApplicationError> build() {
+    private static Option<ApplicationError> executeBuildCommand() {
         return Processes.start(Lists.of("cmd.exe", "/c", "build"), TARGET_DIRECTORY)
                 .mapErr(ApplicationError::new)
                 .match(Application::awaitProcess, Some::new);

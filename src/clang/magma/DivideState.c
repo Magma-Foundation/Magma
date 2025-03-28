@@ -1,8 +1,6 @@
 #include "DivideState.h"
 void DivideState(){
 }
-void DivideState(){
-}
 void isLevel(){
 }
 void isShallow(){
@@ -15,25 +13,9 @@ void exit(){
 }
 void enter(){
 }
-void append(){
+void appendChar(){
 }
 void stream(){
-}
-void getQueue(){
-}
-void setQueue(){
-}
-void getSegments(){
-}
-void setSegments(){
-}
-void getBuffer(){
-}
-void setBuffer(){
-}
-void getDepth(){
-}
-void setDepth(){
 }
 void append(){
 }

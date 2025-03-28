@@ -20,7 +20,7 @@ public class Compiler {
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
 
     static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
-        return divideAndCompile(input, parseState).mapValue(tuple -> {
+        return compileRoot(input, parseState).mapValue(tuple -> {
             return new Tuple<String, String>(wrapHeader(tuple, parseState), wrapTarget(parseState, tuple));
         });
     }
@@ -53,7 +53,7 @@ public class Compiler {
         return "#include \"" + content + ".h" + "\"\n";
     }
 
-    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, ParseState parseState) {
+    static Result<Tuple<String, String>, CompileError> compileRoot(String input, ParseState parseState) {
         return divideAndCompile(input, parseState, Compiler::compileRootSegment);
     }
 
@@ -75,7 +75,7 @@ public class Compiler {
     }
 
     private static DivideState divideText(DivideState state, char c) {
-        DivideState appended = state.append(c);
+        DivideState appended = state.appendChar(c);
 
         return divideSingleQuotes(appended, c)
                 .orElseGet(() -> divideStatementChar(appended, c));
