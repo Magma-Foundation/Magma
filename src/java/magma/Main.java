@@ -72,7 +72,13 @@ public class Main {
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
         Result<List<Path>, ApplicationError> relativePaths = new Ok<>(new ArrayList<>());
         for (Path source : sources) {
-            relativePaths = relativePaths.and(() -> runWithSource(new Source(source))).mapValue(tuple -> {
+            final Source wrapped = new Source(source);
+            List<String> namespace = wrapped.computeNamespace();
+            if (namespace.equals(List.of("java", "magma"))) continue;
+
+            relativePaths = relativePaths.and(() -> {
+                return runWithSource(wrapped, namespace, wrapped.computeName());
+            }).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
@@ -80,17 +86,14 @@ public class Main {
         return relativePaths;
     }
 
-    private static Result<Path, ApplicationError> runWithSource(Source source) {
+    private static Result<Path, ApplicationError> runWithSource(Source source, List<String> namespace, String name) {
         return source.read()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(input -> compileWithInput(source, input));
+                .flatMapValue(input -> compileWithInput(input, namespace, name));
     }
 
-    private static Result<Path, ApplicationError> compileWithInput(Source source, String input) {
-        List<String> namespace = source.computeNamespace();
-        String name = source.computeName();
-
+    private static Result<Path, ApplicationError> compileWithInput(String input, List<String> namespace, String name) {
         State state = new State(namespace, name);
         return compile(state, input)
                 .mapErr(ApplicationError::new)
