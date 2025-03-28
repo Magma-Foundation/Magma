@@ -73,7 +73,7 @@ public class Compiler {
                     .mapValue(Compiler::appendBuilders);
         }
 
-        return output.mapValue(tuple -> new Tuple<String, String>(tuple.left().toString(), tuple.right().toString()));
+        return output.mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
     }
 
     static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<Tuple<StringBuilder, StringBuilder>, Tuple<String, String>> tuple) {
@@ -98,16 +98,25 @@ public class Compiler {
 
                 List<String> copy = new ArrayList<String>();
 
-                List<String> namespace1 = Lists.toNative(state.namespace());
-                for (int i = 0; i < namespace1.size(); i++) {
+                List<String> thisNamespace = Lists.toNative(state.namespace());
+                for (int i = 0; i < thisNamespace.size(); i++) {
                     copy.add("..");
                 }
 
                 if (namespace.isEmpty()) copy.add(".");
-                copy.addAll(namespace);
+
+                if (!namespace.isEmpty()) {
+                    String oldFirst = namespace.getFirst();
+                    if (oldFirst.equals("jvm")) {
+                        copy.add("windows");
+                        copy.addAll(namespace.subList(1, namespace.size()));
+                    } else {
+                        copy.addAll(namespace);
+                    }
+                }
 
                 String joined = String.join("/", copy);
-                return new Ok<Tuple<String, String>, CompileError>(new Tuple<String, String>(generateImport(joined), ""));
+                return new Ok<>(new Tuple<>(generateImport(joined), ""));
             }
         }
 
