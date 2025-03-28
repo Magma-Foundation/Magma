@@ -37,6 +37,11 @@ public record JavaList<T>(List<T> list) implements List_<T> {
         return new JavaList<>(copy);
     }
 
+    @Override
+    public int size() {
+        return list.size();
+    }
+
     private boolean isValidRange(int fromInclusive, int toExclusive) {
         return isRangeWithinBounds(fromInclusive, toExclusive) && fromInclusive <= toExclusive;
     }

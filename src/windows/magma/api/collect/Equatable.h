@@ -1,0 +1,3 @@
+#ifndef magma_api_collect_Equatable
+#define magma_api_collect_Equatable
+#endif

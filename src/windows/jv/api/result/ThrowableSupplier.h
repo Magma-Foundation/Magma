@@ -1,3 +1,0 @@
-#ifndef jv_api_result_ThrowableSupplier
-#define jv_api_result_ThrowableSupplier
-#endif

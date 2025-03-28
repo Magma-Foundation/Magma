@@ -36,4 +36,9 @@ public record Some<T>(T value) implements Option<T> {
     public T orElse(T other) {
         return value;
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+        return other.get().map(otherValue -> new Tuple<>(value, otherValue));
+    }
 }

@@ -1,9 +1,11 @@
 package jv.api.collect;
 
 import jv.api.io.JavaList;
+import magma.api.collect.Equator;
 import magma.api.collect.List_;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JavaLists {
@@ -14,7 +16,17 @@ public class JavaLists {
         });
     }
 
-    public static List_<String> fromNative(List<String> list) {
+    public static <T> List_<T> fromNative(List<T> list) {
         return new JavaList<>(list);
+    }
+
+    public static <T> List_<T> of(T... elements) {
+        return fromNative(Arrays.asList(elements));
+    }
+
+    public static <T> boolean equalsTo(List_<T> first, List_<T> second, Equator<T> equator) {
+        if (first.size() != second.size()) return false;
+
+        return first.stream().zip(second.stream()).allMatch(tuple -> equator.equalsTo(tuple.left(), tuple.right()));
     }
 }

@@ -1,5 +1,6 @@
 package magma;
 
+import jv.api.collect.JavaLists;
 import jv.api.error.ThrowableError;
 import jv.api.io.JavaFiles;
 import jv.api.io.JavaList;
@@ -72,7 +73,8 @@ public class Application {
         for (Path source : sources) {
             final Source wrapped = new PathSource(source);
             List_<String> namespace = wrapped.computeNamespace();
-            if (namespace.subList(0, 1).orElse(new JavaList<>()).equals(List.of("jv"))) {
+            List_<String> slice = namespace.subList(0, 1).orElse(new JavaList<>());
+            if (JavaLists.equalsTo(slice, JavaLists.of("jv"), String::equals)) {
                 continue;
             }
 

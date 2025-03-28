@@ -8,4 +8,6 @@ public interface List_<T> {
     Option<List_<T>> subList(int fromInclusive, int toExclusive);
 
     List_<T> add(T element);
+
+    int size();
 }
