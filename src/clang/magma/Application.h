@@ -1,11 +1,10 @@
 #ifndef magma_Application
 #define magma_Application
-#include "../windows/api/collect/JavaSetCollector.h"
 #include "../windows/api/collect/Lists.h"
-#include "../windows/api/io/JavaList.h"
+#include "../windows/api/collect/Sets.h"
 #include "../windows/api/io/Paths.h"
 #include "../windows/api/process/Processes.h"
-#include "../windows/app/compile/PathSource.h"
+#include "../magma/app/compile/PathSource.h"
 #include "../magma/api/collect/Joiner.h"
 #include "../magma/api/collect/List_.h"
 #include "../magma/api/collect/Set_.h"

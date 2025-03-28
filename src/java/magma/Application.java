@@ -1,11 +1,10 @@
 package magma;
 
-import jvm.api.collect.JavaSetCollector;
 import jvm.api.collect.Lists;
-import jvm.api.io.JavaList;
+import jvm.api.collect.Sets;
 import jvm.api.io.Paths;
 import jvm.api.process.Processes;
-import jvm.app.compile.PathSource;
+import magma.app.compile.PathSource;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
 import magma.api.collect.Set_;
@@ -32,7 +31,7 @@ public class Application {
         Set_<Path_> sources = files.stream()
                 .filter(Path_::isRegularFile)
                 .filter(path -> path.asString().endsWith(".java"))
-                .collect(new JavaSetCollector<>());
+                .collect(Sets.collectToSet());
 
         return runWithSources(sources).match(Application::build, Some::new);
     }
@@ -69,7 +68,7 @@ public class Application {
         return sources.stream()
                 .map(PathSource::new)
                 .filter(Application::isPlatformIndependent)
-                .foldToResult(new JavaList<>(), Application::foldTargets);
+                .foldToResult(Lists.empty(), Application::foldTargets);
     }
 
     private static boolean isPlatformIndependent(Source source) {

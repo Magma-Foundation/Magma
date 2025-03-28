@@ -20,6 +20,7 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\process\Process_.c^
 	 .\magma\api\result\Err.c^
 	 .\magma\api\collect\Set_.c^
+	 .\magma\app\compile\PathSource.c^
 	 .\magma\api\option\Some.c^
 	 .\magma\api\collect\Collector.c^
 	 .\magma\api\io\IOError.c^
