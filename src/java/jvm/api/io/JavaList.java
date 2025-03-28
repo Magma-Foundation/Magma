@@ -7,6 +7,7 @@ import magma.api.collect.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.result.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,25 @@ public record JavaList<T>(List<T> list) implements List_<T> {
     @Override
     public int size() {
         return list.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
+    @Override
+    public Option<Tuple<T, List_<T>>> popFirst() {
+        if (list.isEmpty()) return new None<>();
+
+        T first = list.getFirst();
+        List<T> slice = list.subList(1, list.size());
+        return new Some<>(new Tuple<>(first, new JavaList<>(slice)));
+    }
+
+    @Override
+    public List_<T> addAll(List_<T> other) {
+        return other.stream().<List_<T>>foldWithInitial(this, List_::add);
     }
 
     private boolean isValidRange(int fromInclusive, int toExclusive) {

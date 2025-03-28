@@ -5,4 +5,7 @@
 #include "../../../magma/api/option/Option.h"
 #include "../../../magma/api/result/Result.h"
 #include "../../../magma/api/result/Tuple.h"
+#include "../../../java/util/function/BiFunction.h"
+#include "../../../java/util/function/Function.h"
+#include "../../../java/util/function/Predicate.h"
 #endif

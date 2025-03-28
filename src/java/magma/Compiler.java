@@ -1,7 +1,12 @@
 package magma;
 
 import jvm.api.collect.Lists;
+import jvm.api.io.JavaList;
 import magma.api.collect.Joiner;
+import magma.api.collect.List_;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -9,9 +14,7 @@ import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.State;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class Compiler {
@@ -50,35 +53,28 @@ public class Compiler {
     }
 
     static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state) {
-        List<String> segments = new ArrayList<String>();
+        List_<String> segments = new JavaList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             buffer.append(c);
             if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
+                segments = segments.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
             }
         }
-        segments.add(buffer.toString());
+        segments = segments.add(buffer.toString());
 
-        Result<Tuple<StringBuilder, StringBuilder>, CompileError> output = new Ok<Tuple<StringBuilder, StringBuilder>, CompileError>(new Tuple<StringBuilder, StringBuilder>(new StringBuilder(), new StringBuilder()));
-        for (String segment : segments) {
-            output = output
-                    .and(() -> compileRootSegment(segment, state))
-                    .mapValue(Compiler::appendBuilders);
-        }
-
-        return output.mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
+        return segments.stream()
+                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compileRootSegment(segment, state).mapValue(result -> appendBuilders(output, result)))
+                .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
     }
 
-    static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<Tuple<StringBuilder, StringBuilder>, Tuple<String, String>> tuple) {
-        Tuple<StringBuilder, StringBuilder> builders = tuple.left();
-        Tuple<String, String> elements = tuple.right();
+    static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<StringBuilder, StringBuilder> builders, Tuple<String, String> elements) {
         StringBuilder newLeft = builders.left().append(elements.left());
         StringBuilder newRight = builders.right().append(elements.right());
         return new Tuple<StringBuilder, StringBuilder>(newLeft, newRight);
@@ -91,32 +87,33 @@ public class Compiler {
             String right = input.strip().substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                List<String> namespace = new ArrayList<String>(Arrays.asList(left.split(Pattern.quote("."))));
-                if (namespace.size() >= 3 && namespace.subList(0, 3).equals(List.of("java", "util", "function"))) {
+                List_<String> namespace = new JavaList<>(Arrays.asList(left.split(Pattern.quote("."))));
+                if (namespace.size() >= 3 && namespace.subList(0, 3).equals(Lists.of("java", "util", "function"))) {
                     return generateEmpty();
                 }
 
-                List<String> copy = new ArrayList<String>();
+                List_<String> copy = new JavaList<>();
+                List_<String> thisNamespace = state.namespace();
 
-                List<String> thisNamespace = Lists.toNative(state.namespace());
                 for (int i = 0; i < thisNamespace.size(); i++) {
-                    copy.add("..");
+                    copy = copy.add("..");
                 }
 
                 if (namespace.isEmpty()) copy.add(".");
 
-                if (!namespace.isEmpty()) {
-                    String oldFirst = namespace.getFirst();
-                    if (oldFirst.equals("jvm")) {
-                        copy.add("windows");
-                        copy.addAll(namespace.subList(1, namespace.size()));
-                    } else {
-                        copy.addAll(namespace);
-                    }
-                }
+                List_<String> finalCopy = copy;
+                List_<String> withNamespace = finalCopy.addAll(namespace);
 
-                String joined = String.join("/", copy);
-                return new Ok<>(new Tuple<>(generateImport(joined), ""));
+                List_<String> mapped = namespace.popFirst()
+                        .map(tuple -> mapPlatformDependentNamespace(tuple.left(), tuple.right(), finalCopy).orElse(withNamespace))
+                        .orElse(withNamespace);
+
+                String stringList = mapped
+                        .stream()
+                        .collect(new Joiner("/"))
+                        .orElse("");
+
+                return new Ok<>(new Tuple<>(generateImport(stringList), ""));
             }
         }
 
@@ -172,21 +169,31 @@ public class Compiler {
             }
         }
 
-        return new Err<Tuple<String, String>, CompileError>(new CompileError("Invalid root segment", input));
+        return new Err<>(new CompileError("Invalid root segment", input));
+    }
+
+    private static Option<List_<String>> mapPlatformDependentNamespace(
+            String first,
+            List_<String> slice,
+            List_<String> copy
+    ) {
+        return first.equals("jvm")
+                ? new Some<>(copy.add("windows").addAll(slice))
+                : new None<>();
     }
 
     static Ok<Tuple<String, String>, CompileError> generateEmpty() {
-        return new Ok<Tuple<String, String>, CompileError>(new Tuple<String, String>("", ""));
+        return new Ok<>(new Tuple<>("", ""));
     }
 
     static Ok<Tuple<String, String>, CompileError> generateStruct(String name) {
-        return new Ok<Tuple<String, String>, CompileError>(new Tuple<String, String>("struct " + name + " {\n};\n", ""));
+        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n", ""));
     }
 
     public static String wrapTarget(State state, Tuple<String, String> tuple) {
         String name = state.name();
         String source = generateImport(name) + tuple.right();
-        if (Lists.toNative(state.namespace()).equals(List.of("magma")) && name.equals("Main")) {
+        if (Lists.equalsTo(state.namespace(), Lists.of("magma"), String::equals) && name.equals("Main")) {
             return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
