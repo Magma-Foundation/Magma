@@ -22,4 +22,6 @@ public interface Option<T> {
     <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
 
     <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty);
+
+    boolean isEmpty();
 }

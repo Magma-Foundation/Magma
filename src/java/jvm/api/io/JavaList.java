@@ -18,7 +18,7 @@ public record JavaList<T>(List<T> list) implements List_<T> {
 
     @Override
     public Stream<T> stream() {
-        return Streams.stream(list);
+        return Streams.streamList(list);
     }
 
     @Override

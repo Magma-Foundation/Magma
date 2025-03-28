@@ -39,4 +39,8 @@ public class Lists {
     public static <T> Collector<T, List_<T>> collectToList() {
         return new JavaListCollector<T>();
     }
+
+    public static List_<Character> fromString(String value) {
+        return Streams.streamString(value).collect(collectToList());
+    }
 }

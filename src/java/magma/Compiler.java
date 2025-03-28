@@ -3,6 +3,7 @@ package magma;
 import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
+import magma.api.collect.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -61,26 +62,39 @@ public class Compiler {
         List_<String> segments = Lists.empty();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments = segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                segments = segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
-        }
-        segments = segments.add(buffer.toString());
 
-        return segments.stream()
+        List_<Character> queue = Lists.fromString(input);
+        Stream<String> stream = getStringStream(new magma.State(queue, segments, buffer, depth));
+        return stream
                 .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compiler.apply(segment, state).mapValue(result -> appendBuilders(output, result)))
                 .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
+    }
+
+    private static Stream<String> getStringStream(magma.State state) {
+        magma.State current = state;
+        while (true) {
+            Option<Tuple<magma.State, Character>> maybeNext = current.popNext();
+            if (maybeNext.isEmpty()) break;
+
+            Tuple<magma.State, Character> tuple = maybeNext.orElse(new Tuple<>(current, '\0'));
+            current = divideStatementChar(tuple.left(), tuple.right());
+        }
+
+        return current.advance().stream();
+    }
+
+    private static magma.State divideStatementChar(magma.State state, char c) {
+        magma.State appended = state.append(c);
+
+        if (c == ';' && appended.getDepth() == 0) {
+            return appended.advance();
+        }
+        if (c == '}' && appended.getDepth() == 1) {
+            return appended.advance().exit();
+        }
+        if (c == '{') return appended.enter();
+        if (c == '}') return appended.exit();
+        return appended;
     }
 
     static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<StringBuilder, StringBuilder> builders, Tuple<String, String> elements) {
@@ -91,7 +105,7 @@ public class Compiler {
 
     static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, State state) {
         String stripped = input.strip();
-        if(stripped.isEmpty()) return generateEmpty();
+        if (stripped.isEmpty()) return generateEmpty();
         if (input.startsWith("package ")) return generateEmpty();
 
         if (stripped.startsWith("import ")) {

@@ -14,7 +14,7 @@ public record JavaSet<T>(Set<T> set) implements Set_<T> {
 
     @Override
     public Stream<T> stream() {
-        return Streams.stream(new ArrayList<>(set));
+        return Streams.streamList(new ArrayList<>(set));
     }
 
     @Override
