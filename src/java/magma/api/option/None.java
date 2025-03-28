@@ -40,4 +40,9 @@ public class None<T> implements Option<T> {
     public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
         return new None<>();
     }
+
+    @Override
+    public <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty) {
+        return whenEmpty.get();
+    }
 }

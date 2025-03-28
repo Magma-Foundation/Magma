@@ -1,10 +1,9 @@
 package magma;
 
 import jvm.api.collect.Lists;
-import jvm.api.concurrent.JavaInterruptedError;
 import jvm.api.io.JavaFiles;
-import jvm.api.io.JavaIOError;
-import jvm.api.result.JavaResults;
+import magma.api.process.Process_;
+import jvm.api.process.Processes;
 import jvm.app.compile.PathSource;
 import magma.api.collect.List_;
 import magma.api.option.None;
@@ -53,29 +52,19 @@ public class Application {
     }
 
     private static Option<ApplicationError> build() {
-        return startBuildCommand()
+        return Processes.start(Lists.of("cmd.exe", "/c", "build"), TARGET_DIRECTORY)
                 .mapErr(ApplicationError::new)
                 .match(Application::awaitProcess, Some::new);
     }
 
-    private static Option<ApplicationError> awaitProcess(Process process) {
-        Result<Integer, InterruptedError> awaited = JavaResults
-                .wrapSupplier(process::waitFor)
-                .mapErr(JavaInterruptedError::new);
+    private static Option<ApplicationError> awaitProcess(Process_ process_) {
+        Result<Integer, InterruptedError> awaited = process_.waitFor();
 
         awaited.findValue().ifPresent(exitCode -> {
             if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
         });
 
         return awaited.findError().map(ApplicationError::new);
-    }
-
-    private static Result<Process, JavaIOError> startBuildCommand() {
-        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "build")
-                .directory(TARGET_DIRECTORY.toFile())
-                .inheritIO();
-
-        return JavaResults.wrapSupplier(builder::start).mapErr(JavaIOError::new);
     }
 
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {

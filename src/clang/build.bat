@@ -4,12 +4,14 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\result\Result.c^
 	 .\magma\api\collect\Equatable.c^
 	 .\magma\api\option\None.c^
+	 .\magma\api\process\Process_.c^
 	 .\magma\api\result\Err.c^
 	 .\magma\app\ApplicationError.c^
 	 .\magma\api\option\Some.c^
 	 .\magma\api\collect\Stream.c^
 	 .\magma\api\result\Tuple.c^
 	 .\magma\api\collect\Collector.c^
+	 .\magma\api\concurrent\InterruptedError.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\error\Error.c^

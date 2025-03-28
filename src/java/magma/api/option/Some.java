@@ -41,4 +41,9 @@ public record Some<T>(T value) implements Option<T> {
     public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
         return other.get().map(otherValue -> new Tuple<>(value, otherValue));
     }
+
+    @Override
+    public <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty) {
+        return whenPresent.apply(value);
+    }
 }
