@@ -13,6 +13,8 @@ import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.State;
 
+import java.util.function.BiFunction;
+
 public class Compiler {
 
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
@@ -52,6 +54,10 @@ public class Compiler {
     }
 
     static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state) {
+        return divideAndCompile(input, state, Compiler::compileRootSegment);
+    }
+
+    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state, BiFunction<String, State, Result<Tuple<String, String>, CompileError>> compiler) {
         List_<String> segments = Lists.empty();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -61,6 +67,10 @@ public class Compiler {
             if (c == ';' && depth == 0) {
                 segments = segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments = segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -69,21 +79,23 @@ public class Compiler {
         segments = segments.add(buffer.toString());
 
         return segments.stream()
-                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compileRootSegment(segment, state).mapValue(result -> appendBuilders(output, result)))
+                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compiler.apply(segment, state).mapValue(result -> appendBuilders(output, result)))
                 .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
     }
 
     static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<StringBuilder, StringBuilder> builders, Tuple<String, String> elements) {
         StringBuilder newLeft = builders.left().append(elements.left());
         StringBuilder newRight = builders.right().append(elements.right());
-        return new Tuple<StringBuilder, StringBuilder>(newLeft, newRight);
+        return new Tuple<>(newLeft, newRight);
     }
 
     static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, State state) {
+        String stripped = input.strip();
+        if(stripped.isEmpty()) return generateEmpty();
         if (input.startsWith("package ")) return generateEmpty();
 
-        if (input.strip().startsWith("import ")) {
-            String right = input.strip().substring("import ".length());
+        if (stripped.startsWith("import ")) {
+            String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
 
@@ -145,7 +157,7 @@ public class Compiler {
                     return generateEmpty();
                 }
 
-                return generateStruct(name1);
+                return generateStruct(name1, new Tuple<>("", ""));
             }
         }
 
@@ -155,13 +167,22 @@ public class Compiler {
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String beforeContent = right.substring(0, contentStart).strip();
+                String withEnd = right.substring(contentStart + "{".length()).strip();
+
                 int paramStart = beforeContent.indexOf("(");
                 if (paramStart >= 0) {
                     String maybeWithTypeParams = beforeContent.substring(0, paramStart).strip();
-                    if (maybeWithTypeParams.endsWith(">")) {
-                        return generateEmpty();
-                    } else {
-                        return generateStruct(maybeWithTypeParams);
+                    int implementsIndex = maybeWithTypeParams.indexOf(" implements ");
+                    String name = implementsIndex >= 0
+                            ? maybeWithTypeParams.substring(0, implementsIndex).strip()
+                            : maybeWithTypeParams;
+
+                    if (name.endsWith(">")) return generateEmpty();
+                    if (withEnd.endsWith("}")) {
+                        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                        return divideAndCompile(inputContent, state, (s, state1) -> compileClassMember(s)).flatMapValue(content -> {
+                            return generateStruct(name, content);
+                        });
                     }
                 }
             }
@@ -185,11 +206,27 @@ public class Compiler {
                     name = beforeContent;
                 }
 
-                return generateStruct(name);
+                return generateStruct(name, new Tuple<>("", ""));
             }
         }
 
         return new Err<>(new CompileError("Invalid root segment", input));
+    }
+
+    private static Result<Tuple<String, String>, CompileError> compileClassMember(String input) {
+        if (input.isBlank()) return generateEmpty();
+
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = input.substring(0, paramStart).strip();
+            int nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String name = definition.substring(nameSeparator + " ".length()).strip();
+                return new Ok<>(new Tuple<>("", "void " + name + "(){\n}\n"));
+            }
+        }
+
+        return new Err<>(new CompileError("Invalid class segment", input));
     }
 
     private static boolean isFunctionalImport(List_<String> namespace) {
@@ -211,8 +248,8 @@ public class Compiler {
         return new Ok<>(new Tuple<>("", ""));
     }
 
-    static Ok<Tuple<String, String>, CompileError> generateStruct(String name) {
-        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n", ""));
+    static Ok<Tuple<String, String>, CompileError> generateStruct(String name, Tuple<String, String> content) {
+        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + content.left(), content.right()));
     }
 
     public static String wrapTarget(State state, Tuple<String, String> tuple) {
