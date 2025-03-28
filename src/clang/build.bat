@@ -1,4 +1,5 @@
 clang .\magma\api\collect\Map_.c^
+	 .\magma\app\compile\rule\Generation.c^
 	 .\magma\api\result\Result.c^
 	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^
@@ -23,11 +24,13 @@ clang .\magma\api\collect\Map_.c^
 	 .\magma\app\compile\rule\OrState.c^
 	 .\magma\app\compile\Compiler.c^
 	 .\magma\app\compile\rule\EmptyRule.c^
+	 .\magma\app\compile\rule\Output.c^
 	 .\magma\api\collect\EmptyHead.c^
 	 .\magma\api\option\None.c^
 	 .\magma\api\process\Process_.c^
 	 .\magma\app\compile\rule\PrefixRule.c^
 	 .\magma\api\result\Err.c^
+	 .\magma\app\compile\rule\MapOutput.c^
 	 .\magma\app\compile\rule\OrRule.c^
 	 .\magma\api\collect\Set_.c^
 	 .\magma\app\compile\PathSource.c^

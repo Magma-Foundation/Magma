@@ -1,6 +1,10 @@
 package magma.app.compile.divide;
 
 import jvm.api.collect.Lists;
+import magma.api.result.Ok;
+import magma.app.compile.MapNode;
+import magma.app.compile.rule.MapOutput;
+import magma.app.compile.rule.Output;
 import magma.app.compile.rule.Rule;
 import magma.api.collect.List_;
 import magma.api.option.None;
@@ -10,6 +14,9 @@ import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.ParseState;
+
+import static magma.app.compile.Compiler.HEADER;
+import static magma.app.compile.Compiler.TARGET;
 
 public record DivideRule(Rule child) implements Rule {
     public static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<StringBuilder, StringBuilder> builders, Tuple<String, String> elements) {
@@ -49,8 +56,7 @@ public record DivideRule(Rule child) implements Rule {
         return appended;
     }
 
-    @Override
-    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+    private Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
         List_<Character> queue = Lists.fromString(input);
 
         DivideState current = new DivideState(queue);
@@ -63,7 +69,24 @@ public record DivideRule(Rule child) implements Rule {
         }
 
         return current.advance().stream()
-                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> child().apply(state, segment).mapValue(result -> appendBuilders(output, result)))
+                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> {
+                    Rule rule = child();
+                    return rule.parse(state, segment)
+                            .flatMapValue(rule::generate)
+                            .mapValue(Output::toTuple).mapValue(result -> appendBuilders(output, result));
+                })
                 .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
+    }
+
+    @Override
+    public Result<MapNode, CompileError> parse(ParseState state, String input) {
+        return apply(state, input).mapValue(tuple -> {
+            return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
+        });
+    }
+
+    @Override
+    public Result<Output, CompileError> generate(MapNode node) {
+        return new Ok<>(new MapOutput().with("header", node.find(HEADER).orElse("")));
     }
 }
