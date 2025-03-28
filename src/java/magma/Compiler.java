@@ -1,7 +1,6 @@
 package magma;
 
 import jvm.api.collect.Lists;
-import jvm.api.collect.Streams;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
 import magma.api.option.None;
@@ -13,8 +12,6 @@ import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 import magma.app.compile.State;
-
-import java.util.regex.Pattern;
 
 public class Compiler {
 
@@ -89,9 +86,19 @@ public class Compiler {
             String right = input.strip().substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                String[] array = left.split(Pattern.quote("."));
 
-                List_<String> namespace = Streams.stream(array).collect(Lists.collectToList());
+                List_<String> namespace = Lists.empty();
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < left.length(); i++) {
+                    char c = left.charAt(i);
+                    if (c == '.') {
+                        namespace = namespace.add(buffer.toString());
+                        buffer = new StringBuilder();
+                    } else {
+                        buffer.append(c);
+                    }
+                }
+                namespace = namespace.add(buffer.toString());
 
                 if (isFunctionalImport(namespace)) {
                     return generateEmpty();

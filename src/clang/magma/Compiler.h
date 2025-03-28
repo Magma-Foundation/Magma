@@ -1,7 +1,6 @@
 #ifndef magma_Compiler
 #define magma_Compiler
 #include "../windows/api/collect/Lists.h"
-#include "../windows/api/collect/Streams.h"
 #include "../magma/api/collect/Joiner.h"
 #include "../magma/api/collect/List_.h"
 #include "../magma/api/option/None.h"
@@ -13,7 +12,6 @@
 #include "../magma/api/result/Tuple.h"
 #include "../magma/app/compile/CompileError.h"
 #include "../magma/app/compile/State.h"
-#include "../java/util/regex/Pattern.h"
 struct Compiler {
 };
 #endif
