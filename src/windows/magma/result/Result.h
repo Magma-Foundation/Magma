@@ -1,3 +1,3 @@
 #include "../../magma/option/Option.h"
-struct Temp {
+struct Result<T, X> {
 };

@@ -18,5 +18,5 @@
 #include "../java/util/Set.h"
 #include "../java/util/regex/Pattern.h"
 #include "../java/util/stream/Collectors.h"
-struct Temp {
+struct Main {
 };

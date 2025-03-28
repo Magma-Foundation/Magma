@@ -186,11 +186,11 @@ public class Main {
                 .map(ApplicationError::new);
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileRootSegment(String segment, State state) {
-        if (segment.startsWith("package ")) return new Ok<>(new Tuple<>("", ""));
+    private static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, State state) {
+        if (input.startsWith("package ")) return new Ok<>(new Tuple<>("", ""));
 
-        if (segment.strip().startsWith("import ")) {
-            String right = segment.strip().substring("import ".length());
+        if (input.strip().startsWith("import ")) {
+            String right = input.strip().substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
                 List<String> namespace = new ArrayList<>(Arrays.asList(left.split(Pattern.quote("."))));
@@ -213,9 +213,40 @@ public class Main {
             }
         }
 
-        if (segment.contains("class ") || segment.contains("record ") || segment.contains("interface "))
-            return new Ok<>(new Tuple<>("struct Temp {\n};\n", ""));
+        int classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            String right = input.substring(classIndex + "class ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                return generateStruct(name);
+            }
+        }
 
-        return new Err<>(new CompileError("Invalid root segment", segment));
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex >= 0) {
+            String right = input.substring(recordIndex + "record ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                return generateStruct(name);
+            }
+        }
+
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            String right = input.substring(interfaceIndex + "interface ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                return generateStruct(name);
+            }
+        }
+
+        return new Err<>(new CompileError("Invalid root segment", input));
+    }
+
+    private static Ok<Tuple<String, String>, CompileError> generateStruct(String name) {
+        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n", ""));
     }
 }

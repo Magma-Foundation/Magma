@@ -1,3 +1,3 @@
 #include "../java/util/List.h"
-struct Temp {
+struct State(List<String> namespace, String name) {
 };

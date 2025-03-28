@@ -1,2 +1,2 @@
-struct Temp {
+struct CompileError implements Error {
 };

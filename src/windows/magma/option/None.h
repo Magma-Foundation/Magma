@@ -1,2 +1,2 @@
-struct Temp {
+struct None<T> implements Option<T> {
 };
