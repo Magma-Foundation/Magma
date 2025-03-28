@@ -1,4 +1,5 @@
-clang .\magma\api\result\Result.c^
+clang .\magma\api\collect\Map_.c^
+	 .\magma\api\result\Result.c^
 	 .\magma\DivideState.c^
 	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^
@@ -27,6 +28,7 @@ clang .\magma\api\result\Result.c^
 	 .\magma\api\collect\Collector.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\io\Path_.c^
+	 .\magma\MapNode.c^
 	 .\magma\Compiler.c^
 	 .\magma\Main.c^
 	 .\magma\api\collect\Joiner.c^

@@ -18,6 +18,9 @@ import java.util.function.BiFunction;
 public class Compiler {
 
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
+    public static final String NAME = "name";
+    public static final String LEFT = "left";
+    public static final String RIGHT = "right";
 
     static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
         return compileRoot(input, parseState).mapValue(tuple -> {
@@ -183,7 +186,10 @@ public class Compiler {
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     return divideAndCompile(inputContent, parseState, (s, parseState2) -> compileClassMember(s))
-                            .flatMapValue(tuple -> generateStruct(name1, tuple));
+                            .flatMapValue(tuple -> generateStruct(new MapNode()
+                                    .withString(NAME, name1)
+                                    .withString(LEFT, tuple.left())
+                                    .withString(RIGHT, tuple.right())));
                 }
             }
         }
@@ -208,7 +214,11 @@ public class Compiler {
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                         return divideAndCompile(inputContent, parseState, (s, parseState1) -> compileClassMember(s)).flatMapValue(content -> {
-                            return generateStruct(name, content);
+                            return generateStruct(new MapNode()
+                                    .withString(NAME, name)
+                                    .merge(new MapNode()
+                                            .withString(LEFT, content.left())
+                                            .withString(RIGHT, content.right())));
                         });
                     }
                 }
@@ -233,7 +243,14 @@ public class Compiler {
                     name = beforeContent;
                 }
 
-                return generateStruct(name, new Tuple<>("", ""));
+                final Tuple<String, String> content = new Tuple<>("", "");
+                MapNode other = new MapNode()
+                        .withString(LEFT, content.left())
+                        .withString(RIGHT, content.right());
+
+                return generateStruct(new MapNode()
+                        .withString(NAME, name)
+                        .merge(other));
             }
         }
 
@@ -278,8 +295,12 @@ public class Compiler {
         return new Ok<>(new Tuple<>("", ""));
     }
 
-    static Ok<Tuple<String, String>, CompileError> generateStruct(String name, Tuple<String, String> content) {
-        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + content.left(), content.right()));
+    static Result<Tuple<String, String>, CompileError> generateStruct(MapNode node) {
+        String name = node.find(NAME).orElse("");
+        String left = node.find(LEFT).orElse("");
+        String right = node.find(RIGHT).orElse("");
+
+        return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + left, right));
     }
 
     public static String wrapTarget(ParseState parseState, Tuple<String, String> tuple) {

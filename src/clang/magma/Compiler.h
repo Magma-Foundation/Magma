@@ -15,4 +15,7 @@
 struct Compiler {
 };
 	int value;
+	int value;
+	int value;
+	int value;
 #endif
