@@ -1,11 +1,13 @@
-clang .\magma\app\compile\ImmutableState.c^
-	 .\magma\api\result\Result.c^
+clang .\magma\api\result\Result.c^
+	 .\magma\DivideState.c^
+	 .\magma\app\compile\ImmutableParseState.c^
 	 .\magma\app\ApplicationError.c^
 	 .\magma\api\collect\Stream.c^
 	 .\magma\api\result\Tuple.c^
 	 .\magma\api\concurrent\InterruptedError.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\error\Error.c^
+	 .\magma\app\compile\ParseState.c^
 	 .\magma\api\collect\Equator.c^
 	 .\magma\api\option\Option.c^
 	 .\magma\Application.c^
@@ -27,7 +29,6 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\io\Path_.c^
 	 .\magma\Compiler.c^
 	 .\magma\Main.c^
-	 .\magma\app\compile\State.c^
 	 .\magma\api\collect\Joiner.c^
 	 .\magma\api\result\Ok.c^
 	 -o main.exe

@@ -19,9 +19,9 @@
 #include "../magma/api/result/Result.h"
 #include "../magma/api/result/Tuple.h"
 #include "../magma/app/ApplicationError.h"
-#include "../magma/app/compile/ImmutableState.h"
+#include "../magma/app/compile/ImmutableParseState.h"
 #include "../magma/app/compile/Source.h"
-#include "../magma/app/compile/State.h"
+#include "../magma/app/compile/ParseState.h"
 struct Application {
 };
 #endif

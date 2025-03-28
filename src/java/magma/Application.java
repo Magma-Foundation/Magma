@@ -19,9 +19,9 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.ApplicationError;
-import magma.app.compile.ImmutableState;
+import magma.app.compile.ImmutableParseState;
 import magma.app.compile.Source;
-import magma.app.compile.State;
+import magma.app.compile.ParseState;
 
 public class Application {
     public static final Path_ TARGET_DIRECTORY = Paths.get(".", "src", "clang");
@@ -88,8 +88,8 @@ public class Application {
     }
 
     private static Result<Path_, ApplicationError> compileWithInput(List_<String> namespace, String name, String input) {
-        State state = new ImmutableState(namespace, name);
-        return Compiler.compile(state, input)
+        ParseState parseState = new ImmutableParseState(namespace, name);
+        return Compiler.compile(parseState, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(namespace, name, output));
     }

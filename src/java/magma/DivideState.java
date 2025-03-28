@@ -1,5 +1,6 @@
 package magma;
 
+import jvm.api.collect.Lists;
 import magma.api.collect.List_;
 import magma.api.collect.Stream;
 import magma.api.option.None;
@@ -7,47 +8,59 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Tuple;
 
-public class State {
+public class DivideState {
     private List_<Character> queue;
     private List_<String> segments;
     private StringBuilder buffer;
     private int depth;
 
-    public State(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
+    public DivideState(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
         this.queue = queue;
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
     }
 
-    Option<Tuple<State, Character>> popNext() {
+    public DivideState(List_<Character> queue) {
+        this(queue, Lists.empty(), new StringBuilder(), 0);
+    }
+
+    boolean isLevel() {
+        return getDepth() == 0;
+    }
+
+    boolean isShallow() {
+        return getDepth() == 1;
+    }
+
+    Option<Tuple<DivideState, Character>> pop() {
         Option<Tuple<Character, List_<Character>>> maybeNext = getQueue().popFirst();
         if (maybeNext.isEmpty()) return new None<>();
 
         final Tuple<Character, List_<Character>> nextTuple = maybeNext.orElse(new Tuple<>('\0', getQueue()));
         Character left = nextTuple.left();
-        State withQueue = setQueue(nextTuple.right());
+        DivideState withQueue = setQueue(nextTuple.right());
 
         return new Some<>(new Tuple<>(withQueue, left));
     }
 
-    State advance() {
+    DivideState advance() {
         setSegments(getSegments().add(getBuffer().toString()));
         setBuffer(new StringBuilder());
         return this;
     }
 
-    State exit() {
+    DivideState exit() {
         setDepth(getDepth() - 1);
         return this;
     }
 
-    State enter() {
+    DivideState enter() {
         setDepth(getDepth() + 1);
         return this;
     }
 
-    State append(char c) {
+    DivideState append(char c) {
         getBuffer().append(c);
         return this;
     }
@@ -60,7 +73,7 @@ public class State {
         return queue;
     }
 
-    public State setQueue(List_<Character> queue) {
+    public DivideState setQueue(List_<Character> queue) {
         this.queue = queue;
         return this;
     }
@@ -87,5 +100,16 @@ public class State {
 
     public void setDepth(int depth) {
         this.depth = depth;
+    }
+
+    public Option<Tuple<DivideState, Character>> append() {
+        return pop().map(tuple -> {
+            DivideState appended = tuple.left().append(tuple.right());
+            return new Tuple<>(appended, tuple.right());
+        });
+    }
+
+    public Option<DivideState> appendAndDiscard() {
+        return append().map(Tuple::left);
     }
 }

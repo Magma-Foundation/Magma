@@ -46,4 +46,14 @@ public record Some<T>(T value) implements Option<T> {
     public <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty) {
         return whenPresent.apply(value);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
+    }
 }

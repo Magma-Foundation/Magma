@@ -24,4 +24,6 @@ public interface Option<T> {
     <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty);
 
     boolean isEmpty();
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 }

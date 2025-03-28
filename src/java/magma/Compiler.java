@@ -3,7 +3,6 @@ package magma;
 import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
-import magma.api.collect.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -12,7 +11,7 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
-import magma.app.compile.State;
+import magma.app.compile.ParseState;
 
 import java.util.function.BiFunction;
 
@@ -20,14 +19,14 @@ public class Compiler {
 
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
 
-    static Result<Tuple<String, String>, CompileError> compile(State state, String input) {
-        return divideAndCompile(input, state).mapValue(tuple -> {
-            return new Tuple<String, String>(wrapHeader(tuple, state), wrapTarget(state, tuple));
+    static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
+        return divideAndCompile(input, parseState).mapValue(tuple -> {
+            return new Tuple<String, String>(wrapHeader(tuple, parseState), wrapTarget(parseState, tuple));
         });
     }
 
-    private static String wrapHeader(Tuple<String, String> tuple, State state) {
-        String path = state.namespace().add(state.name())
+    private static String wrapHeader(Tuple<String, String> tuple, ParseState parseState) {
+        String path = parseState.namespace().add(parseState.name())
                 .stream()
                 .collect(new Joiner("_"))
                 .orElse("");
@@ -54,44 +53,53 @@ public class Compiler {
         return "#include \"" + content + ".h" + "\"\n";
     }
 
-    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state) {
-        return divideAndCompile(input, state, Compiler::compileRootSegment);
+    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, ParseState parseState) {
+        return divideAndCompile(input, parseState, Compiler::compileRootSegment);
     }
 
-    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state, BiFunction<String, State, Result<Tuple<String, String>, CompileError>> compiler) {
-        List_<String> segments = Lists.empty();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-
+    static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, ParseState parseState, BiFunction<String, ParseState, Result<Tuple<String, String>, CompileError>> compiler) {
         List_<Character> queue = Lists.fromString(input);
-        Stream<String> stream = getStringStream(new magma.State(queue, segments, buffer, depth));
-        return stream
-                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compiler.apply(segment, state).mapValue(result -> appendBuilders(output, result)))
+
+        DivideState current = new DivideState(queue);
+        while (true) {
+            Option<Tuple<DivideState, Character>> maybeNext = current.pop();
+            if (maybeNext.isEmpty()) break;
+
+            Tuple<DivideState, Character> tuple1 = maybeNext.orElse(new Tuple<>(current, '\0'));
+            current = divideText(tuple1.left(), tuple1.right());
+        }
+
+        return current.advance().stream()
+                .foldToResult(new Tuple<>(new StringBuilder(), new StringBuilder()), (output, segment) -> compiler.apply(segment, parseState).mapValue(result -> appendBuilders(output, result)))
                 .mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
     }
 
-    private static Stream<String> getStringStream(magma.State state) {
-        magma.State current = state;
-        while (true) {
-            Option<Tuple<magma.State, Character>> maybeNext = current.popNext();
-            if (maybeNext.isEmpty()) break;
+    private static DivideState divideText(DivideState state, char c) {
+        DivideState appended = state.append(c);
 
-            Tuple<magma.State, Character> tuple = maybeNext.orElse(new Tuple<>(current, '\0'));
-            current = divideStatementChar(tuple.left(), tuple.right());
-        }
-
-        return current.advance().stream();
+        return divideSingleQuotes(appended, c)
+                .orElseGet(() -> divideStatementChar(appended, c));
     }
 
-    private static magma.State divideStatementChar(magma.State state, char c) {
-        magma.State appended = state.append(c);
+    private static Option<DivideState> divideSingleQuotes(DivideState state, char c) {
+        if (c != '\'') return new None<>();
 
-        if (c == ';' && appended.getDepth() == 0) {
-            return appended.advance();
-        }
-        if (c == '}' && appended.getDepth() == 1) {
-            return appended.advance().exit();
-        }
+        return state.append().flatMap(maybeSlash -> {
+            Option<DivideState> divideStateOption;
+            DivideState oldState = maybeSlash.left();
+            if (maybeSlash.right() == '\\') {
+                divideStateOption = oldState.appendAndDiscard();
+            } else {
+                divideStateOption = new Some<>(oldState);
+            }
+
+            return divideStateOption.flatMap(DivideState::appendAndDiscard);
+        });
+    }
+
+    private static DivideState divideStatementChar(DivideState appended, char c) {
+        if (c == ';' && appended.isLevel()) return appended.advance();
+        if (c == '}' && appended.isShallow()) return appended.advance().exit();
         if (c == '{') return appended.enter();
         if (c == '}') return appended.exit();
         return appended;
@@ -103,7 +111,7 @@ public class Compiler {
         return new Tuple<>(newLeft, newRight);
     }
 
-    static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, State state) {
+    static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, ParseState parseState) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return generateEmpty();
         if (input.startsWith("package ")) return generateEmpty();
@@ -131,7 +139,7 @@ public class Compiler {
                 }
 
                 List_<String> copy = Lists.empty();
-                List_<String> thisNamespace = state.namespace();
+                List_<String> thisNamespace = parseState.namespace();
 
                 for (int i = 0; i < thisNamespace.size(); i++) {
                     copy = copy.add("..");
@@ -194,7 +202,7 @@ public class Compiler {
                     if (name.endsWith(">")) return generateEmpty();
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                        return divideAndCompile(inputContent, state, (s, state1) -> compileClassMember(s)).flatMapValue(content -> {
+                        return divideAndCompile(inputContent, parseState, (s, parseState1) -> compileClassMember(s)).flatMapValue(content -> {
                             return generateStruct(name, content);
                         });
                     }
@@ -266,10 +274,10 @@ public class Compiler {
         return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + content.left(), content.right()));
     }
 
-    public static String wrapTarget(State state, Tuple<String, String> tuple) {
-        String name = state.name();
+    public static String wrapTarget(ParseState parseState, Tuple<String, String> tuple) {
+        String name = parseState.name();
         String source = generateImport(name) + tuple.right();
-        if (Lists.equalsTo(state.namespace(), Lists.of("magma"), String::equals) && name.equals("Main")) {
+        if (Lists.equalsTo(parseState.namespace(), Lists.of("magma"), String::equals) && name.equals("Main")) {
             return source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
