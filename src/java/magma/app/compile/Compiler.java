@@ -3,7 +3,6 @@ package magma.app.compile;
 import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
-import magma.app.compile.divide.DivideRule;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -11,6 +10,8 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
+import magma.app.compile.divide.DivideRule;
+import magma.app.compile.rule.EmptyRule;
 
 public class Compiler {
 
@@ -59,7 +60,7 @@ public class Compiler {
 
     private static Rule createRootSegmentRule() {
         return new OrRule(Lists.of(
-                Compiler::compileWhitespace,
+                createWhitespaceRule(),
                 Compiler::compilePackage,
                 Compiler::compileImport,
                 Compiler::compileClass,
@@ -68,10 +69,8 @@ public class Compiler {
         ));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileWhitespace(ParseState state, String input) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) return generateEmpty();
-        return new Err<>(new CompileError("Input not empty", stripped));
+    private static StripRule createWhitespaceRule() {
+        return new StripRule(new EmptyRule());
     }
 
     private static Result<Tuple<String, String>, CompileError> compilePackage(ParseState state, String input) {
@@ -269,7 +268,7 @@ public class Compiler {
                 : new None<>();
     }
 
-    static Ok<Tuple<String, String>, CompileError> generateEmpty() {
+    public static Ok<Tuple<String, String>, CompileError> generateEmpty() {
         return new Ok<>(new Tuple<>("", ""));
     }
 
