@@ -56,4 +56,9 @@ public record Some<T>(T value) implements Option<T> {
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return mapper.apply(value);
     }
+
+    @Override
+    public boolean isPresent() {
+        return true;
+    }
 }

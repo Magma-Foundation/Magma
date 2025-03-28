@@ -1,9 +1,9 @@
-package magma.api.compile;
+package magma.app.compile;
 
 import jvm.api.collect.Lists;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
-import magma.api.compile.divide.DivideRule;
+import magma.app.compile.divide.DivideRule;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -11,8 +11,6 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Tuple;
-import magma.app.compile.CompileError;
-import magma.app.compile.ParseState;
 
 public class Compiler {
 
@@ -56,29 +54,18 @@ public class Compiler {
     }
 
     private static DivideRule createRootRule() {
-        return new DivideRule((parseState1, input1) -> compileRootSegment(input1, parseState1));
+        return new DivideRule(createRootSegmentRule());
     }
 
-    static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, ParseState state) {
-        Result<Tuple<String, String>, CompileError> maybeWhitespace = compileWhitespace(state, input);
-        if (maybeWhitespace.isOk()) return maybeWhitespace;
-
-        Result<Tuple<String, String>, CompileError> maybePackage = compilePackage(state, input);
-        if (maybePackage.isOk()) return maybePackage;
-
-        Result<Tuple<String, String>, CompileError> maybeImport = compileImport(state, input);
-        if (maybeImport.isOk()) return maybeImport;
-
-        Result<Tuple<String, String>, CompileError> maybeClass = compileClass(state, input);
-        if (maybeClass.isOk()) return maybeClass;
-
-        Result<Tuple<String, String>, CompileError> maybeRecord = compileRecord(state, input);
-        if (maybeRecord.isOk()) return maybeRecord;
-
-        Result<Tuple<String, String>, CompileError> maybeInterface = compileInterface(state, input);
-        if (maybeInterface.isOk()) return maybeInterface;
-
-        return new Err<>(new CompileError("Invalid root segment", input));
+    private static Rule createRootSegmentRule() {
+        return new OrRule(Lists.of(
+                Compiler::compileWhitespace,
+                Compiler::compilePackage,
+                Compiler::compileImport,
+                Compiler::compileClass,
+                Compiler::compileRecord,
+                Compiler::compileInterface
+        ));
     }
 
     private static Result<Tuple<String, String>, CompileError> compileWhitespace(ParseState state, String input) {

@@ -1,4 +1,4 @@
-package magma.api.compile;
+package magma.app.compile;
 
 import magma.api.collect.Map_;
 import jvm.api.collect.Maps;

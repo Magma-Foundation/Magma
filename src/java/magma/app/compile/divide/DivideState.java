@@ -1,4 +1,4 @@
-package magma.api.compile.divide;
+package magma.app.compile.divide;
 
 import jvm.api.collect.Lists;
 import magma.api.collect.List_;

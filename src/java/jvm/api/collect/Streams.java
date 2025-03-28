@@ -17,4 +17,8 @@ public class Streams {
     public static Stream<Character> streamString(String value) {
         return new HeadedStream<>(new RangeHead(value.length())).map(value::charAt);
     }
+
+    public static <T> Stream<T> of(T... array) {
+        return streamArray(array);
+    }
 }

@@ -4,7 +4,7 @@ import jvm.api.collect.Lists;
 import jvm.api.collect.Sets;
 import jvm.api.io.Paths;
 import jvm.api.process.Processes;
-import magma.api.compile.Compiler;
+import magma.app.compile.Compiler;
 import magma.app.compile.PathSource;
 import magma.api.collect.Joiner;
 import magma.api.collect.List_;
