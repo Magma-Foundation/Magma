@@ -7,8 +7,6 @@ import magma.app.compile.MapNode;
 import magma.app.compile.ParseState;
 
 public interface Rule {
-    String INPUT = "input";
-
     Result<MapNode, CompileError> parse(String input);
 
     Result<MapNode, CompileError> transform(ParseState state, MapNode input);

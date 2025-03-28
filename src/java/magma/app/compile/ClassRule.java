@@ -13,14 +13,14 @@ class ClassRule implements Rule {
 
     @Override
     public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-        return Compiler.compileClass(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
+        return Compiler.compileClass(state, input.find(Compiler.INPUT).orElse("")).mapValue(tuple -> {
             return new MapNode().withString(Compiler.HEADER, tuple.left()).withString(Compiler.TARGET, tuple.right());
         });
     }
 
     @Override
     public Result<MapNode, CompileError> parse(String input) {
-        return new Ok<>(new MapNode().withString(INPUT, input));
+        return new Ok<>(new MapNode().withString(Compiler.INPUT, input));
     }
 
 }
