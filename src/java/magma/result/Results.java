@@ -1,6 +1,6 @@
 package magma.result;
 
-import magma.option.JavaOptions;
+import magma.java.Options;
 
 import java.util.Optional;
 
@@ -15,10 +15,10 @@ public class Results {
     }
 
     public static <T, X extends Throwable> T unwrap(Result<T, X> result) throws X {
-        Optional<T> maybeValue = JavaOptions.unwrap(result.findValue());
+        Optional<T> maybeValue = Options.unwrap(result.findValue());
         if (maybeValue.isPresent()) return maybeValue.get();
 
-        Optional<X> maybeError = JavaOptions.unwrap(result.findError());
+        Optional<X> maybeError = Options.unwrap(result.findError());
         if (maybeError.isPresent()) throw maybeError.get();
 
         throw new RuntimeException("Neither a value nor an error is present.");

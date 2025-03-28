@@ -4,8 +4,8 @@ import magma.error.ApplicationError;
 import magma.error.CompileError;
 import magma.error.ThrowableError;
 import magma.java.JavaFiles;
+import magma.java.Options;
 import magma.result.Err;
-import magma.option.JavaOptions;
 import magma.result.Ok;
 import magma.result.Result;
 import magma.result.Results;
@@ -63,10 +63,10 @@ public class Main {
 
         return Results.wrap(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
             Result<Integer, InterruptedException> awaited = Results.wrap(process::waitFor);
-            JavaOptions.unwrap(awaited.findValue()).ifPresent(exitCode -> {
+            Options.unwrap(awaited.findValue()).ifPresent(exitCode -> {
                 if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
             });
-            return JavaOptions.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
+            return Options.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
         }, Optional::of);
     }
 
@@ -75,7 +75,9 @@ public class Main {
         for (Path source : sources) {
             final Source wrapped = new Source(source);
             List<String> namespace = wrapped.computeNamespace();
-            if (namespace.equals(List.of("java", "magma"))) continue;
+            if (namespace.equals(List.of("magma", "java"))) {
+                continue;
+            }
 
             relativePaths = relativePaths.and(() -> {
                 return runWithSource(wrapped, namespace, wrapped.computeName());
@@ -192,6 +194,10 @@ public class Main {
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
                 List<String> namespace = new ArrayList<>(Arrays.asList(left.split(Pattern.quote("."))));
+                if (namespace.size() >= 3 && namespace.subList(0, 3).equals(List.of("java", "util", "function"))) {
+                    return new Ok<>(new Tuple<>("", ""));
+                }
+
                 List<String> copy = new ArrayList<>();
 
                 List<String> namespace1 = state.namespace();

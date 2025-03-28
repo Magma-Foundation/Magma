@@ -1,8 +1,12 @@
-package magma.option;
+package magma.java;
+
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 
 import java.util.Optional;
 
-public class JavaOptions {
+public class Options {
     public static <T> Optional<T> unwrap(Option<T> option) {
         return option.map(Optional::of).orElseGet(Optional::empty);
     }

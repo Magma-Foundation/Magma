@@ -1,6 +1,6 @@
 package magma.result;
 
-import magma.option.JavaOptions;
+import magma.java.Options;
 import magma.option.Option;
 
 import java.util.Optional;
@@ -43,11 +43,11 @@ public record Err<T, X>(X error) implements Result<T, X> {
 
     @Override
     public Option<T> findValue() {
-        return JavaOptions.wrap(findValue1());
+        return Options.wrap(findValue1());
     }
 
     @Override
     public Option<X> findError() {
-        return JavaOptions.wrap(findError0());
+        return Options.wrap(findError0());
     }
 }
