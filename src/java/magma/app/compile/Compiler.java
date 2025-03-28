@@ -26,9 +26,7 @@ public class Compiler {
     public static final String TARGET = "target";
 
     public static Result<Tuple<String, String>, CompileError> compile(ParseState parseState, String input) {
-        Rule rule = createRootRule();
-        return rule.parse(input).flatMapValue(parsed -> rule.transform(parseState, parsed))
-                .flatMapValue(rule::generate).mapValue(tuple -> {
+        return createRootRule().apply(parseState, input).mapValue(tuple -> {
             return new Tuple<String, String>(wrapHeader(tuple, parseState), wrapTarget(parseState, tuple));
         });
     }
@@ -72,67 +70,19 @@ public class Compiler {
                 createImportRule(),
                 new Rule() {
                     @Override
-                    public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                        return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                        return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                            return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                        });
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> parse(String input) {
-                        return new Ok<>(new MapNode().withString(INPUT, input));
-                    }
-
-                    private Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
                         return compileClass(state, input);
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                        return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                        return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                            return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                        });
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> parse(String input) {
-                        return new Ok<>(new MapNode().withString(INPUT, input));
-                    }
-
-                    private Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
                         return compileRecord(state, input);
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                        return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                        return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                            return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                        });
-                    }
-
-                    @Override
-                    public Result<MapNode, CompileError> parse(String input) {
-                        return new Ok<>(new MapNode().withString(INPUT, input));
-                    }
-
-                    private Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
                         return compileInterface(state, input);
                     }
                 }
@@ -146,23 +96,7 @@ public class Compiler {
     private static StripRule createPackageRule() {
         return createNamespaceRule("package ", new Rule() {
             @Override
-            public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-            }
-
-            @Override
-            public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                    return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                });
-            }
-
-            @Override
-            public Result<MapNode, CompileError> parse(String input) {
-                return new Ok<>(new MapNode().withString(INPUT, input));
-            }
-
-            private Result<Tuple<String, String>, CompileError> apply(ParseState state1, String input1) {
+            public Result<Tuple<String, String>, CompileError> apply(ParseState state1, String input1) {
                 return generateEmpty();
             }
         });
@@ -191,30 +125,12 @@ public class Compiler {
         if (!withEnd.endsWith("}")) return createSuffixErr(input, "}");
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Rule rule = new DivideRule(new Rule() {
+        return new DivideRule(new Rule() {
             @Override
-            public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-            }
-
-            @Override
-            public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                    return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                });
-            }
-
-            @Override
-            public Result<MapNode, CompileError> parse(String input) {
-                return new Ok<>(new MapNode().withString(INPUT, input));
-            }
-
-            private Result<Tuple<String, String>, CompileError> apply(ParseState parseState2, String s) {
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState2, String s) {
                 return compileClassMember(s);
             }
-        });
-        return rule.parse(inputContent).flatMapValue(parsed -> rule.transform(state, parsed))
-                .flatMapValue(rule::generate)
+        }).apply(state, inputContent)
                 .flatMapValue(tuple -> generateStruct(new MapNode()
                         .withString(NAME, name1)
                         .withString(HEADER, tuple.left())
@@ -254,30 +170,12 @@ public class Compiler {
 
         if (!withEnd.endsWith("}")) return createSuffixErr(input, "}");
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Rule rule = new DivideRule(new Rule() {
+        return new DivideRule(new Rule() {
             @Override
-            public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-            }
-
-            @Override
-            public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                    return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                });
-            }
-
-            @Override
-            public Result<MapNode, CompileError> parse(String input) {
-                return new Ok<>(new MapNode().withString(INPUT, input));
-            }
-
-            private Result<Tuple<String, String>, CompileError> apply(ParseState parseState1, String s) {
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState1, String s) {
                 return compileClassMember(s);
             }
-        });
-        return rule.parse(inputContent).flatMapValue(parsed -> rule.transform(state, parsed))
-                .flatMapValue(rule::generate).flatMapValue(content -> {
+        }).apply(state, inputContent).flatMapValue(content -> {
             return generateStruct(new MapNode()
                     .withString(NAME, name)
                     .merge(new MapNode()
@@ -320,23 +218,7 @@ public class Compiler {
     private static StripRule createImportRule() {
         return createNamespaceRule("import ", new Rule() {
             @Override
-            public Result<Tuple<String, String>, CompileError> generate(MapNode node) {
-                return new Ok<>(new Tuple<>(node.find(HEADER).orElse(""), node.find(TARGET).orElse("")));
-            }
-
-            @Override
-            public Result<MapNode, CompileError> transform(ParseState state, MapNode input) {
-                return apply(state, input.find(INPUT).orElse("")).mapValue(tuple -> {
-                    return new MapNode().withString(HEADER, tuple.left()).withString(TARGET, tuple.right());
-                });
-            }
-
-            @Override
-            public Result<MapNode, CompileError> parse(String input) {
-                return new Ok<>(new MapNode().withString(INPUT, input));
-            }
-
-            private Result<Tuple<String, String>, CompileError> apply(ParseState parseState, String input) {
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState, String input) {
                 return compileSegments(parseState, input);
             }
         });
