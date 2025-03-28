@@ -160,7 +160,7 @@ public class Main {
             }
         }
 
-        if (segment.contains("class ")) return new Ok<>("struct Temp {\n};\n");
+        if (segment.contains("class ") || segment.contains("record ") || segment.contains("interface ")) return new Ok<>("struct Temp {\n};\n");
         return new Err<>(new CompileError("Invalid root segment", segment));
     }
 }
