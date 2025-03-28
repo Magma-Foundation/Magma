@@ -19,7 +19,6 @@ import magma.app.compile.rule.StripRule;
 import magma.app.compile.rule.SuffixRule;
 
 public class Compiler {
-
     public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
     public static final String NAME = "name";
     public static final String HEADER = "header";
