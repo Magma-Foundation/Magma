@@ -8,6 +8,7 @@ import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
 import magma.result.Results;
+import magma.result.Tuple;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,7 +93,7 @@ public class Main {
                 .flatMapValue(output -> writeOutput(source, output));
     }
 
-    private static Result<Path, ApplicationError> writeOutput(Path source, String output) {
+    private static Result<Path, ApplicationError> writeOutput(Path source, Tuple<String, String> output) {
         Path relative = SOURCE_DIRECTORY.relativize(source);
         Path parent = relative.getParent();
         Path targetParent = TARGET_DIRECTORY.resolve(parent);
@@ -101,16 +102,18 @@ public class Main {
 
         String nameWithExt = relative.getFileName().toString();
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
-        Path target = targetParent.resolve(name + ".c");
 
-        return JavaFiles.writeString(target, output)
+        Path header = targetParent.resolve(name + ".h");
+        Path target = targetParent.resolve(name + ".c");
+        return JavaFiles.writeString(header, output.left())
+                .or(() -> JavaFiles.writeString(target, output.right()))
                 .map(ThrowableError::new)
                 .map(ApplicationError::new)
                 .<Result<Path, ApplicationError>>map(Err::new)
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
-    private static Result<String, CompileError> compile(String input) {
+    private static Result<Tuple<String, String>, CompileError> compile(String input) {
         List<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -127,14 +130,22 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
+        Result<Tuple<StringBuilder, StringBuilder>, CompileError> output = new Ok<>(new Tuple<>(new StringBuilder(), new StringBuilder()));
         for (String segment : segments) {
             output = output
                     .and(() -> compileRootSegment(segment))
-                    .mapValue(tuple -> tuple.left().append(tuple.right()));
+                    .mapValue(Main::appendBuilders);
         }
 
-        return output.mapValue(StringBuilder::toString);
+        return output.mapValue(tuple -> new Tuple<>(tuple.left().toString(), tuple.right().toString()));
+    }
+
+    private static Tuple<StringBuilder, StringBuilder> appendBuilders(Tuple<Tuple<StringBuilder, StringBuilder>, Tuple<String, String>> tuple) {
+        Tuple<StringBuilder, StringBuilder> builders = tuple.left();
+        Tuple<String, String> elements = tuple.right();
+        StringBuilder newLeft = builders.left().append(elements.left());
+        StringBuilder newRight = builders.right().append(elements.right());
+        return new Tuple<>(newLeft, newRight);
     }
 
     private static Optional<ApplicationError> ensureDirectories(Path targetParent) {
@@ -145,8 +156,8 @@ public class Main {
                 .map(ApplicationError::new);
     }
 
-    private static Result<String, CompileError> compileRootSegment(String segment) {
-        if (segment.startsWith("package ")) return new Ok<>("");
+    private static Result<Tuple<String, String>, CompileError> compileRootSegment(String segment) {
+        if (segment.startsWith("package ")) return new Ok<>(new Tuple<>("", ""));
 
         if (segment.strip().startsWith("import ")) {
             String right = segment.strip().substring("import ".length());
@@ -154,13 +165,15 @@ public class Main {
                 String left = right.substring(0, right.length() - ";".length());
                 String[] namespace = left.split(Pattern.quote("."));
                 String joined = String.join("/", namespace);
-                return new Ok<>("#include <" +
+                return new Ok<>(new Tuple<>("#include <" +
                         joined +
-                        ".h>\n");
+                        ".h>\n", ""));
             }
         }
 
-        if (segment.contains("class ") || segment.contains("record ") || segment.contains("interface ")) return new Ok<>("struct Temp {\n};\n");
+        if (segment.contains("class ") || segment.contains("record ") || segment.contains("interface "))
+            return new Ok<>(new Tuple<>("struct Temp {\n};\n", ""));
+
         return new Err<>(new CompileError("Invalid root segment", segment));
     }
 }
