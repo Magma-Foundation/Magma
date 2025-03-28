@@ -1,4 +1,7 @@
+#ifndef magma_Compiler
+#define magma_Compiler
 #include "../jv/api/collect/JavaLists.h"
+#include "../magma/api/collect/Joiner.h"
 #include "../magma/api/result/Err.h"
 #include "../magma/api/result/Ok.h"
 #include "../magma/api/result/Result.h"
@@ -11,3 +14,4 @@
 #include "../java/util/regex/Pattern.h"
 struct Compiler {
 };
+#endif

@@ -1,3 +1,5 @@
+#ifndef jv_api_io_JavaFiles
+#define jv_api_io_JavaFiles
 #include "../../../jv/api/result/JavaResults.h"
 #include "../../../magma/api/option/Option.h"
 #include "../../../magma/api/result/Result.h"
@@ -10,3 +12,4 @@
 #include "../../../java/util/stream/Stream.h"
 struct JavaFiles {
 };
+#endif

@@ -1,0 +1,3 @@
+#ifndef jv_api_result_ThrowableRunnable
+#define jv_api_result_ThrowableRunnable
+#endif

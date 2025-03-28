@@ -1,3 +1,5 @@
+#ifndef jv_api_result_JavaResults
+#define jv_api_result_JavaResults
 #include "../../../jv/api/JavaOptions.h"
 #include "../../../magma/api/option/None.h"
 #include "../../../magma/api/option/Option.h"
@@ -11,3 +13,4 @@
 #include "../../../java/util/Optional.h"
 struct JavaResults {
 };
+#endif

@@ -1,6 +1,7 @@
 package magma;
 
 import jv.api.collect.JavaLists;
+import magma.api.collect.Joiner;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -16,9 +17,32 @@ import java.util.regex.Pattern;
 public class Compiler {
     static Result<Tuple<String, String>, CompileError> compile(State state, String input) {
         return divideAndCompile(input, state).mapValue(tuple -> {
-            String newSource = wrapTarget(state, tuple);
-            return new Tuple<String, String>(tuple.left(), newSource);
+            return new Tuple<String, String>(wrapHeader(tuple, state), wrapTarget(state, tuple));
         });
+    }
+
+    private static String wrapHeader(Tuple<String, String> tuple, State state) {
+        String path = state.namespace().add(state.name())
+                .stream()
+                .collect(new Joiner("_"))
+                .orElse("");
+
+        return generateDirectiveWithValue("ifndef", path) +
+                generateDirectiveWithValue("define", path) +
+                tuple.left() +
+                generateDirective("endif");
+    }
+
+    private static String generateDirective(String name) {
+        return generateDirectiveWithSuffix(name, "");
+    }
+
+    private static String generateDirectiveWithValue(String name, String value) {
+        return generateDirectiveWithSuffix(name, " " + value);
+    }
+
+    private static String generateDirectiveWithSuffix(String name, String suffix) {
+        return "#" + name + suffix + "\n";
     }
 
     static String generateImport(String content) {

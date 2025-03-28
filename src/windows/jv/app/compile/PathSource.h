@@ -1,3 +1,5 @@
+#ifndef jv_app_compile_PathSource
+#define jv_app_compile_PathSource
 #include "../../../jv/api/collect/JavaLists.h"
 #include "../../../jv/api/io/JavaIOError.h"
 #include "../../../jv/api/result/JavaResults.h"
@@ -12,3 +14,4 @@
 #include "../../../java/util/List.h"
 struct PathSource {
 };
+#endif

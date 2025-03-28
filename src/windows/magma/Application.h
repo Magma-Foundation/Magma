@@ -1,3 +1,5 @@
+#ifndef magma_Application
+#define magma_Application
 #include "../jv/api/error/ThrowableError.h"
 #include "../jv/api/io/JavaFiles.h"
 #include "../jv/api/io/JavaList.h"
@@ -24,3 +26,4 @@
 #include "../java/util/stream/Collectors.h"
 struct Application {
 };
+#endif

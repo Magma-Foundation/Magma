@@ -30,6 +30,13 @@ public record JavaList<T>(List<T> list) implements List_<T> {
         return new None<>();
     }
 
+    @Override
+    public List_<T> add(T element) {
+        List<T> copy = new ArrayList<>(list);
+        copy.add(element);
+        return new JavaList<>(copy);
+    }
+
     private boolean isValidRange(int fromInclusive, int toExclusive) {
         return isRangeWithinBounds(fromInclusive, toExclusive) && fromInclusive <= toExclusive;
     }

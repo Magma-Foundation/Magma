@@ -15,6 +15,7 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\option\Some.c^
 	 .\magma\api\collect\Stream.c^
 	 .\magma\api\result\Tuple.c^
+	 .\magma\api\collect\Collector.c^
 	 .\magma\api\collect\List_.c^
 	 .\magma\api\io\IOError.c^
 	 .\magma\api\error\Error.c^
@@ -26,6 +27,7 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\option\Option.c^
 	 .\jv\app\compile\PathSource.c^
 	 .\magma\Application.c^
+	 .\magma\api\collect\Joiner.c^
 	 .\magma\api\collect\RangeHead.c^
 	 .\magma\app\compile\Source.c^
 	 .\jv\api\io\JavaIOError.c^
