@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Compiler {
+
+    public static final List_<String> FUNCTIONAL_NAMESPACE = Lists.of("java", "util", "function");
+
     static Result<Tuple<String, String>, CompileError> compile(State state, String input) {
         return divideAndCompile(input, state).mapValue(tuple -> {
             return new Tuple<String, String>(wrapHeader(tuple, state), wrapTarget(state, tuple));
@@ -88,7 +91,7 @@ public class Compiler {
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
                 List_<String> namespace = new JavaList<>(Arrays.asList(left.split(Pattern.quote("."))));
-                if (namespace.size() >= 3 && namespace.subList(0, 3).equals(Lists.of("java", "util", "function"))) {
+                if (isFunctionalImport(namespace)) {
                     return generateEmpty();
                 }
 
@@ -170,6 +173,11 @@ public class Compiler {
         }
 
         return new Err<>(new CompileError("Invalid root segment", input));
+    }
+
+    private static boolean isFunctionalImport(List_<String> namespace) {
+        List_<String> slice = namespace.subList(0, 3).orElse(new JavaList<>());
+        return Lists.equalsTo(slice, FUNCTIONAL_NAMESPACE, String::equals);
     }
 
     private static Option<List_<String>> mapPlatformDependentNamespace(
