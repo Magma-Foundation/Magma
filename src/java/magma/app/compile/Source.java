@@ -1,12 +1,11 @@
 package magma.app.compile;
 
 import magma.api.collect.List_;
+import magma.api.io.IOError;
 import magma.api.result.Result;
 
-import java.io.IOException;
-
 public interface Source {
-    Result<String, IOException> read();
+    Result<String, IOError> read0();
 
     List_<String> computeNamespace();
 

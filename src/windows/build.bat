@@ -9,6 +9,7 @@ clang .\magma\app\compile\ImmutableState.c^
 	 .\magma\api\collect\Stream.c^
 	 .\magma\api\result\Tuple.c^
 	 .\magma\api\collect\List_.c^
+	 .\magma\api\io\IOError.c^
 	 .\magma\api\error\Error.c^
 	 .\magma\Main.c^
 	 .\magma\app\compile\State.c^

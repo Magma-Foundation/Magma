@@ -1,12 +1,14 @@
 package jv.app.compile;
 
-import jv.api.io.JavaFiles;
 import jv.api.collect.JavaLists;
+import jv.api.io.JavaIOError;
+import jv.api.result.JavaResults;
+import magma.api.io.IOError;
 import magma.app.compile.Source;
 import magma.api.collect.List_;
 import magma.api.result.Result;
 
-import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,8 +18,10 @@ public record PathSource(Path source) implements Source {
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
     @Override
-    public Result<String, IOException> read() {
-        return JavaFiles.readSafe(source());
+    public Result<String, IOError> read0() {
+        return JavaResults
+                .wrap(() -> Files.readString(this.source()))
+                .mapErr(JavaIOError::new);
     }
 
     private List<String> computeNamespace0() {

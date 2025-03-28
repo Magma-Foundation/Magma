@@ -1,7 +1,7 @@
 package jv.api.io;
 
-import magma.api.result.Result;
 import jv.api.result.JavaResults;
+import magma.api.result.Result;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,10 +19,6 @@ public class JavaFiles {
         } catch (IOException e) {
             return Optional.of(e);
         }
-    }
-
-    public static Result<String, IOException> readSafe(Path source) {
-        return JavaResults.wrap(() -> Files.readString(source));
     }
 
     public static Result<Set<Path>, IOException> walk(Path directory) {
