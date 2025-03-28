@@ -64,14 +64,11 @@ public class Compiler {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
                 createPackageRule(),
-                createImportRule(),
-                new ClassRule(),
-                new RecordRule(),
-                new InterfaceRule()
+                createImportRule()
         ));
     }
 
-    private static StripRule createWhitespaceRule() {
+    public static StripRule createWhitespaceRule() {
         return new StripRule(new EmptyRule());
     }
 
@@ -79,12 +76,8 @@ public class Compiler {
         return createNamespaceRule("package ", new MyRule());
     }
 
-    public static Err<Tuple<String, String>, CompileError> createSuffixErr(String input, String suffix) {
-        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
-    }
-
     public static Err<Tuple<String, String>, CompileError> createInfixErr(String input, String infix) {
-        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
     }
 
     private static StripRule createImportRule() {
@@ -99,10 +92,10 @@ public class Compiler {
         return new Ok<>(new Tuple<>("", ""));
     }
 
-    static Result<Tuple<String, String>, CompileError> generateStruct(MapNode node) {
-        String name = node.find("name").orElse("");
-        String left = node.find("header").orElse("");
-        String right = node.find("target").orElse("");
+    static Result<Tuple<String, String>, CompileError> generateStruct(Node node) {
+        String name = node.findString("name").orElse("");
+        String left = node.findString("header").orElse("");
+        String right = node.findString("target").orElse("");
 
         return new Ok<>(new Tuple<>("struct " + name + " {\n};\n" + left, right));
     }
@@ -115,5 +108,11 @@ public class Compiler {
         } else {
             return source;
         }
+    }
+
+    public static Rule createClassMemberRule() {
+        return new OrRule(Lists.of(
+                createWhitespaceRule()
+        ));
     }
 }

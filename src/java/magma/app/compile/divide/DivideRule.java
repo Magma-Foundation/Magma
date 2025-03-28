@@ -3,6 +3,7 @@ package magma.app.compile.divide;
 import jvm.api.collect.Lists;
 import magma.api.result.Ok;
 import magma.app.compile.MapNode;
+import magma.app.compile.Node;
 import magma.app.compile.rule.MapOutput;
 import magma.app.compile.rule.Output;
 import magma.app.compile.rule.Rule;
@@ -76,14 +77,14 @@ public record DivideRule(Rule child) implements Rule {
     }
 
     @Override
-    public Result<MapNode, CompileError> parse(ParseState state, String input) {
+    public Result<Node, CompileError> parse(ParseState state, String input) {
         return apply(state, input).mapValue(tuple -> {
             return new MapNode().withString("header", tuple.left()).withString("target", tuple.right());
         });
     }
 
     @Override
-    public Result<Output, CompileError> generate(MapNode node) {
-        return new Ok<>(new MapOutput().with("header", node.find("header").orElse("")));
+    public Result<String, CompileError> generate(Node node) {
+        return new Ok<>(new MapOutput().with("header", node.findString("header").orElse("")));
     }
 }

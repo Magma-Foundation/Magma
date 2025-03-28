@@ -5,8 +5,8 @@ import magma.api.collect.Joiner;
 import magma.api.collect.List_;
 import magma.api.error.Error;
 
-public record CompileError(String message, String context, List_<CompileError> errors) implements Error {
-    public CompileError(String message, String context) {
+public record CompileError(String message, Context context, List_<CompileError> errors) implements Error {
+    public CompileError(String message, Context context) {
         this(message, context, Lists.empty());
     }
 
@@ -17,6 +17,6 @@ public record CompileError(String message, String context, List_<CompileError> e
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return message + ": " + context + joined;
+        return message + ": " + context.display() + joined;
     }
 }

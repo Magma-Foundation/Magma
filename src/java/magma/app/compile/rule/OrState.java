@@ -8,28 +8,26 @@ import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.api.result.Tuple;
 import magma.app.compile.CompileError;
 
-public record OrState(Option<Tuple<String, String>> maybeValue, List_<CompileError> errors) {
+public record OrState<T>(Option<T> maybeValue, List_<CompileError> errors) {
     public OrState() {
         this(new None<>(), Lists.empty());
     }
 
-    public OrState withValue(Tuple<String, String> result) {
-        return new OrState(new Some<>(result), errors);
+    public OrState<T> withValue(T result) {
+        return new OrState<>(new Some<>(result), errors);
     }
 
     public boolean isPresent() {
         return maybeValue.isPresent();
     }
 
-    public OrState withErr(CompileError error) {
-        return new OrState(maybeValue, errors.add(error));
+    public OrState<T> withErr(CompileError error) {
+        return new OrState<T>(maybeValue, errors.add(error));
     }
 
-    public Result<Tuple<String, String>, List_<CompileError>> toResult() {
-        return maybeValue.<Result<Tuple<String, String>, List_<CompileError>>>map(value -> new Ok<>(value))
-                .orElseGet(() -> new Err<>(errors));
+    public Result<T, List_<CompileError>> toResult() {
+        return maybeValue.<Result<T, List_<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(errors));
     }
 }
