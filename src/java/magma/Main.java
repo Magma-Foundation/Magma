@@ -22,10 +22,9 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "windows");
-    public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
 
     public static void main(String[] args) {
-        JavaFiles.walk(SOURCE_DIRECTORY)
+        JavaFiles.walk(Source.SOURCE_DIRECTORY)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .match(Main::runWithFiles, Optional::of)
@@ -72,7 +71,7 @@ public class Main {
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
         Result<List<Path>, ApplicationError> relativePaths = new Ok<>(new ArrayList<>());
         for (Path source : sources) {
-            relativePaths = relativePaths.and(() -> runWithSource(source)).mapValue(tuple -> {
+            relativePaths = relativePaths.and(() -> runWithSource(new Source(source))).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
@@ -80,28 +79,33 @@ public class Main {
         return relativePaths;
     }
 
-    private static Result<Path, ApplicationError> runWithSource(Path source) {
-        return JavaFiles.readSafe(source)
+    private static Result<Path, ApplicationError> runWithSource(Source source) {
+        return source.read()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(input -> compileWithInput(source, input));
     }
 
-    private static Result<Path, ApplicationError> compileWithInput(Path source, String input) {
-        return compile(input)
+    private static Result<Path, ApplicationError> compileWithInput(Source source, String input) {
+        List<String> namespace = source.computeNamespace();
+        String name = source.computeName();
+
+        List<String> copy = new ArrayList<>(namespace);
+        copy.add(name);
+
+        return compile(input, copy)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(output -> writeOutput(source, output));
+                .flatMapValue(output -> writeOutput(output, namespace, name));
     }
 
-    private static Result<Path, ApplicationError> writeOutput(Path source, Tuple<String, String> output) {
-        Path relative = SOURCE_DIRECTORY.relativize(source);
-        Path parent = relative.getParent();
-        Path targetParent = TARGET_DIRECTORY.resolve(parent);
+    private static Result<Path, ApplicationError> writeOutput(Tuple<String, String> output, List<String> namespace, String name) {
+        Path targetParent = TARGET_DIRECTORY;
+        for (String segment : namespace) {
+            targetParent = targetParent.resolve(segment);
+        }
+
         Optional<Result<Path, ApplicationError>> maybeError = ensureDirectories(targetParent).map(Err::new);
         if (maybeError.isPresent()) return maybeError.get();
-
-        String nameWithExt = relative.getFileName().toString();
-        String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
 
         Path header = targetParent.resolve(name + ".h");
         Path target = targetParent.resolve(name + ".c");
@@ -113,7 +117,22 @@ public class Main {
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compile(String input) {
+    private static Result<Tuple<String, String>, CompileError> compile(String input, List<String> namespace) {
+        return divideAndCompile(input).mapValue(tuple -> {
+            String newSource = attachSource(namespace, tuple.right());
+            return new Tuple<>(tuple.left(), newSource);
+        });
+    }
+
+    private static String attachSource(List<String> namespace, String source) {
+        if (namespace.equals(List.of("magma", "Main"))) {
+            return source + "int main(){\n\treturn 0;\n}\n";
+        } else {
+            return source;
+        }
+    }
+
+    private static Result<Tuple<String, String>, CompileError> divideAndCompile(String input) {
         List<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
