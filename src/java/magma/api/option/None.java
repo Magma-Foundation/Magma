@@ -30,4 +30,9 @@ public class None<T> implements Option<T> {
     public Option<T> or(Supplier<Option<T>> other) {
         return other.get();
     }
+
+    @Override
+    public T orElse(T other) {
+        return other;
+    }
 }

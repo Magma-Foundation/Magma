@@ -1,10 +1,11 @@
 package magma;
 
-import jv.api.collect.JavaLists;
 import jv.api.error.ThrowableError;
 import jv.api.io.JavaFiles;
+import jv.api.io.JavaList;
 import jv.api.result.JavaResults;
 import jv.app.compile.PathSource;
+import magma.api.collect.List_;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Err;
@@ -70,8 +71,8 @@ public class Application {
         Result<List<Path>, ApplicationError> relativePaths = new Ok<List<Path>, ApplicationError>(new ArrayList<Path>());
         for (Path source : sources) {
             final Source wrapped = new PathSource(source);
-            List<String> namespace = JavaLists.toNative(wrapped.computeNamespace());
-            if (namespace.subList(0, 1).equals(List.of("jv"))) {
+            List_<String> namespace = wrapped.computeNamespace();
+            if (namespace.subList(0, 1).orElse(new JavaList<>()).equals(List.of("jv"))) {
                 continue;
             }
 
@@ -85,24 +86,21 @@ public class Application {
         return relativePaths;
     }
 
-    private static Result<Path, ApplicationError> runWithSource(Source source, List<String> namespace, String name) {
+    private static Result<Path, ApplicationError> runWithSource(Source source, List_<String> namespace, String name) {
         return source.read()
                 .mapErr(ApplicationError::new)
                 .flatMapValue(input -> compileWithInput(input, namespace, name));
     }
 
-    private static Result<Path, ApplicationError> compileWithInput(String input, List<String> namespace, String name) {
-        State state = new ImmutableState(JavaLists.fromNative(namespace), name);
+    private static Result<Path, ApplicationError> compileWithInput(String input, List_<String> namespace, String name) {
+        State state = new ImmutableState(namespace, name);
         return Compiler.compile(state, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
     }
 
-    private static Result<Path, ApplicationError> writeOutput(Tuple<String, String> output, List<String> namespace, String name) {
-        Path targetParent = TARGET_DIRECTORY;
-        for (String segment : namespace) {
-            targetParent = targetParent.resolve(segment);
-        }
+    private static Result<Path, ApplicationError> writeOutput(Tuple<String, String> output, List_<String> namespace, String name) {
+        Path targetParent = namespace.stream().fold(TARGET_DIRECTORY, Path::resolve);
 
         Optional<Result<Path, ApplicationError>> maybeError = ensureDirectories(targetParent).map(Err::new);
         if (maybeError.isPresent()) return maybeError.get();
@@ -114,7 +112,7 @@ public class Application {
                 .map(ThrowableError::new)
                 .map(ApplicationError::new)
                 .<Result<Path, ApplicationError>>map(Err::new)
-                .orElseGet(() -> new Ok<Path, ApplicationError>(TARGET_DIRECTORY.relativize(target)));
+                .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
     private static Optional<ApplicationError> ensureDirectories(Path targetParent) {

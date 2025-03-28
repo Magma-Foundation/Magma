@@ -1,5 +1,6 @@
 package magma.api.option;
 
+import jv.api.io.JavaList;
 import magma.api.result.Tuple;
 
 import java.util.function.Consumer;
@@ -16,4 +17,6 @@ public interface Option<T> {
     void ifPresent(Consumer<T> consumer);
 
     Option<T> or(Supplier<Option<T>> other);
+
+    T orElse(T other);
 }
