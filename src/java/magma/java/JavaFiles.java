@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JavaFiles {
-    public static Optional<IOException> writeString(Path target, String output) throws IOException {
+    public static Optional<IOException> writeString(Path target, String output) {
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -31,5 +31,14 @@ public class JavaFiles {
                 return stream.collect(Collectors.toSet());
             }
         });
+    }
+
+    public static Optional<IOException> createDirectoriesSafe(Path targetParent) {
+        try {
+            Files.createDirectories(targetParent);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
     }
 }
