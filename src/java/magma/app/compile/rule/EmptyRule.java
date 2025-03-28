@@ -6,12 +6,11 @@ import magma.api.result.Result;
 import magma.app.compile.CompileError;
 import magma.app.compile.MapNode;
 import magma.app.compile.Node;
-import magma.app.compile.ParseState;
 import magma.app.compile.StringContext;
 
 public class EmptyRule implements Rule {
     @Override
-    public Result<Node, CompileError> parse(ParseState state, String input) {
+    public Result<Node, CompileError> parse(String input) {
         if (input.isEmpty()) return new Ok<>(new MapNode());
         return new Err<>(new CompileError("Must be empty", new StringContext(input)));
     }

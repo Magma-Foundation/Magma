@@ -89,7 +89,7 @@ public class Application {
 
     private static Result<Path_, ApplicationError> compileWithInput(List_<String> namespace, String name, String input) {
         ParseState parseState = new ImmutableParseState(namespace, name);
-        return Compiler.compile(parseState, input)
+        return Compiler.compile(input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(namespace, name, output));
     }

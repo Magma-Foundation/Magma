@@ -7,11 +7,10 @@ import magma.app.compile.CompileError;
 import magma.app.compile.MapNode;
 import magma.app.compile.Node;
 import magma.app.compile.NodeContext;
-import magma.app.compile.ParseState;
 
 public record StringRule(String propertyKey) implements Rule {
     @Override
-    public Result<Node, CompileError> parse(ParseState state, String input) {
+    public Result<Node, CompileError> parse(String input) {
         return new Ok<>(new MapNode().withString(propertyKey, input));
     }
 

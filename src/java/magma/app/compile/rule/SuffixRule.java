@@ -4,15 +4,14 @@ import magma.api.result.Err;
 import magma.api.result.Result;
 import magma.app.compile.CompileError;
 import magma.app.compile.Node;
-import magma.app.compile.ParseState;
 import magma.app.compile.StringContext;
 
 public record SuffixRule(Rule child, String suffix) implements Rule {
     @Override
-    public Result<Node, CompileError> parse(ParseState state, String input) {
+    public Result<Node, CompileError> parse(String input) {
         if (input.endsWith(this.suffix)) {
             String left = input.substring(0, input.length() - this.suffix.length());
-            return child.parse(state, left);
+            return child.parse(left);
         }
 
         String format = "Suffix '%s' not present";

@@ -4,15 +4,14 @@ import magma.api.result.Err;
 import magma.api.result.Result;
 import magma.app.compile.CompileError;
 import magma.app.compile.Node;
-import magma.app.compile.ParseState;
 import magma.app.compile.StringContext;
 
 public record PrefixRule(String prefix, SuffixRule childRule) implements Rule {
     @Override
-    public Result<Node, CompileError> parse(ParseState state, String input) {
+    public Result<Node, CompileError> parse(String input) {
         if (input.startsWith(prefix)) {
             String slice = input.substring(prefix.length());
-            return childRule.parse(state, slice);
+            return childRule.parse(slice);
         }
 
         String format = "Prefix '%s' not present";

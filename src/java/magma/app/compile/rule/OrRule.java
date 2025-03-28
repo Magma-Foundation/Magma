@@ -6,7 +6,6 @@ import magma.app.compile.CompileError;
 import magma.app.compile.Context;
 import magma.app.compile.Node;
 import magma.app.compile.NodeContext;
-import magma.app.compile.ParseState;
 import magma.app.compile.StringContext;
 
 import java.util.function.Function;
@@ -20,8 +19,8 @@ public record OrRule(List_<Rule> rules) implements Rule {
     }
 
     @Override
-    public Result<Node, CompileError> parse(ParseState state, String input) {
-        return foldRules(new StringContext(input), rule -> rule.parse(state, input));
+    public Result<Node, CompileError> parse(String input) {
+        return foldRules(new StringContext(input), rule -> rule.parse(input));
     }
 
     private <T> Result<T, CompileError> foldRules(Context context, Function<Rule, Result<T, CompileError>> function) {
