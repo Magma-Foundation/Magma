@@ -1,7 +1,7 @@
 #ifndef magma_Application
 #define magma_Application
 #include "../windows/api/collect/Lists.h"
-#include "../windows/api/io/JavaPaths.h"
+#include "../windows/api/io/Paths.h"
 #include "../magma/api/io/Path_.h"
 #include "../magma/api/process/Process_.h"
 #include "../windows/api/process/Processes.h"

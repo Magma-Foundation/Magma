@@ -53,13 +53,12 @@ public record JavaPath(Path path) implements Path_ {
         return path.toString();
     }
 
-    @Override
-    public String readString() throws IOException {
+    private String readStringExceptionally() throws IOException {
         return Files.readString(path);
     }
 
     @Override
-    public Option<Path_> getParent() {
+    public Option<Path_> findParent() {
         Path parent = path.getParent();
         return parent == null ? new None<>() : new Some<>(new JavaPath(parent));
     }
@@ -86,11 +85,17 @@ public record JavaPath(Path path) implements Path_ {
                 .map(JavaIOError::new);
     }
 
-    @Override
-    public Set<Path_> walkExceptionally() throws IOException {
+    private Set<Path_> walkExceptionally() throws IOException {
         try (java.util.stream.Stream<Path> stream = Files.walk(path)) {
             return stream.<Path_>map(JavaPath::new)
                     .collect(Collectors.toSet());
         }
+    }
+
+    @Override
+    public Result<String, IOError> readString() {
+        return JavaResults
+                .wrapSupplier(this::readStringExceptionally)
+                .mapErr(JavaIOError::new);
     }
 }
