@@ -68,9 +68,24 @@ public class Compiler {
                 createWhitespaceRule(),
                 createPackageRule(),
                 createImportRule(),
-                Compiler::compileClass,
-                Compiler::compileRecord,
-                Compiler::compileInterface
+                new Rule() {
+                    @Override
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                        return compileClass(state, input);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                        return compileRecord(state, input);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<Tuple<String, String>, CompileError> apply(ParseState state, String input) {
+                        return compileInterface(state, input);
+                    }
+                }
         ));
     }
 
@@ -79,7 +94,12 @@ public class Compiler {
     }
 
     private static StripRule createPackageRule() {
-        return createNamespaceRule("package ", (state1, input1) -> generateEmpty());
+        return createNamespaceRule("package ", new Rule() {
+            @Override
+            public Result<Tuple<String, String>, CompileError> apply(ParseState state1, String input1) {
+                return generateEmpty();
+            }
+        });
     }
 
     private static Result<Tuple<String, String>, CompileError> compileClass(ParseState state, String input) {
@@ -105,7 +125,12 @@ public class Compiler {
         if (!withEnd.endsWith("}")) return createSuffixErr(input, "}");
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return new DivideRule((parseState2, s) -> compileClassMember(s)).apply(state, inputContent)
+        return new DivideRule(new Rule() {
+            @Override
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState2, String s) {
+                return compileClassMember(s);
+            }
+        }).apply(state, inputContent)
                 .flatMapValue(tuple -> generateStruct(new MapNode()
                         .withString(NAME, name1)
                         .withString(HEADER, tuple.left())
@@ -145,7 +170,12 @@ public class Compiler {
 
         if (!withEnd.endsWith("}")) return createSuffixErr(input, "}");
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return new DivideRule((parseState1, s) -> compileClassMember(s)).apply(state, inputContent).flatMapValue(content -> {
+        return new DivideRule(new Rule() {
+            @Override
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState1, String s) {
+                return compileClassMember(s);
+            }
+        }).apply(state, inputContent).flatMapValue(content -> {
             return generateStruct(new MapNode()
                     .withString(NAME, name)
                     .merge(new MapNode()
@@ -186,7 +216,12 @@ public class Compiler {
     }
 
     private static StripRule createImportRule() {
-        return createNamespaceRule("import ", Compiler::compileSegments);
+        return createNamespaceRule("import ", new Rule() {
+            @Override
+            public Result<Tuple<String, String>, CompileError> apply(ParseState parseState, String input) {
+                return compileSegments(parseState, input);
+            }
+        });
     }
 
     private static StripRule createNamespaceRule(String prefix, Rule rule) {
