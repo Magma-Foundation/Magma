@@ -1,13 +1,14 @@
 package magma.result;
 
-import java.util.Optional;
+import magma.option.Option;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface Result<T, X> {
-    Optional<T> findValue();
+    Option<T> findValue();
 
-    Optional<X> findError();
+    Option<X> findError();
 
     <R> Result<R, X> mapValue(Function<T, R> mapper);
 

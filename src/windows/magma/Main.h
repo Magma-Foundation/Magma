@@ -3,6 +3,7 @@
 #include "../magma/error/ThrowableError.h"
 #include "../magma/java/JavaFiles.h"
 #include "../magma/result/Err.h"
+#include "../magma/option/JavaOptions.h"
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
 #include "../magma/result/Results.h"

@@ -5,6 +5,7 @@ import magma.error.CompileError;
 import magma.error.ThrowableError;
 import magma.java.JavaFiles;
 import magma.result.Err;
+import magma.option.JavaOptions;
 import magma.result.Ok;
 import magma.result.Result;
 import magma.result.Results;
@@ -62,10 +63,10 @@ public class Main {
 
         return Results.wrap(builder::start).mapErr(ThrowableError::new).mapErr(ApplicationError::new).match(process -> {
             Result<Integer, InterruptedException> awaited = Results.wrap(process::waitFor);
-            awaited.findValue().ifPresent(exitCode -> {
+            JavaOptions.unwrap(awaited.findValue()).ifPresent(exitCode -> {
                 if (exitCode != 0) System.err.println("Invalid exit code: " + exitCode);
             });
-            return awaited.findError().map(ThrowableError::new).map(ApplicationError::new);
+            return JavaOptions.unwrap(awaited.findError()).map(ThrowableError::new).map(ApplicationError::new);
         }, Optional::of);
     }
 

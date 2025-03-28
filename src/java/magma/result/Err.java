@@ -1,17 +1,18 @@
 package magma.result;
 
+import magma.option.JavaOptions;
+import magma.option.Option;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Err<T, X>(X error) implements Result<T, X> {
-    @Override
-    public Optional<T> findValue() {
+    private Optional<T> findValue1() {
         return Optional.empty();
     }
 
-    @Override
-    public Optional<X> findError() {
+    private Optional<X> findError0() {
         return Optional.of(error);
     }
 
@@ -38,5 +39,15 @@ public record Err<T, X>(X error) implements Result<T, X> {
     @Override
     public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
         return whenErr.apply(error);
+    }
+
+    @Override
+    public Option<T> findValue() {
+        return JavaOptions.wrap(findValue1());
+    }
+
+    @Override
+    public Option<X> findError() {
+        return JavaOptions.wrap(findError0());
     }
 }
