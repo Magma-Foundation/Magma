@@ -10,5 +10,6 @@ clang .\magma\error\Error.c^
 	 .\magma\result\Tuple.c^
 	 .\magma\error\ThrowableError.c^
 	 .\magma\Main.c^
+	 .\magma\State.c^
 	 .\magma\result\Ok.c^
 	 -o main.exe

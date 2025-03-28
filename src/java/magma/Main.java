@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -90,7 +91,8 @@ public class Main {
         List<String> namespace = source.computeNamespace();
         String name = source.computeName();
 
-        return compile(input, namespace, name)
+        State state = new State(namespace, name);
+        return compile(state, input)
                 .mapErr(ApplicationError::new)
                 .flatMapValue(output -> writeOutput(output, namespace, name));
     }
@@ -114,24 +116,28 @@ public class Main {
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compile(String input, List<String> namespace, String name) {
-        return divideAndCompile(input).mapValue(tuple -> {
-            String newSource = attachSource(tuple.right(), namespace, name);
+    private static Result<Tuple<String, String>, CompileError> compile(State state, String input) {
+        return divideAndCompile(input, state).mapValue(tuple -> {
+            String newSource = attachSource(state, tuple);
             return new Tuple<>(tuple.left(), newSource);
         });
     }
 
-    private static String attachSource(String source, List<String> namespace, String name) {
-        if (namespace.equals(List.of("magma")) && name.equals("Main")) {
-            return "#include \"" +
-                    name + ".h" +
-                    "\"\n" + source + "int main(){\n\treturn 0;\n}\n";
+    private static String attachSource(State state, Tuple<String, String> tuple) {
+        String source = tuple.right();
+        String name = state.name();
+        if (state.namespace().equals(List.of("magma")) && name.equals("Main")) {
+            return generateImport(name) + source + "int main(){\n\treturn 0;\n}\n";
         } else {
             return source;
         }
     }
 
-    private static Result<Tuple<String, String>, CompileError> divideAndCompile(String input) {
+    private static String generateImport(String content) {
+        return "#include \"" + content + ".h" + "\"\n";
+    }
+
+    private static Result<Tuple<String, String>, CompileError> divideAndCompile(String input, State state) {
         List<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -151,7 +157,7 @@ public class Main {
         Result<Tuple<StringBuilder, StringBuilder>, CompileError> output = new Ok<>(new Tuple<>(new StringBuilder(), new StringBuilder()));
         for (String segment : segments) {
             output = output
-                    .and(() -> compileRootSegment(segment))
+                    .and(() -> compileRootSegment(segment, state))
                     .mapValue(Main::appendBuilders);
         }
 
@@ -174,18 +180,26 @@ public class Main {
                 .map(ApplicationError::new);
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileRootSegment(String segment) {
+    private static Result<Tuple<String, String>, CompileError> compileRootSegment(String segment, State state) {
         if (segment.startsWith("package ")) return new Ok<>(new Tuple<>("", ""));
 
         if (segment.strip().startsWith("import ")) {
             String right = segment.strip().substring("import ".length());
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                String[] namespace = left.split(Pattern.quote("."));
-                String joined = String.join("/", namespace);
-                return new Ok<>(new Tuple<>("#include <" +
-                        joined +
-                        ".h>\n", ""));
+                List<String> namespace = new ArrayList<>(Arrays.asList(left.split(Pattern.quote("."))));
+                List<String> copy = new ArrayList<>();
+
+                List<String> namespace1 = state.namespace();
+                for (int i = 0; i < namespace1.size(); i++) {
+                    copy.add("..");
+                }
+
+                if (namespace.isEmpty()) copy.add(".");
+                copy.addAll(namespace);
+
+                String joined = String.join("/", copy);
+                return new Ok<>(new Tuple<>(generateImport(joined), ""));
             }
         }
 
