@@ -34,6 +34,11 @@ public record Err<T, X>(X error) implements Result<T, X> {
     }
 
     @Override
+    public boolean isOk() {
+        return false;
+    }
+
+    @Override
     public Option<T> findValue() {
         return new None<>();
     }

@@ -34,6 +34,11 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     }
 
     @Override
+    public boolean isOk() {
+        return true;
+    }
+
+    @Override
     public Option<T> findValue() {
         return new Some<>(value);
     }

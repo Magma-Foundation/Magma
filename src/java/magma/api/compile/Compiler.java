@@ -60,10 +60,10 @@ public class Compiler {
     }
 
     static Result<Tuple<String, String>, CompileError> compileRootSegment(String input, ParseState state) {
-        Result<Tuple<String, String>, CompileError> maybeWhitespace = compileWhitespace(input);
+        Result<Tuple<String, String>, CompileError> maybeWhitespace = compileWhitespace(state, input);
         if (maybeWhitespace.isOk()) return maybeWhitespace;
 
-        Result<Tuple<String, String>, CompileError> maybePackage = compilePackage(input);
+        Result<Tuple<String, String>, CompileError> maybePackage = compilePackage(state, input);
         if (maybePackage.isOk()) return maybePackage;
 
         Result<Tuple<String, String>, CompileError> maybeImport = compileImport(state, input);
@@ -72,22 +72,22 @@ public class Compiler {
         Result<Tuple<String, String>, CompileError> maybeClass = compileClass(state, input);
         if (maybeClass.isOk()) return maybeClass;
 
-        Result<Tuple<String, String>, CompileError> maybeRecord = compileRecord(input, state);
+        Result<Tuple<String, String>, CompileError> maybeRecord = compileRecord(state, input);
         if (maybeRecord.isOk()) return maybeRecord;
 
-        Result<Tuple<String, String>, CompileError> maybeInterface = compileInterface(input);
+        Result<Tuple<String, String>, CompileError> maybeInterface = compileInterface(state, input);
         if (maybeInterface.isOk()) return maybeInterface;
 
         return new Err<>(new CompileError("Invalid root segment", input));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileWhitespace(String input) {
+    private static Result<Tuple<String, String>, CompileError> compileWhitespace(ParseState state, String input) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return generateEmpty();
         return new Err<>(new CompileError("Input not empty", stripped));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compilePackage(String input) {
+    private static Result<Tuple<String, String>, CompileError> compilePackage(ParseState state, String input) {
         if (input.startsWith("package ")) return generateEmpty();
         return createPrefixErr(input, "package ");
     }
@@ -135,7 +135,7 @@ public class Compiler {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileRecord(String input, ParseState state) {
+    private static Result<Tuple<String, String>, CompileError> compileRecord(ParseState state, String input) {
         int recordIndex = input.indexOf("record ");
         if (recordIndex < 0) return createInfixErr(input, "record ");
 
@@ -168,7 +168,7 @@ public class Compiler {
         });
     }
 
-    private static Result<Tuple<String, String>, CompileError> compileInterface(String input) {
+    private static Result<Tuple<String, String>, CompileError> compileInterface(ParseState state, String input) {
         int interfaceIndex = input.indexOf("interface ");
         if (interfaceIndex < 0) return createInfixErr(input, "interface ");
 

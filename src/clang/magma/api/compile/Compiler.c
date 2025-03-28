@@ -11,7 +11,23 @@ void generateDirectiveWithSuffix(){
 }
 void generateImport(){
 }
-void compileRoot(){
+void createRootRule(){
 }
 void compileRootSegment(){
+}
+void compileWhitespace(){
+}
+void compilePackage(){
+}
+void createPrefixErr(){
+}
+void compileClass(){
+}
+void createSuffixErr(){
+}
+void createInfixErr(){
+}
+void compileRecord(){
+}
+void compileInterface(){
 }
