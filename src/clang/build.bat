@@ -6,6 +6,7 @@ clang .\magma\CompileException.c^
 	.\magma\option\Tuple.c^
 	.\magma\collect\stream\HeadedStream.c^
 	.\magma\Rule.c^
+	.\magma\Compiler.c^
 	.\magma\MutableDividingState.c^
 	.\magma\collect\list\List_.c^
 	.\magma\Main.c^
