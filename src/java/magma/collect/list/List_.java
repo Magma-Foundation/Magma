@@ -3,8 +3,6 @@ package magma.collect.list;
 import magma.collect.stream.Stream;
 import magma.option.Option;
 
-import java.util.List;
-
 public interface List_<T> {
     Stream<T> stream();
 
