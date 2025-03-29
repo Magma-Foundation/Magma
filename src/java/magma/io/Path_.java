@@ -1,16 +1,12 @@
 package magma.io;
 
-import jvm.io.Paths;
 import magma.collect.set.Set_;
 import magma.collect.stream.Stream;
 
 import java.io.IOException;
-import java.nio.file.Files;
 
 public interface Path_ {
-    default boolean exists() {
-        return Files.exists((Paths.toNative(this)));
-    }
+    boolean exists();
 
     Set_<Path_> walk() throws IOException;
 

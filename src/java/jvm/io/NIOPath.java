@@ -73,4 +73,9 @@ public record NIOPath(Path path) implements Path_ {
                     .collect(Collectors.toSet()));
         }
     }
+
+    @Override
+    public boolean exists() {
+        return Files.exists((Paths.toNative(this)));
+    }
 }
