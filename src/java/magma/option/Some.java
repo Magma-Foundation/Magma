@@ -13,4 +13,9 @@ public record Some<T>(T value) implements Option<T> {
     public T orElseGet(Supplier<T> other) {
         return value;
     }
+
+    @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(true, value);
+    }
 }

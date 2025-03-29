@@ -1,5 +1,9 @@
 package magma;
 
+import magma.collect.list.JavaList;
+import magma.collect.list.List_;
+import magma.collect.list.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +47,17 @@ public class MutableDividingState implements DividingState {
 
     @Override
     public DividingState advance() {
-        segments().add(buffer.toString());
+        Lists.toNative(segments()).add(buffer.toString());
         this.buffer = new StringBuilder();
         return this;
     }
 
-    @Override
-    public List<String> segments() {
+    private List<String> segments0() {
         return segments;
+    }
+
+    @Override
+    public List_<String> segments() {
+        return new JavaList<>(segments0());
     }
 }

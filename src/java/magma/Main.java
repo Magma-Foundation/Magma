@@ -1,5 +1,6 @@
 package magma;
 
+import magma.collect.list.Lists;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Options;
@@ -80,7 +81,7 @@ public class Main {
         Files.writeString(target, output);
 
         Path header = targetParent.resolve(name + ".h");
-        Files.createFile(header);
+        Files.writeString(header, "");
 
         return TARGET_DIRECTORY.relativize(target);
     }
@@ -103,7 +104,7 @@ public class Main {
             current = divideStatementChar(current, c);
         }
 
-        return current.advance().segments();
+        return Lists.toNative(current.advance().segments());
     }
 
     private static DividingState divideStatementChar(DividingState current, char c) {

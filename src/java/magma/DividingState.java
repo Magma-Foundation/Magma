@@ -1,6 +1,6 @@
 package magma;
 
-import java.util.List;
+import magma.collect.list.List_;
 
 public interface DividingState {
     DividingState append(char c);
@@ -13,5 +13,5 @@ public interface DividingState {
 
     DividingState advance();
 
-    List<String> segments();
+    List_<String> segments();
 }

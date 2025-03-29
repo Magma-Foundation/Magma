@@ -13,4 +13,9 @@ public class None<T> implements Option<T> {
     public T orElseGet(Supplier<T> other) {
         return other.get();
     }
+
+    @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(false, other);
+    }
 }
