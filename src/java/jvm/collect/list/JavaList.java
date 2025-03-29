@@ -21,8 +21,19 @@ public record JavaList<T>(List<T> list) implements List_<T> {
 
     @Override
     public List_<T> add(T element) {
-        ArrayList<T> copy = new ArrayList<>(list);
+        List<T> copy = toNativeCopy();
         copy.add(element);
         return new JavaList<>(copy);
+    }
+
+    @Override
+    public List_<T> addAll(List_<T> others) {
+        List<T> copy = toNativeCopy();
+        copy.addAll(Lists.toNative(others));
+        return new JavaList<>(copy);
+    }
+
+    private List<T> toNativeCopy() {
+        return new ArrayList<>(list);
     }
 }

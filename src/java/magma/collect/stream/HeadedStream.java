@@ -1,5 +1,6 @@
 package magma.collect.stream;
 
+import magma.collect.Collector;
 import magma.option.Tuple;
 
 import java.util.function.BiFunction;
@@ -28,5 +29,10 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     @Override
     public <R> Stream<R> map(Function<T, R> mapper) {
         return new HeadedStream<>(() -> head.next().map(mapper));
+    }
+
+    @Override
+    public <C> C collect(Collector<T, C> collector) {
+        return fold(collector.createInitial(), collector::fold);
     }
 }

@@ -9,7 +9,7 @@ public class MutableDividingState implements DividingState {
     private int depth;
 
     public MutableDividingState() {
-        this(Lists.createEmpty(), new StringBuilder(), 0);
+        this(Lists.empty(), new StringBuilder(), 0);
     }
 
     public MutableDividingState(List_<String> segments, StringBuilder buffer, int depth) {

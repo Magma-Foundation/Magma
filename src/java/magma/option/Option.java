@@ -12,4 +12,6 @@ public interface Option<T> {
     Tuple<Boolean, T> toTuple(T other);
 
     void ifPresent(Consumer<T> consumer);
+
+    T orElse(T other);
 }

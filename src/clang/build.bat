@@ -1,4 +1,5 @@
 clang .\magma\CompileException.c^
+	.\magma\collect\Joiner.c^
 	.\magma\collect\stream\Head.c^
 	.\magma\collect\stream\Stream.c^
 	.\magma\collect\stream\RangeHead.c^
@@ -6,6 +7,7 @@ clang .\magma\CompileException.c^
 	.\magma\option\Tuple.c^
 	.\magma\collect\stream\HeadedStream.c^
 	.\magma\Rule.c^
+	.\magma\collect\Collector.c^
 	.\magma\Compiler.c^
 	.\magma\MutableDividingState.c^
 	.\magma\collect\list\List_.c^

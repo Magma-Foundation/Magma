@@ -2,11 +2,12 @@ package magma;
 
 import jvm.collect.list.Lists;
 import jvm.option.Options;
+import magma.collect.Joiner;
+import magma.collect.list.List_;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -129,25 +130,33 @@ public class Compiler {
             return generateEmpty();
         }
 
-        ArrayList<String> copy = new ArrayList<String>();
-        for (int i = 0; i < thisNamespace.size(); i++) {
-            copy.add("..");
-        }
+        String joined = computeNewNamespace(thisNamespace, requestedNamespace)
+                .stream()
+                .collect(new Joiner("/"))
+                .orElse("");
 
-        List<String> actualNamespace = new ArrayList<String>();
-        if (!requestedNamespace.isEmpty() && requestedNamespace.getFirst().equals("jvm")) {
-            actualNamespace.add("windows");
-            actualNamespace.addAll(requestedNamespace.subList(1, requestedNamespace.size()));
-        } else {
-            actualNamespace.addAll(requestedNamespace);
-        }
-
-        copy.addAll(actualNamespace);
-
-        String joined = String.join("/", copy);
         return new Some<String>("#include \"" +
                 joined +
                 ".h\"\n");
+    }
+
+    private static List_<String> computeNewNamespace(List<String> thisNamespace, List<String> requestedNamespace) {
+        List_<String> copy = Lists.empty();
+        for (int i = 0; i < thisNamespace.size(); i++) {
+            copy = copy.add("..");
+        }
+
+        copy = copy.addAll(maybeReplacePlatformImport(requestedNamespace));
+        return copy;
+    }
+
+    private static List_<String> maybeReplacePlatformImport(List<String> namespace) {
+        if (namespace.isEmpty() || !namespace.getFirst().equals("jvm"))
+            return Lists.fromNative(namespace);
+
+        return Lists.<String>empty()
+                .add("windows")
+                .addAll(Lists.fromNative(namespace.subList(1, namespace.size())));
     }
 
     static Some<String> generateEmpty() {

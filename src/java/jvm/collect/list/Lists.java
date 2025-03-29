@@ -13,7 +13,11 @@ public class Lists {
         });
     }
 
-    public static <T> JavaList<T> createEmpty() {
+    public static <T> JavaList<T> empty() {
         return new JavaList<>();
+    }
+
+    public static <T> List_<T> fromNative(List<T> list) {
+        return new JavaList<>(list);
     }
 }
