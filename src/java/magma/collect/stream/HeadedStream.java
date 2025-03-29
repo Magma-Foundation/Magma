@@ -2,6 +2,8 @@ package magma.collect.stream;
 
 import magma.collect.Collector;
 import magma.option.Tuple;
+import magma.result.Ok;
+import magma.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -34,5 +36,11 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     @Override
     public <C> C collect(Collector<T, C> collector) {
         return fold(collector.createInitial(), collector::fold);
+    }
+
+    @Override
+    public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+        return this.<Result<R, X>>fold(new Ok<>(initial),
+                (rxResult, t) -> rxResult.flatMapValue(inner -> folder.apply(inner, t)));
     }
 }

@@ -40,4 +40,9 @@ public record Some<T>(T value) implements Option<T> {
     public boolean isPresent() {
         return true;
     }
+
+    @Override
+    public <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty) {
+        return ifPresent.apply(value);
+    }
 }

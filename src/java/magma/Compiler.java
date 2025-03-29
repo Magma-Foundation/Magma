@@ -1,42 +1,39 @@
 package magma;
 
 import jvm.collect.list.Lists;
-import jvm.option.Options;
 import magma.collect.Joiner;
 import magma.collect.list.List_;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
+import magma.result.Err;
+import magma.result.Ok;
+import magma.result.Result;
+import magma.result.Results;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class Compiler {
-    static String compile(String input, List<String> namespace, String name) throws CompileException {
-        List<String> segments = divideStatements(input);
-
-        StringBuilder builder = new StringBuilder();
-        for (String segment : segments) {
-            builder.append(compileRootSegment(segment, namespace));
-        }
+    static String compile(String input, List_<String> namespace, String name) throws CompileException {
+        StringBuilder builder = Results.unwrap(divideStatements(input).stream()
+                .foldToResult(new StringBuilder(), (cache, element) -> compileRootSegment(element, namespace).mapValue(cache::append)));
 
         String output = builder.toString();
-        if (namespace.equals(List.of("magma")) && name.equals("Main")) {
+        if (namespace.equals(Lists.of("magma")) && name.equals("Main")) {
             return output + "int main(){\n\treturn 0;\n}\n";
         }
 
         return output;
     }
 
-    static List<String> divideStatements(String input) {
+    static List_<String> divideStatements(String input) {
         DividingState current = new MutableDividingState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = divideStatementChar(current, c);
         }
 
-        return Lists.toNative(current.advance().segments());
+        return current.advance().segments();
     }
 
     static DividingState divideStatementChar(DividingState current, char c) {
@@ -47,51 +44,59 @@ public class Compiler {
         return appended;
     }
 
-    static String compileRootSegment(String input, List<String> namespace) throws CompileException {
-        List<Rule> rules = List.of(
+    private static Result<String, CompileException> compileRootSegment(String input, List_<String> namespace) {
+        List_<Rule> rules = Lists.of(
                 new Rule() {
                     @Override
-                    public Option<String> compile(String input) {
-                        return compilePackage(input);
+                    public Result<String, CompileException> compile(String input) {
+                        return compilePackage(input)
+                                .<Result<String, CompileException>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Option<String> compile(String input) {
-                        return compileImport(input, namespace);
+                    public Result<String, CompileException> compile(String input) {
+                        return compileImport(input, namespace)
+                                .<Result<String, CompileException>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Option<String> compile(String input) {
-                        return compileClass(input);
+                    public Result<String, CompileException> compile(String input) {
+                        return compileClass(input)
+                                .<Result<String, CompileException>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Option<String> compile(String input) {
-                        return compileInterface(input);
+                    public Result<String, CompileException> compile(String input) {
+                        return compileInterface(input)
+                                .<Result<String, CompileException>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileException> compile(String input) {
+                        return compileRecord(input)
+                                .<Result<String, CompileException>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
                     }
 
-                },
-                new Rule() {
-                    @Override
-                    public Option<String> compile(String input) {
-                        if (input.contains("record ")) {
+                    private Option<String> compileRecord(String input2) {
+                        if (input2.contains("record ")) {
                             return generateStruct();
                         }
 
-                        return new None<String>();
+                        return new None<>();
                     }
                 }
         );
 
-        for (Rule rule : rules) {
-            Optional<String> maybe = Options.toNative(rule.compile(input));
-            if (maybe.isPresent()) return maybe.get();
-        }
-
-        throw new CompileException("Invalid root segment", input);
+        return new OrRule(rules).compile(input);
     }
 
     static Option<String> compilePackage(String input) {
@@ -117,7 +122,7 @@ public class Compiler {
         return new None<String>();
     }
 
-    static Option<String> compileImport(String input, List<String> thisNamespace) {
+    static Option<String> compileImport(String input, List_<String> thisNamespace) {
         if (!input.strip().startsWith("import ")) return new None<String>();
 
         String right = input.strip().substring("import ".length());
@@ -139,7 +144,7 @@ public class Compiler {
                 ".h\"\n");
     }
 
-    private static List_<String> computeNewNamespace(List<String> thisNamespace, List_<String> requestedNamespace) {
+    private static List_<String> computeNewNamespace(List_<String> thisNamespace, List_<String> requestedNamespace) {
         List_<String> copy = Lists.empty();
         for (int i = 0; i < thisNamespace.size(); i++) {
             copy = copy.add("..");

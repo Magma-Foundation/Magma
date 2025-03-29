@@ -1,5 +1,7 @@
 package magma;
 
+import jvm.collect.list.JavaList;
+import jvm.collect.list.Lists;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
@@ -57,14 +59,15 @@ public class Main {
         Path relative = SOURCE_DIRECTORY.relativize(source);
         Path parent = relative.getParent();
 
-        ArrayList<String> namespace = new ArrayList<>();
+        JavaList<String> namespace = Lists.empty();
         for (int i = 0; i < parent.getNameCount(); i++) {
             namespace.add(parent.getName(i).toString());
         }
 
-        if (!namespace.isEmpty()) {
-            String first = namespace.getFirst();
-            if (first.equals("jvm")) return new None<>();
+        if(namespace.findFirst()
+                .filter(first -> first.equals("jvm"))
+                .isPresent()) {
+            return new None<>();
         }
 
         String nameWithExt = relative.getFileName().toString();

@@ -1,7 +1,7 @@
 package magma;
 
-import magma.option.Option;
+import magma.result.Result;
 
 public interface Rule {
-    Option<String> compile(String input);
+    Result<String, CompileException> compile(String input);
 }

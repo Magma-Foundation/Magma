@@ -39,4 +39,9 @@ public class None<T> implements Option<T> {
     public boolean isPresent() {
         return false;
     }
+
+    @Override
+    public <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty) {
+        return ifEmpty.get();
+    }
 }

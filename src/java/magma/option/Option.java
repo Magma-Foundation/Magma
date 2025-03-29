@@ -19,4 +19,6 @@ public interface Option<T> {
     Option<T> filter(Predicate<T> predicate);
 
     boolean isPresent();
+
+    <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty);
 }
