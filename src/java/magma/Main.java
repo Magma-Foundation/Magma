@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,7 +95,19 @@ public class Main {
 
     private static String compileRootSegment(String input) throws CompileException {
         if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include \"temp.h\"\n";
+
+        if (input.strip().startsWith("import ")) {
+            String right = input.strip().substring("import ".length());
+            if (right.endsWith(";")) {
+                String namespaceString = right.substring(0, right.length() - ";".length());
+                String[] namespace = namespaceString.split(Pattern.quote("."));
+                String joined = String.join("/", namespace);
+                return "#include \"" +
+                        joined +
+                        ".h\"\n";
+            }
+        }
+
         if (input.contains("class ") || input.contains("interface ")) return "struct Temp {\n};\n";
         throw new CompileException("Invalid root segment", input);
     }
