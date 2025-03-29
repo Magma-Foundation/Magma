@@ -2,6 +2,7 @@ package magma.option;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
@@ -27,5 +28,15 @@ public class None<T> implements Option<T> {
     @Override
     public T orElse(T other) {
         return other;
+    }
+
+    @Override
+    public Option<T> filter(Predicate<T> predicate) {
+        return new None<>();
+    }
+
+    @Override
+    public boolean isPresent() {
+        return false;
     }
 }

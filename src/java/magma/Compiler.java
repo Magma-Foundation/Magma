@@ -8,7 +8,6 @@ import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -125,8 +124,8 @@ public class Compiler {
         if (!right.endsWith(";")) return new None<String>();
 
         String namespaceString = right.substring(0, right.length() - ";".length());
-        List<String> requestedNamespace = Arrays.asList(namespaceString.split(Pattern.quote(".")));
-        if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equals(List.of("java", "util", "function"))) {
+        List_<String> requestedNamespace = Lists.fromArray(namespaceString.split(Pattern.quote(".")));
+        if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"))) {
             return generateEmpty();
         }
 
@@ -140,7 +139,7 @@ public class Compiler {
                 ".h\"\n");
     }
 
-    private static List_<String> computeNewNamespace(List<String> thisNamespace, List<String> requestedNamespace) {
+    private static List_<String> computeNewNamespace(List<String> thisNamespace, List_<String> requestedNamespace) {
         List_<String> copy = Lists.empty();
         for (int i = 0; i < thisNamespace.size(); i++) {
             copy = copy.add("..");
@@ -150,13 +149,18 @@ public class Compiler {
         return copy;
     }
 
-    private static List_<String> maybeReplacePlatformImport(List<String> namespace) {
-        if (namespace.isEmpty() || !namespace.getFirst().equals("jvm"))
-            return Lists.fromNative(namespace);
+    private static List_<String> maybeReplacePlatformImport(List_<String> namespace) {
+        if (!isNativePlatformImport(namespace)) return namespace;
 
         return Lists.<String>empty()
                 .add("windows")
-                .addAll(Lists.fromNative(namespace.subList(1, namespace.size())));
+                .addAll(namespace.subList(1, namespace.size()));
+    }
+
+    private static boolean isNativePlatformImport(List_<String> namespace) {
+        return namespace.findFirst()
+                .filter(value -> value.equals("jvm"))
+                .isPresent();
     }
 
     static Some<String> generateEmpty() {
