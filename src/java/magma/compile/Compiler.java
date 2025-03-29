@@ -48,14 +48,32 @@ public class Compiler {
         List_<Rule> rules = Lists.of(
                 new Rule() {
                     @Override
-                    public Result<String, CompileError> compile(String input) {
+                    public Result<String, CompileError> generate(Node input) {
+                        return new Ok<>(input.findString("value").orElse(""));
+                    }
+
+                    @Override
+                    public Result<Node, CompileError> parse(String input) {
+                        return compile(input).mapValue(value -> new MapNode().withString("value", value));
+                    }
+
+                    private Result<String, CompileError> compile(String input) {
                         if (input.startsWith("package ")) return generateEmpty();
                         return createPrefixErr(input, "package ");
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileError> compile(String input) {
+                    public Result<String, CompileError> generate(Node input) {
+                        return new Ok<>(input.findString("value").orElse(""));
+                    }
+
+                    @Override
+                    public Result<Node, CompileError> parse(String input) {
+                        return compile(input).mapValue(value -> new MapNode().withString("value", value));
+                    }
+
+                    private Result<String, CompileError> compile(String input) {
                         String stripped = input.strip();
                         if (!stripped.startsWith("import "))
                             return createPrefixErr(stripped, "import ");
@@ -83,7 +101,16 @@ public class Compiler {
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileError> compile(String input) {
+                    public Result<String, CompileError> generate(Node input) {
+                        return new Ok<>(input.findString("value").orElse(""));
+                    }
+
+                    @Override
+                    public Result<Node, CompileError> parse(String input) {
+                        return compile(input).mapValue(value -> new MapNode().withString("value", value));
+                    }
+
+                    private Result<String, CompileError> compile(String input) {
                         int classIndex = input.indexOf("class ");
                         if (classIndex < 0) return createInfixErr(input, "class ");
 
@@ -107,7 +134,16 @@ public class Compiler {
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileError> compile(String input) {
+                    public Result<String, CompileError> generate(Node input) {
+                        return new Ok<>(input.findString("value").orElse(""));
+                    }
+
+                    @Override
+                    public Result<Node, CompileError> parse(String input) {
+                        return compile(input).mapValue(value -> new MapNode().withString("value", value));
+                    }
+
+                    private Result<String, CompileError> compile(String input) {
                         if (input.contains("interface ")) {
                             return generateStruct(new MapNode().withString("name", "Temp"));
                         }
@@ -116,7 +152,16 @@ public class Compiler {
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileError> compile(String input) {
+                    public Result<String, CompileError> generate(Node input) {
+                        return new Ok<>(input.findString("value").orElse(""));
+                    }
+
+                    @Override
+                    public Result<Node, CompileError> parse(String input) {
+                        return compile(input).mapValue(value -> new MapNode().withString("value", value));
+                    }
+
+                    private Result<String, CompileError> compile(String input) {
                         if (input.contains("record ")) {
                             return generateStruct(new MapNode().withString("name", "Temp"));
                         }
@@ -126,7 +171,8 @@ public class Compiler {
                 }
         );
 
-        return new OrRule(rules).compile(input);
+        Rule rule = new OrRule(rules);
+        return rule.parse(input).flatMapValue(rule::generate);
     }
 
     private static Err<String, CompileError> createInfixErr(String input, String infix) {
