@@ -109,8 +109,8 @@ public class Main {
     private static DividingState divideStatementChar(DividingState current, char c) {
         DividingState appended = current.append(c);
         if (c == ';' && appended.isLevel()) return appended.advance();
-        if (c == '{') appended.enter();
-        if (c == '}') appended.exit();
+        if (c == '{') return appended.enter();
+        if (c == '}') return appended.exit();
         return appended;
     }
 
