@@ -1,3 +1,7 @@
+#include "magma/option/None.h"
+#include "magma/option/Option.h"
+#include "magma/option/Options.h"
+#include "magma/option/Some.h"
 #include "java/io/IOException.h"
 #include "java/nio/file/Files.h"
 #include "java/nio/file/Path.h"

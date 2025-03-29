@@ -1,7 +1,9 @@
 package magma;
 
+import magma.option.None;
 import magma.option.Option;
 import magma.option.Options;
+import magma.option.Some;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -128,21 +130,24 @@ public class Main {
                 new Rule() {
                     @Override
                     public Option<String> compile(String input) {
-                        return Options.fromNative(compile0(input));
-                    }
-
-                    private Optional<String> compile0(String input1) {
-                        return compileClass(input1);
+                        return compileClass(input);
                     }
                 },
                 new Rule() {
                     @Override
                     public Option<String> compile(String input) {
-                        return Options.fromNative(compile0(input));
+                        return compileInterface(input);
                     }
 
-                    private Optional<String> compile0(String input1) {
-                        return compileInterface(input1);
+                },
+                new Rule() {
+                    @Override
+                    public Option<String> compile(String input) {
+                        if (input.contains("record ")) {
+                            return generateStruct();
+                        }
+
+                        return new None<>();
                     }
                 }
         );
@@ -160,18 +165,22 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileClass(String input) {
+    private static Option<String> compileClass(String input) {
         if (input.contains("class ")) {
-            return Optional.of("struct Temp {\n};\n");
+            return generateStruct();
         }
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<String> compileInterface(String input) {
+    private static Option<String> generateStruct() {
+        return new Some<>("struct Temp {\n};\n");
+    }
+
+    private static Option<String> compileInterface(String input) {
         if (input.contains("interface ")) {
-            return Optional.of("struct Temp {\n};\n");
+            return generateStruct();
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Optional<String> compileImport(String input) {

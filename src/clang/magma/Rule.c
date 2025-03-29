@@ -1,3 +1,3 @@
-#include "java/util/Optional.h"
+#include "magma/option/Option.h"
 struct Temp {
 };
