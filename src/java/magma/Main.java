@@ -101,17 +101,17 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) throws CompileException {
-        Optional<String> maybePackage = compilePackage(input);
-        if (maybePackage.isPresent()) return input;
+        List<Rule> rules = List.of(
+                Main::compilePackage,
+                Main::compileImport,
+                Main::compileClass,
+                Main::compileInterface
+        );
 
-        Optional<String> maybeImport = compileImport(input);
-        if (maybeImport.isPresent()) return maybeImport.get();
-
-        Optional<String> maybeClass = compileClass(input);
-        if (maybeClass.isPresent()) return maybeClass.get();
-
-        Optional<String> maybeInterface = compileInterface(input);
-        if (maybeInterface.isPresent()) return maybeInterface.get();
+        for (Rule rule : rules) {
+            Optional<String> maybe = rule.compile(input);
+            if (maybe.isPresent()) return maybe.get();
+        }
 
         throw new CompileException("Invalid root segment", input);
     }
