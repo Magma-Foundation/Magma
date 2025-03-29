@@ -22,13 +22,13 @@ public class Main {
                     .collect(Collectors.toSet());
 
             runWithSources(sources);
-        } catch (CompileException | IOException e) {
+        } catch (CompileException | IOException | InterruptedException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    private static void runWithSources(Set<Path> sources) throws IOException, CompileException {
+    private static void runWithSources(Set<Path> sources) throws IOException, CompileException, InterruptedException {
         ArrayList<Path> relatives = new ArrayList<>();
         for (Path source : sources) {
             relatives.add(runWithSource(source));
@@ -43,6 +43,12 @@ public class Main {
         Files.writeString(build, "clang " +
                 collect +
                 "-o main.exe");
+
+        new ProcessBuilder("cmd.exe", "/c", "build.bat")
+                .directory(TARGET_DIRECTORY.toFile())
+                .inheritIO()
+                .start()
+                .waitFor();
     }
 
     private static Path runWithSource(Path source) throws IOException, CompileException {
