@@ -1,5 +1,6 @@
-package magma.compile;
+package magma.compile.rule;
 
+import magma.compile.CompileError;
 import magma.result.Result;
 
 public interface Rule {

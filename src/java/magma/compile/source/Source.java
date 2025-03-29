@@ -1,4 +1,4 @@
-package magma.compile;
+package magma.compile.source;
 
 import magma.collect.list.List_;
 import magma.io.IOError;

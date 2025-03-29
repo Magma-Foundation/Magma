@@ -1,6 +1,7 @@
-package magma.compile;
+package magma.compile.rule;
 
 import magma.collect.list.List_;
+import magma.compile.CompileError;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;

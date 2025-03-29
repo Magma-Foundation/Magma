@@ -1,6 +1,7 @@
-package magma.compile;
+package magma.compile.source;
 
 import magma.collect.list.List_;
+import magma.collect.list.ListCollector;
 import magma.io.IOError;
 import magma.io.Path_;
 import magma.result.Result;

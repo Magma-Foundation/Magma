@@ -1,34 +1,33 @@
 clang .\magma\compile\Compiler.c^
+	.\magma\compile\source\Source.c^
 	.\magma\collect\Collectors.c^
 	.\magma\collect\Collector.c^
 	.\magma\io\Path_.c^
-	.\magma\compile\OrState.c^
-	.\magma\compile\PathSource.c^
 	.\magma\option\None.c^
 	.\magma\collect\stream\EmptyHead.c^
+	.\magma\compile\rule\Rule.c^
 	.\magma\collect\set\Set_.c^
+	.\magma\compile\rule\MutableDividingState.c^
 	.\magma\collect\set\SetCollector.c^
+	.\magma\compile\rule\OrRule.c^
 	.\magma\error\Error.c^
 	.\magma\collect\Joiner.c^
 	.\magma\collect\stream\Head.c^
 	.\magma\collect\stream\Stream.c^
-	.\magma\compile\OrRule.c^
 	.\magma\collect\stream\RangeHead.c^
 	.\magma\collect\stream\SingleHead.c^
 	.\magma\option\Some.c^
 	.\magma\ApplicationError.c^
-	.\magma\compile\Rule.c^
+	.\magma\collect\list\ListCollector.c^
+	.\magma\compile\rule\OrState.c^
 	.\magma\JavaInterruptedError.c^
+	.\magma\compile\source\PathSource.c^
 	.\magma\collect\list\List_.c^
 	.\magma\option\Option.c^
 	.\magma\compile\CompileError.c^
-	.\magma\compile\Source.c^
 	.\magma\process\ProcessError.c^
 	.\magma\io\IOError.c^
-	.\magma\compile\ListCollector.c^
 	.\magma\result\Result.c^
-	.\magma\compile\DividingState.c^
-	.\magma\compile\MutableDividingState.c^
 	.\magma\result\ThrowableSupplier.c^
 	.\magma\result\Err.c^
 	.\magma\option\Tuple.c^
@@ -36,4 +35,5 @@ clang .\magma\compile\Compiler.c^
 	.\magma\Main.c^
 	.\magma\result\Ok.c^
 	.\magma\result\ThrowableRunnable.c^
+	.\magma\compile\rule\DividingState.c^
 	 -o main.exe
