@@ -11,8 +11,6 @@ import magma.result.Ok;
 import magma.result.Result;
 import magma.result.Results;
 
-import java.util.regex.Pattern;
-
 public class Compiler {
     public static String compile(String input, List_<String> namespace, String name) throws CompileException {
         StringBuilder builder = Results.unwrap(divideStatements(input).stream()
@@ -126,10 +124,23 @@ public class Compiler {
         if (!input.strip().startsWith("import ")) return new None<String>();
 
         String right = input.strip().substring("import ".length());
-        if (!right.endsWith(";")) return new None<String>();
+        if (!right.endsWith(";")) return new None<>();
 
         String namespaceString = right.substring(0, right.length() - ";".length());
-        List_<String> requestedNamespace = Lists.fromArray(namespaceString.split(Pattern.quote(".")));
+
+        List_<String> requestedNamespace = Lists.empty();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < namespaceString.length(); i++) {
+            char c = namespaceString.charAt(i);
+            if (c == '.') {
+                requestedNamespace = requestedNamespace.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                buffer.append(c);
+            }
+        }
+        requestedNamespace = requestedNamespace.add(buffer.toString());
+
         if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"))) {
             return generateEmpty();
         }
