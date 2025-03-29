@@ -125,11 +125,7 @@ public class Main {
                 new Rule() {
                     @Override
                     public Option<String> compile(String input) {
-                        return Options.fromNative(compile0(input));
-                    }
-
-                    private Optional<String> compile0(String input1) {
-                        return compilePackage(input1);
+                        return compilePackage(input);
                     }
                 },
                 new Rule() {
@@ -171,9 +167,9 @@ public class Main {
         throw new CompileException("Invalid root segment", input);
     }
 
-    private static Optional<String> compilePackage(String input) {
-        if (input.startsWith("package ")) return Optional.of("");
-        return Optional.empty();
+    private static Option<String> compilePackage(String input) {
+        if (input.startsWith("package ")) return generateEmpty();
+        return new None<>();
     }
 
     private static Option<String> compileClass(String input) {
@@ -201,17 +197,24 @@ public class Main {
         if (!right.endsWith(";")) return new None<>();
 
         String namespaceString = right.substring(0, right.length() - ";".length());
-        List<String> otherNamespace = Arrays.asList(namespaceString.split(Pattern.quote(".")));
+        List<String> requestedNamespace = Arrays.asList(namespaceString.split(Pattern.quote(".")));
+        if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equals(List.of("java", "util", "function"))) {
+            return generateEmpty();
+        }
 
         ArrayList<String> copy = new ArrayList<>();
         for (int i = 0; i < thisNamespace.size(); i++) {
             copy.add("..");
         }
-        copy.addAll(otherNamespace);
+        copy.addAll(requestedNamespace);
 
         String joined = String.join("/", copy);
         return new Some<>("#include \"" +
                 joined +
                 ".h\"\n");
+    }
+
+    private static Some<String> generateEmpty() {
+        return new Some<>("");
     }
 }
