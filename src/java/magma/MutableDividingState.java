@@ -4,19 +4,16 @@ import magma.collect.list.JavaList;
 import magma.collect.list.List_;
 import magma.collect.list.Lists;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MutableDividingState implements DividingState {
-    private final List<String> segments;
+    private List_<String> segments;
     private StringBuilder buffer;
     private int depth;
 
     public MutableDividingState() {
-        this(new ArrayList<>(), new StringBuilder(), 0);
+        this(new JavaList<>(), new StringBuilder(), 0);
     }
 
-    public MutableDividingState(List<String> segments, StringBuilder buffer, int depth) {
+    public MutableDividingState(List_<String> segments, StringBuilder buffer, int depth) {
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
@@ -47,17 +44,13 @@ public class MutableDividingState implements DividingState {
 
     @Override
     public DividingState advance() {
-        Lists.toNative(segments()).add(buffer.toString());
+        this.segments = segments.add(buffer.toString());
         this.buffer = new StringBuilder();
         return this;
     }
 
-    private List<String> segments0() {
-        return segments;
-    }
-
     @Override
     public List_<String> segments() {
-        return new JavaList<>(segments0());
+        return segments;
     }
 }
