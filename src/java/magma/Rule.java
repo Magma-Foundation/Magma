@@ -1,7 +1,7 @@
 package magma;
 
-import java.util.Optional;
+import magma.option.Option;
 
 public interface Rule {
-    Optional<String> compile(String input);
+    Option<String> compile(String input);
 }

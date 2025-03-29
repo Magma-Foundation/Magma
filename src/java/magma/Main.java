@@ -1,5 +1,8 @@
 package magma;
 
+import magma.option.Option;
+import magma.option.Options;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -102,14 +105,50 @@ public class Main {
 
     private static String compileRootSegment(String input) throws CompileException {
         List<Rule> rules = List.of(
-                Main::compilePackage,
-                Main::compileImport,
-                Main::compileClass,
-                Main::compileInterface
+                new Rule() {
+                    @Override
+                    public Option<String> compile(String input) {
+                        return Options.fromNative(compile0(input));
+                    }
+
+                    private Optional<String> compile0(String input1) {
+                        return compilePackage(input1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Option<String> compile(String input) {
+                        return Options.fromNative(compile0(input));
+                    }
+
+                    private Optional<String> compile0(String input1) {
+                        return compileImport(input1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Option<String> compile(String input) {
+                        return Options.fromNative(compile0(input));
+                    }
+
+                    private Optional<String> compile0(String input1) {
+                        return compileClass(input1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Option<String> compile(String input) {
+                        return Options.fromNative(compile0(input));
+                    }
+
+                    private Optional<String> compile0(String input1) {
+                        return compileInterface(input1);
+                    }
+                }
         );
 
         for (Rule rule : rules) {
-            Optional<String> maybe = rule.compile(input);
+            Optional<String> maybe = Options.toNative(rule.compile(input));
             if (maybe.isPresent()) return maybe.get();
         }
 
