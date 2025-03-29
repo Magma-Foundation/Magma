@@ -1,6 +1,6 @@
-#include "magma/collect/Collector.h"
-#include "magma/option/Tuple.h"
-#include "magma/result/Ok.h"
-#include "magma/result/Result.h"
+#include "../../../magma/collect/Collector.h"
+#include "../../../magma/option/Tuple.h"
+#include "../../../magma/result/Ok.h"
+#include "../../../magma/result/Result.h"
 struct Temp {
 };

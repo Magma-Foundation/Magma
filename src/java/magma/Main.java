@@ -1,7 +1,9 @@
 package magma;
 
-import jvm.collect.list.JavaList;
 import jvm.collect.list.Lists;
+import magma.collect.list.List_;
+import magma.compile.CompileException;
+import magma.compile.Compiler;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
@@ -59,12 +61,12 @@ public class Main {
         Path relative = SOURCE_DIRECTORY.relativize(source);
         Path parent = relative.getParent();
 
-        JavaList<String> namespace = Lists.empty();
+        List_<String> namespace = Lists.empty();
         for (int i = 0; i < parent.getNameCount(); i++) {
-            namespace.add(parent.getName(i).toString());
+            namespace = namespace.add(parent.getName(i).toString());
         }
 
-        if(namespace.findFirst()
+        if (namespace.findFirst()
                 .filter(first -> first.equals("jvm"))
                 .isPresent()) {
             return new None<>();

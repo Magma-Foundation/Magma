@@ -1,4 +1,4 @@
-package magma;
+package magma.compile;
 
 import magma.collect.list.List_;
 

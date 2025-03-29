@@ -1,4 +1,4 @@
-package magma;
+package magma.compile;
 
 import jvm.collect.list.Lists;
 import magma.collect.Joiner;
@@ -14,7 +14,7 @@ import magma.result.Results;
 import java.util.regex.Pattern;
 
 public class Compiler {
-    static String compile(String input, List_<String> namespace, String name) throws CompileException {
+    public static String compile(String input, List_<String> namespace, String name) throws CompileException {
         StringBuilder builder = Results.unwrap(divideStatements(input).stream()
                 .foldToResult(new StringBuilder(), (cache, element) -> compileRootSegment(element, namespace).mapValue(cache::append)));
 

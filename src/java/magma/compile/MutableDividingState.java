@@ -1,4 +1,4 @@
-package magma;
+package magma.compile;
 
 import jvm.collect.list.Lists;
 import magma.collect.list.List_;

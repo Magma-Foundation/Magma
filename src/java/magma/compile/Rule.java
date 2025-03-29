@@ -1,4 +1,4 @@
-package magma;
+package magma.compile;
 
 import magma.result.Result;
 
