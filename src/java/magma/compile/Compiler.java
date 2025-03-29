@@ -91,7 +91,7 @@ public class Compiler {
 
                     private Option<String> compileRecord(String input2) {
                         if (input2.contains("record ")) {
-                            return generateStruct();
+                            return generateStruct("Temp");
                         }
 
                         return new None<>();
@@ -108,19 +108,34 @@ public class Compiler {
     }
 
     static Option<String> compileClass(String input) {
-        if (input.contains("class ")) {
-            return generateStruct();
+        int classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            String afterKeyword = input.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String beforeContent = afterKeyword.substring(0, contentStart).strip();
+                int implementsIndex = beforeContent.indexOf(" implements ");
+                String name = implementsIndex >= 0
+                        ? beforeContent.substring(0, implementsIndex).strip()
+                        : beforeContent;
+
+                if (name.endsWith(">")) {
+                    return generateEmpty();
+                }
+
+                return generateStruct(name);
+            }
         }
         return new None<String>();
     }
 
-    static Option<String> generateStruct() {
-        return new Some<String>("struct Temp {\n};\n");
+    static Option<String> generateStruct(String name) {
+        return new Some<String>("struct " + name + " {\n};\n");
     }
 
     static Option<String> compileInterface(String input) {
         if (input.contains("interface ")) {
-            return generateStruct();
+            return generateStruct("Temp");
         }
         return new None<String>();
     }

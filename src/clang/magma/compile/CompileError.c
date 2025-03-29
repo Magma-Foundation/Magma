@@ -1,3 +1,3 @@
 #include "../../magma/error/Error.h"
-struct Temp {
+struct CompileError {
 };
