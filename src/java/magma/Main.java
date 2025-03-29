@@ -79,6 +79,9 @@ public class Main {
         Path target = targetParent.resolve(name + ".c");
         Files.writeString(target, output);
 
+        Path header = targetParent.resolve(name + ".h");
+        Files.createFile(header);
+
         return TARGET_DIRECTORY.relativize(target);
     }
 
