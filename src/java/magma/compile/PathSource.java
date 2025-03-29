@@ -1,14 +1,11 @@
 package magma.compile;
 
-import jvm.collect.list.Lists;
-import magma.Path_;
+import magma.io.Path_;
 import magma.collect.list.List_;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-public record PathSource(magma.Path_ sourceDirectory, magma.Path_ source) implements Source {
+public record PathSource(Path_ sourceDirectory, Path_ source) implements Source {
     @Override
     public List_<String> computeNamespace() {
         Path_ relative = sourceDirectory.relativize(source);

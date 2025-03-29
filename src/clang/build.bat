@@ -1,19 +1,18 @@
 clang .\magma\compile\Compiler.c^
-	.\magma\Streams.c^
-	.\magma\collect\Set_.c^
 	.\magma\collect\Collectors.c^
 	.\magma\result\Results.c^
-	.\magma\EmptyHead.c^
-	.\magma\NIOPath.c^
 	.\magma\collect\Collector.c^
-	.\magma\Path_.c^
 	.\magma\collect\list\List_.c^
+	.\magma\io\Path_.c^
 	.\magma\compile\OrState.c^
 	.\magma\compile\PathSource.c^
 	.\magma\option\None.c^
+	.\magma\collect\stream\EmptyHead.c^
 	.\magma\option\Option.c^
 	.\magma\compile\Source.c^
 	.\magma\compile\CompileException.c^
+	.\magma\collect\set\Set_.c^
+	.\magma\collect\set\SetCollector.c^
 	.\magma\compile\ListCollector.c^
 	.\magma\collect\Joiner.c^
 	.\magma\result\Result.c^
@@ -27,14 +26,10 @@ clang .\magma\compile\Compiler.c^
 	.\magma\collect\stream\SingleHead.c^
 	.\magma\result\Err.c^
 	.\magma\option\Some.c^
-	.\magma\JavaSet.c^
 	.\magma\option\Tuple.c^
 	.\magma\collect\stream\HeadedStream.c^
-	.\magma\SetCollector.c^
 	.\magma\compile\Rule.c^
 	.\magma\ApplicationException.c^
-	.\magma\Sets.c^
 	.\magma\Main.c^
-	.\magma\Paths.c^
 	.\magma\result\Ok.c^
 	 -o main.exe

@@ -1,6 +1,5 @@
 package magma.collect.stream;
 
-import magma.EmptyHead;
 import magma.collect.Collector;
 import magma.option.Option;
 import magma.option.Tuple;

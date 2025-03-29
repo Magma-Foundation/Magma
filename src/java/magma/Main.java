@@ -1,15 +1,16 @@
 package magma;
 
 import jvm.collect.list.Lists;
-import magma.collect.Collectors;
+import jvm.io.Paths;
 import magma.collect.Joiner;
-import magma.collect.Set_;
+import magma.collect.set.SetCollector;
+import magma.collect.set.Set_;
 import magma.collect.list.List_;
-import magma.collect.stream.Stream;
 import magma.compile.CompileException;
 import magma.compile.Compiler;
 import magma.compile.PathSource;
 import magma.compile.Source;
+import magma.io.Path_;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
@@ -19,7 +20,6 @@ import magma.result.Result;
 import magma.result.Results;
 
 import java.io.IOException;
-import java.util.Set;
 
 public class Main {
     public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
