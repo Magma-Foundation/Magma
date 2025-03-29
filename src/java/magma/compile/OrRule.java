@@ -14,9 +14,9 @@ public record OrRule(List_<Rule> rules) implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> compile(String input) {
+    public Result<String, CompileError> compile(String input) {
         return rules.stream()
                 .foldWithInitial(new OrState(), (orState, rule) -> fold(input, orState, rule))
-                .toOption().<Result<String, CompileException>>match(Ok::new, () -> new Err<>(new CompileException("Invalid root segment", input)));
+                .toOption().<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid root segment", input)));
     }
 }

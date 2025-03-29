@@ -9,14 +9,15 @@ import magma.option.Some;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
-import magma.result.Results;
 
 public class Compiler {
-    public static String compile(String input, List_<String> namespace, String name) throws CompileException {
-        StringBuilder builder = Results.unwrap(divideStatements(input).stream()
-                .foldToResult(new StringBuilder(), (cache, element) -> compileRootSegment(element, namespace).mapValue(cache::append)));
+    public static Result<String, CompileError> compile(String input, List_<String> namespace, String name) {
+        return divideStatements(input).stream()
+                .foldToResult(new StringBuilder(), (cache, element) -> compileRootSegment(element, namespace).mapValue(cache::append))
+                .mapValue(builder -> complete(namespace, name, builder.toString()));
+    }
 
-        String output = builder.toString();
+    private static String complete(List_<String> namespace, String name, String output) {
         if (namespace.equals(Lists.of("magma")) && name.equals("Main")) {
             return output + "int main(){\n\treturn 0;\n}\n";
         }
@@ -42,46 +43,46 @@ public class Compiler {
         return appended;
     }
 
-    private static Result<String, CompileException> compileRootSegment(String input, List_<String> namespace) {
+    private static Result<String, CompileError> compileRootSegment(String input, List_<String> namespace) {
         List_<Rule> rules = Lists.of(
                 new Rule() {
                     @Override
-                    public Result<String, CompileException> compile(String input) {
+                    public Result<String, CompileError> compile(String input) {
                         return compilePackage(input)
-                                .<Result<String, CompileException>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileException> compile(String input) {
+                    public Result<String, CompileError> compile(String input) {
                         return compileImport(input, namespace)
-                                .<Result<String, CompileException>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileException> compile(String input) {
+                    public Result<String, CompileError> compile(String input) {
                         return compileClass(input)
-                                .<Result<String, CompileException>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileException> compile(String input) {
+                    public Result<String, CompileError> compile(String input) {
                         return compileInterface(input)
-                                .<Result<String, CompileException>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
                     }
                 },
                 new Rule() {
                     @Override
-                    public Result<String, CompileException> compile(String input) {
+                    public Result<String, CompileError> compile(String input) {
                         return compileRecord(input)
-                                .<Result<String, CompileException>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileException("No value present", input)));
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
                     }
 
                     private Option<String> compileRecord(String input2) {

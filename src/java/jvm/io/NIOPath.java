@@ -9,7 +9,7 @@ import magma.io.IOError;
 import magma.io.Path_;
 import magma.option.Option;
 import magma.result.Result;
-import magma.result.Results;
+import jvm.result.Results;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -31,4 +31,9 @@ public record Err<T, X>(X error) implements Result<T, X> {
     public <R> Result<T, R> mapErr(Function<X, R> mapper) {
         return new Err<>(mapper.apply(error));
     }
+
+    @Override
+    public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+        return whenErr.apply(error);
+    }
 }

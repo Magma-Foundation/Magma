@@ -1,13 +1,13 @@
 package magma.compile;
 
 import magma.collect.list.List_;
-
-import java.io.IOException;
+import magma.io.IOError;
+import magma.result.Result;
 
 public interface Source {
     List_<String> computeNamespace();
 
     String computeName();
 
-    String readString() throws IOException;
+    Result<String, IOError> readString();
 }

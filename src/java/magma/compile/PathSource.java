@@ -1,11 +1,9 @@
 package magma.compile;
 
-import jvm.io.JavaIOError;
-import magma.io.Path_;
 import magma.collect.list.List_;
-import magma.result.Results;
-
-import java.io.IOException;
+import magma.io.IOError;
+import magma.io.Path_;
+import magma.result.Result;
 
 public record PathSource(Path_ sourceDirectory, Path_ source) implements Source {
     @Override
@@ -22,7 +20,7 @@ public record PathSource(Path_ sourceDirectory, Path_ source) implements Source 
     }
 
     @Override
-    public String readString() throws IOException {
-        return Results.unwrap(source.readString().mapErr(JavaIOError::unwrap));
+    public Result<String, IOError> readString() {
+        return source.readString();
     }
 }
