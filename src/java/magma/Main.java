@@ -68,11 +68,11 @@ public class Main {
             namespace.add(parent.getName(i).toString());
         }
 
-        String input = Files.readString(source);
-        String output = compile(input, namespace);
-
         String nameWithExt = relative.getFileName().toString();
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
+
+        String input = Files.readString(source);
+        String output = compile(input, namespace, name);
 
         Path targetParent = TARGET_DIRECTORY.resolve(parent);
         if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
@@ -86,7 +86,7 @@ public class Main {
         return TARGET_DIRECTORY.relativize(target);
     }
 
-    private static String compile(String input, ArrayList<String> namespace) throws CompileException {
+    private static String compile(String input, List<String> namespace, String name) throws CompileException {
         List<String> segments = divideStatements(input);
 
         StringBuilder builder = new StringBuilder();
@@ -94,7 +94,12 @@ public class Main {
             builder.append(compileRootSegment(segment, namespace));
         }
 
-        return builder.toString();
+        String output = builder.toString();
+        if (namespace.equals(List.of("magma")) && name.equals("Main")) {
+            return output + "int main(){\n\treturn 0;\n}\n";
+        }
+
+        return output;
     }
 
     private static List<String> divideStatements(String input) {
@@ -115,7 +120,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input, ArrayList<String> namespace) throws CompileException {
+    private static String compileRootSegment(String input, List<String> namespace) throws CompileException {
         List<Rule> rules = List.of(
                 new Rule() {
                     @Override
@@ -189,7 +194,7 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<String> compileImport(String input, ArrayList<String> thisNamespace) {
+    private static Option<String> compileImport(String input, List<String> thisNamespace) {
         if (!input.strip().startsWith("import ")) return new None<>();
 
         String right = input.strip().substring("import ".length());
