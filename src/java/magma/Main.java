@@ -1,6 +1,6 @@
 package magma;
 
-import magma.collect.list.Lists;
+import jvm.collect.list.Lists;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Options;
@@ -39,7 +39,7 @@ public class Main {
     private static void runWithSources(Set<Path> sources) throws IOException, CompileException, InterruptedException {
         ArrayList<Path> relatives = new ArrayList<>();
         for (Path source : sources) {
-            relatives.add(runWithSource(source));
+            runWithSource(source).ifPresent(relatives::add);
         }
 
         Path build = TARGET_DIRECTORY.resolve("build.bat");
@@ -59,13 +59,18 @@ public class Main {
                 .waitFor();
     }
 
-    private static Path runWithSource(Path source) throws IOException, CompileException {
+    private static Option<Path> runWithSource(Path source) throws IOException, CompileException {
         Path relative = SOURCE_DIRECTORY.relativize(source);
         Path parent = relative.getParent();
 
         ArrayList<String> namespace = new ArrayList<>();
         for (int i = 0; i < parent.getNameCount(); i++) {
             namespace.add(parent.getName(i).toString());
+        }
+
+        if (!namespace.isEmpty()) {
+            String first = namespace.getFirst();
+            if (first.equals("jvm")) return new None<>();
         }
 
         String nameWithExt = relative.getFileName().toString();
@@ -83,7 +88,7 @@ public class Main {
         Path header = targetParent.resolve(name + ".h");
         Files.writeString(header, "");
 
-        return TARGET_DIRECTORY.relativize(target);
+        return new Some<>(TARGET_DIRECTORY.relativize(target));
     }
 
     private static String compile(String input, List<String> namespace, String name) throws CompileException {

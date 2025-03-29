@@ -1,4 +1,6 @@
-package magma.collect.list;
+package jvm.collect.list;
+
+import magma.collect.list.List_;
 
 import java.util.ArrayList;
 import java.util.List;

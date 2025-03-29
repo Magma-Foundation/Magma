@@ -1,4 +1,4 @@
-#include "../magma/collect/list/Lists.h"
+#include "../jvm/collect/list/Lists.h"
 #include "../magma/option/None.h"
 #include "../magma/option/Option.h"
 #include "../magma/option/Options.h"

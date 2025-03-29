@@ -2,7 +2,6 @@ package magma;
 
 import magma.collect.list.JavaList;
 import magma.collect.list.List_;
-import magma.collect.list.Lists;
 
 public class MutableDividingState implements DividingState {
     private List_<String> segments;
