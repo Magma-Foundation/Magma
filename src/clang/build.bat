@@ -13,6 +13,7 @@ clang .\magma\compile\Compiler.c^
 	.\magma\compile\CompileException.c^
 	.\magma\collect\set\Set_.c^
 	.\magma\collect\set\SetCollector.c^
+	.\magma\io\IOError.c^
 	.\magma\compile\ListCollector.c^
 	.\magma\collect\Joiner.c^
 	.\magma\result\Result.c^
@@ -32,4 +33,5 @@ clang .\magma\compile\Compiler.c^
 	.\magma\ApplicationException.c^
 	.\magma\Main.c^
 	.\magma\result\Ok.c^
+	.\magma\result\ThrowableRunnable.c^
 	 -o main.exe

@@ -2,17 +2,17 @@ package magma.io;
 
 import magma.collect.set.Set_;
 import magma.collect.stream.Stream;
-
-import java.io.IOException;
+import magma.option.Option;
+import magma.result.Result;
 
 public interface Path_ {
     boolean exists();
 
-    Set_<Path_> walk() throws IOException;
+    Result<Set_<Path_>, IOError> walk();
 
-    void writeString(String output) throws IOException;
+    Option<IOError> writeString(String output);
 
-    void createAsDirectories() throws IOException;
+    Option<IOError> createAsDirectories();
 
     Path_ resolve(String child);
 
@@ -28,5 +28,5 @@ public interface Path_ {
 
     Path_ getFileName();
 
-    String readString() throws IOException;
+    Result<String, IOError> readString();
 }

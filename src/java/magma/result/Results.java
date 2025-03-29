@@ -1,9 +1,11 @@
 package magma.result;
 
+import magma.option.None;
 import magma.option.Option;
+import magma.option.Some;
 
 public class Results {
-    public static <T, X extends Throwable> Result<T, X> wrap(ThrowableSupplier<T, X> supplier) {
+    public static <T, X extends Throwable> Result<T, X> wrapSupplier(ThrowableSupplier<T, X> supplier) {
         try {
             return new Ok<>(supplier.get());
         } catch (Throwable error) {
@@ -20,5 +22,15 @@ public class Results {
         if (maybeError.isPresent()) throw maybeError.orElse(null);
 
         throw new RuntimeException("Neither a value nor an error is present.");
+    }
+
+    public static <X extends Throwable> Option<X> wrapRunnable(ThrowableRunnable<X> runnable) {
+        try {
+            runnable.run();
+            return new None<>();
+        } catch (Throwable e) {
+            //noinspection unchecked
+            return new Some<>((X) e);
+        }
     }
 }

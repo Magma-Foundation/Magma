@@ -1,6 +1,7 @@
 package magma;
 
 import jvm.collect.list.Lists;
+import jvm.io.JavaIOError;
 import jvm.io.Paths;
 import magma.collect.Joiner;
 import magma.collect.set.SetCollector;
@@ -10,6 +11,7 @@ import magma.compile.CompileException;
 import magma.compile.Compiler;
 import magma.compile.PathSource;
 import magma.compile.Source;
+import magma.io.IOError;
 import magma.io.Path_;
 import magma.option.None;
 import magma.option.Option;
@@ -27,7 +29,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            Set_<Path_> filter = SOURCE_DIRECTORY.walk()
+            Set_<Path_> filter = Results.unwrap(SOURCE_DIRECTORY.walk().mapErr(JavaIOError::unwrap))
                     .stream()
                     .filter(Path_::isRegularFile)
                     .collect(new SetCollector<>());
@@ -55,7 +57,8 @@ public class Main {
                 .orElse("");
 
         try {
-            build.writeString("clang " + collect + " -o main.exe");
+            Option<IOError> option = build.writeString("clang " + collect + " -o main.exe");
+            if(option.isPresent()) throw JavaIOError.unwrap(option.orElse(null));
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
@@ -85,10 +88,15 @@ public class Main {
             String output = Compiler.compile(input, namespace, name);
             Path_ targetParent = namespace.stream().foldWithInitial(TARGET_DIRECTORY, Path_::resolve);
             if (!targetParent.exists()) {
-                targetParent.createAsDirectories();
+                Option<IOException> maybe = targetParent.createAsDirectories().map(JavaIOError::unwrap);
+                if(maybe.isPresent()) throw maybe.orElse(null);
             }
-            targetParent.resolve(name + ".c").writeString(output);
-            targetParent.resolve(name + ".h").writeString("");
+            Path_ path1 = targetParent.resolve(name + ".c");
+            Option<IOError> option1 = path1.writeString(output);
+            if(option1.isPresent()) throw JavaIOError.unwrap(option1.orElse(null));
+            Path_ path = targetParent.resolve(name + ".h");
+            Option<IOError> option = path.writeString("");
+            if(option.isPresent()) throw JavaIOError.unwrap(option.orElse(null));
             Option<Path_> result = new Some<>(TARGET_DIRECTORY.relativize(targetParent.resolve(name + ".c")));
 
             return new Ok<>(result);

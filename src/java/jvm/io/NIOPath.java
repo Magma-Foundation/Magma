@@ -5,7 +5,11 @@ import magma.collect.set.Set_;
 import magma.collect.stream.HeadedStream;
 import magma.collect.stream.RangeHead;
 import magma.collect.stream.Stream;
+import magma.io.IOError;
 import magma.io.Path_;
+import magma.option.Option;
+import magma.result.Result;
+import magma.result.Results;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,13 +17,11 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 public record NIOPath(Path path) implements Path_ {
-    @Override
-    public void writeString(String output) throws IOException {
+    private void writeString0(String output) throws IOException {
         Files.writeString(path, output);
     }
 
-    @Override
-    public void createAsDirectories() throws IOException {
+    private void createAsDirectories0() throws IOException {
         Files.createDirectories(path);
     }
 
@@ -60,13 +62,11 @@ public record NIOPath(Path path) implements Path_ {
         return new NIOPath(path.getFileName());
     }
 
-    @Override
-    public String readString() throws IOException {
+    private String readString0() throws IOException {
         return Files.readString(path);
     }
 
-    @Override
-    public Set_<Path_> walk() throws IOException {
+    private Set_<Path_> walk0() throws IOException {
         try (java.util.stream.Stream<Path> stream = Files.walk(path)) {
             return Sets.fromNative(stream
                     .map(NIOPath::new)
@@ -77,5 +77,27 @@ public record NIOPath(Path path) implements Path_ {
     @Override
     public boolean exists() {
         return Files.exists((Paths.toNative(this)));
+    }
+
+    @Override
+    public Result<Set_<Path_>, IOError> walk() {
+        return Results.wrapSupplier(this::walk0).mapErr(JavaIOError::new);
+    }
+
+    @Override
+    public Option<IOError> writeString(String output) {
+        return Results.wrapRunnable(() -> writeString0(output))
+                .map(JavaIOError::new);
+    }
+
+    @Override
+    public Option<IOError> createAsDirectories() {
+        return Results.wrapRunnable(this::createAsDirectories0).map(JavaIOError::new);
+    }
+
+    @Override
+    public Result<String, IOError> readString() {
+        return Results.wrapSupplier(this::readString0)
+                .mapErr(JavaIOError::new);
     }
 }

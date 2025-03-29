@@ -1,4 +1,5 @@
 #include "../windows/collect/list/Lists.h"
+#include "../windows/io/JavaIOError.h"
 #include "../windows/io/Paths.h"
 #include "../magma/collect/Joiner.h"
 #include "../magma/collect/set/SetCollector.h"
@@ -8,6 +9,7 @@
 #include "../magma/compile/Compiler.h"
 #include "../magma/compile/PathSource.h"
 #include "../magma/compile/Source.h"
+#include "../magma/io/IOError.h"
 #include "../magma/io/Path_.h"
 #include "../magma/option/None.h"
 #include "../magma/option/Option.h"
