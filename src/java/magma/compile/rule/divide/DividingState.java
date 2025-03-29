@@ -1,4 +1,4 @@
-package magma.compile.rule;
+package magma.compile.rule.divide;
 
 import magma.collect.list.List_;
 

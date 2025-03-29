@@ -4,6 +4,7 @@ import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.context.StringContext;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -19,7 +20,7 @@ public record OrRule(List_<Rule> rules) implements Rule {
     private Result<String, CompileError> compile(String input) {
         return rules.stream()
                 .foldWithInitial(new OrState(), (orState, rule) -> fold(input, orState, rule))
-                .toOption().<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid root segment", input)));
+                .toOption().<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid root segment", new StringContext(input))));
     }
 
     @Override
