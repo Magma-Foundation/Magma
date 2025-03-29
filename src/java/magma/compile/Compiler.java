@@ -102,14 +102,14 @@ public class Compiler {
                             return generateEmpty();
                         }
 
-                        return generateStruct(name);
+                        return generateStruct(new MapNode().withString("name", name));
                     }
                 },
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input) {
                         if (input.contains("interface ")) {
-                            return generateStruct("Temp");
+                            return generateStruct(new MapNode().withString("name", "Temp"));
                         }
                         return createInfixErr(input, "interface ");
                     }
@@ -118,7 +118,7 @@ public class Compiler {
                     @Override
                     public Result<String, CompileError> compile(String input) {
                         if (input.contains("record ")) {
-                            return generateStruct("Temp");
+                            return generateStruct(new MapNode().withString("name", "Temp"));
                         }
 
                         return createInfixErr(input, "record ");
@@ -133,8 +133,8 @@ public class Compiler {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
-    static Result<String, CompileError> generateStruct(String name) {
-        return new Ok<>("struct " + name + " {\n};\n");
+    static Result<String, CompileError> generateStruct(Node node) {
+        return new Ok<>("struct " + node.findString("name").orElse("") + " {\n};\n");
     }
 
     private static Err<String, CompileError> createPrefixErr(String input, String prefix) {
