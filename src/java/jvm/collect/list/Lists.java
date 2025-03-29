@@ -12,4 +12,8 @@ public class Lists {
             return current;
         });
     }
+
+    public static <T> JavaList<T> createEmpty() {
+        return new JavaList<>();
+    }
 }

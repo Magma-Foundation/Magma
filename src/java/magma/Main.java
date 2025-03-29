@@ -3,7 +3,7 @@ package magma;
 import jvm.collect.list.Lists;
 import magma.option.None;
 import magma.option.Option;
-import magma.option.Options;
+import jvm.option.Options;
 import magma.option.Some;
 
 import java.io.IOException;
@@ -211,7 +211,16 @@ public class Main {
         for (int i = 0; i < thisNamespace.size(); i++) {
             copy.add("..");
         }
-        copy.addAll(requestedNamespace);
+
+        List<String> actualNamespace = new ArrayList<>();
+        if(!requestedNamespace.isEmpty() && requestedNamespace.getFirst().equals("jvm")) {
+            actualNamespace.add("windows");
+            actualNamespace.addAll(requestedNamespace.subList(1, requestedNamespace.size()));
+        } else {
+            actualNamespace.addAll(requestedNamespace);
+        }
+
+        copy.addAll(actualNamespace);
 
         String joined = String.join("/", copy);
         return new Some<>("#include \"" +

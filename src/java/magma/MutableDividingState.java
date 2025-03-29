@@ -1,6 +1,6 @@
 package magma;
 
-import magma.collect.list.JavaList;
+import jvm.collect.list.Lists;
 import magma.collect.list.List_;
 
 public class MutableDividingState implements DividingState {
@@ -9,7 +9,7 @@ public class MutableDividingState implements DividingState {
     private int depth;
 
     public MutableDividingState() {
-        this(new JavaList<>(), new StringBuilder(), 0);
+        this(Lists.createEmpty(), new StringBuilder(), 0);
     }
 
     public MutableDividingState(List_<String> segments, StringBuilder buffer, int depth) {

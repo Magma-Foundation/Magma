@@ -1,4 +1,8 @@
-package magma.option;
+package jvm.option;
+
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 
 import java.util.Optional;
 

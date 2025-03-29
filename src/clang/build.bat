@@ -8,10 +8,8 @@ clang .\magma\CompileException.c^
 	.\magma\Rule.c^
 	.\magma\MutableDividingState.c^
 	.\magma\collect\list\List_.c^
-	.\magma\option\Options.c^
 	.\magma\Main.c^
 	.\magma\option\None.c^
 	.\magma\DividingState.c^
 	.\magma\option\Option.c^
-	.\magma\collect\list\JavaList.c^
 	-o main.exe
