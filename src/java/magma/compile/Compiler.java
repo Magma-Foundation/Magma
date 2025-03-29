@@ -7,9 +7,6 @@ import magma.compile.rule.DividingState;
 import magma.compile.rule.MutableDividingState;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
-import magma.option.None;
-import magma.option.Option;
-import magma.option.Some;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -52,49 +49,79 @@ public class Compiler {
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input) {
-                        return compilePackage(input)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
+                        if (input.startsWith("package ")) return generateEmpty();
+                        return createPrefixErr(input, "package ");
                     }
                 },
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input) {
-                        return compileImport(input, namespace)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
-                    }
-                },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input) {
-                        return compileClass(input)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
-                    }
-                },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input) {
-                        return compileInterface(input)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
-                    }
-                },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input) {
-                        return compileRecord(input)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("No value present", input)));
-                    }
+                        String stripped = input.strip();
+                        if (!stripped.startsWith("import "))
+                            return createPrefixErr(stripped, "import ");
 
-                    private Option<String> compileRecord(String input2) {
-                        if (input2.contains("record ")) {
+                        String right = stripped.substring("import ".length());
+                        if (!right.endsWith(";")) return new Err<>(new CompileError("Suffix ';' not present", right));
+
+                        String namespaceString = right.substring(0, right.length() - ";".length());
+
+                        List_<String> requestedNamespace = splitIntoNamespace(namespaceString);
+
+                        if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"))) {
+                            return generateEmpty();
+                        }
+
+                        String joined = computeNewNamespace(namespace, requestedNamespace)
+                                .stream()
+                                .collect(new Joiner("/"))
+                                .orElse("");
+
+                        return new Ok<>("#include \"" +
+                                joined +
+                                ".h\"\n");
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input) {
+                        int classIndex = input.indexOf("class ");
+                        if (classIndex < 0) return createInfixErr(input, "class ");
+
+                        String afterKeyword = input.substring(classIndex + "class ".length());
+                        int contentStart = afterKeyword.indexOf("{");
+                        if (contentStart < 0)
+                            return new Err<>(new CompileError("Infix '{ ' not present", afterKeyword));
+
+                        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+                        int implementsIndex = beforeContent.indexOf(" implements ");
+                        String name = implementsIndex >= 0
+                                ? beforeContent.substring(0, implementsIndex).strip()
+                                : beforeContent;
+
+                        if (name.endsWith(">")) {
+                            return generateEmpty();
+                        }
+
+                        return generateStruct(name);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input) {
+                        if (input.contains("interface ")) {
+                            return generateStruct("Temp");
+                        }
+                        return createInfixErr(input, "interface ");
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input) {
+                        if (input.contains("record ")) {
                             return generateStruct("Temp");
                         }
 
-                        return new None<>();
+                        return createInfixErr(input, "record ");
                     }
                 }
         );
@@ -102,66 +129,16 @@ public class Compiler {
         return new OrRule(rules).compile(input);
     }
 
-    static Option<String> compilePackage(String input) {
-        if (input.startsWith("package ")) return generateEmpty();
-        return new None<String>();
+    private static Err<String, CompileError> createInfixErr(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
-    static Option<String> compileClass(String input) {
-        int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String afterKeyword = input.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String beforeContent = afterKeyword.substring(0, contentStart).strip();
-                int implementsIndex = beforeContent.indexOf(" implements ");
-                String name = implementsIndex >= 0
-                        ? beforeContent.substring(0, implementsIndex).strip()
-                        : beforeContent;
-
-                if (name.endsWith(">")) {
-                    return generateEmpty();
-                }
-
-                return generateStruct(name);
-            }
-        }
-        return new None<String>();
+    static Result<String, CompileError> generateStruct(String name) {
+        return new Ok<>("struct " + name + " {\n};\n");
     }
 
-    static Option<String> generateStruct(String name) {
-        return new Some<String>("struct " + name + " {\n};\n");
-    }
-
-    static Option<String> compileInterface(String input) {
-        if (input.contains("interface ")) {
-            return generateStruct("Temp");
-        }
-        return new None<String>();
-    }
-
-    static Option<String> compileImport(String input, List_<String> thisNamespace) {
-        if (!input.strip().startsWith("import ")) return new None<String>();
-
-        String right = input.strip().substring("import ".length());
-        if (!right.endsWith(";")) return new None<>();
-
-        String namespaceString = right.substring(0, right.length() - ";".length());
-
-        List_<String> requestedNamespace = splitIntoNamespace(namespaceString);
-
-        if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"))) {
-            return generateEmpty();
-        }
-
-        String joined = computeNewNamespace(thisNamespace, requestedNamespace)
-                .stream()
-                .collect(new Joiner("/"))
-                .orElse("");
-
-        return new Some<String>("#include \"" +
-                joined +
-                ".h\"\n");
+    private static Err<String, CompileError> createPrefixErr(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
     private static List_<String> splitIntoNamespace(String namespaceString) {
@@ -204,7 +181,7 @@ public class Compiler {
                 .isPresent();
     }
 
-    static Some<String> generateEmpty() {
-        return new Some<String>("");
+    static Result<String, CompileError> generateEmpty() {
+        return new Ok<>("");
     }
 }
