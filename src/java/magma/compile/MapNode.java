@@ -5,6 +5,7 @@ import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.option.None;
 import magma.option.Option;
+import magma.option.Some;
 
 import java.util.function.Function;
 
@@ -59,5 +60,10 @@ public final class MapNode implements Node {
     @Override
     public boolean is(String type) {
         return this.type.filter(value -> value.equals(type)).isPresent();
+    }
+
+    @Override
+    public Node withType(String type) {
+        return new MapNode(new Some<>(type), strings, nodeLists);
     }
 }

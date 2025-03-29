@@ -19,4 +19,6 @@ public interface Node {
     Node mapNodeList(String propertyKey, Function<List_<Node>, List_<Node>> mapper);
 
     boolean is(String type);
+
+    Node withType(String type);
 }
