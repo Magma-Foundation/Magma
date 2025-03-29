@@ -128,18 +128,7 @@ public class Compiler {
 
         String namespaceString = right.substring(0, right.length() - ";".length());
 
-        List_<String> requestedNamespace = Lists.empty();
-        StringBuilder buffer = new StringBuilder();
-        for (int i = 0; i < namespaceString.length(); i++) {
-            char c = namespaceString.charAt(i);
-            if (c == '.') {
-                requestedNamespace = requestedNamespace.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                buffer.append(c);
-            }
-        }
-        requestedNamespace = requestedNamespace.add(buffer.toString());
+        List_<String> requestedNamespace = splitIntoNamespace(namespaceString);
 
         if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"))) {
             return generateEmpty();
@@ -153,6 +142,22 @@ public class Compiler {
         return new Some<String>("#include \"" +
                 joined +
                 ".h\"\n");
+    }
+
+    private static List_<String> splitIntoNamespace(String namespaceString) {
+        List_<String> requestedNamespace = Lists.empty();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < namespaceString.length(); i++) {
+            char c = namespaceString.charAt(i);
+            if (c == '.') {
+                requestedNamespace = requestedNamespace.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                buffer.append(c);
+            }
+        }
+        requestedNamespace = requestedNamespace.add(buffer.toString());
+        return requestedNamespace;
     }
 
     private static List_<String> computeNewNamespace(List_<String> thisNamespace, List_<String> requestedNamespace) {
