@@ -1,92 +1,105 @@
 package magma;
 
 import jvm.collect.list.Lists;
+import magma.collect.Collectors;
+import magma.collect.Joiner;
+import magma.collect.Set_;
 import magma.collect.list.List_;
+import magma.collect.stream.Stream;
 import magma.compile.CompileException;
 import magma.compile.Compiler;
+import magma.compile.PathSource;
+import magma.compile.Source;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
+import magma.result.Err;
+import magma.result.Ok;
+import magma.result.Result;
+import magma.result.Results;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
-    public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
-    public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "clang");
+    public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
+    public static final Path_ TARGET_DIRECTORY = Paths.get(".", "src", "clang");
 
     public static void main(String[] args) {
-        try (Stream<Path> stream = Files.walk(SOURCE_DIRECTORY)) {
-            Set<Path> sources = stream.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".java"))
-                    .collect(Collectors.toSet());
+        try {
+            Set_<Path_> filter = SOURCE_DIRECTORY.walk()
+                    .stream()
+                    .filter(Path_::isRegularFile)
+                    .collect(new SetCollector<>());
+
+            Set_<Path_> sources = filter
+                    .stream()
+                    .filter(path -> path.asString().endsWith(".java"))
+                    .collect(new SetCollector<>());
 
             runWithSources(sources);
-        } catch (CompileException | IOException | InterruptedException e) {
+        } catch (IOException | ApplicationException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    private static void runWithSources(Set<Path> sources) throws IOException, CompileException, InterruptedException {
-        ArrayList<Path> relatives = new ArrayList<>();
-        for (Path source : sources) {
-            runWithSource(source).ifPresent(relatives::add);
+    private static void runWithSources(Set_<Path_> sources) throws ApplicationException {
+        List_<Path_> relatives = Results.unwrap(sources.stream().foldToResult(Lists.empty(), Main::foldIntoRelatives));
+
+        Path_ build = TARGET_DIRECTORY.resolve("build.bat");
+        String collect = relatives.stream()
+                .map(Path_::asString)
+                .map(path -> ".\\" + path + "^\n\t")
+                .collect(new Joiner(""))
+                .orElse("");
+
+        try {
+            build.writeString("clang " + collect + " -o main.exe");
+        } catch (IOException e) {
+            throw new ApplicationException(e);
         }
 
-        Path build = TARGET_DIRECTORY.resolve("build.bat");
-        String collect = relatives.stream()
-                .map(Path::toString)
-                .map(path -> ".\\" + path + "^\n\t")
-                .collect(Collectors.joining());
-
-        Files.writeString(build, "clang " +
-                collect +
-                "-o main.exe");
-
-        new ProcessBuilder("cmd.exe", "/c", "build.bat")
-                .directory(TARGET_DIRECTORY.toFile())
-                .inheritIO()
-                .start()
-                .waitFor();
+        try {
+            new ProcessBuilder("cmd.exe", "/c", "build.bat")
+                    .directory(Paths.toNative(TARGET_DIRECTORY).toFile())
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (InterruptedException | IOException e) {
+            throw new ApplicationException(e);
+        }
     }
 
-    private static Option<Path> runWithSource(Path source) throws IOException, CompileException {
-        Path relative = SOURCE_DIRECTORY.relativize(source);
-        Path parent = relative.getParent();
+    private static Result<List_<Path_>, ApplicationException> foldIntoRelatives(List_<Path_> relatives, Path_ path) {
+        return getPathOption(new PathSource(SOURCE_DIRECTORY, path)).mapValue(maybeTarget -> maybeTarget.map(relatives::add).orElse(relatives));
+    }
 
-        List_<String> namespace = Lists.empty();
-        for (int i = 0; i < parent.getNameCount(); i++) {
-            namespace = namespace.add(parent.getName(i).toString());
+    private static Result<Option<Path_>, ApplicationException> getPathOption(Source source) {
+        List_<String> namespace = source.computeNamespace();
+        if (isPlatformDependent(namespace)) return new Ok<>(new None<>());
+
+        try {
+            String name = source.computeName();
+            String input = source.readString();
+            String output = Compiler.compile(input, namespace, name);
+            Path_ targetParent = namespace.stream().foldWithInitial(TARGET_DIRECTORY, Path_::resolve);
+            if (!targetParent.exists()) {
+                targetParent.createAsDirectories();
+            }
+            targetParent.resolve(name + ".c").writeString(output);
+            targetParent.resolve(name + ".h").writeString("");
+            Option<Path_> result = new Some<>(TARGET_DIRECTORY.relativize(targetParent.resolve(name + ".c")));
+
+            return new Ok<>(result);
+        } catch (IOException | CompileException e) {
+            return new Err<>(new ApplicationException(e));
         }
+    }
 
-        if (namespace.findFirst()
+    private static boolean isPlatformDependent(List_<String> namespace) {
+        return namespace.findFirst()
                 .filter(first -> first.equals("jvm"))
-                .isPresent()) {
-            return new None<>();
-        }
-
-        String nameWithExt = relative.getFileName().toString();
-        String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
-
-        String input = Files.readString(source);
-        String output = Compiler.compile(input, namespace, name);
-
-        Path targetParent = TARGET_DIRECTORY.resolve(parent);
-        if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
-
-        Path target = targetParent.resolve(name + ".c");
-        Files.writeString(target, output);
-
-        Path header = targetParent.resolve(name + ".h");
-        Files.writeString(header, "");
-
-        return new Some<>(TARGET_DIRECTORY.relativize(target));
+                .isPresent();
     }
 }

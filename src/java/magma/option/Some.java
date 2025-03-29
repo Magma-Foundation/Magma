@@ -45,4 +45,14 @@ public record Some<T>(T value) implements Option<T> {
     public <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty) {
         return ifPresent.apply(value);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public Option<T> or(Supplier<Option<T>> other) {
+        return this;
+    }
 }

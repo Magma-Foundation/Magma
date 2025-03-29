@@ -1,16 +1,19 @@
 package magma.collect.stream;
 
+import magma.EmptyHead;
 import magma.collect.Collector;
+import magma.option.Option;
 import magma.option.Tuple;
 import magma.result.Ok;
 import magma.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     @Override
-    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+    public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
         R current = initial;
         while (true) {
             R finalCurrent = current;
@@ -35,12 +38,38 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return fold(collector.createInitial(), collector::fold);
+        return foldWithInitial(collector.createInitial(), collector::fold);
     }
 
     @Override
-    public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
-        return this.<Result<R, X>>fold(new Ok<>(initial),
-                (rxResult, t) -> rxResult.flatMapValue(inner -> folder.apply(inner, t)));
+    public Option<T> next() {
+        return head.next();
+    }
+
+    @Override
+    public <R> Option<R> foldMapping(Function<T, R> mapper, BiFunction<R, T, R> folder) {
+        return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));
+    }
+
+    @Override
+    public Stream<T> filter(Predicate<T> predicate) {
+        return flatMap(element -> new HeadedStream<>(predicate.test(element)
+                ? new SingleHead<>(element)
+                : new EmptyHead<>()));
+    }
+
+    private <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
+        return this.<Stream<R>>foldWithInitial(new HeadedStream<>(new EmptyHead<>()),
+                (rStream, t) -> rStream.concat(mapper.apply(t)));
+    }
+
+    @Override
+    public <R, X> magma.result.Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+        return this.<Result<R, X>>foldWithInitial(new Ok<>(initial), (current, t) -> current.flatMapValue(inner -> folder.apply(inner, t)));
+    }
+
+    @Override
+    public Stream<T> concat(Stream<T> other) {
+        return new HeadedStream<>(() -> head.next().or(other::next));
     }
 }

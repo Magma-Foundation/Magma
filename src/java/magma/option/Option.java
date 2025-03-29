@@ -21,4 +21,8 @@ public interface Option<T> {
     boolean isPresent();
 
     <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty);
+
+    boolean isEmpty();
+
+    Option<T> or(Supplier<Option<T>> other);
 }
