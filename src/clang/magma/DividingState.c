@@ -1,3 +1,3 @@
-#include "java/util/List.h"
+#include "../java/util/List.h"
 struct Temp {
 };

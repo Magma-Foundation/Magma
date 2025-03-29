@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,11 +59,16 @@ public class Main {
     }
 
     private static Path runWithSource(Path source) throws IOException, CompileException {
-        String input = Files.readString(source);
-        String output = compile(input);
-
         Path relative = SOURCE_DIRECTORY.relativize(source);
         Path parent = relative.getParent();
+
+        ArrayList<String> namespace = new ArrayList<>();
+        for (int i = 0; i < parent.getNameCount(); i++) {
+            namespace.add(parent.getName(i).toString());
+        }
+
+        String input = Files.readString(source);
+        String output = compile(input, namespace);
 
         String nameWithExt = relative.getFileName().toString();
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
@@ -76,12 +82,12 @@ public class Main {
         return TARGET_DIRECTORY.relativize(target);
     }
 
-    private static String compile(String input) throws CompileException {
+    private static String compile(String input, ArrayList<String> namespace) throws CompileException {
         List<String> segments = divideStatements(input);
 
         StringBuilder builder = new StringBuilder();
         for (String segment : segments) {
-            builder.append(compileRootSegment(segment));
+            builder.append(compileRootSegment(segment, namespace));
         }
 
         return builder.toString();
@@ -105,7 +111,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) throws CompileException {
+    private static String compileRootSegment(String input, ArrayList<String> namespace) throws CompileException {
         List<Rule> rules = List.of(
                 new Rule() {
                     @Override
@@ -120,11 +126,7 @@ public class Main {
                 new Rule() {
                     @Override
                     public Option<String> compile(String input) {
-                        return Options.fromNative(compile0(input));
-                    }
-
-                    private Optional<String> compile0(String input1) {
-                        return compileImport(input1);
+                        return compileImport(input, namespace);
                     }
                 },
                 new Rule() {
@@ -183,16 +185,23 @@ public class Main {
         return new None<>();
     }
 
-    private static Optional<String> compileImport(String input) {
-        if (!input.strip().startsWith("import ")) return Optional.empty();
+    private static Option<String> compileImport(String input, ArrayList<String> thisNamespace) {
+        if (!input.strip().startsWith("import ")) return new None<>();
 
         String right = input.strip().substring("import ".length());
-        if (!right.endsWith(";")) return Optional.empty();
+        if (!right.endsWith(";")) return new None<>();
 
         String namespaceString = right.substring(0, right.length() - ";".length());
-        String[] namespace = namespaceString.split(Pattern.quote("."));
-        String joined = String.join("/", namespace);
-        return Optional.of("#include \"" +
+        List<String> otherNamespace = Arrays.asList(namespaceString.split(Pattern.quote(".")));
+
+        ArrayList<String> copy = new ArrayList<>();
+        for (int i = 0; i < thisNamespace.size(); i++) {
+            copy.add("..");
+        }
+        copy.addAll(otherNamespace);
+
+        String joined = String.join("/", copy);
+        return new Some<>("#include \"" +
                 joined +
                 ".h\"\n");
     }
