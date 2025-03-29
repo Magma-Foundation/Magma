@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -100,21 +101,51 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) throws CompileException {
-        if (input.startsWith("package ")) return "";
+        Optional<String> maybePackage = compilePackage(input);
+        if (maybePackage.isPresent()) return input;
 
-        if (input.strip().startsWith("import ")) {
-            String right = input.strip().substring("import ".length());
-            if (right.endsWith(";")) {
-                String namespaceString = right.substring(0, right.length() - ";".length());
-                String[] namespace = namespaceString.split(Pattern.quote("."));
-                String joined = String.join("/", namespace);
-                return "#include \"" +
-                        joined +
-                        ".h\"\n";
-            }
-        }
+        Optional<String> maybeImport = compileImport(input);
+        if (maybeImport.isPresent()) return maybeImport.get();
 
-        if (input.contains("class ") || input.contains("interface ")) return "struct Temp {\n};\n";
+        Optional<String> maybeClass = compileClass(input);
+        if (maybeClass.isPresent()) return maybeClass.get();
+
+        Optional<String> maybeInterface = compileInterface(input);
+        if (maybeInterface.isPresent()) return maybeInterface.get();
+
         throw new CompileException("Invalid root segment", input);
+    }
+
+    private static Optional<String> compilePackage(String input) {
+        if (input.startsWith("package ")) return Optional.of("");
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileClass(String input) {
+        if (input.contains("class ")) {
+            return Optional.of("struct Temp {\n};\n");
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileInterface(String input) {
+        if (input.contains("interface ")) {
+            return Optional.of("struct Temp {\n};\n");
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileImport(String input) {
+        if (!input.strip().startsWith("import ")) return Optional.empty();
+
+        String right = input.strip().substring("import ".length());
+        if (!right.endsWith(";")) return Optional.empty();
+
+        String namespaceString = right.substring(0, right.length() - ";".length());
+        String[] namespace = namespaceString.split(Pattern.quote("."));
+        String joined = String.join("/", namespace);
+        return Optional.of("#include \"" +
+                joined +
+                ".h\"\n");
     }
 }
