@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ public class Main {
     }
 
     private static String compile(String input) throws CompileException {
-        ArrayList<String> segments = divide(input);
+        List<String> segments = divideStatements(input);
 
         StringBuilder builder = new StringBuilder();
         for (String segment : segments) {
@@ -73,29 +74,28 @@ public class Main {
         return builder.toString();
     }
 
-    private static ArrayList<String> divide(String input) {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
+    private static List<String> divideStatements(String input) {
+        DividingState current = new MutableDividingState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
+            current = divideStatementChar(current, c);
         }
-        segments.add(buffer.toString());
-        return segments;
+
+        return current.advance().segments();
+    }
+
+    private static DividingState divideStatementChar(DividingState current, char c) {
+        DividingState appended = current.append(c);
+        if (c == ';' && appended.isLevel()) return appended.advance();
+        if (c == '{') appended.enter();
+        if (c == '}') appended.exit();
+        return appended;
     }
 
     private static String compileRootSegment(String input) throws CompileException {
         if (input.startsWith("package ")) return "";
         if (input.strip().startsWith("import ")) return "#include \"temp.h\"\n";
-        if (input.contains("class ")) return "";
+        if (input.contains("class ") || input.contains("interface ")) return "struct Temp {\n};\n";
         throw new CompileException("Invalid root segment", input);
     }
 }
