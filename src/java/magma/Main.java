@@ -27,12 +27,23 @@ public class Main {
     }
 
     private static void runWithSources(Set<Path> sources) throws IOException, CompileException {
+        ArrayList<Path> relatives = new ArrayList<>();
         for (Path source : sources) {
-            runWithSource(source);
+            relatives.add(runWithSource(source));
         }
+
+        Path build = TARGET_DIRECTORY.resolve("build.bat");
+        String collect = relatives.stream()
+                .map(Path::toString)
+                .map(path -> ".\\" + path + "^\n\t")
+                .collect(Collectors.joining());
+
+        Files.writeString(build, "clang " +
+                collect +
+                "-o main.exe");
     }
 
-    private static void runWithSource(Path source) throws IOException, CompileException {
+    private static Path runWithSource(Path source) throws IOException, CompileException {
         String input = Files.readString(source);
         String output = compile(input);
 
@@ -47,6 +58,8 @@ public class Main {
 
         Path target = targetParent.resolve(name + ".c");
         Files.writeString(target, output);
+
+        return TARGET_DIRECTORY.relativize(target);
     }
 
     private static String compile(String input) throws CompileException {
