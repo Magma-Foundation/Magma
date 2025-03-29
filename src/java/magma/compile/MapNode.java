@@ -3,9 +3,11 @@ package magma.compile;
 import jvm.collect.map.Maps;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
+import magma.collect.stream.Stream;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
+import magma.option.Tuple;
 
 import java.util.function.Function;
 
@@ -65,5 +67,21 @@ public final class MapNode implements Node {
     @Override
     public Node withType(String type) {
         return new MapNode(new Some<>(type), strings, nodeLists);
+    }
+
+    @Override
+    public Node merge(Node other) {
+        Node withStrings = other.streamStrings().<Node>foldWithInitial(this, (node, tuple) -> node.withString(tuple.left(), tuple.right()));
+        return other.streamNodeLists().foldWithInitial(withStrings, (node, tuple) -> node.withNodeList(tuple.left(), tuple.right()));
+    }
+
+    @Override
+    public Stream<Tuple<String, String>> streamStrings() {
+        return strings.stream();
+    }
+
+    @Override
+    public Stream<Tuple<String, List_<Node>>> streamNodeLists() {
+        return nodeLists.stream();
     }
 }

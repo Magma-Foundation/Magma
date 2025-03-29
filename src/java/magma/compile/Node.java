@@ -1,7 +1,9 @@
 package magma.compile;
 
 import magma.collect.list.List_;
+import magma.collect.stream.Stream;
 import magma.option.Option;
+import magma.option.Tuple;
 
 import java.util.function.Function;
 
@@ -21,4 +23,10 @@ public interface Node {
     boolean is(String type);
 
     Node withType(String type);
+
+    Node merge(Node other);
+
+    Stream<Tuple<String, String>> streamStrings();
+
+    Stream<Tuple<String, List_<Node>>> streamNodeLists();
 }

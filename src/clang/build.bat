@@ -1,14 +1,19 @@
 clang .\magma\compile\Compiler.c^
+	.\magma\compile\rule\divide\DividingState.c^
 	.\magma\collect\map\Map_.c^
+	.\magma\compile\rule\divide\CharDivider.c^
+	.\magma\compile\rule\PrefixRule.c^
 	.\magma\compile\source\Source.c^
+	.\magma\compile\rule\divide\MutableDividingState.c^
 	.\magma\collect\Collector.c^
 	.\magma\compile\Node.c^
 	.\magma\io\Path_.c^
 	.\magma\option\None.c^
 	.\magma\collect\stream\EmptyHead.c^
+	.\magma\compile\lang\JavaCTransformer.c^
+	.\magma\compile\context\NodeContext.c^
 	.\magma\compile\rule\Rule.c^
 	.\magma\collect\set\Set_.c^
-	.\magma\compile\rule\MutableDividingState.c^
 	.\magma\collect\set\SetCollector.c^
 	.\magma\compile\rule\OrRule.c^
 	.\magma\error\Error.c^
@@ -17,13 +22,22 @@ clang .\magma\compile\Compiler.c^
 	.\magma\collect\stream\Stream.c^
 	.\magma\collect\stream\RangeHead.c^
 	.\magma\collect\stream\SingleHead.c^
+	.\magma\compile\lang\JavaLang.c^
+	.\magma\compile\rule\DivideRule.c^
 	.\magma\option\Some.c^
 	.\magma\ApplicationError.c^
 	.\magma\collect\list\ListCollector.c^
+	.\magma\compile\rule\SuffixRule.c^
 	.\magma\compile\rule\OrState.c^
+	.\magma\compile\context\Context.c^
 	.\magma\JavaInterruptedError.c^
+	.\magma\compile\rule\TypeRule.c^
+	.\magma\compile\lang\Transformer.c^
+	.\magma\compile\rule\StringRule.c^
 	.\magma\compile\source\PathSource.c^
+	.\magma\compile\rule\divide\StatementDivider.c^
 	.\magma\collect\list\List_.c^
+	.\magma\compile\lang\CLang.c^
 	.\magma\option\Option.c^
 	.\magma\compile\CompileError.c^
 	.\magma\process\ProcessError.c^
@@ -34,8 +48,11 @@ clang .\magma\compile\Compiler.c^
 	.\magma\result\Err.c^
 	.\magma\option\Tuple.c^
 	.\magma\collect\stream\HeadedStream.c^
+	.\magma\compile\rule\divide\Divider.c^
+	.\magma\compile\context\StringContext.c^
 	.\magma\Main.c^
+	.\magma\compile\rule\StripRule.c^
 	.\magma\result\Ok.c^
 	.\magma\result\ThrowableRunnable.c^
-	.\magma\compile\rule\DividingState.c^
+	.\magma\compile\rule\InfixRule.c^
 	 -o main.exe

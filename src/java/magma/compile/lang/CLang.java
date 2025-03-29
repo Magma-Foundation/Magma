@@ -3,14 +3,16 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.rule.DivideRule;
 import magma.compile.rule.PrefixRule;
+import magma.compile.rule.Rule;
 import magma.compile.rule.SuffixRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.StringRule;
+import magma.compile.rule.TypeRule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.StatementDivider;
 
 public class CLang {
-    public static DivideRule createCRootRule() {
+    public static Rule createCRootRule() {
         return new DivideRule(new StatementDivider(), createCRootSegmentRule(), "children");
     }
 
@@ -20,8 +22,8 @@ public class CLang {
         ));
     }
 
-    private static PrefixRule createIncludeRule() {
+    private static Rule createIncludeRule() {
         DivideRule path = new DivideRule(new CharDivider('/'), new StringRule("value"), "path");
-        return new PrefixRule("#include \"", new SuffixRule(path, ".h\"\n"));
+        return new TypeRule("include",  new PrefixRule("#include \"", new SuffixRule(path, ".h\"\n")));
     }
 }
