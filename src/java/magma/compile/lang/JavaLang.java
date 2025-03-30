@@ -4,7 +4,10 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
+import magma.compile.rule.locate.LastLocator;
 import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
@@ -125,15 +128,26 @@ public class JavaLang {
                 createAddRule(value),
                 createConstructionRule(value),
                 createInvocationRule(value),
-                createDataAccess("data-access", ".", value),
-                createDataAccess("method-access", "::", value),
+                createDataAccessRule(value),
+                createAccessRule("method-access", "::", value),
                 createStringRule(),
                 createLambdaRule(value),
                 createNumberRule(),
-                createTernaryRule(value)
+                createTernaryRule(value),
+                createNotRule(value)
         )));
 
         return value;
+    }
+
+    private static TypeRule createDataAccessRule(LazyRule value) {
+        Rule property = createSymbolRule("property");
+        Rule afterSeparator = new OrRule(Lists.of(
+                new PrefixRule("<", new InfixRule(new NodeListRule("type-arguments", new FoldingDivider(new ValueFolder()), createTypeRule()), ">", property, new LastLocator())),
+                property
+        ));
+
+        return createDataAccess("data-access", ".", value, afterSeparator);
     }
 
     private static Rule createLambdaRule(Rule value) {

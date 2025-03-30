@@ -79,10 +79,11 @@ public class CLang {
                 createSymbolValueRule(),
                 createAddRule(value),
                 createInvocationRule(value),
-                createDataAccess("data-access", ".", value),
+                createAccessRule("data-access", ".", value),
                 createStringRule(),
                 createTernaryRule(value),
-                createNumberRule()
+                createNumberRule(),
+                createNotRule(value)
         )));
 
         return value;

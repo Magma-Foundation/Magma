@@ -9,10 +9,17 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
+// expand None_ = None<struct >
 // expand OrState_T = OrState<struct T>
+// expand OrState_ = OrState<struct >
+// expand Some_ = Some<struct >
 // expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>
 // expand List__CompileError = List_<struct CompileError>
+// expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>
+// expand List__CompileError = List_<struct CompileError>
+// expand Err_ = Err<struct >
 // expand OrState_T = OrState<struct T>
+// expand OrState_ = OrState<struct >
 // expand Option_T = Option<struct T>
 // expand List__CompileError = List_<struct CompileError>
 #endif

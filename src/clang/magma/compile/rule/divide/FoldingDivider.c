@@ -5,8 +5,8 @@ struct List__String divide(struct String input){List_<Character> collector = Str
 
         DividingState current = new MutableDividingState(collector);while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current
-                    .append()
-                    .toTuple(new Tuple<>(, current));
+                    .pop()
+                    .toTuple(new Tuple<>('\0', current));
 
             if(maybeNext.left()) {
                 Tuple<Character, DividingState> result = maybeNext.right();
@@ -14,9 +14,7 @@ struct List__String divide(struct String input){List_<Character> collector = Str
             } else {
                 break;
             }
-        }
-
-        return current.advance().segments();
+        }return current.advance().segments();
 }
 struct String join(struct String current, struct String element){return folder.join(current, element);
 }

@@ -6,8 +6,6 @@ struct public OptionalNodeListRule(struct String propertyKey, struct Rule ifPres
 }
 struct Result_Node_CompileError parse(struct String input){return parseRule.parse(input);
 }
-struct Result_String_CompileError generate(struct Node node){return node.hasNodeList(propertyKey)
-                ? ifPresent.generate(node)
-                : ifMissing.generate(node);
+struct Result_String_CompileError generate(struct Node node){return node.hasNodeList(propertyKey)?ifPresent.generate(node):ifMissing.generate(node);
 }
 
