@@ -1,29 +1,27 @@
 package magma.compile.lang;
 
+import jvm.collect.Streams;
 import jvm.collect.list.Lists;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 
 public class JavaCTransformer implements Transformer {
-    @Override
-    public Node transform(Node tree, List_<String> namespace) {
-        return tree.mapNodeList("children", children -> transformRoot(namespace, children));
-    }
-
     static List_<Node> transformRoot(List_<String> namespace, List_<Node> children) {
         return children.stream()
                 .map(child -> transformRootChild(namespace, child))
+                .flatMap(Streams::fromOption)
                 .collect(new ListCollector<Node>());
     }
 
-    static Node transformRootChild(List_<String> namespace, Node child) {
-        if (child.is("import")) {
-            return transformImport(namespace, child);
-        } else {
-            return child;
-        }
+    static Option<Node> transformRootChild(List_<String> namespace, Node child) {
+        if (child.is("package")) return new None<>();
+        if (child.is("import")) return new Some<>(transformImport(namespace, child));
+        return new Some<>(child);
     }
 
     public static Node transformImport(List_<String> currentNamespace, Node node) {
@@ -62,5 +60,10 @@ public class JavaCTransformer implements Transformer {
         return namespace.findFirst()
                 .filter(value -> value.equals("jvm"))
                 .isPresent();
+    }
+
+    @Override
+    public Node transform(Node tree, List_<String> namespace) {
+        return tree.mapNodeList("children", children -> transformRoot(namespace, children));
     }
 }

@@ -15,6 +15,8 @@ public interface Stream<T> {
 
     <C> C collect(Collector<T, C> collector);
 
+    <R> Stream<R> flatMap(Function<T, Stream<R>> mapper);
+
     <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder);
 
     <R> Option<R> foldMapping(Function<T, R> mapper, BiFunction<R, T, R> folder);
