@@ -9,7 +9,7 @@ public class InvocationStartLocator implements Locator {
     @Override
     public Option<Integer> locate(String input, String infix) {
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
+        for (int i = input.length() - 1; i >= 0; i--) {
             char c = input.charAt(i);
             if (c == '(' && depth == 0) return new Some<>(i);
             if (c == ')') depth++;
