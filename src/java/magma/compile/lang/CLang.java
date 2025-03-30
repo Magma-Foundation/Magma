@@ -6,7 +6,6 @@ import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.divide.StatementFolder;
-import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -30,7 +29,7 @@ public class CLang {
     }
 
     private static TypeRule createFunctionRule() {
-        return new TypeRule("function", new PrefixRule("void temp(){\n}\n", new EmptyRule()));
+        return new TypeRule("function", new SuffixRule(new NodeRule("definition", CommonLang.createDefinitionRule(createTypeRule())), "(){\n}\n"));
     }
 
     private static TypeRule createStructRule() {
