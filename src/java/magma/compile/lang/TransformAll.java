@@ -148,16 +148,15 @@ public class TransformAll implements Transformer {
                     .collect(new Joiner("_"))
                     .orElse("");
 
-            String arguments = node.findNodeList("arguments").orElse(new JavaList<>())
+            return node.findNodeList("arguments").orElse(new JavaList<>())
                     .stream()
                     .map(this::stringify)
                     .collect(new Joiner("_"))
-                    .orElse("");
-
-            return caller + "_" + arguments;
+                    .map(arguments -> caller + "_" + arguments)
+                    .orElse(caller);
         }
 
-        return node.findString("value").orElse("");
+        return node.findString("value").orElse("?");
     }
 
     @Override

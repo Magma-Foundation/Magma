@@ -94,13 +94,12 @@ struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_Lis
                     .collect(new Joiner())
                     .orElse();
 
-            String arguments = node.findNodeList().orElse(new JavaList<>())
+            return node.findNodeList().orElse(new JavaList<>())
                     .stream()
                     .map(this::stringify)
                     .collect(new Joiner())
-                    .orElse();
-
-            return caller +  + arguments;
+                    .map(arguments -> caller +  + arguments)
+                    .orElse(caller);
         }
 
         return node.findString().orElse();}struct Result_Node_CompileError beforePass(struct State state, struct Node node}{if (!node.is()) return new Ok<>(node);
