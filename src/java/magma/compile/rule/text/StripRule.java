@@ -17,10 +17,12 @@ public record StripRule(String leftKey, Rule childRule, String rightKey) impleme
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        return childRule.generate(node).mapValue(value -> {
-            String leftPad = node.findString(leftKey).orElse("");
-            String rightPad = node.findString(rightKey).orElse("");
-            return leftPad + value + rightPad;
-        });
+        return childRule.generate(node).mapValue(value -> attachPadding(node, value));
+    }
+
+    private String attachPadding(Node node, String value) {
+        String leftPad = node.findString(leftKey).orElse("");
+        String rightPad = node.findString(rightKey).orElse("");
+        return leftPad + value + rightPad;
     }
 }
