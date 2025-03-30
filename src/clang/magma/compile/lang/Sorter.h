@@ -15,16 +15,16 @@ struct Sorter{
 };
 // expand List__Node = List_<struct Node>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Ok_ = Ok<struct >
 // expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
+// expand Tuple_ = Tuple<struct >
 // expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct Node asRoot(struct List__Node left);
 struct Result_Node_CompileError afterPass(struct State state, struct Node node);
 struct Tuple_List__Node_List__Node foldIntoBuckets(struct Tuple_List__Node_List__Node tuple, struct Node node);
-struct Result_Node_CompileError beforePass(struct State state, struct Node node);
 #endif
 

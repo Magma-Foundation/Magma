@@ -120,4 +120,20 @@ public class CommonLang {
     static TypeRule createAddRule(LazyRule value) {
         return new TypeRule("add", new InfixRule(new NodeRule("left", value), "+", new NodeRule("right", value), new FirstLocator()));
     }
+
+    static TypeRule createInvocationRule(LazyRule value) {
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new InvocationStartLocator()), ")")));
+    }
+
+    static NodeListRule createArgumentsRule(LazyRule value) {
+        return new NodeListRule("arguments", new FoldingDivider(new DecoratedFolder(new ValueFolder())), value);
+    }
+
+    static TypeRule createDataAccess(LazyRule value) {
+        return new TypeRule("data-access", new InfixRule(new NodeRule("child", value), ".", createSymbolRule("property"), new LastLocator()));
+    }
+
+    static TypeRule createStringRule() {
+        return new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))));
+    }
 }

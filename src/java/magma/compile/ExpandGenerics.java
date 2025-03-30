@@ -10,6 +10,8 @@ import magma.compile.transform.Transformer;
 import magma.result.Ok;
 import magma.result.Result;
 
+import java.util.Map;
+
 public class ExpandGenerics implements Transformer {
     @Override
     public Result<Node, CompileError> beforePass(State state, Node node) {
@@ -60,6 +62,12 @@ public class ExpandGenerics implements Transformer {
             return new Ok<>(new MapNode("group")
                     .withNode("child", symbol)
                     .withNodeList("expansions", Lists.of(expansion)));
+        }
+
+        if (node.is("construction")) {
+            Node type = node.findNode("type").orElse(new MapNode());
+            return new Ok<>(node.retype("invocation")
+                    .withNode("caller", new MapNode("symbol-value").withString("value", stringify(type))));
         }
 
         return new Ok<>(node);

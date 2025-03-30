@@ -77,8 +77,12 @@ public class CLang {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
-                createAddRule(value)
+                createAddRule(value),
+                createInvocationRule(value),
+                createDataAccess(value),
+                createStringRule()
         )));
+
         return value;
     }
 
