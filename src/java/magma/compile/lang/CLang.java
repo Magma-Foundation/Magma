@@ -15,7 +15,7 @@ import magma.compile.rule.divide.StatementDivider;
 
 public class CLang {
     public static Rule createCRootRule() {
-        return new DivideRule(new StatementDivider(), createCRootSegmentRule(), "children");
+        return new DivideRule("children", new StatementDivider(), createCRootSegmentRule());
     }
 
     private static OrRule createCRootSegmentRule() {
@@ -26,7 +26,7 @@ public class CLang {
     }
 
     private static Rule createIncludeRule() {
-        DivideRule path = new DivideRule(new CharDivider('/'), new StringRule("value"), "path");
+        DivideRule path = new DivideRule("path", new CharDivider('/'), new StringRule("value"));
         return new TypeRule("include",  new PrefixRule("#include \"", new SuffixRule(path, ".h\"\n")));
     }
 }

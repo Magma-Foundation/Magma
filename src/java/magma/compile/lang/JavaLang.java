@@ -16,7 +16,7 @@ import magma.compile.rule.divide.StatementDivider;
 
 public class JavaLang {
     public static DivideRule createJavaRootRule() {
-        return new DivideRule(new StatementDivider(), createJavaRootSegmentRule(), "children");
+        return new DivideRule("children", new StatementDivider(), createJavaRootSegmentRule());
     }
 
     private static OrRule createJavaRootSegmentRule() {
@@ -51,7 +51,12 @@ public class JavaLang {
                 namedWithTypeParams
         ));
 
-        return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", new InfixRule(beforeContent, "{", new StringRule("with-end"))));
+        Rule right = new SuffixRule(new DivideRule("children", new StatementDivider(), createClassMemberRule()), "}");
+        return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", new InfixRule(beforeContent, "{", right)));
+    }
+
+    private static Rule createClassMemberRule() {
+        return new OrRule(Lists.empty());
     }
 
     private static Rule createNamedWithTypeParams() {
@@ -63,7 +68,7 @@ public class JavaLang {
     }
 
     private static Rule createImportRule(String prefix, String type) {
-        DivideRule namespace = new DivideRule(new CharDivider('.'), new StringRule("value"), "namespace");
+        DivideRule namespace = new DivideRule("namespace", new CharDivider('.'), new StringRule("value"));
         return new TypeRule(type, new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ";"))));
     }
 }

@@ -10,7 +10,7 @@ import magma.compile.rule.divide.Divider;
 import magma.result.Err;
 import magma.result.Result;
 
-public record DivideRule(Divider divider, Rule childRule, String propertyKey) implements Rule {
+public record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> parse(String input) {
         return divider.divide(input)
