@@ -1,6 +1,6 @@
 DividingState append(){
 }
-boolean isLevel(){
+int isLevel(){
 }
 DividingState exit(){
 }
@@ -10,7 +10,7 @@ DividingState advance(){
 }
 struct List__String segments(){
 }
-boolean isShallow(){
+int isShallow(){
 }
 struct Option_Tuple_Character_DividingState append(){
 }

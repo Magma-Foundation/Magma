@@ -16,7 +16,7 @@ struct Result_Option_Path__ApplicationError writeOutput(){
 }
 struct Option_IOError ensureDirectories(){
 }
-boolean isPlatformDependent(){
+int isPlatformDependent(){
 }
 int main(){
 	return 0;

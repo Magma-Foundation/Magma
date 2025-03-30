@@ -8,5 +8,5 @@ struct Map__K_V ensure(){
 }
 struct Map__K_V withAll(){
 }
-boolean isEmpty(){
+int isEmpty(){
 }

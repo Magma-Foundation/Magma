@@ -1,4 +1,4 @@
-boolean exists(){
+int exists(){
 }
 struct Result_Set__Path__IOError walk(){
 }
@@ -12,7 +12,7 @@ struct Stream_String stream(){
 }
 Path_ relativize(){
 }
-boolean isRegularFile(){
+int isRegularFile(){
 }
 String asString(){
 }

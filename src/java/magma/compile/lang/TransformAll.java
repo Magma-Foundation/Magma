@@ -95,6 +95,12 @@ public class TransformAll implements Transformer {
             return new Ok<>(new MapNode("struct-type").withString("value", stringify));
         }
 
+        if (node.is("symbol-type")) {
+            String oldValue = node.findString("value").orElse("");
+            String newValue = oldValue.equals("boolean") ? "int" : oldValue;
+            return new Ok<>(node.withString("value", newValue));
+        }
+
         return new Ok<>(node);
     }
 

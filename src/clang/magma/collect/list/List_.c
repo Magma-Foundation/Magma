@@ -10,7 +10,7 @@ int size(){
 }
 struct List__T subList(){
 }
-boolean equalsTo(){
+int equalsTo(){
 }
 struct List__T sort(){
 }

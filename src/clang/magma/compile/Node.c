@@ -12,7 +12,7 @@ String format(){
 }
 Node mapNodeList(){
 }
-boolean is(){
+int is(){
 }
 Node retype(){
 }

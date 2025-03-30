@@ -10,11 +10,11 @@ T orElse(){
 }
 struct Option_T filter(){
 }
-boolean isPresent(){
+int isPresent(){
 }
 R match(){
 }
-boolean isEmpty(){
+int isEmpty(){
 }
 struct Option_T or(){
 }

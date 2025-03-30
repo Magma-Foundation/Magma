@@ -22,7 +22,7 @@ String formatList(){
 }
 Node mapNodeList(){
 }
-boolean is(){
+int is(){
 }
 Node retype(){
 }
