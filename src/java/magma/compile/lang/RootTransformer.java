@@ -8,8 +8,9 @@ import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.option.Tuple;
 
-public class JavaCTransformer implements Transformer {
-    private static Node afterPass(Node node) {
+public class RootTransformer implements Transformer {
+    @Override
+    public Node afterPass(Node node) {
         if (node.is("root")) {
             List_<Node> newChildren = node.findNodeList("children")
                     .orElse(Lists.empty())
@@ -21,7 +22,7 @@ public class JavaCTransformer implements Transformer {
                             return Streams.of(child);
                         }
                     })
-                    .collect(new ListCollector<>());
+                    .collect(new ListCollector<Node>());
 
             return node.withNodeList("children", newChildren);
         }
@@ -30,7 +31,7 @@ public class JavaCTransformer implements Transformer {
             Tuple<List_<Node>, List_<Node>> children = node.findNodeList("children")
                     .orElse(Lists.empty())
                     .stream()
-                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), JavaCTransformer::bucketClassMember);
+                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), RootTransformer::bucketClassMember);
 
             Node withChildren = node.retype("struct").withNodeList("children", children.left());
             return new MapNode("group")
@@ -45,39 +46,14 @@ public class JavaCTransformer implements Transformer {
         return node;
     }
 
-    private static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
+    static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
         List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
 
         if (element.is("definition")) {
-            return new Tuple<>(definitions.add(element), others);
+            return new Tuple<List_<Node>, List_<Node>>(definitions.add(element), others);
         } else {
-            return new Tuple<>(definitions, others.add(element));
+            return new Tuple<List_<Node>, List_<Node>>(definitions, others.add(element));
         }
-    }
-
-    @Override
-    public Node transform(Node tree, List_<String> namespace) {
-        Node withNodes = tree.streamNodes()
-                .foldWithInitial(tree, (node, tuple) -> mapNodes(namespace, node, tuple));
-
-        Node withNodeLists = withNodes.streamNodeLists().foldWithInitial(withNodes,
-                (node, tuple) -> mapNodeList(namespace, node, tuple));
-
-        return afterPass(withNodeLists);
-    }
-
-    private Node mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {
-        Node newChild = transform(tuple.right(), namespace);
-        return node.withNode(tuple.left(), newChild);
-    }
-
-    private Node mapNodeList(List_<String> namespace, Node node, Tuple<String, List_<Node>> tuple) {
-        List_<Node> children = tuple.right()
-                .stream()
-                .map(child -> transform(child, namespace))
-                .collect(new ListCollector<>());
-
-        return node.withNodeList(tuple.left(), children);
     }
 }
