@@ -1,7 +1,7 @@
 package magma.compile;
 
 import jvm.collect.list.Lists;
-import magma.collect.Joiner;
+import magma.collect.stream.Joiner;
 import magma.collect.list.List_;
 import magma.compile.context.Context;
 import magma.error.Error;

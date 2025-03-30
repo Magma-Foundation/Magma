@@ -1,6 +1,6 @@
 package jvm.collect.set;
 
-import jvm.collect.Streams;
+import jvm.collect.stream.Streams;
 import magma.collect.set.Set_;
 import magma.collect.stream.Stream;
 

@@ -1,10 +1,10 @@
-package jvm.collect;
+package jvm.collect.stream;
 
-import magma.collect.stream.EmptyHead;
-import magma.collect.stream.Head;
-import magma.collect.stream.HeadedStream;
-import magma.collect.stream.RangeHead;
-import magma.collect.stream.SingleHead;
+import magma.collect.stream.head.EmptyHead;
+import magma.collect.stream.head.Head;
+import magma.collect.stream.head.HeadedStream;
+import magma.collect.stream.head.RangeHead;
+import magma.collect.stream.head.SingleHead;
 import magma.collect.stream.Stream;
 import magma.option.Option;
 

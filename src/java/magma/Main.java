@@ -3,7 +3,7 @@ package magma;
 import jvm.collect.list.Lists;
 import jvm.io.Paths;
 import jvm.process.Processes;
-import magma.collect.Joiner;
+import magma.collect.stream.Joiner;
 import magma.collect.list.List_;
 import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;

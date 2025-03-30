@@ -1,1 +1,1 @@
-struct Option<T>  {};
+struct Option {};

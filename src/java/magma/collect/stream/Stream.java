@@ -1,6 +1,5 @@
 package magma.collect.stream;
 
-import magma.collect.Collector;
 import magma.option.Option;
 import magma.result.Result;
 

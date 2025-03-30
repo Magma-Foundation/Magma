@@ -2,4 +2,4 @@
 #include "/../../magma/collect/stream/Stream.h"
 #include "/../../magma/option/Option.h"
 #include "/../../magma/result/Result.h"
-struct Path_  {};
+struct Path_ {};

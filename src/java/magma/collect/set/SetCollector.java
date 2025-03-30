@@ -1,7 +1,7 @@
 package magma.collect.set;
 
 import jvm.collect.set.Sets;
-import magma.collect.Collector;
+import magma.collect.stream.Collector;
 
 public class SetCollector<T> implements Collector<T, Set_<T>> {
     @Override

@@ -1,8 +1,8 @@
 package jvm.collect.list;
 
 import magma.collect.list.List_;
-import magma.collect.stream.HeadedStream;
-import magma.collect.stream.RangeHead;
+import magma.collect.stream.head.HeadedStream;
+import magma.collect.stream.head.RangeHead;
 import magma.collect.stream.Stream;
 import magma.option.None;
 import magma.option.Option;

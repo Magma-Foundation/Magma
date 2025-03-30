@@ -1,27 +1,24 @@
 clang .\magma\compile\Compiler.c^
 	.\magma\compile\rule\divide\DividingState.c^
 	.\magma\collect\map\Map_.c^
+	.\magma\collect\stream\Joiner.c^
 	.\magma\compile\rule\divide\CharDivider.c^
 	.\magma\compile\rule\PrefixRule.c^
 	.\magma\compile\source\Source.c^
+	.\magma\collect\stream\head\RangeHead.c^
 	.\magma\compile\rule\divide\MutableDividingState.c^
-	.\magma\collect\Collector.c^
 	.\magma\compile\Node.c^
 	.\magma\io\Path_.c^
 	.\magma\option\None.c^
-	.\magma\collect\stream\EmptyHead.c^
 	.\magma\compile\lang\JavaCTransformer.c^
 	.\magma\compile\context\NodeContext.c^
 	.\magma\compile\rule\Rule.c^
+	.\magma\collect\stream\head\HeadedStream.c^
 	.\magma\collect\set\Set_.c^
 	.\magma\collect\set\SetCollector.c^
 	.\magma\compile\rule\OrRule.c^
 	.\magma\error\Error.c^
-	.\magma\collect\Joiner.c^
-	.\magma\collect\stream\Head.c^
 	.\magma\collect\stream\Stream.c^
-	.\magma\collect\stream\RangeHead.c^
-	.\magma\collect\stream\SingleHead.c^
 	.\magma\compile\lang\JavaLang.c^
 	.\magma\compile\rule\DivideRule.c^
 	.\magma\option\Some.c^
@@ -35,6 +32,7 @@ clang .\magma\compile\Compiler.c^
 	.\magma\compile\rule\TypeRule.c^
 	.\magma\compile\lang\Transformer.c^
 	.\magma\compile\rule\StringRule.c^
+	.\magma\collect\stream\head\Head.c^
 	.\magma\compile\source\PathSource.c^
 	.\magma\compile\rule\divide\StatementDivider.c^
 	.\magma\collect\list\List_.c^
@@ -42,12 +40,14 @@ clang .\magma\compile\Compiler.c^
 	.\magma\option\Option.c^
 	.\magma\compile\CompileError.c^
 	.\magma\process\ProcessError.c^
+	.\magma\collect\stream\head\EmptyHead.c^
 	.\magma\io\IOError.c^
 	.\magma\result\Result.c^
 	.\magma\compile\MapNode.c^
 	.\magma\result\Err.c^
+	.\magma\collect\stream\head\SingleHead.c^
 	.\magma\option\Tuple.c^
-	.\magma\collect\stream\HeadedStream.c^
+	.\magma\collect\stream\Collector.c^
 	.\magma\compile\rule\divide\Divider.c^
 	.\magma\compile\context\StringContext.c^
 	.\magma\Main.c^

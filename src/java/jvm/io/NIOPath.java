@@ -2,8 +2,8 @@ package jvm.io;
 
 import jvm.collect.set.Sets;
 import magma.collect.set.Set_;
-import magma.collect.stream.HeadedStream;
-import magma.collect.stream.RangeHead;
+import magma.collect.stream.head.HeadedStream;
+import magma.collect.stream.head.RangeHead;
 import magma.collect.stream.Stream;
 import magma.io.IOError;
 import magma.io.Path_;

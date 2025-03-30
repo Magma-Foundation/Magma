@@ -1,4 +1,4 @@
-package magma.collect.stream;
+package magma.collect.stream.head;
 
 import magma.option.None;
 import magma.option.Option;

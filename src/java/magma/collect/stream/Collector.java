@@ -1,4 +1,4 @@
-package magma.collect;
+package magma.collect.stream;
 
 public interface Collector<T, C> {
     C createInitial();

@@ -1,6 +1,6 @@
 package jvm.collect.map;
 
-import jvm.collect.Streams;
+import jvm.collect.stream.Streams;
 import magma.collect.map.Map_;
 import magma.collect.stream.Stream;
 import magma.option.None;

@@ -20,9 +20,8 @@ public record SymbolRule(Rule rule) implements Rule {
     private boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (!Character.isLetter(c)) {
-                return false;
-            }
+            if (c == '_' || Character.isLetter(c)) continue;
+            return false;
         }
 
         return true;

@@ -1,6 +1,6 @@
 package magma.compile.lang;
 
-import jvm.collect.Streams;
+import jvm.collect.stream.Streams;
 import jvm.collect.list.Lists;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;

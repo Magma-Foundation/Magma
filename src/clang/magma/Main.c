@@ -1,7 +1,7 @@
 #include "/../windows/collect/list/Lists.h"
 #include "/../windows/io/Paths.h"
 #include "/../windows/process/Processes.h"
-#include "/../magma/collect/Joiner.h"
+#include "/../magma/collect/stream/Joiner.h"
 #include "/../magma/collect/list/List_.h"
 #include "/../magma/collect/set/SetCollector.h"
 #include "/../magma/collect/set/Set_.h"

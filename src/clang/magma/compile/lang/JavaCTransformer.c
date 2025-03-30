@@ -1,4 +1,4 @@
-#include "/../../../windows/collect/Streams.h"
+#include "/../../../windows/collect/stream/Streams.h"
 #include "/../../../windows/collect/list/Lists.h"
 #include "/../../../magma/collect/list/ListCollector.h"
 #include "/../../../magma/collect/list/List_.h"

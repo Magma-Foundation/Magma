@@ -35,15 +35,20 @@ public class JavaLang {
     }
 
     private static TypeRule createInterfaceRule() {
-        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", new InfixRule(createNamedWithTypeParams(), "{", new StringRule("with-end"))));
+        Rule namedWithTypeParams = createNamedWithTypeParams();
+        Rule beforeContent = new OrRule(Lists.of(
+                new InfixRule(namedWithTypeParams, "extends ", new StringRule("supertype")),
+                namedWithTypeParams
+        ));
+
+        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", new InfixRule(beforeContent, "{", new StringRule("with-end"))));
     }
 
     private static TypeRule createClassRule() {
-        Rule name1 = createNamedWithTypeParams();
-
+        Rule namedWithTypeParams = createNamedWithTypeParams();
         Rule beforeContent = new OrRule(Lists.of(
-                new InfixRule(name1, "implements ", new StringRule("supertype")),
-                name1
+                new InfixRule(namedWithTypeParams, "implements ", new StringRule("supertype")),
+                namedWithTypeParams
         ));
 
         return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", new InfixRule(beforeContent, "{", new StringRule("with-end"))));
