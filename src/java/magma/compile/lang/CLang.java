@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.rule.divide.DivideFolder;
 import magma.compile.rule.tree.NodeListRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.Rule;
@@ -9,11 +10,11 @@ import magma.compile.rule.tree.OrRule;
 import magma.compile.rule.text.StringRule;
 import magma.compile.rule.tree.TypeRule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.StatementDivider;
+import magma.compile.rule.divide.FoldingDivider;
 
 public class CLang {
     public static Rule createCRootRule() {
-        return new NodeListRule("children", new StatementDivider(), createCRootSegmentRule());
+        return new NodeListRule("children", new FoldingDivider(new DivideFolder()), createCRootSegmentRule());
     }
 
     private static Rule createCRootSegmentRule() {

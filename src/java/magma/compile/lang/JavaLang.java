@@ -2,25 +2,27 @@ package magma.compile.lang;
 
 import jvm.collect.list.Lists;
 import magma.compile.lang.r.SymbolRule;
-import magma.compile.rule.tree.NodeListRule;
-import magma.compile.rule.text.EmptyRule;
-import magma.compile.rule.locate.FirstLocator;
-import magma.compile.rule.text.InfixRule;
-import magma.compile.rule.locate.LastLocator;
-import magma.compile.rule.tree.NodeRule;
-import magma.compile.rule.tree.OrRule;
-import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.Rule;
+import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.DivideFolder;
+import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.ValueFolder;
+import magma.compile.rule.locate.FirstLocator;
+import magma.compile.rule.locate.LastLocator;
+import magma.compile.rule.text.EmptyRule;
+import magma.compile.rule.text.InfixRule;
+import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.SuffixRule;
+import magma.compile.rule.tree.NodeListRule;
+import magma.compile.rule.tree.NodeRule;
+import magma.compile.rule.tree.OrRule;
 import magma.compile.rule.tree.TypeRule;
-import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.StatementDivider;
 
 public class JavaLang {
     public static NodeListRule createJavaRootRule() {
-        return new NodeListRule("children", new StatementDivider(), createJavaRootSegmentRule());
+        return new NodeListRule("children", new FoldingDivider(new DivideFolder()), createJavaRootSegmentRule());
     }
 
     private static OrRule createJavaRootSegmentRule() {
@@ -73,11 +75,29 @@ public class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        return new StripRule(new InfixRule(new StringRule("before-name"), " ", new StringRule("name"), new LastLocator()));
+        NodeListRule modifiers = new NodeListRule("modifiers", new CharDivider(' '), new StringRule("modifier"));
+        Rule beforeName = new InfixRule(modifiers, " ", new NodeRule("type", createTypeRule()), new TypeSeparatorLocator());
+        return new StripRule(new InfixRule(beforeName, " ", createSymbolRule("name"), new LastLocator()));
+    }
+
+    private static Rule createTypeRule() {
+        return new OrRule(Lists.of(
+                createGenericRule(),
+                new TypeRule("symbol", createSymbolRule("value"))
+        ));
+    }
+
+    private static Rule createGenericRule() {
+        Rule typeArguments = new NodeListRule("type-arguments", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new LastLocator()), ">")));
+    }
+
+    private static StripRule createSymbolRule(String propertyKey) {
+        return new StripRule(new SymbolRule(new StringRule(propertyKey)));
     }
 
     private static Rule createNamedWithTypeParams() {
-        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
+        Rule name = createSymbolRule("name");
         return new OrRule(Lists.of(
                 new StripRule(new InfixRule(name, "<", new SuffixRule(new StringRule("type-params"), ">"), new FirstLocator())),
                 name
