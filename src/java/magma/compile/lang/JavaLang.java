@@ -30,19 +30,16 @@ public class JavaLang {
     }
 
     private static TypeRule createRecordRule() {
-        return new TypeRule("record", new InfixRule(new StringRule("modifiers"), "record ", new InfixRule(new StringRule("name"), "(", new StringRule("with-end"))));
+        Rule namedWithTypeParams = createNamedWithTypeParams();
+        return new TypeRule("record", new InfixRule(new StringRule("modifiers"), "record ", new InfixRule(namedWithTypeParams, "(", new StringRule("with-end"))));
     }
 
     private static TypeRule createInterfaceRule() {
-        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", new InfixRule(new StringRule("name"), "{", new StringRule("with-end"))));
+        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", new InfixRule(createNamedWithTypeParams(), "{", new StringRule("with-end"))));
     }
 
     private static TypeRule createClassRule() {
-        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
-        Rule name1 = new OrRule(Lists.of(
-                new StripRule(new InfixRule(name, "<", new SuffixRule(new StringRule("type-params"), ">"))),
-                name
-        ));
+        Rule name1 = createNamedWithTypeParams();
 
         Rule beforeContent = new OrRule(Lists.of(
                 new InfixRule(name1, "implements ", new StringRule("supertype")),
@@ -50,6 +47,14 @@ public class JavaLang {
         ));
 
         return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", new InfixRule(beforeContent, "{", new StringRule("with-end"))));
+    }
+
+    private static Rule createNamedWithTypeParams() {
+        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
+        return new OrRule(Lists.of(
+                new StripRule(new InfixRule(name, "<", new SuffixRule(new StringRule("type-params"), ">"))),
+                name
+        ));
     }
 
     private static Rule createImportRule(String prefix, String type) {

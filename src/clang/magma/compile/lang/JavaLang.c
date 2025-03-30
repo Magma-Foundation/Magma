@@ -11,4 +11,4 @@
 #include "/../../../magma/compile/rule/TypeRule.h"
 #include "/../../../magma/compile/rule/divide/CharDivider.h"
 #include "/../../../magma/compile/rule/divide/StatementDivider.h"
-struct ", new InfixRule {};
+struct ", new InfixRule(new StringRule("name"), " {};

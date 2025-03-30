@@ -3,4 +3,4 @@
 #include "/../../../magma/option/Tuple.h"
 #include "/../../../magma/result/Ok.h"
 #include "/../../../magma/result/Result.h"
-struct HeadedStream<T> {};
+struct HeadedStream {};

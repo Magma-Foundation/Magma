@@ -1,1 +1,1 @@
-struct Some<T> {};
+struct Some {};
