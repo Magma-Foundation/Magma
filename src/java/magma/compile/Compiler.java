@@ -13,9 +13,9 @@ import magma.result.Result;
 public class Compiler {
     public static Result<String, CompileError> compile(String input, List_<String> namespace, String name) {
         return JavaLang.createJavaRootRule().parse(input)
-                .mapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, namespace))
-                .mapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, namespace))
-                .mapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, namespace))
+                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, namespace))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, namespace))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, namespace))
                 .flatMapValue(generate -> CLang.createCRootRule().generate(generate))
                 .mapValue(output -> complete(namespace, name, output));
     }
