@@ -11,6 +11,6 @@ struct Result_T_R mapErr(struct R(*mapper)(struct X)){return new Err<>(mapper.ap
 }
 struct R match(struct R(*whenOk)(struct T), struct R(*whenErr)(struct X)){return whenErr.apply(error);
 }
-struct Result_Tuple_T_R_X and(struct Supplier_Result_R_X other){return new Err<>(error);
+struct Result_Tuple_T_R_X and(struct Result_R_X(*other)()){return new Err<>(error);
 }
 

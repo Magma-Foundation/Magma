@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.OptionalNodeListRule;
 import magma.compile.rule.OptionalNodeRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
@@ -89,10 +90,11 @@ public class CLang {
         ));
     }
 
-    private static TypeRule createFunctionalDefinitionType() {
-        NodeRule returns = new NodeRule("return", createTypeRule());
-        NodeListRule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), createTypeRule());
-        InfixRule right = new InfixRule(new PrefixRule("*", new StringRule("name")), ")(", new SuffixRule(params, ")"), new FirstLocator());
+    private static Rule createFunctionalDefinitionType() {
+        Rule returns = new NodeRule("return", createTypeRule());
+        Rule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), createTypeRule());
+        Rule maybeParams = new OptionalNodeListRule("params", params, new EmptyRule());
+        Rule right = new InfixRule(new PrefixRule("*", new StringRule("name")), ")(", new SuffixRule(maybeParams, ")"), new FirstLocator());
         return new TypeRule("functional-definition", new InfixRule(returns, "(", right, new FirstLocator()));
     }
 

@@ -1,26 +1,29 @@
 #include "ExpandGenerics.h"
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (node.is()) {
-            Node type = node.findNode().orElse(new MapNode());
-            if (type.is()) {
-                String value = type.findNodeList()
-                        .orElse(Lists.empty())
-                        .get(0)
-                        .findString()
-                        .orElse();
+struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (!node.is()) return new Ok<>(node);
 
-                if (value.equals()) {
-                    List_<Node> arguments = type.findNodeList()
-                            .orElse(Lists.empty());
+        Node type = node.findNode().orElse(new MapNode());
+        if (!type.is()) return new Ok<>(node);
 
-                    Node param = arguments.get(0);
-                    Node returns = arguments.get(1);
+        String value = type.findNodeList()
+                .orElse(Lists.empty())
+                .get(0)
+                .findString()
+                .orElse();if (value.equals()) {
+            List_<Node> arguments = type.findNodeList().orElseGet(Lists::empty);
+            Node param = arguments.get(0);
+            Node returns = arguments.get(1);
 
-                    return new Ok<>(node.retype()
-                            .removeNode()
-                            .withNode(, returns)
-                            .withNodeList(, Lists.of(param)));
-                }
-            }
+            return new Ok<>(node.retype()
+                    .removeNode()
+                    .withNode(, returns)
+                    .withNodeList(, Lists.of(param)));
+        }if(value.equals()) {
+            List_<Node> arguments = type.findNodeList().orElseGet(Lists::empty);
+            Node returns = arguments.get(0);
+
+            return new Ok<>(node.retype()
+                    .removeNode()
+                    .withNode(, returns));
         }
 
         return new Ok<>(node);

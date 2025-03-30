@@ -1,5 +1,5 @@
 #include "OrRule.h"
-struct Result_T_CompileError apply(struct Result_T_CompileError(*applicator)(struct Rule), struct Supplier_Context context){return rules.stream()
+struct Result_T_CompileError apply(struct Result_T_CompileError(*applicator)(struct Rule), struct Context(*context)()){return rules.stream()
                 .foldWithInitial(new OrState<T>(), (orState, rule) -> applicator.apply(rule).match(orState::withValue, orState::withError))
                 .toResult()
                 .<Result<T, CompileError>>match(Ok::new, errors -> new Err<>(new CompileError(, context.get(), errors)));

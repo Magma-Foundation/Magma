@@ -2,6 +2,7 @@
 #define magma_compile_lang_CLang
 #include "../../../windows/collect/list/Lists.h"
 #include "../../../magma/compile/rule/LazyRule.h"
+#include "../../../magma/compile/rule/OptionalNodeListRule.h"
 #include "../../../magma/compile/rule/OptionalNodeRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
@@ -29,7 +30,7 @@ struct Rule createStatementRule();
 struct Rule createStructRule();
 struct OrRule createStructMemberRule();
 struct OrRule createDefinitionsRule();
-struct TypeRule createFunctionalDefinitionType();
+struct Rule createFunctionalDefinitionType();
 struct Rule createTypeRule();
 struct Rule createIncludeRule();
 #endif

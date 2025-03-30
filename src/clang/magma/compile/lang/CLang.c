@@ -50,9 +50,10 @@ struct OrRule createDefinitionsRule(){return new OrRule(Lists.of(
                 createFunctionalDefinitionType()
         ));
 }
-struct TypeRule createFunctionalDefinitionType(){NodeRule returns = new NodeRule(, createTypeRule());
-        NodeListRule params = new NodeListRule(, new FoldingDivider(new ValueFolder()), createTypeRule());
-        InfixRule right = new InfixRule(new PrefixRule(, new StringRule()), , new SuffixRule(params, ), new FirstLocator());
+struct Rule createFunctionalDefinitionType(){Rule returns = new NodeRule(, createTypeRule());
+        Rule params = new NodeListRule(, new FoldingDivider(new ValueFolder()), createTypeRule());
+        Rule maybeParams = new OptionalNodeListRule(, params, new EmptyRule());
+        Rule right = new InfixRule(new PrefixRule(, new StringRule()), , new SuffixRule(maybeParams, ), new FirstLocator());
         return new TypeRule(, new InfixRule(returns, , right, new FirstLocator()));
 }
 struct Rule createTypeRule(){LazyRule type = new LazyRule();

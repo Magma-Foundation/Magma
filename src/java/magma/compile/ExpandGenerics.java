@@ -13,28 +13,35 @@ import magma.result.Result;
 public class ExpandGenerics implements Transformer {
     @Override
     public Result<Node, CompileError> beforePass(State state, Node node) {
-        if (node.is("definition")) {
-            Node type = node.findNode("type").orElse(new MapNode());
-            if (type.is("generic")) {
-                String value = type.findNodeList("base")
-                        .orElse(Lists.empty())
-                        .get(0)
-                        .findString("value")
-                        .orElse("");
+        if (!node.is("definition")) return new Ok<>(node);
 
-                if (value.equals("Function")) {
-                    List_<Node> arguments = type.findNodeList("arguments")
-                            .orElse(Lists.empty());
+        Node type = node.findNode("type").orElse(new MapNode());
+        if (!type.is("generic")) return new Ok<>(node);
 
-                    Node param = arguments.get(0);
-                    Node returns = arguments.get(1);
+        String value = type.findNodeList("base")
+                .orElse(Lists.empty())
+                .get(0)
+                .findString("value")
+                .orElse("");
 
-                    return new Ok<>(node.retype("functional-definition")
-                            .removeNode("type")
-                            .withNode("return", returns)
-                            .withNodeList("params", Lists.of(param)));
-                }
-            }
+        if (value.equals("Function")) {
+            List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
+            Node param = arguments.get(0);
+            Node returns = arguments.get(1);
+
+            return new Ok<>(node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param)));
+        }
+
+        if(value.equals("Supplier")) {
+            List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
+            Node returns = arguments.get(0);
+
+            return new Ok<>(node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns));
         }
 
         return new Ok<>(node);
