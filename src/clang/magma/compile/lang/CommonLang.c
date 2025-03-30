@@ -1,6 +1,6 @@
 #include "CommonLang.h"
 struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule){Rule children1 = createBlockRule(childRule);
-        Rule right = new StripRule(new SuffixRule(children1, ));
+        Rule right = new StripRule(, new SuffixRule(children1, ), );
         return new InfixRule(beforeContent, , right, new FirstLocator());}struct Rule createBlockRule(struct Rule childRule){Rule children = new NodeListRule(, new FoldingDivider(new DecoratedFolder(new StatementFolder())), childRule);
         return new NodeRule(, new TypeRule(, children));}struct TypeRule createSymbolTypeRule(){return new TypeRule(, createSymbolRule());}struct StripRule createSymbolRule(struct String propertyKey){return new StripRule(new SymbolRule(new StringRule(propertyKey)));}struct Rule createDefinitionRule(struct Rule type){NodeListRule modifiers = new NodeListRule(, new CharDivider(), new StringRule());
         NodeRule typeProperty = new NodeRule(, type);

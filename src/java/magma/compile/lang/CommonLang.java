@@ -23,7 +23,7 @@ import magma.compile.rule.tree.TypeRule;
 public class CommonLang {
     static InfixRule createContentRule(Rule beforeContent, Rule childRule) {
         Rule children1 = createBlockRule(childRule);
-        Rule right = new StripRule(new SuffixRule(children1, "}"));
+        Rule right = new StripRule("before-children", new SuffixRule(children1, "}"), "after-braces");
         return new InfixRule(beforeContent, "{", right, new FirstLocator());
     }
 

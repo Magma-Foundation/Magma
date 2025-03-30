@@ -5,6 +5,7 @@
 #include "../../magma/collect/map/Map_.h"
 #include "../../magma/compile/lang/CLang.h"
 #include "../../magma/compile/lang/FlattenRoot.h"
+#include "../../magma/compile/lang/Formatter.h"
 #include "../../magma/compile/lang/JavaLang.h"
 #include "../../magma/compile/lang/Sorter.h"
 #include "../../magma/compile/lang/TransformAll.h"

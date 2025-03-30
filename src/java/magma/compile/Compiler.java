@@ -5,6 +5,7 @@ import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
 import magma.compile.lang.FlattenRoot;
+import magma.compile.lang.Formatter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.Sorter;
 import magma.compile.lang.TransformAll;
@@ -19,14 +20,12 @@ public class Compiler {
         State state = new State(namespace, name);
         return JavaLang.createJavaRootRule().parse(input)
                 .flatMapValue(tree -> new TreeTransformingStage(new ExpandGenerics()).transform(tree, state))
-                .flatMapValue(tree -> {
-                    Result<Node, CompileError> transform = new TreeTransformingStage(new FlattenGroup()).transform(tree, state);
-                    return transform;
-                })
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, state))
+                .flatMapValue(tree -> new TreeTransformingStage(new Formatter()).transform(tree, state))
                 .flatMapValue(Compiler::generateRoots);
     }
 

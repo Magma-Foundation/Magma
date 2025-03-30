@@ -10,5 +10,7 @@ public interface Transformer {
         return new Ok<>(node);
     }
 
-    Result<Node, CompileError> afterPass(State state, Node node);
+    default Result<Node, CompileError> afterPass(State state, Node node) {
+        return new Ok<>(node);
+    }
 }

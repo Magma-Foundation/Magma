@@ -114,6 +114,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\process\ProcessError.c^
 	.\magma\compile\rule\tree\NodeListRule.c^
 	.\magma\compile\rule\tree\NodeListRule.c^
+	.\magma\compile\lang\Formatter.c^
+	.\magma\compile\lang\Formatter.c^
 	.\magma\collect\stream\head\EmptyHead.c^
 	.\magma\collect\stream\head\EmptyHead.c^
 	.\magma\io\IOError.c^
