@@ -134,4 +134,15 @@ public class CommonLang {
     static TypeRule createStringRule() {
         return new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))));
     }
+
+    static TypeRule createTernaryRule(LazyRule value) {
+        NodeRule condition = new NodeRule("condition", value);
+        NodeRule whenTrue = new NodeRule("when-true", value);
+        NodeRule whenFalse = new NodeRule("when-false", value);
+        return new TypeRule("ternary", new InfixRule(condition, "?", new InfixRule(whenTrue, ":", whenFalse, new FirstLocator()), new FirstLocator()));
+    }
+
+    static TypeRule createNumberRule() {
+        return new TypeRule("number", new StripRule(new FilterRule(new NumberFilter(), new StringRule("value"))));
+    }
 }

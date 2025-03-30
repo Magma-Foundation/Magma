@@ -80,7 +80,9 @@ public class CLang {
                 createAddRule(value),
                 createInvocationRule(value),
                 createDataAccess("data-access", ".", value),
-                createStringRule()
+                createStringRule(),
+                createTernaryRule(value),
+                createNumberRule()
         )));
 
         return value;
