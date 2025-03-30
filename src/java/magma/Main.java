@@ -82,7 +82,7 @@ public class Main {
                 .mapErr(ApplicationError::new)
                 .flatMapValue(postLoaded -> writeOutputs(postLoaded, namespace, source.computeName()))
                 .mapValue(relatives::addAll);
-    });
+    }
 
     private static Option<ApplicationError> complete(List_<Path_> relatives) {
         Path_ build = TARGET_DIRECTORY.resolve("build.bat");
