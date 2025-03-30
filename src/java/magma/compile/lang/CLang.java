@@ -9,6 +9,7 @@ import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.SuffixRule;
 import magma.compile.rule.tree.NodeListRule;
 import magma.compile.rule.tree.NodeRule;
@@ -36,8 +37,19 @@ public class CLang {
         NodeRule definition = new NodeRule("definition", definitionRule);
         NodeListRule params = CommonLang.createParamsRule(definitionRule);
 
-        InfixRule right = new InfixRule(params, ")", new PrefixRule("{", new SuffixRule(new EmptyRule(), "\n}\n")), new FirstLocator());
-        return new TypeRule("function", new InfixRule(definition, "(", right, new FirstLocator()));
+        Rule block = CommonLang.createContentRule(new StripRule(new SuffixRule(params, "}")), createStatementRule());
+        Rule block1 = new OrRule(Lists.of(
+                block,
+                new SuffixRule(params, ");\n")
+        ));
+
+        return new TypeRule("function", new InfixRule(definition, "(", block1, new FirstLocator()));
+    }
+
+    private static Rule createStatementRule() {
+        return new OrRule(Lists.empty(
+
+        ));
     }
 
     private static TypeRule createStructRule() {

@@ -44,4 +44,6 @@ public interface Node {
     Node withNodeLists(Map_<String, List_<Node>> nodeLists);
 
     Node withNodes(Map_<String, Node> nodes);
+
+    Node removeNode(String propertyKey);
 }

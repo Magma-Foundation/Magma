@@ -1,3 +1,2 @@
 #include "Context.h"
-struct String display(){
-}
+struct String display();

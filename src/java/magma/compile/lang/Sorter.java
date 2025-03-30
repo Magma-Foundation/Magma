@@ -31,6 +31,11 @@ public class Sorter implements Transformer {
                 public Tuple<List_<Node>, List_<Node>> apply(Tuple<List_<Node>, List_<Node>> tuple, Node node) {
                     if (node.is("include") || node.is("struct"))
                         return new Tuple<>(tuple.left().add(node), tuple.right());
+
+                    if(node.is("function")) {
+                        return new Tuple<>(tuple.left().add(node.removeNode("content")), tuple.right().add(node));
+                    }
+
                     return new Tuple<>(tuple.left(), tuple.right().add(node));
                 }
             });

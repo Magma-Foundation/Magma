@@ -6,4 +6,7 @@
 #include "../../../magma/io/Path_.h"
 #include "../../../magma/result/Result.h"
 struct PathSource{};
+struct List__String computeNamespace();
+struct String computeName();
+struct Result_String_IOError readString();
 #endif

@@ -3,4 +3,5 @@
 #include "../magma/error/Error.h"
 #include "../windows/result/Results.h"
 struct JavaInterruptedError{};
+struct String display();
 #endif

@@ -1,3 +1,2 @@
 #include "State.h"
-struct List__String getNamespace(){
-}
+struct List__String getNamespace();

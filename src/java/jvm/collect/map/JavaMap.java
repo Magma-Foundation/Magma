@@ -60,4 +60,11 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     public boolean isEmpty() {
         return map.isEmpty();
     }
+
+    @Override
+    public Map_<K, V> remove(K propertyKey) {
+        Map<K, V> copy = new HashMap<>(map);
+        copy.remove(propertyKey);
+        return new JavaMap<>(copy);
+    }
 }

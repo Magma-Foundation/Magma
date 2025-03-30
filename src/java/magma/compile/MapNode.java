@@ -161,4 +161,9 @@ public final class MapNode implements Node {
     public Node withNodes(Map_<String, Node> nodes) {
         return new MapNode(maybeType, strings, this.nodes.withAll(nodes), this.nodeLists);
     }
+
+    @Override
+    public Node removeNode(String propertyKey) {
+        return new MapNode(maybeType, strings, nodes.remove(propertyKey), nodeLists);
+    }
 }

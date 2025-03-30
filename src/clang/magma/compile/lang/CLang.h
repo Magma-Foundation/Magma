@@ -9,10 +9,19 @@
 #include "../../../magma/compile/rule/text/InfixRule.h"
 #include "../../../magma/compile/rule/text/PrefixRule.h"
 #include "../../../magma/compile/rule/text/StringRule.h"
+#include "../../../magma/compile/rule/text/StripRule.h"
 #include "../../../magma/compile/rule/text/SuffixRule.h"
 #include "../../../magma/compile/rule/tree/NodeListRule.h"
 #include "../../../magma/compile/rule/tree/NodeRule.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
 struct CLang{};
+struct Rule createCRootRule();
+struct Rule createCRootSegmentRule();
+struct TypeRule createFunctionRule();
+struct Rule createStatementRule();
+struct TypeRule createStructRule();
+struct OrRule createStructMemberRule();
+struct Rule createTypeRule();
+struct Rule createIncludeRule();
 #endif

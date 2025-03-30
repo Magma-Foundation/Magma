@@ -1,3 +1,2 @@
 #include "Error.h"
-struct String display(){
-}
+struct String display();

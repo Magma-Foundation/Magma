@@ -19,4 +19,6 @@ public interface Map_<K, V> {
     Map_<K,V> withAll(Map_<K, V> other);
 
     boolean isEmpty();
+
+    Map_<K,V> remove(K propertyKey);
 }
