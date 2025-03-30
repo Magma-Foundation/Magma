@@ -167,7 +167,7 @@ public class TransformAll implements Transformer {
         List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
 
         List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is("package") && !hasTypeParams(child))
+                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
                 .collect(new ListCollector<>());
 
         Node withChildren = content.withNodeList("children", newChildren);
