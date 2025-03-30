@@ -6,7 +6,7 @@ import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.transform.Transformer;
 
-public class RootFlattener implements Transformer {
+public class FlattenRoot implements Transformer {
     @Override
     public Node afterPass(Node node) {
         if (!node.is("group")) return node;

@@ -8,7 +8,7 @@ import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.option.Tuple;
 
-public class GroupTransformer implements Transformer {
+public class FlattenGroup implements Transformer {
     private static Cache foldNodeProperty(Cache state, Tuple<String, Node> property) {
         String propertyKey = property.left();
         Node propertyValue = property.right();
@@ -25,7 +25,7 @@ public class GroupTransformer implements Transformer {
         Node child = element.findNode("child").orElse(new MapNode());
         Tuple<Node, Cache> newChild = flattenNode(cache, child);
 
-        Cache groupCategories = element.streamNodeLists().foldWithInitial(newChild.right(), GroupTransformer::flattenCategory);
+        Cache groupCategories = element.streamNodeLists().foldWithInitial(newChild.right(), FlattenGroup::flattenCategory);
         return new Tuple<>(newChild.left(), groupCategories);
     }
 
@@ -37,7 +37,7 @@ public class GroupTransformer implements Transformer {
         String propertyKey = property.left();
         List_<Node> propertyValues = property.right();
 
-        Tuple<List_<Node>, Cache> listCacheTuple = propertyValues.stream().foldWithInitial(new Tuple<>(Lists.empty(), cache), GroupTransformer::flattenNodeListElement);
+        Tuple<List_<Node>, Cache> listCacheTuple = propertyValues.stream().foldWithInitial(new Tuple<>(Lists.empty(), cache), FlattenGroup::flattenNodeListElement);
         return listCacheTuple.right().withNodeList(propertyKey, listCacheTuple.left());
     }
 
@@ -52,8 +52,8 @@ public class GroupTransformer implements Transformer {
     @Override
     public Node afterPass(Node node) {
         Cache cache = new Cache();
-        Cache foldedNodes = node.streamNodes().foldWithInitial(cache, GroupTransformer::foldNodeProperty);
-        Cache foldedNodeLists = node.streamNodeLists().foldWithInitial(foldedNodes, GroupTransformer::flattenNodeList);
+        Cache foldedNodes = node.streamNodes().foldWithInitial(cache, FlattenGroup::foldNodeProperty);
+        Cache foldedNodeLists = node.streamNodeLists().foldWithInitial(foldedNodes, FlattenGroup::flattenNodeList);
         return foldedNodeLists.tryGroup(node);
     }
 

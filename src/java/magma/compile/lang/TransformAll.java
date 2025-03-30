@@ -9,7 +9,7 @@ import magma.compile.Node;
 import magma.compile.transform.Transformer;
 import magma.option.Tuple;
 
-public class RootTransformer implements Transformer {
+public class TransformAll implements Transformer {
     @Override
     public Node afterPass(Node node) {
         if (node.is("root")) {
@@ -32,7 +32,7 @@ public class RootTransformer implements Transformer {
             Tuple<List_<Node>, List_<Node>> children = node.findNodeList("children")
                     .orElse(Lists.empty())
                     .stream()
-                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), RootTransformer::bucketClassMember);
+                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
 
             Node withChildren = node.retype("struct").withNodeList("children", children.left());
             return new MapNode("group")
