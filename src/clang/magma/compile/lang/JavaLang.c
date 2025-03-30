@@ -50,7 +50,7 @@ struct TypeRule createTypedDefinitionRule(){return TypeRule("definition", create
 struct Rule createStatementRule(){LazyRule value = new LazyRule();
         LazyRule statement = new LazyRule();statement.set(OrRule(Lists.of(createWhitespaceRule(), createReturnRule(createValueRule(value, statement)), createIfRule(), SuffixRule(createInvocationRule(value), ";"), createForRule(), createAssignmentRule(), createPostfixRule(), createElseRule(), createWhileRule())));return statement;
 }
-struct Rule createValueRule(struct LazyRule value, struct Rule statement){value.set(OrRule(Lists.of(createSymbolValueRule(), createAddRule(value), createConstructionRule(value), createInvocationRule(value), createDataAccessRule(value), createAccessRule("method-access", "::", value), createStringRule(), createLambdaRule(value, statement), createNumberRule(), createTernaryRule(value), createNotRule(value))));return value;
+struct Rule createValueRule(struct LazyRule value, struct Rule statement){value.set(OrRule(Lists.of(createSymbolValueRule(), createAddRule(value), createConstructionRule(value), createInvocationRule(value), createDataAccessRule(value), createAccessRule("method-access", "::", value), createStringRule(), createLambdaRule(value, statement), createNumberRule(), createTernaryRule(value), createNotRule(value), TypeRule("quantity", PrefixRule("(", SuffixRule(NodeRule("child", value), ")"))))));return value;
 }
 struct TypeRule createDataAccessRule(struct LazyRule value){Rule property = createSymbolRule("property");
         Rule afterSeparator = new OrRule(Lists.of(

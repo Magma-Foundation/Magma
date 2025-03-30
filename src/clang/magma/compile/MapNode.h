@@ -17,11 +17,13 @@ struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsst
 // expand Map__String_Node = Map_<struct String, struct Node>
 // expand Map__String_List__Node = Map_<struct String, struct List__Node>
 // expand List__Node = List_<struct Node>
+// expand None_ = None<struct >
 // expand Option_String = Option<struct String>
 // expand Map__String_String = Map_<struct String, struct String>
 // expand Map__String_Node = Map_<struct String, struct Node>
 // expand Map__String_List__Node = Map_<struct String, struct List__Node>
 // expand List__Node = List_<struct Node>
+// expand Some_ = Some<struct >
 // expand Option_String = Option<struct String>
 // expand List__Node = List_<struct Node>
 // expand Option_List__Node = Option<struct List__Node>
@@ -30,6 +32,7 @@ struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsst
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
+// expand Some_ = Some<struct >
 // expand Stream_Tuple_String_String = Stream<struct Tuple_String_String>
 // expand Tuple_String_String = Tuple<struct String, struct String>
 // expand Stream_Tuple_String_List__Node = Stream<struct Tuple_String_List__Node>
@@ -67,5 +70,9 @@ struct Node withNodes(struct Map__String_Node nodes);
 struct Node removeNode(struct String propertyKey);
 int hasNode(struct String propertyKey);
 int hasNodeList(struct String propertyKey);
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
 #endif
 

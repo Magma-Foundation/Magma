@@ -44,7 +44,10 @@ struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY
 // expand List__Path_ = List_<struct Path_>
 // expand List__Path_ = List_<struct Path_>
 // expand Result_Path__ApplicationError = Result<struct Path_, struct ApplicationError>
+// expand Result_Path__ApplicationError = Result<struct Path_, struct ApplicationError>
+// expand Ok_ = Ok<struct >
 // expand Option_IOError = Option<struct IOError>
+// expand None_ = None<struct >
 // expand List__String = List_<struct String>
 struct void main(struct String* args);
 struct Option_ApplicationError runWithFiles(struct Set__Path_ files);
@@ -59,5 +62,11 @@ struct Result_List__Path__ApplicationError writeAndFoldOutput(struct List__Path_
 struct Result_Path__ApplicationError writeOutput(struct Path_ parent, struct String name, struct String extension, struct String output);
 struct Option_IOError ensureDirectories(struct Path_ targetParent);
 int isPlatformDependent(struct List__String namespace);
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
 #endif
 

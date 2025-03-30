@@ -26,7 +26,10 @@ public class CompileError implements Error {
     }
 
     private static String format(int depth, int index, List_<CompileError> sorted) {
-        return "\n" + "| ".repeat(depth) + (index + 1) + ") " + sorted.get(index).format(depth + 1);
+        String format = "\n%s%d) %s";
+        String spacer = "| ".repeat(depth);
+        String child = sorted.get(index).format(depth + 1);
+        return format.formatted(spacer, index + 1, child);
     }
 
     public int depth() {

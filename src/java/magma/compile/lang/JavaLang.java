@@ -136,7 +136,8 @@ public class JavaLang {
                 createLambdaRule(value, statement),
                 createNumberRule(),
                 createTernaryRule(value),
-                createNotRule(value)
+                createNotRule(value),
+                new TypeRule("quantity", new PrefixRule("(", new SuffixRule(new NodeRule("child", value), ")")))
         )));
 
         return value;

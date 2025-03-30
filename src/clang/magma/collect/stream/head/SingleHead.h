@@ -4,5 +4,6 @@
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
 // expand Option_T = Option<struct T>
+// expand Some_ = Some<struct >
 #endif
 

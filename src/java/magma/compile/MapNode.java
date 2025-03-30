@@ -35,7 +35,9 @@ public final class MapNode implements Node {
     }
 
     private static String formatEntry(int depth, String key, String value) {
-        return "\t".repeat(depth + 1) + key + ": " + value;
+        String format = "%s%s: %s";
+        String indent = "\t".repeat(depth + 1);
+        return format.formatted(indent, key, value);
     }
 
     @Override

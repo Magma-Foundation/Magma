@@ -9,10 +9,12 @@
 struct PrefixRule{
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Err_ = Err<struct >
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_String_CompileError = Result<struct String, struct CompileError>
 struct Result_Node_CompileError createPrefixErr(struct String input, struct String prefix);
 struct Result_Node_CompileError parse(struct String input);
 struct Result_String_CompileError generate(struct Node node);
+auto __lambda0__();
 #endif
 

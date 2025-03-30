@@ -3,5 +3,6 @@
 #include "../../../../magma/option/None.h"
 #include "../../../../magma/option/Option.h"
 // expand Option_T = Option<struct T>
+// expand None_ = None<struct >
 #endif
 
