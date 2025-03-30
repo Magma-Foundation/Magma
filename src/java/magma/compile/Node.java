@@ -37,4 +37,6 @@ public interface Node {
     Option<Node> findNode(String propertyKey);
 
     Stream<Tuple<String, Node>> streamNodes();
+
+    Node mapNode(String propertyKey, Function<Node, Node> mapper);
 }

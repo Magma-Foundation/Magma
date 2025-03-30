@@ -3,8 +3,8 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.DivideFolder;
 import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -16,7 +16,7 @@ import magma.compile.rule.tree.TypeRule;
 
 public class CLang {
     public static Rule createCRootRule() {
-        return new NodeListRule("children", new FoldingDivider(new DivideFolder()), createCRootSegmentRule());
+        return new NodeListRule("children", new FoldingDivider(new StatementFolder()), createCRootSegmentRule());
     }
 
     private static Rule createCRootSegmentRule() {
@@ -38,6 +38,7 @@ public class CLang {
 
     private static OrRule createStructMemberRule() {
         return new OrRule(Lists.of(
+                new TypeRule("definition", CommonLang.createDefinitionRule(createTypeRule())),
                 new TypeRule("functional-definition", new NodeRule("returns", createTypeRule()))
         ));
     }

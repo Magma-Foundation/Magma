@@ -4,4 +4,21 @@
 #include "/../../../../magma/option/Tuple.h"
 #include "/../../../../magma/result/Ok.h"
 #include "/../../../../magma/result/Result.h"
-struct HeadedStream {};
+struct HeadedStream{}void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}

@@ -146,4 +146,9 @@ public final class MapNode implements Node {
     public Stream<Tuple<String, Node>> streamNodes() {
         return nodes.stream();
     }
+
+    @Override
+    public Node mapNode(String propertyKey, Function<Node, Node> mapper) {
+        return findNode(propertyKey).map(mapper).map(node -> withNode(propertyKey, node)).orElse(this);
+    }
 }

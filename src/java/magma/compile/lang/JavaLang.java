@@ -4,8 +4,8 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.DivideFolder;
 import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.locate.LastLocator;
@@ -24,7 +24,7 @@ import static magma.compile.lang.CommonLang.*;
 
 public class JavaLang {
     public static NodeListRule createJavaRootRule() {
-        return new NodeListRule("children", new FoldingDivider(new DivideFolder()), createJavaRootSegmentRule());
+        return new NodeListRule("children", new FoldingDivider(new StatementFolder()), createJavaRootSegmentRule());
     }
 
     private static OrRule createJavaRootSegmentRule() {
@@ -40,7 +40,15 @@ public class JavaLang {
 
     private static TypeRule createRecordRule() {
         Rule namedWithTypeParams = createNamedWithTypeParams();
-        return new TypeRule("record", new InfixRule(new StringRule("modifiers"), "record ", new InfixRule(namedWithTypeParams, "(", new StringRule("with-end"), new FirstLocator()), new FirstLocator()));
+        Rule stripRule = new StripRule(new SuffixRule(createParamsRule(), ")"));
+        Rule beforeContent = new OrRule(Lists.of(
+                new InfixRule(stripRule, "implements ", new NodeRule("supertype", createTypeRule()), new FirstLocator()),
+                stripRule
+        ));
+
+        Rule right1 = createContentRule(beforeContent, createClassMemberRule());
+        Rule right = new InfixRule(namedWithTypeParams, "(", right1, new FirstLocator());
+        return new TypeRule("record", new InfixRule(new StringRule("modifiers"), "record ", right, new FirstLocator()));
     }
 
     private static TypeRule createInterfaceRule() {
@@ -50,7 +58,8 @@ public class JavaLang {
                 namedWithTypeParams
         ));
 
-        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", createContentRule(beforeContent, createClassMemberRule()), new FirstLocator()));
+        InfixRule contentRule = createContentRule(beforeContent, createClassMemberRule());
+        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", contentRule, new FirstLocator()));
     }
 
     private static TypeRule createClassRule() {
@@ -68,16 +77,24 @@ public class JavaLang {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
                 createMethodRule(),
-                new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";"))
+                createDefinitionStatementRule(),
+                createInitializationRule()
         ));
     }
 
+    private static TypeRule createInitializationRule() {
+        Rule definitionRule = createDefinitionRule(createTypeRule());
+        TypeRule definition = new TypeRule("definition", definitionRule);
+        return new TypeRule("initialization", new SuffixRule(new InfixRule(new NodeRule("definition", definition), "=", new StringRule("value"), new FirstLocator()), ";"));
+    }
+
+    private static TypeRule createDefinitionStatementRule() {
+        return new TypeRule("definition", new SuffixRule(createDefinitionRule(createTypeRule()), ";"));
+    }
+
     private static Rule createMethodRule() {
-        Rule definition = new NodeRule("definition", createDefinitionRule());
-        Rule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
-                createWhitespaceRule(),
-                createDefinitionRule()
-        )));
+        Rule definition = new NodeRule("definition", createDefinitionRule(createTypeRule()));
+        Rule params = createParamsRule();
 
         Rule withParams = new OrRule(Lists.of(
                 createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule()),
@@ -87,12 +104,49 @@ public class JavaLang {
         return new TypeRule("method", new InfixRule(definition, "(", withParams, new FirstLocator()));
     }
 
+    private static NodeListRule createParamsRule() {
+        return new NodeListRule("params", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
+                createWhitespaceRule(),
+                createDefinitionRule(createTypeRule())
+        )));
+    }
+
     private static Rule createStatementRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
                 createReturnRule(),
-                new TypeRule("if", new PrefixRule("if ", new StringRule("content")))
+                createIfRule(),
+                createInvocationRule(),
+                createForRule(),
+                createAssignmentRule(),
+                createPostfixRule(),
+                createElseRule(),
+                new TypeRule("while", new StripRule(new PrefixRule("while", new StringRule("content"))))
         ));
+    }
+
+    private static TypeRule createElseRule() {
+        return new TypeRule("else", new StripRule(new PrefixRule("else", new StringRule("content"))));
+    }
+
+    private static TypeRule createPostfixRule() {
+        return new TypeRule("postfix", new SuffixRule(new StringRule("value"), "++;"));
+    }
+
+    private static TypeRule createAssignmentRule() {
+        return new TypeRule("assignment", new SuffixRule(new InfixRule(new StringRule("destination"), "=", new StringRule("source"), new FirstLocator()), ";"));
+    }
+
+    private static TypeRule createForRule() {
+        return new TypeRule("for", new StripRule(new PrefixRule("for ", new StringRule("content"))));
+    }
+
+    private static TypeRule createInvocationRule() {
+        return new TypeRule("invocation", new SuffixRule(new StringRule("content"), ");"));
+    }
+
+    private static TypeRule createIfRule() {
+        return new TypeRule("if", new StripRule(new PrefixRule("if", new StringRule("content"))));
     }
 
     private static TypeRule createReturnRule() {
@@ -102,17 +156,6 @@ public class JavaLang {
 
     private static TypeRule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new EmptyRule()));
-    }
-
-    private static Rule createDefinitionRule() {
-        NodeListRule modifiers = new NodeListRule("modifiers", new CharDivider(' '), new StringRule("modifier"));
-        NodeRule type = new NodeRule("type", createTypeRule());
-        Rule beforeName = new OrRule(Lists.of(
-                new InfixRule(modifiers, " ", type, new TypeSeparatorLocator()),
-                type
-        ));
-
-        return new StripRule(new InfixRule(beforeName, " ", createSymbolRule("name"), new LastLocator()));
     }
 
     private static Rule createTypeRule() {
@@ -126,7 +169,13 @@ public class JavaLang {
 
     private static Rule createGenericRule(Rule type) {
         Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
-        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new FirstLocator()), ">")));
+        Rule base = createMaybeQualifiedNameRule();
+
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(new NodeRule("base", base), "<", typeArguments, new FirstLocator()), ">")));
+    }
+
+    private static Rule createMaybeQualifiedNameRule() {
+        return new NodeListRule("segments", new CharDivider('.'), createSymbolRule("value"));
     }
 
     private static Rule createNamedWithTypeParams() {

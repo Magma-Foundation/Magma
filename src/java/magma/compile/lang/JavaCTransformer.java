@@ -37,7 +37,7 @@ public class JavaCTransformer implements Transformer {
             return Streams.of(node.retype("include").withNodeList("path", path));
         }
 
-        if (node.is("class")) {
+        if (node.is("class") || node.is("record") || node.is("interface")) {
             List_<Node> children = node.findNodeList("children").orElse(Lists.empty());
 
             Tuple<List_<Node>, List_<Node>> tuple = children.stream()
@@ -48,22 +48,20 @@ public class JavaCTransformer implements Transformer {
             return Lists.<Node>empty().add(newStruct).addAll(tuple.right()).stream();
         }
 
-        if (node.is("interface")) {
-            List_<Node> children = node.findNodeList("children").orElse(Lists.empty());
-
-            Tuple<List_<Node>, List_<Node>> tuple = children.stream()
-                    .map(JavaCTransformer::transformClassMember)
-                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), JavaCTransformer::foldNode);
-
-            Node newStruct = node.retype("struct").withNodeList("children", tuple.left());
-            return Lists.<Node>empty().add(newStruct).addAll(tuple.right()).stream();
-        }
-
-        if (node.is("record")) return Streams.of(node.retype("struct"));
         return Streams.of(node);
     }
 
     private static Node transformClassMember(Node node) {
+        if(node.is("initialization")) {
+            return node.findNode("definition")
+                    .orElse(new MapNode())
+                    .mapNode("type", JavaCTransformer::transformType);
+        }
+
+        if(node.is("definition")) {
+            return node.mapNode("type", JavaCTransformer::transformType);
+        }
+
         if (node.is("method")) {
             return node.findNodeList("children").map(children -> {
                 return node.retype("function");
@@ -71,13 +69,14 @@ public class JavaCTransformer implements Transformer {
                 Node definition = node.findNode("definition").orElse(new MapNode());
                 String name = definition.findString("name").orElse("");
                 Node oldType = definition.findNode("type").orElse(new MapNode());
-                Node returns = getOldType(oldType);
+                Node returns = transformType(oldType);
 
                 List_<Node> paramTypes = node.findNodeList("params")
                         .orElse(Lists.empty())
                         .stream()
                         .map(child -> child.findNode("type"))
                         .flatMap(Streams::fromOption)
+                        .map(JavaCTransformer::transformType)
                         .collect(new ListCollector<>());
 
                 return new MapNode("functional-definition")
@@ -90,7 +89,7 @@ public class JavaCTransformer implements Transformer {
         return node;
     }
 
-    private static Node getOldType(Node oldType) {
+    private static Node transformType(Node oldType) {
         if (oldType.is("generic")) {
             return new MapNode("symbol-type").withString("value", stringify(oldType));
         }
@@ -98,14 +97,18 @@ public class JavaCTransformer implements Transformer {
     }
 
     private static String stringify(Node type) {
-        String base = type.findString("base").orElse("");
-        return type.findNodeList("arguments")
-                .orElse(Lists.empty())
-                .stream()
-                .map(JavaCTransformer::stringify)
-                .collect(new Joiner("_"))
-                .map(inner -> base + "_" + inner)
-                .orElse(base);
+        if (type.is("generic")) {
+            String base = type.findString("base").orElse("");
+            return type.findNodeList("arguments")
+                    .orElse(Lists.empty())
+                    .stream()
+                    .map(JavaCTransformer::stringify)
+                    .collect(new Joiner("_"))
+                    .map(inner -> base + "_" + inner)
+                    .orElse(base);
+        } else {
+            return type.findString("value").orElse("");
+        }
     }
 
     private static Tuple<List_<Node>, List_<Node>> foldNode(Tuple<List_<Node>, List_<Node>> current, Node classMember) {
