@@ -12,7 +12,7 @@ import magma.option.Tuple;
 import java.util.function.Function;
 
 public final class MapNode implements Node {
-    private final Option<String> type;
+    private final Option<String> maybeType;
     private final Map_<String, String> strings;
     private final Map_<String, List_<Node>> nodeLists;
 
@@ -20,15 +20,15 @@ public final class MapNode implements Node {
         this(new None<>(), Maps.empty(), Maps.empty());
     }
 
-    public MapNode(Option<String> type, Map_<String, String> strings, Map_<String, List_<Node>> nodeLists) {
-        this.type = type;
+    public MapNode(Option<String> maybeType, Map_<String, String> strings, Map_<String, List_<Node>> nodeLists) {
+        this.maybeType = maybeType;
         this.strings = strings;
         this.nodeLists = nodeLists;
     }
 
     @Override
     public Node withString(String propertyKey, String propertyValue) {
-        return new MapNode(type, strings.with(propertyKey, propertyValue), nodeLists);
+        return new MapNode(maybeType, strings.with(propertyKey, propertyValue), nodeLists);
     }
 
     @Override
@@ -38,7 +38,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node withNodeList(String propertyKey, List_<Node> propertyValues) {
-        return new MapNode(type, strings, nodeLists.with(propertyKey, propertyValues));
+        return new MapNode(maybeType, strings, nodeLists.with(propertyKey, propertyValues));
     }
 
     @Override
@@ -48,7 +48,8 @@ public final class MapNode implements Node {
 
     @Override
     public String display() {
-        return "";
+        String typeString = maybeType.map(type -> type + " ").orElse("");
+        return typeString + "{}";
     }
 
     @Override
@@ -61,7 +62,7 @@ public final class MapNode implements Node {
 
     @Override
     public boolean is(String type) {
-        return this.type.filter(value -> value.equals(type)).isPresent();
+        return this.maybeType.filter(value -> value.equals(type)).isPresent();
     }
 
     @Override
