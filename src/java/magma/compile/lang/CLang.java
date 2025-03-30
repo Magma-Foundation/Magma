@@ -44,6 +44,7 @@ public class CLang {
 
     private static Rule createTypeRule() {
         return new OrRule(Lists.of(
+                new TypeRule("struct-type", new PrefixRule("struct ", new StringRule("value"))),
                 CommonLang.createSymbolTypeRule()
         ));
     }

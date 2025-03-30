@@ -1,4 +1,4 @@
 public SingleHead(){
 }
-Option_T next(){
+struct Option_T next(){
 }

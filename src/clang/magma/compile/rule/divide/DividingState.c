@@ -8,11 +8,11 @@ DividingState enter(){
 }
 DividingState advance(){
 }
-List__String segments(){
+struct List__String segments(){
 }
 boolean isShallow(){
 }
-Option_Tuple_Character_DividingState append(){
+struct Option_Tuple_Character_DividingState append(){
 }
-Option_DividingState appendAndDiscard(){
+struct Option_DividingState appendAndDiscard(){
 }

@@ -1,12 +1,12 @@
 public TreeTransformingStage(){
 }
-Result_Node_CompileError transform(){
+struct Result_Node_CompileError transform(){
 }
-Result_Node_CompileError transformNodeLists(){
+struct Result_Node_CompileError transformNodeLists(){
 }
-Result_Node_CompileError mapNodes(){
+struct Result_Node_CompileError mapNodes(){
 }
-Result_Node_CompileError mapNodeList(){
+struct Result_Node_CompileError mapNodeList(){
 }
-Result_List__Node_CompileError mapNodeListElement(){
+struct Result_List__Node_CompileError mapNodeListElement(){
 }

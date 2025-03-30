@@ -1,14 +1,14 @@
-Option_R map(){
+struct Option_R map(){
 }
 T orElseGet(){
 }
-Tuple_Boolean_T toTuple(){
+struct Tuple_Boolean_T toTuple(){
 }
 void ifPresent(){
 }
 T orElse(){
 }
-Option_T filter(){
+struct Option_T filter(){
 }
 boolean isPresent(){
 }
@@ -16,7 +16,7 @@ R match(){
 }
 boolean isEmpty(){
 }
-Option_T or(){
+struct Option_T or(){
 }
-Option_R flatMap(){
+struct Option_R flatMap(){
 }

@@ -1,14 +1,14 @@
-Option_T findValue(){
+struct Option_T findValue(){
 }
-Option_X findError(){
+struct Option_X findError(){
 }
-Result_R_X mapValue(){
+struct Result_R_X mapValue(){
 }
-Result_R_X flatMapValue(){
+struct Result_R_X flatMapValue(){
 }
-Result_T_R mapErr(){
+struct Result_T_R mapErr(){
 }
 R match(){
 }
-Result_Tuple_T_R_X and(){
+struct Result_Tuple_T_R_X and(){
 }

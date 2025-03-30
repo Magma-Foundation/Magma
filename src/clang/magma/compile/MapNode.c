@@ -8,11 +8,11 @@ String formatEntry(){
 }
 Node withString(){
 }
-Option_String findString(){
+struct Option_String findString(){
 }
 Node withNodeList(){
 }
-Option_List__Node findNodeList(){
+struct Option_List__Node findNodeList(){
 }
 String display(){
 }
@@ -28,15 +28,15 @@ Node retype(){
 }
 Node merge(){
 }
-Stream_Tuple_String_String streamStrings(){
+struct Stream_Tuple_String_String streamStrings(){
 }
-Stream_Tuple_String_List__Node streamNodeLists(){
+struct Stream_Tuple_String_List__Node streamNodeLists(){
 }
 Node withNode(){
 }
-Option_Node findNode(){
+struct Option_Node findNode(){
 }
-Stream_Tuple_String_Node streamNodes(){
+struct Stream_Tuple_String_Node streamNodes(){
 }
 Node mapNode(){
 }

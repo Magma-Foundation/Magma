@@ -1,2 +1,2 @@
-Result_Node_CompileError transform(){
+struct Result_Node_CompileError transform(){
 }

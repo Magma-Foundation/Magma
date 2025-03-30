@@ -1,2 +1,2 @@
-Option_Integer locate(){
+struct Option_Integer locate(){
 }

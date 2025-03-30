@@ -92,7 +92,7 @@ public class TransformAll implements Transformer {
 
         if (node.is("generic")) {
             String stringify = stringify(node);
-            return new Ok<>(new MapNode("symbol-type").withString("value", stringify));
+            return new Ok<>(new MapNode("struct-type").withString("value", stringify));
         }
 
         return new Ok<>(node);

@@ -1,8 +1,8 @@
 public OrState(){
 }
-OrState_T withValue(){
+struct OrState_T withValue(){
 }
-Result_T_List__CompileError toResult(){
+struct Result_T_List__CompileError toResult(){
 }
-OrState_T withError(){
+struct OrState_T withError(){
 }

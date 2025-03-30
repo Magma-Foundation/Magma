@@ -1,4 +1,4 @@
-Stream_T stream(){
+struct Stream_T stream(){
 }
-Set__T add(){
+struct Set__T add(){
 }

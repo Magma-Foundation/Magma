@@ -1,4 +1,4 @@
 public RangeHead(){
 }
-Option_Integer next(){
+struct Option_Integer next(){
 }

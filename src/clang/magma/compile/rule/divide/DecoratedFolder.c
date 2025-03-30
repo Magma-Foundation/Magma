@@ -1,4 +1,4 @@
-Option_DividingState processSlash(){
+struct Option_DividingState processSlash(){
 }
 DividingState fold(){
 }

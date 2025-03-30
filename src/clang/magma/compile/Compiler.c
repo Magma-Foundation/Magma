@@ -1,4 +1,4 @@
-Result_String_CompileError compile(){
+struct Result_String_CompileError compile(){
 }
 String complete(){
 }

@@ -1,2 +1,2 @@
-Result_Node_CompileError afterPass(){
+struct Result_Node_CompileError afterPass(){
 }

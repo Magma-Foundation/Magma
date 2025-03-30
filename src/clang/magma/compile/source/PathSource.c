@@ -1,6 +1,6 @@
-List__String computeNamespace(){
+struct List__String computeNamespace(){
 }
 String computeName(){
 }
-Result_String_IOError readString(){
+struct Result_String_IOError readString(){
 }

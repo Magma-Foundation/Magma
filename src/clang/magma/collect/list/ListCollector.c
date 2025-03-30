@@ -1,4 +1,4 @@
-List__T createInitial(){
+struct List__T createInitial(){
 }
-List__T fold(){
+struct List__T fold(){
 }
