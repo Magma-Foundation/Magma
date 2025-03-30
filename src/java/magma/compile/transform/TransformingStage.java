@@ -1,4 +1,4 @@
-package magma.compile.lang;
+package magma.compile.transform;
 
 import magma.collect.list.List_;
 import magma.compile.Node;

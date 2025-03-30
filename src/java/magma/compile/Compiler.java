@@ -4,8 +4,8 @@ import jvm.collect.list.Lists;
 import magma.collect.list.List_;
 import magma.compile.lang.CLang;
 import magma.compile.lang.RootTransformer;
-import magma.compile.lang.TreeTransformingStage;
 import magma.compile.lang.JavaLang;
+import magma.compile.transform.TreeTransformingStage;
 import magma.result.Result;
 
 public class Compiler {

@@ -6,6 +6,7 @@ import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.transform.Transformer;
 import magma.option.Tuple;
 
 public class RootTransformer implements Transformer {
