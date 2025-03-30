@@ -19,5 +19,7 @@ public interface DividingState {
 
     boolean isShallow();
 
-    Option<Tuple<Character, DividingState>> popAndAppend();
+    Option<Tuple<Character, DividingState>> append();
+
+    Option<DividingState> appendAndDiscard();
 }

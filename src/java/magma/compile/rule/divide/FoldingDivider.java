@@ -3,7 +3,6 @@ package magma.compile.rule.divide;
 import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
-import magma.option.Option;
 import magma.option.Tuple;
 
 public class FoldingDivider implements Divider {
@@ -20,7 +19,7 @@ public class FoldingDivider implements Divider {
         DividingState current = new MutableDividingState(collector);
         while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current
-                    .popAndAppend()
+                    .append()
                     .toTuple(new Tuple<>('\0', current));
 
             if(maybeNext.left()) {
