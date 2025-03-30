@@ -12,6 +12,6 @@ struct List__String divide(struct String input){List_<String> requestedNamespace
 
         requestedNamespace = requestedNamespace.add(buffer.toString());return requestedNamespace;
 }
-struct String join(struct String current, struct String element){if (current.isEmpty()) return element;return current + delimiter + element;
+struct String join(struct String current, struct String element){if (current.isEmpty()) return element;return current+delimiter+element;
 }
 

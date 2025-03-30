@@ -5,6 +5,6 @@ struct DividingState fold(struct DividingState current, struct char c){DividingS
         if (c ==  || c == ) return appended.enter();
         if (c ==  || c == ) return appended.exit();return appended;
 }
-struct String join(struct String current, struct String element){return current + element;
+struct String join(struct String current, struct String element){return current+element;
 }
 

@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalNodeListRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
@@ -87,7 +88,7 @@ public class CommonLang {
         return new TypeRule("if", new StripRule(new PrefixRule("if", new StringRule("content"))));
     }
 
-    static TypeRule createReturnRule(OrRule value) {
+    static TypeRule createReturnRule(Rule value) {
         PrefixRule rule = new PrefixRule("return ", new SuffixRule(new NodeRule("value", value), ";"));
         return new TypeRule("return", new StripRule(rule));
     }
@@ -110,5 +111,13 @@ public class CommonLang {
                 new StripRule(new InfixRule(name, "<", new SuffixRule(typeParams, ">"), new FirstLocator())),
                 name
         );
+    }
+
+    static TypeRule createSymbolValueRule() {
+        return new TypeRule("symbol-value", createSymbolRule("value"));
+    }
+
+    static TypeRule createAddRule(LazyRule value) {
+        return new TypeRule("add", new InfixRule(new NodeRule("left", value), "+", new NodeRule("right", value), new FirstLocator()));
     }
 }

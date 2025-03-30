@@ -29,7 +29,7 @@ struct TypeRule createFunctionRule(){OrRule definitionRule = createDefinitionsRu
 }
 struct Rule createStatementRule(){return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(),
+                createReturnRule(createValueRule()),
                 createIfRule(),
                 createInvocationRule(),
                 createForRule(),
@@ -38,6 +38,12 @@ struct Rule createStatementRule(){return new OrRule(Lists.of(
                 createElseRule(),
                 createWhileRule()
         ));
+}
+struct Rule createValueRule(){LazyRule value = new LazyRule();
+        value.set(new OrRule(Lists.of(
+                createSymbolValueRule(),
+                createAddRule(value)
+        )));return value;
 }
 struct Rule createStructRule(){Rule name = CommonLang.createNamedWithTypeParams();
         Rule contentRule = CommonLang.createContentRule(name, createStructMemberRule());

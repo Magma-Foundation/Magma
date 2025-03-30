@@ -28,6 +28,7 @@ struct TypeRule createDefinitionStatementRule();
 struct Rule createMethodRule();
 struct TypeRule createTypedDefinitionRule();
 struct Rule createStatementRule();
+struct Rule createValueRule();
 struct Rule createTypeRule();
 struct TypeRule createArrayRule(struct LazyRule type);
 struct Rule createImportRule(struct String prefix, struct String type);

@@ -117,10 +117,14 @@ public class JavaLang {
         ));
     }
 
-    private static OrRule createValueRule() {
-        return new OrRule(Lists.of(
-                new TypeRule("symbol-value", createSymbolRule("value"))
-        ));
+    private static Rule createValueRule() {
+        LazyRule value = new LazyRule();
+        value.set(new OrRule(Lists.of(
+                createSymbolValueRule(),
+                createAddRule(value)
+        )));
+
+        return value;
     }
 
     private static Rule createTypeRule() {

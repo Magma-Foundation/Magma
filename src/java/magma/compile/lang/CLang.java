@@ -62,7 +62,7 @@ public class CLang {
     private static Rule createStatementRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(new OrRule(Lists.of())),
+                createReturnRule(createValueRule()),
                 createIfRule(),
                 createInvocationRule(),
                 createForRule(),
@@ -71,6 +71,15 @@ public class CLang {
                 createElseRule(),
                 createWhileRule()
         ));
+    }
+
+    private static Rule createValueRule() {
+        LazyRule value = new LazyRule();
+        value.set(new OrRule(Lists.of(
+                createSymbolValueRule(),
+                createAddRule(value)
+        )));
+        return value;
     }
 
     private static Rule createStructRule() {

@@ -27,6 +27,7 @@ struct Rule createCRootSegmentRule();
 struct TypeRule createExpansionRule();
 struct TypeRule createFunctionRule();
 struct Rule createStatementRule();
+struct Rule createValueRule();
 struct Rule createStructRule();
 struct OrRule createStructMemberRule();
 struct OrRule createDefinitionsRule();

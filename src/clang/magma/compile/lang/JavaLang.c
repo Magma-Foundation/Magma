@@ -66,7 +66,7 @@ struct TypeRule createTypedDefinitionRule(){return new TypeRule(, createDefiniti
 }
 struct Rule createStatementRule(){return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(),
+                createReturnRule(createValueRule()),
                 createIfRule(),
                 createInvocationRule(),
                 createForRule(),
@@ -75,6 +75,12 @@ struct Rule createStatementRule(){return new OrRule(Lists.of(
                 createElseRule(),
                 createWhileRule()
         ));
+}
+struct Rule createValueRule(){LazyRule value = new LazyRule();
+        value.set(new OrRule(Lists.of(
+                createSymbolValueRule(),
+                createAddRule(value)
+        )));return value;
 }
 struct Rule createTypeRule(){LazyRule type = new LazyRule();
         type.set(new OrRule(Lists.of(
