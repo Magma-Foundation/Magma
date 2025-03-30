@@ -1,2 +1,5 @@
 #include "/../magma/error/Error.h"
-struct ApplicationError {};
+struct ApplicationError{Error error}void temp(){
+}
+void temp(){
+}

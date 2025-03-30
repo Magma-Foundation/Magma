@@ -1,2 +1,3 @@
 #include "/../../magma/error/Error.h"
-struct ProcessError {};
+struct ProcessError{}void temp(){
+}

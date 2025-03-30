@@ -1,2 +1,2 @@
 #include "/../../../../magma/option/Option.h"
-struct Head {};
+struct Head{_T}

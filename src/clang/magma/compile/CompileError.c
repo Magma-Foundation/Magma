@@ -5,4 +5,15 @@
 #include "/../../magma/collect/stream/head/RangeHead.h"
 #include "/../../magma/compile/context/Context.h"
 #include "/../../magma/error/Error.h"
-struct CompileError {};
+struct CompileError{String messageContext context_CompileError errors}void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}

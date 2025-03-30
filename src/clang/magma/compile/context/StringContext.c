@@ -1,1 +1,2 @@
-struct StringContext {};
+struct StringContext{}void temp(){
+}

@@ -1,3 +1,6 @@
 #include "/../../../windows/collect/list/Lists.h"
 #include "/../../../magma/collect/stream/Collector.h"
-struct ListCollector {};
+struct ListCollector{}void temp(){
+}
+void temp(){
+}

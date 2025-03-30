@@ -1,1 +1,1 @@
-struct Tuple {};
+struct Tuple{}

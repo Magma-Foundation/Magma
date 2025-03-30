@@ -14,15 +14,28 @@ public record DecoratedFolder(Folder folder) implements Folder {
     }
 
     @Override
-    public DividingState fold(DividingState current, char c) {
+    public DividingState fold(DividingState state, char c) {
         if (c == '\'') {
-            return current.append()
+            return state.append()
                     .flatMap(DecoratedFolder::processSlash)
                     .flatMap(DividingState::appendAndDiscard)
-                    .orElse(current);
+                    .orElse(state);
         }
 
-        return folder.fold(current, c);
+        if (c == '"') {
+            DividingState current = state;
+            while (true) {
+                Tuple<Character, DividingState> tuple = current.append().orElse(new Tuple<>('\0', current));
+                current = tuple.right();
+
+                if (tuple.left() == '\\') current = current.appendAndDiscard().orElse(current);
+                if (tuple.left() == '"') break;
+            }
+
+            return current;
+        }
+
+        return folder.fold(state, c);
     }
 
     @Override
