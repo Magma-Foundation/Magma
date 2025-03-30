@@ -17,7 +17,7 @@ public class JavaCTransformer implements Transformer {
     }
 
     static Stream<Node> transformRootChild(List_<String> namespace, Node node) {
-        if (node.is("package")) return Streams.empty();
+        if (node.is("package") || node.is("whitespace")) return Streams.empty();
 
         if (node.is("import")) {
             List_<String> requestedNamespace = node.findNodeList("namespace").orElse(Lists.empty())
@@ -80,7 +80,11 @@ public class JavaCTransformer implements Transformer {
     }
 
     private static Tuple<List_<Node>, List_<Node>> foldNode(Tuple<List_<Node>, List_<Node>> current, Node classMember) {
-        if (classMember.is("definition") || classMember.is("functional-definition")) return new Tuple<>(current.left().add(classMember), current.right());
+        if (classMember.is("whitespace")) return current;
+
+        if (classMember.is("definition") || classMember.is("functional-definition"))
+            return new Tuple<>(current.left().add(classMember), current.right());
+
         return new Tuple<>(current.left(), current.right().add(classMember));
     }
 

@@ -1,16 +1,17 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
-import magma.compile.rule.divide.DivideFolder;
-import magma.compile.rule.tree.NodeListRule;
-import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.Rule;
-import magma.compile.rule.text.SuffixRule;
-import magma.compile.rule.tree.OrRule;
-import magma.compile.rule.text.StringRule;
-import magma.compile.rule.tree.TypeRule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.DivideFolder;
 import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.text.PrefixRule;
+import magma.compile.rule.text.StringRule;
+import magma.compile.rule.text.SuffixRule;
+import magma.compile.rule.tree.NodeListRule;
+import magma.compile.rule.tree.NodeRule;
+import magma.compile.rule.tree.OrRule;
+import magma.compile.rule.tree.TypeRule;
 
 public class CLang {
     public static Rule createCRootRule() {
@@ -30,11 +31,19 @@ public class CLang {
     }
 
     private static OrRule createStructMemberRule() {
-        return new OrRule(Lists.of());
+        return new OrRule(Lists.of(
+                new TypeRule("functional-definition", new NodeRule("returns", createTypeRule()))
+        ));
+    }
+
+    private static Rule createTypeRule() {
+        return new OrRule(Lists.of(
+                CommonLang.createSymbolTypeRule()
+        ));
     }
 
     private static Rule createIncludeRule() {
         NodeListRule path = new NodeListRule("path", new CharDivider('/'), new StringRule("value"));
-        return new TypeRule("include",  new PrefixRule("#include \"", new SuffixRule(path, ".h\"\n")));
+        return new TypeRule("include", new PrefixRule("#include \"", new SuffixRule(path, ".h\"\n")));
     }
 }

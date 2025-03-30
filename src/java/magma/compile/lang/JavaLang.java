@@ -1,7 +1,6 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
-import magma.compile.lang.r.SymbolRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DivideFolder;
@@ -89,27 +88,23 @@ public class JavaLang {
                 type
         ));
 
-        return new StripRule(new InfixRule(beforeName, " ", createSymbolRule("name"), new LastLocator()));
+        return new StripRule(new InfixRule(beforeName, " ", CommonLang.createSymbolRule("name"), new LastLocator()));
     }
 
     private static Rule createTypeRule() {
         return new OrRule(Lists.of(
                 createGenericRule(),
-                new TypeRule("symbol", createSymbolRule("value"))
+                CommonLang.createSymbolTypeRule()
         ));
     }
 
     private static Rule createGenericRule() {
-        Rule typeArguments = new NodeListRule("type-arguments", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
-        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new LastLocator()), ">")));
-    }
-
-    private static StripRule createSymbolRule(String propertyKey) {
-        return new StripRule(new SymbolRule(new StringRule(propertyKey)));
+        Rule typeArguments = new NodeListRule("type-arguments", new FoldingDivider(new ValueFolder()), CommonLang.createSymbolRule("value"));
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(CommonLang.createSymbolRule("base"), "<", typeArguments, new LastLocator()), ">")));
     }
 
     private static Rule createNamedWithTypeParams() {
-        Rule name = createSymbolRule("name");
+        Rule name = CommonLang.createSymbolRule("name");
         return new OrRule(Lists.of(
                 new StripRule(new InfixRule(name, "<", new SuffixRule(new StringRule("type-params"), ">"), new FirstLocator())),
                 name
