@@ -13,11 +13,13 @@ public class FlattenRoot implements Transformer {
         Node child = node.findNode("child").orElse(new MapNode());
 
         if (!child.is("root")) return node;
-        List_<Node> oldChildren = node.findNodeList("children").orElse(Lists.empty());
+        List_<Node> oldChildren = node
+                .findNode("content").orElse(new MapNode())
+                .findNodeList("children").orElse(Lists.empty());
 
         List_<Node> newChildren = node.streamNodeLists()
                 .foldWithInitial(Lists.empty(), (nodeList, tuple) -> nodeList.addAll(tuple.right()));
 
-        return new MapNode("root").withNodeList("children", oldChildren.addAll(newChildren));
+        return new MapNode("root").withNode("content", new MapNode("block").withNodeList("children", oldChildren.addAll(newChildren)));
     }
 }

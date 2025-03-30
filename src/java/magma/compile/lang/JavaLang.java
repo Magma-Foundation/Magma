@@ -4,9 +4,7 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.FoldingDivider;
-import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.text.EmptyRule;
@@ -24,8 +22,7 @@ import static magma.compile.lang.CommonLang.*;
 
 public class JavaLang {
     public static Rule createJavaRootRule() {
-        Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createJavaRootSegmentRule());
-        return new TypeRule("root", children);
+        return new TypeRule("root", CommonLang.createBlockRule(createJavaRootSegmentRule()));
     }
 
     private static OrRule createJavaRootSegmentRule() {

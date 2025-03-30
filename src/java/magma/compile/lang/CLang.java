@@ -3,9 +3,6 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.DecoratedFolder;
-import magma.compile.rule.divide.FoldingDivider;
-import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -17,8 +14,7 @@ import magma.compile.rule.tree.TypeRule;
 
 public class CLang {
     public static Rule createCRootRule() {
-        Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createCRootSegmentRule());
-        return new TypeRule("root", children);
+        return new TypeRule("root", CommonLang.createBlockRule(createCRootSegmentRule()));
     }
 
     private static Rule createCRootSegmentRule() {

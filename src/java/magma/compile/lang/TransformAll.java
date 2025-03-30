@@ -10,10 +10,23 @@ import magma.compile.transform.Transformer;
 import magma.option.Tuple;
 
 public class TransformAll implements Transformer {
+    static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
+        List_<Node> definitions = tuple.left();
+        List_<Node> others = tuple.right();
+
+        if (element.is("definition")) {
+            return new Tuple<>(definitions.add(element), others);
+        } else {
+            return new Tuple<>(definitions, others.add(element));
+        }
+    }
+
     @Override
     public Node afterPass(Node node) {
         if (node.is("root")) {
-            List_<Node> newChildren = node.findNodeList("children")
+            List_<Node> newChildren = node.findNode("value")
+                    .orElse(new MapNode())
+                    .findNodeList("children")
                     .orElse(Lists.empty())
                     .stream()
                     .flatMap(child -> {
@@ -23,18 +36,22 @@ public class TransformAll implements Transformer {
                             return Streams.of(child);
                         }
                     })
-                    .collect(new ListCollector<Node>());
+                    .collect(new ListCollector<>());
 
-            return node.withNodeList("children", newChildren);
+            return node.withNode("content", new MapNode("block")
+                    .withNodeList("children", newChildren));
         }
 
         if (node.is("interface")) {
-            Tuple<List_<Node>, List_<Node>> children = node.findNodeList("children")
+            Tuple<List_<Node>, List_<Node>> children = node.findNode("value")
+                    .orElse(new MapNode())
+                    .findNodeList("children")
                     .orElse(Lists.empty())
                     .stream()
                     .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
 
-            Node withChildren = node.retype("struct").withNodeList("children", children.left());
+            Node withChildren = node.retype("struct").withNode("content", new MapNode("block").withNodeList("children", children.left()));
+
             return new MapNode("group")
                     .withNode("child", withChildren)
                     .withNodeList("functions", children.right());
@@ -45,16 +62,5 @@ public class TransformAll implements Transformer {
         }
 
         return node;
-    }
-
-    static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
-        List_<Node> definitions = tuple.left();
-        List_<Node> others = tuple.right();
-
-        if (element.is("definition")) {
-            return new Tuple<List_<Node>, List_<Node>>(definitions.add(element), others);
-        } else {
-            return new Tuple<List_<Node>, List_<Node>>(definitions, others.add(element));
-        }
     }
 }
