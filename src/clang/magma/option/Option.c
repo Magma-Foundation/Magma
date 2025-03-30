@@ -10,3 +10,4 @@ struct R match(struct R(*ifPresent)(struct T), struct Supplier_R ifEmpty);
 int isEmpty();
 struct Option_T or(struct Supplier_Option_T other);
 struct Option_R flatMap(struct Option_R(*mapper)(struct T));
+

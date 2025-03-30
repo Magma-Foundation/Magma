@@ -19,7 +19,8 @@
 #include "../magma/result/Err.h"
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
-struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY};
+struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY
+};
 // expand Option_ApplicationError = Option<struct ApplicationError>
 // expand Set__Path_ = Set_<struct Path_>
 // expand Option_ApplicationError = Option<struct ApplicationError>
@@ -59,3 +60,4 @@ struct Result_Path__ApplicationError writeOutput(struct Path_ parent, struct Str
 struct Option_IOError ensureDirectories(struct Path_ targetParent);
 int isPlatformDependent(struct List__String namespace);
 #endif
+

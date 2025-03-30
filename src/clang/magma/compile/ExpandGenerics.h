@@ -9,10 +9,12 @@
 #include "../../magma/compile/transform/Transformer.h"
 #include "../../magma/result/Ok.h"
 #include "../../magma/result/Result.h"
-struct ExpandGenerics{};
+struct ExpandGenerics{
+};
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct Result_Node_CompileError beforePass(struct State state, struct Node node);
 struct Result_Node_CompileError afterPass(struct State state, struct Node node);
 struct String stringify(struct Node node);
 #endif
+

@@ -2,6 +2,8 @@
 #define magma_JavaInterruptedError
 #include "../magma/error/Error.h"
 #include "../windows/result/Results.h"
-struct JavaInterruptedError{};
+struct JavaInterruptedError{
+};
 struct String display();
 #endif
+

@@ -1,6 +1,7 @@
 #ifndef magma_option_Some
 #define magma_option_Some
-struct Some{};
+struct Some{
+};
 // expand Option_T = Option<struct T>
 // expand Option_R = Option<struct R>
 // expand Supplier_T = Supplier<struct T>
@@ -26,3 +27,4 @@ int isEmpty();
 struct Option_T or(struct Supplier_Option_T other);
 struct Option_R flatMap(struct Option_R(*mapper)(struct T));
 #endif
+

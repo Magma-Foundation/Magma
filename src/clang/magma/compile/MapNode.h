@@ -10,7 +10,8 @@
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Some.h"
 #include "../../magma/option/Tuple.h"
-struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsstruct Map__String_Node nodesstruct Map__String_List__Node nodeLists};
+struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsstruct Map__String_Node nodesstruct Map__String_List__Node nodeLists
+};
 // expand Option_String = Option<struct String>
 // expand Map__String_String = Map_<struct String, struct String>
 // expand Map__String_Node = Map_<struct String, struct Node>
@@ -66,3 +67,4 @@ struct Node withNodes(struct Map__String_Node nodes);
 struct Node removeNode(struct String propertyKey);
 int hasNode(struct String propertyKey);
 #endif
+

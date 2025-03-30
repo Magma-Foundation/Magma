@@ -2,7 +2,8 @@
 #define magma_collect_stream_Stream
 #include "../../../magma/option/Option.h"
 #include "../../../magma/result/Result.h"
-struct Stream{};
+struct Stream{
+};
 // expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
 // expand Stream_R = Stream<struct R>
 // expand Collector_T_C = Collector<struct T, struct C>
@@ -28,3 +29,4 @@ struct Stream_T filter(struct Predicate_T predicate);
 struct Stream_T concat(struct Stream_T other);
 struct Option_T next();
 #endif
+

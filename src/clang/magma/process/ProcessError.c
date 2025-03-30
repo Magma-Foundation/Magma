@@ -1,3 +1,4 @@
 #include "ProcessError.h"
-struct String display(){
-return child.display();}
+struct String display(){return child.display();
+}
+

@@ -5,7 +5,8 @@
 #include "../../../magma/collect/map/Map_.h"
 #include "../../../magma/compile/MapNode.h"
 #include "../../../magma/compile/Node.h"
-struct FlattenCache{};
+struct FlattenCache{
+};
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
 // expand Map__String_Node = Map_<struct String, struct Node>
@@ -19,3 +20,4 @@ struct FlattenCache appendCategory(struct String category, struct List__Node cat
 struct FlattenCache withNodeList(struct String propertyKey, struct List__Node propertyValues);
 struct Node tryGroup(struct Node node);
 #endif
+

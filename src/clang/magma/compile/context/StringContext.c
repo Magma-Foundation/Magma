@@ -1,3 +1,4 @@
 #include "StringContext.h"
-struct String display(){
-return value;}
+struct String display(){return value;
+}
+

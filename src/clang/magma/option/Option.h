@@ -2,7 +2,8 @@
 #define magma_option_Option
 #include "../../magma/collect/list/List_.h"
 #include "../../magma/compile/Node.h"
-struct Option{};
+struct Option{
+};
 // expand Option_R = Option<struct R>
 // expand Supplier_T = Supplier<struct T>
 // expand Tuple_Boolean_T = Tuple<struct Boolean, struct T>
@@ -27,3 +28,4 @@ int isEmpty();
 struct Option_T or(struct Supplier_Option_T other);
 struct Option_R flatMap(struct Option_R(*mapper)(struct T));
 #endif
+

@@ -4,7 +4,8 @@
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Tuple.h"
-struct MutableDividingState{struct List__Character queuestruct List__String segmentsstruct StringBuilder bufferstruct int depth};
+struct MutableDividingState{struct List__Character queuestruct List__String segmentsstruct StringBuilder bufferstruct int depth
+};
 // expand List__Character = List_<struct Character>
 // expand List__String = List_<struct String>
 // expand List__Character = List_<struct Character>
@@ -26,3 +27,4 @@ int isShallow();
 struct Option_Tuple_Character_DividingState append();
 struct Option_DividingState appendAndDiscard();
 #endif
+

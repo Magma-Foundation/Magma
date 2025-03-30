@@ -3,7 +3,8 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-struct List_{};
+struct List_{
+};
 // expand Stream_T = Stream<struct T>
 // expand List__T = List_<struct T>
 // expand List__T = List_<struct T>
@@ -28,3 +29,4 @@ struct T get(struct int index);
 struct Option_Tuple_T_List__T popFirst();
 int isEmpty();
 #endif
+

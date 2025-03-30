@@ -8,3 +8,4 @@ struct Option_R foldMapping(struct R(*mapper)(struct T), struct BiFunction_R_T_R
 struct Stream_T filter(struct Predicate_T predicate);
 struct Stream_T concat(struct Stream_T other);
 struct Option_T next();
+

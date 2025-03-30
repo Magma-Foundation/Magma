@@ -8,7 +8,8 @@
 #include "../../../magma/option/Tuple.h"
 #include "../../../magma/result/Ok.h"
 #include "../../../magma/result/Result.h"
-struct FlattenGroup{};
+struct FlattenGroup{
+};
 // expand Tuple_String_Node = Tuple<struct String, struct Node>
 // expand Tuple_Node_FlattenCache = Tuple<struct Node, struct FlattenCache>
 // expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
@@ -30,3 +31,4 @@ struct Node afterPass0(struct Node node);
 struct Result_Node_CompileError afterPass(struct State state, struct Node node);
 struct Result_Node_CompileError beforePass(struct State state, struct Node node);
 #endif
+

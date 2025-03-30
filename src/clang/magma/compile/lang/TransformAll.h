@@ -16,7 +16,8 @@
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Ok.h"
 #include "../../../magma/result/Result.h"
-struct TransformAll{};
+struct TransformAll{
+};
 // expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
 // expand List__Node = List_<struct Node>
 // expand List__Node = List_<struct Node>
@@ -36,3 +37,4 @@ int hasTypeParams(struct Node child);
 struct Result_Node_CompileError afterPass(struct State state, struct Node node);
 struct Result_Node_CompileError beforePass(struct State state, struct Node node);
 #endif
+

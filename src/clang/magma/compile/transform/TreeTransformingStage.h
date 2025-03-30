@@ -6,7 +6,8 @@
 #include "../../../magma/compile/Node.h"
 #include "../../../magma/option/Tuple.h"
 #include "../../../magma/result/Result.h"
-struct TreeTransformingStage{struct Transformer transformer};
+struct TreeTransformingStage{struct Transformer transformer
+};
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
@@ -26,3 +27,4 @@ struct Result_Node_CompileError mapNodes(struct Node node, struct Tuple_String_N
 struct Result_Node_CompileError mapNodeList(struct Node node, struct Tuple_String_List__Node tuple, struct State state);
 struct Result_List__Node_CompileError mapNodeListElement(struct List__Node elements, struct Node element, struct State state);
 #endif
+

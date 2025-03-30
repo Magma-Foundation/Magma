@@ -8,9 +8,11 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-struct StringRule{};
+struct StringRule{
+};
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_String_CompileError = Result<struct String, struct CompileError>
 struct Result_Node_CompileError parse(struct String value);
 struct Result_String_CompileError generate(struct Node input);
 #endif
+

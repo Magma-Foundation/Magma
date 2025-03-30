@@ -6,7 +6,8 @@
 #include "../../../../magma/option/Tuple.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-struct HeadedStream{};
+struct HeadedStream{
+};
 // expand Stream_T = Stream<struct T>
 // expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
 // expand Stream_R = Stream<struct R>
@@ -34,3 +35,4 @@ struct Stream_R flatMap(struct Stream_R(*mapper)(struct T));
 struct magma_result_Result_R_X foldToResult(struct R initial, struct BiFunction_R_T_Result_R_X folder);
 struct Stream_T concat(struct Stream_T other);
 #endif
+

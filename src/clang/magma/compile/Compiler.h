@@ -14,7 +14,8 @@
 #include "../../magma/compile/transform/TreeTransformingStage.h"
 #include "../../magma/option/Tuple.h"
 #include "../../magma/result/Result.h"
-struct Compiler{};
+struct Compiler{
+};
 // expand Result_Map__String_String_CompileError = Result<struct Map__String_String, struct CompileError>
 // expand Map__String_String = Map_<struct String, struct String>
 // expand List__String = List_<struct String>
@@ -28,3 +29,4 @@ struct Result_Map__String_String_CompileError compile(struct String input, struc
 struct Result_Map__String_String_CompileError generateRoots(struct Node roots);
 struct Result_Map__String_String_CompileError generateTarget(struct Map__String_String current, struct Tuple_String_Node tuple);
 #endif
+

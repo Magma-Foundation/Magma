@@ -2,7 +2,8 @@
 #define magma_result_Result
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Tuple.h"
-struct Result{};
+struct Result{
+};
 // expand Option_T = Option<struct T>
 // expand Option_X = Option<struct X>
 // expand Result_R_X = Result<struct R, struct X>
@@ -21,3 +22,4 @@ struct Result_T_R mapErr(struct R(*mapper)(struct X));
 struct R match(struct R(*whenOk)(struct T), struct R(*whenErr)(struct X));
 struct Result_Tuple_T_R_X and(struct Supplier_Result_R_X other);
 #endif
+

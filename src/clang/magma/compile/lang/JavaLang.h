@@ -17,7 +17,8 @@
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
 #include "../../../static magma/compile/lang/CommonLang/*.h"
-struct JavaLang{};
+struct JavaLang{
+};
 struct Rule createJavaRootRule();
 struct OrRule createJavaRootSegmentRule();
 struct TypeRule createRecordRule();
@@ -34,3 +35,4 @@ struct TypeRule createArrayRule(struct LazyRule type);
 struct Rule createNamedWithTypeParams();
 struct Rule createImportRule(struct String prefix, struct String type);
 #endif
+

@@ -1,6 +1,5 @@
 #include "ExpandGenerics.h"
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){
-if (node.is()) {
+struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (node.is()) {
             Node type = node.findNode().orElse(new MapNode());
             if (type.is()) {
                 String value = type.findNodeList()
@@ -24,9 +23,9 @@ if (node.is()) {
             }
         }
 
-        return new Ok<>(node);}
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){
-if(node.is()) {
+        return new Ok<>(node);
+}
+struct Result_Node_CompileError afterPass(struct State state, struct Node node){if(node.is()) {
             String value = stringify(node);
 
             Node symbol = new MapNode().withString(, value);
@@ -39,9 +38,9 @@ if(node.is()) {
                     .withNodeList(, Lists.of(expansion)));
         }
 
-        return new Ok<>(node);}
-struct String stringify(struct Node node){
-if (node.is()) {
+        return new Ok<>(node);
+}
+struct String stringify(struct Node node){if (node.is()) {
             String caller = node.findNodeList()
                     .orElse(Lists.empty())
                     .stream()
@@ -60,4 +59,6 @@ if (node.is()) {
 
         return node.findString()
                 .or(() -> node.findNode().orElse(new MapNode()).findString())
-                .orElse();}
+                .orElse();
+}
+

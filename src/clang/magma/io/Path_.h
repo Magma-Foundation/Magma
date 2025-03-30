@@ -4,7 +4,8 @@
 #include "../../magma/collect/stream/Stream.h"
 #include "../../magma/option/Option.h"
 #include "../../magma/result/Result.h"
-struct Path_{};
+struct Path_{
+};
 // expand Result_Set__Path__IOError = Result<struct Set__Path_, struct IOError>
 // expand Set__Path_ = Set_<struct Path_>
 // expand Option_IOError = Option<struct IOError>
@@ -24,3 +25,4 @@ struct Path_ getParent();
 struct Path_ getFileName();
 struct Result_String_IOError readString();
 #endif
+

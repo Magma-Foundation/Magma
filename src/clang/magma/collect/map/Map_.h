@@ -3,7 +3,8 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-struct Map_{};
+struct Map_{
+};
 // expand Map__K_V = Map_<struct K, struct V>
 // expand Option_V = Option<struct V>
 // expand Stream_Tuple_K_V = Stream<struct Tuple_K_V>
@@ -22,3 +23,4 @@ int isEmpty();
 struct Map__K_V remove(struct K key);
 int containsKey(struct K key);
 #endif
+

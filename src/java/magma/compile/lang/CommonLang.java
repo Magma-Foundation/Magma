@@ -23,13 +23,13 @@ import magma.compile.rule.tree.TypeRule;
 public class CommonLang {
     static InfixRule createContentRule(Rule beforeContent, Rule childRule) {
         Rule children1 = createBlockRule(childRule);
-        Rule right = new StripRule("before-children", new SuffixRule(children1, "}"), "after-braces");
+        Rule right = new StripRule("", new SuffixRule(children1, "}"), "after-braces");
         return new InfixRule(beforeContent, "{", right, new FirstLocator());
     }
 
     static Rule createBlockRule(Rule childRule) {
         Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), childRule);
-        return new NodeRule("content", new TypeRule("block", children));
+        return new NodeRule("content", new TypeRule("block", new StripRule("", children, "after-children")));
     }
 
     static TypeRule createSymbolTypeRule() {

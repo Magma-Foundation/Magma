@@ -10,7 +10,8 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-struct OrRule{};
+struct OrRule{
+};
 // expand Result_T_CompileError = Result<struct T, struct CompileError>
 // expand Result_T_CompileError = Result<struct T, struct CompileError>
 // expand Supplier_Context = Supplier<struct Context>
@@ -21,3 +22,4 @@ struct Result_T_CompileError apply(struct Result_T_CompileError(*applicator)(str
 struct Result_Node_CompileError parse(struct String input);
 struct Result_String_CompileError generate(struct Node input);
 #endif
+

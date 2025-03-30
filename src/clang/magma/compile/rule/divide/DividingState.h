@@ -3,7 +3,8 @@
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Tuple.h"
-struct DividingState{};
+struct DividingState{
+};
 // expand List__String = List_<struct String>
 // expand Option_Tuple_Character_DividingState = Option<struct Tuple_Character_DividingState>
 // expand Tuple_Character_DividingState = Tuple<struct Character, struct DividingState>
@@ -18,3 +19,4 @@ int isShallow();
 struct Option_Tuple_Character_DividingState append();
 struct Option_DividingState appendAndDiscard();
 #endif
+

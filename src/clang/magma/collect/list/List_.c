@@ -10,3 +10,4 @@ struct List__T sort(struct BiFunction_T_T_Integer comparator);
 struct T get(struct int index);
 struct Option_Tuple_T_List__T popFirst();
 int isEmpty();
+

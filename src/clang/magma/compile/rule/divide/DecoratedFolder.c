@@ -1,12 +1,11 @@
 #include "DecoratedFolder.h"
-struct Option_DividingState processSlash(struct Tuple_Character_DividingState tuple){
-if (tuple.left() == ) {
+struct Option_DividingState processSlash(struct Tuple_Character_DividingState tuple){if (tuple.left() == ) {
             return tuple.right().appendAndDiscard();
         }else {
             return new Some<>(tuple.right());
-        }}
-struct DividingState fold(struct DividingState state, struct char c){
-if (c == ) {
+        }
+}
+struct DividingState fold(struct DividingState state, struct char c){if (c == ) {
             return state.append()
                     .flatMap(DecoratedFolder::processSlash)
                     .flatMap(DividingState::appendAndDiscard)
@@ -24,6 +23,8 @@ if (c == ) {
             return current;
         }
 
-        return folder.fold(state, c);}
-struct String join(struct String current, struct String element){
-return folder.join(current, element);}
+        return folder.fold(state, c);
+}
+struct String join(struct String current, struct String element){return folder.join(current, element);
+}
+

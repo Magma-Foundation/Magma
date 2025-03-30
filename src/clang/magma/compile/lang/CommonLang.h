@@ -19,7 +19,8 @@
 #include "../../../magma/compile/rule/tree/NodeRule.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
-struct CommonLang{};
+struct CommonLang{
+};
 struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule);
 struct Rule createBlockRule(struct Rule childRule);
 struct TypeRule createSymbolTypeRule();
@@ -37,3 +38,4 @@ struct TypeRule createReturnRule();
 struct TypeRule createWhileRule();
 struct Rule createGenericRule(struct Rule type);
 #endif
+
