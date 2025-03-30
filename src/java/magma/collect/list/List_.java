@@ -26,4 +26,6 @@ public interface List_<T> {
     T get(int index);
 
     Option<Tuple<T, List_<T>>> popFirst();
+
+    boolean isEmpty();
 }

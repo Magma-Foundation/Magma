@@ -9,13 +9,16 @@ import magma.compile.context.NodeContext;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.Divider;
 import magma.result.Err;
+import magma.result.Ok;
 import magma.result.Result;
 
 public record NodeListRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> parse(String input) {
-        return divider.divide(input)
-                .stream()
+        List_<String> segments = divider.divide(input);
+        if (segments.isEmpty()) return new Ok<>(new MapNode());
+
+        return segments.stream()
                 .<List_<Node>, CompileError>foldToResult(Lists.empty(), (children, element) -> childRule().parse(element).mapValue(children::add))
                 .mapValue(children -> new MapNode().withNodeList(propertyKey(), children));
     }

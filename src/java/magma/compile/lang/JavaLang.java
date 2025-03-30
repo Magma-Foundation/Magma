@@ -166,8 +166,10 @@ public class JavaLang {
 
     private static Rule createNamedWithTypeParams() {
         Rule name = createSymbolRule("name");
+        Rule typeParams = new NodeListRule("type-params", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
+
         return new OrRule(Lists.of(
-                new StripRule(new InfixRule(name, "<", new SuffixRule(new StringRule("type-params"), ">"), new FirstLocator())),
+                new StripRule(new InfixRule(name, "<", new SuffixRule(typeParams, ">"), new FirstLocator())),
                 name
         ));
     }

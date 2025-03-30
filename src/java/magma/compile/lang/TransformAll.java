@@ -168,10 +168,15 @@ public class TransformAll implements Transformer {
         List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
 
         List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                .filter(child -> !isFunctionalImport(child) && !child.is("package") && !hasTypeParams(child))
                 .collect(new ListCollector<>());
 
         Node withChildren = content.withNodeList("children", newChildren);
         return new Ok<>(node.withNode("content", withChildren));
+    }
+
+    private static boolean hasTypeParams(Node child) {
+        List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());
+        return !typeParams.isEmpty();
     }
 }

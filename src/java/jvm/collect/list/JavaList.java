@@ -81,6 +81,11 @@ public record JavaList<T>(List<T> list) implements List_<T> {
         return new Some<>(new Tuple<>(first, new JavaList<>(elements)));
     }
 
+    @Override
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
     private List<T> toNativeCopy() {
         return new ArrayList<>(list);
     }

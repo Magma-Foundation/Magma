@@ -13,3 +13,5 @@ struct String stringify(struct Node node){
 }
 struct Result_Node_CompileError beforePass(struct State state, struct Node node){
 }
+int hasTypeParams(struct Node child){
+}
