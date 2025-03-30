@@ -166,4 +166,9 @@ public final class MapNode implements Node {
     public Node removeNode(String propertyKey) {
         return new MapNode(maybeType, strings, nodes.remove(propertyKey), nodeLists);
     }
+
+    @Override
+    public boolean hasNode(String propertyKey) {
+        return nodes.containsKey(propertyKey);
+    }
 }

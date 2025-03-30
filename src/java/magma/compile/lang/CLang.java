@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.OptionalNodeRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.locate.FirstLocator;
@@ -38,10 +39,10 @@ public class CLang {
         NodeListRule params = CommonLang.createParamsRule(definitionRule);
 
         Rule block = CommonLang.createContentRule(new StripRule(new SuffixRule(params, "}")), createStatementRule());
-        Rule block1 = new OrRule(Lists.of(
+        Rule block1 = new OptionalNodeRule("content",
                 block,
                 new SuffixRule(params, ");\n")
-        ));
+        );
 
         return new TypeRule("function", new InfixRule(definition, "(", block1, new FirstLocator()));
     }

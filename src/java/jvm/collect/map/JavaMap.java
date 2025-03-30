@@ -20,16 +20,16 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     }
 
     @Override
-    public Map_<K, V> with(K propertyKey, V propertyValue) {
+    public Map_<K, V> with(K key, V value) {
         HashMap<K, V> copy = new HashMap<>(map);
-        copy.put(propertyKey, propertyValue);
+        copy.put(key, value);
         return new JavaMap<>(copy);
     }
 
     @Override
-    public Option<V> find(K propertyKey) {
-        return map.containsKey(propertyKey)
-                ? new Some<>(map.get(propertyKey))
+    public Option<V> find(K key) {
+        return map.containsKey(key)
+                ? new Some<>(map.get(key))
                 : new None<>();
     }
 
@@ -42,11 +42,11 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     }
 
     @Override
-    public Map_<K, V> ensure(K propertyKey, Function<V, V> ifPresent, Supplier<V> ifEmpty) {
-        if (map.containsKey(propertyKey)) {
-            return with(propertyKey, ifPresent.apply(map.get(propertyKey)));
+    public Map_<K, V> ensure(K key, Function<V, V> ifPresent, Supplier<V> ifEmpty) {
+        if (map.containsKey(key)) {
+            return with(key, ifPresent.apply(map.get(key)));
         } else {
-            return with(propertyKey, ifEmpty.get());
+            return with(key, ifEmpty.get());
         }
     }
 
@@ -62,9 +62,14 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     }
 
     @Override
-    public Map_<K, V> remove(K propertyKey) {
+    public Map_<K, V> remove(K key) {
         Map<K, V> copy = new HashMap<>(map);
-        copy.remove(propertyKey);
+        copy.remove(key);
         return new JavaMap<>(copy);
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
     }
 }
