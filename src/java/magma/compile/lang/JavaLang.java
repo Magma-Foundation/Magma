@@ -106,7 +106,7 @@ public class JavaLang {
     private static Rule createStatementRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(),
+                createReturnRule(createValueRule()),
                 createIfRule(),
                 createInvocationRule(),
                 createForRule(),
@@ -114,6 +114,12 @@ public class JavaLang {
                 createPostfixRule(),
                 createElseRule(),
                 createWhileRule()
+        ));
+    }
+
+    private static OrRule createValueRule() {
+        return new OrRule(Lists.of(
+                new TypeRule("symbol-value", createSymbolRule("value"))
         ));
     }
 

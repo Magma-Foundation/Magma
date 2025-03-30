@@ -62,7 +62,7 @@ public class CLang {
     private static Rule createStatementRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(),
+                createReturnRule(new OrRule(Lists.of())),
                 createIfRule(),
                 createInvocationRule(),
                 createForRule(),
