@@ -22,7 +22,7 @@ public interface Node {
 
     boolean is(String type);
 
-    Node withType(String type);
+    Node retype(String type);
 
     Node merge(Node other);
 

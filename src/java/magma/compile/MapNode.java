@@ -66,7 +66,7 @@ public final class MapNode implements Node {
     }
 
     @Override
-    public Node withType(String type) {
+    public Node retype(String type) {
         return new MapNode(new Some<>(type), strings, nodeLists);
     }
 

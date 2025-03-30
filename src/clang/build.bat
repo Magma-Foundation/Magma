@@ -28,6 +28,7 @@ clang .\magma\compile\Compiler.c^
 	.\magma\ApplicationError.c^
 	.\magma\collect\list\ListCollector.c^
 	.\magma\compile\rule\SuffixRule.c^
+	.\magma\compile\rule\EmptyRule.c^
 	.\magma\compile\rule\OrState.c^
 	.\magma\compile\context\Context.c^
 	.\magma\JavaInterruptedError.c^
@@ -53,6 +54,7 @@ clang .\magma\compile\Compiler.c^
 	.\magma\Main.c^
 	.\magma\compile\rule\StripRule.c^
 	.\magma\result\Ok.c^
+	.\magma\compile\lang\r\SymbolRule.c^
 	.\magma\result\ThrowableRunnable.c^
 	.\magma\compile\rule\InfixRule.c^
 	 -o main.exe

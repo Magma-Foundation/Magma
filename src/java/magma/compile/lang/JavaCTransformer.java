@@ -21,6 +21,9 @@ public class JavaCTransformer implements Transformer {
     static Option<Node> transformRootChild(List_<String> namespace, Node child) {
         if (child.is("package")) return new None<>();
         if (child.is("import")) return new Some<>(transformImport(namespace, child));
+        if (child.is("class")) return new Some<>(child.retype("struct"));
+        if (child.is("interface")) return new Some<>(child.retype("struct"));
+        if (child.is("record")) return new Some<>(child.retype("struct"));
         return new Some<>(child);
     }
 
@@ -35,7 +38,7 @@ public class JavaCTransformer implements Transformer {
                 .map(value -> new MapNode().withString("value", value))
                 .collect(new ListCollector<>());
 
-        return new MapNode().withNodeList("path", path);
+        return node.retype("include").withNodeList("path", path);
     }
 
     private static List_<String> computeNewNamespace(List_<String> thisNamespace, List_<String> requestedNamespace) {

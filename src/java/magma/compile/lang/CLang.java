@@ -2,6 +2,8 @@ package magma.compile.lang;
 
 import jvm.collect.list.Lists;
 import magma.compile.rule.DivideRule;
+import magma.compile.rule.EmptyRule;
+import magma.compile.rule.InfixRule;
 import magma.compile.rule.PrefixRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SuffixRule;
@@ -18,7 +20,8 @@ public class CLang {
 
     private static OrRule createCRootSegmentRule() {
         return new OrRule(Lists.of(
-                createIncludeRule()
+                createIncludeRule(),
+                new TypeRule("struct", new PrefixRule("struct ", new InfixRule(new StringRule("name"), " {", new SuffixRule(new EmptyRule(), "}"))))
         ));
     }
 

@@ -1,50 +1,10 @@
-package magma.compile.rule;class package magma.compile.rule;{package magma.compile.rule;
-
-import magma.option.None;class import magma.option.None;{
-
-import magma.option.None;
-import magma.option.Option;class import magma.option.Option;{
-import magma.option.Option;
-import magma.option.Some;class import magma.option.Some;{
-import magma.option.Some;
-
-public record OrState(Option<String> result) {
-    public OrState() {
-        this(new None<>());
-    }
-
-    public OrState withValue(String value) {
-        return new OrState(new Some<>(value));
-    }
-
-    public Option<String> toOption() {
-        return result;
-    }
-}
-class public record OrState(Option<String> result) {
-    public OrState() {
-        this(new None<>());
-    }
-
-    public OrState withValue(String value) {
-        return new OrState(new Some<>(value));
-    }
-
-    public Option<String> toOption() {
-        return result;
-    }
-}{
-
-public record OrState(Option<String> result) {
-    public OrState() {
-        this(new None<>());
-    }
-
-    public OrState withValue(String value) {
-        return new OrState(new Some<>(value));
-    }
-
-    public Option<String> toOption() {
-        return result;
-    }
-}
+#include "/../../../windows/collect/list/Lists.h"
+#include "/../../../magma/collect/list/List_.h"
+#include "/../../../magma/compile/CompileError.h"
+#include "/../../../magma/option/None.h"
+#include "/../../../magma/option/Option.h"
+#include "/../../../magma/option/Some.h"
+#include "/../../../magma/result/Err.h"
+#include "/../../../magma/result/Ok.h"
+#include "/../../../magma/result/Result.h"
+struct OrState<T> {}
