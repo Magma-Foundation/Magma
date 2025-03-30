@@ -128,7 +128,8 @@ public class JavaLang {
                 createDataAccess("data-access", ".", value),
                 createDataAccess("method-access", "::", value),
                 createStringRule(),
-                createLambdaRule(value)
+                createLambdaRule(value),
+                new TypeRule("number", new StripRule(new FilterRule(new NumberFilter(), new StringRule("value"))))
         )));
 
         return value;

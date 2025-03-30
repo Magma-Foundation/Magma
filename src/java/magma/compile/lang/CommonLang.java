@@ -40,7 +40,7 @@ public class CommonLang {
     }
 
     static Rule createSymbolRule(String propertyKey) {
-        return new StripRule(new SymbolRule(new StringRule(propertyKey)));
+        return new StripRule(new FilterRule(new SymbolFilter(), new StringRule(propertyKey)));
     }
 
     static Rule createDefinitionRule(Rule type) {
