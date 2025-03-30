@@ -9,7 +9,7 @@
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Some.h"
 #include "../../../magma/option/Tuple.h"
-struct InvocationStartLocator{struct Tuple_Integer_Character DEFAULT_PAIR
+struct InvocationStartLocator{struct Tuple_Integer_Character DEFAULT_PAIR;
 };
 // expand Tuple_Integer_Character = Tuple<struct Integer, struct Character>
 // expand List__Tuple_Integer_Character = List_<struct Tuple_Integer_Character>

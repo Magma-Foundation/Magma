@@ -95,8 +95,8 @@ public class CLang {
         return new TypeRule("struct", new PrefixRule("struct ", new SuffixRule(contentRule, ";\n")));
     }
 
-    private static OrRule createStructMemberRule() {
-        return createDefinitionsRule();
+    private static Rule createStructMemberRule() {
+        return new SuffixRule(createDefinitionsRule(), ";");
     }
 
     private static OrRule createDefinitionsRule() {

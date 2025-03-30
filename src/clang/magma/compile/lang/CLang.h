@@ -29,7 +29,7 @@ struct Rule createFunctionRule();
 struct Rule createStatementRule();
 struct Rule createValueRule();
 struct Rule createStructRule();
-struct OrRule createStructMemberRule();
+struct Rule createStructMemberRule();
 struct OrRule createDefinitionsRule();
 struct Rule createFunctionalDefinitionType();
 struct Rule createTypeRule();

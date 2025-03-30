@@ -19,7 +19,7 @@
 #include "../magma/result/Err.h"
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
-struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY
+struct Main{struct Path_ SOURCE_DIRECTORY;struct Path_ TARGET_DIRECTORY;
 };
 // expand Option_ApplicationError = Option<struct ApplicationError>
 // expand Set__Path_ = Set_<struct Path_>

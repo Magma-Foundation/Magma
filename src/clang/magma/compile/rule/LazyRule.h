@@ -10,7 +10,7 @@
 #include "../../../magma/option/Some.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-struct LazyRule{struct Option_Rule child
+struct LazyRule{struct Option_Rule child;
 };
 // expand Option_Rule = Option<struct Rule>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>

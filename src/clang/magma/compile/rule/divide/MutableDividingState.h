@@ -4,7 +4,7 @@
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Tuple.h"
-struct MutableDividingState{struct List__Character queuestruct List__String segmentsstruct StringBuilder bufferint depth
+struct MutableDividingState{struct List__Character queue;struct List__String segments;struct StringBuilder buffer;int depth;
 };
 // expand List__Character = List_<struct Character>
 // expand List__String = List_<struct String>

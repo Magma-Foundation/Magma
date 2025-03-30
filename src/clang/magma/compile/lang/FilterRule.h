@@ -6,7 +6,7 @@
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-struct FilterRule{struct Rule rulestruct Filter filter
+struct FilterRule{struct Rule rule;struct Filter filter;
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_String_CompileError = Result<struct String, struct CompileError>

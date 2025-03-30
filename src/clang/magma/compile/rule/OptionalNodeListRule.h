@@ -5,7 +5,7 @@
 #include "../../../magma/compile/Node.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/result/Result.h"
-struct OptionalNodeListRule{struct String propertyKeystruct Rule ifPresentstruct Rule ifMissingstruct OrRule parseRule
+struct OptionalNodeListRule{struct String propertyKey;struct Rule ifPresent;struct Rule ifMissing;struct OrRule parseRule;
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_String_CompileError = Result<struct String, struct CompileError>

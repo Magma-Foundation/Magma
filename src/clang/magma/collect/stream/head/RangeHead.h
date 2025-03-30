@@ -3,7 +3,7 @@
 #include "../../../../magma/option/None.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
-struct RangeHead{int extentint counter
+struct RangeHead{int extent;int counter;
 };
 // expand Option_Integer = Option<struct Integer>
 // expand Some_ = Some<struct >

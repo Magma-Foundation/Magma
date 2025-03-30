@@ -6,7 +6,7 @@
 #include "../../../magma/compile/Node.h"
 #include "../../../magma/option/Tuple.h"
 #include "../../../magma/result/Result.h"
-struct TreeTransformingStage{struct Transformer transformer
+struct TreeTransformingStage{struct Transformer transformer;
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>

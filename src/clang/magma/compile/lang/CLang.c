@@ -23,7 +23,7 @@ struct Rule createValueRule(){LazyRule value = new LazyRule();value.set(OrRule(L
 struct Rule createStructRule(){Rule name = CommonLang.createNamedWithTypeParams();
         Rule contentRule = CommonLang.createContentRule(name, createStructMemberRule());return TypeRule("struct", PrefixRule("struct ", SuffixRule(contentRule, ";\n")));
 }
-struct OrRule createStructMemberRule(){return createDefinitionsRule();
+struct Rule createStructMemberRule(){return SuffixRule(createDefinitionsRule(), ";");
 }
 struct OrRule createDefinitionsRule(){return OrRule(Lists.of(TypeRule("definition", CommonLang.createDefinitionRule(createTypeRule())), createFunctionalDefinitionType()));
 }

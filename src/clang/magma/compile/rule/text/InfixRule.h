@@ -7,7 +7,7 @@
 #include "../../../../magma/compile/rule/locate/Locator.h"
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Result.h"
-struct InfixRule{struct Rule leftstruct String infixstruct Rule rightstruct Locator locator
+struct InfixRule{struct Rule left;struct String infix;struct Rule right;struct Locator locator;
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 // expand Result_String_CompileError = Result<struct String, struct CompileError>
