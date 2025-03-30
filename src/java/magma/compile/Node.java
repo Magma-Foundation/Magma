@@ -1,6 +1,7 @@
 package magma.compile;
 
 import magma.collect.list.List_;
+import magma.collect.map.Map_;
 import magma.collect.stream.Stream;
 import magma.option.Option;
 import magma.option.Tuple;
@@ -39,4 +40,8 @@ public interface Node {
     Stream<Tuple<String, Node>> streamNodes();
 
     Node mapNode(String propertyKey, Function<Node, Node> mapper);
+
+    Node withNodeLists(Map_<String, List_<Node>> nodeLists);
+
+    Node withNodes(Map_<String, Node> nodes);
 }

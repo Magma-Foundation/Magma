@@ -11,6 +11,8 @@ import magma.option.Tuple;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     public JavaMap() {
@@ -37,5 +39,20 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
                 .stream()
                 .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
                 .toList());
+    }
+
+    @Override
+    public Map_<K, V> ensure(K propertyKey, Function<V, V> ifPresent, Supplier<V> ifEmpty) {
+        if (map.containsKey(propertyKey)) {
+            return with(propertyKey, ifPresent.apply(map.get(propertyKey)));
+        } else {
+            return with(propertyKey, ifEmpty.get());
+        }
+    }
+
+    @Override
+    public Map_<K, V> withAll(Map_<K, V> other) {
+        return other.stream().<Map_<K, V>>foldWithInitial(this,
+                (current, entry) -> current.with(entry.left(), entry.right()));
     }
 }

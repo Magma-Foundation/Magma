@@ -151,4 +151,14 @@ public final class MapNode implements Node {
     public Node mapNode(String propertyKey, Function<Node, Node> mapper) {
         return findNode(propertyKey).map(mapper).map(node -> withNode(propertyKey, node)).orElse(this);
     }
+
+    @Override
+    public Node withNodeLists(Map_<String, List_<Node>> nodeLists) {
+        return new MapNode(maybeType, strings, nodes, this.nodeLists.withAll(nodeLists));
+    }
+
+    @Override
+    public Node withNodes(Map_<String, Node> nodes) {
+        return new MapNode(maybeType, strings, this.nodes.withAll(nodes), this.nodeLists);
+    }
 }
