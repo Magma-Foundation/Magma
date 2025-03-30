@@ -43,6 +43,18 @@ public class TransformAll implements Transformer {
                 .orElseGet(() -> new Err<>(new CompileError("Node list '" + propertyKey + "' not present", new NodeContext(value))));
     }
 
+    private static boolean isFunctionalImport(Node child) {
+        if (!child.is("import")) return true;
+        List_<String> namespace = child.findNodeList("namespace")
+                .orElse(Lists.empty())
+                .stream()
+                .map(segment -> segment.findString("value"))
+                .flatMap(Streams::fromOption)
+                .collect(new ListCollector<>());
+
+        return namespace.size() < 3 || !namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
+    }
+
     @Override
     public Result<Node, CompileError> afterPass(State state, Node node) {
         if (node.is("root")) {
@@ -157,5 +169,23 @@ public class TransformAll implements Transformer {
         }
 
         return node.findString("value").orElse("");
+    }
+
+    @Override
+    public Result<Node, CompileError> beforePass(State state, Node node) {
+        if (node.is("root")) {
+            Node content = node.findNode("content").orElse(new MapNode());
+            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+
+            List_<Node> newChildren = children.stream()
+                    .filter(TransformAll::isFunctionalImport)
+                    .collect(new ListCollector<>());
+
+            Node withChildren = content.withNodeList("children", newChildren);
+            Node content1 = node.withNode("content", withChildren);
+            return new Ok<>(content1);
+        }
+
+        return new Ok<>(node);
     }
 }

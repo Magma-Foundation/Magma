@@ -10,6 +10,5 @@
 #include "../../../magma/option/Some.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-#include "../../../java/util/function/Function.h"
 struct LazyRule{struct Option_Rule child};
 #endif

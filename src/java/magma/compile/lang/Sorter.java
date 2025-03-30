@@ -60,4 +60,9 @@ public class Sorter implements Transformer {
 
         return new Ok<>(node);
     }
+
+    @Override
+    public Result<Node, CompileError> beforePass(State state, Node node) {
+        return new Ok<>(node);
+    }
 }

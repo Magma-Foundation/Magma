@@ -30,4 +30,9 @@ public class FlattenRoot implements Transformer {
     public Result<Node, CompileError> afterPass(State state, Node node) {
         return new Ok<>(afterPass0(node));
     }
+
+    @Override
+    public Result<Node, CompileError> beforePass(State state, Node node) {
+        return new Ok<>(node);
+    }
 }

@@ -10,7 +10,5 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-#include "../../../../java/util/function/Function.h"
-#include "../../../../java/util/function/Supplier.h"
 struct OrRule{};
 #endif

@@ -16,9 +16,9 @@ public class TreeTransformingStage implements TransformingStage {
 
     @Override
     public Result<Node, CompileError> transform(Node root, State state) {
-        return root.streamNodes()
+        return transformer.beforePass(state, root).flatMapValue(beforePass -> beforePass.streamNodes()
                 .foldToResult(root, (node, tuple) -> mapNodes(node, tuple, state))
-                .flatMapValue(withNodes -> transformNodeLists(withNodes, state));
+                .flatMapValue(withNodes -> transformNodeLists(withNodes, state)));
     }
 
     private Result<Node, CompileError> transformNodeLists(Node withNodes, State state) {
