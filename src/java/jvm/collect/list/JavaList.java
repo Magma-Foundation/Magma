@@ -1,15 +1,16 @@
 package jvm.collect.list;
 
 import magma.collect.list.List_;
+import magma.collect.stream.Stream;
 import magma.collect.stream.head.HeadedStream;
 import magma.collect.stream.head.RangeHead;
-import magma.collect.stream.Stream;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public record JavaList<T>(List<T> list) implements List_<T> {
     public JavaList() {
@@ -55,6 +56,18 @@ public record JavaList<T>(List<T> list) implements List_<T> {
     @Override
     public boolean equalsTo(List_<T> other) {
         return list.equals(Lists.toNative(other));
+    }
+
+    @Override
+    public List_<T> sort(BiFunction<T, T, Integer> comparator) {
+        ArrayList<T> copy = new ArrayList<>(list);
+        copy.sort(comparator::apply);
+        return new JavaList<>(copy);
+    }
+
+    @Override
+    public T get(int index) {
+        return list.get(index);
     }
 
     private List<T> toNativeCopy() {

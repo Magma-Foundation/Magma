@@ -3,6 +3,8 @@ package magma.collect.list;
 import magma.collect.stream.Stream;
 import magma.option.Option;
 
+import java.util.function.BiFunction;
+
 public interface List_<T> {
     Stream<T> stream();
 
@@ -17,4 +19,8 @@ public interface List_<T> {
     List_<T> subList(int start, int end);
 
     boolean equalsTo(List_<T> other);
+
+    List_<T> sort(BiFunction<T, T, Integer> comparator);
+
+    T get(int index);
 }

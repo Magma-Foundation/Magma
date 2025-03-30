@@ -1,10 +1,14 @@
 package magma.compile;
 
 import jvm.collect.list.Lists;
-import magma.collect.stream.Joiner;
 import magma.collect.list.List_;
+import magma.collect.stream.Joiner;
+import magma.collect.stream.head.HeadedStream;
+import magma.collect.stream.head.RangeHead;
 import magma.compile.context.Context;
 import magma.error.Error;
+
+import java.util.function.Function;
 
 public class CompileError implements Error {
     private final String message;
@@ -21,11 +25,25 @@ public class CompileError implements Error {
         this.errors = errors;
     }
 
+    public int depth() {
+        return 1 + errors.stream()
+                .map(CompileError::depth)
+                .foldMapping(Function.identity(), Math::max)
+                .orElse(0);
+    }
+
     @Override
     public String display() {
-        String joined = errors.stream()
-                .map(CompileError::display)
-                .map(value -> "\n" + value)
+        return format(0);
+    }
+
+    private String format(int depth) {
+        List_<CompileError> sorted = errors.sort((error, error2) -> error.depth() - error2.depth());
+
+        String joined = new HeadedStream<>(new RangeHead(sorted.size()))
+                .map(index -> {
+                    return "\n" + "\t".repeat(depth) + index + ") " + sorted.get(index).format(depth + 1);
+                })
                 .collect(new Joiner(""))
                 .orElse("");
 
