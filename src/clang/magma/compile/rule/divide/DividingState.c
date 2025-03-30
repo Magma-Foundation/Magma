@@ -1,4 +1,4 @@
-DividingState append(){
+DividingState append(char c){
 }
 int isLevel(){
 }

@@ -7,7 +7,6 @@ import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
-import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -38,7 +37,7 @@ public class JavaLang {
 
     private static TypeRule createRecordRule() {
         Rule namedWithTypeParams = createNamedWithTypeParams();
-        Rule stripRule = new StripRule(new SuffixRule(createParamsRule(), ")"));
+        Rule stripRule = new StripRule(new SuffixRule(createParamsRule(createDefinitionRule(createTypeRule())), ")"));
         Rule beforeContent = new OrRule(Lists.of(
                 new InfixRule(stripRule, "implements ", new NodeRule("supertype", createTypeRule()), new FirstLocator()),
                 stripRule
@@ -92,7 +91,7 @@ public class JavaLang {
 
     private static Rule createMethodRule() {
         Rule definition = new NodeRule("definition", createDefinitionRule(createTypeRule()));
-        Rule params = createParamsRule();
+        Rule params = createParamsRule(createDefinitionRule(createTypeRule()));
 
         Rule withParams = new OrRule(Lists.of(
                 createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule()),
@@ -100,13 +99,6 @@ public class JavaLang {
         ));
 
         return new TypeRule("method", new InfixRule(definition, "(", withParams, new FirstLocator()));
-    }
-
-    private static NodeListRule createParamsRule() {
-        return new NodeListRule("params", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
-                createWhitespaceRule(),
-                createDefinitionRule(createTypeRule())
-        )));
     }
 
     private static Rule createStatementRule() {
@@ -150,10 +142,6 @@ public class JavaLang {
     private static TypeRule createReturnRule() {
         PrefixRule rule = new PrefixRule("return ", new SuffixRule(new StringRule("value"), ";"));
         return new TypeRule("return", new StripRule(rule));
-    }
-
-    private static TypeRule createWhitespaceRule() {
-        return new TypeRule("whitespace", new StripRule(new EmptyRule()));
     }
 
     private static Rule createTypeRule() {

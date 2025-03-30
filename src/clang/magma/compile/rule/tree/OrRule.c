@@ -1,6 +1,6 @@
-struct Result_T_CompileError apply(){
+struct Result_T_CompileError apply(struct Function_Rule_Result_T_CompileError applicator, struct Supplier_Context context){
 }
-struct Result_Node_CompileError parse(){
+struct Result_Node_CompileError parse(String input){
 }
-struct Result_String_CompileError generate(){
+struct Result_String_CompileError generate(Node input){
 }

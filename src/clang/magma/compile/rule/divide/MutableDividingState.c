@@ -1,8 +1,8 @@
-public MutableDividingState(){
+public MutableDividingState(struct List__Character queue){
 }
-public MutableDividingState(){
+public MutableDividingState(struct List__Character queue, struct List__String segments, StringBuilder buffer, int depth){
 }
-DividingState append(){
+DividingState append(char c){
 }
 int isLevel(){
 }

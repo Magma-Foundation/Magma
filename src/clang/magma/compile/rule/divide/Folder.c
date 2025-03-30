@@ -1,4 +1,4 @@
-DividingState fold(){
+DividingState fold(DividingState current, char c){
 }
-String join(){
+String join(String current, String element){
 }

@@ -1,4 +1,4 @@
-struct List__String divide(){
+struct List__String divide(String input){
 }
-String join(){
+String join(String current, String element){
 }

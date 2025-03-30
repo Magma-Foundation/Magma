@@ -3,6 +3,8 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.locate.FirstLocator;
+import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -26,7 +28,12 @@ public class CLang {
     }
 
     private static TypeRule createFunctionRule() {
-        return new TypeRule("function", new SuffixRule(new NodeRule("definition", CommonLang.createDefinitionRule(createTypeRule())), "(){\n}\n"));
+        Rule definitionRule = CommonLang.createDefinitionRule(createTypeRule());
+        NodeRule definition = new NodeRule("definition", definitionRule);
+        NodeListRule params = CommonLang.createParamsRule(definitionRule);
+
+        InfixRule right = new InfixRule(params, ")", new PrefixRule("{", new SuffixRule(new EmptyRule(), "\n}\n")), new FirstLocator());
+        return new TypeRule("function", new InfixRule(definition, "(", right, new FirstLocator()));
     }
 
     private static TypeRule createStructRule() {

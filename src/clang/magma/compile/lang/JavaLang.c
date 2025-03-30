@@ -16,8 +16,6 @@ TypeRule createDefinitionStatementRule(){
 }
 Rule createMethodRule(){
 }
-NodeListRule createParamsRule(){
-}
 Rule createStatementRule(){
 }
 TypeRule createElseRule(){
@@ -34,15 +32,13 @@ TypeRule createIfRule(){
 }
 TypeRule createReturnRule(){
 }
-TypeRule createWhitespaceRule(){
-}
 Rule createTypeRule(){
 }
-TypeRule createArrayRule(){
+TypeRule createArrayRule(LazyRule type){
 }
-Rule createGenericRule(){
+Rule createGenericRule(Rule type){
 }
 Rule createNamedWithTypeParams(){
 }
-Rule createImportRule(){
+Rule createImportRule(String prefix, String type){
 }

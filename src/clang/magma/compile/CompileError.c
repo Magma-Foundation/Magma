@@ -1,12 +1,12 @@
-public CompileError(){
+public CompileError(String message, Context context){
 }
-public CompileError(){
+public CompileError(String message, Context context, struct List__CompileError errors){
 }
-String format(){
+String format(int depth, int index, struct List__CompileError sorted){
 }
 int depth(){
 }
 String display(){
 }
-String format(){
+String format(int depth){
 }

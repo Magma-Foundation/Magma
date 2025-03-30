@@ -1,4 +1,4 @@
-struct Result_String_CompileError compile(){
+struct Result_String_CompileError compile(String input, struct List__String namespace, String name){
 }
-String complete(){
+String complete(struct List__String namespace, String name, String output){
 }

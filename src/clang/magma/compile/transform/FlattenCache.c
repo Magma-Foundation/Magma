@@ -1,10 +1,10 @@
 public FlattenCache(){
 }
-FlattenCache withNode(){
+FlattenCache withNode(String propertyKey, Node propertyValue){
 }
-FlattenCache appendCategory(){
+FlattenCache appendCategory(String category, struct List__Node categoryValues){
 }
-FlattenCache withNodeList(){
+FlattenCache withNodeList(String propertyKey, struct List__Node propertyValues){
 }
-Node tryGroup(){
+Node tryGroup(Node node){
 }
