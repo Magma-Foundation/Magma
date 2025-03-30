@@ -4,7 +4,11 @@
 #include "../../../magma/compile/rule/LazyRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
+#include "../../../magma/compile/rule/divide/DecoratedFolder.h"
+#include "../../../magma/compile/rule/divide/FoldingDivider.h"
+#include "../../../magma/compile/rule/divide/ValueFolder.h"
 #include "../../../magma/compile/rule/locate/FirstLocator.h"
+#include "../../../magma/compile/rule/locate/LastLocator.h"
 #include "../../../magma/compile/rule/text/InfixRule.h"
 #include "../../../magma/compile/rule/text/PrefixRule.h"
 #include "../../../magma/compile/rule/text/StringRule.h"
@@ -28,7 +32,10 @@ struct TypeRule createDefinitionStatementRule();
 struct Rule createMethodRule();
 struct TypeRule createTypedDefinitionRule();
 struct Rule createStatementRule();
-struct Rule createValueRule();
+struct Rule createValueRule(struct LazyRule value, struct Rule statement);
+struct TypeRule createDataAccessRule(struct LazyRule value);
+struct Rule createLambdaRule(struct Rule value, struct Rule statement);
+struct TypeRule createConstructionRule(struct LazyRule value);
 struct Rule createTypeRule();
 struct TypeRule createArrayRule(struct LazyRule type);
 struct Rule createImportRule(struct String prefix, struct String type);

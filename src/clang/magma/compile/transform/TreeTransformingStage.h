@@ -26,5 +26,13 @@ struct Result_Node_CompileError transformNodeLists(struct Node root, struct Stat
 struct Result_Node_CompileError mapNodes(struct Node node, struct Tuple_String_Node tuple, struct State state);
 struct Result_Node_CompileError mapNodeList(struct Node node, struct Tuple_String_List__Node tuple, struct State state);
 struct Result_List__Node_CompileError mapNodeListElement(struct List__Node elements, struct Node element, struct State state);
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
+auto __lambda7__();
 #endif
 

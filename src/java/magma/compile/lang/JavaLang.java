@@ -109,9 +109,10 @@ public class JavaLang {
 
     private static Rule createStatementRule() {
         LazyRule value = new LazyRule();
-        return new OrRule(Lists.of(
+        LazyRule statement = new LazyRule();
+        statement.set(new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(createValueRule(value)),
+                createReturnRule(createValueRule(value, statement)),
                 createIfRule(),
                 new SuffixRule(createInvocationRule(value), ";"),
                 createForRule(),
@@ -119,10 +120,11 @@ public class JavaLang {
                 createPostfixRule(),
                 createElseRule(),
                 createWhileRule()
-        ));
+        )));
+        return statement;
     }
 
-    private static Rule createValueRule(LazyRule value) {
+    private static Rule createValueRule(LazyRule value, Rule statement) {
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
                 createAddRule(value),
@@ -131,7 +133,7 @@ public class JavaLang {
                 createDataAccessRule(value),
                 createAccessRule("method-access", "::", value),
                 createStringRule(),
-                createLambdaRule(value),
+                createLambdaRule(value, statement),
                 createNumberRule(),
                 createTernaryRule(value),
                 createNotRule(value)
@@ -150,14 +152,18 @@ public class JavaLang {
         return createDataAccess("data-access", ".", value, afterSeparator);
     }
 
-    private static Rule createLambdaRule(Rule value) {
+    private static Rule createLambdaRule(Rule value, Rule statement) {
         Rule left = createSymbolRule("param-name");
         Rule params = new NodeListRule("params", new FoldingDivider(new DecoratedFolder(new ValueFolder())), createSymbolRule("value"));
         Rule beforeArrow = new OrRule(Lists.of(
                 left,
                 new StripRule(new PrefixRule("(", new SuffixRule(params, ")")))
         ));
-        return new TypeRule("lambda", new InfixRule(beforeArrow, "->", new NodeRule("child", value), new FirstLocator()));
+        InfixRule withValue = new InfixRule(beforeArrow, "->", new NodeRule("child", value), new FirstLocator());
+        return new TypeRule("lambda", new OrRule(Lists.of(
+                createContentRule(new StripRule(new SuffixRule(beforeArrow, "->")), statement),
+                withValue
+        )));
     }
 
     private static TypeRule createConstructionRule(LazyRule value) {

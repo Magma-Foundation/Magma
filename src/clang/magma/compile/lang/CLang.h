@@ -25,7 +25,7 @@ struct CLang{
 struct Rule createCRootRule();
 struct Rule createCRootSegmentRule();
 struct TypeRule createExpansionRule();
-struct TypeRule createFunctionRule();
+struct Rule createFunctionRule();
 struct Rule createStatementRule();
 struct Rule createValueRule();
 struct Rule createStructRule();

@@ -7,6 +7,7 @@
 struct TypeSeparatorLocator{
 };
 // expand Option_Integer = Option<struct Integer>
+// expand None_ = None<struct >
 struct Option_Integer locate(struct String input, struct String infix);
 #endif
 

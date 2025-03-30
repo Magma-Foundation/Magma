@@ -8,6 +8,7 @@
 struct PathSource{
 };
 // expand List__String = List_<struct String>
+// expand ListCollector_ = ListCollector<struct >
 // expand Result_String_IOError = Result<struct String, struct IOError>
 struct List__String computeNamespace();
 struct String computeName();

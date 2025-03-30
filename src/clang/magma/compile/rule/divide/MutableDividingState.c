@@ -1,5 +1,5 @@
 #include "MutableDividingState.h"
-struct public MutableDividingState(struct List__Character queue){this(queue, Lists.empty(), new StringBuilder(), 0);
+struct public MutableDividingState(struct List__Character queue){this(queue, Lists.empty(), StringBuilder(), 0);
 }
 struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, int depth){this.queue = queue;
         this.segments = segments;
@@ -21,10 +21,14 @@ struct List__String segments(){return segments;
 }
 int isShallow(){return depth == 1;
 }
-struct Option_Tuple_Character_DividingState append(){return queue.popFirst().map(tuple -> {
-            return new Tuple<>(tuple.left(), new MutableDividingState(tuple.right(), segments, buffer, depth));
-        });
+struct Option_Tuple_Character_DividingState append(){return pop().map(__lambda0__);
 }
-struct Option_DividingState appendAndDiscard(){return append().map(Tuple::right);
+struct Option_Tuple_Character_DividingState pop(){return queue.popFirst().map(__lambda1__);
 }
+struct Option_Character peek(){return queue.findFirst();
+}
+struct Option_DividingState appendAndDiscard(){return append().map(Tuple.right);
+}
+auto __lambda0__();
+auto __lambda1__();
 

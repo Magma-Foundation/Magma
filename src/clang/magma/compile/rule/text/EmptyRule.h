@@ -11,7 +11,10 @@
 struct EmptyRule{
 };
 // expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Ok_ = Ok<struct >
+// expand Err_ = Err<struct >
 // expand Result_String_CompileError = Result<struct String, struct CompileError>
+// expand Ok_ = Ok<struct >
 struct Result_Node_CompileError parse(struct String input);
 struct Result_String_CompileError generate(struct Node node);
 #endif

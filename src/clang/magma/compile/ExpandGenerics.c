@@ -1,67 +1,63 @@
 #include "ExpandGenerics.h"
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (!node.is()) return new Ok<>(node);
+struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (!node.is("definition")) return new Ok<>(node);
 
-        Node type = node.findNode().orElse(new MapNode());
-        if (!type.is()) return new Ok<>(node);
+        Node type = node.findNode("type").orElse(new MapNode());if (!type.is("generic")) return new Ok<>(node);
 
-        String value = type.findNodeList()
+        String value = type.findNodeList("base")
                 .orElse(Lists.empty())
                 .get(0)
-                .findString()
-                .orElse();if (value.equals()) {
-            List_<Node> arguments = type.findNodeList().orElseGet(Lists::empty);
+                .findString("value")
+                .orElse("");if (value.equals("Function")) {
+            List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
             Node param = arguments.get(0);
             Node returns = arguments.get(1);
 
-            return new Ok<>(node.retype()
-                    .removeNode()
-                    .withNode(, returns)
-                    .withNodeList(, Lists.of(param)));
-        }if(value.equals()) {
-            List_<Node> arguments = type.findNodeList().orElseGet(Lists::empty);
+            return new Ok<>(node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param)));
+        }if(value.equals("Supplier")) {
+            List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
             Node returns = arguments.get(0);
 
-            return new Ok<>(node.retype()
-                    .removeNode()
-                    .withNode(, returns));
-        }
-
-        return new Ok<>(node);
+            return new Ok<>(node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns));
+        }return Ok_(node);
 }
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){if(node.is()) {
+struct Result_Node_CompileError afterPass(struct State state, struct Node node){if(node.is("generic")) {
             String value = stringify(node);
 
-            Node symbol = new MapNode().withString(, value);
-            Node expansion = new MapNode()
-                    .withString(, value)
-                    .withNode(, node);
+            Node symbol = new MapNode("symbol-type").withString("value", value);
+            Node expansion = new MapNode("expansion")
+                    .withString("name", value)
+                    .withNode("type", node);
 
-            return new Ok<>(new MapNode()
-                    .withNode(, symbol)
-                    .withNodeList(, Lists.of(expansion)));
-        }
-
-        return new Ok<>(node);
+            return new Ok<>(new MapNode("group")
+                    .withNode("child", symbol)
+                    .withNodeList("expansions", Lists.of(expansion)));
+        }if (node.is("construction")) {
+            Node type = node.findNode("type").orElse(new MapNode());
+            return new Ok<>(node.retype("invocation")
+                    .withNode("caller", new MapNode("symbol-value").withString("value", stringify(type))));
+        }return Ok_(node);
 }
-struct String stringify(struct Node node){if (node.is()) {
-            String caller = node.findNodeList()
+struct String stringify(struct Node node){if (node.is("generic")) {
+            String caller = node.findNodeList("base")
                     .orElse(Lists.empty())
                     .stream()
-                    .map(element -> element.findString())
+                    .map(element -> element.findString("value"))
                     .flatMap(Streams::fromOption)
-                    .collect(new Joiner())
-                    .orElse();
+                    .collect(new Joiner("_"))
+                    .orElse("");
 
-            return node.findNodeList().orElse(new JavaList<>())
+            return node.findNodeList("arguments").orElse(new JavaList<>())
                     .stream()
                     .map(this::stringify)
-                    .collect(new Joiner())
-                    .map(arguments -> caller +  + arguments)
+                    .collect(new Joiner("_"))
+                    .map(arguments -> caller + "_" + arguments)
                     .orElse(caller);
-        }
-
-        return node.findString()
-                .or(() -> node.findNode().orElse(new MapNode()).findString())
-                .orElse();
+        }return node.findString("value").or(__lambda0__).orElse("?");
 }
+auto __lambda0__();
 

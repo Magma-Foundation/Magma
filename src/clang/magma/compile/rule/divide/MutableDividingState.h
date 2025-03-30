@@ -14,6 +14,11 @@ struct MutableDividingState{struct List__Character queuestruct List__String segm
 // expand List__String = List_<struct String>
 // expand Option_Tuple_Character_DividingState = Option<struct Tuple_Character_DividingState>
 // expand Tuple_Character_DividingState = Tuple<struct Character, struct DividingState>
+// expand Tuple_ = Tuple<struct >
+// expand Option_Tuple_Character_DividingState = Option<struct Tuple_Character_DividingState>
+// expand Tuple_Character_DividingState = Tuple<struct Character, struct DividingState>
+// expand Tuple_ = Tuple<struct >
+// expand Option_Character = Option<struct Character>
 // expand Option_DividingState = Option<struct DividingState>
 struct public MutableDividingState(struct List__Character queue);
 struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, int depth);
@@ -25,6 +30,10 @@ struct DividingState advance();
 struct List__String segments();
 int isShallow();
 struct Option_Tuple_Character_DividingState append();
+struct Option_Tuple_Character_DividingState pop();
+struct Option_Character peek();
 struct Option_DividingState appendAndDiscard();
+auto __lambda0__();
+auto __lambda1__();
 #endif
 
