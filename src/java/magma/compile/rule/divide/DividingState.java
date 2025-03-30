@@ -14,4 +14,6 @@ public interface DividingState {
     DividingState advance();
 
     List_<String> segments();
+
+    boolean isShallow();
 }

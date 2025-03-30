@@ -5,6 +5,7 @@ import magma.compile.lang.r.SymbolRule;
 import magma.compile.rule.DivideRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.InfixRule;
+import magma.compile.rule.NodeRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.PrefixRule;
 import magma.compile.rule.Rule;
@@ -22,6 +23,7 @@ public class JavaLang {
 
     private static OrRule createJavaRootSegmentRule() {
         return new OrRule(Lists.of(
+                createWhitespaceRule(),
                 createImportRule("package ", "package"),
                 createImportRule("import ", "import"),
                 createClassRule(),
@@ -58,10 +60,14 @@ public class JavaLang {
 
     private static Rule createClassMemberRule() {
         return new OrRule(Lists.of(
-                new TypeRule("whitespace", new StripRule(new EmptyRule())),
-                new TypeRule("method", new InfixRule(createDefinitionRule(), "(", new StringRule("with-params"))),
+                createWhitespaceRule(),
+                new TypeRule("method", new InfixRule(new NodeRule("definition", createDefinitionRule()), "(", new StringRule("with-params"))),
                 new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";"))
         ));
+    }
+
+    private static TypeRule createWhitespaceRule() {
+        return new TypeRule("whitespace", new StripRule(new EmptyRule()));
     }
 
     private static StringRule createDefinitionRule() {

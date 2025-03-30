@@ -1,6 +1,7 @@
 package magma.compile;
 
 import jvm.collect.map.Maps;
+import jvm.collect.stream.Streams;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.collect.stream.Joiner;
@@ -15,21 +16,27 @@ import java.util.function.Function;
 public final class MapNode implements Node {
     private final Option<String> maybeType;
     private final Map_<String, String> strings;
+    private final Map_<String, Node> nodes;
     private final Map_<String, List_<Node>> nodeLists;
 
     public MapNode() {
-        this(new None<>(), Maps.empty(), Maps.empty());
+        this(new None<>(), Maps.empty(), Maps.empty(), Maps.empty());
     }
 
-    public MapNode(Option<String> maybeType, Map_<String, String> strings, Map_<String, List_<Node>> nodeLists) {
+    public MapNode(Option<String> maybeType, Map_<String, String> strings, Map_<String, Node> nodes, Map_<String, List_<Node>> nodeLists) {
         this.maybeType = maybeType;
         this.strings = strings;
+        this.nodes = nodes;
         this.nodeLists = nodeLists;
+    }
+
+    private static String formatEntry(String key, String value) {
+        return "\t" + key + ": " + value;
     }
 
     @Override
     public Node withString(String propertyKey, String propertyValue) {
-        return new MapNode(maybeType, strings.with(propertyKey, propertyValue), nodeLists);
+        return new MapNode(maybeType, strings.with(propertyKey, propertyValue), nodes, nodeLists);
     }
 
     @Override
@@ -39,7 +46,7 @@ public final class MapNode implements Node {
 
     @Override
     public Node withNodeList(String propertyKey, List_<Node> propertyValues) {
-        return new MapNode(maybeType, strings, nodeLists.with(propertyKey, propertyValues));
+        return new MapNode(maybeType, strings, nodes, nodeLists.with(propertyKey, propertyValues));
     }
 
     @Override
@@ -51,21 +58,32 @@ public final class MapNode implements Node {
     public String display() {
         String typeString = maybeType.map(type -> type + " ").orElse("");
 
-        String joinedStrings = strings.stream()
-                .map(entry -> "\t" + entry.left() + ": \"" + entry.right() + "\"")
+        Option<String> joinedStrings = strings.stream()
+                .map(entry -> formatEntry(entry.left(), "\"" + entry.right() + "\""))
+                .collect(new Joiner(",\n"));
+
+        Option<String> joinedNodes = nodes.stream()
+                .map(entry -> formatEntry(entry.left(), entry.right().display()))
+                .collect(new Joiner(",\n"));
+
+        Option<String> joinedNodeLists = nodeLists.stream()
+                .map(entry -> formatEntry(entry.left(), formatList(entry)))
+                .collect(new Joiner(",\n"));
+
+        String joined = Streams.of(joinedStrings, joinedNodes, joinedNodeLists)
+                .flatMap(Streams::fromOption)
                 .collect(new Joiner(",\n"))
                 .orElse("");
 
-        String joinedNodeLists = nodeLists.stream()
-                .map(entry -> entry.left() + ": [" + entry.right()
-                        .stream()
-                        .map(Node::display)
-                        .collect(new Joiner(","))
-                        .orElse("") + "]")
-                .collect(new Joiner(",\n"))
-                .orElse("");
+        return typeString + "{\n" + joined + "}";
+    }
 
-        return typeString + "{\n" + joinedStrings + joinedNodeLists + "}";
+    private String formatList(Tuple<String, List_<Node>> entry) {
+        return "[" + entry.right()
+                .stream()
+                .map(Node::display)
+                .collect(new Joiner(","))
+                .orElse("") + "]";
     }
 
     @Override
@@ -83,13 +101,14 @@ public final class MapNode implements Node {
 
     @Override
     public Node retype(String type) {
-        return new MapNode(new Some<>(type), strings, nodeLists);
+        return new MapNode(new Some<>(type), strings, nodes, nodeLists);
     }
 
     @Override
     public Node merge(Node other) {
         Node withStrings = other.streamStrings().<Node>foldWithInitial(this, (node, tuple) -> node.withString(tuple.left(), tuple.right()));
-        return other.streamNodeLists().foldWithInitial(withStrings, (node, tuple) -> node.withNodeList(tuple.left(), tuple.right()));
+        Node withNodes = other.streamNodes().foldWithInitial(withStrings, (node, tuple) -> node.withNode(tuple.left(), tuple.right()));
+        return other.streamNodeLists().foldWithInitial(withNodes, (node, tuple) -> node.withNodeList(tuple.left(), tuple.right()));
     }
 
     @Override
@@ -100,5 +119,20 @@ public final class MapNode implements Node {
     @Override
     public Stream<Tuple<String, List_<Node>>> streamNodeLists() {
         return nodeLists.stream();
+    }
+
+    @Override
+    public Node withNode(String propertyKey, Node propertyValue) {
+        return new MapNode(maybeType, strings, nodes.with(propertyKey, propertyValue), nodeLists);
+    }
+
+    @Override
+    public Option<Node> findNode(String propertyKey) {
+        return nodes.find(propertyKey);
+    }
+
+    @Override
+    public Stream<Tuple<String, Node>> streamNodes() {
+        return nodes.stream();
     }
 }

@@ -52,4 +52,9 @@ public class MutableDividingState implements DividingState {
     public List_<String> segments() {
         return segments;
     }
+
+    @Override
+    public boolean isShallow() {
+        return depth == 1;
+    }
 }
