@@ -19,7 +19,7 @@ public class FoldingDivider implements Divider {
         DividingState current = new MutableDividingState(collector);
         while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current
-                    .append()
+                    .pop()
                     .toTuple(new Tuple<>('\0', current));
 
             if(maybeNext.left()) {

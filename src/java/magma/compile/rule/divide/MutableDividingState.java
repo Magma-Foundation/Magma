@@ -64,9 +64,14 @@ public class MutableDividingState implements DividingState {
 
     @Override
     public Option<Tuple<Character, DividingState>> append() {
-        return queue.popFirst().map(tuple -> {
-            return new Tuple<>(tuple.left(), new MutableDividingState(tuple.right(), segments, buffer, depth));
+        return pop().map(tuple -> {
+            return new Tuple<>(tuple.left(), tuple.right().append(tuple.left()));
         });
+    }
+
+    @Override
+    public Option<Tuple<Character, DividingState>> pop() {
+        return queue.popFirst().map(tuple -> new Tuple<>(tuple.left(), new MutableDividingState(tuple.right(), segments, buffer, depth)));
     }
 
     @Override

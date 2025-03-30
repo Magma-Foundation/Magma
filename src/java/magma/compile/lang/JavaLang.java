@@ -4,9 +4,11 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
+import magma.compile.rule.locate.LastLocator;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -125,22 +127,28 @@ public class JavaLang {
                 createSymbolValueRule(),
                 createAddRule(value),
                 createConstructionRule(value),
-                createInvocationRule(value)
+                createInvocationRule(value),
+                createDataAccess(value),
+                new TypeRule("string", new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))))
         )));
 
         return value;
     }
 
+    private static TypeRule createDataAccess(LazyRule value) {
+        return new TypeRule("data-access", new InfixRule(new NodeRule("child", value), ".", new StripRule(new StringRule("property")), new LastLocator()));
+    }
+
     private static TypeRule createConstructionRule(LazyRule value) {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new FirstLocator()), ")"))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new LastLocator()), ")"))));
     }
 
     private static TypeRule createInvocationRule(LazyRule value) {
-        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new FirstLocator()), ")")));
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new LastLocator()), ")")));
     }
 
     private static NodeListRule createArgumentsRule(LazyRule value) {
-        return new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), value);
+        return new NodeListRule("arguments", new FoldingDivider(new DecoratedFolder(new ValueFolder())), value);
     }
 
     private static Rule createTypeRule() {

@@ -16,14 +16,15 @@ public record DecoratedFolder(Folder folder) implements Folder {
     @Override
     public DividingState fold(DividingState state, char c) {
         if (c == '\'') {
-            return state.append()
+            return state.append(c)
+                    .append()
                     .flatMap(DecoratedFolder::processSlash)
                     .flatMap(DividingState::appendAndDiscard)
                     .orElse(state);
         }
 
         if (c == '"') {
-            DividingState current = state;
+            DividingState current = state.append(c);
             while (true) {
                 Tuple<Character, DividingState> tuple = current.append().orElse(new Tuple<>('\0', current));
                 current = tuple.right();

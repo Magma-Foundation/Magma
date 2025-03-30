@@ -61,9 +61,4 @@ public class Sorter implements Transformer {
 
         return new Tuple<>(tuple.left(), tuple.right().add(node));
     }
-
-    @Override
-    public Result<Node, CompileError> beforePass(State state, Node node) {
-        return new Ok<>(node);
-    }
 }

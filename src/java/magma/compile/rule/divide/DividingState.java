@@ -22,4 +22,6 @@ public interface DividingState {
     Option<Tuple<Character, DividingState>> append();
 
     Option<DividingState> appendAndDiscard();
+
+    Option<Tuple<Character, DividingState>> pop();
 }

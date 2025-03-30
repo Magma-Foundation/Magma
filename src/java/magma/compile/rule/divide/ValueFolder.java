@@ -6,8 +6,8 @@ public class ValueFolder implements Folder {
         if (c == ',' && current.isLevel()) return current.advance();
 
         DividingState appended = current.append(c);
-        if (c == '<') return appended.enter();
-        if (c == '>') return appended.exit();
+        if (c == '<' || c == '(') return appended.enter();
+        if (c == '>' || c == ')') return appended.exit();
         return appended;
     }
 
