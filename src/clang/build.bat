@@ -13,7 +13,6 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\io\Path_.c^
 	.\magma\option\None.c^
 	.\magma\compile\rule\locate\Locator.c^
-	.\magma\compile\lang\JavaCTransformer.c^
 	.\magma\compile\context\NodeContext.c^
 	.\magma\compile\rule\divide\DecoratedFolder.c^
 	.\magma\compile\rule\Rule.c^
@@ -22,17 +21,21 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\collect\set\SetCollector.c^
 	.\magma\error\Error.c^
 	.\magma\collect\stream\Stream.c^
+	.\magma\compile\lang\FlattenRoot.c^
 	.\magma\compile\lang\JavaLang.c^
+	.\magma\compile\transform\Transformer.c^
 	.\magma\option\Some.c^
 	.\magma\ApplicationError.c^
 	.\magma\compile\rule\tree\OrState.c^
+	.\magma\compile\lang\TransformAll.c^
 	.\magma\collect\list\ListCollector.c^
+	.\magma\compile\transform\FlattenCache.c^
 	.\magma\compile\rule\locate\LastLocator.c^
 	.\magma\compile\context\Context.c^
 	.\magma\JavaInterruptedError.c^
 	.\magma\compile\rule\text\EmptyRule.c^
 	.\magma\compile\rule\text\SuffixRule.c^
-	.\magma\compile\lang\Transformer.c^
+	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\rule\text\InfixRule.c^
 	.\magma\compile\rule\tree\TypeRule.c^
 	.\magma\compile\rule\tree\NodeRule.c^
@@ -40,6 +43,7 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\divide\FoldingDivider.c^
 	.\magma\collect\stream\head\Head.c^
 	.\magma\compile\source\PathSource.c^
+	.\magma\compile\transform\TransformingStage.c^
 	.\magma\collect\list\List_.c^
 	.\magma\compile\rule\divide\ValueFolder.c^
 	.\magma\compile\lang\CLang.c^
@@ -50,6 +54,7 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\collect\stream\head\EmptyHead.c^
 	.\magma\io\IOError.c^
 	.\magma\result\Result.c^
+	.\magma\compile\transform\FlattenGroup.c^
 	.\magma\compile\MapNode.c^
 	.\magma\result\Err.c^
 	.\magma\collect\stream\head\SingleHead.c^

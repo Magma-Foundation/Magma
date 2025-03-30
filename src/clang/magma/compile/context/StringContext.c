@@ -1,3 +1,2 @@
-struct StringContext{};
-void temp(){
+String display(){
 }

@@ -1,1 +1,4 @@
-struct Collector{CC};
+C createInitial(){
+}
+C fold(){
+}

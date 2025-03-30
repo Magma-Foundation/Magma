@@ -1,9 +1,4 @@
-#include "/../../../../magma/compile/CompileError.h"
-#include "/../../../../magma/compile/Node.h"
-#include "/../../../../magma/compile/rule/Rule.h"
-#include "/../../../../magma/result/Result.h"
-struct StripRule{};
-void temp(){
+_Node_CompileError parse(){
 }
-void temp(){
+_String_CompileError generate(){
 }

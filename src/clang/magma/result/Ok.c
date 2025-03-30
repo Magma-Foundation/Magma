@@ -1,19 +1,14 @@
-#include "/../../magma/option/None.h"
-#include "/../../magma/option/Option.h"
-#include "/../../magma/option/Some.h"
-#include "/../../magma/option/Tuple.h"
-struct Ok{};
-void temp(){
+_T findValue(){
 }
-void temp(){
+_X findError(){
 }
-void temp(){
+_R_X mapValue(){
 }
-void temp(){
+_R_X flatMapValue(){
 }
-void temp(){
+_T_R mapErr(){
 }
-void temp(){
+R match(){
 }
-void temp(){
+__T_R_X and(){
 }

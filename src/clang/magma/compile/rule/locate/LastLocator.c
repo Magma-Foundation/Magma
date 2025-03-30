@@ -1,0 +1,2 @@
+_Integer locate(){
+}

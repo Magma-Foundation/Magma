@@ -1,0 +1,4 @@
+public ApplicationError(){
+}
+String display(){
+}

@@ -1,53 +1,46 @@
-#include "/../../windows/collect/map/Maps.h"
-#include "/../../windows/collect/stream/Streams.h"
-#include "/../../magma/collect/list/List_.h"
-#include "/../../magma/collect/map/Map_.h"
-#include "/../../magma/collect/stream/Joiner.h"
-#include "/../../magma/collect/stream/Stream.h"
-#include "/../../magma/option/None.h"
-#include "/../../magma/option/Option.h"
-#include "/../../magma/option/Some.h"
-#include "/../../magma/option/Tuple.h"
-struct MapNode{_String maybeType_String_String strings_String_Node nodes_String__Node nodeLists};
-void temp(){
+public MapNode(){
 }
-void temp(){
+public MapNode(){
 }
-void temp(){
+public MapNode(){
 }
-void temp(){
+String formatEntry(){
 }
-void temp(){
+Node withString(){
 }
-void temp(){
+_String findString(){
 }
-void temp(){
+Node withNodeList(){
 }
-void temp(){
+__Node findNodeList(){
 }
-void temp(){
+String display(){
 }
-void temp(){
+String format(){
 }
-void temp(){
+String formatList(){
 }
-void temp(){
+Node mapNodeList(){
 }
-void temp(){
+boolean is(){
 }
-void temp(){
+Node retype(){
 }
-void temp(){
+Node merge(){
 }
-void temp(){
+__String_String streamStrings(){
 }
-void temp(){
+__String__Node streamNodeLists(){
 }
-void temp(){
+Node withNode(){
 }
-void temp(){
+_Node findNode(){
 }
-void temp(){
+__String_Node streamNodes(){
 }
-void temp(){
+Node mapNode(){
+}
+Node withNodeLists(){
+}
+Node withNodes(){
 }

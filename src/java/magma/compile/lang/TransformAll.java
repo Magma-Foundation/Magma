@@ -21,11 +21,13 @@ public class TransformAll implements Transformer {
         List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
 
-        if (element.is("definition")) {
-            return new Tuple<>(definitions.add(element), others);
-        } else {
-            return new Tuple<>(definitions, others.add(element));
+        if (element.is("definition")) return new Tuple<>(definitions.add(element), others);
+        if (element.is("initialization")) {
+            Node definition = element.findNode("definition").orElse(new MapNode());
+            return new Tuple<>(definitions.add(definition), others);
         }
+
+        return new Tuple<>(definitions, others.add(element));
     }
 
     private static Result<Node, CompileError> find(Node node, String propertyKey) {

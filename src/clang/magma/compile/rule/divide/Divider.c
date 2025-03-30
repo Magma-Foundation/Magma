@@ -1,2 +1,4 @@
-#include "/../../../../magma/collect/list/List_.h"
-struct Divider{_StringString};
+_String divide(){
+}
+String join(){
+}
