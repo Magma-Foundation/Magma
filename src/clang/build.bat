@@ -1,58 +1,69 @@
-clang .\magma\compile\Compiler.c^
+clang .\magma\compile\rule\divide\Folder.c^
+	.\magma\compile\Compiler.c^
 	.\magma\compile\rule\divide\DividingState.c^
 	.\magma\collect\map\Map_.c^
 	.\magma\collect\stream\Joiner.c^
 	.\magma\compile\rule\divide\CharDivider.c^
-	.\magma\compile\rule\PrefixRule.c^
 	.\magma\compile\source\Source.c^
 	.\magma\collect\stream\head\RangeHead.c^
+	.\magma\compile\rule\LazyRule.c^
 	.\magma\compile\rule\divide\MutableDividingState.c^
+	.\magma\compile\lang\TypeSeparatorLocator.c^
 	.\magma\compile\Node.c^
 	.\magma\io\Path_.c^
 	.\magma\option\None.c^
+	.\magma\compile\rule\locate\Locator.c^
 	.\magma\compile\lang\JavaCTransformer.c^
 	.\magma\compile\context\NodeContext.c^
+	.\magma\compile\rule\divide\DecoratedFolder.c^
 	.\magma\compile\rule\Rule.c^
 	.\magma\collect\stream\head\HeadedStream.c^
 	.\magma\collect\set\Set_.c^
 	.\magma\collect\set\SetCollector.c^
-	.\magma\compile\rule\OrRule.c^
 	.\magma\error\Error.c^
 	.\magma\collect\stream\Stream.c^
 	.\magma\compile\lang\JavaLang.c^
-	.\magma\compile\rule\DivideRule.c^
 	.\magma\option\Some.c^
 	.\magma\ApplicationError.c^
+	.\magma\compile\rule\tree\OrState.c^
 	.\magma\collect\list\ListCollector.c^
-	.\magma\compile\rule\SuffixRule.c^
-	.\magma\compile\rule\EmptyRule.c^
-	.\magma\compile\rule\OrState.c^
+	.\magma\compile\rule\locate\LastLocator.c^
 	.\magma\compile\context\Context.c^
 	.\magma\JavaInterruptedError.c^
-	.\magma\compile\rule\TypeRule.c^
+	.\magma\compile\rule\text\EmptyRule.c^
+	.\magma\compile\rule\text\SuffixRule.c^
 	.\magma\compile\lang\Transformer.c^
-	.\magma\compile\rule\StringRule.c^
+	.\magma\compile\rule\text\InfixRule.c^
+	.\magma\compile\rule\tree\TypeRule.c^
+	.\magma\compile\rule\tree\NodeRule.c^
+	.\magma\compile\rule\divide\StatementFolder.c^
+	.\magma\compile\rule\divide\FoldingDivider.c^
 	.\magma\collect\stream\head\Head.c^
 	.\magma\compile\source\PathSource.c^
-	.\magma\compile\rule\divide\StatementDivider.c^
 	.\magma\collect\list\List_.c^
+	.\magma\compile\rule\divide\ValueFolder.c^
 	.\magma\compile\lang\CLang.c^
 	.\magma\option\Option.c^
 	.\magma\compile\CompileError.c^
 	.\magma\process\ProcessError.c^
+	.\magma\compile\rule\tree\NodeListRule.c^
 	.\magma\collect\stream\head\EmptyHead.c^
 	.\magma\io\IOError.c^
 	.\magma\result\Result.c^
 	.\magma\compile\MapNode.c^
 	.\magma\result\Err.c^
 	.\magma\collect\stream\head\SingleHead.c^
+	.\magma\compile\rule\text\StringRule.c^
 	.\magma\option\Tuple.c^
+	.\magma\compile\rule\text\PrefixRule.c^
 	.\magma\collect\stream\Collector.c^
 	.\magma\compile\rule\divide\Divider.c^
+	.\magma\compile\rule\locate\FirstLocator.c^
+	.\magma\compile\lang\CommonLang.c^
+	.\magma\compile\rule\tree\OrRule.c^
 	.\magma\compile\context\StringContext.c^
 	.\magma\Main.c^
-	.\magma\compile\rule\StripRule.c^
+	.\magma\compile\rule\text\StripRule.c^
 	.\magma\result\Ok.c^
 	.\magma\compile\lang\r\SymbolRule.c^
-	.\magma\compile\rule\InfixRule.c^
 	 -o main.exe

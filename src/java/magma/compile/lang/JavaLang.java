@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.Node;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
@@ -161,10 +162,15 @@ public class JavaLang {
     private static Rule createTypeRule() {
         LazyRule type = new LazyRule();
         type.set(new OrRule(Lists.of(
+                createArrayRule(type),
                 createGenericRule(type),
                 createSymbolTypeRule()
         )));
         return type;
+    }
+
+    private static TypeRule createArrayRule(LazyRule type) {
+        return new TypeRule("array", new SuffixRule(new NodeRule("child", type), "[]"));
     }
 
     private static Rule createGenericRule(Rule type) {

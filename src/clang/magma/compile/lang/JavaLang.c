@@ -1,4 +1,5 @@
 #include "/../../../windows/collect/list/Lists.h"
+#include "/../../../magma/compile/Node.h"
 #include "/../../../magma/compile/rule/LazyRule.h"
 #include "/../../../magma/compile/rule/Rule.h"
 #include "/../../../magma/compile/rule/divide/CharDivider.h"
@@ -19,6 +20,8 @@
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 #include "/../../../static magma/compile/lang/CommonLang/*.h"
 struct JavaLang{}void temp(){
+}
+void temp(){
 }
 void temp(){
 }
