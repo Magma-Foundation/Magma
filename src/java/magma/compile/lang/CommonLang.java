@@ -3,6 +3,7 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.lang.r.SymbolRule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.locate.LastLocator;
 import magma.compile.rule.text.StringRule;
@@ -19,7 +20,7 @@ import magma.compile.rule.tree.TypeRule;
 
 public class CommonLang {
     static InfixRule createContentRule(Rule beforeContent, Rule childRule) {
-        Rule children = new NodeListRule("children", new FoldingDivider(new StatementFolder()), childRule);
+        Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), childRule);
         Rule right = new StripRule(new SuffixRule(children, "}"));
         return new InfixRule(beforeContent, "{", right, new FirstLocator());
     }
