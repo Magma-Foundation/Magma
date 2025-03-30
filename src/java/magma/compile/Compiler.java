@@ -5,7 +5,7 @@ import magma.collect.list.List_;
 import magma.compile.lang.CLang;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.RootTransformer;
-import magma.compile.lang.RootUnwrapper;
+import magma.compile.lang.RootFlattener;
 import magma.compile.transform.GroupTransformer;
 import magma.compile.transform.TreeTransformingStage;
 import magma.result.Result;
@@ -15,7 +15,7 @@ public class Compiler {
         return JavaLang.createJavaRootRule().parse(input)
                 .mapValue(tree -> new TreeTransformingStage(new RootTransformer()).transform(tree, namespace))
                 .mapValue(tree -> new TreeTransformingStage(new GroupTransformer()).transform(tree, namespace))
-                .mapValue(tree -> new TreeTransformingStage(new RootUnwrapper()).transform(tree, namespace))
+                .mapValue(tree -> new TreeTransformingStage(new RootFlattener()).transform(tree, namespace))
                 .flatMapValue(generate -> CLang.createCRootRule().generate(generate))
                 .mapValue(output -> complete(namespace, name, output));
     }
