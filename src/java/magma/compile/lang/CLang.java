@@ -17,7 +17,8 @@ import magma.compile.rule.tree.TypeRule;
 
 public class CLang {
     public static Rule createCRootRule() {
-        return new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createCRootSegmentRule());
+        Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createCRootSegmentRule());
+        return new TypeRule("root", children);
     }
 
     private static Rule createCRootSegmentRule() {

@@ -1,7 +1,6 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
-import magma.compile.Node;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
@@ -24,8 +23,9 @@ import magma.compile.rule.tree.TypeRule;
 import static magma.compile.lang.CommonLang.*;
 
 public class JavaLang {
-    public static NodeListRule createJavaRootRule() {
-        return new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createJavaRootSegmentRule());
+    public static Rule createJavaRootRule() {
+        Rule children = new NodeListRule("children", new FoldingDivider(new DecoratedFolder(new StatementFolder())), createJavaRootSegmentRule());
+        return new TypeRule("root", children);
     }
 
     private static OrRule createJavaRootSegmentRule() {
