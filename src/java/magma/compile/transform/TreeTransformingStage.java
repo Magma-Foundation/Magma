@@ -20,7 +20,7 @@ public class TreeTransformingStage implements TransformingStage {
         Node withNodeLists = withNodes.streamNodeLists().foldWithInitial(withNodes,
                 (node, tuple) -> mapNodeList(namespace, node, tuple));
 
-        return transformer.afterPass(withNodeLists);
+        return transformer.afterPass(withNodeLists).findValue().orElse(null);
     }
 
     private Node mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {

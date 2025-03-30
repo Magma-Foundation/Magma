@@ -4,10 +4,13 @@ import jvm.collect.list.Lists;
 import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
+import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.transform.Transformer;
 import magma.option.Tuple;
+import magma.result.Ok;
+import magma.result.Result;
 
 public class TransformAll implements Transformer {
     static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
@@ -21,8 +24,7 @@ public class TransformAll implements Transformer {
         }
     }
 
-    @Override
-    public Node afterPass(Node node) {
+    private Node afterPass0(Node node) {
         if (node.is("root")) {
             List_<Node> newChildren = node.findNode("value")
                     .orElse(new MapNode())
@@ -62,5 +64,10 @@ public class TransformAll implements Transformer {
         }
 
         return node;
+    }
+
+    @Override
+    public Result<Node, CompileError> afterPass(Node node) {
+        return new Ok<>(afterPass0(node));
     }
 }

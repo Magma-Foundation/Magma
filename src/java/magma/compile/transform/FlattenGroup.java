@@ -4,9 +4,12 @@ import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
+import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.option.Tuple;
+import magma.result.Ok;
+import magma.result.Result;
 
 public class FlattenGroup implements Transformer {
     private static Cache foldNodeProperty(Cache state, Tuple<String, Node> property) {
@@ -49,12 +52,16 @@ public class FlattenGroup implements Transformer {
         return new Tuple<>(currentPropertyValues.add(flattened.left()), flattened.right());
     }
 
-    @Override
-    public Node afterPass(Node node) {
+    private Node afterPass0(Node node) {
         Cache cache = new Cache();
         Cache foldedNodes = node.streamNodes().foldWithInitial(cache, FlattenGroup::foldNodeProperty);
         Cache foldedNodeLists = node.streamNodeLists().foldWithInitial(foldedNodes, FlattenGroup::flattenNodeList);
         return foldedNodeLists.tryGroup(node);
+    }
+
+    @Override
+    public Result<Node, CompileError> afterPass(Node node) {
+        return new Ok<>(afterPass0(node));
     }
 
     record Cache(
