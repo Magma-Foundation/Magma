@@ -30,8 +30,8 @@ public final class MapNode implements Node {
         this.nodeLists = nodeLists;
     }
 
-    private static String formatEntry(String key, String value) {
-        return "\t" + key + ": " + value;
+    private static String formatEntry(int depth, String key, String value) {
+        return "\t".repeat(depth + 1) + key + ": " + value;
     }
 
     @Override
@@ -56,18 +56,23 @@ public final class MapNode implements Node {
 
     @Override
     public String display() {
+        return format(0);
+    }
+
+    @Override
+    public String format(int depth) {
         String typeString = maybeType.map(type -> type + " ").orElse("");
 
         Option<String> joinedStrings = strings.stream()
-                .map(entry -> formatEntry(entry.left(), "\"" + entry.right() + "\""))
+                .map(entry -> formatEntry(depth, entry.left(), "\"" + entry.right() + "\""))
                 .collect(new Joiner(",\n"));
 
         Option<String> joinedNodes = nodes.stream()
-                .map(entry -> formatEntry(entry.left(), entry.right().display()))
+                .map(entry -> formatEntry(depth, entry.left(), entry.right().format(depth + 1)))
                 .collect(new Joiner(",\n"));
 
         Option<String> joinedNodeLists = nodeLists.stream()
-                .map(entry -> formatEntry(entry.left(), formatList(entry)))
+                .map(entry -> formatEntry(depth, entry.left(), formatList(entry, depth)))
                 .collect(new Joiner(",\n"));
 
         String joined = Streams.of(joinedStrings, joinedNodes, joinedNodeLists)
@@ -75,13 +80,15 @@ public final class MapNode implements Node {
                 .collect(new Joiner(",\n"))
                 .orElse("");
 
-        return typeString + "{\n" + joined + "}";
+        return typeString + "{\n" + joined + "\n" +
+                "\t".repeat(depth) +
+                "}";
     }
 
-    private String formatList(Tuple<String, List_<Node>> entry) {
+    private String formatList(Tuple<String, List_<Node>> entry, int depth) {
         return "[" + entry.right()
                 .stream()
-                .map(Node::display)
+                .map(node -> node.format(depth + 1))
                 .collect(new Joiner(","))
                 .orElse("") + "]";
     }

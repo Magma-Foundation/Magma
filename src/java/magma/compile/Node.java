@@ -18,6 +18,8 @@ public interface Node {
 
     String display();
 
+    String format(int depth);
+
     Node mapNodeList(String propertyKey, Function<List_<Node>, List_<Node>> mapper);
 
     boolean is(String type);
