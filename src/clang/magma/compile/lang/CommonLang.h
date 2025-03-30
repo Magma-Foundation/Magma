@@ -1,7 +1,9 @@
 #ifndef magma_compile_lang_CommonLang
 #define magma_compile_lang_CommonLang
 #include "../../../windows/collect/list/Lists.h"
+#include "../../../magma/compile/rule/LazyRule.h"
 #include "../../../magma/compile/rule/OptionalNodeListRule.h"
+#include "../../../magma/compile/rule/OptionalNodeRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
 #include "../../../magma/compile/rule/divide/DecoratedFolder.h"
@@ -25,19 +27,28 @@ struct CommonLang{
 struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule);
 struct Rule createBlockRule(struct Rule childRule);
 struct TypeRule createSymbolTypeRule();
-struct StripRule createSymbolRule(struct String propertyKey);
+struct Rule createSymbolRule(struct String propertyKey);
 struct Rule createDefinitionRule(struct Rule type);
-struct NodeListRule createParamsRule(struct Rule definition);
+struct Rule createParamsRule(struct Rule definition);
 struct TypeRule createWhitespaceRule();
 struct TypeRule createAssignmentRule();
-struct TypeRule createInvocationRule();
 struct TypeRule createElseRule();
 struct TypeRule createPostfixRule();
 struct TypeRule createForRule();
 struct TypeRule createIfRule();
-struct TypeRule createReturnRule();
+struct TypeRule createReturnRule(struct Rule value);
 struct TypeRule createWhileRule();
 struct Rule createGenericRule(struct Rule type);
 struct Rule createNamedWithTypeParams();
+struct TypeRule createSymbolValueRule();
+struct TypeRule createAddRule(struct LazyRule value);
+struct TypeRule createInvocationRule(struct Rule value);
+struct NodeListRule createArgumentsRule(struct Rule value);
+struct TypeRule createAccessRule(struct String type, struct String infix, struct Rule value);
+struct TypeRule createDataAccess(struct String type, struct String infix, struct Rule value, struct Rule property);
+struct TypeRule createStringRule();
+struct TypeRule createTernaryRule(struct LazyRule value);
+struct TypeRule createNumberRule();
+struct TypeRule createNotRule(struct LazyRule value);
 #endif
 
