@@ -11,6 +11,6 @@
 #include "../../../magma/result/Result.h"
 struct FlattenRoot{};
 struct Node afterPass0(struct Node node);
-Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node);
-Result<struct Node, struct CompileError> beforePass(struct State state, struct Node node);
+struct Result_Node_CompileError afterPass(struct State state, struct Node node);
+struct Result_Node_CompileError beforePass(struct State state, struct Node node);
 #endif

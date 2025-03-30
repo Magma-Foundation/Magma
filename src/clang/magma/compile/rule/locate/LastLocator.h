@@ -4,5 +4,5 @@
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
 struct LastLocator{};
-Option<struct Integer> locate(struct String input, struct String infix);
+struct Option_Integer locate(struct String input, struct String infix);
 #endif

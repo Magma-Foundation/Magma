@@ -9,8 +9,8 @@ int isLevel();
 struct DividingState exit();
 struct DividingState enter();
 struct DividingState advance();
-List_<struct String> segments();
+struct List__String segments();
 int isShallow();
-Option<Tuple<struct Character, struct DividingState>> append();
-Option<struct DividingState> appendAndDiscard();
+struct Option_Tuple_Character_DividingState append();
+struct Option_DividingState appendAndDiscard();
 #endif

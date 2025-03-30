@@ -1,4 +1,6 @@
 #include "Source.h"
-List_<struct String> computeNamespace();
+expand List__String
+expand Result_String_IOError
+struct List__String computeNamespace();
 struct String computeName();
-Result<struct String, struct IOError> readString();
+struct Result_String_IOError readString();

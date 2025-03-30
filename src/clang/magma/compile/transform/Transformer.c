@@ -1,3 +1,4 @@
 #include "Transformer.h"
-Result<struct Node, struct CompileError> beforePass(struct State state, struct Node node);
-Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node);
+expand Result_Node_CompileError
+expand Result_Node_CompileError
+struct Result_Node_CompileError beforePass(struct State state, struct Node node}{return new Ok<>(node);}struct Result_Node_CompileError afterPass(struct State state, struct Node node);

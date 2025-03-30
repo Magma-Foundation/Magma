@@ -10,9 +10,9 @@
 #include "../../../magma/option/Some.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-struct LazyRule{Option<struct Rule> child};
-Result<struct Node, struct CompileError> parse(struct String input);
-Result<struct String, struct CompileError> generate(struct Node node);
-Result<struct T, struct CompileError> withChildSet(Result<struct T, struct CompileError>(*mapper)(struct Rule), struct Context context);
+struct LazyRule{struct Option_Rule child};
+struct Result_Node_CompileError parse(struct String input);
+struct Result_String_CompileError generate(struct Node node);
+struct Result_T_CompileError withChildSet(struct Result_T_CompileError(*mapper)(struct Rule), struct Context context);
 struct void set(struct Rule child);
 #endif

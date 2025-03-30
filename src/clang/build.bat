@@ -84,6 +84,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\rule\text\InfixRule.c^
 	.\magma\compile\rule\text\InfixRule.c^
+	.\magma\compile\ExpandGenerics.c^
+	.\magma\compile\ExpandGenerics.c^
 	.\magma\compile\rule\tree\TypeRule.c^
 	.\magma\compile\rule\tree\TypeRule.c^
 	.\magma\compile\rule\tree\NodeRule.c^

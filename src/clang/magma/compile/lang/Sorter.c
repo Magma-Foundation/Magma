@@ -1,6 +1,9 @@
 #include "Sorter.h"
-struct Node asRoot(List_<struct Node> left}{Node node1 = new MapNode().withNodeList(, left);
-        return new MapNode().withNode(, node1);}Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node}{if (node.is()) {
+expand List__Node
+expand Result_Node_CompileError
+expand Result_Node_CompileError
+struct Node asRoot(struct List__Node left}{Node node1 = new MapNode().withNodeList(, left);
+        return new MapNode().withNode(, node1);}struct Result_Node_CompileError afterPass(struct State state, struct Node node}{if (node.is()) {
             List_<Node> children = node.findNode().orElse(new MapNode())
                     .findNodeList().orElse(Lists.empty());
 
@@ -41,4 +44,4 @@ struct Node asRoot(List_<struct Node> left}{Node node1 = new MapNode().withNodeL
             return new Ok<>(separated);
         }
 
-        return new Ok<>(node);}Result<struct Node, struct CompileError> beforePass(struct State state, struct Node node}{return new Ok<>(node);}
+        return new Ok<>(node);}struct Result_Node_CompileError beforePass(struct State state, struct Node node}{return new Ok<>(node);}

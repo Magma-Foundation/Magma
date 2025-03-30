@@ -34,7 +34,8 @@ public class CLang {
                 new TypeRule("define", new PrefixRule("#define ", new SuffixRule(new StringRule("value"), "\n"))),
                 new TypeRule("endif", new PrefixRule("#endif\n", new EmptyRule())),
                 createStructRule(),
-                createFunctionRule()
+                createFunctionRule(),
+                new TypeRule("expansion", new PrefixRule("expand ", new SuffixRule(new StringRule("name"), "\n")))
         ));
     }
 

@@ -1,5 +1,16 @@
 #include "TransformAll.h"
-Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<struct Node>, List_<struct Node>> tuple, struct Node element}{List_<Node> definitions = tuple.left();
+expand Tuple_List__Node_List__Node
+expand List__Node
+expand List__Node
+expand Tuple_List__Node_List__Node
+expand List__Node
+expand List__Node
+expand Result_Node_CompileError
+expand Result_List__Node_CompileError
+expand List__Node
+expand Result_Node_CompileError
+expand Result_Node_CompileError
+struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element}{List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
 
         if (element.is()) return new Tuple<>(definitions.add(element), others);if (element.is()) {
@@ -7,9 +18,9 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
             return new Tuple<>(definitions.add(definition), others);
         }
 
-        return new Tuple<>(definitions, others.add(element));}Result<struct Node, struct CompileError> find(struct Node node, struct String propertyKey}{return node.findNode(propertyKey)
+        return new Tuple<>(definitions, others.add(element));}struct Result_Node_CompileError find(struct Node node, struct String propertyKey}{return node.findNode(propertyKey)
                 .<Result<Node, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(node))));}Result<List_<struct Node>, struct CompileError> findNodeList(struct Node value, struct String propertyKey}{return value.findNodeList(propertyKey)
+                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(node))));}struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey}{return value.findNodeList(propertyKey)
                 .<Result<List_<Node>, CompileError>>map(Ok::new)
                 .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(value))));}int isFunctionalImport(struct Node child}{if (!child.is()) return false;
 
@@ -21,7 +32,7 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
                 .collect(new ListCollector<>());
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of(, , ));}int hasTypeParams(struct Node child}{List_<Node> typeParams = child.findNodeList().orElse(Lists.empty());
-        return !typeParams.isEmpty();}Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node}{if (node.is() || node.is() || node.is()) {
+        return !typeParams.isEmpty();}struct Result_Node_CompileError afterPass(struct State state, struct Node node}{if (node.is() || node.is() || node.is()) {
             return find(node, ).flatMapValue(value -> {
                 return findNodeList(value, ).mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
@@ -73,28 +84,6 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
                 return node.retype().withNodeList(, path);
             });
         }if (node.is()) {
-            Node type = node.findNode().orElse(new MapNode());
-            if (type.is()) {
-                String value = type.findNodeList()
-                        .orElse(Lists.empty())
-                        .get(0)
-                        .findString()
-                        .orElse();
-
-                if (value.equals()) {
-                    List_<Node> arguments = type.findNodeList()
-                            .orElse(Lists.empty());
-
-                    Node param = arguments.get(0);
-                    Node returns = arguments.get(1);
-
-                    return new Ok<>(node.retype()
-                            .removeNode()
-                            .withNode(, returns)
-                            .withNodeList(, Lists.of(param)));
-                }
-            }
-        }if (node.is()) {
             String oldValue = node.findString().orElse();
             if (oldValue.equals()) {
                 return new Ok<>(node.withString(, ));
@@ -105,31 +94,16 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
             return new Ok<>(node.retype());
         }
 
-        return new Ok<>(node);}struct String stringify(struct Node node}{if (node.is()) {
-            String caller = node.findNodeList()
-                    .orElse(Lists.empty())
-                    .stream()
-                    .map(element -> element.findString())
-                    .flatMap(Streams::fromOption)
-                    .collect(new Joiner())
-                    .orElse();
+        return new Ok<>(node);}struct Result_Node_CompileError beforePass(struct State state, struct Node node}{if (node.is()) {
+            Node content = node.findNode().orElse(new MapNode());
+            List_<Node> children = content.findNodeList().orElse(Lists.empty());
 
-            return node.findNodeList().orElse(new JavaList<>())
-                    .stream()
-                    .map(this::stringify)
-                    .collect(new Joiner())
-                    .map(arguments -> caller +  + arguments)
-                    .orElse(caller);
+            List_<Node> newChildren = children.stream()
+                    .filter(child -> !isFunctionalImport(child) && !child.is())
+                    .collect(new ListCollector<>());
+
+            Node withChildren = content.withNodeList(, newChildren);
+            return new Ok<>(node.withNode(, withChildren));
         }
 
-        return node.findString().orElse();}Result<struct Node, struct CompileError> beforePass(struct State state, struct Node node}{if (!node.is()) return new Ok<>(node);
-
-        Node content = node.findNode().orElse(new MapNode());
-        List_<Node> children = content.findNodeList().orElse(Lists.empty());
-
-        List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is() && !hasTypeParams(child))
-                .collect(new ListCollector<>());
-
-        Node withChildren = content.withNodeList(, newChildren);
-        return new Ok<>(node.withNode(, withChildren));}
+        return new Ok<>(node);}

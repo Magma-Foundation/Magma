@@ -5,5 +5,5 @@
 #include "../../../../magma/option/Some.h"
 struct RangeHead{struct int extentstruct int counter};
 struct public RangeHead(struct int extent);
-Option<struct Integer> next();
+struct Option_Integer next();
 #endif

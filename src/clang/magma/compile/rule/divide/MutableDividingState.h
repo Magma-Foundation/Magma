@@ -4,16 +4,16 @@
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Tuple.h"
-struct MutableDividingState{List_<struct Character> queueList_<struct String> segmentsstruct StringBuilder bufferstruct int depth};
-struct public MutableDividingState(List_<struct Character> queue);
-struct public MutableDividingState(List_<struct Character> queue, List_<struct String> segments, struct StringBuilder buffer, struct int depth);
+struct MutableDividingState{struct List__Character queuestruct List__String segmentsstruct StringBuilder bufferstruct int depth};
+struct public MutableDividingState(struct List__Character queue);
+struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, struct int depth);
 struct DividingState append(struct char c);
 int isLevel();
 struct DividingState exit();
 struct DividingState enter();
 struct DividingState advance();
-List_<struct String> segments();
+struct List__String segments();
 int isShallow();
-Option<Tuple<struct Character, struct DividingState>> append();
-Option<struct DividingState> appendAndDiscard();
+struct Option_Tuple_Character_DividingState append();
+struct Option_DividingState appendAndDiscard();
 #endif

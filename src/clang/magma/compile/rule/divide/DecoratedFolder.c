@@ -1,5 +1,7 @@
 #include "DecoratedFolder.h"
-Option<struct DividingState> processSlash(Tuple<struct Character, struct DividingState> tuple}{if (tuple.left() == ) {
+expand Option_DividingState
+expand Tuple_Character_DividingState
+struct Option_DividingState processSlash(struct Tuple_Character_DividingState tuple}{if (tuple.left() == ) {
             return tuple.right().appendAndDiscard();
         }else {
             return new Some<>(tuple.right());

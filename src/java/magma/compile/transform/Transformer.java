@@ -2,10 +2,13 @@ package magma.compile.transform;
 
 import magma.compile.CompileError;
 import magma.compile.Node;
+import magma.result.Ok;
 import magma.result.Result;
 
 public interface Transformer {
-    Result<Node, CompileError> beforePass(State state, Node node);
+    default Result<Node, CompileError> beforePass(State state, Node node) {
+        return new Ok<>(node);
+    }
 
     Result<Node, CompileError> afterPass(State state, Node node);
 }

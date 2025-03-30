@@ -18,6 +18,11 @@ public class Compiler {
     public static Result<Map_<String, String>, CompileError> compile(String input, List_<String> namespace, String name) {
         State state = new State(namespace, name);
         return JavaLang.createJavaRootRule().parse(input)
+                .flatMapValue(tree -> new TreeTransformingStage(new ExpandGenerics()).transform(tree, state))
+                .flatMapValue(tree -> {
+                    Result<Node, CompileError> transform = new TreeTransformingStage(new FlattenGroup()).transform(tree, state);
+                    return transform;
+                })
                 .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, state))

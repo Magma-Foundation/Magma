@@ -1,10 +1,14 @@
 #include "DividingState.h"
+expand List__String
+expand Option_Tuple_Character_DividingState
+expand Tuple_Character_DividingState
+expand Option_DividingState
 struct DividingState append(struct char c);
 int isLevel();
 struct DividingState exit();
 struct DividingState enter();
 struct DividingState advance();
-List_<struct String> segments();
+struct List__String segments();
 int isShallow();
-Option<Tuple<struct Character, struct DividingState>> append();
-Option<struct DividingState> appendAndDiscard();
+struct Option_Tuple_Character_DividingState append();
+struct Option_DividingState appendAndDiscard();

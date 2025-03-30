@@ -4,7 +4,7 @@
 #include "../../../magma/io/IOError.h"
 #include "../../../magma/result/Result.h"
 struct Source{};
-List_<struct String> computeNamespace();
+struct List__String computeNamespace();
 struct String computeName();
-Result<struct String, struct IOError> readString();
+struct Result_String_IOError readString();
 #endif

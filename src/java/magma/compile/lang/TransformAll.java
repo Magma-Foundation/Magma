@@ -122,30 +122,6 @@ public class TransformAll implements Transformer {
             });
         }
 
-        if (node.is("definition")) {
-            Node type = node.findNode("type").orElse(new MapNode());
-            if (type.is("generic")) {
-                String value = type.findNodeList("base")
-                        .orElse(Lists.empty())
-                        .get(0)
-                        .findString("value")
-                        .orElse("");
-
-                if (value.equals("Function")) {
-                    List_<Node> arguments = type.findNodeList("arguments")
-                            .orElse(Lists.empty());
-
-                    Node param = arguments.get(0);
-                    Node returns = arguments.get(1);
-
-                    return new Ok<>(node.retype("functional-definition")
-                            .removeNode("type")
-                            .withNode("return", returns)
-                            .withNodeList("params", Lists.of(param)));
-                }
-            }
-        }
-
         if (node.is("symbol-type")) {
             String oldValue = node.findString("value").orElse("");
             if (oldValue.equals("boolean")) {
@@ -162,39 +138,20 @@ public class TransformAll implements Transformer {
         return new Ok<>(node);
     }
 
-    private String stringify(Node node) {
-        if (node.is("generic")) {
-            String caller = node.findNodeList("base")
-                    .orElse(Lists.empty())
-                    .stream()
-                    .map(element -> element.findString("value"))
-                    .flatMap(Streams::fromOption)
-                    .collect(new Joiner("_"))
-                    .orElse("");
-
-            return node.findNodeList("arguments").orElse(new JavaList<>())
-                    .stream()
-                    .map(this::stringify)
-                    .collect(new Joiner("_"))
-                    .map(arguments -> caller + "_" + arguments)
-                    .orElse(caller);
-        }
-
-        return node.findString("value").orElse("?");
-    }
-
     @Override
     public Result<Node, CompileError> beforePass(State state, Node node) {
-        if (!node.is("root")) return new Ok<>(node);
+        if (node.is("root")) {
+            Node content = node.findNode("content").orElse(new MapNode());
+            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
 
-        Node content = node.findNode("content").orElse(new MapNode());
-        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+            List_<Node> newChildren = children.stream()
+                    .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                    .collect(new ListCollector<>());
 
-        List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is("package") && !hasTypeParams(child))
-                .collect(new ListCollector<>());
+            Node withChildren = content.withNodeList("children", newChildren);
+            return new Ok<>(node.withNode("content", withChildren));
+        }
 
-        Node withChildren = content.withNodeList("children", newChildren);
-        return new Ok<>(node.withNode("content", withChildren));
+        return new Ok<>(node);
     }
 }

@@ -7,6 +7,6 @@
 #include "../../../magma/result/Result.h"
 struct OptionalNodeRule{struct OrRule rulestruct String propertyKeystruct Rule ifPresentstruct Rule ifEmpty};
 struct public OptionalNodeRule(struct String propertyKey, struct Rule ifPresent, struct Rule ifEmpty);
-Result<struct Node, struct CompileError> parse(struct String input);
-Result<struct String, struct CompileError> generate(struct Node node);
+struct Result_Node_CompileError parse(struct String input);
+struct Result_String_CompileError generate(struct Node node);
 #endif

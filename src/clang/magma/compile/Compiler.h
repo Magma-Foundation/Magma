@@ -14,7 +14,7 @@
 #include "../../magma/option/Tuple.h"
 #include "../../magma/result/Result.h"
 struct Compiler{};
-Result<Map_<struct String, struct String>, struct CompileError> compile(struct String input, List_<struct String> namespace, struct String name);
-Result<Map_<struct String, struct String>, struct CompileError> generateRoots(struct Node roots);
-Result<Map_<struct String, struct String>, struct CompileError> generateTarget(Map_<struct String, struct String> current, Tuple<struct String, struct Node> tuple);
+struct Result_Map__String_String_CompileError compile(struct String input, struct List__String namespace, struct String name);
+struct Result_Map__String_String_CompileError generateRoots(struct Node roots);
+struct Result_Map__String_String_CompileError generateTarget(struct Map__String_String current, struct Tuple_String_Node tuple);
 #endif

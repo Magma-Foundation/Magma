@@ -5,7 +5,8 @@ struct Rule createCRootRule(}{return new TypeRule(, CommonLang.createBlockRule(c
                 new TypeRule(, new PrefixRule(, new SuffixRule(new StringRule(), ))),
                 new TypeRule(, new PrefixRule(, new EmptyRule())),
                 createStructRule(),
-                createFunctionRule()
+                createFunctionRule(),
+                new TypeRule(, new PrefixRule(, new SuffixRule(new StringRule(), )))
         ));}struct TypeRule createFunctionRule(}{OrRule definitionRule = createDefinitionsRule();
         NodeRule definition = new NodeRule(, definitionRule);
         NodeListRule params = CommonLang.createParamsRule(definitionRule);

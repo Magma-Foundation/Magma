@@ -4,5 +4,5 @@
 #include "../../../magma/compile/Node.h"
 #include "../../../magma/result/Result.h"
 struct TransformingStage{};
-Result<struct Node, struct CompileError> transform(struct Node root, struct State state);
+struct Result_Node_CompileError transform(struct Node root, struct State state);
 #endif

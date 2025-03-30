@@ -1,2 +1,3 @@
 #include "Locator.h"
-Option<struct Integer> locate(struct String input, struct String infix);
+expand Option_Integer
+struct Option_Integer locate(struct String input, struct String infix);

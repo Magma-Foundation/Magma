@@ -1,2 +1,4 @@
 #include "State.h"
-List_<struct String> getNamespace(}{return namespace;}
+expand List__String
+expand List__String
+struct List__String getNamespace(}{return namespace;}
