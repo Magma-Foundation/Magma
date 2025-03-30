@@ -24,6 +24,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\lang\TypeSeparatorLocator.c^
 	.\magma\compile\Node.c^
 	.\magma\compile\Node.c^
+	.\magma\compile\lang\SymbolRule.c^
+	.\magma\compile\lang\SymbolRule.c^
 	.\magma\io\Path_.c^
 	.\magma\io\Path_.c^
 	.\magma\option\None.c^
@@ -146,6 +148,4 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\text\StripRule.c^
 	.\magma\result\Ok.c^
 	.\magma\result\Ok.c^
-	.\magma\compile\lang\r\SymbolRule.c^
-	.\magma\compile\lang\r\SymbolRule.c^
 	 -o main.exe
