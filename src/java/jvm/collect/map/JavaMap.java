@@ -55,4 +55,9 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
         return other.stream().<Map_<K, V>>foldWithInitial(this,
                 (current, entry) -> current.with(entry.left(), entry.right()));
     }
+
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 }

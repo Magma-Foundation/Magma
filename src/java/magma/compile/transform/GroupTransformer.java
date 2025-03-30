@@ -23,8 +23,10 @@ public class GroupTransformer implements Transformer {
         if (!element.is("group")) return new Tuple<>(element, cache);
 
         Node child = element.findNode("child").orElse(new MapNode());
-        Cache groupCategories = element.streamNodeLists().foldWithInitial(cache, GroupTransformer::flattenCategory);
-        return new Tuple<>(child, groupCategories);
+        Tuple<Node, Cache> newChild = flattenNode(cache, child);
+
+        Cache groupCategories = element.streamNodeLists().foldWithInitial(newChild.right(), GroupTransformer::flattenCategory);
+        return new Tuple<>(newChild.left(), groupCategories);
     }
 
     private static Cache flattenCategory(Cache current, Tuple<String, List_<Node>> category) {
@@ -52,7 +54,7 @@ public class GroupTransformer implements Transformer {
         Cache cache = new Cache();
         Cache foldedNodes = node.streamNodes().foldWithInitial(cache, GroupTransformer::foldNodeProperty);
         Cache foldedNodeLists = node.streamNodeLists().foldWithInitial(foldedNodes, GroupTransformer::flattenNodeList);
-        return foldedNodeLists.toGroup(node);
+        return foldedNodeLists.tryGroup(node);
     }
 
     record Cache(
@@ -76,9 +78,13 @@ public class GroupTransformer implements Transformer {
             return new Cache(nodes, nodeLists.with(propertyKey, propertyValues), categories);
         }
 
-        public Node toGroup(Node node) {
+        public Node tryGroup(Node node) {
             Node with = node.withNodes(nodes).withNodeLists(nodeLists);
-            return new MapNode("group").withNode("child", with).withNodeLists(categories);
+            if (categories.isEmpty()) {
+                return with;
+            } else {
+                return new MapNode("group").withNode("child", with).withNodeLists(categories);
+            }
         }
     }
 }
