@@ -36,7 +36,16 @@ public class JavaCTransformer implements Transformer {
             return Streams.of(node.retype("include").withNodeList("path", path));
         }
 
-        if (node.is("class")) return Streams.of(node.retype("struct"));
+        if (node.is("class")) {
+            List_<Node> children = node.findNodeList("children").orElse(Lists.empty());
+
+            Tuple<List_<Node>, List_<Node>> tuple = children.stream()
+                    .map(JavaCTransformer::transformClassMember)
+                    .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), JavaCTransformer::foldNode);
+
+            Node newStruct = node.retype("struct").withNodeList("children", tuple.left());
+            return Lists.<Node>empty().add(newStruct).addAll(tuple.right()).stream();
+        }
 
         if (node.is("interface")) {
             List_<Node> children = node.findNodeList("children").orElse(Lists.empty());

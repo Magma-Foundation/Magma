@@ -5,6 +5,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DivideFolder;
 import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
 import magma.compile.rule.text.SuffixRule;
@@ -21,13 +22,18 @@ public class CLang {
     private static Rule createCRootSegmentRule() {
         return new OrRule(Lists.of(
                 createIncludeRule(),
-                createStructRule()
+                createStructRule(),
+                createFunctionRule()
         ));
+    }
+
+    private static TypeRule createFunctionRule() {
+        return new TypeRule("function", new PrefixRule("void temp(){\n}\n", new EmptyRule()));
     }
 
     private static TypeRule createStructRule() {
         StringRule name = new StringRule("name");
-        return new TypeRule("struct", new PrefixRule("struct ", CommonLang.withContent(name, createStructMemberRule())));
+        return new TypeRule("struct", new PrefixRule("struct ", CommonLang.createContentRule(name, createStructMemberRule())));
     }
 
     private static OrRule createStructMemberRule() {

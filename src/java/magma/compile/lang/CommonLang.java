@@ -13,7 +13,7 @@ import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.tree.TypeRule;
 
 public class CommonLang {
-    static InfixRule withContent(Rule beforeContent, Rule childRule) {
+    static InfixRule createContentRule(Rule beforeContent, Rule childRule) {
         Rule children = new NodeListRule("children", new FoldingDivider(new DivideFolder()), childRule);
         Rule right = new StripRule(new SuffixRule(children, "}"));
         return new InfixRule(beforeContent, "{", right, new FirstLocator());

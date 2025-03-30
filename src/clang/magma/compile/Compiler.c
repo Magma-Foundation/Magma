@@ -4,4 +4,7 @@
 #include "/../../magma/compile/lang/JavaCTransformer.h"
 #include "/../../magma/compile/lang/JavaLang.h"
 #include "/../../magma/result/Result.h"
-struct Compiler {};
+struct Compiler{}void temp(){
+}
+void temp(){
+}
