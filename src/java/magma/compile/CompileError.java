@@ -25,6 +25,7 @@ public class CompileError implements Error {
     public String display() {
         String joined = errors.stream()
                 .map(CompileError::display)
+                .map(value -> "\n" + value)
                 .collect(new Joiner(""))
                 .orElse("");
 
