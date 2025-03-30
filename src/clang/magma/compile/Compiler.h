@@ -28,5 +28,13 @@ struct Compiler{
 struct Result_Map__String_String_CompileError compile(struct String input, struct List__String namespace, struct String name);
 struct Result_Map__String_String_CompileError generateRoots(struct Node roots);
 struct Result_Map__String_String_CompileError generateTarget(struct Map__String_String current, struct Tuple_String_Node tuple);
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
+auto __lambda7__();
 #endif
 

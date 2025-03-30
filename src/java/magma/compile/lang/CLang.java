@@ -45,10 +45,10 @@ public class CLang {
         return new TypeRule("expansion", new PrefixRule("// expand ", new SuffixRule(childRule, "\n")));
     }
 
-    private static TypeRule createFunctionRule() {
-        OrRule definitionRule = createDefinitionsRule();
-        NodeRule definition = new NodeRule("definition", definitionRule);
-        NodeListRule params = CommonLang.createParamsRule(definitionRule);
+    private static Rule createFunctionRule() {
+        Rule definitionRule = createDefinitionsRule();
+        Rule definition = new NodeRule("definition", definitionRule);
+        Rule params = CommonLang.createParamsRule(definitionRule);
 
         Rule block = CommonLang.createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule());
         Rule block1 = new OptionalNodeRule("content",

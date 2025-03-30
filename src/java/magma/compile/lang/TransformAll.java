@@ -16,6 +16,8 @@ import magma.result.Ok;
 import magma.result.Result;
 
 public class TransformAll implements Transformer {
+    private int counter = 0;
+
     static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
         List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
@@ -129,6 +131,29 @@ public class TransformAll implements Transformer {
 
         if (node.is("array")) {
             return new Ok<>(node.retype("ref"));
+        }
+
+        if (node.is("lambda")) {
+            Node child = node.findNode("child")
+                    .orElse(new MapNode());
+
+            String generatedName = "__lambda" + counter + "__";
+            counter++;
+
+            Node definition = new MapNode("definition")
+                    .withString("name", generatedName)
+                    .withNode("type", new MapNode("symbol-type").withString("value", "auto"));
+
+            Node function = new MapNode("function")
+                    .withNode("definition", definition);
+
+            return new Ok<>(new MapNode("group")
+                    .withNode("child", new MapNode("symbol-value").withString("value", generatedName))
+                    .withNodeList("functions", Lists.of(function)));
+        }
+
+        if (node.is("method-access")) {
+            return new Ok<>(node.retype("data-access"));
         }
 
         return new Ok<>(node);

@@ -8,4 +8,6 @@ struct List__String segments();
 int isShallow();
 struct Option_Tuple_Character_DividingState append();
 struct Option_DividingState appendAndDiscard();
+struct Option_Tuple_Character_DividingState pop();
+struct Option_Character peek();
 

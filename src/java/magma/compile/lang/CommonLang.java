@@ -3,6 +3,7 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalNodeListRule;
+import magma.compile.rule.OptionalNodeRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DecoratedFolder;
@@ -44,20 +45,21 @@ public class CommonLang {
 
     static Rule createDefinitionRule(Rule type) {
         NodeListRule modifiers = new NodeListRule("modifiers", new CharDivider(' '), new StringRule("modifier"));
+
         NodeRule typeProperty = new NodeRule("type", type);
-        Rule beforeName = new OrRule(Lists.of(
+        Rule beforeName = new OptionalNodeRule("modifiers",
                 new InfixRule(modifiers, " ", typeProperty, new TypeSeparatorLocator()),
                 typeProperty
-        ));
+        );
 
         return new StripRule(new InfixRule(beforeName, " ", createSymbolRule("name"), new LastLocator()));
     }
 
-    static NodeListRule createParamsRule(Rule definition) {
-        return new NodeListRule("params", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
+    static Rule createParamsRule(Rule definition) {
+        return new OptionalNodeListRule("params", new NodeListRule("params", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
                 createWhitespaceRule(),
                 definition
-        )));
+        ))), new EmptyRule());
     }
 
     static TypeRule createWhitespaceRule() {

@@ -135,7 +135,7 @@ public class JavaLang {
 
     private static Rule createLambdaRule(Rule value) {
         Rule left = createSymbolRule("param-name");
-        return new TypeRule("lambda", new InfixRule(left, "->", new NodeRule("value", value), new FirstLocator()));
+        return new TypeRule("lambda", new InfixRule(left, "->", new NodeRule("child", value), new FirstLocator()));
     }
 
     private static TypeRule createConstructionRule(LazyRule value) {
