@@ -35,7 +35,6 @@ public class Main {
                 .match(Main::runWithFiles, Some::new)
                 .ifPresent(error -> System.err.println(error.display()));
     }
-                                            .
 
     private static Option<ApplicationError> runWithFiles(Set_<Path_> files) {
         Set_<Path_> collect = files.stream()
