@@ -89,7 +89,7 @@ public final class MapNode implements Node {
         return "[" + entry.right()
                 .stream()
                 .map(node -> node.format(depth + 1))
-                .collect(new Joiner(","))
+                .collect(new Joiner(", "))
                 .orElse("") + "]";
     }
 

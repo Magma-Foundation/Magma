@@ -65,9 +65,16 @@ public class JavaLang {
     private static Rule createClassMemberRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                new TypeRule("method", new InfixRule(new NodeRule("definition", createDefinitionRule()), "(", new StringRule("with-params"), new FirstLocator())),
+                createMethodRule(),
                 new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";"))
         ));
+    }
+
+    private static Rule createMethodRule() {
+        Rule definition = new NodeRule("definition", createDefinitionRule());
+        Rule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), createDefinitionRule());
+        Rule right = new SuffixRule(params, ");");
+        return new TypeRule("method", new InfixRule(definition, "(", right, new FirstLocator()));
     }
 
     private static TypeRule createWhitespaceRule() {
@@ -76,7 +83,12 @@ public class JavaLang {
 
     private static Rule createDefinitionRule() {
         NodeListRule modifiers = new NodeListRule("modifiers", new CharDivider(' '), new StringRule("modifier"));
-        Rule beforeName = new InfixRule(modifiers, " ", new NodeRule("type", createTypeRule()), new TypeSeparatorLocator());
+        NodeRule type = new NodeRule("type", createTypeRule());
+        Rule beforeName = new OrRule(Lists.of(
+                new InfixRule(modifiers, " ", type, new TypeSeparatorLocator()),
+                type
+        ));
+
         return new StripRule(new InfixRule(beforeName, " ", createSymbolRule("name"), new LastLocator()));
     }
 

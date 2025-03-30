@@ -19,7 +19,7 @@ public record OrRule(List_<Rule> rules) implements Rule {
         return rules.stream()
                 .foldWithInitial(new OrState<T>(), (orState, rule) -> applicator.apply(rule).match(orState::withValue, orState::withError))
                 .toResult()
-                .<Result<T, CompileError>>match(Ok::new, errors -> new Err<>(new CompileError("Invalid root segment", context.get(), errors)));
+                .<Result<T, CompileError>>match(Ok::new, errors -> new Err<>(new CompileError("No valid combination present", context.get(), errors)));
     }
 
     @Override
