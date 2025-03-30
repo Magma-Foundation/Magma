@@ -24,7 +24,8 @@ public class TransformAll implements Transformer {
         }
     }
 
-    private Node afterPass0(Node node) {
+    @Override
+    public Result<Node, CompileError> afterPass(Node node) {
         if (node.is("root")) {
             List_<Node> newChildren = node.findNode("value")
                     .orElse(new MapNode())
@@ -40,8 +41,8 @@ public class TransformAll implements Transformer {
                     })
                     .collect(new ListCollector<>());
 
-            return node.withNode("content", new MapNode("block")
-                    .withNodeList("children", newChildren));
+            return new Ok<>(node.withNode("content", new MapNode("block")
+                    .withNodeList("children", newChildren)));
         }
 
         if (node.is("interface")) {
@@ -54,20 +55,15 @@ public class TransformAll implements Transformer {
 
             Node withChildren = node.retype("struct").withNode("content", new MapNode("block").withNodeList("children", children.left()));
 
-            return new MapNode("group")
+            return new Ok<>(new MapNode("group")
                     .withNode("child", withChildren)
-                    .withNodeList("functions", children.right());
+                    .withNodeList("functions", children.right()));
         }
 
         if (node.is("method")) {
-            return node.retype("function");
+            return new Ok<>(node.retype("function"));
         }
 
-        return node;
-    }
-
-    @Override
-    public Result<Node, CompileError> afterPass(Node node) {
-        return new Ok<>(afterPass0(node));
+        return new Ok<>(node);
     }
 }
