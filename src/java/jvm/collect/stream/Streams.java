@@ -27,4 +27,8 @@ public class Streams {
     public static <T> Stream<T> of(T... elements) {
         return fromNativeList(Arrays.asList(elements));
     }
+
+    public static Stream<Character> fromString(String value) {
+        return new HeadedStream<>(new RangeHead(value.length())).map(value::charAt);
+    }
 }

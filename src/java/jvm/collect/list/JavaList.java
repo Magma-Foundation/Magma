@@ -7,6 +7,7 @@ import magma.collect.stream.head.RangeHead;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
+import magma.option.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,16 @@ public record JavaList<T>(List<T> list) implements List_<T> {
     @Override
     public T get(int index) {
         return list.get(index);
+    }
+
+    @Override
+    public Option<Tuple<T, List_<T>>> popFirst() {
+        if (list.isEmpty()) return new None<>();
+
+        T first = list.getFirst();
+        List<T> elements = list.subList(1, list.size());
+
+        return new Some<>(new Tuple<>(first, new JavaList<>(elements)));
     }
 
     private List<T> toNativeCopy() {

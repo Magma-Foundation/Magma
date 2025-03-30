@@ -1,6 +1,10 @@
 package magma.compile.rule.divide;
 
+import jvm.collect.stream.Streams;
+import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
+import magma.option.Option;
+import magma.option.Tuple;
 
 public class FoldingDivider implements Divider {
     private final Folder folder;
@@ -11,10 +15,20 @@ public class FoldingDivider implements Divider {
 
     @Override
     public List_<String> divide(String input) {
-        DividingState current = new MutableDividingState();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = folder.fold(current, c);
+        List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
+
+        DividingState current = new MutableDividingState(collector);
+        while(true) {
+            Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current
+                    .popAndAppend()
+                    .toTuple(new Tuple<>('\0', current));
+
+            if(maybeNext.left()) {
+                Tuple<Character, DividingState> result = maybeNext.right();
+                current = folder.fold(result.right(), result.left());
+            } else {
+                break;
+            }
         }
 
         return current.advance().segments();

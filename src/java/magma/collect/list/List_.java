@@ -2,6 +2,7 @@ package magma.collect.list;
 
 import magma.collect.stream.Stream;
 import magma.option.Option;
+import magma.option.Tuple;
 
 import java.util.function.BiFunction;
 
@@ -23,4 +24,6 @@ public interface List_<T> {
     List_<T> sort(BiFunction<T, T, Integer> comparator);
 
     T get(int index);
+
+    Option<Tuple<T, List_<T>>> popFirst();
 }

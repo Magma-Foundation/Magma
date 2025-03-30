@@ -2,17 +2,21 @@ package magma.compile.rule.divide;
 
 import jvm.collect.list.Lists;
 import magma.collect.list.List_;
+import magma.option.Option;
+import magma.option.Tuple;
 
 public class MutableDividingState implements DividingState {
+    private final List_<Character> queue;
     private List_<String> segments;
     private StringBuilder buffer;
     private int depth;
 
-    public MutableDividingState() {
-        this(Lists.empty(), new StringBuilder(), 0);
+    public MutableDividingState(List_<Character> queue) {
+        this(queue, Lists.empty(), new StringBuilder(), 0);
     }
 
-    public MutableDividingState(List_<String> segments, StringBuilder buffer, int depth) {
+    public MutableDividingState(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
+        this.queue = queue;
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
@@ -56,5 +60,12 @@ public class MutableDividingState implements DividingState {
     @Override
     public boolean isShallow() {
         return depth == 1;
+    }
+
+    @Override
+    public Option<Tuple<Character, DividingState>> popAndAppend() {
+        return queue.popFirst().map(tuple -> {
+            return new Tuple<>(tuple.left(), new MutableDividingState(tuple.right(), segments, buffer, depth));
+        });
     }
 }
