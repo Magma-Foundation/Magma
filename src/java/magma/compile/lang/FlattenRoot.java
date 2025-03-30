@@ -15,7 +15,7 @@ public class FlattenRoot implements Transformer {
         Node child = node.findNode("child").orElse(new MapNode());
 
         if (!child.is("root")) return node;
-        List_<Node> oldChildren = node
+        List_<Node> oldChildren = child
                 .findNode("content").orElse(new MapNode())
                 .findNodeList("children").orElse(Lists.empty());
 

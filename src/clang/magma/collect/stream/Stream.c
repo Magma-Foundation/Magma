@@ -1,3 +1,9 @@
+#include "/magma/option/Option.h"
+#include "/magma/result/Result.h"
+#include "/java/util/function/BiFunction.h"
+#include "/java/util/function/Function.h"
+#include "/java/util/function/Predicate.h"
+struct Stream{};
 R foldWithInitial(R initial, struct BiFunction_R_T_R folder){
 }
 struct Stream_R map(struct Function_T_R mapper){

@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.locate.FirstLocator;
@@ -50,10 +51,13 @@ public class CLang {
     }
 
     private static Rule createTypeRule() {
-        return new OrRule(Lists.of(
+        LazyRule type = new LazyRule();
+        type.set(new OrRule(Lists.of(
                 new TypeRule("struct-type", new PrefixRule("struct ", new StringRule("value"))),
+                new TypeRule("ref", new SuffixRule(new NodeRule("child", type), "*")),
                 CommonLang.createSymbolTypeRule()
-        ));
+        )));
+        return type;
     }
 
     private static Rule createIncludeRule() {

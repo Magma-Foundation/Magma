@@ -1,3 +1,12 @@
+#include "/jvm/collect/list/Lists.h"
+#include "/magma/collect/list/List_.h"
+#include "/magma/compile/CompileError.h"
+#include "/magma/compile/MapNode.h"
+#include "/magma/compile/Node.h"
+#include "/magma/option/Tuple.h"
+#include "/magma/result/Ok.h"
+#include "/magma/result/Result.h"
+struct FlattenGroup{};
 FlattenCache foldNodeProperty(FlattenCache state, struct Tuple_String_Node property){
 }
 struct Tuple_Node_FlattenCache flattenNode(FlattenCache cache, Node element){

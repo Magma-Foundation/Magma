@@ -1,3 +1,10 @@
+#include "/magma/option/None.h"
+#include "/magma/option/Option.h"
+#include "/magma/option/Some.h"
+#include "/magma/option/Tuple.h"
+#include "/java/util/function/Function.h"
+#include "/java/util/function/Supplier.h"
+struct Err{};
 struct Option_T findValue(){
 }
 struct Option_X findError(){

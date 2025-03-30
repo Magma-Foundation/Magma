@@ -1,2 +1,3 @@
+struct StringContext{};
 String display(){
 }

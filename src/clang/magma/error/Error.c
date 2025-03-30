@@ -1,2 +1,3 @@
+struct Error{};
 String display(){
 }

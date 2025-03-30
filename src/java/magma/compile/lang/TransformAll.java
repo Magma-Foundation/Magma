@@ -101,6 +101,10 @@ public class TransformAll implements Transformer {
             return new Ok<>(node.withString("value", newValue));
         }
 
+        if (node.is("array")) {
+            return new Ok<>(node.retype("ref"));
+        }
+
         return new Ok<>(node);
     }
 
