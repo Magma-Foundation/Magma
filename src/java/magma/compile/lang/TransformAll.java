@@ -44,7 +44,8 @@ public class TransformAll implements Transformer {
     }
 
     private static boolean isFunctionalImport(Node child) {
-        if (!child.is("import")) return true;
+        if (!child.is("import")) return false;
+
         List_<String> namespace = child.findNodeList("namespace")
                 .orElse(Lists.empty())
                 .stream()
@@ -52,23 +53,11 @@ public class TransformAll implements Transformer {
                 .flatMap(Streams::fromOption)
                 .collect(new ListCollector<>());
 
-        return namespace.size() < 3 || !namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
+        return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
     }
 
     @Override
     public Result<Node, CompileError> afterPass(State state, Node node) {
-        if (node.is("root")) {
-            return find(node, "content").flatMapValue(value -> {
-                return findNodeList(value, "children").mapValue(children -> {
-                    List_<Node> newChildren = children.stream()
-                            .flatMap(child -> child.is("package") ? Streams.empty() : Streams.of(child))
-                            .collect(new ListCollector<>());
-
-                    return node.withNode("content", new MapNode("block").withNodeList("children", newChildren));
-                });
-            });
-        }
-
         if (node.is("interface") || node.is("record") || node.is("class")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
@@ -173,19 +162,16 @@ public class TransformAll implements Transformer {
 
     @Override
     public Result<Node, CompileError> beforePass(State state, Node node) {
-        if (node.is("root")) {
-            Node content = node.findNode("content").orElse(new MapNode());
-            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+        if (!node.is("root")) return new Ok<>(node);
 
-            List_<Node> newChildren = children.stream()
-                    .filter(TransformAll::isFunctionalImport)
-                    .collect(new ListCollector<>());
+        Node content = node.findNode("content").orElse(new MapNode());
+        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
 
-            Node withChildren = content.withNodeList("children", newChildren);
-            Node content1 = node.withNode("content", withChildren);
-            return new Ok<>(content1);
-        }
+        List_<Node> newChildren = children.stream()
+                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                .collect(new ListCollector<>());
 
-        return new Ok<>(node);
+        Node withChildren = content.withNodeList("children", newChildren);
+        return new Ok<>(node.withNode("content", withChildren));
     }
 }
