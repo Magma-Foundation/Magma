@@ -1,3 +1,5 @@
+#ifndef magma_compile_lang_JavaLang
+#define magma_compile_lang_JavaLang
 #include "/../../../jvm/collect/list/Lists.h"
 #include "/../../../magma/compile/rule/LazyRule.h"
 #include "/../../../magma/compile/rule/Rule.h"
@@ -16,3 +18,4 @@
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 #include "/../../../static magma/compile/lang/CommonLang/*.h"
 struct JavaLang{};
+#endif

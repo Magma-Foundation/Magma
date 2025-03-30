@@ -1,3 +1,4 @@
+#include "/FlattenGroup.h"
 struct FlattenCache foldNodeProperty(struct FlattenCache state, struct Tuple_String_Node property){
 }
 struct Tuple_Node_FlattenCache flattenNode(struct FlattenCache cache, struct Node element){

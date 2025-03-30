@@ -5,5 +5,5 @@ import magma.compile.Node;
 import magma.result.Result;
 
 public interface TransformingStage {
-    Result<Node, CompileError> transform(Node tree, State state);
+    Result<Node, CompileError> transform(Node root, State state);
 }

@@ -1,1 +1,4 @@
+#ifndef magma_compile_rule_divide_StatementFolder
+#define magma_compile_rule_divide_StatementFolder
 struct StatementFolder{};
+#endif

@@ -1,3 +1,4 @@
+#include "/Node.h"
 struct Node withString(struct String propertyKey, struct String propertyValue){
 }
 struct Option_String findString(struct String propertyKey){

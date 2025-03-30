@@ -1,3 +1,5 @@
+#ifndef magma_compile_lang_CLang
+#define magma_compile_lang_CLang
 #include "/../../../jvm/collect/list/Lists.h"
 #include "/../../../magma/compile/rule/LazyRule.h"
 #include "/../../../magma/compile/rule/Rule.h"
@@ -13,3 +15,4 @@
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 struct CLang{};
+#endif

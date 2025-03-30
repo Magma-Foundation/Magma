@@ -1,2 +1,3 @@
-struct Result_Node_CompileError transform(struct Node tree, struct State state){
+#include "/TransformingStage.h"
+struct Result_Node_CompileError transform(struct Node root, struct State state){
 }

@@ -23,6 +23,9 @@ public class CLang {
     private static Rule createCRootSegmentRule() {
         return new OrRule(Lists.of(
                 createIncludeRule(),
+                new TypeRule("ifndef", new PrefixRule("#ifndef ", new SuffixRule(new StringRule("value"), "\n"))),
+                new TypeRule("define", new PrefixRule("#define ", new SuffixRule(new StringRule("value"), "\n"))),
+                new TypeRule("endif", new PrefixRule("#endif\n", new EmptyRule())),
                 createStructRule(),
                 createFunctionRule()
         ));

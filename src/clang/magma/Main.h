@@ -1,3 +1,5 @@
+#ifndef magma_Main
+#define magma_Main
 #include "/../jvm/collect/list/Lists.h"
 #include "/../jvm/io/Paths.h"
 #include "/../jvm/process/Processes.h"
@@ -18,3 +20,4 @@
 #include "/../magma/result/Ok.h"
 #include "/../magma/result/Result.h"
 struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY};
+#endif

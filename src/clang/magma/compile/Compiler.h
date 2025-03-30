@@ -1,3 +1,5 @@
+#ifndef magma_compile_Compiler
+#define magma_compile_Compiler
 #include "/../../jvm/collect/map/Maps.h"
 #include "/../../magma/collect/list/List_.h"
 #include "/../../magma/collect/map/Map_.h"
@@ -12,3 +14,4 @@
 #include "/../../magma/option/Tuple.h"
 #include "/../../magma/result/Result.h"
 struct Compiler{};
+#endif

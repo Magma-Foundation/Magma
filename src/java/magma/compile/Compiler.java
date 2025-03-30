@@ -16,11 +16,12 @@ import magma.result.Result;
 
 public class Compiler {
     public static Result<Map_<String, String>, CompileError> compile(String input, List_<String> namespace, String name) {
+        State state = new State(namespace, name);
         return JavaLang.createJavaRootRule().parse(input)
-                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, new State(namespace)))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, new State(namespace)))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, new State(namespace)))
-                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, new State(namespace)))
+                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, state))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, state))
+                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, state))
                 .flatMapValue(Compiler::generateRoots);
     }
 

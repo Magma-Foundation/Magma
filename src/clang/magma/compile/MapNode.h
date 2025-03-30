@@ -1,3 +1,5 @@
+#ifndef magma_compile_MapNode
+#define magma_compile_MapNode
 #include "/../../jvm/collect/map/Maps.h"
 #include "/../../jvm/collect/stream/Streams.h"
 #include "/../../magma/collect/list/List_.h"
@@ -10,3 +12,4 @@
 #include "/../../magma/option/Tuple.h"
 #include "/../../java/util/function/Function.h"
 struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsstruct Map__String_Node nodesstruct Map__String_List__Node nodeLists};
+#endif

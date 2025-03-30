@@ -15,30 +15,30 @@ public class TreeTransformingStage implements TransformingStage {
     }
 
     @Override
-    public Result<Node, CompileError> transform(Node tree, State state) {
-        return tree.streamNodes()
-                .foldToResult(tree, (node, tuple) -> mapNodes(state.namespace(), node, tuple))
-                .flatMapValue(withNodes -> transformNodeLists(state.namespace(), withNodes));
+    public Result<Node, CompileError> transform(Node root, State state) {
+        return root.streamNodes()
+                .foldToResult(root, (node, tuple) -> mapNodes(node, tuple, state))
+                .flatMapValue(withNodes -> transformNodeLists(withNodes, state));
     }
 
-    private Result<Node, CompileError> transformNodeLists(List_<String> namespace, Node withNodes) {
+    private Result<Node, CompileError> transformNodeLists(Node withNodes, State state) {
         return withNodes.streamNodeLists()
-                .foldToResult(withNodes, (node, tuple) -> mapNodeList(namespace, node, tuple))
-                .flatMapValue(node1 -> transformer.afterPass(new State(namespace), node1));
+                .foldToResult(withNodes, (node, tuple) -> mapNodeList(node, tuple, state))
+                .flatMapValue(node1 -> transformer.afterPass(state, node1));
     }
 
-    private Result<Node, CompileError> mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {
-        return transform(tuple.right(), new State(namespace)).mapValue(newChild -> node.withNode(tuple.left(), newChild));
+    private Result<Node, CompileError> mapNodes(Node node, Tuple<String, Node> tuple, State state) {
+        return transform(tuple.right(), state).mapValue(newChild -> node.withNode(tuple.left(), newChild));
     }
 
-    private Result<Node, CompileError> mapNodeList(List_<String> namespace, Node node, Tuple<String, List_<Node>> tuple) {
+    private Result<Node, CompileError> mapNodeList(Node node, Tuple<String, List_<Node>> tuple, State state) {
         return tuple.right()
                 .stream()
-                .foldToResult(Lists.<Node>empty(), (current, element) -> mapNodeListElement(namespace, current, element))
+                .foldToResult(Lists.<Node>empty(), (current, element) -> mapNodeListElement(current, element, state))
                 .mapValue(children -> node.withNodeList(tuple.left(), children));
     }
 
-    private Result<List_<Node>, CompileError> mapNodeListElement(List_<String> namespace, List_<Node> elements, Node element) {
-        return transform(element, new State(namespace)).mapValue(elements::add);
+    private Result<List_<Node>, CompileError> mapNodeListElement(List_<Node> elements, Node element, State state) {
+        return transform(element, state).mapValue(elements::add);
     }
 }

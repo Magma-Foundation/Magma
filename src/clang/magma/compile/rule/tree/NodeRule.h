@@ -1,3 +1,5 @@
+#ifndef magma_compile_rule_tree_NodeRule
+#define magma_compile_rule_tree_NodeRule
 #include "/../../../../jvm/collect/list/Lists.h"
 #include "/../../../../magma/compile/CompileError.h"
 #include "/../../../../magma/compile/MapNode.h"
@@ -8,3 +10,4 @@
 #include "/../../../../magma/result/Err.h"
 #include "/../../../../magma/result/Result.h"
 struct NodeRule{};
+#endif

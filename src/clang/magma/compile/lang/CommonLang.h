@@ -1,3 +1,5 @@
+#ifndef magma_compile_lang_CommonLang
+#define magma_compile_lang_CommonLang
 #include "/../../../jvm/collect/list/Lists.h"
 #include "/../../../magma/compile/lang/r/SymbolRule.h"
 #include "/../../../magma/compile/rule/Rule.h"
@@ -18,3 +20,4 @@
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 struct CommonLang{};
+#endif

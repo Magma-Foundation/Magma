@@ -1,3 +1,5 @@
+#ifndef magma_compile_lang_TransformAll
+#define magma_compile_lang_TransformAll
 #include "/../../../jvm/collect/list/JavaList.h"
 #include "/../../../jvm/collect/list/Lists.h"
 #include "/../../../jvm/collect/stream/Streams.h"
@@ -15,3 +17,4 @@
 #include "/../../../magma/result/Ok.h"
 #include "/../../../magma/result/Result.h"
 struct TransformAll{};
+#endif

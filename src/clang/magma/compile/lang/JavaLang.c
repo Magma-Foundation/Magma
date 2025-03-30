@@ -1,3 +1,4 @@
+#include "/JavaLang.h"
 struct Rule createJavaRootRule(){
 }
 struct OrRule createJavaRootSegmentRule(){

@@ -1,3 +1,4 @@
+#include "/CommonLang.h"
 struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule){
 }
 struct Rule createBlockRule(struct Rule childRule){

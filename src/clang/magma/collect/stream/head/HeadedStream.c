@@ -1,3 +1,4 @@
+#include "/HeadedStream.h"
 struct R foldWithInitial(struct R initial, struct BiFunction_R_T_R folder){
 }
 struct Stream_R map(struct Function_T_R mapper){

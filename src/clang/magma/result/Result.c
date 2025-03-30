@@ -1,3 +1,4 @@
+#include "/Result.h"
 struct Option_T findValue(){
 }
 struct Option_X findError(){

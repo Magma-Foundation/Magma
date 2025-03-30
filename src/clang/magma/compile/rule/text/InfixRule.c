@@ -1,3 +1,4 @@
+#include "/InfixRule.h"
 struct public InfixRule(struct Rule left, struct String infix, struct Rule right, struct Locator locator){
 }
 struct Result_Node_CompileError parse(struct String input){

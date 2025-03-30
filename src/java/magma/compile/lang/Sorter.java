@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import jvm.collect.list.Lists;
 import magma.collect.list.List_;
+import magma.collect.stream.Joiner;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
@@ -34,9 +35,25 @@ public class Sorter implements Transformer {
                 }
             });
 
+            String joined = state.namespace()
+                    .add(state.name())
+                    .stream()
+                    .collect(new Joiner("_"))
+                    .orElse("");
+
+            List_<Node> headerChildren = Lists.<Node>empty()
+                    .add(new MapNode("ifndef").withString("value", joined))
+                    .add(new MapNode("define").withString("value", joined))
+                    .addAll(tuple.left())
+                    .add(new MapNode("endif"));
+
+            List_<Node> sourceChildren = Lists.<Node>empty()
+                    .add(new MapNode("include").withNodeList("path", Lists.of(new MapNode().withString("value", state.name()))))
+                    .addAll(tuple.right());
+
             Node separated = new MapNode()
-                    .withNode(".h", asRoot(tuple.left()))
-                    .withNode(".c", asRoot(tuple.right()));
+                    .withNode(".h", asRoot(headerChildren))
+                    .withNode(".c", asRoot(sourceChildren));
 
             return new Ok<>(separated);
         }
