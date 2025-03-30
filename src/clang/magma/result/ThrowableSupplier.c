@@ -1,1 +1,1 @@
-struct ThrowableSupplier<T, X extends Throwable>  {}
+struct ThrowableSupplier<T, X extends Throwable>  {};

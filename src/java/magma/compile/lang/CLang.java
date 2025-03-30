@@ -21,7 +21,7 @@ public class CLang {
     private static OrRule createCRootSegmentRule() {
         return new OrRule(Lists.of(
                 createIncludeRule(),
-                new TypeRule("struct", new PrefixRule("struct ", new InfixRule(new StringRule("name"), " {", new SuffixRule(new EmptyRule(), "}"))))
+                new TypeRule("struct", new PrefixRule("struct ", new InfixRule(new StringRule("name"), " {", new SuffixRule(new EmptyRule(), "};"))))
         ));
     }
 

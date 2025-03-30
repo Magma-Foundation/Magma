@@ -1,1 +1,1 @@
-struct Collector<T, C>  {}
+struct Collector<T, C>  {};

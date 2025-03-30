@@ -7,4 +7,4 @@
 #include "/../../../magma/compile/rule/divide/Divider.h"
 #include "/../../../magma/result/Err.h"
 #include "/../../../magma/result/Result.h"
-struct DivideRule {}
+struct DivideRule {};

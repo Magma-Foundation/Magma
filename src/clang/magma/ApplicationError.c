@@ -1,2 +1,2 @@
 #include "/../magma/error/Error.h"
-struct ApplicationError {}
+struct ApplicationError {};

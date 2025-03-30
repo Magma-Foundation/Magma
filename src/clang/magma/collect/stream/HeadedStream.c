@@ -6,4 +6,4 @@
 #include "/../../../java/util/function/BiFunction.h"
 #include "/../../../java/util/function/Function.h"
 #include "/../../../java/util/function/Predicate.h"
-struct HeadedStream<T> {}
+struct HeadedStream<T> {};

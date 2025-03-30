@@ -3,4 +3,4 @@
 #include "/../../magma/collect/list/List_.h"
 #include "/../../magma/compile/context/Context.h"
 #include "/../../magma/error/Error.h"
-struct CompileError {}
+struct CompileError {};

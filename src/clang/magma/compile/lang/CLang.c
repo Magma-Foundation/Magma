@@ -10,4 +10,4 @@
 #include "/../../../magma/compile/rule/TypeRule.h"
 #include "/../../../magma/compile/rule/divide/CharDivider.h"
 #include "/../../../magma/compile/rule/divide/StatementDivider.h"
-struct CLang {}
+struct CLang {};

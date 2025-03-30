@@ -1,1 +1,1 @@
-struct ThrowableRunnable<T extends Throwable>  {}
+struct ThrowableRunnable<T extends Throwable>  {};

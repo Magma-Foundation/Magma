@@ -7,4 +7,4 @@
 #include "/../../magma/option/Some.h"
 #include "/../../magma/option/Tuple.h"
 #include "/../../java/util/function/Function.h"
-struct MapNode {}
+struct MapNode {};
