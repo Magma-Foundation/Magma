@@ -18,7 +18,6 @@ import magma.compile.rule.tree.NodeListRule;
 import magma.compile.rule.tree.NodeRule;
 import magma.compile.rule.tree.OrRule;
 import magma.compile.rule.tree.TypeRule;
-import org.w3c.dom.NodeList;
 
 import static magma.compile.lang.CommonLang.*;
 
@@ -35,8 +34,14 @@ public class CLang {
                 new TypeRule("endif", new PrefixRule("#endif\n", new EmptyRule())),
                 createStructRule(),
                 createFunctionRule(),
-                new TypeRule("expansion", new PrefixRule("expand ", new SuffixRule(new StringRule("name"), "\n")))
+                createExpansionRule()
         ));
+    }
+
+    private static TypeRule createExpansionRule() {
+        StringRule name = new StringRule("name");
+        InfixRule childRule = new InfixRule(name, " = ", new NodeRule("type", createTypeRule()), new FirstLocator());
+        return new TypeRule("expansion", new PrefixRule("// expand ", new SuffixRule(childRule, "\n")));
     }
 
     private static TypeRule createFunctionRule() {
@@ -44,7 +49,7 @@ public class CLang {
         NodeRule definition = new NodeRule("definition", definitionRule);
         NodeListRule params = CommonLang.createParamsRule(definitionRule);
 
-        Rule block = CommonLang.createContentRule(new StripRule(new SuffixRule(params, "}")), createStatementRule());
+        Rule block = CommonLang.createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule());
         Rule block1 = new OptionalNodeRule("content",
                 block,
                 new SuffixRule(params, ");\n")

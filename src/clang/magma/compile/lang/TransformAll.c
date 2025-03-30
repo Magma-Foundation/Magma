@@ -1,16 +1,16 @@
 #include "TransformAll.h"
-expand Tuple_List__Node_List__Node
-expand List__Node
-expand List__Node
-expand Tuple_List__Node_List__Node
-expand List__Node
-expand List__Node
-expand Result_Node_CompileError
-expand Result_List__Node_CompileError
-expand List__Node
-expand Result_Node_CompileError
-expand Result_Node_CompileError
-struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element}{List_<Node> definitions = tuple.left();
+// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
+// expand List__Node = List_<struct Node>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element){List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
 
         if (element.is()) return new Tuple<>(definitions.add(element), others);if (element.is()) {
@@ -18,11 +18,11 @@ struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_Lis
             return new Tuple<>(definitions.add(definition), others);
         }
 
-        return new Tuple<>(definitions, others.add(element));}struct Result_Node_CompileError find(struct Node node, struct String propertyKey}{return node.findNode(propertyKey)
+        return new Tuple<>(definitions, others.add(element));}struct Result_Node_CompileError find(struct Node node, struct String propertyKey){return node.findNode(propertyKey)
                 .<Result<Node, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(node))));}struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey}{return value.findNodeList(propertyKey)
+                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(node))));}struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey){return value.findNodeList(propertyKey)
                 .<Result<List_<Node>, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(value))));}int isFunctionalImport(struct Node child}{if (!child.is()) return false;
+                .orElseGet(() -> new Err<>(new CompileError( + propertyKey + , new NodeContext(value))));}int isFunctionalImport(struct Node child){if (!child.is()) return false;
 
         List_<String> namespace = child.findNodeList()
                 .orElse(Lists.empty())
@@ -31,8 +31,8 @@ struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_Lis
                 .flatMap(Streams::fromOption)
                 .collect(new ListCollector<>());
 
-        return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of(, , ));}int hasTypeParams(struct Node child}{List_<Node> typeParams = child.findNodeList().orElse(Lists.empty());
-        return !typeParams.isEmpty();}struct Result_Node_CompileError afterPass(struct State state, struct Node node}{if (node.is() || node.is() || node.is()) {
+        return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of(, , ));}int hasTypeParams(struct Node child){List_<Node> typeParams = child.findNodeList().orElse(Lists.empty());
+        return !typeParams.isEmpty();}struct Result_Node_CompileError afterPass(struct State state, struct Node node){if (node.is() || node.is() || node.is()) {
             return find(node, ).flatMapValue(value -> {
                 return findNodeList(value, ).mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
@@ -94,7 +94,7 @@ struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_Lis
             return new Ok<>(node.retype());
         }
 
-        return new Ok<>(node);}struct Result_Node_CompileError beforePass(struct State state, struct Node node}{if (node.is()) {
+        return new Ok<>(node);}struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (node.is()) {
             Node content = node.findNode().orElse(new MapNode());
             List_<Node> children = content.findNodeList().orElse(Lists.empty());
 

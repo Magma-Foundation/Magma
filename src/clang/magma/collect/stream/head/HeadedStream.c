@@ -1,22 +1,22 @@
 #include "HeadedStream.h"
-expand Stream_T
-expand BiFunction_R_T_R
-expand Stream_R
-expand Collector_T_C
-expand Option_T
-expand Option_R
-expand BiFunction_R_T_R
-expand Stream_T
-expand Predicate_T
-expand Stream_R
-expand Stream_R
-expand magma_result_Result_R_X
-expand BiFunction_R_T_Result_R_X
-expand Result_R_X
-expand Stream_T
-expand Stream_T
-expand Head_T
-struct R foldWithInitial(struct R initial, struct BiFunction_R_T_R folder}{R current = initial;while (true) {
+// expand Stream_T = Stream<struct T>
+// expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
+// expand Stream_R = Stream<struct R>
+// expand Collector_T_C = Collector<struct T, struct C>
+// expand Option_T = Option<struct T>
+// expand Option_R = Option<struct R>
+// expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
+// expand Stream_T = Stream<struct T>
+// expand Predicate_T = Predicate<struct T>
+// expand Stream_R = Stream<struct R>
+// expand Stream_R = Stream<struct R>
+// expand magma_result_Result_R_X = magma.result.Result<struct R, struct X>
+// expand BiFunction_R_T_Result_R_X = BiFunction<struct R, struct T, struct Result_R_X>
+// expand Result_R_X = Result<struct R, struct X>
+// expand Stream_T = Stream<struct T>
+// expand Stream_T = Stream<struct T>
+// expand Head_T = Head<struct T>
+struct R foldWithInitial(struct R initial, struct BiFunction_R_T_R folder){R current = initial;while (true) {
             R finalCurrent = current;
             Tuple<Boolean, R> tuple = head.next()
                     .map(inner -> folder.apply(finalCurrent, inner))
@@ -27,7 +27,7 @@ struct R foldWithInitial(struct R initial, struct BiFunction_R_T_R folder}{R cur
             } else {
                 break;
             }
-        }return current;}struct Stream_R map(struct R(*mapper)(struct T)}{return new HeadedStream<>(() -> head.next().map(mapper));}struct C collect(struct Collector_T_C collector}{return foldWithInitial(collector.createInitial(), collector::fold);}struct Option_T next(}{return head.next();}struct Option_R foldMapping(struct R(*mapper)(struct T), struct BiFunction_R_T_R folder}{return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));}struct Stream_T filter(struct Predicate_T predicate}{return flatMap(element -> new HeadedStream<>(predicate.test(element)
+        }return current;}struct Stream_R map(struct R(*mapper)(struct T)){return new HeadedStream<>(() -> head.next().map(mapper));}struct C collect(struct Collector_T_C collector){return foldWithInitial(collector.createInitial(), collector::fold);}struct Option_T next(){return head.next();}struct Option_R foldMapping(struct R(*mapper)(struct T), struct BiFunction_R_T_R folder){return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));}struct Stream_T filter(struct Predicate_T predicate){return flatMap(element -> new HeadedStream<>(predicate.test(element)
                 ? new SingleHead<>(element)
-                : new EmptyHead<>()));}struct Stream_R flatMap(struct Stream_R(*mapper)(struct T)}{return this.<Stream<R>>foldWithInitial(new HeadedStream<>(new EmptyHead<>()),
-                (rStream, t) -> rStream.concat(mapper.apply(t)));}struct magma_result_Result_R_X foldToResult(struct R initial, struct BiFunction_R_T_Result_R_X folder}{return this.<Result<R, X>>foldWithInitial(new Ok<>(initial), (current, t) -> current.flatMapValue(inner -> folder.apply(inner, t)));}struct Stream_T concat(struct Stream_T other}{return new HeadedStream<>(() -> head.next().or(other::next));}
+                : new EmptyHead<>()));}struct Stream_R flatMap(struct Stream_R(*mapper)(struct T)){return this.<Stream<R>>foldWithInitial(new HeadedStream<>(new EmptyHead<>()),
+                (rStream, t) -> rStream.concat(mapper.apply(t)));}struct magma_result_Result_R_X foldToResult(struct R initial, struct BiFunction_R_T_Result_R_X folder){return this.<Result<R, X>>foldWithInitial(new Ok<>(initial), (current, t) -> current.flatMapValue(inner -> folder.apply(inner, t)));}struct Stream_T concat(struct Stream_T other){return new HeadedStream<>(() -> head.next().or(other::next));}

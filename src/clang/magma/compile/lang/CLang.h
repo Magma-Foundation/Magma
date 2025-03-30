@@ -18,11 +18,11 @@
 #include "../../../magma/compile/rule/tree/NodeRule.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
-#include "../../../org/w3c/dom/NodeList.h"
 #include "../../../static magma/compile/lang/CommonLang/*.h"
 struct CLang{};
 struct Rule createCRootRule();
 struct Rule createCRootSegmentRule();
+struct TypeRule createExpansionRule();
 struct TypeRule createFunctionRule();
 struct Rule createStatementRule();
 struct TypeRule createStructRule();

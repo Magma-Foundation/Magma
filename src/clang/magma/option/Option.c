@@ -1,16 +1,16 @@
 #include "Option.h"
-expand Option_R
-expand Supplier_T
-expand Tuple_Boolean_T
-expand Consumer_T
-expand Option_T
-expand Predicate_T
-expand Supplier_R
-expand Option_T
-expand Supplier_Option_T
-expand Option_T
-expand Option_R
-expand Option_R
+// expand Option_R = Option<struct R>
+// expand Supplier_T = Supplier<struct T>
+// expand Tuple_Boolean_T = Tuple<struct Boolean, struct T>
+// expand Consumer_T = Consumer<struct T>
+// expand Option_T = Option<struct T>
+// expand Predicate_T = Predicate<struct T>
+// expand Supplier_R = Supplier<struct R>
+// expand Option_T = Option<struct T>
+// expand Supplier_Option_T = Supplier<struct Option_T>
+// expand Option_T = Option<struct T>
+// expand Option_R = Option<struct R>
+// expand Option_R = Option<struct R>
 struct Option_R map(struct R(*mapper)(struct T));
 struct T orElseGet(struct Supplier_T other);
 struct Tuple_Boolean_T toTuple(struct T other);
