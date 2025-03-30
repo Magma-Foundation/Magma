@@ -1,6 +1,7 @@
 package magma;
 
 import jvm.collect.list.Lists;
+import jvm.collect.map.Maps;
 import jvm.io.Paths;
 import jvm.process.Processes;
 import magma.collect.list.List_;
@@ -9,13 +10,16 @@ import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
 import magma.compile.Compiler;
+import magma.compile.Node;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
+import magma.compile.transform.State;
 import magma.io.IOError;
 import magma.io.Path_;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
+import magma.option.Tuple;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -24,12 +28,14 @@ public class Main {
     public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
     public static final Path_ TARGET_DIRECTORY = Paths.get(".", "src", "clang");
 
+
     public static void main(String[] args) {
         SOURCE_DIRECTORY.walk()
                 .mapErr(ApplicationError::new)
                 .match(Main::runWithFiles, Some::new)
                 .ifPresent(error -> System.err.println(error.display()));
     }
+                                            .
 
     private static Option<ApplicationError> runWithFiles(Set_<Path_> files) {
         Set_<Path_> collect = files.stream()
@@ -42,9 +48,42 @@ public class Main {
 
     private static Option<ApplicationError> runWithSources(Set_<Path_> sources) {
         return sources.stream()
-                .foldToResult(Lists.empty(), Main::foldIntoRelatives)
+                .foldToResult(Maps.empty(), Main::preLoadSources)
+                .match(Main::postLoadTrees, Some::new);
+    }
+
+    private static Option<ApplicationError> postLoadTrees(Map_<Path_, Node> trees) {
+        return trees.stream()
+                .foldToResult(Lists.empty(), Main::postLoadTree)
                 .match(Main::complete, Some::new);
     }
+
+    private static Result<Map_<Path_, Node>, ApplicationError> preLoadSources(Map_<Path_, Node> trees, Path_ path) {
+        Source source = new PathSource(SOURCE_DIRECTORY, path);
+        List_<String> namespace = source.computeNamespace();
+        String name = source.computeName();
+        State state = new State(namespace, name);
+
+        if (isPlatformDependent(namespace)) return new Ok<>(trees);
+        return source.readString()
+                .mapErr(ApplicationError::new)
+                .flatMapValue(input -> Compiler.preLoad(input, state).mapErr(ApplicationError::new))
+                .mapValue(node -> trees.with(path, node));
+
+    }
+
+    private static Result<List_<Path_>, ApplicationError> postLoadTree(List_<Path_> relatives, Tuple<Path_, Node> pathNodeTuple) {
+        Path_ path = pathNodeTuple.left();
+        Node tree = pathNodeTuple.right();
+
+        Source source = new PathSource(SOURCE_DIRECTORY, path);
+        List_<String> namespace = source.computeNamespace();
+
+        return Compiler.postLoad(new State(namespace, source.computeName()), tree)
+                .mapErr(ApplicationError::new)
+                .flatMapValue(postLoaded -> writeOutputs(postLoaded, namespace, source.computeName()))
+                .mapValue(relatives::addAll);
+    });
 
     private static Option<ApplicationError> complete(List_<Path_> relatives) {
         Path_ build = TARGET_DIRECTORY.resolve("build.bat");
@@ -61,30 +100,6 @@ public class Main {
 
     private static Option<ApplicationError> startCommand() {
         return Processes.executeCommand(Lists.of("cmd.exe", "/c", "build.bat"), TARGET_DIRECTORY).map(ApplicationError::new);
-    }
-
-    private static Result<List_<Path_>, ApplicationError> foldIntoRelatives(List_<Path_> relatives, Path_ path) {
-        return compileSource(new PathSource(SOURCE_DIRECTORY, path)).mapValue(relatives::addAll);
-    }
-
-    private static Result<List_<Path_>, ApplicationError> compileSource(Source source) {
-        List_<String> namespace = source.computeNamespace();
-        if (isPlatformDependent(namespace)) return new Ok<>(Lists.empty());
-
-        String name = source.computeName();
-        return source.readString()
-                .mapErr(ApplicationError::new)
-                .flatMapValue(input -> compileAndWrite(input, namespace, name));
-    }
-
-    private static Result<List_<Path_>, ApplicationError> compileAndWrite(
-            String input,
-            List_<String> namespace,
-            String name
-    ) {
-        return Compiler.compile(input, namespace, name)
-                .mapErr(ApplicationError::new)
-                .flatMapValue(output -> writeOutputs(output, namespace, name));
     }
 
     private static Result<List_<Path_>, ApplicationError> writeOutputs(

@@ -1,7 +1,6 @@
 package magma.compile;
 
 import jvm.collect.map.Maps;
-import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
 import magma.compile.lang.FlattenRoot;
@@ -16,17 +15,19 @@ import magma.option.Tuple;
 import magma.result.Result;
 
 public class Compiler {
-    public static Result<Map_<String, String>, CompileError> compile(String input, List_<String> namespace, String name) {
-        State state = new State(namespace, name);
+    public static Result<Map_<String, String>, CompileError> postLoad(State state, Node tree) {
+        return new TreeTransformingStage(new Formatter()).transform(tree, state)
+                .flatMapValue(Compiler::generateRoots);
+    }
+
+    public static Result<Node, CompileError> preLoad(String input, State state) {
         return JavaLang.createJavaRootRule().parse(input)
                 .flatMapValue(tree -> new TreeTransformingStage(new ExpandGenerics()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new Formatter()).transform(tree, state))
-                .flatMapValue(Compiler::generateRoots);
+                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, state));
     }
 
     private static Result<Map_<String, String>, CompileError> generateRoots(Node roots) {
