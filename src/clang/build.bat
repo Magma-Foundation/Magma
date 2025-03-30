@@ -54,6 +54,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\lang\JavaLang.c^
 	.\magma\compile\transform\Transformer.c^
 	.\magma\compile\transform\Transformer.c^
+	.\magma\compile\rule\OptionalNodeRule.c^
+	.\magma\compile\rule\OptionalNodeRule.c^
 	.\magma\option\Some.c^
 	.\magma\option\Some.c^
 	.\magma\ApplicationError.c^

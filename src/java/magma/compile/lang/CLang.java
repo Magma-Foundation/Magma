@@ -17,6 +17,8 @@ import magma.compile.rule.tree.NodeRule;
 import magma.compile.rule.tree.OrRule;
 import magma.compile.rule.tree.TypeRule;
 
+import static magma.compile.lang.CommonLang.*;
+
 public class CLang {
     public static Rule createCRootRule() {
         return new TypeRule("root", CommonLang.createBlockRule(createCRootSegmentRule()));
@@ -48,8 +50,16 @@ public class CLang {
     }
 
     private static Rule createStatementRule() {
-        return new OrRule(Lists.empty(
-
+        return new OrRule(Lists.of(
+                createWhitespaceRule(),
+                createReturnRule(),
+                createIfRule(),
+                createInvocationRule(),
+                createForRule(),
+                createAssignmentRule(),
+                createPostfixRule(),
+                createElseRule(),
+                createWhileRule()
         ));
     }
 

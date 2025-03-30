@@ -11,6 +11,7 @@
 #include "../../../magma/compile/rule/locate/LastLocator.h"
 #include "../../../magma/compile/rule/text/EmptyRule.h"
 #include "../../../magma/compile/rule/text/InfixRule.h"
+#include "../../../magma/compile/rule/text/PrefixRule.h"
 #include "../../../magma/compile/rule/text/StringRule.h"
 #include "../../../magma/compile/rule/text/StripRule.h"
 #include "../../../magma/compile/rule/text/SuffixRule.h"
@@ -26,4 +27,12 @@ struct StripRule createSymbolRule(struct String propertyKey);
 struct Rule createDefinitionRule(struct Rule type);
 struct NodeListRule createParamsRule(struct Rule definition);
 struct TypeRule createWhitespaceRule();
+struct TypeRule createAssignmentRule();
+struct TypeRule createInvocationRule();
+struct TypeRule createElseRule();
+struct TypeRule createPostfixRule();
+struct TypeRule createForRule();
+struct TypeRule createIfRule();
+struct TypeRule createReturnRule();
+struct TypeRule createWhileRule();
 #endif

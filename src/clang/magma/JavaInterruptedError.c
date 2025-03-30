@@ -1,2 +1,2 @@
 #include "JavaInterruptedError.h"
-struct String display();
+struct String display(}{return Results.printStackTraceToString(error);}

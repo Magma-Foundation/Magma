@@ -11,6 +11,7 @@ import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.locate.LastLocator;
 import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
+import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.SuffixRule;
@@ -59,5 +60,38 @@ public class CommonLang {
 
     static TypeRule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new EmptyRule()));
+    }
+
+    static TypeRule createAssignmentRule() {
+        return new TypeRule("assignment", new SuffixRule(new InfixRule(new StringRule("destination"), "=", new StringRule("source"), new FirstLocator()), ";"));
+    }
+
+    static TypeRule createInvocationRule() {
+        return new TypeRule("invocation", new SuffixRule(new StringRule("content"), ");"));
+    }
+
+    static TypeRule createElseRule() {
+        return new TypeRule("else", new StripRule(new PrefixRule("else", new StringRule("content"))));
+    }
+
+    static TypeRule createPostfixRule() {
+        return new TypeRule("postfix", new SuffixRule(new StringRule("value"), "++;"));
+    }
+
+    static TypeRule createForRule() {
+        return new TypeRule("for", new StripRule(new PrefixRule("for ", new StringRule("content"))));
+    }
+
+    static TypeRule createIfRule() {
+        return new TypeRule("if", new StripRule(new PrefixRule("if", new StringRule("content"))));
+    }
+
+    static TypeRule createReturnRule() {
+        PrefixRule rule = new PrefixRule("return ", new SuffixRule(new StringRule("value"), ";"));
+        return new TypeRule("return", new StripRule(rule));
+    }
+
+    static TypeRule createWhileRule() {
+        return new TypeRule("while", new StripRule(new PrefixRule("while", new StringRule("content"))));
     }
 }

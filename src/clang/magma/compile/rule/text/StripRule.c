@@ -1,3 +1,2 @@
 #include "StripRule.h"
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+struct Result_Node_CompileError parse(struct String input}{return childRule().parse(input.strip());}struct Result_String_CompileError generate(struct Node node}{return childRule.generate(node);}

@@ -2,6 +2,7 @@
 #define magma_compile_lang_CLang
 #include "../../../windows/collect/list/Lists.h"
 #include "../../../magma/compile/rule/LazyRule.h"
+#include "../../../magma/compile/rule/OptionalNodeRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
 #include "../../../magma/compile/rule/locate/FirstLocator.h"
@@ -15,6 +16,7 @@
 #include "../../../magma/compile/rule/tree/NodeRule.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
+#include "../../../static magma/compile/lang/CommonLang/*.h"
 struct CLang{};
 struct Rule createCRootRule();
 struct Rule createCRootSegmentRule();

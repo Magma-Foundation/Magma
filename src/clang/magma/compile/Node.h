@@ -5,6 +5,7 @@
 #include "../../magma/collect/stream/Stream.h"
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Tuple.h"
+#include "../../magma/result/Result.h"
 struct Node{};
 struct Node withString(struct String propertyKey, struct String propertyValue);
 struct Option_String findString(struct String propertyKey);
@@ -25,4 +26,5 @@ struct Node mapNode(struct String propertyKey, struct Function_Node_Node mapper)
 struct Node withNodeLists(struct Map__String_List__Node nodeLists);
 struct Node withNodes(struct Map__String_Node nodes);
 struct Node removeNode(struct String propertyKey);
+int hasNode(struct String propertyKey);
 #endif

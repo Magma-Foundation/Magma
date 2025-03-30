@@ -111,37 +111,8 @@ public class JavaLang {
                 createAssignmentRule(),
                 createPostfixRule(),
                 createElseRule(),
-                new TypeRule("while", new StripRule(new PrefixRule("while", new StringRule("content"))))
+                createWhileRule()
         ));
-    }
-
-    private static TypeRule createElseRule() {
-        return new TypeRule("else", new StripRule(new PrefixRule("else", new StringRule("content"))));
-    }
-
-    private static TypeRule createPostfixRule() {
-        return new TypeRule("postfix", new SuffixRule(new StringRule("value"), "++;"));
-    }
-
-    private static TypeRule createAssignmentRule() {
-        return new TypeRule("assignment", new SuffixRule(new InfixRule(new StringRule("destination"), "=", new StringRule("source"), new FirstLocator()), ";"));
-    }
-
-    private static TypeRule createForRule() {
-        return new TypeRule("for", new StripRule(new PrefixRule("for ", new StringRule("content"))));
-    }
-
-    private static TypeRule createInvocationRule() {
-        return new TypeRule("invocation", new SuffixRule(new StringRule("content"), ");"));
-    }
-
-    private static TypeRule createIfRule() {
-        return new TypeRule("if", new StripRule(new PrefixRule("if", new StringRule("content"))));
-    }
-
-    private static TypeRule createReturnRule() {
-        PrefixRule rule = new PrefixRule("return ", new SuffixRule(new StringRule("value"), ";"));
-        return new TypeRule("return", new StripRule(rule));
     }
 
     private static Rule createTypeRule() {

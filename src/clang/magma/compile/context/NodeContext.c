@@ -1,2 +1,2 @@
 #include "NodeContext.h"
-struct String display();
+struct String display(}{return value.display();}
