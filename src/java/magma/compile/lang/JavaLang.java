@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DivideFolder;
@@ -115,15 +116,17 @@ public class JavaLang {
     }
 
     private static Rule createTypeRule() {
-        return new OrRule(Lists.of(
-                createGenericRule(),
+        LazyRule type = new LazyRule();
+        type.set(new OrRule(Lists.of(
+                createGenericRule(type),
                 createSymbolTypeRule()
-        ));
+        )));
+        return type;
     }
 
-    private static Rule createGenericRule() {
-        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
-        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new LastLocator()), ">")));
+    private static Rule createGenericRule(Rule type) {
+        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new FirstLocator()), ">")));
     }
 
     private static Rule createNamedWithTypeParams() {
