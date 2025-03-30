@@ -1,10 +1,10 @@
-__Node__Node bucketClassMember(){
+Tuple_List__Node_List__Node bucketClassMember(){
 }
-_Node_CompileError find(){
+Result_Node_CompileError find(){
 }
-__Node_CompileError findNodeList(){
+Result_List__Node_CompileError findNodeList(){
 }
-_Node_CompileError afterPass(){
+Result_Node_CompileError afterPass(){
 }
 String stringify(){
 }

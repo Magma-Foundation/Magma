@@ -1,14 +1,14 @@
-_R map(){
+Option_R map(){
 }
 T orElseGet(){
 }
-_Boolean_T toTuple(){
+Tuple_Boolean_T toTuple(){
 }
 void ifPresent(){
 }
 T orElse(){
 }
-_T filter(){
+Option_T filter(){
 }
 boolean isPresent(){
 }
@@ -16,7 +16,7 @@ R match(){
 }
 boolean isEmpty(){
 }
-_T or(){
+Option_T or(){
 }
-_R flatMap(){
+Option_R flatMap(){
 }

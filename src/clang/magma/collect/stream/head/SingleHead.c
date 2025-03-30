@@ -1,4 +1,4 @@
 public SingleHead(){
 }
-_T next(){
+Option_T next(){
 }

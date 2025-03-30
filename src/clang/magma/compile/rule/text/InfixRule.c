@@ -1,6 +1,6 @@
 public InfixRule(){
 }
-_Node_CompileError parse(){
+Result_Node_CompileError parse(){
 }
-_String_CompileError generate(){
+Result_String_CompileError generate(){
 }

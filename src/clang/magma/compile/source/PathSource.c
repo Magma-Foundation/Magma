@@ -1,6 +1,6 @@
-_String computeNamespace(){
+List__String computeNamespace(){
 }
 String computeName(){
 }
-_String_IOError readString(){
+Result_String_IOError readString(){
 }

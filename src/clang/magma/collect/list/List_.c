@@ -1,20 +1,20 @@
-_T stream(){
+Stream_T stream(){
 }
-_T add(){
+List__T add(){
 }
-_T addAll(){
+List__T addAll(){
 }
-_T findFirst(){
+Option_T findFirst(){
 }
 int size(){
 }
-_T subList(){
+List__T subList(){
 }
 boolean equalsTo(){
 }
-_T sort(){
+List__T sort(){
 }
 T get(){
 }
-__T__T popFirst(){
+Option_Tuple_T_List__T popFirst(){
 }

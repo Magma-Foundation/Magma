@@ -1,4 +1,4 @@
-_T createInitial(){
+Set__T createInitial(){
 }
-_T fold(){
+Set__T fold(){
 }

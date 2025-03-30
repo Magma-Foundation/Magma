@@ -1,4 +1,4 @@
 public RangeHead(){
 }
-_Integer next(){
+Option_Integer next(){
 }

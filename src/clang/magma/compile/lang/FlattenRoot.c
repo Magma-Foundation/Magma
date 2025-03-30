@@ -1,4 +1,4 @@
 Node afterPass0(){
 }
-_Node_CompileError afterPass(){
+Result_Node_CompileError afterPass(){
 }

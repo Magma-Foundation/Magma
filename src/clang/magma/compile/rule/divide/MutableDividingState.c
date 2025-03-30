@@ -12,11 +12,11 @@ DividingState enter(){
 }
 DividingState advance(){
 }
-_String segments(){
+List__String segments(){
 }
 boolean isShallow(){
 }
-__Character_DividingState append(){
+Option_Tuple_Character_DividingState append(){
 }
-_DividingState appendAndDiscard(){
+Option_DividingState appendAndDiscard(){
 }

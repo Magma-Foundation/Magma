@@ -1,4 +1,4 @@
-_String divide(){
+List__String divide(){
 }
 String join(){
 }

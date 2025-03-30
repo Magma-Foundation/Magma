@@ -1,14 +1,14 @@
 FlattenCache foldNodeProperty(){
 }
-_Node_FlattenCache flattenNode(){
+Tuple_Node_FlattenCache flattenNode(){
 }
 FlattenCache flattenCategory(){
 }
 FlattenCache flattenNodeList(){
 }
-__Node_FlattenCache flattenNodeListElement(){
+Tuple_List__Node_FlattenCache flattenNodeListElement(){
 }
 Node afterPass0(){
 }
-_Node_CompileError afterPass(){
+Result_Node_CompileError afterPass(){
 }

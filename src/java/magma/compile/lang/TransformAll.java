@@ -100,7 +100,14 @@ public class TransformAll implements Transformer {
 
     private String stringify(Node node) {
         if (node.is("generic")) {
-            String caller = node.findString("caller").orElse("");
+            String caller = node.findNodeList("base")
+                    .orElse(Lists.empty())
+                    .stream()
+                    .map(element -> element.findString("value"))
+                    .flatMap(Streams::fromOption)
+                    .collect(new Joiner("_"))
+                    .orElse("");
+
             String arguments = node.findNodeList("arguments").orElse(new JavaList<>())
                     .stream()
                     .map(this::stringify)

@@ -1,18 +1,18 @@
 R foldWithInitial(){
 }
-_R map(){
+Stream_R map(){
 }
 C collect(){
 }
-_R flatMap(){
+Stream_R flatMap(){
 }
-_R_X foldToResult(){
+Result_R_X foldToResult(){
 }
-_R foldMapping(){
+Option_R foldMapping(){
 }
-_T filter(){
+Stream_T filter(){
 }
-_T concat(){
+Stream_T concat(){
 }
-_T next(){
+Option_T next(){
 }

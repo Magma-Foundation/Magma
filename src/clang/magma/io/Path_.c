@@ -1,14 +1,14 @@
 boolean exists(){
 }
-__Path__IOError walk(){
+Result_Set__Path__IOError walk(){
 }
-_IOError writeString(){
+Option_IOError writeString(){
 }
-_IOError createAsDirectories(){
+Option_IOError createAsDirectories(){
 }
 Path_ resolve(){
 }
-_String stream(){
+Stream_String stream(){
 }
 Path_ relativize(){
 }
@@ -20,5 +20,5 @@ Path_ getParent(){
 }
 Path_ getFileName(){
 }
-_String_IOError readString(){
+Result_String_IOError readString(){
 }

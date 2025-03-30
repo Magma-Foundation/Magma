@@ -1,12 +1,12 @@
-_K_V with(){
+Map__K_V with(){
 }
-_V find(){
+Option_V find(){
 }
-__K_V stream(){
+Stream_Tuple_K_V stream(){
 }
-_K_V ensure(){
+Map__K_V ensure(){
 }
-_K_V withAll(){
+Map__K_V withAll(){
 }
 boolean isEmpty(){
 }

@@ -1,6 +1,6 @@
 public Joiner(){
 }
-_String createInitial(){
+Option_String createInitial(){
 }
-_String fold(){
+Option_String fold(){
 }

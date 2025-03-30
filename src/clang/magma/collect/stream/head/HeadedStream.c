@@ -1,18 +1,18 @@
 R foldWithInitial(){
 }
-_R map(){
+Stream_R map(){
 }
 C collect(){
 }
-_T next(){
+Option_T next(){
 }
-_R foldMapping(){
+Option_R foldMapping(){
 }
-_T filter(){
+Stream_T filter(){
 }
-_R flatMap(){
+Stream_R flatMap(){
 }
-_R_X foldToResult(){
+magma_result_Result_R_X foldToResult(){
 }
-_T concat(){
+Stream_T concat(){
 }

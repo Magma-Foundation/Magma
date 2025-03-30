@@ -1,4 +1,4 @@
-_T stream(){
+Stream_T stream(){
 }
-_T add(){
+Set__T add(){
 }

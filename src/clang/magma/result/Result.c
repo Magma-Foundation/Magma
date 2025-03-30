@@ -1,14 +1,14 @@
-_T findValue(){
+Option_T findValue(){
 }
-_X findError(){
+Option_X findError(){
 }
-_R_X mapValue(){
+Result_R_X mapValue(){
 }
-_R_X flatMapValue(){
+Result_R_X flatMapValue(){
 }
-_T_R mapErr(){
+Result_T_R mapErr(){
 }
 R match(){
 }
-__T_R_X and(){
+Result_Tuple_T_R_X and(){
 }

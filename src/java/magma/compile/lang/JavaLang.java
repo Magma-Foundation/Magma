@@ -172,13 +172,8 @@ public class JavaLang {
 
     private static Rule createGenericRule(Rule type) {
         Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
-        Rule base = createMaybeQualifiedNameRule();
-
-        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(new NodeRule("base", base), "<", typeArguments, new FirstLocator()), ">")));
-    }
-
-    private static Rule createMaybeQualifiedNameRule() {
-        return new NodeListRule("segments", new CharDivider('.'), createSymbolRule("value"));
+        Rule base = new NodeListRule("base", new CharDivider('.'), createSymbolRule("value"));
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
     }
 
     private static Rule createNamedWithTypeParams() {

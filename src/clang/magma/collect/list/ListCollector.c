@@ -1,4 +1,4 @@
-_T createInitial(){
+List__T createInitial(){
 }
-_T fold(){
+List__T fold(){
 }

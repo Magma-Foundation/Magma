@@ -1,20 +1,20 @@
 void main(){
 }
-_ApplicationError runWithFiles(){
+Option_ApplicationError runWithFiles(){
 }
-_ApplicationError runWithSources(){
+Option_ApplicationError runWithSources(){
 }
-_ApplicationError complete(){
+Option_ApplicationError complete(){
 }
-_ApplicationError startCommand(){
+Option_ApplicationError startCommand(){
 }
-__Path__ApplicationError foldIntoRelatives(){
+Result_List__Path__ApplicationError foldIntoRelatives(){
 }
-__Path__ApplicationError compileSource(){
+Result_Option_Path__ApplicationError compileSource(){
 }
-__Path__ApplicationError writeOutput(){
+Result_Option_Path__ApplicationError writeOutput(){
 }
-_IOError ensureDirectories(){
+Option_IOError ensureDirectories(){
 }
 boolean isPlatformDependent(){
 }

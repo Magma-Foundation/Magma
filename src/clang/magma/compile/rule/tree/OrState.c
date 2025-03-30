@@ -1,8 +1,8 @@
 public OrState(){
 }
-_T withValue(){
+OrState_T withValue(){
 }
-_T__CompileError toResult(){
+Result_T_List__CompileError toResult(){
 }
-_T withError(){
+OrState_T withError(){
 }

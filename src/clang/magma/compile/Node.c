@@ -1,10 +1,10 @@
 Node withString(){
 }
-_String findString(){
+Option_String findString(){
 }
 Node withNodeList(){
 }
-__Node findNodeList(){
+Option_List__Node findNodeList(){
 }
 String display(){
 }
@@ -18,15 +18,15 @@ Node retype(){
 }
 Node merge(){
 }
-__String_String streamStrings(){
+Stream_Tuple_String_String streamStrings(){
 }
-__String__Node streamNodeLists(){
+Stream_Tuple_String_List__Node streamNodeLists(){
 }
 Node withNode(){
 }
-_Node findNode(){
+Option_Node findNode(){
 }
-__String_Node streamNodes(){
+Stream_Tuple_String_Node streamNodes(){
 }
 Node mapNode(){
 }

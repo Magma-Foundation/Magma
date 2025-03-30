@@ -1,2 +1,2 @@
-_Node_CompileError transform(){
+Result_Node_CompileError transform(){
 }

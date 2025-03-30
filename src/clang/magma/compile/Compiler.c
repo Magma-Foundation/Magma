@@ -1,4 +1,4 @@
-_String_CompileError compile(){
+Result_String_CompileError compile(){
 }
 String complete(){
 }

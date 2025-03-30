@@ -42,8 +42,6 @@ TypeRule createArrayRule(){
 }
 Rule createGenericRule(){
 }
-Rule createMaybeQualifiedNameRule(){
-}
 Rule createNamedWithTypeParams(){
 }
 Rule createImportRule(){

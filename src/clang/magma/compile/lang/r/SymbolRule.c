@@ -1,6 +1,6 @@
-_Node_CompileError parse(){
+Result_Node_CompileError parse(){
 }
 boolean isSymbol(){
 }
-_String_CompileError generate(){
+Result_String_CompileError generate(){
 }
