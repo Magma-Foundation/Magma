@@ -1,2 +1,3 @@
 #include "EmptyHead.h"
-struct Option_T next(){return new None<>();}
+struct Option_T next(){
+return new None<>();}

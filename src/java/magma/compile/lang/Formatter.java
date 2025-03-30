@@ -10,7 +10,7 @@ import magma.result.Result;
 public class Formatter implements Transformer {
     @Override
     public Result<Node, CompileError> afterPass(State state, Node node) {
-        if (node.is("block")) {
+        if (node.is("function")) {
             return new Ok<>(node.withString("before-children", "\n")
                     .withString("after-braces", "\n"));
         }
