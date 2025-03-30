@@ -1,3 +1,3 @@
-#include "/EmptyHead.h"
+#include "EmptyHead.h"
 struct Option_T next(){
 }

@@ -1,4 +1,4 @@
-#include "/Compiler.h"
+#include "Compiler.h"
 struct Result_Map__String_String_CompileError compile(struct String input, struct List__String namespace, struct String name){
 }
 struct Result_Map__String_String_CompileError generateRoots(struct Node roots){

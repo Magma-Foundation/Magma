@@ -1,4 +1,4 @@
-#include "/FlattenCache.h"
+#include "FlattenCache.h"
 struct public FlattenCache(){
 }
 struct FlattenCache withNode(struct String propertyKey, struct Node propertyValue){

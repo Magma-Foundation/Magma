@@ -1,4 +1,4 @@
-#include "/DividingState.h"
+#include "DividingState.h"
 struct DividingState append(struct char c){
 }
 int isLevel(){

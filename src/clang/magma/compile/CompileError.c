@@ -1,4 +1,4 @@
-#include "/CompileError.h"
+#include "CompileError.h"
 struct public CompileError(struct String message, struct Context context){
 }
 struct public CompileError(struct String message, struct Context context, struct List__CompileError errors){

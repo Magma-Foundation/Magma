@@ -1,4 +1,4 @@
-package magma.compile.lang.r;
+package magma.compile.lang;
 
 import magma.compile.CompileError;
 import magma.compile.Node;

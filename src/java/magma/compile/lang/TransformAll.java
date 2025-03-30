@@ -101,7 +101,12 @@ public class TransformAll implements Transformer {
                         outputNamespace = outputNamespace.add("..");
                     }
                 }
-                outputNamespace = outputNamespace.addAll(requestedNamespace);
+
+                List_<String> newNamespace = requestedNamespace.popFirst()
+                        .map(first -> first.left().equals("jvm") ? Lists.of("windows").addAll(first.right()) : requestedNamespace)
+                        .orElse(requestedNamespace);
+
+                outputNamespace = outputNamespace.addAll(newNamespace);
 
                 List_<Node> path = outputNamespace.stream()
                         .map(segment -> new MapNode().withString("value", segment))

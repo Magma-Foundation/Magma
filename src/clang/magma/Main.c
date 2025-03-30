@@ -1,4 +1,4 @@
-#include "/Main.h"
+#include "Main.h"
 struct void main(struct String* args){
 }
 struct Option_ApplicationError runWithFiles(struct Set__Path_ files){

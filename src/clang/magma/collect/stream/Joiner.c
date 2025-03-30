@@ -1,4 +1,4 @@
-#include "/Joiner.h"
+#include "Joiner.h"
 struct public Joiner(){
 }
 struct Option_String createInitial(){

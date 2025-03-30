@@ -1,4 +1,4 @@
-#include "/CLang.h"
+#include "CLang.h"
 struct Rule createCRootRule(){
 }
 struct Rule createCRootSegmentRule(){

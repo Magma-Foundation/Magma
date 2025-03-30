@@ -24,6 +24,7 @@ public record CharDivider(char delimiter) implements Divider {
 
     @Override
     public String join(String current, String element) {
+        if (current.isEmpty()) return element;
         return current + delimiter + element;
     }
 }

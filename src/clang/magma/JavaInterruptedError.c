@@ -1,3 +1,3 @@
-#include "/JavaInterruptedError.h"
+#include "JavaInterruptedError.h"
 struct String display(){
 }

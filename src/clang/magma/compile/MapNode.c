@@ -1,4 +1,4 @@
-#include "/MapNode.h"
+#include "MapNode.h"
 struct public MapNode(){
 }
 struct public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists){

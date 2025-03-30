@@ -1,4 +1,4 @@
-#include "/TreeTransformingStage.h"
+#include "TreeTransformingStage.h"
 struct public TreeTransformingStage(struct Transformer transformer){
 }
 struct Result_Node_CompileError transform(struct Node root, struct State state){

@@ -1,7 +1,6 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
-import magma.compile.lang.r.SymbolRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DecoratedFolder;
