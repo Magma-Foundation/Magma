@@ -136,15 +136,15 @@ public class JavaLang {
     }
 
     private static TypeRule createDataAccess(LazyRule value) {
-        return new TypeRule("data-access", new InfixRule(new NodeRule("child", value), ".", new StripRule(new StringRule("property")), new LastLocator()));
+        return new TypeRule("data-access", new InfixRule(new NodeRule("child", value), ".", createSymbolRule("property"), new LastLocator()));
     }
 
     private static TypeRule createConstructionRule(LazyRule value) {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new LastLocator()), ")"))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new InvocationStartLocator()), ")"))));
     }
 
     private static TypeRule createInvocationRule(LazyRule value) {
-        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new LastLocator()), ")")));
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new InvocationStartLocator()), ")")));
     }
 
     private static NodeListRule createArgumentsRule(LazyRule value) {
