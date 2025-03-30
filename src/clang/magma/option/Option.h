@@ -2,7 +2,7 @@
 #define magma_option_Option
 #include "../../magma/collect/list/List_.h"
 #include "../../magma/compile/Node.h"
-struct Option{
+struct Option<T>{
 };
 // expand Option_R = Option<struct R>
 // expand Supplier_T = Supplier<struct T>

@@ -108,6 +108,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\lang\CLang.c^
 	.\magma\option\Option.c^
 	.\magma\option\Option.c^
+	.\magma\compile\rule\OptionalNodeListRule.c^
+	.\magma\compile\rule\OptionalNodeListRule.c^
 	.\magma\compile\CompileError.c^
 	.\magma\compile\CompileError.c^
 	.\magma\process\ProcessError.c^

@@ -1,6 +1,6 @@
 #ifndef magma_option_Some
 #define magma_option_Some
-struct Some{
+struct Some<T>{
 };
 // expand Option_T = Option<struct T>
 // expand Option_R = Option<struct R>

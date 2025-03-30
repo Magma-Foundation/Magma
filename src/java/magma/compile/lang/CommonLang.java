@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import jvm.collect.list.Lists;
+import magma.compile.rule.OptionalNodeListRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.divide.DecoratedFolder;
@@ -99,5 +100,15 @@ public class CommonLang {
         Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
         Rule base = new NodeListRule("base", new CharDivider('.'), createSymbolRule("value"));
         return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
+    }
+
+    static Rule createNamedWithTypeParams() {
+        Rule name = createSymbolRule("name");
+        Rule typeParams = new NodeListRule("type-params", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
+
+        return new OptionalNodeListRule("type-params",
+                new StripRule(new InfixRule(name, "<", new SuffixRule(typeParams, ">"), new FirstLocator())),
+                name
+        );
     }
 }

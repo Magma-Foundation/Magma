@@ -3,7 +3,7 @@
 #include "../../../../magma/option/None.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
-struct SingleHead{struct T valueint retrieved
+struct SingleHead<T>{struct T valueint retrieved
 };
 // expand Option_T = Option<struct T>
 struct public SingleHead(struct T value);

@@ -171,4 +171,9 @@ public final class MapNode implements Node {
     public boolean hasNode(String propertyKey) {
         return nodes.containsKey(propertyKey);
     }
+
+    @Override
+    public boolean hasNodeList(String propertyKey) {
+        return nodeLists.containsKey(propertyKey);
+    }
 }

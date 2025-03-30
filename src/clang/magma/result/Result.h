@@ -2,7 +2,7 @@
 #define magma_result_Result
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Tuple.h"
-struct Result{
+struct Result<T, X>{
 };
 // expand Option_T = Option<struct T>
 // expand Option_X = Option<struct X>

@@ -85,14 +85,6 @@ struct Rule createTypeRule(){LazyRule type = new LazyRule();
 }
 struct TypeRule createArrayRule(struct LazyRule type){return new TypeRule(, new SuffixRule(new NodeRule(, type), ));
 }
-struct Rule createNamedWithTypeParams(){Rule name = createSymbolRule();
-        Rule typeParams = new NodeListRule(, new FoldingDivider(new ValueFolder()), createSymbolRule());
-
-        return new OrRule(Lists.of(
-                new StripRule(new InfixRule(name, , new SuffixRule(typeParams, ), new FirstLocator())),
-                name
-        ));
-}
 struct Rule createImportRule(struct String prefix, struct String type){NodeListRule namespace = new NodeListRule(, new CharDivider(), new StringRule());
         return new TypeRule(type, new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ))));
 }

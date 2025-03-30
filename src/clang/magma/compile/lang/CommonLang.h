@@ -1,6 +1,7 @@
 #ifndef magma_compile_lang_CommonLang
 #define magma_compile_lang_CommonLang
 #include "../../../windows/collect/list/Lists.h"
+#include "../../../magma/compile/rule/OptionalNodeListRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
 #include "../../../magma/compile/rule/divide/DecoratedFolder.h"
@@ -37,5 +38,6 @@ struct TypeRule createIfRule();
 struct TypeRule createReturnRule();
 struct TypeRule createWhileRule();
 struct Rule createGenericRule(struct Rule type);
+struct Rule createNamedWithTypeParams();
 #endif
 

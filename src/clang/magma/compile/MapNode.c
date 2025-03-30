@@ -80,4 +80,6 @@ struct Node removeNode(struct String propertyKey){return new MapNode(maybeType, 
 }
 int hasNode(struct String propertyKey){return nodes.containsKey(propertyKey);
 }
+int hasNodeList(struct String propertyKey){return nodeLists.containsKey(propertyKey);
+}
 

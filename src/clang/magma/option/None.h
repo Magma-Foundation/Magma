@@ -1,6 +1,6 @@
 #ifndef magma_option_None
 #define magma_option_None
-struct None{
+struct None<T>{
 };
 // expand Option_R = Option<struct R>
 // expand Supplier_T = Supplier<struct T>

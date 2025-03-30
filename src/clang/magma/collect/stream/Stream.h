@@ -2,7 +2,7 @@
 #define magma_collect_stream_Stream
 #include "../../../magma/option/Option.h"
 #include "../../../magma/result/Result.h"
-struct Stream{
+struct Stream<T>{
 };
 // expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
 // expand Stream_R = Stream<struct R>

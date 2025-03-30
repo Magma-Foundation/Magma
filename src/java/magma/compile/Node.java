@@ -49,4 +49,6 @@ public interface Node {
     Node removeNode(String propertyKey);
 
     boolean hasNode(String propertyKey);
+
+    boolean hasNodeList(String propertyKey);
 }

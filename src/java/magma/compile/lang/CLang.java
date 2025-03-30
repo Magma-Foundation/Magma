@@ -72,9 +72,9 @@ public class CLang {
         ));
     }
 
-    private static TypeRule createStructRule() {
-        StringRule name = new StringRule("name");
-        InfixRule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
+    private static Rule createStructRule() {
+        Rule name = CommonLang.createNamedWithTypeParams();
+        Rule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
         return new TypeRule("struct", new PrefixRule("struct ", new SuffixRule(contentRule, ";\n")));
     }
 

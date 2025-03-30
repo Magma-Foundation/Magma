@@ -47,4 +47,12 @@ struct Rule createGenericRule(struct Rule type){Rule typeArguments = new NodeLis
         Rule base = new NodeListRule(, new CharDivider(), createSymbolRule());
         return new TypeRule(, new StripRule(new SuffixRule(new InfixRule(base, , typeArguments, new FirstLocator()), )));
 }
+struct Rule createNamedWithTypeParams(){Rule name = createSymbolRule();
+        Rule typeParams = new NodeListRule(, new FoldingDivider(new ValueFolder()), createSymbolRule());
+
+        return new OptionalNodeListRule(,
+                new StripRule(new InfixRule(name, , new SuffixRule(typeParams, ), new FirstLocator())),
+                name
+        );
+}
 

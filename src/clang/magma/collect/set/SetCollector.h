@@ -2,7 +2,7 @@
 #define magma_collect_set_SetCollector
 #include "../../../windows/collect/set/Sets.h"
 #include "../../../magma/collect/stream/Collector.h"
-struct SetCollector{
+struct SetCollector<T>{
 };
 // expand Set__T = Set_<struct T>
 // expand Set__T = Set_<struct T>

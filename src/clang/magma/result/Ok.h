@@ -4,7 +4,7 @@
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Some.h"
 #include "../../magma/option/Tuple.h"
-struct Ok{
+struct Ok<T, X>{
 };
 // expand Result_T_X = Result<struct T, struct X>
 // expand Option_T = Option<struct T>

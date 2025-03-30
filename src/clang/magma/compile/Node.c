@@ -19,4 +19,5 @@ struct Node withNodeLists(struct Map__String_List__Node nodeLists);
 struct Node withNodes(struct Map__String_Node nodes);
 struct Node removeNode(struct String propertyKey);
 int hasNode(struct String propertyKey);
+int hasNodeList(struct String propertyKey);
 

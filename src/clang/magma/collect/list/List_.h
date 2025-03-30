@@ -3,7 +3,7 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-struct List_{
+struct List_<T>{
 };
 // expand Stream_T = Stream<struct T>
 // expand List__T = List_<struct T>

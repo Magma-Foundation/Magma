@@ -9,7 +9,7 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-struct OrState{
+struct OrState<T>{
 };
 // expand OrState_T = OrState<struct T>
 // expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>

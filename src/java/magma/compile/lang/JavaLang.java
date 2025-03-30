@@ -4,8 +4,6 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
-import magma.compile.rule.divide.FoldingDivider;
-import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
@@ -131,16 +129,6 @@ public class JavaLang {
 
     private static TypeRule createArrayRule(LazyRule type) {
         return new TypeRule("array", new SuffixRule(new NodeRule("child", type), "[]"));
-    }
-
-    private static Rule createNamedWithTypeParams() {
-        Rule name = createSymbolRule("name");
-        Rule typeParams = new NodeListRule("type-params", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
-
-        return new OrRule(Lists.of(
-                new StripRule(new InfixRule(name, "<", new SuffixRule(typeParams, ">"), new FirstLocator())),
-                name
-        ));
     }
 
     private static Rule createImportRule(String prefix, String type) {

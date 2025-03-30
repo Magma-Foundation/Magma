@@ -6,7 +6,7 @@
 #include "../../../../magma/option/Tuple.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-struct HeadedStream{
+struct HeadedStream<T>{
 };
 // expand Stream_T = Stream<struct T>
 // expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>

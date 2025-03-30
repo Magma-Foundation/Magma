@@ -39,8 +39,8 @@ struct Rule createStatementRule(){return new OrRule(Lists.of(
                 createWhileRule()
         ));
 }
-struct TypeRule createStructRule(){StringRule name = new StringRule();
-        InfixRule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
+struct Rule createStructRule(){Rule name = CommonLang.createNamedWithTypeParams();
+        Rule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
         return new TypeRule(, new PrefixRule(, new SuffixRule(contentRule, )));
 }
 struct OrRule createStructMemberRule(){return createDefinitionsRule();

@@ -4,8 +4,6 @@
 #include "../../../magma/compile/rule/LazyRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
-#include "../../../magma/compile/rule/divide/FoldingDivider.h"
-#include "../../../magma/compile/rule/divide/ValueFolder.h"
 #include "../../../magma/compile/rule/locate/FirstLocator.h"
 #include "../../../magma/compile/rule/text/InfixRule.h"
 #include "../../../magma/compile/rule/text/PrefixRule.h"
@@ -32,7 +30,6 @@ struct TypeRule createTypedDefinitionRule();
 struct Rule createStatementRule();
 struct Rule createTypeRule();
 struct TypeRule createArrayRule(struct LazyRule type);
-struct Rule createNamedWithTypeParams();
 struct Rule createImportRule(struct String prefix, struct String type);
 #endif
 

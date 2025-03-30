@@ -3,7 +3,7 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-struct Map_{
+struct Map_<K, V>{
 };
 // expand Map__K_V = Map_<struct K, struct V>
 // expand Option_V = Option<struct V>
