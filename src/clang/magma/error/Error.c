@@ -1,0 +1,3 @@
+struct Error{};
+String display(){
+}
