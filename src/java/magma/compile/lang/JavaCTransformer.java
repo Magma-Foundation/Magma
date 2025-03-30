@@ -52,13 +52,13 @@ public class JavaCTransformer implements Transformer {
     }
 
     private static Node transformClassMember(Node node) {
-        if(node.is("initialization")) {
+        if (node.is("initialization")) {
             return node.findNode("definition")
                     .orElse(new MapNode())
                     .mapNode("type", JavaCTransformer::transformType);
         }
 
-        if(node.is("definition")) {
+        if (node.is("definition")) {
             return node.mapNode("type", JavaCTransformer::transformType);
         }
 
@@ -146,6 +146,24 @@ public class JavaCTransformer implements Transformer {
 
     @Override
     public Node transform(Node tree, List_<String> namespace) {
-        return tree.mapNodeList("children", children -> transformRoot(namespace, children));
+        Node withNodes = tree.streamNodes()
+                .foldWithInitial(tree, (node, tuple) -> mapNodes(namespace, node, tuple));
+
+        return withNodes.streamNodeLists().foldWithInitial(withNodes,
+                (node, tuple) -> mapNodeList(namespace, node, tuple));
+    }
+
+    private Node mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {
+        Node newChild = transform(tuple.right(), namespace);
+        return node.withNode(tuple.left(), newChild);
+    }
+
+    private Node mapNodeList(List_<String> namespace, Node node, Tuple<String, List_<Node>> tuple) {
+        List_<Node> children = tuple.right()
+                .stream()
+                .map(child -> transform(child, namespace))
+                .collect(new ListCollector<>());
+
+        return node.withNodeList(tuple.left(), children);
     }
 }
