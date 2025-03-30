@@ -5,6 +5,10 @@ import magma.option.Option;
 import magma.option.Some;
 
 public record Joiner(String delimiter) implements Collector<String, Option<String>> {
+    public Joiner() {
+        this("");
+    }
+
     @Override
     public Option<String> createInitial() {
         return new None<>();

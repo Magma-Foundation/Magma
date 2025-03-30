@@ -3,6 +3,7 @@ package magma.compile;
 import jvm.collect.map.Maps;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
+import magma.collect.stream.Joiner;
 import magma.collect.stream.Stream;
 import magma.option.None;
 import magma.option.Option;
@@ -49,7 +50,22 @@ public final class MapNode implements Node {
     @Override
     public String display() {
         String typeString = maybeType.map(type -> type + " ").orElse("");
-        return typeString + "{}";
+
+        String joinedStrings = strings.stream()
+                .map(entry -> "\t" + entry.left() + ": \"" + entry.right() + "\"")
+                .collect(new Joiner(",\n"))
+                .orElse("");
+
+        String joinedNodeLists = nodeLists.stream()
+                .map(entry -> entry.left() + ": [" + entry.right()
+                        .stream()
+                        .map(Node::display)
+                        .collect(new Joiner(","))
+                        .orElse("") + "]")
+                .collect(new Joiner(",\n"))
+                .orElse("");
+
+        return typeString + "{\n" + joinedStrings + joinedNodeLists + "}";
     }
 
     @Override
