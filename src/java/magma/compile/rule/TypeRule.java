@@ -13,7 +13,7 @@ public record TypeRule(String type, Rule rule) implements Rule {
     public Result<Node, CompileError> parse(String input) {
         return rule.parse(input)
                 .mapValue(node -> node.retype(type))
-                .mapErr(error -> new CompileError("Failed to assign type", new StringContext(input), Lists.of(error)));
+                .mapErr(error -> new CompileError("Failed to assign type '" + type + "'", new StringContext(input), Lists.of(error)));
     }
 
     @Override

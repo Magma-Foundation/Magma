@@ -25,6 +25,10 @@ public class CompileError implements Error {
         this.errors = errors;
     }
 
+    private static String format(int depth, int index, List_<CompileError> sorted) {
+        return "\n" + "| ".repeat(depth) + (index + 1) + ") " + sorted.get(index).format(depth + 1);
+    }
+
     public int depth() {
         return 1 + errors.stream()
                 .map(CompileError::depth)
@@ -41,9 +45,7 @@ public class CompileError implements Error {
         List_<CompileError> sorted = errors.sort((error, error2) -> error.depth() - error2.depth());
 
         String joined = new HeadedStream<>(new RangeHead(sorted.size()))
-                .map(index -> {
-                    return "\n" + "\t".repeat(depth) + index + ") " + sorted.get(index).format(depth + 1);
-                })
+                .map(index -> format(depth, index, sorted))
                 .collect(new Joiner(""))
                 .orElse("");
 

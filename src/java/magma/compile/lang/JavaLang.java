@@ -3,6 +3,7 @@ package magma.compile.lang;
 import jvm.collect.list.Lists;
 import magma.compile.lang.r.SymbolRule;
 import magma.compile.rule.DivideRule;
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.InfixRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.PrefixRule;
@@ -41,7 +42,7 @@ public class JavaLang {
                 namedWithTypeParams
         ));
 
-        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", new InfixRule(beforeContent, "{", new StringRule("with-end"))));
+        return new TypeRule("interface", new InfixRule(new StringRule("modifiers"), "interface ", CommonLang.withContent(beforeContent, createClassMemberRule())));
     }
 
     private static TypeRule createClassRule() {
@@ -51,12 +52,20 @@ public class JavaLang {
                 namedWithTypeParams
         ));
 
-        Rule right = new SuffixRule(new DivideRule("children", new StatementDivider(), createClassMemberRule()), "}");
-        return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", new InfixRule(beforeContent, "{", right)));
+        Rule right1 = CommonLang.withContent(beforeContent, createClassMemberRule());
+        return new TypeRule("class", new InfixRule(new StringRule("modifiers"), "class ", right1));
     }
 
     private static Rule createClassMemberRule() {
-        return new OrRule(Lists.empty());
+        return new OrRule(Lists.of(
+                new TypeRule("whitespace", new StripRule(new EmptyRule())),
+                new TypeRule("method", new InfixRule(createDefinitionRule(), "(", new StringRule("with-params"))),
+                new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";"))
+        ));
+    }
+
+    private static StringRule createDefinitionRule() {
+        return new StringRule("definition");
     }
 
     private static Rule createNamedWithTypeParams() {

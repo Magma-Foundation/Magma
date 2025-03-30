@@ -18,11 +18,20 @@ public class CLang {
         return new DivideRule("children", new StatementDivider(), createCRootSegmentRule());
     }
 
-    private static OrRule createCRootSegmentRule() {
+    private static Rule createCRootSegmentRule() {
         return new OrRule(Lists.of(
                 createIncludeRule(),
-                new TypeRule("struct", new PrefixRule("struct ", new InfixRule(new StringRule("name"), " {", new SuffixRule(new EmptyRule(), "};"))))
+                createStructRule()
         ));
+    }
+
+    private static TypeRule createStructRule() {
+        StringRule name = new StringRule("name");
+        return new TypeRule("struct", new PrefixRule("struct ", CommonLang.withContent(name, createStructMemberRule())));
+    }
+
+    private static OrRule createStructMemberRule() {
+        return new OrRule(Lists.of());
     }
 
     private static Rule createIncludeRule() {

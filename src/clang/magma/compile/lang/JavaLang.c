@@ -1,6 +1,7 @@
 #include "/../../../windows/collect/list/Lists.h"
 #include "/../../../magma/compile/lang/r/SymbolRule.h"
 #include "/../../../magma/compile/rule/DivideRule.h"
+#include "/../../../magma/compile/rule/EmptyRule.h"
 #include "/../../../magma/compile/rule/InfixRule.h"
 #include "/../../../magma/compile/rule/OrRule.h"
 #include "/../../../magma/compile/rule/PrefixRule.h"
