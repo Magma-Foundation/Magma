@@ -124,11 +124,17 @@ public class JavaLang {
                 createAddRule(value),
                 createConstructionRule(value),
                 createInvocationRule(value),
-                createDataAccess(value),
-                createStringRule()
+                createDataAccess("data-access", ".", value),
+                createDataAccess("method-access", "::", value),
+                createStringRule(),
+                createLambdaRule()
         )));
 
         return value;
+    }
+
+    private static TypeRule createLambdaRule() {
+        return new TypeRule("lambda", new InfixRule(new StringRule("left"), "->", new StringRule("right"), new FirstLocator()));
     }
 
     private static TypeRule createConstructionRule(LazyRule value) {

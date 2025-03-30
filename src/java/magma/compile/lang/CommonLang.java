@@ -129,8 +129,8 @@ public class CommonLang {
         return new NodeListRule("arguments", new FoldingDivider(new DecoratedFolder(new ValueFolder())), value);
     }
 
-    static TypeRule createDataAccess(LazyRule value) {
-        return new TypeRule("data-access", new InfixRule(new NodeRule("child", value), ".", createSymbolRule("property"), new LastLocator()));
+    static TypeRule createDataAccess(String type, String infix, Rule value) {
+        return new TypeRule(type, new InfixRule(new NodeRule("child", value), infix, createSymbolRule("property"), new LastLocator()));
     }
 
     static TypeRule createStringRule() {
