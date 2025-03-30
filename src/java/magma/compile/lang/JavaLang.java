@@ -4,6 +4,8 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
@@ -104,11 +106,12 @@ public class JavaLang {
     }
 
     private static Rule createStatementRule() {
+        LazyRule value = new LazyRule();
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
-                createReturnRule(createValueRule()),
+                createReturnRule(createValueRule(value)),
                 createIfRule(),
-                createInvocationRule(),
+                createInvocationRule(value),
                 createForRule(),
                 createAssignmentRule(),
                 createPostfixRule(),
@@ -117,14 +120,27 @@ public class JavaLang {
         ));
     }
 
-    private static Rule createValueRule() {
-        LazyRule value = new LazyRule();
+    private static Rule createValueRule(LazyRule value) {
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
-                createAddRule(value)
+                createAddRule(value),
+                createConstructionRule(value),
+                createInvocationRule(value)
         )));
 
         return value;
+    }
+
+    private static TypeRule createConstructionRule(LazyRule value) {
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new FirstLocator()), ")"))));
+    }
+
+    private static TypeRule createInvocationRule(LazyRule value) {
+        return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new FirstLocator()), ")")));
+    }
+
+    private static NodeListRule createArgumentsRule(LazyRule value) {
+        return new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), value);
     }
 
     private static Rule createTypeRule() {
