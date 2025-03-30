@@ -10,6 +10,7 @@ import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.context.NodeContext;
+import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
 import magma.option.Tuple;
 import magma.result.Err;
@@ -43,7 +44,7 @@ public class TransformAll implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(List_<String> currentNamespace, Node node) {
+    public Result<Node, CompileError> afterPass(State state, Node node) {
         if (node.is("root")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
@@ -92,7 +93,7 @@ public class TransformAll implements Transformer {
                         .collect(new ListCollector<>());
 
                 List_<String> outputNamespace = Lists.empty();
-                int size = currentNamespace.size();
+                int size = state.getNamespace().size();
                 if (size == 0) {
                     outputNamespace = outputNamespace.add(".");
                 } else {

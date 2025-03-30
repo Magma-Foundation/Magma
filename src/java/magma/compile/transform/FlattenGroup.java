@@ -58,7 +58,7 @@ public class FlattenGroup implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(List_<String> namespace, Node node) {
+    public Result<Node, CompileError> afterPass(State state, Node node) {
         return new Ok<>(afterPass0(node));
     }
 }

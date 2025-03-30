@@ -1,6 +1,6 @@
 struct public TreeTransformingStage(struct Transformer transformer){
 }
-struct Result_Node_CompileError transform(struct Node tree, struct List__String namespace){
+struct Result_Node_CompileError transform(struct Node tree, struct State state){
 }
 struct Result_Node_CompileError transformNodeLists(struct List__String namespace, struct Node withNodes){
 }

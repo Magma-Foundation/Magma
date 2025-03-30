@@ -15,20 +15,20 @@ public class TreeTransformingStage implements TransformingStage {
     }
 
     @Override
-    public Result<Node, CompileError> transform(Node tree, List_<String> namespace) {
+    public Result<Node, CompileError> transform(Node tree, State state) {
         return tree.streamNodes()
-                .foldToResult(tree, (node, tuple) -> mapNodes(namespace, node, tuple))
-                .flatMapValue(withNodes -> transformNodeLists(namespace, withNodes));
+                .foldToResult(tree, (node, tuple) -> mapNodes(state.namespace(), node, tuple))
+                .flatMapValue(withNodes -> transformNodeLists(state.namespace(), withNodes));
     }
 
     private Result<Node, CompileError> transformNodeLists(List_<String> namespace, Node withNodes) {
         return withNodes.streamNodeLists()
                 .foldToResult(withNodes, (node, tuple) -> mapNodeList(namespace, node, tuple))
-                .flatMapValue(node1 -> transformer.afterPass(namespace, node1));
+                .flatMapValue(node1 -> transformer.afterPass(new State(namespace), node1));
     }
 
     private Result<Node, CompileError> mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {
-        return transform(tuple.right(), namespace).mapValue(newChild -> node.withNode(tuple.left(), newChild));
+        return transform(tuple.right(), new State(namespace)).mapValue(newChild -> node.withNode(tuple.left(), newChild));
     }
 
     private Result<Node, CompileError> mapNodeList(List_<String> namespace, Node node, Tuple<String, List_<Node>> tuple) {
@@ -39,6 +39,6 @@ public class TreeTransformingStage implements TransformingStage {
     }
 
     private Result<List_<Node>, CompileError> mapNodeListElement(List_<String> namespace, List_<Node> elements, Node element) {
-        return transform(element, namespace).mapValue(elements::add);
+        return transform(element, new State(namespace)).mapValue(elements::add);
     }
 }

@@ -9,6 +9,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.Sorter;
 import magma.compile.lang.TransformAll;
 import magma.compile.transform.FlattenGroup;
+import magma.compile.transform.State;
 import magma.compile.transform.TreeTransformingStage;
 import magma.option.Tuple;
 import magma.result.Result;
@@ -16,10 +17,10 @@ import magma.result.Result;
 public class Compiler {
     public static Result<Map_<String, String>, CompileError> compile(String input, List_<String> namespace, String name) {
         return JavaLang.createJavaRootRule().parse(input)
-                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, namespace))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, namespace))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, namespace))
-                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, namespace))
+                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, new State(namespace)))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, new State(namespace)))
+                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, new State(namespace)))
+                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, new State(namespace)))
                 .flatMapValue(Compiler::generateRoots);
     }
 

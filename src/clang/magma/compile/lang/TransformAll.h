@@ -8,6 +8,7 @@
 #include "/../../../magma/compile/MapNode.h"
 #include "/../../../magma/compile/Node.h"
 #include "/../../../magma/compile/context/NodeContext.h"
+#include "/../../../magma/compile/transform/State.h"
 #include "/../../../magma/compile/transform/Transformer.h"
 #include "/../../../magma/option/Tuple.h"
 #include "/../../../magma/result/Err.h"

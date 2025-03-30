@@ -64,6 +64,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\collect\list\ListCollector.c^
 	.\magma\compile\transform\FlattenCache.c^
 	.\magma\compile\transform\FlattenCache.c^
+	.\magma\compile\transform\State.c^
+	.\magma\compile\transform\State.c^
 	.\magma\compile\rule\locate\LastLocator.c^
 	.\magma\compile\rule\locate\LastLocator.c^
 	.\magma\compile\context\Context.c^

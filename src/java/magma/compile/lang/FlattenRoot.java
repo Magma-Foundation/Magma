@@ -5,6 +5,7 @@ import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
 import magma.result.Ok;
 import magma.result.Result;
@@ -26,7 +27,7 @@ public class FlattenRoot implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(List_<String> namespace, Node node) {
+    public Result<Node, CompileError> afterPass(State state, Node node) {
         return new Ok<>(afterPass0(node));
     }
 }

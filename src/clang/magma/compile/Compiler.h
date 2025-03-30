@@ -7,6 +7,7 @@
 #include "/../../magma/compile/lang/Sorter.h"
 #include "/../../magma/compile/lang/TransformAll.h"
 #include "/../../magma/compile/transform/FlattenGroup.h"
+#include "/../../magma/compile/transform/State.h"
 #include "/../../magma/compile/transform/TreeTransformingStage.h"
 #include "/../../magma/option/Tuple.h"
 #include "/../../magma/result/Result.h"

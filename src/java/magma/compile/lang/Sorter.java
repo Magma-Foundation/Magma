@@ -5,6 +5,7 @@ import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
 import magma.option.Tuple;
 import magma.result.Ok;
@@ -19,7 +20,7 @@ public class Sorter implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(List_<String> namespace, Node node) {
+    public Result<Node, CompileError> afterPass(State state, Node node) {
         if (node.is("root")) {
             List_<Node> children = node.findNode("content").orElse(new MapNode())
                     .findNodeList("children").orElse(Lists.empty());
