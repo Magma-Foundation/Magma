@@ -84,29 +84,25 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
             });
         }if (node.is()) {
             String oldValue = node.findString().orElse();
-            if (oldValue.equals()) {
-                return new Ok<>(node.withString(, ));
-            } else {
-                return new Ok<>(node.retype());
-            }
+            if (oldValue.equals()) return new Ok<>(node.withString(, ));
+            if (oldValue.equals()) return new Ok<>(node);
+            return new Ok<>(node.retype());
         }if (node.is()) {
             return new Ok<>(node.retype());
         }
 
         return new Ok<>(node);
 }
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (node.is()) {
-            Node content = node.findNode().orElse(new MapNode());
-            List_<Node> children = content.findNodeList().orElse(Lists.empty());
+struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (!node.is()) return new Ok<>(node);
 
-            List_<Node> newChildren = children.stream()
-                    .filter(child -> !isFunctionalImport(child) && !child.is())
-                    .collect(new ListCollector<>());
+        Node content = node.findNode().orElse(new MapNode());
+        List_<Node> children = content.findNodeList().orElse(Lists.empty());
 
-            Node withChildren = content.withNodeList(, newChildren);
-            return new Ok<>(node.withNode(, withChildren));
-        }
+        List_<Node> newChildren = children.stream()
+                .filter(child -> !isFunctionalImport(child) && !child.is())
+                .collect(new ListCollector<>());
 
-        return new Ok<>(node);
+        Node withChildren = content.withNodeList(, newChildren);
+        return new Ok<>(node.withNode(, withChildren));
 }
 

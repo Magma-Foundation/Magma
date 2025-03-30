@@ -1,11 +1,9 @@
 package magma.compile.lang;
 
-import jvm.collect.list.JavaList;
 import jvm.collect.list.Lists;
 import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
-import magma.collect.stream.Joiner;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
@@ -124,11 +122,9 @@ public class TransformAll implements Transformer {
 
         if (node.is("symbol-type")) {
             String oldValue = node.findString("value").orElse("");
-            if (oldValue.equals("boolean")) {
-                return new Ok<>(node.withString("value", "int"));
-            } else {
-                return new Ok<>(node.retype("struct-type"));
-            }
+            if (oldValue.equals("boolean")) return new Ok<>(node.withString("value", "int"));
+            if (oldValue.equals("int")) return new Ok<>(node);
+            return new Ok<>(node.retype("struct-type"));
         }
 
         if (node.is("array")) {
@@ -140,18 +136,16 @@ public class TransformAll implements Transformer {
 
     @Override
     public Result<Node, CompileError> beforePass(State state, Node node) {
-        if (node.is("root")) {
-            Node content = node.findNode("content").orElse(new MapNode());
-            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+        if (!node.is("root")) return new Ok<>(node);
 
-            List_<Node> newChildren = children.stream()
-                    .filter(child -> !isFunctionalImport(child) && !child.is("package"))
-                    .collect(new ListCollector<>());
+        Node content = node.findNode("content").orElse(new MapNode());
+        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
 
-            Node withChildren = content.withNodeList("children", newChildren);
-            return new Ok<>(node.withNode("content", withChildren));
-        }
+        List_<Node> newChildren = children.stream()
+                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                .collect(new ListCollector<>());
 
-        return new Ok<>(node);
+        Node withChildren = content.withNodeList("children", newChildren);
+        return new Ok<>(node.withNode("content", withChildren));
     }
 }

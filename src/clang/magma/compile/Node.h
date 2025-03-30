@@ -30,7 +30,7 @@ struct Option_String findString(struct String propertyKey);
 struct Node withNodeList(struct String propertyKey, struct List__Node propertyValues);
 struct Option_List__Node findNodeList(struct String propertyKey);
 struct String display();
-struct String format(struct int depth);
+struct String format(int depth);
 struct Node mapNodeList(struct String propertyKey, struct List__Node(*mapper)(struct List__Node));
 int is(struct String type);
 struct Node retype(struct String type);

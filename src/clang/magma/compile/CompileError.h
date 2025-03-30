@@ -14,9 +14,9 @@ struct CompileError{struct String messagestruct Context contextstruct List__Comp
 // expand List__CompileError = List_<struct CompileError>
 struct public CompileError(struct String message, struct Context context);
 struct public CompileError(struct String message, struct Context context, struct List__CompileError errors);
-struct String format(struct int depth, struct int index, struct List__CompileError sorted);
-struct int depth();
+struct String format(int depth, int index, struct List__CompileError sorted);
+int depth();
 struct String display();
-struct String format(struct int depth);
+struct String format(int depth);
 #endif
 

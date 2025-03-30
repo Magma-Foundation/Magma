@@ -1,7 +1,7 @@
 #include "MutableDividingState.h"
 struct public MutableDividingState(struct List__Character queue){this(queue, Lists.empty(), new StringBuilder(), 0);
 }
-struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, struct int depth){this.queue = queue;
+struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, int depth){this.queue = queue;
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;

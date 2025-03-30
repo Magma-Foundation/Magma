@@ -1,11 +1,9 @@
 #ifndef magma_compile_lang_TransformAll
 #define magma_compile_lang_TransformAll
-#include "../../../windows/collect/list/JavaList.h"
 #include "../../../windows/collect/list/Lists.h"
 #include "../../../windows/collect/stream/Streams.h"
 #include "../../../magma/collect/list/ListCollector.h"
 #include "../../../magma/collect/list/List_.h"
-#include "../../../magma/collect/stream/Joiner.h"
 #include "../../../magma/compile/CompileError.h"
 #include "../../../magma/compile/MapNode.h"
 #include "../../../magma/compile/Node.h"

@@ -8,7 +8,7 @@ struct public MapNode(struct Option_String maybeType, struct Map__String_String 
 }
 struct public MapNode(struct String type){this(new Some<>(type), Maps.empty(), Maps.empty(), Maps.empty());
 }
-struct String formatEntry(struct int depth, struct String key, struct String value){return .repeat(depth + 1) + key +  + value;
+struct String formatEntry(int depth, struct String key, struct String value){return .repeat(depth + 1) + key +  + value;
 }
 struct Node withString(struct String propertyKey, struct String propertyValue){return new MapNode(maybeType, strings.with(propertyKey, propertyValue), nodes, nodeLists);
 }
@@ -20,7 +20,7 @@ struct Option_List__Node findNodeList(struct String propertyKey){return nodeList
 }
 struct String display(){return format(0);
 }
-struct String format(struct int depth){String typeString = maybeType.map(type -> type + ).orElse();
+struct String format(int depth){String typeString = maybeType.map(type -> type + ).orElse();
 
         Option<String> joinedStrings = strings.stream()
                 .map(entry -> formatEntry(depth, entry.left(),  + entry.right() + ))
@@ -41,7 +41,7 @@ struct String format(struct int depth){String typeString = maybeType.map(type ->
                 .repeat(depth) +
                 ;
 }
-struct String formatList(struct Tuple_String_List__Node entry, struct int depth){return  + entry.right()
+struct String formatList(struct Tuple_String_List__Node entry, int depth){return  + entry.right()
                 .stream()
                 .map(node -> node.format(depth + 1))
                 .collect(new Joiner())
