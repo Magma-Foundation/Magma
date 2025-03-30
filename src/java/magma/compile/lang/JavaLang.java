@@ -122,7 +122,7 @@ public class JavaLang {
     }
 
     private static Rule createGenericRule() {
-        Rule typeArguments = new NodeListRule("type-arguments", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
+        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));
         return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(createSymbolRule("base"), "<", typeArguments, new LastLocator()), ">")));
     }
 

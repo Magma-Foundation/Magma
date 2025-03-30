@@ -4,6 +4,7 @@ import jvm.collect.list.Lists;
 import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
+import magma.collect.stream.Joiner;
 import magma.collect.stream.Stream;
 import magma.compile.MapNode;
 import magma.compile.Node;
@@ -69,7 +70,8 @@ public class JavaCTransformer implements Transformer {
             }).orElseGet(() -> {
                 Node definition = node.findNode("definition").orElse(new MapNode());
                 String name = definition.findString("name").orElse("");
-                Node returns = definition.findNode("type").orElse(new MapNode());
+                Node oldType = definition.findNode("type").orElse(new MapNode());
+                Node returns = getOldType(oldType);
 
                 List_<Node> paramTypes = node.findNodeList("params")
                         .orElse(Lists.empty())
@@ -86,6 +88,24 @@ public class JavaCTransformer implements Transformer {
         }
 
         return node;
+    }
+
+    private static Node getOldType(Node oldType) {
+        if (oldType.is("generic")) {
+            return new MapNode("symbol-type").withString("value", stringify(oldType));
+        }
+        return oldType;
+    }
+
+    private static String stringify(Node type) {
+        String base = type.findString("base").orElse("");
+        return type.findNodeList("arguments")
+                .orElse(Lists.empty())
+                .stream()
+                .map(JavaCTransformer::stringify)
+                .collect(new Joiner("_"))
+                .map(inner -> base + "_" + inner)
+                .orElse(base);
     }
 
     private static Tuple<List_<Node>, List_<Node>> foldNode(Tuple<List_<Node>, List_<Node>> current, Node classMember) {
