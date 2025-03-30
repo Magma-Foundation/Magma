@@ -1,6 +1,7 @@
 #ifndef magma_compile_CompileError
 #define magma_compile_CompileError
 #include "../../windows/collect/list/Lists.h"
+#include "../../windows/collect/string/Strings.h"
 #include "../../magma/collect/list/List_.h"
 #include "../../magma/collect/stream/Joiner.h"
 #include "../../magma/collect/stream/head/HeadedStream.h"

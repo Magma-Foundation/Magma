@@ -1,6 +1,7 @@
 package magma.compile;
 
 import jvm.collect.list.Lists;
+import jvm.collect.string.Strings;
 import magma.collect.list.List_;
 import magma.collect.stream.Joiner;
 import magma.collect.stream.head.HeadedStream;
@@ -52,6 +53,6 @@ public class CompileError implements Error {
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return message + ": " + context.display() + joined;
+        return message + ": " + Strings.unwrap(context.display()) + joined;
     }
 }

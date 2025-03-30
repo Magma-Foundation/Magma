@@ -68,6 +68,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\tree\OrRule.c^
 	.\magma\compile\context\StringContext.c^
 	.\magma\compile\context\StringContext.c^
+	.\magma\collect\string\String_.c^
+	.\magma\collect\string\String_.c^
 	.\magma\compile\lang\Sorter.c^
 	.\magma\compile\lang\Sorter.c^
 	.\magma\compile\Compiler.c^

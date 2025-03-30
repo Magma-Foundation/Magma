@@ -18,6 +18,6 @@ struct String format(int depth){List_<CompileError> sorted = errors.sort((error,
         String joined = new HeadedStream<>(new RangeHead(sorted.size()))
                 .map(index -> format(depth, index, sorted))
                 .collect(new Joiner(""))
-                .orElse("");return message+": "+context.display()+joined;
+                .orElse("");return message+": "+Strings.unwrap(context.display())+joined;
 }
 

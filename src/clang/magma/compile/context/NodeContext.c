@@ -1,4 +1,6 @@
 #include "NodeContext.h"
-struct String display(){return value.display();
+struct String display0(){return value.display();
+}
+struct JavaString display(){return JavaString(display0());
 }
 

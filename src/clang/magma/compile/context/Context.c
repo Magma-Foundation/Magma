@@ -1,3 +1,3 @@
 #include "Context.h"
-struct String display();
+struct JavaString display();
 
