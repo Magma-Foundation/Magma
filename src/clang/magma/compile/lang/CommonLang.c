@@ -15,7 +15,8 @@
 #include "/../../../magma/compile/rule/tree/NodeRule.h"
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
-struct CommonLang{}void temp(){
+struct CommonLang{};
+void temp(){
 }
 void temp(){
 }

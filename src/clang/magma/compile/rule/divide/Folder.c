@@ -1,1 +1,1 @@
-struct Folder{DividingStateString}
+struct Folder{DividingStateString};

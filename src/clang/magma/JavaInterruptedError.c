@@ -1,4 +1,5 @@
 #include "/../magma/error/Error.h"
 #include "/../windows/result/Results.h"
-struct JavaInterruptedError{}void temp(){
+struct JavaInterruptedError{};
+void temp(){
 }

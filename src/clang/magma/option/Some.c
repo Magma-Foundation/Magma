@@ -1,4 +1,5 @@
-struct Some{}void temp(){
+struct Some{};
+void temp(){
 }
 void temp(){
 }

@@ -1,1 +1,1 @@
-struct Error{String}
+struct Error{String};

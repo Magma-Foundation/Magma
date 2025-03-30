@@ -1,4 +1,5 @@
-struct ValueFolder{}void temp(){
+struct ValueFolder{};
+void temp(){
 }
 void temp(){
 }

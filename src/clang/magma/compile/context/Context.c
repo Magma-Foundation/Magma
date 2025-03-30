@@ -1,1 +1,1 @@
-struct Context{String}
+struct Context{String};

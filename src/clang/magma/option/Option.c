@@ -1,1 +1,1 @@
-struct Option{_RT_Boolean_TvoidT_TbooleanRboolean_T_R}
+struct Option{_RT_Boolean_TvoidT_TbooleanRboolean_T_R};

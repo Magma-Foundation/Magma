@@ -8,7 +8,8 @@
 #include "/../../../magma/option/Some.h"
 #include "/../../../magma/result/Err.h"
 #include "/../../../magma/result/Result.h"
-struct LazyRule{_Rule child}void temp(){
+struct LazyRule{_Rule child};
+void temp(){
 }
 void temp(){
 }

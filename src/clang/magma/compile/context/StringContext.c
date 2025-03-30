@@ -1,2 +1,3 @@
-struct StringContext{}void temp(){
+struct StringContext{};
+void temp(){
 }

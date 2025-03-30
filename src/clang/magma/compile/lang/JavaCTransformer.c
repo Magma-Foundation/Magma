@@ -7,7 +7,8 @@
 #include "/../../../magma/compile/MapNode.h"
 #include "/../../../magma/compile/Node.h"
 #include "/../../../magma/option/Tuple.h"
-struct JavaCTransformer{}void temp(){
+struct JavaCTransformer{};
+void temp(){
 }
 void temp(){
 }

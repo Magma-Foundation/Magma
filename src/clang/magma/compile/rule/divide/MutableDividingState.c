@@ -2,7 +2,8 @@
 #include "/../../../../magma/collect/list/List_.h"
 #include "/../../../../magma/option/Option.h"
 #include "/../../../../magma/option/Tuple.h"
-struct MutableDividingState{_Character queue_String segmentsStringBuilder bufferint depth}void temp(){
+struct MutableDividingState{_Character queue_String segmentsStringBuilder bufferint depth};
+void temp(){
 }
 void temp(){
 }

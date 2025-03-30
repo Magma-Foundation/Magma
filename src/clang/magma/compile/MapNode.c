@@ -8,7 +8,8 @@
 #include "/../../magma/option/Option.h"
 #include "/../../magma/option/Some.h"
 #include "/../../magma/option/Tuple.h"
-struct MapNode{_String maybeType_String_String strings_String_Node nodes_String__Node nodeLists}void temp(){
+struct MapNode{_String maybeType_String_String strings_String_Node nodes_String__Node nodeLists};
+void temp(){
 }
 void temp(){
 }

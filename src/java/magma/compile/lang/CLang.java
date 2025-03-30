@@ -7,6 +7,7 @@ import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.divide.StatementFolder;
 import magma.compile.rule.text.EmptyRule;
+import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
 import magma.compile.rule.text.SuffixRule;
@@ -34,7 +35,8 @@ public class CLang {
 
     private static TypeRule createStructRule() {
         StringRule name = new StringRule("name");
-        return new TypeRule("struct", new PrefixRule("struct ", CommonLang.createContentRule(name, createStructMemberRule())));
+        InfixRule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
+        return new TypeRule("struct", new PrefixRule("struct ", new SuffixRule(contentRule, ";\n")));
     }
 
     private static OrRule createStructMemberRule() {

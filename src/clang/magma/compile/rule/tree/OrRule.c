@@ -8,7 +8,8 @@
 #include "/../../../../magma/result/Err.h"
 #include "/../../../../magma/result/Ok.h"
 #include "/../../../../magma/result/Result.h"
-struct OrRule{}void temp(){
+struct OrRule{};
+void temp(){
 }
 void temp(){
 }

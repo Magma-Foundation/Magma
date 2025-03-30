@@ -1,7 +1,8 @@
 #include "/../../../../magma/option/None.h"
 #include "/../../../../magma/option/Option.h"
 #include "/../../../../magma/option/Some.h"
-struct RangeHead{int extentint counter}void temp(){
+struct RangeHead{int extentint counter};
+void temp(){
 }
 void temp(){
 }

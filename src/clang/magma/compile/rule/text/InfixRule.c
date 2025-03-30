@@ -5,7 +5,8 @@
 #include "/../../../../magma/compile/rule/locate/Locator.h"
 #include "/../../../../magma/result/Err.h"
 #include "/../../../../magma/result/Result.h"
-struct InfixRule{Rule leftString infixRule rightLocator locator}void temp(){
+struct InfixRule{Rule leftString infixRule rightLocator locator};
+void temp(){
 }
 void temp(){
 }

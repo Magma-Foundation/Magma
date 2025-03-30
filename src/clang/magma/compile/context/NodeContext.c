@@ -1,3 +1,4 @@
 #include "/../../../magma/compile/Node.h"
-struct NodeContext{}void temp(){
+struct NodeContext{};
+void temp(){
 }

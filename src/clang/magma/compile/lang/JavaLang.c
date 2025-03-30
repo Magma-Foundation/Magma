@@ -19,7 +19,8 @@
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 #include "/../../../static magma/compile/lang/CommonLang/*.h"
-struct JavaLang{}void temp(){
+struct JavaLang{};
+void temp(){
 }
 void temp(){
 }

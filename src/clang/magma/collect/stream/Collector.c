@@ -1,1 +1,1 @@
-struct Collector{CC}
+struct Collector{CC};

@@ -2,7 +2,8 @@
 #include "/../../magma/option/Option.h"
 #include "/../../magma/option/Some.h"
 #include "/../../magma/option/Tuple.h"
-struct Ok{}void temp(){
+struct Ok{};
+void temp(){
 }
 void temp(){
 }

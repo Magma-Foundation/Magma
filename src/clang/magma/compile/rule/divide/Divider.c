@@ -1,2 +1,2 @@
 #include "/../../../../magma/collect/list/List_.h"
-struct Divider{_StringString}
+struct Divider{_StringString};
