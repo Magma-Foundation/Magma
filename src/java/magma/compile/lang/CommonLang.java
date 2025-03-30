@@ -70,10 +70,6 @@ public class CommonLang {
         return new TypeRule("assignment", new SuffixRule(new InfixRule(new StringRule("destination"), "=", new StringRule("source"), new FirstLocator()), ";"));
     }
 
-    static TypeRule createInvocationRule() {
-        return new TypeRule("invocation", new SuffixRule(new StringRule("content"), ");"));
-    }
-
     static TypeRule createElseRule() {
         return new TypeRule("else", new StripRule(new PrefixRule("else", new StringRule("content"))));
     }
@@ -123,11 +119,11 @@ public class CommonLang {
         return new TypeRule("add", new InfixRule(new NodeRule("left", value), "+", new NodeRule("right", value), new FirstLocator()));
     }
 
-    static TypeRule createInvocationRule(LazyRule value) {
+    static TypeRule createInvocationRule(Rule value) {
         return new TypeRule("invocation", new StripRule(new SuffixRule(new InfixRule(new NodeRule("caller", value), "(", createArgumentsRule(value), new InvocationStartLocator()), ")")));
     }
 
-    static NodeListRule createArgumentsRule(LazyRule value) {
+    static NodeListRule createArgumentsRule(Rule value) {
         return new NodeListRule("arguments", new FoldingDivider(new DecoratedFolder(new ValueFolder())), value);
     }
 

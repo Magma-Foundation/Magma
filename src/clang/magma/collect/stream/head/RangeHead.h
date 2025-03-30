@@ -6,6 +6,7 @@
 struct RangeHead{int extentint counter
 };
 // expand Option_Integer = Option<struct Integer>
+// expand Some_ = Some<struct >
 struct public RangeHead(int extent);
 struct Option_Integer next();
 #endif

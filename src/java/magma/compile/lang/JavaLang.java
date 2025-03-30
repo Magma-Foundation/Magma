@@ -5,6 +5,7 @@ import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
 import magma.compile.rule.locate.FirstLocator;
+import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -109,7 +110,7 @@ public class JavaLang {
                 createWhitespaceRule(),
                 createReturnRule(createValueRule(value)),
                 createIfRule(),
-                createInvocationRule(value),
+                new SuffixRule(createInvocationRule(value), ";"),
                 createForRule(),
                 createAssignmentRule(),
                 createPostfixRule(),
@@ -135,7 +136,11 @@ public class JavaLang {
 
     private static Rule createLambdaRule(Rule value) {
         Rule left = createSymbolRule("param-name");
-        return new TypeRule("lambda", new InfixRule(left, "->", new NodeRule("child", value), new FirstLocator()));
+        Rule beforeArrow = new OrRule(Lists.of(
+                new StripRule(new PrefixRule("()", new EmptyRule())),
+                left
+        ));
+        return new TypeRule("lambda", new InfixRule(beforeArrow, "->", new NodeRule("child", value), new FirstLocator()));
     }
 
     private static TypeRule createConstructionRule(LazyRule value) {

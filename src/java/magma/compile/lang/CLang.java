@@ -64,7 +64,7 @@ public class CLang {
                 createWhitespaceRule(),
                 createReturnRule(createValueRule()),
                 createIfRule(),
-                createInvocationRule(),
+                new SuffixRule(createInvocationRule(createValueRule()), ";"),
                 createForRule(),
                 createAssignmentRule(),
                 createPostfixRule(),
