@@ -1,15 +1,4 @@
 #include "TransformAll.h"
-// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
-// expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element){List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();
 

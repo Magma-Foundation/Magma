@@ -1,16 +1,4 @@
 #include "FlattenGroup.h"
-// expand Tuple_String_Node = Tuple<struct String, struct Node>
-// expand Tuple_Node_FlattenCache = Tuple<struct Node, struct FlattenCache>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_List__Node_FlattenCache = Tuple<struct List__Node, struct FlattenCache>
-// expand List__Node = List_<struct Node>
-// expand Tuple_List__Node_FlattenCache = Tuple<struct List__Node, struct FlattenCache>
-// expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct FlattenCache foldNodeProperty(struct FlattenCache state, struct Tuple_String_Node property){String propertyKey = property.left();
         Node propertyValue = property.right();
 

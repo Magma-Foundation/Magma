@@ -1,6 +1,4 @@
 #include "InfixRule.h"
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
 struct public InfixRule(struct Rule left, struct String infix, struct Rule right, struct Locator locator){this.left = left;
         this.infix = infix;
         this.right = right;

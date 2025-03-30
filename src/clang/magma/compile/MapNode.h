@@ -11,6 +11,35 @@
 #include "../../magma/option/Some.h"
 #include "../../magma/option/Tuple.h"
 struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsstruct Map__String_Node nodesstruct Map__String_List__Node nodeLists};
+// expand Option_String = Option<struct String>
+// expand Map__String_String = Map_<struct String, struct String>
+// expand Map__String_Node = Map_<struct String, struct Node>
+// expand Map__String_List__Node = Map_<struct String, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand Option_String = Option<struct String>
+// expand Map__String_String = Map_<struct String, struct String>
+// expand Map__String_Node = Map_<struct String, struct Node>
+// expand Map__String_List__Node = Map_<struct String, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand Option_String = Option<struct String>
+// expand List__Node = List_<struct Node>
+// expand Option_List__Node = Option<struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand Stream_Tuple_String_String = Stream<struct Tuple_String_String>
+// expand Tuple_String_String = Tuple<struct String, struct String>
+// expand Stream_Tuple_String_List__Node = Stream<struct Tuple_String_List__Node>
+// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand Option_Node = Option<struct Node>
+// expand Stream_Tuple_String_Node = Stream<struct Tuple_String_Node>
+// expand Tuple_String_Node = Tuple<struct String, struct Node>
+// expand Map__String_List__Node = Map_<struct String, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand Map__String_Node = Map_<struct String, struct Node>
 struct public MapNode();
 struct public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists);
 struct public MapNode(struct String type);

@@ -1,6 +1,4 @@
 #include "FlattenRoot.h"
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct Node afterPass0(struct Node node){if (!node.is()) return node;
         Node child = node.findNode().orElse(new MapNode());if (!child.is()) return node;
         List_<Node> oldChildren = child

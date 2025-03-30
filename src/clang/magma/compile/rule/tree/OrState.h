@@ -10,6 +10,12 @@
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
 struct OrState{};
+// expand OrState_T = OrState<struct T>
+// expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>
+// expand List__CompileError = List_<struct CompileError>
+// expand OrState_T = OrState<struct T>
+// expand Option_T = Option<struct T>
+// expand List__CompileError = List_<struct CompileError>
 struct public OrState();
 struct OrState_T withValue(struct T value);
 struct Result_T_List__CompileError toResult();

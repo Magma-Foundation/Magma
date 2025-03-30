@@ -17,6 +17,17 @@
 #include "../../../magma/result/Ok.h"
 #include "../../../magma/result/Result.h"
 struct TransformAll{};
+// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
+// expand List__Node = List_<struct Node>
+// expand List__Node = List_<struct Node>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
+// expand List__Node = List_<struct Node>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
+// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
 struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element);
 struct Result_Node_CompileError find(struct Node node, struct String propertyKey);
 struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey);

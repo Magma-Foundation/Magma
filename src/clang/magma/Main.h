@@ -20,6 +20,31 @@
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
 struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY};
+// expand Option_ApplicationError = Option<struct ApplicationError>
+// expand Set__Path_ = Set_<struct Path_>
+// expand Option_ApplicationError = Option<struct ApplicationError>
+// expand Set__Path_ = Set_<struct Path_>
+// expand Option_ApplicationError = Option<struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand Option_ApplicationError = Option<struct ApplicationError>
+// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand List__Path_ = List_<struct Path_>
+// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand List__String = List_<struct String>
+// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand Map__String_String = Map_<struct String, struct String>
+// expand List__String = List_<struct String>
+// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
+// expand List__Path_ = List_<struct Path_>
+// expand List__Path_ = List_<struct Path_>
+// expand Result_Path__ApplicationError = Result<struct Path_, struct ApplicationError>
+// expand Option_IOError = Option<struct IOError>
+// expand List__String = List_<struct String>
 struct void main(struct String* args);
 struct Option_ApplicationError runWithFiles(struct Set__Path_ files);
 struct Option_ApplicationError runWithSources(struct Set__Path_ sources);

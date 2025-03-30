@@ -1,29 +1,4 @@
 #include "Main.h"
-// expand Option_ApplicationError = Option<struct ApplicationError>
-// expand Set__Path_ = Set_<struct Path_>
-// expand Option_ApplicationError = Option<struct ApplicationError>
-// expand Set__Path_ = Set_<struct Path_>
-// expand Option_ApplicationError = Option<struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand Option_ApplicationError = Option<struct ApplicationError>
-// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand List__Path_ = List_<struct Path_>
-// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand List__String = List_<struct String>
-// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand List__String = List_<struct String>
-// expand Result_List__Path__ApplicationError = Result<struct List__Path_, struct ApplicationError>
-// expand List__Path_ = List_<struct Path_>
-// expand List__Path_ = List_<struct Path_>
-// expand Result_Path__ApplicationError = Result<struct Path_, struct ApplicationError>
-// expand Option_IOError = Option<struct IOError>
-// expand List__String = List_<struct String>
 struct void main(struct String* args){SOURCE_DIRECTORY.walk()
                 .mapErr(ApplicationError::new)
                 .match(Main::runWithFiles, Some::new)

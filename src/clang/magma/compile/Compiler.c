@@ -1,13 +1,4 @@
 #include "Compiler.h"
-// expand Result_Map__String_String_CompileError = Result<struct Map__String_String, struct CompileError>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand List__String = List_<struct String>
-// expand Result_Map__String_String_CompileError = Result<struct Map__String_String, struct CompileError>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand Result_Map__String_String_CompileError = Result<struct Map__String_String, struct CompileError>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand Tuple_String_Node = Tuple<struct String, struct Node>
 struct Result_Map__String_String_CompileError compile(struct String input, struct List__String namespace, struct String name){State state = new State(namespace, name);
         return JavaLang.createJavaRootRule().parse(input)
                 .flatMapValue(tree -> new TreeTransformingStage(new ExpandGenerics()).transform(tree, state))

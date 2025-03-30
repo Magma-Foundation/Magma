@@ -1,7 +1,4 @@
 #include "CompileError.h"
-// expand List__CompileError = List_<struct CompileError>
-// expand List__CompileError = List_<struct CompileError>
-// expand List__CompileError = List_<struct CompileError>
 struct public CompileError(struct String message, struct Context context){this(message, context, Lists.empty());}struct public CompileError(struct String message, struct Context context, struct List__CompileError errors){this.message = message;
         this.context = context;
         this.errors = errors;}struct String format(struct int depth, struct int index, struct List__CompileError sorted){return  + .repeat(depth) + (index + 1) +  + sorted.get(index).format(depth + 1);}struct int depth(){return 1 + errors.stream()

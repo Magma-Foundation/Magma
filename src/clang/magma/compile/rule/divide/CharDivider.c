@@ -1,5 +1,4 @@
 #include "CharDivider.h"
-// expand List__String = List_<struct String>
 struct List__String divide(struct String input){List_<String> requestedNamespace = Lists.empty();
         StringBuilder buffer = new StringBuilder();for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);

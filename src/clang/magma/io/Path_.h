@@ -5,6 +5,12 @@
 #include "../../magma/option/Option.h"
 #include "../../magma/result/Result.h"
 struct Path_{};
+// expand Result_Set__Path__IOError = Result<struct Set__Path_, struct IOError>
+// expand Set__Path_ = Set_<struct Path_>
+// expand Option_IOError = Option<struct IOError>
+// expand Option_IOError = Option<struct IOError>
+// expand Stream_String = Stream<struct String>
+// expand Result_String_IOError = Result<struct String, struct IOError>
 int exists();
 struct Result_Set__Path__IOError walk();
 struct Option_IOError writeString(struct String output);

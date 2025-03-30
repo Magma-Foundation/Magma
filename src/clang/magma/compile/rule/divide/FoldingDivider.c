@@ -1,5 +1,4 @@
 #include "FoldingDivider.h"
-// expand List__String = List_<struct String>
 struct public FoldingDivider(struct Folder folder){this.folder = folder;}struct List__String divide(struct String input){List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
 
         DividingState current = new MutableDividingState(collector);while(true) {

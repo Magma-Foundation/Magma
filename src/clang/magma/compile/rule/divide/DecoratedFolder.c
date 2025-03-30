@@ -1,6 +1,4 @@
 #include "DecoratedFolder.h"
-// expand Option_DividingState = Option<struct DividingState>
-// expand Tuple_Character_DividingState = Tuple<struct Character, struct DividingState>
 struct Option_DividingState processSlash(struct Tuple_Character_DividingState tuple){if (tuple.left() == ) {
             return tuple.right().appendAndDiscard();
         }else {

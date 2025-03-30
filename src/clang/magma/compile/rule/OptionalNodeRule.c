@@ -1,6 +1,4 @@
 #include "OptionalNodeRule.h"
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
 struct public OptionalNodeRule(struct String propertyKey, struct Rule ifPresent, struct Rule ifEmpty){this.propertyKey = propertyKey;
         this.ifPresent = ifPresent;
         this.ifEmpty = ifEmpty;
