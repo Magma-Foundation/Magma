@@ -99,7 +99,7 @@ struct Result_Node_CompileError beforePass(struct State state, struct Node node)
         List_<Node> children = content.findNodeList().orElse(Lists.empty());
 
         List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is())
+                .filter(child -> !isFunctionalImport(child) && !child.is() && !hasTypeParams(child))
                 .collect(new ListCollector<>());
 
         Node withChildren = content.withNodeList(, newChildren);
