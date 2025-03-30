@@ -59,9 +59,7 @@ struct Rule createJavaRootRule(}{return new TypeRule(, CommonLang.createBlockRul
                 createArrayRule(type),
                 createGenericRule(type),
                 createSymbolTypeRule()
-        )));return type;}struct TypeRule createArrayRule(struct LazyRule type}{return new TypeRule(, new SuffixRule(new NodeRule(, type), ));}struct Rule createGenericRule(struct Rule type}{Rule typeArguments = new NodeListRule(, new FoldingDivider(new ValueFolder()), type);
-        Rule base = new NodeListRule(, new CharDivider(), createSymbolRule());
-        return new TypeRule(, new StripRule(new SuffixRule(new InfixRule(base, , typeArguments, new FirstLocator()), )));}struct Rule createNamedWithTypeParams(}{Rule name = createSymbolRule();
+        )));return type;}struct TypeRule createArrayRule(struct LazyRule type}{return new TypeRule(, new SuffixRule(new NodeRule(, type), ));}struct Rule createNamedWithTypeParams(}{Rule name = createSymbolRule();
         Rule typeParams = new NodeListRule(, new FoldingDivider(new ValueFolder()), createSymbolRule());
 
         return new OrRule(Lists.of(

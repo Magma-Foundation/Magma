@@ -35,6 +35,7 @@ struct Rule createCRootRule(}{return new TypeRule(, CommonLang.createBlockRule(c
         type.set(new OrRule(Lists.of(
                 new TypeRule(, new PrefixRule(, new StringRule())),
                 new TypeRule(, new SuffixRule(new NodeRule(, type), )),
-                CommonLang.createSymbolTypeRule()
+                CommonLang.createSymbolTypeRule(),
+                CommonLang.createGenericRule(type)
         )));return type;}struct Rule createIncludeRule(}{NodeListRule path = new NodeListRule(, new CharDivider(), new StringRule());
         return new TypeRule(, new PrefixRule(, new SuffixRule(path, )));}

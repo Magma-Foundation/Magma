@@ -129,12 +129,6 @@ public class JavaLang {
         return new TypeRule("array", new SuffixRule(new NodeRule("child", type), "[]"));
     }
 
-    private static Rule createGenericRule(Rule type) {
-        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
-        Rule base = new NodeListRule("base", new CharDivider('.'), createSymbolRule("value"));
-        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
-    }
-
     private static Rule createNamedWithTypeParams() {
         Rule name = createSymbolRule("name");
         Rule typeParams = new NodeListRule("type-params", new FoldingDivider(new ValueFolder()), createSymbolRule("value"));

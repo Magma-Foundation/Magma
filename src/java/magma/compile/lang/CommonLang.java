@@ -94,4 +94,10 @@ public class CommonLang {
     static TypeRule createWhileRule() {
         return new TypeRule("while", new StripRule(new PrefixRule("while", new StringRule("content"))));
     }
+
+    static Rule createGenericRule(Rule type) {
+        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
+        Rule base = new NodeListRule("base", new CharDivider('.'), createSymbolRule("value"));
+        return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
+    }
 }

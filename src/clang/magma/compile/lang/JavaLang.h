@@ -30,7 +30,6 @@ struct Rule createMethodRule();
 struct Rule createStatementRule();
 struct Rule createTypeRule();
 struct TypeRule createArrayRule(struct LazyRule type);
-struct Rule createGenericRule(struct Rule type);
 struct Rule createNamedWithTypeParams();
 struct Rule createImportRule(struct String prefix, struct String type);
 #endif

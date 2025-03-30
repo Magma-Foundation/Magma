@@ -1,2 +1,2 @@
 #include "TransformingStage.h"
-struct Result_Node_CompileError transform(struct Node root, struct State state);
+Result<struct Node, struct CompileError> transform(struct Node root, struct State state);

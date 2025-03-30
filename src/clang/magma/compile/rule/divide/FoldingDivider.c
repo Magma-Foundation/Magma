@@ -1,5 +1,5 @@
 #include "FoldingDivider.h"
-struct public FoldingDivider(struct Folder folder}{this.folder = folder;}struct List__String divide(struct String input}{List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
+struct public FoldingDivider(struct Folder folder}{this.folder = folder;}List_<struct String> divide(struct String input}{List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
 
         DividingState current = new MutableDividingState(collector);while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current

@@ -21,16 +21,16 @@
 #include "../magma/result/Result.h"
 struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY};
 struct void main(struct String* args);
-struct Option_ApplicationError runWithFiles(struct Set__Path_ files);
-struct Option_ApplicationError runWithSources(struct Set__Path_ sources);
-struct Option_ApplicationError complete(struct List__Path_ relatives);
-struct Option_ApplicationError startCommand();
-struct Result_List__Path__ApplicationError foldIntoRelatives(struct List__Path_ relatives, struct Path_ path);
-struct Result_List__Path__ApplicationError compileSource(struct Source source);
-struct Result_List__Path__ApplicationError compileAndWrite(struct String input, struct List__String namespace, struct String name);
-struct Result_List__Path__ApplicationError writeOutputs(struct Map__String_String output, struct List__String namespace, struct String name);
-struct Result_List__Path__ApplicationError writeAndFoldOutput(struct List__Path_ current, struct Path_ targetParent, struct String name, struct String extension, struct String output);
-struct Result_Path__ApplicationError writeOutput(struct Path_ parent, struct String name, struct String extension, struct String output);
-struct Option_IOError ensureDirectories(struct Path_ targetParent);
-int isPlatformDependent(struct List__String namespace);
+Option<struct ApplicationError> runWithFiles(Set_<struct Path_> files);
+Option<struct ApplicationError> runWithSources(Set_<struct Path_> sources);
+Option<struct ApplicationError> complete(List_<struct Path_> relatives);
+Option<struct ApplicationError> startCommand();
+Result<List_<struct Path_>, struct ApplicationError> foldIntoRelatives(List_<struct Path_> relatives, struct Path_ path);
+Result<List_<struct Path_>, struct ApplicationError> compileSource(struct Source source);
+Result<List_<struct Path_>, struct ApplicationError> compileAndWrite(struct String input, List_<struct String> namespace, struct String name);
+Result<List_<struct Path_>, struct ApplicationError> writeOutputs(Map_<struct String, struct String> output, List_<struct String> namespace, struct String name);
+Result<List_<struct Path_>, struct ApplicationError> writeAndFoldOutput(List_<struct Path_> current, struct Path_ targetParent, struct String name, struct String extension, struct String output);
+Result<struct Path_, struct ApplicationError> writeOutput(struct Path_ parent, struct String name, struct String extension, struct String output);
+Option<struct IOError> ensureDirectories(struct Path_ targetParent);
+int isPlatformDependent(List_<struct String> namespace);
 #endif

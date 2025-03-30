@@ -81,7 +81,8 @@ public class CLang {
         type.set(new OrRule(Lists.of(
                 new TypeRule("struct-type", new PrefixRule("struct ", new StringRule("value"))),
                 new TypeRule("ref", new SuffixRule(new NodeRule("child", type), "*")),
-                CommonLang.createSymbolTypeRule()
+                CommonLang.createSymbolTypeRule(),
+                CommonLang.createGenericRule(type)
         )));
         return type;
     }

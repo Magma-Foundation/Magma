@@ -5,6 +5,6 @@
 #include "../../../../magma/compile/rule/Rule.h"
 #include "../../../../magma/result/Result.h"
 struct StripRule{};
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+Result<struct Node, struct CompileError> parse(struct String input);
+Result<struct String, struct CompileError> generate(struct Node node);
 #endif

@@ -1,5 +1,5 @@
 #include "SymbolRule.h"
-struct Result_Node_CompileError parse(struct String input}{if (isSymbol(input)) {
+Result<struct Node, struct CompileError> parse(struct String input}{if (isSymbol(input)) {
             return rule.parse(input);
         }else {
             return new Err<>(new CompileError(, new StringContext(input)));
@@ -7,4 +7,4 @@ struct Result_Node_CompileError parse(struct String input}{if (isSymbol(input)) 
             char c = input.charAt(i);
             if (c ==  || Character.isLetter(c) || (i != 0 && Character.isDigit(c))) continue;
             return false;
-        }return true;}struct Result_String_CompileError generate(struct Node node}{return rule.generate(node);}
+        }return true;}Result<struct String, struct CompileError> generate(struct Node node}{return rule.generate(node);}

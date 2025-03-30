@@ -35,4 +35,5 @@ struct TypeRule createForRule();
 struct TypeRule createIfRule();
 struct TypeRule createReturnRule();
 struct TypeRule createWhileRule();
+struct Rule createGenericRule(struct Rule type);
 #endif

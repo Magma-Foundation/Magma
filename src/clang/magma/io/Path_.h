@@ -6,15 +6,15 @@
 #include "../../magma/result/Result.h"
 struct Path_{};
 int exists();
-struct Result_Set__Path__IOError walk();
-struct Option_IOError writeString(struct String output);
-struct Option_IOError createAsDirectories();
+Result<Set_<struct Path_>, struct IOError> walk();
+Option<struct IOError> writeString(struct String output);
+Option<struct IOError> createAsDirectories();
 struct Path_ resolve(struct String child);
-struct Stream_String stream();
+Stream<struct String> stream();
 struct Path_ relativize(struct Path_ child);
 int isRegularFile();
 struct String asString();
 struct Path_ getParent();
 struct Path_ getFileName();
-struct Result_String_IOError readString();
+Result<struct String, struct IOError> readString();
 #endif
