@@ -1,5 +1,8 @@
 package magma.option;
 
+import magma.collect.list.List_;
+import magma.compile.Node;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;

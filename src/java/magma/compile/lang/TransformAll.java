@@ -1,9 +1,11 @@
 package magma.compile.lang;
 
+import jvm.collect.list.JavaList;
 import jvm.collect.list.Lists;
 import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
+import magma.collect.stream.Joiner;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
@@ -52,7 +54,7 @@ public class TransformAll implements Transformer {
             });
         }
 
-        if (node.is("interface")) {
+        if (node.is("interface") || node.is("record") || node.is("class")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
@@ -72,6 +74,40 @@ public class TransformAll implements Transformer {
             return new Ok<>(node.retype("function"));
         }
 
+        if (node.is("block")) {
+            return new Ok<>(node.mapNodeList("children", children -> {
+                return children.stream()
+                        .filter(child -> !child.is("whitespace"))
+                        .collect(new ListCollector<>());
+            }));
+        }
+
+        if (node.is("import")) {
+            return findNodeList(node, "namespace").mapValue(namespace -> {
+                return node.retype("include").withNodeList("path", namespace);
+            });
+        }
+
+        if (node.is("generic")) {
+            String stringify = stringify(node);
+            return new Ok<>(new MapNode("symbol-type").withString("value", stringify));
+        }
+
         return new Ok<>(node);
+    }
+
+    private String stringify(Node node) {
+        if (node.is("generic")) {
+            String caller = node.findString("caller").orElse("");
+            String arguments = node.findNodeList("arguments").orElse(new JavaList<>())
+                    .stream()
+                    .map(this::stringify)
+                    .collect(new Joiner("_"))
+                    .orElse("");
+
+            return caller + "_" + arguments;
+        }
+
+        return node.findString("value").orElse("");
     }
 }
