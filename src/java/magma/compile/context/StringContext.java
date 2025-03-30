@@ -1,6 +1,7 @@
 package magma.compile.context;
 
 import jvm.collect.string.JavaString;
+import magma.collect.string.String_;
 
 public record StringContext(String value) implements Context {
     private String display0() {
@@ -8,7 +9,7 @@ public record StringContext(String value) implements Context {
     }
 
     @Override
-    public JavaString display() {
+    public String_ display() {
         return new JavaString(display0());
     }
 }

@@ -1,7 +1,7 @@
 package magma.compile.context;
 
-import jvm.collect.string.JavaString;
+import magma.collect.string.String_;
 
 public interface Context {
-    JavaString display();
+    String_ display();
 }
