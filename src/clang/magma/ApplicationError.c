@@ -1,4 +1,4 @@
-#include "/magma/error/Error.h"
+#include "/../magma/error/Error.h"
 struct ApplicationError{Error error};
 public ApplicationError(Error error){
 }

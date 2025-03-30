@@ -26,7 +26,7 @@ public class FlattenRoot implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(Node node) {
+    public Result<Node, CompileError> afterPass(List_<String> namespace, Node node) {
         return new Ok<>(afterPass0(node));
     }
 }

@@ -1,5 +1,5 @@
-#include "/magma/error/Error.h"
-#include "/jvm/result/Results.h"
+#include "/../magma/error/Error.h"
+#include "/../jvm/result/Results.h"
 struct JavaInterruptedError{};
 String display(){
 }

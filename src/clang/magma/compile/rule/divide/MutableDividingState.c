@@ -1,7 +1,7 @@
-#include "/jvm/collect/list/Lists.h"
-#include "/magma/collect/list/List_.h"
-#include "/magma/option/Option.h"
-#include "/magma/option/Tuple.h"
+#include "/../../../../jvm/collect/list/Lists.h"
+#include "/../../../../magma/collect/list/List_.h"
+#include "/../../../../magma/option/Option.h"
+#include "/../../../../magma/option/Tuple.h"
 struct MutableDividingState{struct List__Character queuestruct List__String segmentsStringBuilder bufferint depth};
 public MutableDividingState(struct List__Character queue){
 }

@@ -24,7 +24,7 @@ public class TreeTransformingStage implements TransformingStage {
     private Result<Node, CompileError> transformNodeLists(List_<String> namespace, Node withNodes) {
         return withNodes.streamNodeLists()
                 .foldToResult(withNodes, (node, tuple) -> mapNodeList(namespace, node, tuple))
-                .flatMapValue(transformer::afterPass);
+                .flatMapValue(node1 -> transformer.afterPass(namespace, node1));
     }
 
     private Result<Node, CompileError> mapNodes(List_<String> namespace, Node node, Tuple<String, Node> tuple) {

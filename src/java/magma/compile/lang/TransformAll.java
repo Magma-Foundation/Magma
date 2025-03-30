@@ -43,7 +43,7 @@ public class TransformAll implements Transformer {
     }
 
     @Override
-    public Result<Node, CompileError> afterPass(Node node) {
+    public Result<Node, CompileError> afterPass(List_<String> currentNamespace, Node node) {
         if (node.is("root")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
@@ -85,8 +85,28 @@ public class TransformAll implements Transformer {
         }
 
         if (node.is("import")) {
-            return findNodeList(node, "namespace").mapValue(namespace -> {
-                return node.retype("include").withNodeList("path", namespace);
+            return findNodeList(node, "namespace").mapValue(requestedNodes -> {
+                List_<String> requestedNamespace = requestedNodes.stream()
+                        .map(child -> child.findString("value"))
+                        .flatMap(Streams::fromOption)
+                        .collect(new ListCollector<>());
+
+                List_<String> outputNamespace = Lists.empty();
+                int size = currentNamespace.size();
+                if (size == 0) {
+                    outputNamespace = outputNamespace.add(".");
+                } else {
+                    for (int i = 0; i < size; i++) {
+                        outputNamespace = outputNamespace.add("..");
+                    }
+                }
+                outputNamespace = outputNamespace.addAll(requestedNamespace);
+
+                List_<Node> path = outputNamespace.stream()
+                        .map(segment -> new MapNode().withString("value", segment))
+                        .collect(new ListCollector<>());
+
+                return node.retype("include").withNodeList("path", path);
             });
         }
 

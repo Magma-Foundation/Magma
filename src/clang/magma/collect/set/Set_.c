@@ -1,4 +1,4 @@
-#include "/magma/collect/stream/Stream.h"
+#include "/../../../magma/collect/stream/Stream.h"
 struct Set_{};
 struct Stream_T stream(){
 }

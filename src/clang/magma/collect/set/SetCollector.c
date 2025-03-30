@@ -1,5 +1,5 @@
-#include "/jvm/collect/set/Sets.h"
-#include "/magma/collect/stream/Collector.h"
+#include "/../../../jvm/collect/set/Sets.h"
+#include "/../../../magma/collect/stream/Collector.h"
 struct SetCollector{};
 struct Set__T createInitial(){
 }
