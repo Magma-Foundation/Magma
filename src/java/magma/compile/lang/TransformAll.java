@@ -42,10 +42,6 @@ public class TransformAll implements Transformer {
                 .orElseGet(() -> new Err<>(new CompileError("Node list '" + propertyKey + "' not present", new NodeContext(value))));
     }
 
-    private static Ok<Node, CompileError> getNodeCompileErrorOk(Node node) {
-        return new Ok<>(node.withString("value", "int"));
-    }
-
     @Override
     public Result<Node, CompileError> afterPass(List_<String> currentNamespace, Node node) {
         if (node.is("root")) {
@@ -122,7 +118,7 @@ public class TransformAll implements Transformer {
         if (node.is("symbol-type")) {
             String oldValue = node.findString("value").orElse("");
             if (oldValue.equals("boolean")) {
-                return getNodeCompileErrorOk(node);
+                return new Ok<>(node.withString("value", "int"));
             } else {
                 return new Ok<>(node.retype("struct-type"));
             }

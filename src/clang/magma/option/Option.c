@@ -1,10 +1,3 @@
-#include "/../../magma/collect/list/List_.h"
-#include "/../../magma/compile/Node.h"
-#include "/../../java/util/function/Consumer.h"
-#include "/../../java/util/function/Function.h"
-#include "/../../java/util/function/Predicate.h"
-#include "/../../java/util/function/Supplier.h"
-struct Option{};
 struct Option_R map(struct Function_T_R mapper){
 }
 struct T orElseGet(struct Supplier_T other){

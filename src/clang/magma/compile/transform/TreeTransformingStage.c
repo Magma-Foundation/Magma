@@ -1,10 +1,3 @@
-#include "/../../../jvm/collect/list/Lists.h"
-#include "/../../../magma/collect/list/List_.h"
-#include "/../../../magma/compile/CompileError.h"
-#include "/../../../magma/compile/Node.h"
-#include "/../../../magma/option/Tuple.h"
-#include "/../../../magma/result/Result.h"
-struct TreeTransformingStage{struct Transformer transformer};
 struct public TreeTransformingStage(struct Transformer transformer){
 }
 struct Result_Node_CompileError transform(struct Node tree, struct List__String namespace){

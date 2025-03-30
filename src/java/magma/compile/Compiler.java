@@ -1,30 +1,35 @@
 package magma.compile;
 
-import jvm.collect.list.Lists;
+import jvm.collect.map.Maps;
 import magma.collect.list.List_;
+import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
-import magma.compile.lang.JavaLang;
-import magma.compile.lang.TransformAll;
 import magma.compile.lang.FlattenRoot;
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.Sorter;
+import magma.compile.lang.TransformAll;
 import magma.compile.transform.FlattenGroup;
 import magma.compile.transform.TreeTransformingStage;
+import magma.option.Tuple;
 import magma.result.Result;
 
 public class Compiler {
-    public static Result<String, CompileError> compile(String input, List_<String> namespace, String name) {
+    public static Result<Map_<String, String>, CompileError> compile(String input, List_<String> namespace, String name) {
         return JavaLang.createJavaRootRule().parse(input)
                 .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, namespace))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, namespace))
                 .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, namespace))
-                .flatMapValue(generate -> CLang.createCRootRule().generate(generate))
-                .mapValue(output -> complete(namespace, name, output));
+                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, namespace))
+                .flatMapValue(Compiler::generateRoots);
     }
 
-    private static String complete(List_<String> namespace, String name, String output) {
-        if (namespace.equals(Lists.of("magma")) && name.equals("Main")) {
-            return output + "int main(){\n\treturn 0;\n}\n";
-        }
+    private static Result<Map_<String, String>, CompileError> generateRoots(Node roots) {
+        return roots.streamNodes().foldToResult(Maps.empty(), Compiler::generateTarget);
+    }
 
-        return output;
+    private static Result<Map_<String, String>, CompileError> generateTarget(Map_<String, String> current, Tuple<String, Node> tuple) {
+        String extension = tuple.left();
+        Node root = tuple.right();
+        return CLang.createCRootRule().generate(root).mapValue(generated -> current.with(extension, generated));
     }
 }

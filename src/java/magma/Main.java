@@ -3,10 +3,11 @@ package magma;
 import jvm.collect.list.Lists;
 import jvm.io.Paths;
 import jvm.process.Processes;
-import magma.collect.stream.Joiner;
 import magma.collect.list.List_;
+import magma.collect.map.Map_;
 import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;
+import magma.collect.stream.Joiner;
 import magma.compile.Compiler;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
@@ -63,34 +64,56 @@ public class Main {
     }
 
     private static Result<List_<Path_>, ApplicationError> foldIntoRelatives(List_<Path_> relatives, Path_ path) {
-        return compileSource(new PathSource(SOURCE_DIRECTORY, path)).mapValue(maybeTarget -> maybeTarget.map(relatives::add).orElse(relatives));
+        return compileSource(new PathSource(SOURCE_DIRECTORY, path)).mapValue(relatives::addAll);
     }
 
-    private static Result<Option<Path_>, ApplicationError> compileSource(Source source) {
+    private static Result<List_<Path_>, ApplicationError> compileSource(Source source) {
         List_<String> namespace = source.computeNamespace();
-        if (isPlatformDependent(namespace)) return new Ok<>(new None<>());
+        if (isPlatformDependent(namespace)) return new Ok<>(Lists.empty());
 
         String name = source.computeName();
-        return source.readString().mapErr(ApplicationError::new).flatMapValue(input -> {
-            return Compiler.compile(input, namespace, name).mapErr(ApplicationError::new).flatMapValue(output -> {
-                Path_ targetParent = namespace.stream().foldWithInitial(TARGET_DIRECTORY, Path_::resolve);
-                return ensureDirectories(targetParent).map(ApplicationError::new).<Result<Option<Path_>, ApplicationError>>match(Err::new, () -> {
-                    return writeOutput(targetParent, output, name);
-                });
-            });
-        });
+        return source.readString()
+                .mapErr(ApplicationError::new)
+                .flatMapValue(input -> compileAndWrite(input, namespace, name));
     }
 
-    private static Result<Option<Path_>, ApplicationError> writeOutput(Path_ parent, String output, String name) {
-        Path_ path1 = parent.resolve(name + ".c");
-        Path_ path = parent.resolve(name + ".h");
+    private static Result<List_<Path_>, ApplicationError> compileAndWrite(
+            String input,
+            List_<String> namespace,
+            String name
+    ) {
+        return Compiler.compile(input, namespace, name)
+                .mapErr(ApplicationError::new)
+                .flatMapValue(output -> writeOutputs(output, namespace, name));
+    }
 
-        Option<IOError> option1 = path1.writeString(output);
-        Option<IOError> option = path.writeString("");
-        return option1.or(() -> option).map(ApplicationError::new).match(Err::new, () -> {
-            Option<Path_> result = new Some<>(TARGET_DIRECTORY.relativize(parent.resolve(name + ".c")));
-            return new Ok<>(result);
-        });
+    private static Result<List_<Path_>, ApplicationError> writeOutputs(
+            Map_<String, String> output,
+            List_<String> namespace,
+            String name
+    ) {
+        Path_ targetParent = namespace.stream().foldWithInitial(TARGET_DIRECTORY, Path_::resolve);
+        return ensureDirectories(targetParent)
+                .map(ApplicationError::new)
+                .match(Err::new, () -> output.stream().foldToResult(Lists.empty(), (pathList, tuple) -> writeAndFoldOutput(pathList, targetParent, name, tuple.left(), tuple.right())));
+    }
+
+    private static Result<List_<Path_>, ApplicationError> writeAndFoldOutput(
+            List_<Path_> current,
+            Path_ targetParent,
+            String name,
+            String extension,
+            String output
+    ) {
+        return writeOutput(targetParent, name, extension, output).mapValue(current::add);
+    }
+
+    private static Result<Path_, ApplicationError> writeOutput(Path_ parent, String name, String extension, String output) {
+        return parent.resolve(name + extension)
+                .writeString(output)
+                .map(ApplicationError::new)
+                .<Result<Path_, ApplicationError>>match(Err::new,
+                        () -> new Ok<>(TARGET_DIRECTORY.relativize(parent.resolve(name + ".c"))));
     }
 
     private static Option<IOError> ensureDirectories(Path_ targetParent) {
