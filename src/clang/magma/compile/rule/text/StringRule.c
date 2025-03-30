@@ -7,7 +7,7 @@
 #include "/../../../../magma/result/Ok.h"
 #include "/../../../../magma/result/Result.h"
 struct StringRule{};
-struct Result_Node_CompileError parse(String value){
+struct Result_Node_CompileError parse(struct String value){
 }
-struct Result_String_CompileError generate(Node input){
+struct Result_String_CompileError generate(struct Node input){
 }

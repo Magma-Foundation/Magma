@@ -16,47 +16,47 @@
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 #include "/../../../static magma/compile/lang/CommonLang/*.h"
 struct JavaLang{};
-Rule createJavaRootRule(){
+struct Rule createJavaRootRule(){
 }
-OrRule createJavaRootSegmentRule(){
+struct OrRule createJavaRootSegmentRule(){
 }
-TypeRule createRecordRule(){
+struct TypeRule createRecordRule(){
 }
-TypeRule createInterfaceRule(){
+struct TypeRule createInterfaceRule(){
 }
-TypeRule createClassRule(){
+struct TypeRule createClassRule(){
 }
-Rule createClassMemberRule(){
+struct Rule createClassMemberRule(){
 }
-TypeRule createInitializationRule(){
+struct TypeRule createInitializationRule(){
 }
-TypeRule createDefinitionStatementRule(){
+struct TypeRule createDefinitionStatementRule(){
 }
-Rule createMethodRule(){
+struct Rule createMethodRule(){
 }
-Rule createStatementRule(){
+struct Rule createStatementRule(){
 }
-TypeRule createElseRule(){
+struct TypeRule createElseRule(){
 }
-TypeRule createPostfixRule(){
+struct TypeRule createPostfixRule(){
 }
-TypeRule createAssignmentRule(){
+struct TypeRule createAssignmentRule(){
 }
-TypeRule createForRule(){
+struct TypeRule createForRule(){
 }
-TypeRule createInvocationRule(){
+struct TypeRule createInvocationRule(){
 }
-TypeRule createIfRule(){
+struct TypeRule createIfRule(){
 }
-TypeRule createReturnRule(){
+struct TypeRule createReturnRule(){
 }
-Rule createTypeRule(){
+struct Rule createTypeRule(){
 }
-TypeRule createArrayRule(LazyRule type){
+struct TypeRule createArrayRule(struct LazyRule type){
 }
-Rule createGenericRule(Rule type){
+struct Rule createGenericRule(struct Rule type){
 }
-Rule createNamedWithTypeParams(){
+struct Rule createNamedWithTypeParams(){
 }
-Rule createImportRule(String prefix, String type){
+struct Rule createImportRule(struct String prefix, struct String type){
 }

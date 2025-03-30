@@ -8,11 +8,11 @@
 #include "/../../../../magma/result/Ok.h"
 #include "/../../../../magma/result/Result.h"
 struct OrState{};
-public OrState(){
+struct public OrState(){
 }
-struct OrState_T withValue(T value){
+struct OrState_T withValue(struct T value){
 }
 struct Result_T_List__CompileError toResult(){
 }
-struct OrState_T withError(CompileError error){
+struct OrState_T withError(struct CompileError error){
 }

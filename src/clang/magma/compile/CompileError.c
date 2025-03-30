@@ -6,16 +6,16 @@
 #include "/../../magma/compile/context/Context.h"
 #include "/../../magma/error/Error.h"
 #include "/../../java/util/function/Function.h"
-struct CompileError{String messageContext contextstruct List__CompileError errors};
-public CompileError(String message, Context context){
+struct CompileError{struct String messagestruct Context contextstruct List__CompileError errors};
+struct public CompileError(struct String message, struct Context context){
 }
-public CompileError(String message, Context context, struct List__CompileError errors){
+struct public CompileError(struct String message, struct Context context, struct List__CompileError errors){
 }
-String format(int depth, int index, struct List__CompileError sorted){
+struct String format(struct int depth, struct int index, struct List__CompileError sorted){
 }
-int depth(){
+struct int depth(){
 }
-String display(){
+struct String display(){
 }
-String format(int depth){
+struct String format(struct int depth){
 }

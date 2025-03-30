@@ -13,17 +13,17 @@
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 struct CLang{};
-Rule createCRootRule(){
+struct Rule createCRootRule(){
 }
-Rule createCRootSegmentRule(){
+struct Rule createCRootSegmentRule(){
 }
-TypeRule createFunctionRule(){
+struct TypeRule createFunctionRule(){
 }
-TypeRule createStructRule(){
+struct TypeRule createStructRule(){
 }
-OrRule createStructMemberRule(){
+struct OrRule createStructMemberRule(){
 }
-Rule createTypeRule(){
+struct Rule createTypeRule(){
 }
-Rule createIncludeRule(){
+struct Rule createIncludeRule(){
 }

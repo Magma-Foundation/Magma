@@ -4,13 +4,13 @@
 #include "/../../../magma/compile/MapNode.h"
 #include "/../../../magma/compile/Node.h"
 struct FlattenCache{};
-public FlattenCache(){
+struct public FlattenCache(){
 }
-FlattenCache withNode(String propertyKey, Node propertyValue){
+struct FlattenCache withNode(struct String propertyKey, struct Node propertyValue){
 }
-FlattenCache appendCategory(String category, struct List__Node categoryValues){
+struct FlattenCache appendCategory(struct String category, struct List__Node categoryValues){
 }
-FlattenCache withNodeList(String propertyKey, struct List__Node propertyValues){
+struct FlattenCache withNodeList(struct String propertyKey, struct List__Node propertyValues){
 }
-Node tryGroup(Node node){
+struct Node tryGroup(struct Node node){
 }

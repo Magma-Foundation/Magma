@@ -1,3 +1,3 @@
 struct Error{};
-String display(){
+struct String display(){
 }

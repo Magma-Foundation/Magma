@@ -1,5 +1,5 @@
 struct StatementFolder{};
-DividingState fold(DividingState current, char c){
+struct DividingState fold(struct DividingState current, struct char c){
 }
-String join(String current, String element){
+struct String join(struct String current, struct String element){
 }

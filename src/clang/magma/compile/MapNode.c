@@ -10,49 +10,49 @@
 #include "/../../magma/option/Tuple.h"
 #include "/../../java/util/function/Function.h"
 struct MapNode{struct Option_String maybeTypestruct Map__String_String stringsstruct Map__String_Node nodesstruct Map__String_List__Node nodeLists};
-public MapNode(){
+struct public MapNode(){
 }
-public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists){
+struct public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists){
 }
-public MapNode(String type){
+struct public MapNode(struct String type){
 }
-String formatEntry(int depth, String key, String value){
+struct String formatEntry(struct int depth, struct String key, struct String value){
 }
-Node withString(String propertyKey, String propertyValue){
+struct Node withString(struct String propertyKey, struct String propertyValue){
 }
-struct Option_String findString(String propertyKey){
+struct Option_String findString(struct String propertyKey){
 }
-Node withNodeList(String propertyKey, struct List__Node propertyValues){
+struct Node withNodeList(struct String propertyKey, struct List__Node propertyValues){
 }
-struct Option_List__Node findNodeList(String propertyKey){
+struct Option_List__Node findNodeList(struct String propertyKey){
 }
-String display(){
+struct String display(){
 }
-String format(int depth){
+struct String format(struct int depth){
 }
-String formatList(struct Tuple_String_List__Node entry, int depth){
+struct String formatList(struct Tuple_String_List__Node entry, struct int depth){
 }
-Node mapNodeList(String propertyKey, struct Function_List__Node_List__Node mapper){
+struct Node mapNodeList(struct String propertyKey, struct Function_List__Node_List__Node mapper){
 }
-int is(String type){
+int is(struct String type){
 }
-Node retype(String type){
+struct Node retype(struct String type){
 }
-Node merge(Node other){
+struct Node merge(struct Node other){
 }
 struct Stream_Tuple_String_String streamStrings(){
 }
 struct Stream_Tuple_String_List__Node streamNodeLists(){
 }
-Node withNode(String propertyKey, Node propertyValue){
+struct Node withNode(struct String propertyKey, struct Node propertyValue){
 }
-struct Option_Node findNode(String propertyKey){
+struct Option_Node findNode(struct String propertyKey){
 }
 struct Stream_Tuple_String_Node streamNodes(){
 }
-Node mapNode(String propertyKey, struct Function_Node_Node mapper){
+struct Node mapNode(struct String propertyKey, struct Function_Node_Node mapper){
 }
-Node withNodeLists(struct Map__String_List__Node nodeLists){
+struct Node withNodeLists(struct Map__String_List__Node nodeLists){
 }
-Node withNodes(struct Map__String_Node nodes){
+struct Node withNodes(struct Map__String_Node nodes){
 }

@@ -8,7 +8,7 @@
 #include "/../../magma/compile/transform/TreeTransformingStage.h"
 #include "/../../magma/result/Result.h"
 struct Compiler{};
-struct Result_String_CompileError compile(String input, struct List__String namespace, String name){
+struct Result_String_CompileError compile(struct String input, struct List__String namespace, struct String name){
 }
-String complete(struct List__String namespace, String name, String output){
+struct String complete(struct List__String namespace, struct String name, struct String output){
 }

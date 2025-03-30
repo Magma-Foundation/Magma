@@ -14,13 +14,15 @@
 #include "/../../../magma/result/Ok.h"
 #include "/../../../magma/result/Result.h"
 struct TransformAll{};
-struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, Node element){
+struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element){
 }
-struct Result_Node_CompileError find(Node node, String propertyKey){
+struct Result_Node_CompileError find(struct Node node, struct String propertyKey){
 }
-struct Result_List__Node_CompileError findNodeList(Node value, String propertyKey){
+struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey){
 }
-struct Result_Node_CompileError afterPass(struct List__String currentNamespace, Node node){
+struct Ok_Node_CompileError getNodeCompileErrorOk(struct Node node){
 }
-String stringify(Node node){
+struct Result_Node_CompileError afterPass(struct List__String currentNamespace, struct Node node){
+}
+struct String stringify(struct Node node){
 }

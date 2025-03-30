@@ -2,15 +2,15 @@
 #include "/../../../../magma/option/Option.h"
 #include "/../../../../magma/option/Tuple.h"
 struct DividingState{};
-DividingState append(char c){
+struct DividingState append(struct char c){
 }
 int isLevel(){
 }
-DividingState exit(){
+struct DividingState exit(){
 }
-DividingState enter(){
+struct DividingState enter(){
 }
-DividingState advance(){
+struct DividingState advance(){
 }
 struct List__String segments(){
 }

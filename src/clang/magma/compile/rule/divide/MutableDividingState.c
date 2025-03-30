@@ -2,20 +2,20 @@
 #include "/../../../../magma/collect/list/List_.h"
 #include "/../../../../magma/option/Option.h"
 #include "/../../../../magma/option/Tuple.h"
-struct MutableDividingState{struct List__Character queuestruct List__String segmentsStringBuilder bufferint depth};
-public MutableDividingState(struct List__Character queue){
+struct MutableDividingState{struct List__Character queuestruct List__String segmentsstruct StringBuilder bufferstruct int depth};
+struct public MutableDividingState(struct List__Character queue){
 }
-public MutableDividingState(struct List__Character queue, struct List__String segments, StringBuilder buffer, int depth){
+struct public MutableDividingState(struct List__Character queue, struct List__String segments, struct StringBuilder buffer, struct int depth){
 }
-DividingState append(char c){
+struct DividingState append(struct char c){
 }
 int isLevel(){
 }
-DividingState exit(){
+struct DividingState exit(){
 }
-DividingState enter(){
+struct DividingState enter(){
 }
-DividingState advance(){
+struct DividingState advance(){
 }
 struct List__String segments(){
 }

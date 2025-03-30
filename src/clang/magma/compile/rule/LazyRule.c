@@ -10,11 +10,11 @@
 #include "/../../../magma/result/Result.h"
 #include "/../../../java/util/function/Function.h"
 struct LazyRule{struct Option_Rule child};
-struct Result_Node_CompileError parse(String input){
+struct Result_Node_CompileError parse(struct String input){
 }
-struct Result_String_CompileError generate(Node node){
+struct Result_String_CompileError generate(struct Node node){
 }
-struct Result_T_CompileError withChildSet(struct Function_Rule_Result_T_CompileError mapper, Context context){
+struct Result_T_CompileError withChildSet(struct Function_Rule_Result_T_CompileError mapper, struct Context context){
 }
-void set(Rule child){
+struct void set(struct Rule child){
 }

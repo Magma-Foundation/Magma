@@ -1,5 +1,5 @@
 struct Collector{};
-C createInitial(){
+struct C createInitial(){
 }
-C fold(C c, T t){
+struct C fold(struct C c, struct T t){
 }

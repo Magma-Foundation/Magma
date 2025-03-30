@@ -1,6 +1,6 @@
 #include "/../magma/error/Error.h"
-struct ApplicationError{Error error};
-public ApplicationError(Error error){
+struct ApplicationError{struct Error error};
+struct public ApplicationError(struct Error error){
 }
-String display(){
+struct String display(){
 }

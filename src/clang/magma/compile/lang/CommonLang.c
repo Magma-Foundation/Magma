@@ -18,17 +18,17 @@
 #include "/../../../magma/compile/rule/tree/OrRule.h"
 #include "/../../../magma/compile/rule/tree/TypeRule.h"
 struct CommonLang{};
-InfixRule createContentRule(Rule beforeContent, Rule childRule){
+struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule){
 }
-Rule createBlockRule(Rule childRule){
+struct Rule createBlockRule(struct Rule childRule){
 }
-TypeRule createSymbolTypeRule(){
+struct TypeRule createSymbolTypeRule(){
 }
-StripRule createSymbolRule(String propertyKey){
+struct StripRule createSymbolRule(struct String propertyKey){
 }
-Rule createDefinitionRule(Rule type){
+struct Rule createDefinitionRule(struct Rule type){
 }
-NodeListRule createParamsRule(Rule definition){
+struct NodeListRule createParamsRule(struct Rule definition){
 }
-TypeRule createWhitespaceRule(){
+struct TypeRule createWhitespaceRule(){
 }

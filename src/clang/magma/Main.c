@@ -16,8 +16,8 @@
 #include "/../magma/result/Err.h"
 #include "/../magma/result/Ok.h"
 #include "/../magma/result/Result.h"
-struct Main{Path_ SOURCE_DIRECTORYPath_ TARGET_DIRECTORY};
-void main(String* args){
+struct Main{struct Path_ SOURCE_DIRECTORYstruct Path_ TARGET_DIRECTORY};
+struct void main(struct String* args){
 }
 struct Option_ApplicationError runWithFiles(struct Set__Path_ files){
 }
@@ -27,13 +27,13 @@ struct Option_ApplicationError complete(struct List__Path_ relatives){
 }
 struct Option_ApplicationError startCommand(){
 }
-struct Result_List__Path__ApplicationError foldIntoRelatives(struct List__Path_ relatives, Path_ path){
+struct Result_List__Path__ApplicationError foldIntoRelatives(struct List__Path_ relatives, struct Path_ path){
 }
-struct Result_Option_Path__ApplicationError compileSource(Source source){
+struct Result_Option_Path__ApplicationError compileSource(struct Source source){
 }
-struct Result_Option_Path__ApplicationError writeOutput(Path_ parent, String output, String name){
+struct Result_Option_Path__ApplicationError writeOutput(struct Path_ parent, struct String output, struct String name){
 }
-struct Option_IOError ensureDirectories(Path_ targetParent){
+struct Option_IOError ensureDirectories(struct Path_ targetParent){
 }
 int isPlatformDependent(struct List__String namespace){
 }

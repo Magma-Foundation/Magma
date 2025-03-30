@@ -5,19 +5,19 @@
 struct None{};
 struct Option_R map(struct Function_T_R mapper){
 }
-T orElseGet(struct Supplier_T other){
+struct T orElseGet(struct Supplier_T other){
 }
-struct Tuple_Boolean_T toTuple(T other){
+struct Tuple_Boolean_T toTuple(struct T other){
 }
-void ifPresent(struct Consumer_T consumer){
+struct void ifPresent(struct Consumer_T consumer){
 }
-T orElse(T other){
+struct T orElse(struct T other){
 }
 struct Option_T filter(struct Predicate_T predicate){
 }
 int isPresent(){
 }
-R match(struct Function_T_R ifPresent, struct Supplier_R ifEmpty){
+struct R match(struct Function_T_R ifPresent, struct Supplier_R ifEmpty){
 }
 int isEmpty(){
 }

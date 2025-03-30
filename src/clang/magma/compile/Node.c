@@ -5,39 +5,39 @@
 #include "/../../magma/option/Tuple.h"
 #include "/../../java/util/function/Function.h"
 struct Node{};
-Node withString(String propertyKey, String propertyValue){
+struct Node withString(struct String propertyKey, struct String propertyValue){
 }
-struct Option_String findString(String propertyKey){
+struct Option_String findString(struct String propertyKey){
 }
-Node withNodeList(String propertyKey, struct List__Node propertyValues){
+struct Node withNodeList(struct String propertyKey, struct List__Node propertyValues){
 }
-struct Option_List__Node findNodeList(String propertyKey){
+struct Option_List__Node findNodeList(struct String propertyKey){
 }
-String display(){
+struct String display(){
 }
-String format(int depth){
+struct String format(struct int depth){
 }
-Node mapNodeList(String propertyKey, struct Function_List__Node_List__Node mapper){
+struct Node mapNodeList(struct String propertyKey, struct Function_List__Node_List__Node mapper){
 }
-int is(String type){
+int is(struct String type){
 }
-Node retype(String type){
+struct Node retype(struct String type){
 }
-Node merge(Node other){
+struct Node merge(struct Node other){
 }
 struct Stream_Tuple_String_String streamStrings(){
 }
 struct Stream_Tuple_String_List__Node streamNodeLists(){
 }
-Node withNode(String propertyKey, Node propertyValue){
+struct Node withNode(struct String propertyKey, struct Node propertyValue){
 }
-struct Option_Node findNode(String propertyKey){
+struct Option_Node findNode(struct String propertyKey){
 }
 struct Stream_Tuple_String_Node streamNodes(){
 }
-Node mapNode(String propertyKey, struct Function_Node_Node mapper){
+struct Node mapNode(struct String propertyKey, struct Function_Node_Node mapper){
 }
-Node withNodeLists(struct Map__String_List__Node nodeLists){
+struct Node withNodeLists(struct Map__String_List__Node nodeLists){
 }
-Node withNodes(struct Map__String_Node nodes){
+struct Node withNodes(struct Map__String_Node nodes){
 }

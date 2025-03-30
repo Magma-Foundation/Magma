@@ -7,7 +7,7 @@
 #include "/../../../magma/result/Ok.h"
 #include "/../../../magma/result/Result.h"
 struct FlattenRoot{};
-Node afterPass0(Node node){
+struct Node afterPass0(struct Node node){
 }
-struct Result_Node_CompileError afterPass(struct List__String namespace, Node node){
+struct Result_Node_CompileError afterPass(struct List__String namespace, struct Node node){
 }

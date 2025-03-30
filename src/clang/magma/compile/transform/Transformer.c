@@ -3,5 +3,5 @@
 #include "/../../../magma/compile/Node.h"
 #include "/../../../magma/result/Result.h"
 struct Transformer{};
-struct Result_Node_CompileError afterPass(struct List__String namespace, Node node){
+struct Result_Node_CompileError afterPass(struct List__String namespace, struct Node node){
 }

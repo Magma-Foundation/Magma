@@ -3,7 +3,7 @@
 #include "/../../../../magma/compile/rule/Rule.h"
 #include "/../../../../magma/result/Result.h"
 struct StripRule{};
-struct Result_Node_CompileError parse(String input){
+struct Result_Node_CompileError parse(struct String input){
 }
-struct Result_String_CompileError generate(Node node){
+struct Result_String_CompileError generate(struct Node node){
 }

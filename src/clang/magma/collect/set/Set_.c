@@ -2,5 +2,5 @@
 struct Set_{};
 struct Stream_T stream(){
 }
-struct Set__T add(T element){
+struct Set__T add(struct T element){
 }

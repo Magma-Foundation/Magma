@@ -2,10 +2,10 @@
 #include "/../../../../magma/collect/list/ListCollector.h"
 #include "/../../../../magma/collect/list/List_.h"
 #include "/../../../../magma/option/Tuple.h"
-struct FoldingDivider{Folder folder};
-public FoldingDivider(Folder folder){
+struct FoldingDivider{struct Folder folder};
+struct public FoldingDivider(struct Folder folder){
 }
-struct List__String divide(String input){
+struct List__String divide(struct String input){
 }
-String join(String current, String element){
+struct String join(struct String current, struct String element){
 }
