@@ -1,10 +1,11 @@
-package magma.compile.rule;
+package magma.compile.rule.tree;
 
 import jvm.collect.list.Lists;
 import magma.compile.CompileError;
 import magma.compile.Node;
 import magma.compile.context.NodeContext;
 import magma.compile.context.StringContext;
+import magma.compile.rule.Rule;
 import magma.result.Err;
 import magma.result.Result;
 

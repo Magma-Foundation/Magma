@@ -1,4 +1,4 @@
-package magma.compile.rule;
+package magma.compile.rule.tree;
 
 import jvm.collect.list.Lists;
 import magma.collect.list.List_;

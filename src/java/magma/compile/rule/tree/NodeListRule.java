@@ -1,4 +1,4 @@
-package magma.compile.rule;
+package magma.compile.rule.tree;
 
 import jvm.collect.list.Lists;
 import magma.collect.list.List_;
@@ -6,11 +6,12 @@ import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.context.NodeContext;
+import magma.compile.rule.Rule;
 import magma.compile.rule.divide.Divider;
 import magma.result.Err;
 import magma.result.Result;
 
-public record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
+public record NodeListRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> parse(String input) {
         return divider.divide(input)
