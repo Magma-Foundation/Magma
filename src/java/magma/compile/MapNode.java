@@ -30,6 +30,10 @@ public final class MapNode implements Node {
         this.nodeLists = nodeLists;
     }
 
+    public MapNode(String type) {
+        this(new Some<>(type), Maps.empty(), Maps.empty(), Maps.empty());
+    }
+
     private static String formatEntry(int depth, String key, String value) {
         return "\t".repeat(depth + 1) + key + ": " + value;
     }

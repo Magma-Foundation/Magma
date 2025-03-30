@@ -14,7 +14,7 @@ public class Lists {
         });
     }
 
-    public static <T> JavaList<T> empty() {
+    public static <T> List_<T> empty() {
         return new JavaList<>();
     }
 
