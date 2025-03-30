@@ -38,7 +38,7 @@ public class CommonLang {
         return new TypeRule("symbol-type", createSymbolRule("value"));
     }
 
-    static StripRule createSymbolRule(String propertyKey) {
+    static Rule createSymbolRule(String propertyKey) {
         return new StripRule(new SymbolRule(new StringRule(propertyKey)));
     }
 

@@ -75,6 +75,11 @@ public class MutableDividingState implements DividingState {
     }
 
     @Override
+    public Option<Character> peek() {
+        return queue.findFirst();
+    }
+
+    @Override
     public Option<DividingState> appendAndDiscard() {
         return append().map(Tuple::right);
     }

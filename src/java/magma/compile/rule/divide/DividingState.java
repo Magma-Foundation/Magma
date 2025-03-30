@@ -24,4 +24,6 @@ public interface DividingState {
     Option<DividingState> appendAndDiscard();
 
     Option<Tuple<Character, DividingState>> pop();
+
+    Option<Character> peek();
 }

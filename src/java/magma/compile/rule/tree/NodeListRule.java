@@ -6,8 +6,10 @@ import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.context.NodeContext;
+import magma.compile.context.StringContext;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.Divider;
+import magma.compile.rule.text.StringRule;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
@@ -20,7 +22,8 @@ public record NodeListRule(String propertyKey, Divider divider, Rule childRule) 
 
         return segments.stream()
                 .<List_<Node>, CompileError>foldToResult(Lists.empty(), (children, element) -> childRule().parse(element).mapValue(children::add))
-                .mapValue(children -> new MapNode().withNodeList(propertyKey(), children));
+                .mapValue(children -> new MapNode().withNodeList(propertyKey(), children))
+                .mapErr(err -> new CompileError("Failed to attach node list '" + propertyKey + "'", new StringContext(input), Lists.of(err)));
     }
 
     @Override
