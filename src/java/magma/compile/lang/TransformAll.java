@@ -117,8 +117,10 @@ public class TransformAll implements Transformer {
 
         if (node.is("symbol-type")) {
             String oldValue = node.findString("value").orElse("");
-            String newValue = oldValue.equals("boolean") ? "int" : oldValue;
-            return new Ok<>(node.withString("value", newValue));
+            if (oldValue.equals("boolean")) {
+                String newValue = "int";
+                return new Ok<>(node.withString("value", newValue));
+            } else new Ok<>(node.retype("struct"));
         }
 
         if (node.is("array")) {
