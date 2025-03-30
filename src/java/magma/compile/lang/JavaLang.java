@@ -4,11 +4,11 @@ import jvm.collect.list.Lists;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.DecoratedFolder;
 import magma.compile.rule.divide.FoldingDivider;
 import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.locate.LastLocator;
-import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
 import magma.compile.rule.text.PrefixRule;
 import magma.compile.rule.text.StringRule;
@@ -152,9 +152,10 @@ public class JavaLang {
 
     private static Rule createLambdaRule(Rule value) {
         Rule left = createSymbolRule("param-name");
+        Rule params = new NodeListRule("params", new FoldingDivider(new DecoratedFolder(new ValueFolder())), createSymbolRule("value"));
         Rule beforeArrow = new OrRule(Lists.of(
-                new StripRule(new PrefixRule("()", new EmptyRule())),
-                left
+                left,
+                new StripRule(new PrefixRule("(", new SuffixRule(params, ")")))
         ));
         return new TypeRule("lambda", new InfixRule(beforeArrow, "->", new NodeRule("child", value), new FirstLocator()));
     }
