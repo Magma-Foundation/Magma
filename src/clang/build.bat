@@ -44,7 +44,6 @@ clang .\magma\compile\Compiler.c^
 	.\magma\process\ProcessError.c^
 	.\magma\io\IOError.c^
 	.\magma\result\Result.c^
-	.\magma\result\ThrowableSupplier.c^
 	.\magma\compile\MapNode.c^
 	.\magma\result\Err.c^
 	.\magma\option\Tuple.c^
@@ -55,6 +54,5 @@ clang .\magma\compile\Compiler.c^
 	.\magma\compile\rule\StripRule.c^
 	.\magma\result\Ok.c^
 	.\magma\compile\lang\r\SymbolRule.c^
-	.\magma\result\ThrowableRunnable.c^
 	.\magma\compile\rule\InfixRule.c^
 	 -o main.exe

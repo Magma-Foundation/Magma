@@ -6,8 +6,6 @@ import magma.option.Some;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
-import magma.result.ThrowableRunnable;
-import magma.result.ThrowableSupplier;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

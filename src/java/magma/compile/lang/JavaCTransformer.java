@@ -20,25 +20,28 @@ public class JavaCTransformer implements Transformer {
 
     static Option<Node> transformRootChild(List_<String> namespace, Node child) {
         if (child.is("package")) return new None<>();
-        if (child.is("import")) return new Some<>(transformImport(namespace, child));
+
+        if (child.is("import")) {
+            List_<String> requestedNamespace = child.findNodeList("namespace").orElse(Lists.empty())
+                    .stream()
+                    .map(segment -> segment.findString("value").orElse(""))
+                    .collect(new ListCollector<>());
+
+            if (requestedNamespace.size() >= 3 && requestedNamespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function")))
+                return new None<>();
+
+            List_<Node> path = computeNewNamespace(namespace, requestedNamespace)
+                    .stream()
+                    .map(value -> new MapNode().withString("value", value))
+                    .collect(new ListCollector<>());
+
+            return new Some<>(child.retype("include").withNodeList("path", path));
+        }
+
         if (child.is("class")) return new Some<>(child.retype("struct"));
         if (child.is("interface")) return new Some<>(child.retype("struct"));
         if (child.is("record")) return new Some<>(child.retype("struct"));
         return new Some<>(child);
-    }
-
-    public static Node transformImport(List_<String> currentNamespace, Node node) {
-        List_<String> requestedNamespace = node.findNodeList("namespace").orElse(Lists.empty())
-                .stream()
-                .map(segment -> segment.findString("value").orElse(""))
-                .collect(new ListCollector<>());
-
-        List_<Node> path = computeNewNamespace(currentNamespace, requestedNamespace)
-                .stream()
-                .map(value -> new MapNode().withString("value", value))
-                .collect(new ListCollector<>());
-
-        return node.retype("include").withNodeList("path", path);
     }
 
     private static List_<String> computeNewNamespace(List_<String> thisNamespace, List_<String> requestedNamespace) {
