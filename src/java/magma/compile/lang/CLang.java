@@ -5,6 +5,8 @@ import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalNodeRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.divide.CharDivider;
+import magma.compile.rule.divide.FoldingDivider;
+import magma.compile.rule.divide.ValueFolder;
 import magma.compile.rule.locate.FirstLocator;
 import magma.compile.rule.text.EmptyRule;
 import magma.compile.rule.text.InfixRule;
@@ -16,6 +18,7 @@ import magma.compile.rule.tree.NodeListRule;
 import magma.compile.rule.tree.NodeRule;
 import magma.compile.rule.tree.OrRule;
 import magma.compile.rule.tree.TypeRule;
+import org.w3c.dom.NodeList;
 
 import static magma.compile.lang.CommonLang.*;
 
@@ -36,7 +39,7 @@ public class CLang {
     }
 
     private static TypeRule createFunctionRule() {
-        Rule definitionRule = CommonLang.createDefinitionRule(createTypeRule());
+        OrRule definitionRule = createDefinitionsRule();
         NodeRule definition = new NodeRule("definition", definitionRule);
         NodeListRule params = CommonLang.createParamsRule(definitionRule);
 
@@ -70,10 +73,21 @@ public class CLang {
     }
 
     private static OrRule createStructMemberRule() {
+        return createDefinitionsRule();
+    }
+
+    private static OrRule createDefinitionsRule() {
         return new OrRule(Lists.of(
                 new TypeRule("definition", CommonLang.createDefinitionRule(createTypeRule())),
-                new TypeRule("functional-definition", new NodeRule("returns", createTypeRule()))
+                createFunctionalDefinitionType()
         ));
+    }
+
+    private static TypeRule createFunctionalDefinitionType() {
+        NodeRule returns = new NodeRule("return", createTypeRule());
+        NodeListRule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), createTypeRule());
+        InfixRule right = new InfixRule(new PrefixRule("*", new StringRule("name")), ")(", new SuffixRule(params, ")"), new FirstLocator());
+        return new TypeRule("functional-definition", new InfixRule(returns, "(", right, new FirstLocator()));
     }
 
     private static Rule createTypeRule() {

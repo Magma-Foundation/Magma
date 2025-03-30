@@ -5,7 +5,7 @@ struct Node withNodeList(struct String propertyKey, List_<struct Node> propertyV
 Option<List_<struct Node>> findNodeList(struct String propertyKey);
 struct String display();
 struct String format(struct int depth);
-struct Node mapNodeList(struct String propertyKey, Function<List_<struct Node>, List_<struct Node>> mapper);
+struct Node mapNodeList(struct String propertyKey, List_<struct Node>(*mapper)(List_<struct Node>));
 int is(struct String type);
 struct Node retype(struct String type);
 struct Node merge(struct Node other);
@@ -14,7 +14,7 @@ Stream<Tuple<struct String, List_<struct Node>>> streamNodeLists();
 struct Node withNode(struct String propertyKey, struct Node propertyValue);
 Option<struct Node> findNode(struct String propertyKey);
 Stream<Tuple<struct String, struct Node>> streamNodes();
-struct Node mapNode(struct String propertyKey, Function<struct Node, struct Node> mapper);
+struct Node mapNode(struct String propertyKey, struct Node(*mapper)(struct Node));
 struct Node withNodeLists(Map_<struct String, List_<struct Node>> nodeLists);
 struct Node withNodes(Map_<struct String, struct Node> nodes);
 struct Node removeNode(struct String propertyKey);

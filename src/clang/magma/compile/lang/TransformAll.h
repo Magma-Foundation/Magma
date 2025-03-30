@@ -21,8 +21,8 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
 Result<struct Node, struct CompileError> find(struct Node node, struct String propertyKey);
 Result<List_<struct Node>, struct CompileError> findNodeList(struct Node value, struct String propertyKey);
 int isFunctionalImport(struct Node child);
+int hasTypeParams(struct Node child);
 Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node);
 struct String stringify(struct Node node);
 Result<struct Node, struct CompileError> beforePass(struct State state, struct Node node);
-int hasTypeParams(struct Node child);
 #endif

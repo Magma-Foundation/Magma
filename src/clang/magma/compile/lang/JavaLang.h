@@ -27,6 +27,7 @@ struct Rule createClassMemberRule();
 struct TypeRule createInitializationRule();
 struct TypeRule createDefinitionStatementRule();
 struct Rule createMethodRule();
+struct TypeRule createTypedDefinitionRule();
 struct Rule createStatementRule();
 struct Rule createTypeRule();
 struct TypeRule createArrayRule(struct LazyRule type);

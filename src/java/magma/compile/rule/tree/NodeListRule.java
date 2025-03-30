@@ -27,7 +27,8 @@ public record NodeListRule(String propertyKey, Divider divider, Rule childRule) 
     public Result<String, CompileError> generate(Node node) {
         return node.findNodeList(propertyKey)
                 .map(this::generateChildren)
-                .orElseGet(() -> new Err<>(new CompileError("Node list '" + propertyKey + "' not present", new NodeContext(node))));
+                .orElseGet(() -> new Err<>(new CompileError("Node list '" + propertyKey + "' not present", new NodeContext(node))))
+                .mapErr(err -> new CompileError("Failed to generate node list '" + propertyKey + "'", new NodeContext(node), Lists.of(err)));
     }
 
     private Result<String, CompileError> generateChildren(List_<Node> children) {

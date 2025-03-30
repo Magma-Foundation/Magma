@@ -56,6 +56,11 @@ public class TransformAll implements Transformer {
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
     }
 
+    private static boolean hasTypeParams(Node child) {
+        List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());
+        return !typeParams.isEmpty();
+    }
+
     @Override
     public Result<Node, CompileError> afterPass(State state, Node node) {
         if (node.is("interface") || node.is("record") || node.is("class")) {
@@ -117,6 +122,30 @@ public class TransformAll implements Transformer {
             });
         }
 
+        if (node.is("definition")) {
+            Node type = node.findNode("type").orElse(new MapNode());
+            if (type.is("generic")) {
+                String value = type.findNodeList("base")
+                        .orElse(Lists.empty())
+                        .get(0)
+                        .findString("value")
+                        .orElse("");
+
+                if (value.equals("Function")) {
+                    List_<Node> arguments = type.findNodeList("arguments")
+                            .orElse(Lists.empty());
+
+                    Node param = arguments.get(0);
+                    Node returns = arguments.get(1);
+
+                    return new Ok<>(node.retype("functional-definition")
+                            .removeNode("type")
+                            .withNode("return", returns)
+                            .withNodeList("params", Lists.of(param)));
+                }
+            }
+        }
+
         if (node.is("symbol-type")) {
             String oldValue = node.findString("value").orElse("");
             if (oldValue.equals("boolean")) {
@@ -167,10 +196,5 @@ public class TransformAll implements Transformer {
 
         Node withChildren = content.withNodeList("children", newChildren);
         return new Ok<>(node.withNode("content", withChildren));
-    }
-
-    private static boolean hasTypeParams(Node child) {
-        List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());
-        return !typeParams.isEmpty();
     }
 }

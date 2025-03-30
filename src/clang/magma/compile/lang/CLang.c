@@ -6,7 +6,7 @@ struct Rule createCRootRule(}{return new TypeRule(, CommonLang.createBlockRule(c
                 new TypeRule(, new PrefixRule(, new EmptyRule())),
                 createStructRule(),
                 createFunctionRule()
-        ));}struct TypeRule createFunctionRule(}{Rule definitionRule = CommonLang.createDefinitionRule(createTypeRule());
+        ));}struct TypeRule createFunctionRule(}{OrRule definitionRule = createDefinitionsRule();
         NodeRule definition = new NodeRule(, definitionRule);
         NodeListRule params = CommonLang.createParamsRule(definitionRule);
 
@@ -28,10 +28,13 @@ struct Rule createCRootRule(}{return new TypeRule(, CommonLang.createBlockRule(c
                 createWhileRule()
         ));}struct TypeRule createStructRule(}{StringRule name = new StringRule();
         InfixRule contentRule = CommonLang.createContentRule(name, createStructMemberRule());
-        return new TypeRule(, new PrefixRule(, new SuffixRule(contentRule, )));}struct OrRule createStructMemberRule(}{return new OrRule(Lists.of(
+        return new TypeRule(, new PrefixRule(, new SuffixRule(contentRule, )));}struct OrRule createStructMemberRule(}{return createDefinitionsRule();}struct OrRule createDefinitionsRule(}{return new OrRule(Lists.of(
                 new TypeRule(, CommonLang.createDefinitionRule(createTypeRule())),
-                new TypeRule(, new NodeRule(, createTypeRule()))
-        ));}struct Rule createTypeRule(}{LazyRule type = new LazyRule();
+                createFunctionalDefinitionType()
+        ));}struct TypeRule createFunctionalDefinitionType(}{NodeRule returns = new NodeRule(, createTypeRule());
+        NodeListRule params = new NodeListRule(, new FoldingDivider(new ValueFolder()), createTypeRule());
+        InfixRule right = new InfixRule(new PrefixRule(, new StringRule()), , new SuffixRule(params, ), new FirstLocator());
+        return new TypeRule(, new InfixRule(returns, , right, new FirstLocator()));}struct Rule createTypeRule(}{LazyRule type = new LazyRule();
         type.set(new OrRule(Lists.of(
                 new TypeRule(, new PrefixRule(, new StringRule())),
                 new TypeRule(, new SuffixRule(new NodeRule(, type), )),

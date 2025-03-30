@@ -36,15 +36,15 @@ struct Rule createJavaRootRule(}{return new TypeRule(, CommonLang.createBlockRul
                 createInitializationRule()
         ));}struct TypeRule createInitializationRule(}{Rule definitionRule = createDefinitionRule(createTypeRule());
         TypeRule definition = new TypeRule(, definitionRule);
-        return new TypeRule(, new SuffixRule(new InfixRule(new NodeRule(, definition), , new StringRule(), new FirstLocator()), ));}struct TypeRule createDefinitionStatementRule(}{return new TypeRule(, new SuffixRule(createDefinitionRule(createTypeRule()), ));}struct Rule createMethodRule(}{Rule definition = new NodeRule(, createDefinitionRule(createTypeRule()));
-        Rule params = createParamsRule(createDefinitionRule(createTypeRule()));
+        return new TypeRule(, new SuffixRule(new InfixRule(new NodeRule(, definition), , new StringRule(), new FirstLocator()), ));}struct TypeRule createDefinitionStatementRule(}{return new TypeRule(, new SuffixRule(createDefinitionRule(createTypeRule()), ));}struct Rule createMethodRule(}{Rule definition = new NodeRule(, createTypedDefinitionRule());
+        Rule params = createParamsRule(createTypedDefinitionRule());
 
         Rule withParams = new OrRule(Lists.of(
                 createContentRule(new StripRule(new SuffixRule(params, )), createStatementRule()),
                 new SuffixRule(params, )
         ));
 
-        return new TypeRule(, new InfixRule(definition, , withParams, new FirstLocator()));}struct Rule createStatementRule(}{return new OrRule(Lists.of(
+        return new TypeRule(, new InfixRule(definition, , withParams, new FirstLocator()));}struct TypeRule createTypedDefinitionRule(}{return new TypeRule(, createDefinitionRule(createTypeRule()));}struct Rule createStatementRule(}{return new OrRule(Lists.of(
                 createWhitespaceRule(),
                 createReturnRule(),
                 createIfRule(),

@@ -20,7 +20,8 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
                 .flatMap(Streams::fromOption)
                 .collect(new ListCollector<>());
 
-        return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of(, , ));}Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node}{if (node.is() || node.is() || node.is()) {
+        return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of(, , ));}int hasTypeParams(struct Node child}{List_<Node> typeParams = child.findNodeList().orElse(Lists.empty());
+        return !typeParams.isEmpty();}Result<struct Node, struct CompileError> afterPass(struct State state, struct Node node}{if (node.is() || node.is() || node.is()) {
             return find(node, ).flatMapValue(value -> {
                 return findNodeList(value, ).mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
@@ -72,6 +73,28 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
                 return node.retype().withNodeList(, path);
             });
         }if (node.is()) {
+            Node type = node.findNode().orElse(new MapNode());
+            if (type.is()) {
+                String value = type.findNodeList()
+                        .orElse(Lists.empty())
+                        .get(0)
+                        .findString()
+                        .orElse();
+
+                if (value.equals()) {
+                    List_<Node> arguments = type.findNodeList()
+                            .orElse(Lists.empty());
+
+                    Node param = arguments.get(0);
+                    Node returns = arguments.get(1);
+
+                    return new Ok<>(node.retype()
+                            .removeNode()
+                            .withNode(, returns)
+                            .withNodeList(, Lists.of(param)));
+                }
+            }
+        }if (node.is()) {
             String oldValue = node.findString().orElse();
             if (oldValue.equals()) {
                 return new Ok<>(node.withString(, ));
@@ -109,5 +132,4 @@ Tuple<List_<struct Node>, List_<struct Node>> bucketClassMember(Tuple<List_<stru
                 .collect(new ListCollector<>());
 
         Node withChildren = content.withNodeList(, newChildren);
-        return new Ok<>(node.withNode(, withChildren));}int hasTypeParams(struct Node child}{List_<Node> typeParams = child.findNodeList().orElse(Lists.empty());
-        return !typeParams.isEmpty();}
+        return new Ok<>(node.withNode(, withChildren));}

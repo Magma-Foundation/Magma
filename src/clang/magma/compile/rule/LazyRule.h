@@ -13,6 +13,6 @@
 struct LazyRule{Option<struct Rule> child};
 Result<struct Node, struct CompileError> parse(struct String input);
 Result<struct String, struct CompileError> generate(struct Node node);
-Result<struct T, struct CompileError> withChildSet(Function<struct Rule, Result<struct T, struct CompileError>> mapper, struct Context context);
+Result<struct T, struct CompileError> withChildSet(Result<struct T, struct CompileError>(*mapper)(struct Rule), struct Context context);
 struct void set(struct Rule child);
 #endif

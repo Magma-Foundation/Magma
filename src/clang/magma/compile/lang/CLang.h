@@ -5,6 +5,8 @@
 #include "../../../magma/compile/rule/OptionalNodeRule.h"
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/compile/rule/divide/CharDivider.h"
+#include "../../../magma/compile/rule/divide/FoldingDivider.h"
+#include "../../../magma/compile/rule/divide/ValueFolder.h"
 #include "../../../magma/compile/rule/locate/FirstLocator.h"
 #include "../../../magma/compile/rule/text/EmptyRule.h"
 #include "../../../magma/compile/rule/text/InfixRule.h"
@@ -16,6 +18,7 @@
 #include "../../../magma/compile/rule/tree/NodeRule.h"
 #include "../../../magma/compile/rule/tree/OrRule.h"
 #include "../../../magma/compile/rule/tree/TypeRule.h"
+#include "../../../org/w3c/dom/NodeList.h"
 #include "../../../static magma/compile/lang/CommonLang/*.h"
 struct CLang{};
 struct Rule createCRootRule();
@@ -24,6 +27,8 @@ struct TypeRule createFunctionRule();
 struct Rule createStatementRule();
 struct TypeRule createStructRule();
 struct OrRule createStructMemberRule();
+struct OrRule createDefinitionsRule();
+struct TypeRule createFunctionalDefinitionType();
 struct Rule createTypeRule();
 struct Rule createIncludeRule();
 #endif

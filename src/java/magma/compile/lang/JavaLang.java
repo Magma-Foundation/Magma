@@ -90,8 +90,8 @@ public class JavaLang {
     }
 
     private static Rule createMethodRule() {
-        Rule definition = new NodeRule("definition", createDefinitionRule(createTypeRule()));
-        Rule params = createParamsRule(createDefinitionRule(createTypeRule()));
+        Rule definition = new NodeRule("definition", createTypedDefinitionRule());
+        Rule params = createParamsRule(createTypedDefinitionRule());
 
         Rule withParams = new OrRule(Lists.of(
                 createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule()),
@@ -99,6 +99,10 @@ public class JavaLang {
         ));
 
         return new TypeRule("method", new InfixRule(definition, "(", withParams, new FirstLocator()));
+    }
+
+    private static TypeRule createTypedDefinitionRule() {
+        return new TypeRule("definition", createDefinitionRule(createTypeRule()));
     }
 
     private static Rule createStatementRule() {

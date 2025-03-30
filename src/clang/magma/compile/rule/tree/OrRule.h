@@ -11,7 +11,7 @@
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
 struct OrRule{};
-Result<struct T, struct CompileError> apply(Function<struct Rule, Result<struct T, struct CompileError>> applicator, Supplier<struct Context> context);
+Result<struct T, struct CompileError> apply(Result<struct T, struct CompileError>(*applicator)(struct Rule), Supplier<struct Context> context);
 Result<struct Node, struct CompileError> parse(struct String input);
 Result<struct String, struct CompileError> generate(struct Node input);
 #endif
