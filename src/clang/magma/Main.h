@@ -12,7 +12,6 @@
 #include "../magma/collect/stream/Joiner.h"
 #include "../magma/collect/stream/Stream.h"
 #include "../magma/compile/Compiler.h"
-#include "../magma/compile/MapNode.h"
 #include "../magma/compile/Node.h"
 #include "../magma/compile/lang/CommonLang.h"
 #include "../magma/compile/lang/JavaLang.h"
@@ -28,7 +27,6 @@
 #include "../magma/result/Err.h"
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
-#include "../java/util/List.h"
 struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
 };
 // expand magma.option.Option<magma.ApplicationError>
@@ -39,7 +37,6 @@ struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
 // expand magma.collect.set.SetCollector<>
 // expand magma.collect.list.ListCollector<>
 // expand magma.collect.map.Map_<magma.io.Path_, magma.compile.Node>
-// expand magma.collect.stream.Stream<magma.compile.Node>
 // expand magma.collect.stream.Stream<magma.compile.Node>
 // expand magma.option.Option<magma.ApplicationError>
 // expand magma.collect.map.Map_<magma.io.Path_, magma.compile.Node>
@@ -79,14 +76,12 @@ auto __lambda6__();
 auto __lambda7__();
 auto __lambda8__();
 auto __lambda9__();
-auto __lambda10__();
 magma.void main(String* args);
 magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files);
 magma.option.Option<magma.ApplicationError> runWithSources(magma.collect.set.Set_<magma.io.Path_> sources);
 magma.collect.map.Map_<magma.io.Path_, magma.compile.Node> getPathNodeMap(magma.collect.map.Map_<magma.io.Path_, magma.compile.Node> trees);
 String getString(magma.compile.Node element);
 magma.collect.stream.Stream<magma.compile.Node> findExpansionsInTargetSet(magma.compile.Node value);
-magma.collect.stream.Stream<magma.compile.Node> findExpansionsInRoot(magma.compile.Node value);
 magma.option.Option<magma.ApplicationError> postLoadTrees(magma.collect.map.Map_<magma.io.Path_, magma.compile.Node> trees);
 magma.result.Result<magma.collect.map.Map_<magma.io.Path_, magma.compile.Node>, magma.ApplicationError> preLoadSources(magma.collect.map.Map_<magma.io.Path_, magma.compile.Node> trees, magma.io.Path_ path);
 magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> postLoadTree(magma.collect.list.List_<magma.io.Path_> relatives, magma.option.Tuple<magma.io.Path_, magma.compile.Node> pathNodeTuple);

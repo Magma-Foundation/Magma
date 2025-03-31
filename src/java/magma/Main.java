@@ -12,7 +12,6 @@ import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
 import magma.collect.stream.Stream;
 import magma.compile.Compiler;
-import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.lang.CommonLang;
 import magma.compile.lang.JavaLang;
@@ -28,8 +27,6 @@ import magma.option.Tuple;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
-
-import java.util.List;
 
 public class Main {
     public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
@@ -84,18 +81,9 @@ public class Main {
     }
 
     private static Stream<Node> findExpansionsInTargetSet(Node value) {
-        return value.streamNodes()
-                .map(Tuple::right)
-                .flatMap(Main::findExpansionsInRoot);
-    }
-
-    private static Stream<Node> findExpansionsInRoot(Node value) {
-        return value.findNode("content")
-                .orElse(new MapNode())
-                .findNodeList("children")
+        return value.findNodeList("expansions")
                 .orElse(Lists.empty())
-                .stream()
-                .filter(child -> child.is("expansion"));
+                .stream();
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Path_, Node> trees) {
