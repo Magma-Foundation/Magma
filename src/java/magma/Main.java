@@ -4,17 +4,13 @@ import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.io.Paths;
 import jvm.process.Processes;
-import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
-import magma.collect.stream.Stream;
 import magma.compile.Compiler;
-import magma.compile.MapNode;
 import magma.compile.Node;
-import magma.compile.lang.StringLists;
 import magma.compile.source.Location;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
@@ -53,67 +49,25 @@ public class Main {
     private static Option<ApplicationError> runWithSources(Set_<Path_> sources) {
         return sources.stream()
                 .foldToResult(Maps.empty(), Main::preLoadSources)
-                .mapValue(Main::getPathNodeMap)
+                .mapValue(Main::modifyTrees)
                 .match(Main::postLoadTrees, Some::new);
     }
 
-    private static Map_<Location, Node> getPathNodeMap(Map_<Location, Node> trees) {
-        Map_<Location, List_<Node>> expansions = trees.streamValues()
-                .flatMap(Main::findExpansionsInTargetSet)
-                .foldWithInitial(Maps.empty(), (map, expansion) -> foldIntoCache(map, trees, expansion));
-
-        return expansions.stream().foldWithInitial(trees, (current, entry) -> {
-            Location location = entry.left();
-            List_<Node> mergedChildren = entry.right()
-                    .stream()
-                    .flatMap(node -> {
-                        Node content = node.findNode("content")
-                                .or(() -> node.findNode("child").flatMap(child -> child.findNode("content")))
-                                .orElse(new MapNode());
-                        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
-                        return children.stream();
-                    })
-                    .collect(new ListCollector<>());
-
-            Node block = new MapNode("block").withNodeList("children", mergedChildren);
-            Node root = new MapNode("root").withNode("content", block);
-            return current.with(location.resolveSibling(location.name() + "_expansion"), root);
-        });
+    private static Map_<Location, Node> modifyTrees(Map_<Location, Node> trees) {
+        return findExpansions(trees).stream().foldWithInitial(trees, Main::attachExpansion);
     }
 
-    private static Map_<Location, List_<Node>> foldIntoCache(
-            Map_<Location, List_<Node>> cache,
-            Map_<Location, Node> trees,
-            Node expansion
-    ) {
-        Node base = expansion.findNode("base").orElse(new MapNode());
-        List_<String> segments = StringLists.fromQualified(base);
+    private static Map_<Location, Node> findExpansions(Map_<Location, Node> trees) {
 
-        return trees.stream()
-                .filter(entry -> isDefined(entry, segments))
-                .next()
-                .map(entry -> foldEntry(cache, entry))
-                .orElse(cache);
     }
 
-    private static Map_<Location, List_<Node>> foldEntry(
-            Map_<Location, List_<Node>> map,
+    private static Map_<Location, Node> attachExpansion(
+            Map_<Location, Node> current,
             Tuple<Location, Node> entry
     ) {
-        return map.ensure(entry.left(),
-                nodeList -> nodeList.add(entry.right()),
-                () -> Lists.of(entry.right()));
-    }
-
-    private static boolean isDefined(Tuple<Location, Node> entry, List_<String> segments) {
         Location location = entry.left();
-        return location.namespace().add(location.name()).equalsTo(segments);
-    }
-
-    private static Stream<Node> findExpansionsInTargetSet(Node value) {
-        return value.findNodeList("expansions")
-                .orElse(Lists.empty())
-                .stream();
+        Node node = entry.right();
+        return current.with(location.resolveSibling(location.name() + "_expansion"), node);
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees) {
