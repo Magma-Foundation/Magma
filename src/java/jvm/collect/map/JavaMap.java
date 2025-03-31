@@ -78,4 +78,9 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     public Stream<V> streamValues() {
         return Streams.fromNativeList(new ArrayList<>(map.values()));
     }
+
+    @Override
+    public Stream<K> streamKeys() {
+        return Streams.fromNativeList(new ArrayList<>(map.keySet()));
+    }
 }
