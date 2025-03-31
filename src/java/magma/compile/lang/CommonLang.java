@@ -92,7 +92,11 @@ public class CommonLang {
     }
 
     public static Rule createGenericRule(Rule type) {
-        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
+        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
+                createWhitespaceRule(),
+                type
+        )));
+
         Rule base = new NodeRule("base", createQualifiedRule());
         return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
     }

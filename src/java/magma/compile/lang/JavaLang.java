@@ -160,7 +160,12 @@ public class JavaLang {
 
     private static Rule createLambdaRule(Rule value, Rule statement) {
         Rule left = createSymbolRule("param-name");
-        Rule params = new NodeListRule("params", new FoldingDivider(new DecoratedFolder(new ValueFolder())), createSymbolRule("value"));
+        Rule param = createSymbolRule("value");
+        Rule params = new NodeListRule("params", new FoldingDivider(new DecoratedFolder(new ValueFolder())), new OrRule(Lists.of(
+                createWhitespaceRule(),
+                param
+        )));
+
         Rule beforeArrow = new OrRule(Lists.of(
                 left,
                 new StripRule(new PrefixRule("(", new SuffixRule(params, ")")))

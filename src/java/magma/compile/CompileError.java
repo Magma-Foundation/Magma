@@ -66,6 +66,6 @@ public class CompileError implements Error {
                 .map(result -> ": " + Strings.unwrap(result))
                 .orElse("");
 
-        return message + ": " + contextString + joined;
+        return message + contextString + joined;
     }
 }
