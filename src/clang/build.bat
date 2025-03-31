@@ -164,6 +164,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\tree\OrRule.c^
 	.\magma\compile\context\StringContext.c^
 	.\magma\compile\context\StringContext.c^
+	.\magma\compile\lang\PruneTypeParameterized.c^
+	.\magma\compile\lang\PruneTypeParameterized.c^
 	.\magma\Main.c^
 	.\magma\Main.c^
 	.\magma\compile\rule\text\StripRule.c^

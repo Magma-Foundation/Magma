@@ -13,10 +13,6 @@
 #include "../../magma/option/Some.h"
 struct CompileError{String message;magma.option.Option<magma.compile.context.Context> maybeContext;magma.collect.list.List_<magma.compile.CompileError> errors;
 };
-// expand magma.option.Option<magma.compile.context.Context>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
 magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext);
 magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext, magma.collect.list.List_<magma.compile.CompileError> errors);
 magma.compile.public CompileError(String message);
@@ -24,5 +20,9 @@ String format(int depth, int index, magma.collect.list.List_<magma.compile.Compi
 int depth();
 String display();
 String format(int depth);
+// expand magma.option.Option<magma.compile.context.Context>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
 #endif
 

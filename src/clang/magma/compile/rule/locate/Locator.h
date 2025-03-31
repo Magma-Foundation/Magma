@@ -3,7 +3,7 @@
 #include "../../../../magma/option/Option.h"
 struct Locator{
 };
-// expand magma.option.Option<int>
 magma.option.Option<int> locate(String input, String infix);
+// expand magma.option.Option<int>
 #endif
 

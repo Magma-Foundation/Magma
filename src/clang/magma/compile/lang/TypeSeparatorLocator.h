@@ -6,8 +6,8 @@
 #include "../../../magma/option/Some.h"
 struct TypeSeparatorLocator{
 };
+magma.option.Option<int> locate(String input, String infix);
 // expand magma.option.Option<int>
 // expand magma.option.None<>
-magma.option.Option<int> locate(String input, String infix);
 #endif
 

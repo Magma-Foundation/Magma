@@ -8,10 +8,10 @@
 #include "../../../../magma/result/Result.h"
 struct SuffixRule{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 auto __lambda0__();
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
 #endif
 

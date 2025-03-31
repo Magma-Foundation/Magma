@@ -11,6 +11,8 @@
 #include "../../../magma/option/Tuple.h"
 struct InvocationStartLocator{magma.option.Tuple<int, char> DEFAULT_PAIR;
 };
+magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue);
+magma.option.Option<int> locate(String input, String infix);
 // expand magma.option.Tuple<int, char>
 // expand magma.collect.list.List_<magma.option.Tuple<int, char>>
 // expand magma.option.Tuple<int, char>
@@ -20,7 +22,5 @@ struct InvocationStartLocator{magma.option.Tuple<int, char> DEFAULT_PAIR;
 // expand magma.option.Tuple<int, char>
 // expand magma.option.Option<int>
 // expand magma.option.None<>
-magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue);
-magma.option.Option<int> locate(String input, String infix);
 #endif
 

@@ -5,15 +5,6 @@
 #include "../../../../magma/option/Tuple.h"
 struct DividingState{
 };
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<char>
 magma.compile.rule.divide.DividingState append(char c);
 magma.compile.rule.divide.boolean isLevel();
 magma.compile.rule.divide.DividingState exit();
@@ -25,5 +16,14 @@ magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingS
 magma.option.Option<magma.compile.rule.divide.DividingState> appendAndDiscard();
 magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> pop();
 magma.option.Option<char> peek();
+// expand magma.collect.list.List_<String>
+// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
+// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
+// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
+// expand magma.option.Option<magma.compile.rule.divide.DividingState>
+// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
+// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
+// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
+// expand magma.option.Option<char>
 #endif
 

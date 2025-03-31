@@ -15,11 +15,6 @@
 #include "../../../../magma/result/Result.h"
 struct NodeListRule{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 magma.result.Result<String, magma.compile.CompileError> generateChildren(magma.collect.list.List_<magma.compile.Node> children);
@@ -30,5 +25,10 @@ auto __lambda3__();
 auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<String, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.Node>
 #endif
 

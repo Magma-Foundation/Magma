@@ -7,6 +7,7 @@ import magma.compile.lang.ExpandGenerics;
 import magma.compile.lang.FlattenRoot;
 import magma.compile.lang.Formatter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.PruneTypeParameterized;
 import magma.compile.lang.ResolveTypes;
 import magma.compile.lang.Sorter;
 import magma.compile.lang.TransformAll;
@@ -33,7 +34,7 @@ public class Compiler {
                 .flatMapValue(transformUsing(new FlattenGroup()))
                 .flatMapValue(transformUsing(new ExpandGenerics()))
                 .flatMapValue(transformUsing(new FlattenGroup()))
-                .flatMapValue(transformUsing(new FlattenGroup()))
+                .flatMapValue(transformUsing(new PruneTypeParameterized()))
                 .flatMapValue(transformUsing(new FlattenRoot()))
                 .flatMapValue(transformUsing(new Sorter()))
                 .mapValue(Tuple::right);

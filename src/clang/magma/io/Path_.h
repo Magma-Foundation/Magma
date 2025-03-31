@@ -6,13 +6,6 @@
 #include "../../magma/result/Result.h"
 struct Path_{
 };
-// expand magma.result.Result<magma.collect.set.Set_<magma.io.Path_>, magma.io.IOError>
-// expand magma.collect.set.Set_<magma.io.Path_>
-// expand magma.collect.set.Set_<magma.io.Path_>
-// expand magma.option.Option<magma.io.IOError>
-// expand magma.option.Option<magma.io.IOError>
-// expand magma.collect.stream.Stream<String>
-// expand magma.result.Result<String, magma.io.IOError>
 magma.io.boolean exists();
 magma.result.Result<magma.collect.set.Set_<magma.io.Path_>, magma.io.IOError> walk();
 magma.option.Option<magma.io.IOError> writeString(String output);
@@ -25,5 +18,12 @@ String asString();
 magma.io.Path_ getParent();
 magma.io.Path_ getFileName();
 magma.result.Result<String, magma.io.IOError> readString();
+// expand magma.result.Result<magma.collect.set.Set_<magma.io.Path_>, magma.io.IOError>
+// expand magma.collect.set.Set_<magma.io.Path_>
+// expand magma.collect.set.Set_<magma.io.Path_>
+// expand magma.option.Option<magma.io.IOError>
+// expand magma.option.Option<magma.io.IOError>
+// expand magma.collect.stream.Stream<String>
+// expand magma.result.Result<String, magma.io.IOError>
 #endif
 

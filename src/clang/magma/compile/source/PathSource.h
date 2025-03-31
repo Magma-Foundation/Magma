@@ -7,11 +7,11 @@
 #include "../../../magma/result/Result.h"
 struct PathSource{
 };
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.ListCollector<>
-// expand magma.result.Result<String, magma.io.IOError>
 magma.collect.list.List_<String> computeNamespace();
 String computeName();
 magma.result.Result<String, magma.io.IOError> readString();
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.ListCollector<>
+// expand magma.result.Result<String, magma.io.IOError>
 #endif
 

@@ -12,16 +12,6 @@
 #include "../../../magma/result/Result.h"
 struct FlattenRoot{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 magma.compile.Node afterPass0(magma.compile.Node node);
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node);
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> beforePass0(magma.compile.transform.State state, magma.compile.Node node);
@@ -29,5 +19,15 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
 auto __lambda0__();
 auto __lambda1__();
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 #endif
 
