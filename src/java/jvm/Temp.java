@@ -1,7 +1,6 @@
-package magma;
+package jvm;
 
 import jvm.collect.list.Lists;
-import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.compile.MapNode;
 import magma.compile.Node;
@@ -10,7 +9,7 @@ import magma.option.None;
 import magma.option.Option;
 
 public class Temp {
-    static List_<Node> walkTopLevel(Node topLevel) {
+    public static List_<Node> walkTopLevel(List_<Node> seen, Node topLevel) {
         if (topLevel.is("root")) {
             /*
             By definition, a root type has no expansions,
@@ -19,23 +18,22 @@ public class Temp {
             return Lists.of(topLevel);
         } else {
             // We know this has to be a group.
-            return walkGroup(topLevel);
+            return walkGroup(topLevel, seen);
         }
     }
 
-    private static List_<Node> walkGroup(Node topLevel) {
+    private static List_<Node> walkGroup(Node topLevel,  List_<Node> seen) {
         /*
         We walk through all the expansions and collect them.
          */
         return topLevel.findNodeList("expansions")
                 .orElse(Lists.empty())
                 .stream()
-                .map(Temp::walkEnclosedInType)
-                .flatMap(List_::stream)
-                .collect(new ListCollector<>());
+                .filter(node -> !seen.contains(node, Node::equalsTo))
+                .foldWithInitial(seen, (seen0, expansion) -> seen0.addAll(walkEnclosedInType(expansion, seen0)));
     }
 
-    private static List_<Node> walkEnclosedInType(Node expansion) {
+    private static List_<Node> walkEnclosedInType(Node expansion, List_<Node> seen) {
         // fully expanded, something like first.second.Third
 
         // This is the base type, so the base of Map<K, V> would be Map.
@@ -57,7 +55,7 @@ public class Temp {
         */
         return lookupTree(listBaseType)
                 .map(group -> monomorphizeGroup(group, argumentTypes))
-                .map(Temp::walkTopLevel)
+                .map(topLevel -> walkTopLevel(seen, topLevel))
                 .orElse(Lists.empty());
     }
 

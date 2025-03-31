@@ -50,4 +50,6 @@ public interface Node {
     boolean hasNode(String propertyKey);
 
     boolean hasNodeList(String propertyKey);
+
+    Boolean equalsTo(Node other);
 }

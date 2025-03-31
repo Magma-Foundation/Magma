@@ -27,4 +27,6 @@ public interface Stream<T> {
     Option<T> next();
 
     boolean anyMatch(Predicate<T> predicate);
+
+    boolean allMatch(Predicate<T> predicate);
 }

@@ -1,5 +1,6 @@
 package magma;
 
+import jvm.Temp;
 import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.io.Paths;
@@ -54,20 +55,12 @@ public class Main {
     }
 
     private static Map_<Location, Node> modifyTrees(Map_<Location, Node> trees) {
-        return findExpansions(trees).stream().foldWithInitial(trees, Main::attachExpansion);
+        findExpansions(trees);
+        return Maps.empty();
     }
 
-    private static Map_<Location, Node> findExpansions(Map_<Location, Node> trees) {
-
-    }
-
-    private static Map_<Location, Node> attachExpansion(
-            Map_<Location, Node> current,
-            Tuple<Location, Node> entry
-    ) {
-        Location location = entry.left();
-        Node node = entry.right();
-        return current.with(location.resolveSibling(location.name() + "_expansion"), node);
+    private static List_<Node> findExpansions(Map_<Location, Node> trees) {
+        return trees.streamValues().foldWithInitial(Lists.empty(), Temp::walkTopLevel);
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees) {

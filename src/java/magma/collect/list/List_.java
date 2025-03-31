@@ -38,4 +38,6 @@ public interface List_<T> {
     void forEach(Consumer<T> consumer);
 
     List_<T> mapLast(Function<T, T> mapper);
+
+    boolean contains(T node, BiFunction<T, T, Boolean> equator);
 }

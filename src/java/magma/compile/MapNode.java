@@ -1,8 +1,10 @@
 package magma.compile;
 
+import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.collect.stream.Streams;
 import magma.collect.list.List_;
+import magma.collect.map.MapCollector;
 import magma.collect.map.Map_;
 import magma.collect.stream.Joiner;
 import magma.collect.stream.Stream;
@@ -177,6 +179,23 @@ public final class MapNode implements Node {
     @Override
     public boolean hasNodeList(String propertyKey) {
         return nodeLists.containsKey(propertyKey);
+    }
+
+    @Override
+    public Boolean equalsTo(Node other) {
+        boolean isType = maybeType.map(other::is).orElse(false);
+
+        Map_<String, String> stringsCopy = other.streamStrings().collect(new MapCollector<>());
+        Map_<String, Node> nodesCopy = other.streamNodes().collect(new MapCollector<>());
+        Map_<String, List_<Node>> nodeListCopy = other.streamNodeLists().collect(new MapCollector<>());
+
+        return isType && Maps.equalsTo(strings, stringsCopy, String::equals)
+                && Maps.equalsTo(nodes, nodesCopy, Node::equalsTo)
+                && Maps.equalsTo(nodeLists, nodeListCopy, this::doNodeListsEqual);
+    }
+
+    private boolean doNodeListsEqual(List_<Node> nodeList, List_<Node> nodeList2) {
+        return Lists.equalsTo(nodeList, nodeList2, Node::equalsTo);
     }
 
     @Override
