@@ -1,5 +1,7 @@
 package magma.collect.string;
 
+import magma.collect.stream.Stream;
+
 public interface String_ {
-    String value();
+    Stream<Character> stream();
 }

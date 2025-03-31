@@ -1,3 +1,3 @@
 #include "String_.h"
-String value();
+magma.collect.stream.Stream<char> stream();
 
