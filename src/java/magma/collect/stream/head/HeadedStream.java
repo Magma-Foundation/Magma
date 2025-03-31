@@ -52,6 +52,11 @@ public record HeadedStream<T>(Head<T> head) implements Stream<T> {
     }
 
     @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        return foldWithInitial(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+    }
+
+    @Override
     public <R> Option<R> foldMapping(Function<T, R> mapper, BiFunction<R, T, R> folder) {
         return head.next().map(mapper).map(initial -> foldWithInitial(initial, folder));
     }
