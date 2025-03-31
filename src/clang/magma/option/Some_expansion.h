@@ -1,0 +1,3 @@
+#ifndef magma_option_Some_expansion
+#define magma_option_Some_expansion
+#endif

@@ -1,0 +1,3 @@
+#ifndef magma_compile_rule_tree_OrState_expansion
+#define magma_compile_rule_tree_OrState_expansion
+#endif

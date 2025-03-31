@@ -1,0 +1,3 @@
+#ifndef magma_collect_stream_head_HeadedStream_expansion
+#define magma_collect_stream_head_HeadedStream_expansion
+#endif

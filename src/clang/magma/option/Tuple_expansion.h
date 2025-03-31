@@ -1,0 +1,3 @@
+#ifndef magma_option_Tuple_expansion
+#define magma_option_Tuple_expansion
+#endif
