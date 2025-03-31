@@ -13,7 +13,7 @@ public class StringLists {
                 .map(segment -> new MapNode().withString("value", segment))
                 .collect(new ListCollector<Node>());
 
-        return new MapNode().withNodeList("segments", resolved);
+        return new MapNode("qualified").withNodeList("segments", resolved);
     }
 
     public static List_<String> fromSegments(Node node) {

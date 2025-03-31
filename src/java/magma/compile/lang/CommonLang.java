@@ -91,7 +91,7 @@ public class CommonLang {
         return new TypeRule("while", new StripRule(new PrefixRule("while", new StringRule("content"))));
     }
 
-    static Rule createGenericRule(Rule type) {
+    public static Rule createGenericRule(Rule type) {
         Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
         Rule base = new NodeRule("base", createQualifiedRule());
         return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));

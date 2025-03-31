@@ -176,7 +176,7 @@ public class JavaLang {
         return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new InfixRule(new NodeRule("type", createTypeRule()), "(", createArgumentsRule(value), new InvocationStartLocator()), ")"))));
     }
 
-    private static Rule createTypeRule() {
+    public static Rule createTypeRule() {
         LazyRule type = new LazyRule();
         type.set(new OrRule(Lists.of(
                 createArrayRule(type),

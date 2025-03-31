@@ -5,6 +5,7 @@ import magma.option.Option;
 import magma.option.Some;
 import magma.option.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,5 +43,10 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     @Override
     public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
         return other.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
+    }
+
+    @Override
+    public void consume(Consumer<T> whenOk, Consumer<X> whenErr) {
+        whenOk.accept(value);
     }
 }

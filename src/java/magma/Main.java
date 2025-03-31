@@ -14,6 +14,8 @@ import magma.collect.stream.Stream;
 import magma.compile.Compiler;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.lang.CommonLang;
+import magma.compile.lang.JavaLang;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
 import magma.compile.transform.State;
@@ -26,6 +28,8 @@ import magma.option.Tuple;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
+
+import java.util.List;
 
 public class Main {
     public static final Path_ SOURCE_DIRECTORY = Paths.get(".", "src", "java");
@@ -51,17 +55,32 @@ public class Main {
     private static Option<ApplicationError> runWithSources(Set_<Path_> sources) {
         return sources.stream()
                 .foldToResult(Maps.empty(), Main::preLoadSources)
-                .mapValue(trees -> {
-                    trees.streamValues()
-                            .flatMap(Main::findExpansionsInTargetSet)
-                            .collect(new ListCollector<>())
-                            .forEach(element -> {
-                                System.out.println(element.display());
-                            });
-
-                    return trees;
-                })
+                .mapValue(Main::getPathNodeMap)
                 .match(Main::postLoadTrees, Some::new);
+    }
+
+    private static Map_<Path_, Node> getPathNodeMap(Map_<Path_, Node> trees) {
+        trees.streamValues()
+                .flatMap(Main::findExpansionsInTargetSet)
+                .map(Main::getString)
+                .collect(new SetCollector<>())
+                .stream()
+                .collect(new ListCollector<>())
+                .sort(String::compareTo)
+                .forEach(System.out::println);
+
+        return trees;
+    }
+
+    private static String getString(Node element) {
+        return CommonLang.createGenericRule(JavaLang.createTypeRule())
+                .generate(element.retype("generic"))
+                .match(generated -> {
+                    return generated;
+                }, err -> {
+                    System.err.println(err.display());
+                    return "";
+                });
     }
 
     private static Stream<Node> findExpansionsInTargetSet(Node value) {

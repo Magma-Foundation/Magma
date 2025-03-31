@@ -7,6 +7,7 @@ import magma.collect.stream.Stream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public record JavaSet<T>(Set<T> set) implements Set_<T> {
     public JavaSet() {
@@ -22,5 +23,10 @@ public record JavaSet<T>(Set<T> set) implements Set_<T> {
     public Set_<T> add(T element) {
         set.add(element);
         return this;
+    }
+
+    @Override
+    public void forEach(Consumer<T> consumer) {
+        set.forEach(consumer);
     }
 }
