@@ -48,7 +48,7 @@ public class TransformAll implements Transformer {
         Node type = node.findNode("type").orElse(new MapNode());
         if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
 
-        List_<String> qualifiedName = StringLists.fromQualified(type.findNode("base")
+        List_<String> qualifiedName = StringLists.fromQualifiedType(type.findNode("base")
                 .orElse(new MapNode()));
 
         List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
@@ -188,7 +188,7 @@ public class TransformAll implements Transformer {
         }
 
         if (node.is("construction")) {
-            List_<String> list = StringLists.fromQualified(node.findNode("type")
+            List_<String> list = StringLists.fromQualifiedType(node.findNode("type")
                     .orElse(new MapNode()));
 
             Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));

@@ -16,7 +16,7 @@ public class StringLists {
         return new MapNode("qualified").withNodeList("segments", resolved);
     }
 
-    public static List_<String> fromQualified(Node node) {
+    public static List_<String> fromQualifiedType(Node node) {
         return node.findNodeList("segments")
                 .orElse(Lists.empty())
                 .stream()
