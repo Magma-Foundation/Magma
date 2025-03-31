@@ -127,13 +127,15 @@ public class JavaLang {
     private static Rule createValueRule(LazyRule value, Rule statement) {
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
-                createAddRule(value),
+                createLambdaRule(value, statement),
+                createOperatorRule(value, "add", "+"),
+                createOperatorRule(value, "subtract", "-"),
+                createOperatorRule(value, "or", "||"),
                 createConstructionRule(value),
                 createInvocationRule(value),
                 createDataAccessRule(value),
                 createAccessRule("method-access", "::", value),
                 createStringRule(),
-                createLambdaRule(value, statement),
                 createNumberRule(),
                 createTernaryRule(value),
                 createNotRule(value),

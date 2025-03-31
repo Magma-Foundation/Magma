@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public record JavaList<T>(List<T> list) implements List_<T> {
     public JavaList() {
@@ -100,6 +101,24 @@ public record JavaList<T>(List<T> list) implements List_<T> {
     @Override
     public void forEach(Consumer<T> consumer) {
         list.forEach(consumer);
+    }
+
+    @Override
+    public List_<T> mapLast(Function<T, T> mapper) {
+        return findLast()
+                .map(mapper)
+                .map(this::setLast)
+                .orElse(this);
+    }
+
+    private List_<T> setLast(T last) {
+        return set(list.size() - 1, last);
+    }
+
+    private JavaList<T> set(int index, T last) {
+        List<T> copy = new ArrayList<>(list);
+        copy.set(index, last);
+        return new JavaList<>(copy);
     }
 
     private List<T> toNativeCopy() {

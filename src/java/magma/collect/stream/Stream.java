@@ -25,4 +25,6 @@ public interface Stream<T> {
     Stream<T> concat(Stream<T> other);
 
     Option<T> next();
+
+    boolean anyMatch(Predicate<T> predicate);
 }

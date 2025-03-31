@@ -5,7 +5,6 @@ import magma.collect.map.Map_;
 import magma.collect.stream.Stream;
 import magma.option.Option;
 import magma.option.Tuple;
-import magma.result.Result;
 
 import java.util.function.Function;
 

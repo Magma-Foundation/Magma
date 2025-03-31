@@ -119,8 +119,10 @@ public class CommonLang {
         return new TypeRule("symbol-value", createSymbolRule("value"));
     }
 
-    static TypeRule createAddRule(LazyRule value) {
-        return new TypeRule("add", new InfixRule(new NodeRule("left", value), "+", new NodeRule("right", value), new FirstLocator()));
+    static TypeRule createOperatorRule(LazyRule value, String type, String infix) {
+        NodeRule left = new NodeRule("left", value);
+        NodeRule right = new NodeRule("right", value);
+        return new TypeRule(type, new InfixRule(left, infix, right, new FirstLocator()));
     }
 
     static TypeRule createInvocationRule(Rule value) {

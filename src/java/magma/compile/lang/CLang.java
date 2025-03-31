@@ -77,7 +77,7 @@ public class CLang {
         LazyRule value = new LazyRule();
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
-                createAddRule(value),
+                createOperatorRule(value, "add", "+"),
                 createInvocationRule(value),
                 createAccessRule("data-access", ".", value),
                 createStringRule(),

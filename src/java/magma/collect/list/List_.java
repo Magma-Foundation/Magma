@@ -6,6 +6,7 @@ import magma.option.Tuple;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface List_<T> {
     Stream<T> stream();
@@ -35,4 +36,6 @@ public interface List_<T> {
     Option<T> findLast();
 
     void forEach(Consumer<T> consumer);
+
+    List_<T> mapLast(Function<T, T> mapper);
 }
