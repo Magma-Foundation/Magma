@@ -121,13 +121,6 @@ public class TransformAll implements Transformer {
             });
         }
 
-        if (node.is("symbol-type")) {
-            String oldValue = node.findString("value").orElse("");
-            if (oldValue.equals("boolean")) return new Ok<>(node.withString("value", "int"));
-            if (oldValue.equals("int")) return new Ok<>(node);
-            return new Ok<>(node.retype("struct-type"));
-        }
-
         if (node.is("array")) {
             return new Ok<>(node.retype("ref"));
         }
@@ -158,23 +151,90 @@ public class TransformAll implements Transformer {
         return new Ok<>(node);
     }
 
-    private Result<Node, CompileError> beforePass0(State state, Node node) {
-        if (!node.is("root")) return new Ok<>(node);
-
-        Node content = node.findNode("content").orElse(new MapNode());
-        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
-
-        List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
-                .collect(new ListCollector<>());
-
-        Node withChildren = content.withNodeList("children", newChildren);
-        return new Ok<>(node.withNode("content", withChildren));
-    }
-
     @Override
     public Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node) {
-        return beforePass0(state, node).mapValue(value -> new Tuple<>(state, value));
+        if (node.is("root")){
+            Node content = node.findNode("content").orElse(new MapNode());
+            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+            List_<Node> newChildren = children.stream()
+                    .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                    .collect(new ListCollector<>());
+
+            Node withChildren = content.withNodeList("children", newChildren);
+            Node withContent = node.withNode("content", withChildren);
+            return new Ok<>(new Tuple<>(state, withContent));
+        }
+
+        if (!node.is("definition")) return new Ok<>(new Tuple<>(state, node));
+
+        Node type = node.findNode("type").orElse(new MapNode());
+        if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
+
+        List_<String> qualifiedName = StringLists.fromQualified(type.findNode("base")
+                .orElse(new MapNode()));
+
+        List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
+        if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "BiFunction"))) {
+            Node param0 = arguments.get(0);
+            Node param1 = arguments.get(1);
+            Node returns = arguments.get(2);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param0, param1));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }
+
+        if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Function"))) {
+            Node param = arguments.get(0);
+            Node returns = arguments.get(1);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }
+
+        if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Predicate"))) {
+            Node param = arguments.get(0);
+
+            Node returns = StringLists.toQualified(Lists.of("int"));
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }
+
+        if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Consumer"))) {
+            Node paramType = arguments.get(0);
+
+            Node qualified = StringLists.toQualified(Lists.of("void"));
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", qualified)
+                    .withNodeList("params", Lists.of(paramType));;
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }
+
+        if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Supplier"))) {
+            Node returns = arguments.get(0);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns);
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }
+
+        return new Ok<>(new Tuple<>(state, node));
+
     }
 
     @Override

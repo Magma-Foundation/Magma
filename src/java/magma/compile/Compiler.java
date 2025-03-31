@@ -3,9 +3,11 @@ package magma.compile;
 import jvm.collect.map.Maps;
 import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
+import magma.compile.lang.ExpandGenerics;
 import magma.compile.lang.FlattenRoot;
 import magma.compile.lang.Formatter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.ResolveTypes;
 import magma.compile.lang.Sorter;
 import magma.compile.lang.TransformAll;
 import magma.compile.transform.FlattenGroup;
@@ -26,9 +28,11 @@ public class Compiler {
     public static Result<Node, CompileError> preLoad(String input, State state) {
         return JavaLang.createJavaRootRule().parse(input)
                 .mapValue(tree -> new Tuple<>(state, tree))
+                .flatMapValue(transformUsing(new ResolveTypes()))
+                .flatMapValue(transformUsing(new TransformAll()))
+                .flatMapValue(transformUsing(new FlattenGroup()))
                 .flatMapValue(transformUsing(new ExpandGenerics()))
                 .flatMapValue(transformUsing(new FlattenGroup()))
-                .flatMapValue(transformUsing(new TransformAll()))
                 .flatMapValue(transformUsing(new FlattenGroup()))
                 .flatMapValue(transformUsing(new FlattenRoot()))
                 .flatMapValue(transformUsing(new Sorter()))
