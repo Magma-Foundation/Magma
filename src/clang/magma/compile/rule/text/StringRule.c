@@ -1,7 +1,7 @@
 #include "StringRule.h"
-struct Result_Node_CompileError parse(struct String value){return Ok_(MapNode().withString(propertyKey(), value));
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String value){return (MapNode().withString(propertyKey(), value));
 }
-struct Result_String_CompileError generate(struct Node input){return input.findString(propertyKey).map(Ok.new).orElseGet(__lambda0__);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input){return input.findString(propertyKey).map(Ok.new).orElseGet(__lambda0__);
 }
 auto __lambda0__();
 

@@ -134,7 +134,7 @@ public class TransformAll implements Transformer {
 
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
-                    .withNode("type", new MapNode("symbol-type").withString("value", "auto"));
+                    .withNode("type", StringLists.toQualified(Lists.of("auto")));
 
             Node function = new MapNode("function")
                     .withNode("definition", definition);
@@ -148,12 +148,20 @@ public class TransformAll implements Transformer {
             return new Ok<>(node.retype("data-access"));
         }
 
+        if (node.is("construction")) {
+            List_<String> list = StringLists.fromQualified(node.findNode("type")
+                    .orElse(new MapNode()));
+
+            Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));
+            return new Ok<>(node.retype("invocation").withNode("caller", caller));
+        }
+
         return new Ok<>(node);
     }
 
     @Override
     public Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node) {
-        if (node.is("root")){
+        if (node.is("root")) {
             Node content = node.findNode("content").orElse(new MapNode());
             List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
             List_<Node> newChildren = children.stream()
@@ -218,7 +226,7 @@ public class TransformAll implements Transformer {
             Node definition = node.retype("functional-definition")
                     .removeNode("type")
                     .withNode("return", qualified)
-                    .withNodeList("params", Lists.of(paramType));;
+                    .withNodeList("params", Lists.of(paramType));
 
             return new Ok<>(new Tuple<>(state, definition));
         }

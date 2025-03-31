@@ -1,11 +1,11 @@
 #include "OrState.h"
-struct public OrState(){this(None_(), Lists.empty());
+magma.compile.rule.tree.public OrState(){this((), Lists.empty());
 }
-struct OrState_T withValue(struct T value){return OrState_(Some_(value), errors);
+magma.compile.rule.tree.OrState<T> withValue(T value){return ((value), errors);
 }
-struct Result_T_List__CompileError toResult(){return maybeValue.map(Ok.new).orElseGet(__lambda0__);
+magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>> toResult(){return maybeValue.map(Ok.new).orElseGet(__lambda0__);
 }
-struct OrState_T withError(struct CompileError error){return OrState_(maybeValue, errors.add(error));
+magma.compile.rule.tree.OrState<T> withError(magma.compile.CompileError error){return (maybeValue, errors.add(error));
 }
 auto __lambda0__();
 

@@ -1,3 +1,3 @@
 #include "Error.h"
-struct String display();
+String display();
 

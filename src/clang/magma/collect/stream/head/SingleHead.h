@@ -3,11 +3,11 @@
 #include "../../../../magma/option/None.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
-struct SingleHead<T>{struct T value;int retrieved;
+struct SingleHead<T>{T value;magma.collect.stream.head.boolean retrieved;
 };
-// expand Option_T = Option<struct T>
-// expand Some_ = Some<struct >
-struct public SingleHead(struct T value);
-struct Option_T next();
+// expand magma.option.Option<T>
+// expand magma.option.Some<>
+magma.collect.stream.head.public SingleHead(T value);
+magma.option.Option<T> next();
 #endif
 

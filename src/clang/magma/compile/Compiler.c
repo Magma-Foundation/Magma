@@ -1,18 +1,16 @@
 #include "Compiler.h"
-struct Result_Map__String_String_CompileError postLoad(struct State state, struct Node tree){return TreeTransformingStage(Formatter()).transform(tree, state).flatMapValue(Compiler.generateRoots);
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree){return TreeTransformingStage(Formatter()).transform(state, tree).mapValue(Tuple.right).flatMapValue(Compiler.generateRoots);
 }
-struct Result_Node_CompileError preLoad(struct String input, struct State state){return JavaLang.createJavaRootRule().parse(input).flatMapValue(__lambda0__).flatMapValue(__lambda1__).flatMapValue(__lambda2__).flatMapValue(__lambda3__).flatMapValue(__lambda4__).flatMapValue(__lambda5__);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state){return JavaLang.createJavaRootRule().parse(input).mapValue(__lambda0__).flatMapValue(transformUsing(ResolveTypes())).flatMapValue(transformUsing(TransformAll())).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(ExpandGenerics())).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(FlattenRoot())).flatMapValue(transformUsing(Sorter())).mapValue(Tuple.right);
 }
-struct Result_Map__String_String_CompileError generateRoots(struct Node roots){return roots.streamNodes().foldToResult(Maps.empty(), Compiler.generateTarget);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>(*transformUsing)(magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>)(magma.compile.transform.Transformer transformer){return __lambda1__.transform(tree.left(), tree.right());
 }
-struct Result_Map__String_String_CompileError generateTarget(struct Map__String_String current, struct Tuple_String_Node tuple){String extension = tuple.left();
-        Node root = tuple.right();return CLang.createCRootRule().generate(root).mapValue(__lambda6__);
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateRoots(magma.compile.Node roots){return roots.streamNodes().foldToResult(Maps.empty(), Compiler.generateTarget);
+}
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateTarget(magma.collect.map.Map_<String, String> current, magma.option.Tuple<String, magma.compile.Node> tuple){String extension = tuple.left();
+        Node root = tuple.right();return CLang.createCRootRule().generate(root).mapValue(__lambda2__.with(extension, generated));
 }
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
 

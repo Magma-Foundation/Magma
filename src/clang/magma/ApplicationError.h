@@ -1,9 +1,9 @@
 #ifndef magma_ApplicationError
 #define magma_ApplicationError
 #include "../magma/error/Error.h"
-struct ApplicationError{struct Error error;
+struct ApplicationError{magma.error.Error error;
 };
-struct public ApplicationError(struct Error error);
-struct String display();
+magma.public ApplicationError(magma.error.Error error);
+String display();
 #endif
 

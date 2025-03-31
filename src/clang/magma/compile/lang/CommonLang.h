@@ -24,31 +24,32 @@
 #include "../../../magma/compile/rule/tree/TypeRule.h"
 struct CommonLang{
 };
-struct InfixRule createContentRule(struct Rule beforeContent, struct Rule childRule);
-struct Rule createBlockRule(struct Rule childRule);
-struct TypeRule createSymbolTypeRule();
-struct Rule createSymbolRule(struct String propertyKey);
-struct Rule createDefinitionRule(struct Rule type);
-struct Rule createParamsRule(struct Rule definition);
-struct TypeRule createWhitespaceRule();
-struct TypeRule createAssignmentRule();
-struct TypeRule createElseRule();
-struct TypeRule createPostfixRule();
-struct TypeRule createForRule();
-struct TypeRule createIfRule();
-struct TypeRule createReturnRule(struct Rule value);
-struct TypeRule createWhileRule();
-struct Rule createGenericRule(struct Rule type);
-struct Rule createNamedWithTypeParams();
-struct TypeRule createSymbolValueRule();
-struct TypeRule createAddRule(struct LazyRule value);
-struct TypeRule createInvocationRule(struct Rule value);
-struct NodeListRule createArgumentsRule(struct Rule value);
-struct TypeRule createAccessRule(struct String type, struct String infix, struct Rule value);
-struct TypeRule createDataAccess(struct String type, struct String infix, struct Rule value, struct Rule property);
-struct TypeRule createStringRule();
-struct TypeRule createTernaryRule(struct LazyRule value);
-struct TypeRule createNumberRule();
-struct TypeRule createNotRule(struct LazyRule value);
+magma.compile.rule.text.InfixRule createContentRule(magma.compile.rule.Rule beforeContent, magma.compile.rule.Rule childRule);
+magma.compile.rule.Rule createBlockRule(magma.compile.rule.Rule childRule);
+magma.compile.rule.Rule createSymbolRule(String propertyKey);
+magma.compile.rule.Rule createDefinitionRule(magma.compile.rule.Rule type);
+magma.compile.rule.Rule createParamsRule(magma.compile.rule.Rule definition);
+magma.compile.rule.tree.TypeRule createWhitespaceRule();
+magma.compile.rule.tree.TypeRule createAssignmentRule();
+magma.compile.rule.tree.TypeRule createElseRule();
+magma.compile.rule.tree.TypeRule createPostfixRule();
+magma.compile.rule.tree.TypeRule createForRule();
+magma.compile.rule.tree.TypeRule createIfRule();
+magma.compile.rule.tree.TypeRule createReturnRule(magma.compile.rule.Rule value);
+magma.compile.rule.tree.TypeRule createWhileRule();
+magma.compile.rule.Rule createGenericRule(magma.compile.rule.Rule type);
+magma.compile.rule.Rule createQualifiedRule();
+magma.compile.rule.Rule createNamedWithTypeParams();
+magma.compile.rule.tree.TypeRule createSymbolValueRule();
+magma.compile.rule.tree.TypeRule createOperatorRule(magma.compile.rule.LazyRule value, String type, String infix);
+magma.compile.rule.tree.TypeRule createInvocationRule(magma.compile.rule.Rule value);
+magma.compile.rule.tree.NodeListRule createArgumentsRule(magma.compile.rule.Rule value);
+magma.compile.rule.tree.TypeRule createAccessRule(String type, String infix, magma.compile.rule.Rule value);
+magma.compile.rule.tree.TypeRule createDataAccess(String type, String infix, magma.compile.rule.Rule value, magma.compile.rule.Rule property);
+magma.compile.rule.tree.TypeRule createStringRule();
+magma.compile.rule.tree.TypeRule createTernaryRule(magma.compile.rule.LazyRule value);
+magma.compile.rule.tree.TypeRule createNumberRule();
+magma.compile.rule.tree.TypeRule createNotRule(magma.compile.rule.LazyRule value);
+magma.compile.rule.tree.TypeRule createCharRule();
 #endif
 

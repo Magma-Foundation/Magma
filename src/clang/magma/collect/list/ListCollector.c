@@ -1,6 +1,6 @@
 #include "ListCollector.h"
-struct List__T createInitial(){return Lists.empty();
+magma.collect.list.List_<T> createInitial(){return Lists.empty();
 }
-struct List__T fold(struct List__T tList, struct T t){return tList.add(t);
+magma.collect.list.List_<T> fold(magma.collect.list.List_<T> tList, T t){return tList.add(t);
 }
 

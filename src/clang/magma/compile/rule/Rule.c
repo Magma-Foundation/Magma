@@ -1,4 +1,4 @@
 #include "Rule.h"
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 

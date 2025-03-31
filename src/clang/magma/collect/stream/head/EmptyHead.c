@@ -1,4 +1,4 @@
 #include "EmptyHead.h"
-struct Option_T next(){return None_();
+magma.option.Option<T> next(){return ();
 }
 

@@ -1,10 +1,10 @@
 #include "InfixRule.h"
-struct public InfixRule(struct Rule left, struct String infix, struct Rule right, struct Locator locator){this.left = left;
+magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator){this.left = left;
         this.infix = infix;
         this.right = right;
         this.locator = locator;
 }
-struct Result_Node_CompileError parse(struct String input){return locator.locate(input, infix).map(index -> {
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return locator.locate(input, infix).map(index -> {
             String left = input.substring(0, index);
             String right = input.substring(index + infix.length());
             return this.left.parse(left).and(() -> this.right.parse(right)).mapValue(tuple -> tuple.left().merge(tuple.right()));
@@ -12,7 +12,7 @@ struct Result_Node_CompileError parse(struct String input){return locator.locate
             return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
         });
 }
-struct Result_String_CompileError generate(struct Node node){return left.generate(node).and(__lambda0__).mapValue(__lambda1__);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return left.generate(node).and(__lambda0__.generate(node)).mapValue(__lambda1__.left()+infix+tuple.right());
 }
 auto __lambda0__();
 auto __lambda1__();

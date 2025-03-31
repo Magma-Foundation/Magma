@@ -2,7 +2,7 @@
 #define magma_compile_rule_divide_StatementFolder
 struct StatementFolder{
 };
-struct DividingState fold(struct DividingState current, struct char c);
-struct String join(struct String current, struct String element);
+magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingState current, char c);
+String join(String current, String element);
 #endif
 

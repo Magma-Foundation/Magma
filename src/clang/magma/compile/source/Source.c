@@ -1,5 +1,5 @@
 #include "Source.h"
-struct List__String computeNamespace();
-struct String computeName();
-struct Result_String_IOError readString();
+magma.collect.list.List_<String> computeNamespace();
+String computeName();
+magma.result.Result<String, magma.io.IOError> readString();
 

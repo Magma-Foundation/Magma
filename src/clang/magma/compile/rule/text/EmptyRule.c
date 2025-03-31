@@ -1,6 +1,6 @@
 #include "EmptyRule.h"
-struct Result_Node_CompileError parse(struct String input){return input.isEmpty()?Ok_(MapNode()):Err_(CompileError("Input not empty", StringContext(input)));
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return input.isEmpty()?(MapNode()):(CompileError("Input not empty", StringContext(input)));
 }
-struct Result_String_CompileError generate(struct Node node){return Ok_("");
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return ("");
 }
 

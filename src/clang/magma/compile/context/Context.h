@@ -3,6 +3,6 @@
 #include "../../../magma/collect/string/String_.h"
 struct Context{
 };
-struct String_ display();
+magma.collect.string.String_ display();
 #endif
 

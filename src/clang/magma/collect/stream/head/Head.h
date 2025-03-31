@@ -3,7 +3,7 @@
 #include "../../../../magma/option/Option.h"
 struct Head<T>{
 };
-// expand Option_T = Option<struct T>
-struct Option_T next();
+// expand magma.option.Option<T>
+magma.option.Option<T> next();
 #endif
 

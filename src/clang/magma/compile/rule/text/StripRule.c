@@ -1,11 +1,11 @@
 #include "StripRule.h"
-struct public StripRule(struct Rule childRule){this("", childRule, "");
+magma.compile.rule.text.public StripRule(magma.compile.rule.Rule childRule){this("", childRule, "");
 }
-struct Result_Node_CompileError parse(struct String input){return childRule().parse(input.strip());
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return childRule().parse(input.strip());
 }
-struct Result_String_CompileError generate(struct Node node){return childRule.generate(node).mapValue(__lambda0__);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return childRule.generate(node).mapValue(__lambda0__(node, value));
 }
-struct String attachPadding(struct Node node, struct String value){String leftPad = node.findString(leftKey).orElse("");
+String attachPadding(magma.compile.Node node, String value){String leftPad = node.findString(leftKey).orElse("");
         String rightPad = node.findString(rightKey).orElse("");return leftPad+value+rightPad;
 }
 auto __lambda0__();

@@ -6,28 +6,29 @@
 #include "../../magma/option/Tuple.h"
 struct Ok<T, X>{
 };
-// expand Result_T_X = Result<struct T, struct X>
-// expand Option_T = Option<struct T>
-// expand Some_ = Some<struct >
-// expand Option_X = Option<struct X>
-// expand None_ = None<struct >
-// expand Result_R_X = Result<struct R, struct X>
-// expand Ok_ = Ok<struct >
-// expand Result_R_X = Result<struct R, struct X>
-// expand Result_R_X = Result<struct R, struct X>
-// expand Result_T_R = Result<struct T, struct R>
-// expand Ok_ = Ok<struct >
-// expand Result_Tuple_T_R_X = Result<struct Tuple_T_R, struct X>
-// expand Tuple_T_R = Tuple<struct T, struct R>
-// expand Tuple_ = Tuple<struct >
-// expand Result_R_X = Result<struct R, struct X>
-struct Option_T findValue();
-struct Option_X findError();
-struct Result_R_X mapValue(struct R(*mapper)(struct T));
-struct Result_R_X flatMapValue(struct Result_R_X(*mapper)(struct T));
-struct Result_T_R mapErr(struct R(*mapper)(struct X));
-struct R match(struct R(*whenOk)(struct T), struct R(*whenErr)(struct X));
-struct Result_Tuple_T_R_X and(struct Result_R_X(*other)());
+// expand magma.result.Result<T, X>
+// expand magma.option.Option<T>
+// expand magma.option.Some<>
+// expand magma.option.Option<X>
+// expand magma.option.None<>
+// expand magma.result.Result<magma.result.R, X>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.result.R, X>
+// expand magma.result.Result<magma.result.R, X>
+// expand magma.result.Result<T, magma.result.R>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.option.Tuple<T, magma.result.R>, X>
+// expand magma.option.Tuple<T, magma.result.R>
+// expand magma.option.Tuple<T, magma.result.R>
+// expand magma.result.Result<magma.result.R, X>
+magma.option.Option<T> findValue();
+magma.option.Option<X> findError();
+magma.result.Result<magma.result.R, X> mapValue(magma.result.R(*mapper)(T));
+magma.result.Result<magma.result.R, X> flatMapValue(magma.result.Result<magma.result.R, X>(*mapper)(T));
+magma.result.Result<T, magma.result.R> mapErr(magma.result.R(*mapper)(X));
+magma.result.R match(magma.result.R(*whenOk)(T), magma.result.R(*whenErr)(X));
+magma.result.Result<magma.option.Tuple<T, magma.result.R>, X> and(magma.result.Result<magma.result.R, X>(*other)());
+magma.result.void consume(void(*whenOk)(T), void(*whenErr)(X));
 auto __lambda0__();
 #endif
 

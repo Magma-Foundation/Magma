@@ -4,28 +4,56 @@
 #include "../../../magma/collect/list/List_.h"
 #include "../../../magma/compile/CompileError.h"
 #include "../../../magma/compile/Node.h"
+#include "../../../magma/compile/context/NodeContext.h"
 #include "../../../magma/option/Tuple.h"
 #include "../../../magma/result/Result.h"
-struct TreeTransformingStage{struct Transformer transformer;
+struct TreeTransformingStage{magma.compile.transform.Transformer transformer;
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Tuple_String_Node = Tuple<struct String, struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-struct public TreeTransformingStage(struct Transformer transformer);
-struct Result_Node_CompileError transform(struct Node root, struct State state);
-struct Result_Node_CompileError transformNodes(struct Node root, struct State state);
-struct Result_Node_CompileError transformNodeLists(struct Node root, struct State state);
-struct Result_Node_CompileError mapNodes(struct Node node, struct Tuple_String_Node tuple, struct State state);
-struct Result_Node_CompileError mapNodeList(struct Node node, struct Tuple_String_List__Node tuple, struct State state);
-struct Result_List__Node_CompileError mapNodeListElement(struct List__Node elements, struct Node element, struct State state);
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<String, magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer);
+magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> attachChildren(magma.compile.Node node, String propertyKey, magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> children);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodes(magma.compile.transform.State state, magma.compile.Node root);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodeLists(magma.compile.transform.State state, magma.compile.Node root);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodes(magma.compile.transform.State state, magma.compile.Node node, magma.option.Tuple<String, magma.compile.Node> entry);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodeList(magma.compile.transform.State state, magma.compile.Node node, magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> entry);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>, magma.compile.CompileError> transformElement(magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> current, magma.compile.Node element);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();
@@ -33,6 +61,5 @@ auto __lambda3__();
 auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
-auto __lambda7__();
 #endif
 

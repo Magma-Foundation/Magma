@@ -3,6 +3,6 @@
 #include "../../magma/error/Error.h"
 struct ProcessError{
 };
-struct String display();
+String display();
 #endif
 

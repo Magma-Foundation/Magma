@@ -1,3 +1,3 @@
 #include "TransformingStage.h"
-struct Result_Node_CompileError transform(struct Node root, struct State state);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root);
 

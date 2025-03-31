@@ -1,27 +1,27 @@
 #include "MapNode.h"
-struct public MapNode(){this(None_(), Maps.empty(), Maps.empty(), Maps.empty());
+magma.compile.public MapNode(){this((), Maps.empty(), Maps.empty(), Maps.empty());
 }
-struct public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists){this.maybeType = maybeType;
+magma.compile.public MapNode(magma.option.Option<String> maybeType, magma.collect.map.Map_<String, String> strings, magma.collect.map.Map_<String, magma.compile.Node> nodes, magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists){this.maybeType = maybeType;
         this.strings = strings;
         this.nodes = nodes;
         this.nodeLists = nodeLists;
 }
-struct public MapNode(struct String type){this(Some_(type), Maps.empty(), Maps.empty(), Maps.empty());
+magma.compile.public MapNode(String type){this((type), Maps.empty(), Maps.empty(), Maps.empty());
 }
-struct String formatEntry(int depth, struct String key, struct String value){String format = "%s%s: %s";
+String formatEntry(int depth, String key, String value){String format = "%s%s: %s";
         String indent = "\t".repeat(depth + 1);return format.formatted(indent, key, value);
 }
-struct Node withString(struct String propertyKey, struct String propertyValue){return MapNode(maybeType, strings.with(propertyKey, propertyValue), nodes, nodeLists);
+magma.compile.Node withString(String propertyKey, String propertyValue){return MapNode(maybeType, strings.with(propertyKey, propertyValue), nodes, nodeLists);
 }
-struct Option_String findString(struct String propertyKey){return strings.find(propertyKey);
+magma.option.Option<String> findString(String propertyKey){return strings.find(propertyKey);
 }
-struct Node withNodeList(struct String propertyKey, struct List__Node propertyValues){return MapNode(maybeType, strings, nodes, nodeLists.with(propertyKey, propertyValues));
+magma.compile.Node withNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node> propertyValues){return MapNode(maybeType, strings, nodes, nodeLists.with(propertyKey, propertyValues));
 }
-struct Option_List__Node findNodeList(struct String propertyKey){return nodeLists.find(propertyKey);
+magma.option.Option<magma.collect.list.List_<magma.compile.Node>> findNodeList(String propertyKey){return nodeLists.find(propertyKey);
 }
-struct String display(){return format(0);
+String display(){return format(0);
 }
-struct String format(int depth){String typeString = maybeType.map(type -> type + " ").orElse("");
+String format(int depth){String typeString = maybeType.map(type -> type + " ").orElse("");
 
         Option<String> joinedStrings = strings.stream()
                 .map(entry -> formatEntry(depth, entry.left(), "\"" + entry.right() + "\""))
@@ -42,42 +42,42 @@ struct String format(int depth){String typeString = maybeType.map(type -> type +
                 "\t".repeat(depth) +
                 "}";
 }
-struct String formatList(struct Tuple_String_List__Node entry, int depth){return "[" + entry.right()
+String formatList(magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> entry, int depth){return "[" + entry.right()
                 .stream()
                 .map(node -> node.format(depth + 1))
                 .collect(new Joiner(", "))
                 .orElse("") + "]";
 }
-struct Node mapNodeList(struct String propertyKey, struct List__Node(*mapper)(struct List__Node)){return findNodeList(propertyKey).map(mapper).map(__lambda0__).orElse(this);
+magma.compile.Node mapNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node>(*mapper)(magma.collect.list.List_<magma.compile.Node>)){return findNodeList(propertyKey).map(mapper).map(__lambda0__(propertyKey, nodeList)).orElse(this);
 }
-int is(struct String type){return this.maybeType.filter(__lambda1__).isPresent();
+magma.compile.boolean is(String type){return this.maybeType.filter(__lambda1__.equals(type)).isPresent();
 }
-struct Node retype(struct String type){return MapNode(Some_(type), strings, nodes, nodeLists);
+magma.compile.Node retype(String type){return MapNode((type), strings, nodes, nodeLists);
 }
-struct Node merge(struct Node other){Node withStrings = other.streamStrings().<Node>foldWithInitial(this, (node, tuple) -> node.withString(tuple.left(), tuple.right()));
-        Node withNodes = other.streamNodes().foldWithInitial(withStrings, (node, tuple) -> node.withNode(tuple.left(), tuple.right()));return other.streamNodeLists().foldWithInitial(withNodes, __lambda2__);
+magma.compile.Node merge(magma.compile.Node other){Node withStrings = other.streamStrings().<Node>foldWithInitial(this, (node, tuple) -> node.withString(tuple.left(), tuple.right()));
+        Node withNodes = other.streamNodes().foldWithInitial(withStrings, (node, tuple) -> node.withNode(tuple.left(), tuple.right()));return other.streamNodeLists().foldWithInitial(withNodes, __lambda2__.withNodeList(tuple.left(), tuple.right()));
 }
-struct Stream_Tuple_String_String streamStrings(){return strings.stream();
+magma.collect.stream.Stream<magma.option.Tuple<String, String>> streamStrings(){return strings.stream();
 }
-struct Stream_Tuple_String_List__Node streamNodeLists(){return nodeLists.stream();
+magma.collect.stream.Stream<magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>> streamNodeLists(){return nodeLists.stream();
 }
-struct Node withNode(struct String propertyKey, struct Node propertyValue){return MapNode(maybeType, strings, nodes.with(propertyKey, propertyValue), nodeLists);
+magma.compile.Node withNode(String propertyKey, magma.compile.Node propertyValue){return MapNode(maybeType, strings, nodes.with(propertyKey, propertyValue), nodeLists);
 }
-struct Option_Node findNode(struct String propertyKey){return nodes.find(propertyKey);
+magma.option.Option<magma.compile.Node> findNode(String propertyKey){return nodes.find(propertyKey);
 }
-struct Stream_Tuple_String_Node streamNodes(){return nodes.stream();
+magma.collect.stream.Stream<magma.option.Tuple<String, magma.compile.Node>> streamNodes(){return nodes.stream();
 }
-struct Node mapNode(struct String propertyKey, struct Node(*mapper)(struct Node)){return findNode(propertyKey).map(mapper).map(__lambda3__).orElse(this);
+magma.compile.Node mapNode(String propertyKey, magma.compile.Node(*mapper)(magma.compile.Node)){return findNode(propertyKey).map(mapper).map(__lambda3__(propertyKey, node)).orElse(this);
 }
-struct Node withNodeLists(struct Map__String_List__Node nodeLists){return MapNode(maybeType, strings, nodes, this.nodeLists.withAll(nodeLists));
+magma.compile.Node withNodeLists(magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists){return MapNode(maybeType, strings, nodes, this.nodeLists.withAll(nodeLists));
 }
-struct Node withNodes(struct Map__String_Node nodes){return MapNode(maybeType, strings, this.nodes.withAll(nodes), this.nodeLists);
+magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> nodes){return MapNode(maybeType, strings, this.nodes.withAll(nodes), this.nodeLists);
 }
-struct Node removeNode(struct String propertyKey){return MapNode(maybeType, strings, nodes.remove(propertyKey), nodeLists);
+magma.compile.Node removeNode(String propertyKey){return MapNode(maybeType, strings, nodes.remove(propertyKey), nodeLists);
 }
-int hasNode(struct String propertyKey){return nodes.containsKey(propertyKey);
+magma.compile.boolean hasNode(String propertyKey){return nodes.containsKey(propertyKey);
 }
-int hasNodeList(struct String propertyKey){return nodeLists.containsKey(propertyKey);
+magma.compile.boolean hasNodeList(String propertyKey){return nodeLists.containsKey(propertyKey);
 }
 auto __lambda0__();
 auto __lambda1__();

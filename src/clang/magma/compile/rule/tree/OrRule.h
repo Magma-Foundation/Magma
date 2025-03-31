@@ -12,17 +12,16 @@
 #include "../../../../magma/result/Result.h"
 struct OrRule{
 };
-// expand Result_T_CompileError = Result<struct T, struct CompileError>
-// expand OrState_T = OrState<struct T>
-// expand Result_T_CompileError = Result<struct T, struct CompileError>
-// expand Err_ = Err<struct >
-// expand Result_T_CompileError = Result<struct T, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-// expand List__Rule = List_<struct Rule>
-struct Result_T_CompileError apply(struct Result_T_CompileError(*applicator)(struct Rule), struct Context(*context)());
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node input);
+// expand magma.collect.list.List_<magma.compile.rule.Rule>
+// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
+// expand magma.compile.rule.tree.OrState<magma.compile.rule.tree.T>
+// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
+// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError> apply(magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>(*applicator)(magma.compile.rule.Rule), magma.compile.context.Context(*context)());
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

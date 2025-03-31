@@ -1,6 +1,6 @@
 #include "ApplicationError.h"
-struct public ApplicationError(struct Error error){this.error = error;
+magma.public ApplicationError(magma.error.Error error){this.error = error;
 }
-struct String display(){return error.display();
+String display(){return error.display();
 }
 

@@ -10,11 +10,11 @@
 #include "../../../../magma/result/Result.h"
 struct TypeRule{
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-// expand Err_ = Err<struct >
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+// expand magma.result.Err<>
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 auto __lambda0__();
 auto __lambda1__();
 #endif

@@ -5,28 +5,38 @@
 #include "../../../magma/option/Tuple.h"
 struct List_<T>{
 };
-// expand Stream_T = Stream<struct T>
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-// expand Option_T = Option<struct T>
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-// expand BiFunction_T_T_Integer = BiFunction<struct T, struct T, struct Integer>
-// expand Option_Tuple_T_List__T = Option<struct Tuple_T_List__T>
-// expand Tuple_T_List__T = Tuple<struct T, struct List__T>
-// expand List__T = List_<struct T>
-struct Stream_T stream();
-struct List__T add(struct T element);
-struct List__T addAll(struct List__T others);
-struct Option_T findFirst();
+// expand magma.collect.stream.Stream<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.option.Option<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.option.Option<magma.option.Tuple<T, magma.collect.list.List_<T>>>
+// expand magma.option.Tuple<T, magma.collect.list.List_<T>>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.option.Tuple<T, magma.collect.list.List_<T>>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.option.Option<T>
+// expand magma.collect.list.List_<T>
+magma.collect.stream.Stream<T> stream();
+magma.collect.list.List_<T> add(T element);
+magma.collect.list.List_<T> addAll(magma.collect.list.List_<T> others);
+magma.option.Option<T> findFirst();
 int size();
-struct List__T subList(int start, int end);
-int equalsTo(struct List__T other);
-struct List__T sort(struct BiFunction_T_T_Integer comparator);
-struct T get(int index);
-struct Option_Tuple_T_List__T popFirst();
-int isEmpty();
+magma.collect.list.List_<T> subList(int start, int end);
+magma.collect.list.boolean equalsTo(magma.collect.list.List_<T> other);
+magma.collect.list.List_<T> sort(int(*comparator)(T, T));
+T get(int index);
+magma.option.Option<magma.option.Tuple<T, magma.collect.list.List_<T>>> popFirst();
+magma.collect.list.boolean isEmpty();
+magma.collect.list.List_<T> clear();
+magma.option.Option<T> findLast();
+magma.collect.list.void forEach(void(*consumer)(T));
+magma.collect.list.List_<T> mapLast(T(*mapper)(T));
 #endif
 

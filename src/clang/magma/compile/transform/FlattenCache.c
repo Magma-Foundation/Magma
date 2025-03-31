@@ -1,13 +1,13 @@
 #include "FlattenCache.h"
-struct public FlattenCache(){this(Maps.empty(), Maps.empty(), Maps.empty());
+magma.compile.transform.public FlattenCache(){this(Maps.empty(), Maps.empty(), Maps.empty());
 }
-struct FlattenCache withNode(struct String propertyKey, struct Node propertyValue){return FlattenCache(nodes.with(propertyKey, propertyValue), nodeLists, categories);
+magma.compile.transform.FlattenCache withNode(String propertyKey, magma.compile.Node propertyValue){return FlattenCache(nodes.with(propertyKey, propertyValue), nodeLists, categories);
 }
-struct FlattenCache appendCategory(struct String category, struct List__Node categoryValues){return FlattenCache(nodes, nodeLists, categories.ensure(category, __lambda0__, __lambda1__));
+magma.compile.transform.FlattenCache appendCategory(String category, magma.collect.list.List_<magma.compile.Node> categoryValues){return FlattenCache(nodes, nodeLists, categories.ensure(category, __lambda0__.addAll(categoryValues), __lambda1__));
 }
-struct FlattenCache withNodeList(struct String propertyKey, struct List__Node propertyValues){return FlattenCache(nodes, nodeLists.with(propertyKey, propertyValues), categories);
+magma.compile.transform.FlattenCache withNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node> propertyValues){return FlattenCache(nodes, nodeLists.with(propertyKey, propertyValues), categories);
 }
-struct Node tryGroup(struct Node node){Node with = node.withNodes(nodes).withNodeLists(nodeLists);if (categories.isEmpty()) {
+magma.compile.Node tryGroup(magma.compile.Node node){Node with = node.withNodes(nodes).withNodeLists(nodeLists);if (categories.isEmpty()) {
             return with;
         }else {
             return new MapNode("group").withNode("child", with).withNodeLists(categories);

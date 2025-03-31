@@ -1,9 +1,9 @@
 #include "Joiner.h"
-struct public Joiner(){this("");
+magma.collect.stream.public Joiner(){this("");
 }
-struct Option_String createInitial(){return None_();
+magma.option.Option<String> createInitial(){return ();
 }
-struct Option_String fold(struct Option_String maybeCurrent, struct String element){return Some_(maybeCurrent.map(__lambda0__).orElse(element));
+magma.option.Option<String> fold(magma.option.Option<String> maybeCurrent, String element){return (maybeCurrent.map(__lambda0__+delimiter+element).orElse(element));
 }
 auto __lambda0__();
 

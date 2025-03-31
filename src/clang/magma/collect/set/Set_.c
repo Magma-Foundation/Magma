@@ -1,4 +1,5 @@
 #include "Set_.h"
-struct Stream_T stream();
-struct Set__T add(struct T element);
+magma.collect.stream.Stream<T> stream();
+magma.collect.set.Set_<T> add(T element);
+magma.collect.set.void forEach(void(*consumer)(T));
 

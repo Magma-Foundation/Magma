@@ -1,10 +1,11 @@
 #include "Map_.h"
-struct Map__K_V with(struct K key, struct V value);
-struct Option_V find(struct K key);
-struct Stream_Tuple_K_V stream();
-struct Map__K_V ensure(struct K key, struct V(*whenPresent)(struct V), struct V(*whenEmpty)());
-struct Map__K_V withAll(struct Map__K_V other);
-int isEmpty();
-struct Map__K_V remove(struct K key);
-int containsKey(struct K key);
+magma.collect.map.Map_<K, V> with(K key, V value);
+magma.option.Option<V> find(K key);
+magma.collect.stream.Stream<magma.option.Tuple<K, V>> stream();
+magma.collect.map.Map_<K, V> ensure(K key, V(*whenPresent)(V), V(*whenEmpty)());
+magma.collect.map.Map_<K, V> withAll(magma.collect.map.Map_<K, V> other);
+magma.collect.map.boolean isEmpty();
+magma.collect.map.Map_<K, V> remove(K key);
+magma.collect.map.boolean containsKey(K key);
+magma.collect.stream.Stream<V> streamValues();
 

@@ -140,7 +140,7 @@ public class JavaLang {
                 createTernaryRule(value),
                 createNotRule(value),
                 createQuantityRule(value),
-                new TypeRule("char", new PrefixRule("'", new SuffixRule(new StringRule("value"), "'")))
+                createCharRule()
         )));
 
         return value;

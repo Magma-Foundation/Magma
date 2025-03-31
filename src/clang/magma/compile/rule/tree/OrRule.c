@@ -1,9 +1,9 @@
 #include "OrRule.h"
-struct Result_T_CompileError apply(struct Result_T_CompileError(*applicator)(struct Rule), struct Context(*context)()){return rules.stream().foldWithInitial(OrState_T(), __lambda0__).toResult().match(Ok.new, __lambda1__);
+magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError> apply(magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>(*applicator)(magma.compile.rule.Rule), magma.compile.context.Context(*context)()){return rules.stream().foldWithInitial((), __lambda0__.apply(rule).match(orState.withValue, orState.withError)).toResult().match(Ok.new, __lambda1__);
 }
-struct Result_Node_CompileError parse(struct String input){return apply(__lambda2__, __lambda3__);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return apply(__lambda2__.parse(input), __lambda3__);
 }
-struct Result_String_CompileError generate(struct Node input){return apply(__lambda4__, __lambda5__);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input){return apply(__lambda4__.generate(input), __lambda5__);
 }
 auto __lambda0__();
 auto __lambda1__();

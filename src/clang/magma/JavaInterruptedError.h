@@ -4,6 +4,6 @@
 #include "../windows/result/Results.h"
 struct JavaInterruptedError{
 };
-struct String display();
+String display();
 #endif
 

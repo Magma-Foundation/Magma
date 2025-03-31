@@ -7,18 +7,20 @@
 #include "../../../magma/compile/Node.h"
 struct FlattenCache{
 };
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Map__String_Node = Map_<struct String, struct Node>
-// expand Map__String_List__Node = Map_<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Map__String_List__Node = Map_<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-struct public FlattenCache();
-struct FlattenCache withNode(struct String propertyKey, struct Node propertyValue);
-struct FlattenCache appendCategory(struct String category, struct List__Node categoryValues);
-struct FlattenCache withNodeList(struct String propertyKey, struct List__Node propertyValues);
-struct Node tryGroup(struct Node node);
+// expand magma.collect.map.Map_<String, magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+magma.compile.transform.public FlattenCache();
+magma.compile.transform.FlattenCache withNode(String propertyKey, magma.compile.Node propertyValue);
+magma.compile.transform.FlattenCache appendCategory(String category, magma.collect.list.List_<magma.compile.Node> categoryValues);
+magma.compile.transform.FlattenCache withNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node> propertyValues);
+magma.compile.Node tryGroup(magma.compile.Node node);
 auto __lambda0__();
 auto __lambda1__();
 #endif

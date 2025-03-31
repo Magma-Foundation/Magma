@@ -4,7 +4,7 @@
 #include "../../../magma/collect/string/String_.h"
 struct StringContext{
 };
-struct String display0();
-struct String_ display();
+String display0();
+magma.collect.string.String_ display();
 #endif
 

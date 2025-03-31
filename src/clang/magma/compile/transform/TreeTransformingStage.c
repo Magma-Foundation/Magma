@@ -1,17 +1,32 @@
 #include "TreeTransformingStage.h"
-struct public TreeTransformingStage(struct Transformer transformer){this.transformer = transformer;
+magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer){this.transformer = transformer;
 }
-struct Result_Node_CompileError transform(struct Node root, struct State state){return transformer.beforePass(state, root).flatMapValue(__lambda0__);
+magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> attachChildren(magma.compile.Node node, String propertyKey, magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> children){State newState = children.left();
+        List_<Node> newChildren = children.right();
+        Node withChildren = node.withNodeList(propertyKey, newChildren);return (newState, withChildren);
 }
-struct Result_Node_CompileError transformNodes(struct Node root, struct State state){return root.streamNodes().foldToResult(root, __lambda1__).flatMapValue(__lambda2__);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodes(magma.compile.transform.State state, magma.compile.Node root){return root.streamNodes().foldToResult((state, root), __lambda0__(current.left(), current.right(), entry)).flatMapValue(__lambda1__(withNodes.left(), withNodes.right()));
 }
-struct Result_Node_CompileError transformNodeLists(struct Node root, struct State state){return root.streamNodeLists().foldToResult(root, __lambda3__).flatMapValue(__lambda4__);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodeLists(magma.compile.transform.State state, magma.compile.Node root){return root.streamNodeLists().foldToResult((state, root), __lambda2__(current.left(), current.right(), tuple)).flatMapValue(__lambda3__.afterPass(withNodeLists.left(), withNodeLists.right()));
 }
-struct Result_Node_CompileError mapNodes(struct Node node, struct Tuple_String_Node tuple, struct State state){return transform(tuple.right(), state).mapValue(__lambda5__);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodes(magma.compile.transform.State state, magma.compile.Node node, magma.option.Tuple<String, magma.compile.Node> entry){return transform(state, entry.right()).mapValue(newChild -> {
+            Node withChild = node.withNode(entry.left(), newChild.right());
+            return new Tuple<>(newChild.left(), withChild);
+        });
 }
-struct Result_Node_CompileError mapNodeList(struct Node node, struct Tuple_String_List__Node tuple, struct State state){return tuple.right().stream().foldToResult(Lists.empty(), __lambda6__).mapValue(__lambda7__);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodeList(magma.compile.transform.State state, magma.compile.Node node, magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> entry){String propertyKey = entry.left();
+        List_<Node> propertyValues = entry.right();return propertyValues.stream().foldToResult((state, Lists.empty()), this.transformElement).mapValue(__lambda4__(node, propertyKey, children));
 }
-struct Result_List__Node_CompileError mapNodeListElement(struct List__Node elements, struct Node element, struct State state){return transform(element, state).mapValue(elements.add);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>>, magma.compile.CompileError> transformElement(magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> current, magma.compile.Node element){State currentState = current.left();
+        List_<Node> currentChildren = current.right();
+
+        return transform(currentState, element).mapValue((Tuple<State, Node> newTuple) -> {
+            State newState = newTuple.left();
+            Node newChild = newTuple.right();
+            return new Tuple<>(newState, currentChildren.add(newChild));
+        });
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root){return transformer.beforePass(state, root).flatMapValue(__lambda5__(beforePass.left(), beforePass.right())).mapErr(__lambda6__);
 }
 auto __lambda0__();
 auto __lambda1__();
@@ -20,5 +35,4 @@ auto __lambda3__();
 auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
-auto __lambda7__();
 

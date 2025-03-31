@@ -1,3 +1,3 @@
 #include "Head.h"
-struct Option_T next();
+magma.option.Option<T> next();
 

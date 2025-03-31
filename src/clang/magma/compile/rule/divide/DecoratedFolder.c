@@ -1,11 +1,11 @@
 #include "DecoratedFolder.h"
-struct Option_DividingState processSlash(struct Tuple_Character_DividingState tuple){if (tuple.left() == '\\') {
+magma.option.Option<magma.compile.rule.divide.DividingState> processSlash(magma.option.Tuple<char, magma.compile.rule.divide.DividingState> tuple){if (tuple.left() == '\\') {
             return tuple.right().appendAndDiscard();
         }else {
             return new Some<>(tuple.right());
         }
 }
-struct DividingState fold(struct DividingState state, struct char c){if (c == '\'') {
+magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingState state, char c){if (c == '\'') {
             return state.append(c)
                     .append()
                     .flatMap(DecoratedFolder::processSlash)
@@ -24,6 +24,6 @@ struct DividingState fold(struct DividingState state, struct char c){if (c == '\
             return current;
         }return folder.fold(state, c);
 }
-struct String join(struct String current, struct String element){return folder.join(current, element);
+String join(String current, String element){return folder.join(current, element);
 }
 

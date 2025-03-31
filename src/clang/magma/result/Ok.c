@@ -1,17 +1,19 @@
 #include "Ok.h"
-struct Option_T findValue(){return Some_(value);
+magma.option.Option<T> findValue(){return (value);
 }
-struct Option_X findError(){return None_();
+magma.option.Option<X> findError(){return ();
 }
-struct Result_R_X mapValue(struct R(*mapper)(struct T)){return Ok_(mapper.apply(value));
+magma.result.Result<magma.result.R, X> mapValue(magma.result.R(*mapper)(T)){return (mapper.apply(value));
 }
-struct Result_R_X flatMapValue(struct Result_R_X(*mapper)(struct T)){return mapper.apply(value);
+magma.result.Result<magma.result.R, X> flatMapValue(magma.result.Result<magma.result.R, X>(*mapper)(T)){return mapper.apply(value);
 }
-struct Result_T_R mapErr(struct R(*mapper)(struct X)){return Ok_(value);
+magma.result.Result<T, magma.result.R> mapErr(magma.result.R(*mapper)(X)){return (value);
 }
-struct R match(struct R(*whenOk)(struct T), struct R(*whenErr)(struct X)){return whenOk.apply(value);
+magma.result.R match(magma.result.R(*whenOk)(T), magma.result.R(*whenErr)(X)){return whenOk.apply(value);
 }
-struct Result_Tuple_T_R_X and(struct Result_R_X(*other)()){return other.get().mapValue(__lambda0__);
+magma.result.Result<magma.option.Tuple<T, magma.result.R>, X> and(magma.result.Result<magma.result.R, X>(*other)()){return other.get().mapValue(__lambda0__);
+}
+magma.result.void consume(void(*whenOk)(T), void(*whenErr)(X)){whenOk.accept(value);
 }
 auto __lambda0__();
 

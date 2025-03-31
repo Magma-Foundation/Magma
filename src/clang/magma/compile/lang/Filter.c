@@ -1,3 +1,3 @@
 #include "Filter.h"
-int isValid(struct String input);
+magma.compile.lang.boolean isValid(String input);
 

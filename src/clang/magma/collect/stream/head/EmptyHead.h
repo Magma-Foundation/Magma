@@ -4,8 +4,8 @@
 #include "../../../../magma/option/Option.h"
 struct EmptyHead<T>{
 };
-// expand Option_T = Option<struct T>
-// expand None_ = None<struct >
-struct Option_T next();
+// expand magma.option.Option<T>
+// expand magma.option.None<>
+magma.option.Option<T> next();
 #endif
 

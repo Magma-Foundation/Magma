@@ -1,6 +1,6 @@
 #include "StringContext.h"
-struct String display0(){return value;
+String display0(){return value;
 }
-struct String_ display(){return JavaString(display0());
+magma.collect.string.String_ display(){return JavaString(display0());
 }
 

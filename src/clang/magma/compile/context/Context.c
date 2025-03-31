@@ -1,3 +1,3 @@
 #include "Context.h"
-struct String_ display();
+magma.collect.string.String_ display();
 

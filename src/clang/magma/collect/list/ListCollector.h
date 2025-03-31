@@ -4,10 +4,10 @@
 #include "../../../magma/collect/stream/Collector.h"
 struct ListCollector<T>{
 };
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-// expand List__T = List_<struct T>
-struct List__T createInitial();
-struct List__T fold(struct List__T tList, struct T t);
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+// expand magma.collect.list.List_<T>
+magma.collect.list.List_<T> createInitial();
+magma.collect.list.List_<T> fold(magma.collect.list.List_<T> tList, T t);
 #endif
 

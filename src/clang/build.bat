@@ -64,6 +64,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\lang\TransformAll.c^
 	.\magma\collect\list\ListCollector.c^
 	.\magma\collect\list\ListCollector.c^
+	.\magma\compile\lang\ResolveTypes.c^
+	.\magma\compile\lang\ResolveTypes.c^
 	.\magma\compile\transform\FlattenCache.c^
 	.\magma\compile\transform\FlattenCache.c^
 	.\magma\compile\transform\State.c^
@@ -82,12 +84,14 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\text\EmptyRule.c^
 	.\magma\compile\rule\text\SuffixRule.c^
 	.\magma\compile\rule\text\SuffixRule.c^
+	.\magma\compile\transform\Frame.c^
+	.\magma\compile\transform\Frame.c^
 	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\rule\text\InfixRule.c^
 	.\magma\compile\rule\text\InfixRule.c^
-	.\magma\compile\ExpandGenerics.c^
-	.\magma\compile\ExpandGenerics.c^
+	.\magma\compile\lang\ExpandGenerics.c^
+	.\magma\compile\lang\ExpandGenerics.c^
 	.\magma\compile\rule\tree\TypeRule.c^
 	.\magma\compile\rule\tree\TypeRule.c^
 	.\magma\compile\rule\tree\NodeRule.c^
@@ -150,6 +154,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\collect\stream\Collector.c^
 	.\magma\compile\rule\divide\Divider.c^
 	.\magma\compile\rule\divide\Divider.c^
+	.\magma\compile\lang\StringLists.c^
+	.\magma\compile\lang\StringLists.c^
 	.\magma\compile\rule\locate\FirstLocator.c^
 	.\magma\compile\rule\locate\FirstLocator.c^
 	.\magma\compile\lang\CommonLang.c^

@@ -4,10 +4,10 @@
 #include "../../../magma/collect/stream/Collector.h"
 struct SetCollector<T>{
 };
-// expand Set__T = Set_<struct T>
-// expand Set__T = Set_<struct T>
-// expand Set__T = Set_<struct T>
-struct Set__T createInitial();
-struct Set__T fold(struct Set__T tSet, struct T t);
+// expand magma.collect.set.Set_<T>
+// expand magma.collect.set.Set_<T>
+// expand magma.collect.set.Set_<T>
+magma.collect.set.Set_<T> createInitial();
+magma.collect.set.Set_<T> fold(magma.collect.set.Set_<T> tSet, T t);
 #endif
 

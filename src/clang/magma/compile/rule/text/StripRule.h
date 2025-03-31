@@ -6,12 +6,12 @@
 #include "../../../../magma/result/Result.h"
 struct StripRule{
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-struct public StripRule(struct Rule childRule);
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
-struct String attachPadding(struct Node node, struct String value);
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+magma.compile.rule.text.public StripRule(magma.compile.rule.Rule childRule);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
+String attachPadding(magma.compile.Node node, String value);
 auto __lambda0__();
 #endif
 

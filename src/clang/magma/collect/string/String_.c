@@ -1,3 +1,3 @@
 #include "String_.h"
-struct String value();
+String value();
 

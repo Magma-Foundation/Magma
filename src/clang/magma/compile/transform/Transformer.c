@@ -1,6 +1,6 @@
 #include "Transformer.h"
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){return Ok_(node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){return ((state, node));
 }
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){return Ok_(node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return ((state, node));
 }
 

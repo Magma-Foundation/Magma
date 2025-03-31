@@ -10,18 +10,17 @@
 #include "../../../magma/option/Some.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-struct LazyRule{struct Option_Rule child;
+struct LazyRule{magma.option.Option<magma.compile.rule.Rule> child;
 };
-// expand Option_Rule = Option<struct Rule>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-// expand Result_T_CompileError = Result<struct T, struct CompileError>
-// expand Err_ = Err<struct >
-// expand Result_T_CompileError = Result<struct T, struct CompileError>
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
-struct Result_T_CompileError withChildSet(struct Result_T_CompileError(*mapper)(struct Rule), struct Context context);
-struct void set(struct Rule child);
+// expand magma.option.Option<magma.compile.rule.Rule>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+// expand magma.result.Result<magma.compile.rule.T, magma.compile.CompileError>
+// expand magma.result.Result<magma.compile.rule.T, magma.compile.CompileError>
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
+magma.result.Result<magma.compile.rule.T, magma.compile.CompileError> withChildSet(magma.result.Result<magma.compile.rule.T, magma.compile.CompileError>(*mapper)(magma.compile.rule.Rule), magma.compile.context.Context context);
+magma.compile.rule.void set(magma.compile.rule.Rule child);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

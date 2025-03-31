@@ -5,7 +5,7 @@
 #include "../../../../magma/option/Some.h"
 struct FirstLocator{
 };
-// expand Option_Integer = Option<struct Integer>
-struct Option_Integer locate(struct String input, struct String infix);
+// expand magma.option.Option<int>
+magma.option.Option<int> locate(String input, String infix);
 #endif
 

@@ -8,16 +8,21 @@
 #include "../../magma/collect/stream/head/RangeHead.h"
 #include "../../magma/compile/context/Context.h"
 #include "../../magma/error/Error.h"
-struct CompileError{struct String message;struct Context context;struct List__CompileError errors;
+#include "../../magma/option/None.h"
+#include "../../magma/option/Option.h"
+#include "../../magma/option/Some.h"
+struct CompileError{String message;magma.option.Option<magma.compile.context.Context> maybeContext;magma.collect.list.List_<magma.compile.CompileError> errors;
 };
-// expand List__CompileError = List_<struct CompileError>
-// expand List__CompileError = List_<struct CompileError>
-// expand List__CompileError = List_<struct CompileError>
-struct public CompileError(struct String message, struct Context context);
-struct public CompileError(struct String message, struct Context context, struct List__CompileError errors);
-struct String format(int depth, int index, struct List__CompileError sorted);
+// expand magma.option.Option<magma.compile.context.Context>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext);
+magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext, magma.collect.list.List_<magma.compile.CompileError> errors);
+magma.compile.public CompileError(String message);
+String format(int depth, int index, magma.collect.list.List_<magma.compile.CompileError> sorted);
 int depth();
-struct String display();
-struct String format(int depth);
+String display();
+String format(int depth);
 #endif
 

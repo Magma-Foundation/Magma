@@ -16,33 +16,45 @@
 #include "../../../magma/result/Result.h"
 struct TransformAll{int counter;
 };
-// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_ = Tuple<struct >
-// expand Tuple_List__Node_List__Node = Tuple<struct List__Node, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Err_ = Err<struct >
-// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
-// expand List__Node = List_<struct Node>
-// expand Result_List__Node_CompileError = Result<struct List__Node, struct CompileError>
-// expand List__Node = List_<struct Node>
-// expand Err_ = Err<struct >
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Ok_ = Ok<struct >
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Ok_ = Ok<struct >
-struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element);
-struct Result_Node_CompileError find(struct Node node, struct String propertyKey);
-struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey);
-int isFunctionalImport(struct Node child);
-int hasTypeParams(struct Node child);
-struct Result_Node_CompileError afterPass(struct State state, struct Node node);
-struct Result_Node_CompileError beforePass(struct State state, struct Node node);
+// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.result.Ok<>
+// expand magma.option.Tuple<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> bucketClassMember(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node element);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> find(magma.compile.Node node, String propertyKey);
+magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey);
+magma.compile.lang.boolean isFunctionalImport(magma.compile.Node child);
+magma.compile.lang.boolean hasTypeParams(magma.compile.Node child);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
 auto __lambda0__();
 auto __lambda1__();
+auto __lambda2__();
 #endif
 

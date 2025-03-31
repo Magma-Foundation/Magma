@@ -11,23 +11,24 @@
 #include "../../../../magma/result/Result.h"
 struct OrState<T>{
 };
-// expand None_ = None<struct >
-// expand OrState_T = OrState<struct T>
-// expand OrState_ = OrState<struct >
-// expand Some_ = Some<struct >
-// expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>
-// expand List__CompileError = List_<struct CompileError>
-// expand Result_T_List__CompileError = Result<struct T, struct List__CompileError>
-// expand List__CompileError = List_<struct CompileError>
-// expand Err_ = Err<struct >
-// expand OrState_T = OrState<struct T>
-// expand OrState_ = OrState<struct >
-// expand Option_T = Option<struct T>
-// expand List__CompileError = List_<struct CompileError>
-struct public OrState();
-struct OrState_T withValue(struct T value);
-struct Result_T_List__CompileError toResult();
-struct OrState_T withError(struct CompileError error);
+// expand magma.option.Option<T>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.option.None<>
+// expand magma.compile.rule.tree.OrState<T>
+// expand magma.compile.rule.tree.OrState<>
+// expand magma.option.Some<>
+// expand magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.collect.list.List_<magma.compile.CompileError>
+// expand magma.compile.rule.tree.OrState<T>
+// expand magma.compile.rule.tree.OrState<>
+magma.compile.rule.tree.public OrState();
+magma.compile.rule.tree.OrState<T> withValue(T value);
+magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>> toResult();
+magma.compile.rule.tree.OrState<T> withError(magma.compile.CompileError error);
 auto __lambda0__();
 #endif
 

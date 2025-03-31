@@ -1,13 +1,17 @@
 #include "List_.h"
-struct Stream_T stream();
-struct List__T add(struct T element);
-struct List__T addAll(struct List__T others);
-struct Option_T findFirst();
+magma.collect.stream.Stream<T> stream();
+magma.collect.list.List_<T> add(T element);
+magma.collect.list.List_<T> addAll(magma.collect.list.List_<T> others);
+magma.option.Option<T> findFirst();
 int size();
-struct List__T subList(int start, int end);
-int equalsTo(struct List__T other);
-struct List__T sort(struct BiFunction_T_T_Integer comparator);
-struct T get(int index);
-struct Option_Tuple_T_List__T popFirst();
-int isEmpty();
+magma.collect.list.List_<T> subList(int start, int end);
+magma.collect.list.boolean equalsTo(magma.collect.list.List_<T> other);
+magma.collect.list.List_<T> sort(int(*comparator)(T, T));
+T get(int index);
+magma.option.Option<magma.option.Tuple<T, magma.collect.list.List_<T>>> popFirst();
+magma.collect.list.boolean isEmpty();
+magma.collect.list.List_<T> clear();
+magma.option.Option<T> findLast();
+magma.collect.list.void forEach(void(*consumer)(T));
+magma.collect.list.List_<T> mapLast(T(*mapper)(T));
 

@@ -1,8 +1,16 @@
 #include "Formatter.h"
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){if (node.is("block")) {
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node){if (node.is("block")) {
             return new Ok<>(node.withString("after-children", "\n"));
         }if (node.is("function")) {
             return new Ok<>(node.withString("after-braces", "\n"));
-        }return Ok_(node);
+        }return (node);
 }
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> beforePass0(magma.compile.transform.State state, magma.compile.Node node){return (node);
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){return beforePass0(state, node).mapValue(__lambda0__);
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return afterPass0(state, node).mapValue(__lambda1__);
+}
+auto __lambda0__();
+auto __lambda1__();
 

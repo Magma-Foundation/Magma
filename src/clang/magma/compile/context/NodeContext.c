@@ -1,6 +1,6 @@
 #include "NodeContext.h"
-struct String display0(){return value.display();
+String display0(){return value.display();
 }
-struct String_ display(){return JavaString(display0());
+magma.collect.string.String_ display(){return JavaString(display0());
 }
 

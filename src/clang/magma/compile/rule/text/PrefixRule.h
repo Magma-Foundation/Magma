@@ -8,13 +8,13 @@
 #include "../../../../magma/result/Result.h"
 struct PrefixRule{
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Err_ = Err<struct >
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-struct Result_Node_CompileError createPrefixErr(struct String input, struct String prefix);
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Err<>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> createPrefixErr(String input, String prefix);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 auto __lambda0__();
 #endif
 

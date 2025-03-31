@@ -40,9 +40,14 @@ public class CLang {
     }
 
     private static TypeRule createExpansionRule() {
-        StringRule name = new StringRule("name");
-        InfixRule childRule = new InfixRule(name, " = ", new NodeRule("type", createTypeRule()), new FirstLocator());
-        return new TypeRule("expansion", new PrefixRule("// expand ", new SuffixRule(childRule, "\n")));
+        Rule type = createTypeRule();
+        Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), new OrRule(Lists.of(
+                createWhitespaceRule(),
+                type
+        )));
+
+        Rule base = new NodeRule("base", createQualifiedRule());
+        return new TypeRule("expansion", new PrefixRule("// expand ", new SuffixRule( new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")), "\n")));
     }
 
     private static Rule createFunctionRule() {
@@ -78,12 +83,15 @@ public class CLang {
         value.set(new OrRule(Lists.of(
                 createSymbolValueRule(),
                 createOperatorRule(value, "add", "+"),
+                createOperatorRule(value, "subtract", "-"),
+                createOperatorRule(value, "or", "||"),
                 createInvocationRule(value),
                 createAccessRule("data-access", ".", value),
                 createStringRule(),
                 createTernaryRule(value),
                 createNumberRule(),
-                createNotRule(value)
+                createNotRule(value),
+                createCharRule()
         )));
 
         return value;

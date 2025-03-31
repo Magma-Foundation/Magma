@@ -1,5 +1,5 @@
 #include "InvocationStartLocator.h"
-struct List__Tuple_Integer_Character skipDoubleQuotes(struct List__Tuple_Integer_Character queue){List_<Tuple<Integer, Character>> current = queue;while (true) {
+magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue){List_<Tuple<Integer, Character>> current = queue;while (true) {
             Tuple<Boolean, Tuple<Tuple<Integer, Character>, List_<Tuple<Integer, Character>>>> first = current.popFirst()
                     .toTuple(new Tuple<>(DEFAULT_PAIR, current));
 
@@ -16,7 +16,7 @@ struct List__Tuple_Integer_Character skipDoubleQuotes(struct List__Tuple_Integer
             }
         }return current;
 }
-struct Option_Integer locate(struct String input, struct String infix){List_<Tuple<Integer, Character>> queue = new HeadedStream<>(new RangeHead(input.length()))
+magma.option.Option<int> locate(String input, String infix){List_<Tuple<Integer, Character>> queue = new HeadedStream<>(new RangeHead(input.length()))
                 .map(index -> input.length() - index - 1)
                 .map(index -> new Tuple<>(index, input.charAt(index)))
                 .collect(new ListCollector<>());
@@ -41,6 +41,6 @@ struct Option_Integer locate(struct String input, struct String infix){List_<Tup
             } else {
                 break;
             }
-        }return None_();
+        }return ();
 }
 

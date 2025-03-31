@@ -8,47 +8,43 @@
 #include "../../../../magma/result/Result.h"
 struct HeadedStream<T>{
 };
-// expand Stream_T = Stream<struct T>
-// expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
-// expand Stream_R = Stream<struct R>
-// expand HeadedStream_ = HeadedStream<struct >
-// expand Collector_T_C = Collector<struct T, struct C>
-// expand Option_T = Option<struct T>
-// expand Option_R = Option<struct R>
-// expand BiFunction_R_T_R = BiFunction<struct R, struct T, struct R>
-// expand Stream_T = Stream<struct T>
-// expand HeadedStream_ = HeadedStream<struct >
-// expand SingleHead_ = SingleHead<struct >
-// expand EmptyHead_ = EmptyHead<struct >
-// expand Predicate_T = Predicate<struct T>
-// expand Stream_R = Stream<struct R>
-// expand Stream_R = Stream<struct R>
-// expand HeadedStream_ = HeadedStream<struct >
-// expand EmptyHead_ = EmptyHead<struct >
-// expand Stream_R = Stream<struct R>
-// expand magma_result_Result_R_X = magma.result.Result<struct R, struct X>
-// expand Result_R_X = Result<struct R, struct X>
-// expand Ok_ = Ok<struct >
-// expand BiFunction_R_T_Result_R_X = BiFunction<struct R, struct T, struct Result_R_X>
-// expand Result_R_X = Result<struct R, struct X>
-// expand Stream_T = Stream<struct T>
-// expand HeadedStream_ = HeadedStream<struct >
-// expand Stream_T = Stream<struct T>
-// expand Head_T = Head<struct T>
-struct R foldWithInitial(struct R initial, struct BiFunction_R_T_R folder);
-struct Stream_R map(struct R(*mapper)(struct T));
-struct C collect(struct Collector_T_C collector);
-struct Option_T next();
-struct Option_R foldMapping(struct R(*mapper)(struct T), struct BiFunction_R_T_R folder);
-struct Stream_T filter(struct Predicate_T predicate);
-struct Stream_R flatMap(struct Stream_R(*mapper)(struct T));
-struct magma_result_Result_R_X foldToResult(struct R initial, struct BiFunction_R_T_Result_R_X folder);
-struct Stream_T concat(struct Stream_T other);
+// expand magma.collect.stream.Stream<T>
+// expand magma.collect.stream.head.Head<T>
+// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
+// expand magma.collect.stream.head.HeadedStream<>
+// expand magma.collect.stream.Collector<T, magma.collect.stream.head.C>
+// expand magma.option.Option<T>
+// expand magma.option.Option<magma.collect.stream.head.R>
+// expand magma.collect.stream.Stream<T>
+// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
+// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
+// expand magma.collect.stream.head.HeadedStream<>
+// expand magma.collect.stream.head.EmptyHead<>
+// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
+// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
+// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
+// expand magma.collect.stream.Stream<T>
+// expand magma.collect.stream.head.HeadedStream<>
+// expand magma.collect.stream.Stream<T>
+magma.collect.stream.head.R foldWithInitial(magma.collect.stream.head.R initial, magma.collect.stream.head.R(*folder)(magma.collect.stream.head.R, T));
+magma.collect.stream.Stream<magma.collect.stream.head.R> map(magma.collect.stream.head.R(*mapper)(T));
+magma.collect.stream.head.C collect(magma.collect.stream.Collector<T, magma.collect.stream.head.C> collector);
+magma.option.Option<T> next();
+magma.collect.stream.head.boolean anyMatch(int(*predicate)(T));
+magma.option.Option<magma.collect.stream.head.R> foldMapping(magma.collect.stream.head.R(*mapper)(T), magma.collect.stream.head.R(*folder)(magma.collect.stream.head.R, T));
+magma.collect.stream.Stream<T> filter(int(*predicate)(T));
+magma.collect.stream.Stream<magma.collect.stream.head.R> flatMap(magma.collect.stream.Stream<magma.collect.stream.head.R>(*mapper)(T));
+magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X> foldToResult(magma.collect.stream.head.R initial, magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>(*folder)(magma.collect.stream.head.R, T));
+magma.collect.stream.Stream<T> concat(magma.collect.stream.Stream<T> other);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();
 auto __lambda3__();
+auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
+auto __lambda7__();
 #endif
 

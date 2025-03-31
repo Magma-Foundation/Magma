@@ -9,16 +9,18 @@
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Some.h"
 #include "../../../magma/option/Tuple.h"
-struct InvocationStartLocator{struct Tuple_Integer_Character DEFAULT_PAIR;
+struct InvocationStartLocator{magma.option.Tuple<int, char> DEFAULT_PAIR;
 };
-// expand Tuple_Integer_Character = Tuple<struct Integer, struct Character>
-// expand List__Tuple_Integer_Character = List_<struct Tuple_Integer_Character>
-// expand Tuple_Integer_Character = Tuple<struct Integer, struct Character>
-// expand List__Tuple_Integer_Character = List_<struct Tuple_Integer_Character>
-// expand Tuple_Integer_Character = Tuple<struct Integer, struct Character>
-// expand Option_Integer = Option<struct Integer>
-// expand None_ = None<struct >
-struct List__Tuple_Integer_Character skipDoubleQuotes(struct List__Tuple_Integer_Character queue);
-struct Option_Integer locate(struct String input, struct String infix);
+// expand magma.option.Tuple<int, char>
+// expand magma.collect.list.List_<magma.option.Tuple<int, char>>
+// expand magma.option.Tuple<int, char>
+// expand magma.option.Tuple<int, char>
+// expand magma.collect.list.List_<magma.option.Tuple<int, char>>
+// expand magma.option.Tuple<int, char>
+// expand magma.option.Tuple<int, char>
+// expand magma.option.Option<int>
+// expand magma.option.None<>
+magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue);
+magma.option.Option<int> locate(String input, String infix);
 #endif
 

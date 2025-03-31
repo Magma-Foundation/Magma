@@ -1,7 +1,7 @@
 #include "NodeRule.h"
-struct Result_Node_CompileError parse(struct String input){return childRule.parse(input).mapValue(__lambda0__).mapErr(__lambda1__);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return childRule.parse(input).mapValue(__lambda0__.withNode(propertyKey, node)).mapErr(__lambda1__);
 }
-struct Result_String_CompileError generate(struct Node node){return node.findNode(propertyKey).map(childRule.generate).orElseGet(__lambda2__);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return node.findNode(propertyKey).map(childRule.generate).orElseGet(__lambda2__);
 }
 auto __lambda0__();
 auto __lambda1__();

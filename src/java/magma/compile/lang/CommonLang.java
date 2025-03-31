@@ -159,4 +159,8 @@ public class CommonLang {
     static TypeRule createNotRule(LazyRule value) {
         return new TypeRule("not", new PrefixRule("!", new NodeRule("child", value)));
     }
+
+    static TypeRule createCharRule() {
+        return new TypeRule("char", new PrefixRule("'", new SuffixRule(new StringRule("value"), "'")));
+    }
 }

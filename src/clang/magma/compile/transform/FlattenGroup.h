@@ -10,29 +10,43 @@
 #include "../../../magma/result/Result.h"
 struct FlattenGroup{
 };
-// expand Tuple_String_Node = Tuple<struct String, struct Node>
-// expand Tuple_Node_FlattenCache = Tuple<struct Node, struct FlattenCache>
-// expand Tuple_ = Tuple<struct >
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_List__Node_FlattenCache = Tuple<struct List__Node, struct FlattenCache>
-// expand List__Node = List_<struct Node>
-// expand Tuple_ = Tuple<struct >
-// expand Tuple_List__Node_FlattenCache = Tuple<struct List__Node, struct FlattenCache>
-// expand List__Node = List_<struct Node>
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Ok_ = Ok<struct >
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Ok_ = Ok<struct >
-struct FlattenCache foldNodeProperty(struct FlattenCache state, struct Tuple_String_Node property);
-struct Tuple_Node_FlattenCache flattenNode(struct FlattenCache cache, struct Node element);
-struct FlattenCache flattenCategory(struct FlattenCache current, struct Tuple_String_List__Node category);
-struct FlattenCache flattenNodeList(struct FlattenCache cache, struct Tuple_String_List__Node property);
-struct Tuple_List__Node_FlattenCache flattenNodeListElement(struct Tuple_List__Node_FlattenCache tuple, struct Node node);
-struct Node afterPass0(struct Node node);
-struct Result_Node_CompileError afterPass(struct State state, struct Node node);
-struct Result_Node_CompileError beforePass(struct State state, struct Node node);
+// expand magma.option.Tuple<String, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.Node, magma.compile.transform.FlattenCache>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.compile.transform.FlattenCache>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.compile.transform.FlattenCache>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+magma.compile.transform.FlattenCache foldNodeProperty(magma.compile.transform.FlattenCache state, magma.option.Tuple<String, magma.compile.Node> property);
+magma.option.Tuple<magma.compile.Node, magma.compile.transform.FlattenCache> flattenNode(magma.compile.transform.FlattenCache cache, magma.compile.Node element);
+magma.compile.transform.FlattenCache flattenCategory(magma.compile.transform.FlattenCache current, magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> category);
+magma.compile.transform.FlattenCache flattenNodeList(magma.compile.transform.FlattenCache cache, magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> property);
+magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.compile.transform.FlattenCache> flattenNodeListElement(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.compile.transform.FlattenCache> tuple, magma.compile.Node node);
+magma.compile.Node afterPass0(magma.compile.Node node);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> beforePass0(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+auto __lambda0__();
+auto __lambda1__();
 #endif
 

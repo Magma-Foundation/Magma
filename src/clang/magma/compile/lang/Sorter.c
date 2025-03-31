@@ -1,7 +1,7 @@
 #include "Sorter.h"
-struct Node asRoot(struct List__Node left){Node node1 = new MapNode("block").withNodeList("children", left);return MapNode("root").withNode("content", node1);
+magma.compile.Node asRoot(magma.collect.list.List_<magma.compile.Node> left){Node node1 = new MapNode("block").withNodeList("children", left);return MapNode("root").withNode("content", node1);
 }
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){if (!node.is("root")) return new Ok<>(node);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node){if (!node.is("root")) return new Ok<>(node);
 
         List_<Node> children = node.findNode("content").orElse(new MapNode())
                 .findNodeList("children").orElse(Lists.empty());
@@ -26,11 +26,19 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
 
         Node separated = new MapNode()
                 .withNode(".h", asRoot(headerChildren))
-                .withNode(".c", asRoot(sourceChildren));return Ok_(separated);
+                .withNode(".c", asRoot(sourceChildren));return (separated);
 }
-struct Tuple_List__Node_List__Node foldIntoBuckets(struct Tuple_List__Node_List__Node tuple, struct Node node){if (node.is("include") || node.is("struct") || node.is("expansion"))
+magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> foldIntoBuckets(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node node){if (node.is("include") || node.is("struct") || node.is("expansion"))
             return new Tuple<>(tuple.left().add(node), tuple.right());if(node.is("function")) {
             return new Tuple<>(tuple.left().add(node.removeNode("content")), tuple.right().add(node));
-        }return Tuple_(tuple.left(), tuple.right().add(node));
+        }return (tuple.left(), tuple.right().add(node));
 }
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> beforePass0(magma.compile.transform.State state, magma.compile.Node node){return (node);
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){return beforePass0(state, node).mapValue(__lambda0__);
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return afterPass0(state, node).mapValue(__lambda1__);
+}
+auto __lambda0__();
+auto __lambda1__();
 

@@ -1,4 +1,4 @@
 #include "Divider.h"
-struct List__String divide(struct String input);
-struct String join(struct String current, struct String element);
+magma.collect.list.List_<String> divide(String input);
+String join(String current, String element);
 

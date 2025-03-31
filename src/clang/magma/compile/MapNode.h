@@ -10,66 +10,77 @@
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Some.h"
 #include "../../magma/option/Tuple.h"
-struct MapNode{struct Option_String maybeType;struct Map__String_String strings;struct Map__String_Node nodes;struct Map__String_List__Node nodeLists;
+struct MapNode{magma.option.Option<String> maybeType;magma.collect.map.Map_<String, String> strings;magma.collect.map.Map_<String, magma.compile.Node> nodes;magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists;
 };
-// expand Option_String = Option<struct String>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand Map__String_Node = Map_<struct String, struct Node>
-// expand Map__String_List__Node = Map_<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand None_ = None<struct >
-// expand Option_String = Option<struct String>
-// expand Map__String_String = Map_<struct String, struct String>
-// expand Map__String_Node = Map_<struct String, struct Node>
-// expand Map__String_List__Node = Map_<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Some_ = Some<struct >
-// expand Option_String = Option<struct String>
-// expand List__Node = List_<struct Node>
-// expand Option_List__Node = Option<struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand List__Node = List_<struct Node>
-// expand Some_ = Some<struct >
-// expand Stream_Tuple_String_String = Stream<struct Tuple_String_String>
-// expand Tuple_String_String = Tuple<struct String, struct String>
-// expand Stream_Tuple_String_List__Node = Stream<struct Tuple_String_List__Node>
-// expand Tuple_String_List__Node = Tuple<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Option_Node = Option<struct Node>
-// expand Stream_Tuple_String_Node = Stream<struct Tuple_String_Node>
-// expand Tuple_String_Node = Tuple<struct String, struct Node>
-// expand Map__String_List__Node = Map_<struct String, struct List__Node>
-// expand List__Node = List_<struct Node>
-// expand Map__String_Node = Map_<struct String, struct Node>
-struct public MapNode();
-struct public MapNode(struct Option_String maybeType, struct Map__String_String strings, struct Map__String_Node nodes, struct Map__String_List__Node nodeLists);
-struct public MapNode(struct String type);
-struct String formatEntry(int depth, struct String key, struct String value);
-struct Node withString(struct String propertyKey, struct String propertyValue);
-struct Option_String findString(struct String propertyKey);
-struct Node withNodeList(struct String propertyKey, struct List__Node propertyValues);
-struct Option_List__Node findNodeList(struct String propertyKey);
-struct String display();
-struct String format(int depth);
-struct String formatList(struct Tuple_String_List__Node entry, int depth);
-struct Node mapNodeList(struct String propertyKey, struct List__Node(*mapper)(struct List__Node));
-int is(struct String type);
-struct Node retype(struct String type);
-struct Node merge(struct Node other);
-struct Stream_Tuple_String_String streamStrings();
-struct Stream_Tuple_String_List__Node streamNodeLists();
-struct Node withNode(struct String propertyKey, struct Node propertyValue);
-struct Option_Node findNode(struct String propertyKey);
-struct Stream_Tuple_String_Node streamNodes();
-struct Node mapNode(struct String propertyKey, struct Node(*mapper)(struct Node));
-struct Node withNodeLists(struct Map__String_List__Node nodeLists);
-struct Node withNodes(struct Map__String_Node nodes);
-struct Node removeNode(struct String propertyKey);
-int hasNode(struct String propertyKey);
-int hasNodeList(struct String propertyKey);
+// expand magma.option.Option<String>
+// expand magma.collect.map.Map_<String, String>
+// expand magma.collect.map.Map_<String, magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.None<>
+// expand magma.option.Option<String>
+// expand magma.collect.map.Map_<String, String>
+// expand magma.collect.map.Map_<String, magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Some<>
+// expand magma.option.Option<String>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Option<magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Some<>
+// expand magma.collect.stream.Stream<magma.option.Tuple<String, String>>
+// expand magma.option.Tuple<String, String>
+// expand magma.option.Tuple<String, String>
+// expand magma.collect.stream.Stream<magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.option.Option<magma.compile.Node>
+// expand magma.collect.stream.Stream<magma.option.Tuple<String, magma.compile.Node>>
+// expand magma.option.Tuple<String, magma.compile.Node>
+// expand magma.option.Tuple<String, magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.map.Map_<String, magma.compile.Node>
+magma.compile.public MapNode();
+magma.compile.public MapNode(magma.option.Option<String> maybeType, magma.collect.map.Map_<String, String> strings, magma.collect.map.Map_<String, magma.compile.Node> nodes, magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists);
+magma.compile.public MapNode(String type);
+String formatEntry(int depth, String key, String value);
+magma.compile.Node withString(String propertyKey, String propertyValue);
+magma.option.Option<String> findString(String propertyKey);
+magma.compile.Node withNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node> propertyValues);
+magma.option.Option<magma.collect.list.List_<magma.compile.Node>> findNodeList(String propertyKey);
+String display();
+String format(int depth);
+String formatList(magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> entry, int depth);
+magma.compile.Node mapNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node>(*mapper)(magma.collect.list.List_<magma.compile.Node>));
+magma.compile.boolean is(String type);
+magma.compile.Node retype(String type);
+magma.compile.Node merge(magma.compile.Node other);
+magma.collect.stream.Stream<magma.option.Tuple<String, String>> streamStrings();
+magma.collect.stream.Stream<magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>>> streamNodeLists();
+magma.compile.Node withNode(String propertyKey, magma.compile.Node propertyValue);
+magma.option.Option<magma.compile.Node> findNode(String propertyKey);
+magma.collect.stream.Stream<magma.option.Tuple<String, magma.compile.Node>> streamNodes();
+magma.compile.Node mapNode(String propertyKey, magma.compile.Node(*mapper)(magma.compile.Node));
+magma.compile.Node withNodeLists(magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists);
+magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> nodes);
+magma.compile.Node removeNode(String propertyKey);
+magma.compile.boolean hasNode(String propertyKey);
+magma.compile.boolean hasNodeList(String propertyKey);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

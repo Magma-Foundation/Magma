@@ -1,8 +1,8 @@
 #include "SingleHead.h"
-struct public SingleHead(struct T value){this.value = value;
+magma.collect.stream.head.public SingleHead(T value){this.value = value;
 }
-struct Option_T next(){if (retrieved) return new None<>();
+magma.option.Option<T> next(){if (retrieved) return new None<>();
 
-        retrieved = true;return Some_(value);
+        retrieved = true;return (value);
 }
 

@@ -4,11 +4,11 @@
 #include "../../../../magma/collect/list/ListCollector.h"
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Tuple.h"
-struct FoldingDivider{struct Folder folder;
+struct FoldingDivider{magma.compile.rule.divide.Folder folder;
 };
-// expand List__String = List_<struct String>
-struct public FoldingDivider(struct Folder folder);
-struct List__String divide(struct String input);
-struct String join(struct String current, struct String element);
+// expand magma.collect.list.List_<String>
+magma.compile.rule.divide.public FoldingDivider(magma.compile.rule.divide.Folder folder);
+magma.collect.list.List_<String> divide(String input);
+String join(String current, String element);
 #endif
 

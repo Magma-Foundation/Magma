@@ -21,23 +21,24 @@
 #include "../../../static magma/compile/lang/CommonLang/*.h"
 struct JavaLang{
 };
-struct Rule createJavaRootRule();
-struct OrRule createJavaRootSegmentRule();
-struct TypeRule createRecordRule();
-struct TypeRule createInterfaceRule();
-struct TypeRule createClassRule();
-struct Rule createClassMemberRule();
-struct TypeRule createInitializationRule();
-struct TypeRule createDefinitionStatementRule();
-struct Rule createMethodRule();
-struct TypeRule createTypedDefinitionRule();
-struct Rule createStatementRule();
-struct Rule createValueRule(struct LazyRule value, struct Rule statement);
-struct TypeRule createDataAccessRule(struct LazyRule value);
-struct Rule createLambdaRule(struct Rule value, struct Rule statement);
-struct TypeRule createConstructionRule(struct LazyRule value);
-struct Rule createTypeRule();
-struct TypeRule createArrayRule(struct LazyRule type);
-struct Rule createImportRule(struct String prefix, struct String type);
+magma.compile.rule.Rule createJavaRootRule();
+magma.compile.rule.tree.OrRule createJavaRootSegmentRule();
+magma.compile.rule.tree.TypeRule createRecordRule();
+magma.compile.rule.tree.TypeRule createInterfaceRule();
+magma.compile.rule.tree.TypeRule createClassRule();
+magma.compile.rule.Rule createClassMemberRule();
+magma.compile.rule.tree.TypeRule createInitializationRule();
+magma.compile.rule.tree.TypeRule createDefinitionStatementRule();
+magma.compile.rule.Rule createMethodRule();
+magma.compile.rule.tree.TypeRule createTypedDefinitionRule();
+magma.compile.rule.Rule createStatementRule();
+magma.compile.rule.Rule createValueRule(magma.compile.rule.LazyRule value, magma.compile.rule.Rule statement);
+magma.compile.rule.tree.TypeRule createQuantityRule(magma.compile.rule.LazyRule value);
+magma.compile.rule.tree.TypeRule createDataAccessRule(magma.compile.rule.LazyRule value);
+magma.compile.rule.Rule createLambdaRule(magma.compile.rule.Rule value, magma.compile.rule.Rule statement);
+magma.compile.rule.tree.TypeRule createConstructionRule(magma.compile.rule.LazyRule value);
+magma.compile.rule.Rule createTypeRule();
+magma.compile.rule.tree.TypeRule createArrayRule(magma.compile.rule.LazyRule type);
+magma.compile.rule.Rule createImportRule(String prefix, String type);
 #endif
 

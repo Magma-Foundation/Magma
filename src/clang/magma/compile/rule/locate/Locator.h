@@ -3,7 +3,7 @@
 #include "../../../../magma/option/Option.h"
 struct Locator{
 };
-// expand Option_Integer = Option<struct Integer>
-struct Option_Integer locate(struct String input, struct String infix);
+// expand magma.option.Option<int>
+magma.option.Option<int> locate(String input, String infix);
 #endif
 

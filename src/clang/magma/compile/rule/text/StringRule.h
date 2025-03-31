@@ -10,13 +10,12 @@
 #include "../../../../magma/result/Result.h"
 struct StringRule{
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Ok_ = Ok<struct >
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-// expand Err_ = Err<struct >
-struct Result_Node_CompileError parse(struct String value);
-struct Result_String_CompileError generate(struct Node input);
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Ok<>
+// expand magma.result.Result<String, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String value);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input);
 auto __lambda0__();
 #endif
 

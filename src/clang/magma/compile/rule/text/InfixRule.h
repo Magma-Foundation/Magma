@@ -7,13 +7,13 @@
 #include "../../../../magma/compile/rule/locate/Locator.h"
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Result.h"
-struct InfixRule{struct Rule left;struct String infix;struct Rule right;struct Locator locator;
+struct InfixRule{magma.compile.rule.Rule left;String infix;magma.compile.rule.Rule right;magma.compile.rule.locate.Locator locator;
 };
-// expand Result_Node_CompileError = Result<struct Node, struct CompileError>
-// expand Result_String_CompileError = Result<struct String, struct CompileError>
-struct public InfixRule(struct Rule left, struct String infix, struct Rule right, struct Locator locator);
-struct Result_Node_CompileError parse(struct String input);
-struct Result_String_CompileError generate(struct Node node);
+// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
+// expand magma.result.Result<String, magma.compile.CompileError>
+magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
+magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
 auto __lambda0__();
 auto __lambda1__();
 #endif

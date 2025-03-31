@@ -3,9 +3,10 @@
 #include "../../../magma/collect/stream/Stream.h"
 struct Set_<T>{
 };
-// expand Stream_T = Stream<struct T>
-// expand Set__T = Set_<struct T>
-struct Stream_T stream();
-struct Set__T add(struct T element);
+// expand magma.collect.stream.Stream<T>
+// expand magma.collect.set.Set_<T>
+magma.collect.stream.Stream<T> stream();
+magma.collect.set.Set_<T> add(T element);
+magma.collect.set.void forEach(void(*consumer)(T));
 #endif
 

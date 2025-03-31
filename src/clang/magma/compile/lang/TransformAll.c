@@ -1,15 +1,15 @@
 #include "TransformAll.h"
-struct Tuple_List__Node_List__Node bucketClassMember(struct Tuple_List__Node_List__Node tuple, struct Node element){List_<Node> definitions = tuple.left();
+magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> bucketClassMember(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node element){List_<Node> definitions = tuple.left();
         List_<Node> others = tuple.right();if (element.is("definition")) return new Tuple<>(definitions.add(element), others);if (element.is("initialization")) {
             Node definition = element.findNode("definition").orElse(new MapNode());
             return new Tuple<>(definitions.add(definition), others);
-        }return Tuple_(definitions, others.add(element));
+        }return (definitions, others.add(element));
 }
-struct Result_Node_CompileError find(struct Node node, struct String propertyKey){return node.findNode(propertyKey).map(Ok.new).orElseGet(__lambda0__);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> find(magma.compile.Node node, String propertyKey){return node.findNode(propertyKey).map(Ok.new).orElseGet(__lambda0__);
 }
-struct Result_List__Node_CompileError findNodeList(struct Node value, struct String propertyKey){return value.findNodeList(propertyKey).map(Ok.new).orElseGet(__lambda1__);
+magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey){return value.findNodeList(propertyKey).map(Ok.new).orElseGet(__lambda1__);
 }
-int isFunctionalImport(struct Node child){if (!child.is("import")) return false;
+magma.compile.lang.boolean isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return false;
 
         List_<String> namespace = child.findNodeList("namespace")
                 .orElse(Lists.empty())
@@ -20,9 +20,9 @@ int isFunctionalImport(struct Node child){if (!child.is("import")) return false;
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
 }
-int hasTypeParams(struct Node child){List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());return !typeParams.isEmpty();
+magma.compile.lang.boolean hasTypeParams(magma.compile.Node child){List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());return !typeParams.isEmpty();
 }
-struct Result_Node_CompileError afterPass(struct State state, struct Node node){if (node.is("interface") || node.is("record") || node.is("class")) {
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node){if (node.is("interface") || node.is("record") || node.is("class")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
@@ -52,7 +52,7 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
                         .collect(new ListCollector<>());
 
                 List_<String> outputNamespace = Lists.empty();
-                int size = state.getNamespace().size();
+                int size = state.namespace().size();
                 if (size == 0) {
                     outputNamespace = outputNamespace.add(".");
                 } else {
@@ -73,11 +73,6 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
 
                 return node.retype("include").withNodeList("path", path);
             });
-        }if (node.is("symbol-type")) {
-            String oldValue = node.findString("value").orElse("");
-            if (oldValue.equals("boolean")) return new Ok<>(node.withString("value", "int"));
-            if (oldValue.equals("int")) return new Ok<>(node);
-            return new Ok<>(node.retype("struct-type"));
         }if (node.is("array")) {
             return new Ok<>(node.retype("ref"));
         }if (node.is("lambda")) {
@@ -89,7 +84,7 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
 
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
-                    .withNode("type", new MapNode("symbol-type").withString("value", "auto"));
+                    .withNode("type", StringLists.toQualified(Lists.of("auto")));
 
             Node function = new MapNode("function")
                     .withNode("definition", definition);
@@ -99,19 +94,85 @@ struct Result_Node_CompileError afterPass(struct State state, struct Node node){
                     .withNodeList("functions", Lists.of(function)));
         }if (node.is("method-access")) {
             return new Ok<>(node.retype("data-access"));
-        }return Ok_(node);
+        }if (node.is("construction")) {
+            List_<String> list = StringLists.fromQualified(node.findNode("type")
+                    .orElse(new MapNode()));
+
+            Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));
+            return new Ok<>(node.retype("invocation").withNode("caller", caller));
+        }return (node);
 }
-struct Result_Node_CompileError beforePass(struct State state, struct Node node){if (!node.is("root")) return new Ok<>(node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("root")) {
+            Node content = node.findNode("content").orElse(new MapNode());
+            List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+            List_<Node> newChildren = children.stream()
+                    .filter(child -> !isFunctionalImport(child) && !child.is("package"))
+                    .collect(new ListCollector<>());
 
-        Node content = node.findNode("content").orElse(new MapNode());
-        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+            Node withChildren = content.withNodeList("children", newChildren);
+            Node withContent = node.withNode("content", withChildren);
+            return new Ok<>(new Tuple<>(state, withContent));
+        }if (!node.is("definition")) return new Ok<>(new Tuple<>(state, node));
 
-        List_<Node> newChildren = children.stream()
-                .filter(child -> !isFunctionalImport(child) && !child.is("package"))
-                .collect(new ListCollector<>());
+        Node type = node.findNode("type").orElse(new MapNode());if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
 
-        Node withChildren = content.withNodeList("children", newChildren);return Ok_(node.withNode("content", withChildren));
+        List_<String> qualifiedName = StringLists.fromQualified(type.findNode("base")
+                .orElse(new MapNode()));
+
+        List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "BiFunction"))) {
+            Node param0 = arguments.get(0);
+            Node param1 = arguments.get(1);
+            Node returns = arguments.get(2);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param0, param1));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Function"))) {
+            Node param = arguments.get(0);
+            Node returns = arguments.get(1);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Predicate"))) {
+            Node param = arguments.get(0);
+
+            Node returns = StringLists.toQualified(Lists.of("int"));
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns)
+                    .withNodeList("params", Lists.of(param));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Consumer"))) {
+            Node paramType = arguments.get(0);
+
+            Node qualified = StringLists.toQualified(Lists.of("void"));
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", qualified)
+                    .withNodeList("params", Lists.of(paramType));
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Supplier"))) {
+            Node returns = arguments.get(0);
+
+            Node definition = node.retype("functional-definition")
+                    .removeNode("type")
+                    .withNode("return", returns);
+
+            return new Ok<>(new Tuple<>(state, definition));
+        }return ((state, node));
+}
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return afterPass0(state, node).mapValue(__lambda2__);
 }
 auto __lambda0__();
 auto __lambda1__();
+auto __lambda2__();
 

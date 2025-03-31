@@ -1,7 +1,7 @@
 #include "FoldingDivider.h"
-struct public FoldingDivider(struct Folder folder){this.folder = folder;
+magma.compile.rule.divide.public FoldingDivider(magma.compile.rule.divide.Folder folder){this.folder = folder;
 }
-struct List__String divide(struct String input){List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
+magma.collect.list.List_<String> divide(String input){List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
 
         DividingState current = new MutableDividingState(collector);while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current
@@ -16,6 +16,6 @@ struct List__String divide(struct String input){List_<Character> collector = Str
             }
         }return current.advance().segments();
 }
-struct String join(struct String current, struct String element){return folder.join(current, element);
+String join(String current, String element){return folder.join(current, element);
 }
 
