@@ -12,6 +12,7 @@ import magma.option.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public record JavaList<T>(List<T> list) implements List_<T> {
     public JavaList() {
@@ -94,6 +95,11 @@ public record JavaList<T>(List<T> list) implements List_<T> {
     @Override
     public Option<T> findLast() {
         return list.isEmpty() ? new None<>() : new Some<>(list.getLast());
+    }
+
+    @Override
+    public void forEach(Consumer<T> consumer) {
+        list.forEach(consumer);
     }
 
     private List<T> toNativeCopy() {

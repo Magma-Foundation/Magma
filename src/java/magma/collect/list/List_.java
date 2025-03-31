@@ -5,6 +5,7 @@ import magma.option.Option;
 import magma.option.Tuple;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public interface List_<T> {
     Stream<T> stream();
@@ -32,4 +33,6 @@ public interface List_<T> {
     List_<T> clear();
 
     Option<T> findLast();
+
+    void forEach(Consumer<T> consumer);
 }

@@ -137,10 +137,15 @@ public class JavaLang {
                 createNumberRule(),
                 createTernaryRule(value),
                 createNotRule(value),
-                new TypeRule("quantity", new PrefixRule("(", new SuffixRule(new NodeRule("child", value), ")")))
+                createQuantityRule(value),
+                new TypeRule("char", new PrefixRule("'", new SuffixRule(new StringRule("value"), "'")))
         )));
 
         return value;
+    }
+
+    private static TypeRule createQuantityRule(LazyRule value) {
+        return new TypeRule("quantity", new PrefixRule("(", new SuffixRule(new NodeRule("child", value), ")")));
     }
 
     private static TypeRule createDataAccessRule(LazyRule value) {
@@ -176,7 +181,7 @@ public class JavaLang {
         type.set(new OrRule(Lists.of(
                 createArrayRule(type),
                 createGenericRule(type),
-                createSymbolTypeRule()
+                createQualifiedRule()
         )));
         return type;
     }

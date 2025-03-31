@@ -35,10 +35,6 @@ public class CommonLang {
         return new NodeRule("content", new TypeRule("block", new StripRule("", children, "after-children")));
     }
 
-    static TypeRule createSymbolTypeRule() {
-        return new TypeRule("symbol-type", createSymbolRule("value"));
-    }
-
     static Rule createSymbolRule(String propertyKey) {
         return new StripRule(new FilterRule(new SymbolFilter(), new StringRule(propertyKey)));
     }
@@ -97,8 +93,12 @@ public class CommonLang {
 
     static Rule createGenericRule(Rule type) {
         Rule typeArguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), type);
-        Rule base = new NodeListRule("base", new CharDivider('.'), createSymbolRule("value"));
+        Rule base = new NodeRule("base", createQualifiedRule());
         return new TypeRule("generic", new StripRule(new SuffixRule(new InfixRule(base, "<", typeArguments, new FirstLocator()), ">")));
+    }
+
+    static Rule createQualifiedRule() {
+        return new TypeRule("qualified", new NodeListRule("segments", new CharDivider('.'), createSymbolRule("value")));
     }
 
     static Rule createNamedWithTypeParams() {

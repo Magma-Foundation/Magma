@@ -23,4 +23,6 @@ public interface Map_<K, V> {
     Map_<K,V> remove(K key);
 
     boolean containsKey(K key);
+
+    Stream<V> streamValues();
 }

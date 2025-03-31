@@ -4,12 +4,15 @@ import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.io.Paths;
 import jvm.process.Processes;
+import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
+import magma.collect.stream.Stream;
 import magma.compile.Compiler;
+import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
@@ -48,7 +51,32 @@ public class Main {
     private static Option<ApplicationError> runWithSources(Set_<Path_> sources) {
         return sources.stream()
                 .foldToResult(Maps.empty(), Main::preLoadSources)
+                .mapValue(trees -> {
+                    trees.streamValues()
+                            .flatMap(Main::findExpansionsInTargetSet)
+                            .collect(new ListCollector<>())
+                            .forEach(element -> {
+                                System.out.println(element.display());
+                            });
+
+                    return trees;
+                })
                 .match(Main::postLoadTrees, Some::new);
+    }
+
+    private static Stream<Node> findExpansionsInTargetSet(Node value) {
+        return value.streamNodes()
+                .map(Tuple::right)
+                .flatMap(Main::findExpansionsInRoot);
+    }
+
+    private static Stream<Node> findExpansionsInRoot(Node value) {
+        return value.findNode("content")
+                .orElse(new MapNode())
+                .findNodeList("children")
+                .orElse(Lists.empty())
+                .stream()
+                .filter(child -> child.is("expansion"));
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Path_, Node> trees) {

@@ -8,6 +8,7 @@ import magma.option.Option;
 import magma.option.Some;
 import magma.option.Tuple;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,5 +72,10 @@ public record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
     @Override
     public boolean containsKey(K key) {
         return map.containsKey(key);
+    }
+
+    @Override
+    public Stream<V> streamValues() {
+        return Streams.fromNativeList(new ArrayList<>(map.values()));
     }
 }

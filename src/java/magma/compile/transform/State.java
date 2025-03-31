@@ -28,18 +28,13 @@ public record State(List_<String> namespace, String name, List_<List_<String>> i
         return new State(namespace, name, imports.clear());
     }
 
-    public Option<List_<String>> resolve(List_<String> names) {
-        if (names.size() == 1) {
-            String first = names.findFirst().orElse("");
-            if(first.equals(this.name)) {
-                return new Some<>(namespace.add(name));
-            }
-
-            return imports.stream()
-                    .filter(import_ -> import_.findLast().orElse("").equals(first))
-                    .next();
+    public Option<List_<String>> qualifyName(String name) {
+        if(name.equals(this.name)) {
+            return new Some<>(namespace.add(this.name));
         }
 
-        return new Some<>(names);
+        return imports.stream()
+                .filter(import_ -> import_.findLast().orElse("").equals(name))
+                .next();
     }
 }
