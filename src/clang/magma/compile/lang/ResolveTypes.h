@@ -16,17 +16,6 @@
 #include "../../../magma/result/Result.h"
 struct ResolveTypes{
 };
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name);
-magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError> resolveAsLocal(magma.compile.transform.State state, magma.collect.list.List_<String> name, magma.compile.Node node);
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsPrimitive(magma.collect.list.List_<String> oldName);
-magma.option.Option<String> resolvePrimitiveString(String maybePrimitive);
-magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> wrapToTuple(magma.compile.transform.State state, magma.collect.list.List_<String> newName);
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsTypeParam(magma.compile.transform.State state, magma.collect.list.List_<String> segments);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
 // expand magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>>
 // expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
 // expand magma.collect.list.List_<String>
@@ -75,5 +64,15 @@ auto __lambda2__();
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.result.Ok<>
 // expand magma.option.Tuple<>
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name);
+magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError> resolveAsLocal(magma.compile.transform.State state, magma.collect.list.List_<String> name, magma.compile.Node node);
+magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsPrimitive(magma.collect.list.List_<String> oldName);
+magma.option.Option<String> resolvePrimitiveString(String maybePrimitive);
+magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> wrapToTuple(magma.compile.transform.State state, magma.collect.list.List_<String> newName);
+magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsTypeParam(magma.compile.transform.State state, magma.collect.list.List_<String> segments);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
 #endif
-

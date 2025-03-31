@@ -14,4 +14,3 @@ magma.collect.list.List_<String> divide(String input){List_<String> requestedNam
 }
 String join(String current, String element){if (current.isEmpty()) return element;return current+delimiter+element;
 }
-

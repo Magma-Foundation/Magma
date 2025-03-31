@@ -5,6 +5,7 @@ import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
 import magma.compile.lang.ExpandGenerics;
 import magma.compile.lang.FlattenRoot;
+import magma.compile.lang.FlattenStructs;
 import magma.compile.lang.Formatter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.PruneTypeParameterized;
@@ -22,7 +23,12 @@ import java.util.function.Function;
 
 public class Compiler {
     public static Result<Map_<String, String>, CompileError> postLoad(State state, Node tree) {
-        return new TreeTransformingStage(new Formatter()).transform(state, tree).mapValue(Tuple::right)
+        return new TreeTransformingStage(new FlattenStructs()).transform(state, tree)
+                .flatMapValue(transformUsing(new FlattenGroup()))
+                .flatMapValue(transformUsing(new Formatter()))
+                .flatMapValue(transformUsing(new FlattenRoot()))
+                .flatMapValue(transformUsing(new Sorter()))
+                .mapValue(Tuple::right)
                 .flatMapValue(Compiler::generateRoots);
     }
 
@@ -35,8 +41,6 @@ public class Compiler {
                 .flatMapValue(transformUsing(new ExpandGenerics()))
                 .flatMapValue(transformUsing(new FlattenGroup()))
                 .flatMapValue(transformUsing(new PruneTypeParameterized()))
-                .flatMapValue(transformUsing(new FlattenRoot()))
-                .flatMapValue(transformUsing(new Sorter()))
                 .mapValue(Tuple::right);
     }
 

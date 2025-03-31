@@ -6,4 +6,3 @@ magma.option.Option<int> locate(String input, String infix){int depth = 0;for (i
             if (c == '<') depth--;
         }return ();
 }
-

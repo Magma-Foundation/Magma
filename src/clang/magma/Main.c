@@ -1,4 +1,15 @@
 #include "Main.h"
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
+auto __lambda7__();
+auto __lambda8__();
+auto __lambda9__();
+auto __lambda10__();
 magma.void main(String* args){SOURCE_DIRECTORY.walk().mapErr(ApplicationError.new).match(Main.runWithFiles, Some.new).ifPresent(__lambda0__.err.println(error.display()));
 }
 magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files){Set_<Path_> collect = files.stream()
@@ -50,15 +61,3 @@ magma.option.Option<magma.io.IOError> ensureDirectories(magma.io.Path_ targetPar
 }
 int isPlatformDependent(magma.collect.list.List_<String> namespace){return namespace.findFirst().filter(__lambda10__.equals("jvm")).isPresent();
 }
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
-auto __lambda7__();
-auto __lambda8__();
-auto __lambda9__();
-auto __lambda10__();
-

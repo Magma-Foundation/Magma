@@ -1,4 +1,6 @@
 #include "FlattenRoot.h"
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.Node afterPass0(magma.compile.Node node){if (!node.is("group")) return node;
         Node child = node.findNode("child").orElse(new MapNode());if (!child.is("root")) return node;
         List_<Node> oldChildren = child
@@ -16,6 +18,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return afterPass0(state, node).mapValue(__lambda1__);
 }
-auto __lambda0__();
-auto __lambda1__();
-

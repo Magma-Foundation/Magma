@@ -41,4 +41,3 @@ magma.compile.rule.Rule createTypeRule();
 magma.compile.rule.tree.TypeRule createArrayRule(magma.compile.rule.LazyRule type);
 magma.compile.rule.Rule createImportRule(String prefix, String type);
 #endif
-

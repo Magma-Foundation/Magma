@@ -5,4 +5,3 @@ struct Context{
 };
 magma.collect.string.String_ display();
 #endif
-

@@ -86,6 +86,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\text\SuffixRule.c^
 	.\magma\compile\transform\Frame.c^
 	.\magma\compile\transform\Frame.c^
+	.\magma\compile\lang\FlattenStructs.c^
+	.\magma\compile\lang\FlattenStructs.c^
 	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\transform\TreeTransformingStage.c^
 	.\magma\compile\rule\text\InfixRule.c^
@@ -152,6 +154,8 @@ clang .\magma\compile\rule\divide\Folder.c^
 	.\magma\compile\rule\text\PrefixRule.c^
 	.\magma\collect\stream\Collector.c^
 	.\magma\collect\stream\Collector.c^
+	.\magma\compile\lang\Transformers.c^
+	.\magma\compile\lang\Transformers.c^
 	.\magma\compile\rule\divide\Divider.c^
 	.\magma\compile\rule\divide\Divider.c^
 	.\magma\compile\lang\StringLists.c^

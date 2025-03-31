@@ -81,4 +81,3 @@ magma.compile.rule.tree.TypeRule createArrayRule(magma.compile.rule.LazyRule typ
 }
 magma.compile.rule.Rule createImportRule(String prefix, String type){NodeListRule namespace = new NodeListRule("namespace", new CharDivider('.'), new StringRule("value"));return TypeRule(type, StripRule(PrefixRule(prefix, SuffixRule(namespace, ";"))));
 }
-

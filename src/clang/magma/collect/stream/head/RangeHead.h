@@ -5,9 +5,8 @@
 #include "../../../../magma/option/Some.h"
 struct RangeHead{int extent;int counter;
 };
-magma.collect.stream.head.public RangeHead(int extent);
-magma.option.Option<int> next();
 // expand magma.option.Option<int>
 // expand magma.option.Some<>
+magma.collect.stream.head.public RangeHead(int extent);
+magma.option.Option<int> next();
 #endif
-

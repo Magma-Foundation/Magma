@@ -43,4 +43,3 @@ magma.option.Option<int> locate(String input, String infix){List_<Tuple<Integer,
             }
         }return ();
 }
-

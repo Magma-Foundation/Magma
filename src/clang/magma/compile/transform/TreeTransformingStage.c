@@ -1,4 +1,11 @@
 #include "TreeTransformingStage.h"
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
 magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer){this.transformer = transformer;
 }
 magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> attachChildren(magma.compile.Node node, String propertyKey, magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> children){State newState = children.left();
@@ -28,11 +35,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.coll
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root){return transformer.beforePass(state, root).flatMapValue(__lambda5__(beforePass.left(), beforePass.right())).mapErr(__lambda6__);
 }
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
-

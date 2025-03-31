@@ -8,11 +8,10 @@
 #include "../../../magma/compile/Node.h"
 struct StringLists{
 };
-magma.compile.Node toQualified(magma.collect.list.List_<String> list);
-magma.collect.list.List_<String> fromQualified(magma.compile.Node node);
-auto __lambda0__();
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.ListCollector<String>
+auto __lambda0__();
+magma.compile.Node toQualified(magma.collect.list.List_<String> list);
+magma.collect.list.List_<String> fromQualified(magma.compile.Node node);
 #endif
-

@@ -6,9 +6,8 @@
 #include "../../../magma/result/Result.h"
 struct TransformingStage{
 };
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root);
 // expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transform(magma.compile.transform.State state, magma.compile.Node root);
 #endif
-

@@ -11,4 +11,3 @@ String asString();
 magma.io.Path_ getParent();
 magma.io.Path_ getFileName();
 magma.result.Result<String, magma.io.IOError> readString();
-

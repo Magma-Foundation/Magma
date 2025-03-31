@@ -1,4 +1,6 @@
 #include "FlattenCache.h"
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.transform.public FlattenCache(){this(Maps.empty(), Maps.empty(), Maps.empty());
 }
 magma.compile.transform.FlattenCache withNode(String propertyKey, magma.compile.Node propertyValue){return FlattenCache(nodes.with(propertyKey, propertyValue), nodeLists, categories);
@@ -13,6 +15,3 @@ magma.compile.Node tryGroup(magma.compile.Node node){Node with = node.withNodes(
             return new MapNode("group").withNode("child", with).withNodeLists(categories);
         }
 }
-auto __lambda0__();
-auto __lambda1__();
-

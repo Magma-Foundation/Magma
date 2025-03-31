@@ -35,4 +35,3 @@ magma.compile.rule.Rule createFunctionalDefinitionType();
 magma.compile.rule.Rule createTypeRule();
 magma.compile.rule.Rule createIncludeRule();
 #endif
-

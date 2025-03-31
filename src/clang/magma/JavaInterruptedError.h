@@ -6,4 +6,3 @@ struct JavaInterruptedError{
 };
 String display();
 #endif
-

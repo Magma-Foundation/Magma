@@ -13,4 +13,3 @@ magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingS
 }
 String join(String current, String element){if (current.isEmpty()) return element;return current+", "+element;
 }
-

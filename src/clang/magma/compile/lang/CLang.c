@@ -41,4 +41,3 @@ magma.compile.rule.Rule createTypeRule(){LazyRule type = new LazyRule();type.set
 }
 magma.compile.rule.Rule createIncludeRule(){NodeListRule path = new NodeListRule("path", new CharDivider('/'), new StringRule("value"));return TypeRule("include", PrefixRule("#include \"", SuffixRule(path, ".h\"\n")));
 }
-

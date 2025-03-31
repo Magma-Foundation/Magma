@@ -7,41 +7,14 @@ import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.MapNode;
 import magma.compile.Node;
-import magma.compile.context.NodeContext;
 import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
 import magma.option.Tuple;
-import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
 
 public class TransformAll implements Transformer {
     private int counter = 0;
-
-    static Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element) {
-        List_<Node> definitions = tuple.left();
-        List_<Node> others = tuple.right();
-
-        if (element.is("definition")) return new Tuple<>(definitions.add(element), others);
-        if (element.is("initialization")) {
-            Node definition = element.findNode("definition").orElse(new MapNode());
-            return new Tuple<>(definitions.add(definition), others);
-        }
-
-        return new Tuple<>(definitions, others.add(element));
-    }
-
-    private static Result<Node, CompileError> find(Node node, String propertyKey) {
-        return node.findNode(propertyKey)
-                .<Result<Node, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Node '" + propertyKey + "' not present", new NodeContext(node))));
-    }
-
-    private static Result<List_<Node>, CompileError> findNodeList(Node value, String propertyKey) {
-        return value.findNodeList(propertyKey)
-                .<Result<List_<Node>, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Node list '" + propertyKey + "' not present", new NodeContext(value))));
-    }
 
     private static boolean isFunctionalImport(Node child) {
         if (!child.is("import")) return false;
@@ -54,11 +27,6 @@ public class TransformAll implements Transformer {
                 .collect(new ListCollector<>());
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
-    }
-
-    private static boolean hasTypeParams(Node child) {
-        List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());
-        return !typeParams.isEmpty();
     }
 
     @Override
@@ -149,22 +117,6 @@ public class TransformAll implements Transformer {
 
     @Override
     public Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node) {
-        if (node.is("interface") || node.is("record") || node.is("class")) {
-            return find(node, "content").flatMapValue(value -> {
-                return findNodeList(value, "children").mapValue(children -> {
-                    Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
-                            .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
-
-                    Node withChildren = node.retype("struct").withNode("content", new MapNode("block")
-                            .withNodeList("children", newChildren.left()));
-
-                    return new Tuple<>(state, new MapNode("group")
-                            .withNode("child", withChildren)
-                            .withNodeList("functions", newChildren.right()));
-                });
-            });
-        }
-
         if (node.is("method")) {
             return new Ok<>(new Tuple<>(state, node.retype("function")));
         }
@@ -178,7 +130,7 @@ public class TransformAll implements Transformer {
         }
 
         if (node.is("import")) {
-            return findNodeList(node, "namespace").mapValue(requestedNodes -> {
+            return Transformers.findNodeList(node, "namespace").mapValue(requestedNodes -> {
                 List_<String> requestedNamespace = requestedNodes.stream()
                         .map(child -> child.findString("value"))
                         .flatMap(Streams::fromOption)

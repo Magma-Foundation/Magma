@@ -1,4 +1,6 @@
 #include "InfixRule.h"
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator){this.left = left;
         this.infix = infix;
         this.right = right;
@@ -14,6 +16,3 @@ magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String
 }
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return left.generate(node).and(__lambda0__.generate(node)).mapValue(__lambda1__.left()+infix+tuple.right());
 }
-auto __lambda0__();
-auto __lambda1__();
-

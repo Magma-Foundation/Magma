@@ -1,4 +1,6 @@
 #include "FlattenGroup.h"
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.transform.FlattenCache foldNodeProperty(magma.compile.transform.FlattenCache state, magma.option.Tuple<String, magma.compile.Node> property){String propertyKey = property.left();
         Node propertyValue = property.right();
 
@@ -37,6 +39,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return afterPass0(state, node).mapValue(__lambda1__);
 }
-auto __lambda0__();
-auto __lambda1__();
-

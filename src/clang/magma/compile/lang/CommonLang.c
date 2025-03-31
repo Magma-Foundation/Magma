@@ -69,4 +69,3 @@ magma.compile.rule.tree.TypeRule createNotRule(magma.compile.rule.LazyRule value
 }
 magma.compile.rule.tree.TypeRule createCharRule(){return TypeRule("char", PrefixRule("'", SuffixRule(StringRule("value"), "'")));
 }
-

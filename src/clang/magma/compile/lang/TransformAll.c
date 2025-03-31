@@ -1,14 +1,4 @@
 #include "TransformAll.h"
-magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> bucketClassMember(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node element){List_<Node> definitions = tuple.left();
-        List_<Node> others = tuple.right();if (element.is("definition")) return new Tuple<>(definitions.add(element), others);if (element.is("initialization")) {
-            Node definition = element.findNode("definition").orElse(new MapNode());
-            return new Tuple<>(definitions.add(definition), others);
-        }return (definitions, others.add(element));
-}
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> find(magma.compile.Node node, String propertyKey){return node.findNode(propertyKey).map(Ok.new).orElseGet(__lambda0__);
-}
-magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey){return value.findNodeList(propertyKey).map(Ok.new).orElseGet(__lambda1__);
-}
 int isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return false;
 
         List_<String> namespace = child.findNodeList("namespace")
@@ -19,8 +9,6 @@ int isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return
                 .collect(new ListCollector<>());
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
-}
-int hasTypeParams(magma.compile.Node child){List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());return !typeParams.isEmpty();
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("root")) {
             Node content = node.findNode("content").orElse(new MapNode());
@@ -90,21 +78,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state, definition));
         }return ((state, node));
 }
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("interface") || node.is("record") || node.is("class")) {
-            return find(node, "content").flatMapValue(value -> {
-                return findNodeList(value, "children").mapValue(children -> {
-                    Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
-                            .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
-
-                    Node withChildren = node.retype("struct").withNode("content", new MapNode("block")
-                            .withNodeList("children", newChildren.left()));
-
-                    return new Tuple<>(state, new MapNode("group")
-                            .withNode("child", withChildren)
-                            .withNodeList("functions", newChildren.right()));
-                });
-            });
-        }if (node.is("method")) {
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("method")) {
             return new Ok<>(new Tuple<>(state, node.retype("function")));
         }if (node.is("block")) {
             return new Ok<>(new Tuple<>(state, node.mapNodeList("children", children -> {
@@ -113,7 +87,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
                         .collect(new ListCollector<>());
             })));
         }if (node.is("import")) {
-            return findNodeList(node, "namespace").mapValue(requestedNodes -> {
+            return Transformers.findNodeList(node, "namespace").mapValue(requestedNodes -> {
                 List_<String> requestedNamespace = requestedNodes.stream()
                         .map(child -> child.findString("value"))
                         .flatMap(Streams::fromOption)
@@ -170,6 +144,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state, node.retype("invocation").withNode("caller", caller)));
         }return ((state, node));
 }
-auto __lambda0__();
-auto __lambda1__();
-

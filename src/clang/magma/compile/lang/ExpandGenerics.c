@@ -7,4 +7,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state, expansionGroup));
         }return ((state, node));
 }
-

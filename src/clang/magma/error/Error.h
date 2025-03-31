@@ -4,4 +4,3 @@ struct Error{
 };
 String display();
 #endif
-

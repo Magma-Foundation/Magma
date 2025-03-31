@@ -5,6 +5,7 @@
 #include "../../magma/compile/lang/CLang.h"
 #include "../../magma/compile/lang/ExpandGenerics.h"
 #include "../../magma/compile/lang/FlattenRoot.h"
+#include "../../magma/compile/lang/FlattenStructs.h"
 #include "../../magma/compile/lang/Formatter.h"
 #include "../../magma/compile/lang/JavaLang.h"
 #include "../../magma/compile/lang/PruneTypeParameterized.h"
@@ -19,14 +20,6 @@
 #include "../../magma/result/Result.h"
 struct Compiler{
 };
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>(*transformUsing)(magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>)(magma.compile.transform.Transformer transformer);
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateRoots(magma.compile.Node roots);
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateTarget(magma.collect.map.Map_<String, String> current, magma.option.Tuple<String, magma.compile.Node> tuple);
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
 // expand magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError>
 // expand magma.collect.map.Map_<String, String>
 // expand magma.collect.map.Map_<String, String>
@@ -43,5 +36,12 @@ auto __lambda2__();
 // expand magma.collect.map.Map_<String, String>
 // expand magma.collect.map.Map_<String, String>
 // expand magma.option.Tuple<String, magma.compile.Node>
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree);
+magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state);
+magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>(*transformUsing)(magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>)(magma.compile.transform.Transformer transformer);
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateRoots(magma.compile.Node roots);
+magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateTarget(magma.collect.map.Map_<String, String> current, magma.option.Tuple<String, magma.compile.Node> tuple);
 #endif
-

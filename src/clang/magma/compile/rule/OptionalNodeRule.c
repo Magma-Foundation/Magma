@@ -8,4 +8,3 @@ magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String
 }
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return node.hasNode(propertyKey)?ifPresent.generate(node):ifEmpty.generate(node);
 }
-

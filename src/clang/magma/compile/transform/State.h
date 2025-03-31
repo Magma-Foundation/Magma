@@ -10,6 +10,17 @@
 #include "../../../magma/option/Some.h"
 struct State{
 };
+// expand magma.collect.list.List_<String>
+// expand magma.option.Option<magma.collect.list.List_<String>>
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.List_<magma.collect.list.List_<String>>
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.List_<String>
+// expand magma.collect.list.List_<magma.compile.transform.Frame>
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.transform.public State(magma.collect.list.List_<String> namespace, String name);
 magma.compile.transform.State defineImport(magma.compile.Node import_);
 magma.compile.transform.State clearImports();
@@ -18,16 +29,4 @@ magma.compile.transform.State defineType(magma.compile.Node type);
 magma.compile.transform.State enter();
 magma.compile.transform.State exit();
 int isTypeParamDefined(String type);
-auto __lambda0__();
-auto __lambda1__();
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<magma.collect.list.List_<String>>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<magma.compile.transform.Frame>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.collect.list.List_<String>>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
 #endif
-

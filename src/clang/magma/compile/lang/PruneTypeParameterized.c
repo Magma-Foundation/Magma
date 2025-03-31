@@ -11,4 +11,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state, node.withNode("content", block)));
         }return ((state, node));
 }
-

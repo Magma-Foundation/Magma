@@ -18,4 +18,3 @@ magma.collect.list.List_<String> divide(String input){List_<Character> collector
 }
 String join(String current, String element){return folder.join(current, element);
 }
-

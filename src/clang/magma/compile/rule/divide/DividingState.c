@@ -10,4 +10,3 @@ magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingS
 magma.option.Option<magma.compile.rule.divide.DividingState> appendAndDiscard();
 magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> pop();
 magma.option.Option<char> peek();
-

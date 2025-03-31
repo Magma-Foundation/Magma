@@ -6,4 +6,3 @@ String computeName(){String nameWithExt = source().getFileName().asString();retu
 }
 magma.result.Result<String, magma.io.IOError> readString(){return source.readString();
 }
-

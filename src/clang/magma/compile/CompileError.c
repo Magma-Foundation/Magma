@@ -28,4 +28,3 @@ String format(int depth){List_<CompileError> sorted = errors.sort((error, error2
                 .map(result -> ": " + Strings.unwrap(result))
                 .orElse("");return message+contextString+joined;
 }
-

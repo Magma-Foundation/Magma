@@ -1,4 +1,7 @@
 #include "ResolveTypes.h"
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
 magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name){if (name.size() == 1) {
             return state.qualifyName(name.findLast().orElse("")).map(Ok::new);
         }return ((name));
@@ -51,7 +54,3 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state.exit(), node));
         }return ((state, node));
 }
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-

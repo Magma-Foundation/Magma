@@ -6,9 +6,8 @@
 #include "../../../../magma/option/Tuple.h"
 struct FoldingDivider{magma.compile.rule.divide.Folder folder;
 };
+// expand magma.collect.list.List_<String>
 magma.compile.rule.divide.public FoldingDivider(magma.compile.rule.divide.Folder folder);
 magma.collect.list.List_<String> divide(String input);
 String join(String current, String element);
-// expand magma.collect.list.List_<String>
 #endif
-

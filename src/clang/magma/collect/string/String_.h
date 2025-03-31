@@ -3,7 +3,6 @@
 #include "../../../magma/collect/stream/Stream.h"
 struct String_{
 };
-magma.collect.stream.Stream<char> stream();
 // expand magma.collect.stream.Stream<char>
+magma.collect.stream.Stream<char> stream();
 #endif
-

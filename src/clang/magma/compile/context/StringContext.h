@@ -7,4 +7,3 @@ struct StringContext{
 String display0();
 magma.collect.string.String_ display();
 #endif
-

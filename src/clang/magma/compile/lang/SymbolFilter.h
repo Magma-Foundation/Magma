@@ -4,4 +4,3 @@ struct SymbolFilter{
 };
 int isValid(String input);
 #endif
-

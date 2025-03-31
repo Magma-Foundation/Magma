@@ -7,4 +7,3 @@ magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingS
 }
 String join(String current, String element){return current+element;
 }
-

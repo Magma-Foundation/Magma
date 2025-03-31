@@ -5,4 +5,3 @@ int isValid(String input){for (int i = 0; i < input.length(); i++) {
             return false;
         }return true;
 }
-

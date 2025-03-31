@@ -1,4 +1,6 @@
 #include "State.h"
+auto __lambda0__();
+auto __lambda1__();
 magma.compile.transform.public State(magma.collect.list.List_<String> namespace, String name){this(namespace, name, Lists.empty(), Lists.of(Frame()));
 }
 magma.compile.transform.State defineImport(magma.compile.Node import_){List_<String> namespace = import_.findNodeList("namespace")
@@ -24,6 +26,3 @@ magma.compile.transform.State exit(){return State(namespace, name, imports, fram
 }
 int isTypeParamDefined(String type){return frames.stream().anyMatch(__lambda1__.isTypeDefined(type));
 }
-auto __lambda0__();
-auto __lambda1__();
-

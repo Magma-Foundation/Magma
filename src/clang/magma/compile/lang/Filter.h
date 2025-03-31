@@ -4,4 +4,3 @@ struct Filter{
 };
 int isValid(String input);
 #endif
-

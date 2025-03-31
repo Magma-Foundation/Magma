@@ -5,4 +5,3 @@ struct ProcessError{
 };
 String display();
 #endif
-
