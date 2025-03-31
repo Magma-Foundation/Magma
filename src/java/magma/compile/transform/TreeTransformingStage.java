@@ -4,6 +4,7 @@ import jvm.collect.list.Lists;
 import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.Node;
+import magma.compile.context.NodeContext;
 import magma.option.Tuple;
 import magma.result.Result;
 
@@ -65,6 +66,7 @@ public class TreeTransformingStage implements TransformingStage {
     @Override
     public Result<Tuple<State, Node>, CompileError> transform(State state, Node root) {
         return transformer.beforePass(state, root)
-                .flatMapValue(beforePass -> transformNodes(beforePass.left(), beforePass.right()));
+                .flatMapValue(beforePass -> transformNodes(beforePass.left(), beforePass.right()))
+                .mapErr(err -> new CompileError("Error when transforming", new NodeContext(root), Lists.of(err)));
     }
 }

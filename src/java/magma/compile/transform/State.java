@@ -5,6 +5,7 @@ import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.compile.Node;
+import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 
@@ -29,6 +30,10 @@ public record State(List_<String> namespace, String name, List_<List_<String>> i
     }
 
     public Option<List_<String>> qualifyName(String name) {
+        if(name.isEmpty()) {
+            return new None<>();
+        }
+
         if(name.equals(this.name)) {
             return new Some<>(namespace.add(this.name));
         }

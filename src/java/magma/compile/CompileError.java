@@ -8,22 +8,31 @@ import magma.collect.stream.head.HeadedStream;
 import magma.collect.stream.head.RangeHead;
 import magma.compile.context.Context;
 import magma.error.Error;
+import magma.option.None;
+import magma.option.Option;
+import magma.option.Some;
 
 import java.util.function.Function;
 
 public class CompileError implements Error {
     private final String message;
-    private final Context context;
+    private final Option<Context> maybeContext;
     private final List_<CompileError> errors;
 
-    public CompileError(String message, Context context) {
-        this(message, context, Lists.empty());
+    public CompileError(String message, Context maybeContext) {
+        this(message, maybeContext, Lists.empty());
     }
 
-    public CompileError(String message, Context context, List_<CompileError> errors) {
+    public CompileError(String message, Context maybeContext, List_<CompileError> errors) {
         this.message = message;
-        this.context = context;
+        this.maybeContext = new Some<>(maybeContext);
         this.errors = errors;
+    }
+
+    public CompileError(String message) {
+        this.message = message;
+        this.maybeContext = new None<>();
+        this.errors = Lists.empty();
     }
 
     private static String format(int depth, int index, List_<CompileError> sorted) {
@@ -53,6 +62,10 @@ public class CompileError implements Error {
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return message + ": " + Strings.unwrap(context.display()) + joined;
+        String contextString = maybeContext.map(Context::display)
+                .map(result -> ": " + Strings.unwrap(result))
+                .orElse("");
+
+        return message + ": " + contextString + joined;
     }
 }

@@ -4,36 +4,37 @@ import jvm.collect.list.Lists;
 import magma.collect.list.List_;
 import magma.compile.CompileError;
 import magma.compile.Node;
+import magma.compile.context.NodeContext;
 import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 import magma.option.Tuple;
+import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
 
 public class ResolveTypes implements Transformer {
-    private static Option<List_<String>> qualifyName(State state, List_<String> name) {
-        if (name.size() != 1) return new Some<>(name);
-        return state.qualifyName(name.findFirst().orElse(""));
+    private static Option<Result<List_<String>, CompileError>> qualifyName(State state, List_<String> name) {
+        if (name.size() == 1) {
+            return state.qualifyName(name.findLast().orElse("")).map(Ok::new);
+        }
+        return new Some<>(new Ok<>(name));
     }
 
-    private static List_<String> attachNamespaceToName(State state, List_<String> name) {
-        String last = name.findLast().orElse("");
-        return state.namespace().add(last);
+    private static Result<List_<String>, CompileError> attachNamespaceToName(State state, List_<String> name, Node node) {
+        return name.findLast()
+                .filter(value -> !value.isEmpty())
+                .<Result<List_<String>, CompileError>>map(
+                        last -> new Ok<>(state.namespace().add(last))).orElseGet(
+                        () -> new Err<>(new CompileError("At least one name is required", new NodeContext(node))));
     }
 
-    private static Option<List_<String>> getTupleCompileErrorResult(String oldValue) {
-        if (oldValue.equals("boolean")) return new Some<>(Lists.of("int"));
-        if (oldValue.equals("int")) return new Some<>(Lists.of("int"));
-        return new None<>();
-    }
-
-    private static Option<List_<String>> getListOption(List_<String> oldName) {
+    private static Option<Result<List_<String>, CompileError>> getListOption(List_<String> oldName) {
         String last = oldName.findLast().orElse("");
         if (last.equals("int") || last.equals("Integer")) {
-            return new Some<>(Lists.of("int"));
+            return new Some<>(new Ok<>(Lists.of("int")));
         } else {
             return new None<>();
         }
@@ -48,12 +49,16 @@ public class ResolveTypes implements Transformer {
 
         if (node.is("qualified")) {
             List_<String> oldName = StringLists.fromQualified(node);
-            List_<String> newName = qualifyName(state, oldName)
-                    .or(() -> getListOption(oldName))
-                    .orElseGet(() -> attachNamespaceToName(state, oldName));
+            if (oldName.isEmpty())
+                return new Err<>(new CompileError("At least one segment must be present", new NodeContext(node)));
 
-            Node qualifiedNode = StringLists.toQualified(newName);
-            return new Ok<>(new Tuple<>(state, qualifiedNode));
+            return qualifyName(state, oldName)
+                    .or(() -> getListOption(oldName))
+                    .orElseGet(() -> attachNamespaceToName(state, oldName, node))
+                    .mapValue(newName -> {
+                        Node qualifiedNode = StringLists.toQualified(newName);
+                        return new Tuple<>(state, qualifiedNode);
+                    });
         }
 
         return new Ok<>(new Tuple<>(state, node));
