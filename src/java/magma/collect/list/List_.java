@@ -28,4 +28,8 @@ public interface List_<T> {
     Option<Tuple<T, List_<T>>> popFirst();
 
     boolean isEmpty();
+
+    List_<T> clear();
+
+    Option<T> findLast();
 }

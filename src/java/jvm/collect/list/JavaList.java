@@ -86,6 +86,16 @@ public record JavaList<T>(List<T> list) implements List_<T> {
         return list.isEmpty();
     }
 
+    @Override
+    public List_<T> clear() {
+        return new JavaList<>(new ArrayList<>());
+    }
+
+    @Override
+    public Option<T> findLast() {
+        return list.isEmpty() ? new None<>() : new Some<>(list.getLast());
+    }
+
     private List<T> toNativeCopy() {
         return new ArrayList<>(list);
     }

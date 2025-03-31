@@ -98,7 +98,7 @@ public class TransformAll implements Transformer {
                         .collect(new ListCollector<>());
 
                 List_<String> outputNamespace = Lists.empty();
-                int size = state.getNamespace().size();
+                int size = state.namespace().size();
                 if (size == 0) {
                     outputNamespace = outputNamespace.add(".");
                 } else {
