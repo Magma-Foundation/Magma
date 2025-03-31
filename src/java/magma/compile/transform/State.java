@@ -5,17 +5,27 @@ import jvm.collect.stream.Streams;
 import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.compile.Node;
+import magma.compile.source.Location;
 import magma.option.None;
 import magma.option.Option;
 import magma.option.Some;
 
-public record State(
-        List_<String> namespace,
-        String name,
-        List_<List_<String>> imports,
-        List_<Frame> frames) {
-    public State(List_<String> namespace, String name) {
-        this(namespace, name, Lists.empty(), Lists.of(new Frame()));
+public final class State {
+    private final List_<List_<String>> imports;
+    private final List_<Frame> frames;
+    private final Location location;
+
+    public State(
+            Location location,
+            List_<List_<String>> imports,
+            List_<Frame> frames) {
+        this.location = location;
+        this.imports = imports;
+        this.frames = frames;
+    }
+
+    public State(Location location) {
+        this(location, Lists.empty(), Lists.of(new Frame()));
     }
 
     public State defineImport(Node import_) {
@@ -26,11 +36,11 @@ public record State(
                 .flatMap(Streams::fromOption)
                 .collect(new ListCollector<>());
 
-        return new State(this.namespace, name, imports.add(namespace), frames);
+        return new State(location, imports.add(namespace), frames);
     }
 
     public State clearImports() {
-        return new State(namespace, name, imports.clear(), frames);
+        return new State(location, imports.clear(), frames);
     }
 
     public Option<List_<String>> qualifyName(String name) {
@@ -38,8 +48,8 @@ public record State(
             return new None<>();
         }
 
-        if (name.equals(this.name)) {
-            return new Some<>(namespace.add(this.name));
+        if (name.equals(location.name())) {
+            return new Some<>(location.namespace().add(location.name()));
         }
 
         return imports.stream()
@@ -49,18 +59,26 @@ public record State(
 
     public State defineType(Node type) {
         List_<Frame> newFrames = frames.mapLast(last -> last.defineType(type));
-        return new State(namespace, name, imports, newFrames);
+        return new State(location, imports, newFrames);
     }
 
     public State enter() {
-        return new State(namespace, name, imports, frames.add(new Frame()));
+        return new State(location, imports, frames.add(new Frame()));
     }
 
     public State exit() {
-        return new State(namespace, name, imports, frames.subList(0, frames.size() - 1));
+        return new State(location, imports, frames.subList(0, frames.size() - 1));
     }
 
     public boolean isTypeParamDefined(String type) {
         return frames.stream().anyMatch(frame -> frame.isTypeDefined(type));
+    }
+
+    public List_<String> namespace() {
+        return location.namespace();
+    }
+
+    public String name() {
+        return location.name();
     }
 }

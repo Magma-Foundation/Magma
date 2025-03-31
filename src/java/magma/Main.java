@@ -12,9 +12,10 @@ import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
 import magma.collect.stream.Stream;
 import magma.compile.Compiler;
+import magma.compile.MapNode;
 import magma.compile.Node;
-import magma.compile.lang.CommonLang;
-import magma.compile.lang.JavaLang;
+import magma.compile.lang.StringLists;
+import magma.compile.source.Location;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
 import magma.compile.transform.State;
@@ -56,28 +57,57 @@ public class Main {
                 .match(Main::postLoadTrees, Some::new);
     }
 
-    private static Map_<Path_, Node> getPathNodeMap(Map_<Path_, Node> trees) {
-        trees.streamValues()
+    private static Map_<Location, Node> getPathNodeMap(Map_<Location, Node> trees) {
+        Map_<Location, List_<Node>> expansions = trees.streamValues()
                 .flatMap(Main::findExpansionsInTargetSet)
-                .map(Main::getString)
-                .collect(new SetCollector<>())
-                .stream()
-                .collect(new ListCollector<>())
-                .sort(String::compareTo)
-                .forEach(System.out::println);
+                .foldWithInitial(Maps.empty(), (map, expansion) -> foldIntoCache(map, trees, expansion));
 
-        return trees;
+        return expansions.stream().foldWithInitial(trees, (current, entry) -> {
+            Location location = entry.left();
+            List_<Node> mergedChildren = entry.right()
+                    .stream()
+                    .flatMap(node -> {
+                        Node content = node.findNode("content")
+                                .or(() -> node.findNode("child").flatMap(child -> child.findNode("content")))
+                                .orElse(new MapNode());
+                        List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
+                        return children.stream();
+                    })
+                    .collect(new ListCollector<>());
+
+            Node block = new MapNode("block").withNodeList("children", mergedChildren);
+            Node root = new MapNode("root").withNode("content", block);
+            return current.with(location.resolveSibling(location.name() + "_expansion"), root);
+        });
     }
 
-    private static String getString(Node element) {
-        return CommonLang.createGenericRule(JavaLang.createTypeRule())
-                .generate(element.retype("generic"))
-                .match(generated -> {
-                    return generated;
-                }, err -> {
-                    System.err.println(err.display());
-                    return "";
-                });
+    private static Map_<Location, List_<Node>> foldIntoCache(
+            Map_<Location, List_<Node>> cache,
+            Map_<Location, Node> trees,
+            Node expansion
+    ) {
+        Node base = expansion.findNode("base").orElse(new MapNode());
+        List_<String> segments = StringLists.fromQualified(base);
+
+        return trees.stream()
+                .filter(entry -> isDefined(entry, segments))
+                .next()
+                .map(entry -> foldEntry(cache, entry))
+                .orElse(cache);
+    }
+
+    private static Map_<Location, List_<Node>> foldEntry(
+            Map_<Location, List_<Node>> map,
+            Tuple<Location, Node> entry
+    ) {
+        return map.ensure(entry.left(),
+                nodeList -> nodeList.add(entry.right()),
+                () -> Lists.of(entry.right()));
+    }
+
+    private static boolean isDefined(Tuple<Location, Node> entry, List_<String> segments) {
+        Location location = entry.left();
+        return location.namespace().add(location.name()).equalsTo(segments);
     }
 
     private static Stream<Node> findExpansionsInTargetSet(Node value) {
@@ -86,39 +116,35 @@ public class Main {
                 .stream();
     }
 
-    private static Option<ApplicationError> postLoadTrees(Map_<Path_, Node> trees) {
+    private static Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees) {
         return trees.stream()
                 .foldToResult(Lists.empty(), Main::postLoadTree)
                 .match(Main::complete, Some::new);
     }
 
-    private static Result<Map_<Path_, Node>, ApplicationError> preLoadSources(Map_<Path_, Node> trees, Path_ path) {
+    private static Result<List_<Path_>, ApplicationError> postLoadTree(List_<Path_> relatives, Tuple<Location, Node> pathNodeTuple) {
+        Location location = pathNodeTuple.left();
+        List_<String> namespace = location.namespace();
+
+        return Compiler.postLoad(new State(location), pathNodeTuple.right())
+                .mapErr(ApplicationError::new)
+                .flatMapValue(postLoaded -> writeOutputs(postLoaded, namespace, location.name()))
+                .mapValue(relatives::addAll);
+    }
+
+    private static Result<Map_<Location, Node>, ApplicationError> preLoadSources(Map_<Location, Node> trees, Path_ path) {
         System.out.println("Loading: " + path.asString());
 
         Source source = new PathSource(SOURCE_DIRECTORY, path);
-        List_<String> namespace = source.computeNamespace();
-        String name = source.computeName();
-        State state = new State(namespace, name);
+        Location location = source.location();
+        State state = new State(location);
 
-        if (isPlatformDependent(namespace)) return new Ok<>(trees);
+        if (isPlatformDependent(location)) return new Ok<>(trees);
         return source.readString()
                 .mapErr(ApplicationError::new)
                 .flatMapValue(input -> Compiler.preLoad(input, state).mapErr(ApplicationError::new))
-                .mapValue(node -> trees.with(path, node));
+                .mapValue(node -> trees.with(location, node));
 
-    }
-
-    private static Result<List_<Path_>, ApplicationError> postLoadTree(List_<Path_> relatives, Tuple<Path_, Node> pathNodeTuple) {
-        Path_ path = pathNodeTuple.left();
-        Node tree = pathNodeTuple.right();
-
-        Source source = new PathSource(SOURCE_DIRECTORY, path);
-        List_<String> namespace = source.computeNamespace();
-
-        return Compiler.postLoad(new State(namespace, source.computeName()), tree)
-                .mapErr(ApplicationError::new)
-                .flatMapValue(postLoaded -> writeOutputs(postLoaded, namespace, source.computeName()))
-                .mapValue(relatives::addAll);
     }
 
     private static Option<ApplicationError> complete(List_<Path_> relatives) {
@@ -172,8 +198,9 @@ public class Main {
         return new None<>();
     }
 
-    private static boolean isPlatformDependent(List_<String> namespace) {
-        return namespace.findFirst()
+    private static boolean isPlatformDependent(Location location) {
+        return location.namespace()
+                .findFirst()
                 .filter(first -> first.equals("jvm"))
                 .isPresent();
     }
