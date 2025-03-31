@@ -111,6 +111,11 @@ public record JavaList<T>(List<T> list) implements List_<T> {
                 .orElse(this);
     }
 
+    @Override
+    public boolean contains(T node, BiFunction<T, T, Boolean> equator) {
+        return stream().anyMatch(element -> equator.apply(node, element));
+    }
+
     private List_<T> setLast(T last) {
         return set(list.size() - 1, last);
     }
