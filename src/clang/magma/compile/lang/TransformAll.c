@@ -9,7 +9,7 @@ magma.result.Result<magma.compile.Node, magma.compile.CompileError> find(magma.c
 }
 magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey){return value.findNodeList(propertyKey).map(Ok.new).orElseGet(__lambda1__);
 }
-magma.compile.lang.boolean isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return false;
+int isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return false;
 
         List_<String> namespace = child.findNodeList("namespace")
                 .orElse(Lists.empty())
@@ -20,7 +20,7 @@ magma.compile.lang.boolean isFunctionalImport(magma.compile.Node child){if (!chi
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
 }
-magma.compile.lang.boolean hasTypeParams(magma.compile.Node child){List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());return !typeParams.isEmpty();
+int hasTypeParams(magma.compile.Node child){List_<Node> typeParams = child.findNodeList("type-params").orElse(Lists.empty());return !typeParams.isEmpty();
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("root")) {
             Node content = node.findNode("content").orElse(new MapNode());

@@ -8,7 +8,7 @@ struct Frame{
 };
 magma.compile.transform.public Frame();
 magma.compile.transform.Frame defineType(magma.compile.Node type);
-magma.compile.transform.boolean isTypeDefined(String typeParam);
+int isTypeDefined(String typeParam);
 auto __lambda0__();
 // expand magma.collect.list.List_<magma.compile.Node>
 #endif

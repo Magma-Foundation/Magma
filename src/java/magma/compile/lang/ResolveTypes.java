@@ -37,9 +37,13 @@ public class ResolveTypes implements Transformer {
     }
 
     private static Option<String> resolvePrimitiveString(String maybePrimitive) {
-        if (maybePrimitive.equals("int") || maybePrimitive.equals("Integer")) return new Some<>("int");
-        if (maybePrimitive.equals("char") || maybePrimitive.equals("Character")) return new Some<>("char");
-        if (maybePrimitive.equals("String")) return new Some<>("String");
+        if (maybePrimitive.equals("int") || maybePrimitive.equals("Integer") || maybePrimitive.equals("boolean") || maybePrimitive.equals("Boolean")) {
+            return new Some<>("int");
+        } else if (maybePrimitive.equals("char") || maybePrimitive.equals("Character")) {
+            return new Some<>("char");
+        } else if (maybePrimitive.equals("String")) {
+            return new Some<>("String");
+        }
         return new None<>();
     }
 

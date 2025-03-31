@@ -2,6 +2,6 @@
 #define magma_compile_lang_Filter
 struct Filter{
 };
-magma.compile.lang.boolean isValid(String input);
+int isValid(String input);
 #endif
 

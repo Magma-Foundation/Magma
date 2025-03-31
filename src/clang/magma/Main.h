@@ -47,7 +47,7 @@ magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationE
 magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> writeAndFoldOutput(magma.collect.list.List_<magma.io.Path_> current, magma.io.Path_ targetParent, String name, String extension, String output);
 magma.result.Result<magma.io.Path_, magma.ApplicationError> writeOutput(magma.io.Path_ parent, String name, String extension, String output);
 magma.option.Option<magma.io.IOError> ensureDirectories(magma.io.Path_ targetParent);
-magma.boolean isPlatformDependent(magma.collect.list.List_<String> namespace);
+int isPlatformDependent(magma.collect.list.List_<String> namespace);
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

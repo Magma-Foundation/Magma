@@ -10,7 +10,7 @@ magma.collect.stream.head.R foldWithInitial(magma.collect.stream.head.R initial,
 magma.collect.stream.Stream<magma.collect.stream.head.R> map(magma.collect.stream.head.R(*mapper)(T));
 magma.collect.stream.head.C collect(magma.collect.stream.Collector<T, magma.collect.stream.head.C> collector);
 magma.option.Option<T> next();
-magma.collect.stream.head.boolean anyMatch(int(*predicate)(T));
+int anyMatch(int(*predicate)(T));
 magma.option.Option<magma.collect.stream.head.R> foldMapping(magma.collect.stream.head.R(*mapper)(T), magma.collect.stream.head.R(*folder)(magma.collect.stream.head.R, T));
 magma.collect.stream.Stream<T> filter(int(*predicate)(T));
 magma.collect.stream.Stream<magma.collect.stream.head.R> flatMap(magma.collect.stream.Stream<magma.collect.stream.head.R>(*mapper)(T));

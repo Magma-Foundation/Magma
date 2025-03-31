@@ -8,7 +8,7 @@ magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<c
 }
 magma.compile.rule.divide.DividingState append(char c){buffer.append(c);return this;
 }
-magma.compile.rule.divide.boolean isLevel(){return depth == 0;
+int isLevel(){return depth == 0;
 }
 magma.compile.rule.divide.DividingState exit(){this.depth = depth - 1;return this;
 }
@@ -19,7 +19,7 @@ magma.compile.rule.divide.DividingState advance(){this.segments = segments.add(b
 }
 magma.collect.list.List_<String> segments(){return segments;
 }
-magma.compile.rule.divide.boolean isShallow(){return depth == 1;
+int isShallow(){return depth == 1;
 }
 magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> append(){return pop().map(__lambda0__);
 }

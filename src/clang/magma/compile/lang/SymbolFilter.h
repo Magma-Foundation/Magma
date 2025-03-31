@@ -2,6 +2,6 @@
 #define magma_compile_lang_SymbolFilter
 struct SymbolFilter{
 };
-magma.compile.lang.boolean isValid(String input);
+int isValid(String input);
 #endif
 

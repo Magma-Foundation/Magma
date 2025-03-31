@@ -22,7 +22,7 @@ magma.compile.transform.State enter(){return State(namespace, name, imports, fra
 }
 magma.compile.transform.State exit(){return State(namespace, name, imports, frames.subList(0, frames.size()-1));
 }
-magma.compile.transform.boolean isTypeParamDefined(String type){return frames.stream().anyMatch(__lambda1__.isTypeDefined(type));
+int isTypeParamDefined(String type){return frames.stream().anyMatch(__lambda1__.isTypeDefined(type));
 }
 auto __lambda0__();
 auto __lambda1__();

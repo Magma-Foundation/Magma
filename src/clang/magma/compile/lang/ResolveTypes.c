@@ -7,7 +7,13 @@ magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError
 }
 magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsPrimitive(magma.collect.list.List_<String> oldName){String last = oldName.findLast().orElse("");return resolvePrimitiveString(last).map(Lists.of).map(Ok.new);
 }
-magma.option.Option<String> resolvePrimitiveString(String maybePrimitive){if (maybePrimitive.equals("int") || maybePrimitive.equals("Integer")) return new Some<>("int");if (maybePrimitive.equals("char") || maybePrimitive.equals("Character")) return new Some<>("char");if (maybePrimitive.equals("String")) return new Some<>("String");return ();
+magma.option.Option<String> resolvePrimitiveString(String maybePrimitive){if (maybePrimitive.equals("int") || maybePrimitive.equals("Integer") || maybePrimitive.equals("boolean") || maybePrimitive.equals("Boolean")) {
+            return new Some<>("int");
+        }else if (maybePrimitive.equals("char") || maybePrimitive.equals("Character")) {
+            return new Some<>("char");
+        }else if (maybePrimitive.equals("String")) {
+            return new Some<>("String");
+        }return ();
 }
 magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> wrapToTuple(magma.compile.transform.State state, magma.collect.list.List_<String> newName){Node qualifiedNode = StringLists.toQualified(newName);return (state, qualifiedNode);
 }

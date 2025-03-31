@@ -14,7 +14,7 @@ magma.option.Option<magma.collect.list.List_<magma.compile.Node>> findNodeList(S
 String display();
 String format(int depth);
 magma.compile.Node mapNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node>(*mapper)(magma.collect.list.List_<magma.compile.Node>));
-magma.compile.boolean is(String type);
+int is(String type);
 magma.compile.Node retype(String type);
 magma.compile.Node merge(magma.compile.Node other);
 magma.collect.stream.Stream<magma.option.Tuple<String, String>> streamStrings();
@@ -26,8 +26,8 @@ magma.compile.Node mapNode(String propertyKey, magma.compile.Node(*mapper)(magma
 magma.compile.Node withNodeLists(magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists);
 magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> nodes);
 magma.compile.Node removeNode(String propertyKey);
-magma.compile.boolean hasNode(String propertyKey);
-magma.compile.boolean hasNodeList(String propertyKey);
+int hasNode(String propertyKey);
+int hasNodeList(String propertyKey);
 // expand magma.option.Option<String>
 // expand magma.collect.list.List_<magma.compile.Node>
 // expand magma.option.Option<magma.collect.list.List_<magma.compile.Node>>

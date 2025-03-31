@@ -18,7 +18,7 @@ magma.collect.stream.head.C collect(magma.collect.stream.Collector<T, magma.coll
 }
 magma.option.Option<T> next(){return head.next();
 }
-magma.collect.stream.head.boolean anyMatch(int(*predicate)(T)){return foldWithInitial(false, __lambda1__||predicate.test(t));
+int anyMatch(int(*predicate)(T)){return foldWithInitial(false, __lambda1__||predicate.test(t));
 }
 magma.option.Option<magma.collect.stream.head.R> foldMapping(magma.collect.stream.head.R(*mapper)(T), magma.collect.stream.head.R(*folder)(magma.collect.stream.head.R, T)){return head.next().map(mapper).map(__lambda2__(initial, folder));
 }

@@ -11,7 +11,7 @@ magma.option.Option<magma.collect.stream.R> foldMapping(magma.collect.stream.R(*
 magma.collect.stream.Stream<T> filter(int(*predicate)(T));
 magma.collect.stream.Stream<T> concat(magma.collect.stream.Stream<T> other);
 magma.option.Option<T> next();
-magma.collect.stream.boolean anyMatch(int(*predicate)(T));
+int anyMatch(int(*predicate)(T));
 // expand magma.collect.stream.Stream<magma.collect.stream.R>
 // expand magma.collect.stream.Collector<T, magma.collect.stream.C>
 // expand magma.collect.stream.Stream<magma.collect.stream.R>

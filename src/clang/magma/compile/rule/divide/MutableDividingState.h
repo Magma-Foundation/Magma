@@ -9,12 +9,12 @@ struct MutableDividingState{magma.collect.list.List_<char> queue;magma.collect.l
 magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue);
 magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue, magma.collect.list.List_<String> segments, magma.compile.rule.divide.StringBuilder buffer, int depth);
 magma.compile.rule.divide.DividingState append(char c);
-magma.compile.rule.divide.boolean isLevel();
+int isLevel();
 magma.compile.rule.divide.DividingState exit();
 magma.compile.rule.divide.DividingState enter();
 magma.compile.rule.divide.DividingState advance();
 magma.collect.list.List_<String> segments();
-magma.compile.rule.divide.boolean isShallow();
+int isShallow();
 magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> append();
 magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> pop();
 magma.option.Option<char> peek();

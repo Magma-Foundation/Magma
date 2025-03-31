@@ -17,7 +17,7 @@ magma.option.Option<magma.collect.list.List_<String>> qualifyName(String name);
 magma.compile.transform.State defineType(magma.compile.Node type);
 magma.compile.transform.State enter();
 magma.compile.transform.State exit();
-magma.compile.transform.boolean isTypeParamDefined(String type);
+int isTypeParamDefined(String type);
 auto __lambda0__();
 auto __lambda1__();
 // expand magma.collect.list.List_<String>

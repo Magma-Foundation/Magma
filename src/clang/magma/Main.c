@@ -48,7 +48,7 @@ magma.result.Result<magma.io.Path_, magma.ApplicationError> writeOutput(magma.io
 }
 magma.option.Option<magma.io.IOError> ensureDirectories(magma.io.Path_ targetParent){if (!targetParent.exists()) return targetParent.createAsDirectories();return ();
 }
-magma.boolean isPlatformDependent(magma.collect.list.List_<String> namespace){return namespace.findFirst().filter(__lambda10__.equals("jvm")).isPresent();
+int isPlatformDependent(magma.collect.list.List_<String> namespace){return namespace.findFirst().filter(__lambda10__.equals("jvm")).isPresent();
 }
 auto __lambda0__();
 auto __lambda1__();

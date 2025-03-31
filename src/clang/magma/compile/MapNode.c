@@ -50,7 +50,7 @@ String formatList(magma.option.Tuple<String, magma.collect.list.List_<magma.comp
 }
 magma.compile.Node mapNodeList(String propertyKey, magma.collect.list.List_<magma.compile.Node>(*mapper)(magma.collect.list.List_<magma.compile.Node>)){return findNodeList(propertyKey).map(mapper).map(__lambda0__(propertyKey, nodeList)).orElse(this);
 }
-magma.compile.boolean is(String type){return this.maybeType.filter(__lambda1__.equals(type)).isPresent();
+int is(String type){return this.maybeType.filter(__lambda1__.equals(type)).isPresent();
 }
 magma.compile.Node retype(String type){return MapNode((type), strings, nodes, nodeLists);
 }
@@ -75,9 +75,9 @@ magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> 
 }
 magma.compile.Node removeNode(String propertyKey){return MapNode(maybeType, strings, nodes.remove(propertyKey), nodeLists);
 }
-magma.compile.boolean hasNode(String propertyKey){return nodes.containsKey(propertyKey);
+int hasNode(String propertyKey){return nodes.containsKey(propertyKey);
 }
-magma.compile.boolean hasNodeList(String propertyKey){return nodeLists.containsKey(propertyKey);
+int hasNodeList(String propertyKey){return nodeLists.containsKey(propertyKey);
 }
 auto __lambda0__();
 auto __lambda1__();
