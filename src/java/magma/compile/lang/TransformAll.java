@@ -61,104 +61,6 @@ public class TransformAll implements Transformer {
         return !typeParams.isEmpty();
     }
 
-    private Result<Node, CompileError> afterPass0(State state, Node node) {
-        if (node.is("interface") || node.is("record") || node.is("class")) {
-            return find(node, "content").flatMapValue(value -> {
-                return findNodeList(value, "children").mapValue(children -> {
-                    Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
-                            .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
-
-                    Node withChildren = node.retype("struct").withNode("content", new MapNode("block")
-                            .withNodeList("children", newChildren.left()));
-
-                    return new MapNode("group")
-                            .withNode("child", withChildren)
-                            .withNodeList("functions", newChildren.right());
-                });
-            });
-        }
-
-        if (node.is("method")) {
-            return new Ok<>(node.retype("function"));
-        }
-
-        if (node.is("block")) {
-            return new Ok<>(node.mapNodeList("children", children -> {
-                return children.stream()
-                        .filter(child -> !child.is("whitespace"))
-                        .collect(new ListCollector<>());
-            }));
-        }
-
-        if (node.is("import")) {
-            return findNodeList(node, "namespace").mapValue(requestedNodes -> {
-                List_<String> requestedNamespace = requestedNodes.stream()
-                        .map(child -> child.findString("value"))
-                        .flatMap(Streams::fromOption)
-                        .collect(new ListCollector<>());
-
-                List_<String> outputNamespace = Lists.empty();
-                int size = state.namespace().size();
-                if (size == 0) {
-                    outputNamespace = outputNamespace.add(".");
-                } else {
-                    for (int i = 0; i < size; i++) {
-                        outputNamespace = outputNamespace.add("..");
-                    }
-                }
-
-                List_<String> newNamespace = requestedNamespace.popFirst()
-                        .map(first -> first.left().equals("jvm") ? Lists.of("windows").addAll(first.right()) : requestedNamespace)
-                        .orElse(requestedNamespace);
-
-                outputNamespace = outputNamespace.addAll(newNamespace);
-
-                List_<Node> path = outputNamespace.stream()
-                        .map(segment -> new MapNode().withString("value", segment))
-                        .collect(new ListCollector<>());
-
-                return node.retype("include").withNodeList("path", path);
-            });
-        }
-
-        if (node.is("array")) {
-            return new Ok<>(node.retype("ref"));
-        }
-
-        if (node.is("lambda")) {
-            Node child = node.findNode("child")
-                    .orElse(new MapNode());
-
-            String generatedName = "__lambda" + counter + "__";
-            counter++;
-
-            Node definition = new MapNode("definition")
-                    .withString("name", generatedName)
-                    .withNode("type", StringLists.toQualified(Lists.of("auto")));
-
-            Node function = new MapNode("function")
-                    .withNode("definition", definition);
-
-            return new Ok<>(new MapNode("group")
-                    .withNode("child", new MapNode("symbol-value").withString("value", generatedName))
-                    .withNodeList("functions", Lists.of(function)));
-        }
-
-        if (node.is("method-access")) {
-            return new Ok<>(node.retype("data-access"));
-        }
-
-        if (node.is("construction")) {
-            List_<String> list = StringLists.fromQualified(node.findNode("type")
-                    .orElse(new MapNode()));
-
-            Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));
-            return new Ok<>(node.retype("invocation").withNode("caller", caller));
-        }
-
-        return new Ok<>(node);
-    }
-
     @Override
     public Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node) {
         if (node.is("root")) {
@@ -247,6 +149,100 @@ public class TransformAll implements Transformer {
 
     @Override
     public Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node) {
-        return afterPass0(state, node).mapValue(value -> new Tuple<>(state, value));
+        if (node.is("interface") || node.is("record") || node.is("class")) {
+            return find(node, "content").flatMapValue(value -> {
+                return findNodeList(value, "children").mapValue(children -> {
+                    Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
+                            .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), TransformAll::bucketClassMember);
+
+                    Node withChildren = node.retype("struct").withNode("content", new MapNode("block")
+                            .withNodeList("children", newChildren.left()));
+
+                    return new Tuple<>(state, new MapNode("group")
+                            .withNode("child", withChildren)
+                            .withNodeList("functions", newChildren.right()));
+                });
+            });
+        }
+
+        if (node.is("method")) {
+            return new Ok<>(new Tuple<>(state, node.retype("function")));
+        }
+
+        if (node.is("block")) {
+            return new Ok<>(new Tuple<>(state, node.mapNodeList("children", children -> {
+                return children.stream()
+                        .filter(child -> !child.is("whitespace"))
+                        .collect(new ListCollector<>());
+            })));
+        }
+
+        if (node.is("import")) {
+            return findNodeList(node, "namespace").mapValue(requestedNodes -> {
+                List_<String> requestedNamespace = requestedNodes.stream()
+                        .map(child -> child.findString("value"))
+                        .flatMap(Streams::fromOption)
+                        .collect(new ListCollector<>());
+
+                List_<String> outputNamespace = Lists.empty();
+                int size = state.namespace().size();
+                if (size == 0) {
+                    outputNamespace = outputNamespace.add(".");
+                } else {
+                    for (int i = 0; i < size; i++) {
+                        outputNamespace = outputNamespace.add("..");
+                    }
+                }
+
+                List_<String> newNamespace = requestedNamespace.popFirst()
+                        .map(first -> first.left().equals("jvm") ? Lists.of("windows").addAll(first.right()) : requestedNamespace)
+                        .orElse(requestedNamespace);
+
+                outputNamespace = outputNamespace.addAll(newNamespace);
+
+                List_<Node> path = outputNamespace.stream()
+                        .map(segment -> new MapNode().withString("value", segment))
+                        .collect(new ListCollector<>());
+
+                return new Tuple<>(state, node.retype("include").withNodeList("path", path));
+            });
+        }
+
+        if (node.is("array")) {
+            return new Ok<>(new Tuple<>(state, node.retype("ref")));
+        }
+
+        if (node.is("lambda")) {
+            Node child = node.findNode("child")
+                    .orElse(new MapNode());
+
+            String generatedName = "__lambda" + counter + "__";
+            counter++;
+
+            Node definition = new MapNode("definition")
+                    .withString("name", generatedName)
+                    .withNode("type", StringLists.toQualified(Lists.of("auto")));
+
+            Node function = new MapNode("function")
+                    .withNode("definition", definition);
+
+            return new Ok<>(new Tuple<>(state, new MapNode("group")
+                    .withNode("child", new MapNode("symbol-value").withString("value", generatedName))
+                    .withNodeList("functions", Lists.of(function))));
+        }
+
+        if (node.is("method-access")) {
+            return new Ok<>(new Tuple<>(state, node.retype("data-access")));
+        }
+
+        if (node.is("construction")) {
+            List_<String> list = StringLists.fromQualified(node.findNode("type")
+                    .orElse(new MapNode()));
+
+            Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));
+            return new Ok<>(new Tuple<>(state, node.retype("invocation").withNode("caller", caller)));
+        }
+
+        return new Ok<>(new Tuple<>(state, node));
     }
 }
