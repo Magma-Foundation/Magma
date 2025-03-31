@@ -58,6 +58,8 @@ public class Main {
     }
 
     private static Result<Map_<Path_, Node>, ApplicationError> preLoadSources(Map_<Path_, Node> trees, Path_ path) {
+        System.out.println("Loading: " + path.asString());
+
         Source source = new PathSource(SOURCE_DIRECTORY, path);
         List_<String> namespace = source.computeNamespace();
         String name = source.computeName();

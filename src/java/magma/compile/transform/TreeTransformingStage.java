@@ -14,36 +14,57 @@ public class TreeTransformingStage implements TransformingStage {
         this.transformer = transformer;
     }
 
-    @Override
-    public Result<Node, CompileError> transform(Node root, State state) {
-        return transformer.beforePass(state, root).mapValue(Tuple::right)
-                .flatMapValue(beforePass -> transformNodes(beforePass, state));
+    private static Tuple<State, Node> attachChildren(Node node, String propertyKey, Tuple<State, List_<Node>> children) {
+        State newState = children.left();
+        List_<Node> newChildren = children.right();
+        Node withChildren = node.withNodeList(propertyKey, newChildren);
+        return new Tuple<>(newState, withChildren);
     }
 
-    private Result<Node, CompileError> transformNodes(Node root, State state) {
+    private Result<Tuple<State, Node>, CompileError> transformNodes(State state, Node root) {
         return root.streamNodes()
-                .foldToResult(root, (node, tuple) -> mapNodes(node, tuple, state))
-                .flatMapValue(withNodes -> transformNodeLists(withNodes, state));
+                .foldToResult(new Tuple<>(state, root), (current, entry) -> transformNodes(current.left(), current.right(), entry))
+                .flatMapValue(withNodes -> transformNodeLists(withNodes.left(), withNodes.right()));
     }
 
-    private Result<Node, CompileError> transformNodeLists(Node root, State state) {
+    private Result<Tuple<State, Node>, CompileError> transformNodeLists(State state, Node root) {
         return root.streamNodeLists()
-                .foldToResult(root, (node, tuple) -> mapNodeList(node, tuple, state))
-                .flatMapValue(node1 -> transformer.afterPass(state, node1).mapValue(Tuple::right));
+                .foldToResult(new Tuple<>(state, root), (current, tuple) -> transformNodeList(current.left(), current.right(), tuple))
+                .flatMapValue(withNodeLists -> transformer.afterPass(withNodeLists.left(), withNodeLists.right()));
     }
 
-    private Result<Node, CompileError> mapNodes(Node node, Tuple<String, Node> tuple, State state) {
-        return transform(tuple.right(), state).mapValue(newChild -> node.withNode(tuple.left(), newChild));
+    private Result<Tuple<State, Node>, CompileError> transformNodes(State state, Node node, Tuple<String, Node> entry) {
+        return transform(state, entry.right()).mapValue(newChild -> {
+            Node withChild = node.withNode(entry.left(), newChild.right());
+            return new Tuple<>(newChild.left(), withChild);
+        });
     }
 
-    private Result<Node, CompileError> mapNodeList(Node node, Tuple<String, List_<Node>> tuple, State state) {
-        return tuple.right()
-                .stream()
-                .foldToResult(Lists.<Node>empty(), (current, element) -> mapNodeListElement(current, element, state))
-                .mapValue(children -> node.withNodeList(tuple.left(), children));
+    private Result<Tuple<State, Node>, CompileError> transformNodeList(State state, Node node, Tuple<String, List_<Node>> entry) {
+        String propertyKey = entry.left();
+        List_<Node> propertyValues = entry.right();
+        return propertyValues.stream()
+                .foldToResult(new Tuple<>(state, Lists.empty()), this::transformElement)
+                .mapValue(children -> attachChildren(node, propertyKey, children));
     }
 
-    private Result<List_<Node>, CompileError> mapNodeListElement(List_<Node> elements, Node element, State state) {
-        return transform(element, state).mapValue(elements::add);
+    private Result<Tuple<State, List_<Node>>, CompileError> transformElement(
+            Tuple<State, List_<Node>> current,
+            Node element
+    ) {
+        State currentState = current.left();
+        List_<Node> currentChildren = current.right();
+
+        return transform(currentState, element).mapValue((Tuple<State, Node> newTuple) -> {
+            State newState = newTuple.left();
+            Node newChild = newTuple.right();
+            return new Tuple<>(newState, currentChildren.add(newChild));
+        });
+    }
+
+    @Override
+    public Result<Tuple<State, Node>, CompileError> transform(State state, Node root) {
+        return transformer.beforePass(state, root)
+                .flatMapValue(beforePass -> transformNodes(beforePass.left(), beforePass.right()));
     }
 }

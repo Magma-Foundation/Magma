@@ -10,24 +10,33 @@ import magma.compile.lang.Sorter;
 import magma.compile.lang.TransformAll;
 import magma.compile.transform.FlattenGroup;
 import magma.compile.transform.State;
+import magma.compile.transform.Transformer;
 import magma.compile.transform.TreeTransformingStage;
 import magma.option.Tuple;
 import magma.result.Result;
 
+import java.util.function.Function;
+
 public class Compiler {
     public static Result<Map_<String, String>, CompileError> postLoad(State state, Node tree) {
-        return new TreeTransformingStage(new Formatter()).transform(tree, state)
+        return new TreeTransformingStage(new Formatter()).transform(state, tree).mapValue(Tuple::right)
                 .flatMapValue(Compiler::generateRoots);
     }
 
     public static Result<Node, CompileError> preLoad(String input, State state) {
         return JavaLang.createJavaRootRule().parse(input)
-                .flatMapValue(tree -> new TreeTransformingStage(new ExpandGenerics()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new TransformAll()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenGroup()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new FlattenRoot()).transform(tree, state))
-                .flatMapValue(tree -> new TreeTransformingStage(new Sorter()).transform(tree, state));
+                .mapValue(tree -> new Tuple<>(state, tree))
+                .flatMapValue(transformUsing(new ExpandGenerics()))
+                .flatMapValue(transformUsing(new FlattenGroup()))
+                .flatMapValue(transformUsing(new TransformAll()))
+                .flatMapValue(transformUsing(new FlattenGroup()))
+                .flatMapValue(transformUsing(new FlattenRoot()))
+                .flatMapValue(transformUsing(new Sorter()))
+                .mapValue(Tuple::right);
+    }
+
+    private static Function<Tuple<State, Node>, Result<Tuple<State, Node>, CompileError>> transformUsing(Transformer transformer) {
+        return tree -> new TreeTransformingStage(transformer).transform(tree.left(), tree.right());
     }
 
     private static Result<Map_<String, String>, CompileError> generateRoots(Node roots) {
