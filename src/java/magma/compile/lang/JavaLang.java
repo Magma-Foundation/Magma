@@ -130,6 +130,7 @@ public class JavaLang {
                 createLambdaRule(value, statement),
                 createOperatorRule(value, "add", "+"),
                 createOperatorRule(value, "subtract", "-"),
+                createOperatorRule(value, "and", "&&"),
                 createOperatorRule(value, "or", "||"),
                 createConstructionRule(value),
                 createInvocationRule(value),

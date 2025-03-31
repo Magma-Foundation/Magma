@@ -84,6 +84,7 @@ public class CLang {
                 createSymbolValueRule(),
                 createOperatorRule(value, "add", "+"),
                 createOperatorRule(value, "subtract", "-"),
+                createOperatorRule(value, "and", "&&"),
                 createOperatorRule(value, "or", "||"),
                 createInvocationRule(value),
                 createAccessRule("data-access", ".", value),
