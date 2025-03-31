@@ -1,0 +1,9 @@
+#include "HeadedStream.h"
+auto __lambda0__();
+auto __lambda1__();
+auto __lambda2__();
+auto __lambda3__();
+auto __lambda4__();
+auto __lambda5__();
+auto __lambda6__();
+auto __lambda7__();
