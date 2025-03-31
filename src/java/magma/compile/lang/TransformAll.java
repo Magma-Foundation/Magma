@@ -61,8 +61,7 @@ public class TransformAll implements Transformer {
         return !typeParams.isEmpty();
     }
 
-    @Override
-    public Result<Node, CompileError> afterPass(State state, Node node) {
+    private Result<Node, CompileError> afterPass0(State state, Node node) {
         if (node.is("interface") || node.is("record") || node.is("class")) {
             return find(node, "content").flatMapValue(value -> {
                 return findNodeList(value, "children").mapValue(children -> {
@@ -159,8 +158,7 @@ public class TransformAll implements Transformer {
         return new Ok<>(node);
     }
 
-    @Override
-    public Result<Node, CompileError> beforePass(State state, Node node) {
+    private Result<Node, CompileError> beforePass0(State state, Node node) {
         if (!node.is("root")) return new Ok<>(node);
 
         Node content = node.findNode("content").orElse(new MapNode());
@@ -172,5 +170,15 @@ public class TransformAll implements Transformer {
 
         Node withChildren = content.withNodeList("children", newChildren);
         return new Ok<>(node.withNode("content", withChildren));
+    }
+
+    @Override
+    public Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node) {
+        return beforePass0(state, node).mapValue(value -> new Tuple<>(state, value));
+    }
+
+    @Override
+    public Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node) {
+        return afterPass0(state, node).mapValue(value -> new Tuple<>(state, value));
     }
 }

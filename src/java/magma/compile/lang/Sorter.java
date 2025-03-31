@@ -18,8 +18,7 @@ public class Sorter implements Transformer {
         return new MapNode("root").withNode("content", node1);
     }
 
-    @Override
-    public Result<Node, CompileError> afterPass(State state, Node node) {
+    private Result<Node, CompileError> afterPass0(State state, Node node) {
         if (!node.is("root")) return new Ok<>(node);
 
         List_<Node> children = node.findNode("content").orElse(new MapNode())
@@ -60,5 +59,19 @@ public class Sorter implements Transformer {
         }
 
         return new Tuple<>(tuple.left(), tuple.right().add(node));
+    }
+
+    private Result<Node, CompileError> beforePass0(State state, Node node) {
+        return new Ok<>(node);
+    }
+
+    @Override
+    public Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node) {
+        return beforePass0(state, node).mapValue(value -> new Tuple<>(state, value));
+    }
+
+    @Override
+    public Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node) {
+        return afterPass0(state, node).mapValue(value -> new Tuple<>(state, value));
     }
 }

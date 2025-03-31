@@ -2,15 +2,11 @@ package magma.compile.transform;
 
 import magma.compile.CompileError;
 import magma.compile.Node;
-import magma.result.Ok;
+import magma.option.Tuple;
 import magma.result.Result;
 
 public interface Transformer {
-    default Result<Node, CompileError> beforePass(State state, Node node) {
-        return new Ok<>(node);
-    }
+    Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node);
 
-    default Result<Node, CompileError> afterPass(State state, Node node) {
-        return new Ok<>(node);
-    }
+    Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 }
