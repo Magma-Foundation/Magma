@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,7 +85,17 @@ public class Main {
 
     private static String extracted(String segment) throws CompileException {
         if (segment.startsWith("package ")) return "";
-        if (segment.strip().startsWith("import ")) return "#include <temp.h>\n";
+
+        String stripped = segment.strip();
+        if (stripped.startsWith("import ")) {
+            String right = stripped.substring("import ".length());
+            if (right.endsWith(";")) {
+                String substring = right.substring(0, right.length() - ";".length());
+                String replaced = String.join("/", substring.split(Pattern.quote(".")));
+                return "#include \"" + replaced + ".h\"\n";
+            }
+        }
+
         if (segment.contains("class ")) return "struct Temp {\n};\n";
         throw new CompileException("Invalid root segment", segment);
     }
