@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 public class Main {
 
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
+    public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "clang");
 
     public static void main(String[] args) {
         try (Stream<Path> stream = Files.walk(SOURCE_DIRECTORY)) {
@@ -20,6 +21,7 @@ public class Main {
                     .filter(path -> path.toString().endsWith(".java"))
                     .collect(Collectors.toSet());
 
+            ArrayList<Path> targetPaths = new ArrayList<>();
             for (Path source : sources) {
                 String input = Files.readString(source);
 
@@ -47,7 +49,7 @@ public class Main {
                 Path relative = SOURCE_DIRECTORY.relativize(source);
                 Path parent = relative.getParent();
 
-                Path targetParent = Paths.get(".", "src", "clang").resolve(parent);
+                Path targetParent = TARGET_DIRECTORY.resolve(parent);
                 if (!Files.exists(targetParent)) {
                     Files.createDirectories(targetParent);
                 }
@@ -57,8 +59,24 @@ public class Main {
 
                 Path target = targetParent.resolve(name + ".c");
                 Files.writeString(target, output);
+
+                targetPaths.add(TARGET_DIRECTORY.relativize(target));
             }
-        } catch (IOException | CompileException e) {
+
+            Path build = TARGET_DIRECTORY.resolve("build.bat");
+            String joined = targetPaths.stream()
+                    .map(Path::toString)
+                    .map(path -> path + "^\n\t")
+                    .collect(Collectors.joining());
+
+            Files.writeString(build, "clang " + joined + "-o main.exe");
+
+            new ProcessBuilder("cmd", "/c", "build.bat")
+                    .directory(TARGET_DIRECTORY.toFile())
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (IOException | CompileException | InterruptedException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
