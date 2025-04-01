@@ -26,16 +26,18 @@ Option<ApplicationError> runWithSources(Set_<Path_> sources){return sources.stre
 }
 Map_<Location, Node> modifyTrees(Map_<Location, Node> trees){var collected = trees.streamValues()
                 .filter(node -> node.is("group"))
-                .flatMap(root -> {
-                    return root.findNodeList("expansions")
-                            .orElse(Lists.empty())
-                            .stream();
-                })
-                .collect(new ListCollector<>());
+                .flatMap(root -> root.findNodeList("expansions").orElse(Lists.empty()).stream())
+                .foldWithInitial(Lists.empty(), Main::getNodeList);
 
         Location location = new Location(Lists.of("magma"), "Generated");
         Node block = new MapNode("block").withNodeList("children", collected);
         Node root = new MapNode("root");return trees.with(location, root.withNode("content", block));
+}
+List_<Node> getNodeList(List_<Node> nodeList, Node node){if (nodeList.contains(node, Node::equalsTo)) {
+            return nodeList;
+        }else {
+            return nodeList.add(node);
+        }
 }
 Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees){return trees.stream().foldToResult(Lists.empty(), Main.postLoadTree).match(Main.complete, Some.new);
 }

@@ -4,7 +4,6 @@
 #include "../windows/collect/map/Maps.h"
 #include "../windows/io/Paths.h"
 #include "../windows/process/Processes.h"
-#include "../magma/collect/list/ListCollector.h"
 #include "../magma/collect/list/List_.h"
 #include "../magma/collect/map/Map_.h"
 #include "../magma/collect/set/SetCollector.h"
@@ -34,6 +33,8 @@ struct Main{Path_ SOURCE_DIRECTORY;Path_ TARGET_DIRECTORY;
 // expand Set_<Path_>
 // expand Map_<Location, Node>
 // expand Map_<Location, Node>
+// expand List_<Node>
+// expand List_<Node>
 // expand Option<ApplicationError>
 // expand Map_<Location, Node>
 // expand Result<List_<Path_>, ApplicationError>
@@ -74,6 +75,7 @@ void main(String* args);
 Option<ApplicationError> runWithFiles(Set_<Path_> files);
 Option<ApplicationError> runWithSources(Set_<Path_> sources);
 Map_<Location, Node> modifyTrees(Map_<Location, Node> trees);
+List_<Node> getNodeList(List_<Node> nodeList, Node node);
 Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees);
 Result<List_<Path_>, ApplicationError> postLoadTree(List_<Path_> relatives, Tuple<Location, Node> pathNodeTuple);
 Result<Map_<Location, Node>, ApplicationError> preLoadSources(Map_<Location, Node> trees, Path_ path);
