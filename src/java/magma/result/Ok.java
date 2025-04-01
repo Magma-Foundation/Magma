@@ -36,4 +36,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
         return supplier.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
     }
+
+    @Override
+    public boolean isOk() {
+        return true;
+    }
 }

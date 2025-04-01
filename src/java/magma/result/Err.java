@@ -36,4 +36,9 @@ public record Err<T, X>(X error) implements Result<T, X> {
     public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
         return new Err<>(error);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
 }

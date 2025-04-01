@@ -200,27 +200,32 @@ public class Main {
             return generateStruct("Temp");
         }
 
-        int interfaceIndex = segment.indexOf("interface ");
-        if (interfaceIndex >= 0) {
-            String afterKeyword = segment.substring(interfaceIndex + "interface ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String beforeContent = afterKeyword.substring(0, contentStart);
-                int extendsIndex = beforeContent.indexOf("extends ");
-
-                String name = extendsIndex >= 0
-                        ? beforeContent.substring(0, extendsIndex)
-                        : beforeContent;
-
-                return generateStruct(name.strip());
-            }
-        }
+        Result<String, CompileError> maybeInterface = compileInterface(segment);
+        if (maybeInterface.isOk()) return maybeInterface;
 
         if (segment.contains("record ")) {
             return generateStruct("Temp");
         }
 
         return new Err<>(new CompileError("Invalid root segment", segment));
+    }
+
+    private static Result<String, CompileError> compileInterface(String input) {
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex < 0) return new Err<>(new CompileError("Infix 'interface ' not present", input));
+
+        String afterKeyword = input.substring(interfaceIndex + "interface ".length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) return new Err<>(new CompileError("Infix '{' not present", afterKeyword));
+
+        String beforeContent = afterKeyword.substring(0, contentStart);
+        int extendsIndex = beforeContent.indexOf("extends ");
+
+        String name = extendsIndex >= 0
+                ? beforeContent.substring(0, extendsIndex)
+                : beforeContent;
+
+        return generateStruct(name.strip());
     }
 
     private static Ok<String, CompileError> generateStruct(String name) {

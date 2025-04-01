@@ -18,4 +18,6 @@ public interface Result<T, X> {
     <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
 
     <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier);
+
+    boolean isOk();
 }
