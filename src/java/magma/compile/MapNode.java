@@ -183,7 +183,8 @@ public final class MapNode implements Node {
 
     @Override
     public Boolean equalsTo(Node other) {
-        boolean isType = maybeType.map(other::is).orElse(false);
+        boolean noTypePresent = maybeType.isEmpty() && other.hasNoType();
+        boolean isType = noTypePresent || maybeType.map(other::is).orElse(false);
 
         Map_<String, String> stringsCopy = other.streamStrings().collect(new MapCollector<>());
         Map_<String, Node> nodesCopy = other.streamNodes().collect(new MapCollector<>());
@@ -192,6 +193,11 @@ public final class MapNode implements Node {
         return isType && Maps.equalsTo(strings, stringsCopy, String::equals)
                 && Maps.equalsTo(nodes, nodesCopy, Node::equalsTo)
                 && Maps.equalsTo(nodeLists, nodeListCopy, this::doNodeListsEqual);
+    }
+
+    @Override
+    public boolean hasNoType() {
+        return maybeType.isEmpty();
     }
 
     private boolean doNodeListsEqual(List_<Node> nodeList, List_<Node> nodeList2) {

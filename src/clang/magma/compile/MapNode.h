@@ -90,6 +90,7 @@ Node removeNode(String propertyKey);
 int hasNode(String propertyKey);
 int hasNodeList(String propertyKey);
 int equalsTo(Node other);
+int hasNoType();
 int doNodeListsEqual(List_<Node> nodeList, List_<Node> nodeList2);
 String toString();
 #endif

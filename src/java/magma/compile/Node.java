@@ -52,4 +52,6 @@ public interface Node {
     boolean hasNodeList(String propertyKey);
 
     Boolean equalsTo(Node other);
+
+    boolean hasNoType();
 }

@@ -54,4 +54,5 @@ Node removeNode(String propertyKey);
 int hasNode(String propertyKey);
 int hasNodeList(String propertyKey);
 int equalsTo(Node other);
+int hasNoType();
 #endif
