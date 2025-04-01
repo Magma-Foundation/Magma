@@ -1,4 +1,4 @@
-#include "../jvm/result/Results.h"
+#include "../windows/result/Results.h"
 #include "../magma/process/ExceptionalProcessError.h"
 #include "../magma/process/ProcessError.h"
 #include "../magma/process/Processes.h"

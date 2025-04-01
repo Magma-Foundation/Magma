@@ -166,12 +166,26 @@ public class Main {
                 String segmentString = right.substring(0, right.length() - ";".length());
                 String[] segmentSplits = segmentString.split(Pattern.quote("."));
 
-                ArrayList<String> path = new ArrayList<>();
+                List<String> path = new ArrayList<>();
                 for (int i = 0; i < namespace.size(); i++) {
                     path.add("..");
                 }
 
-                path.addAll(Arrays.asList(segmentSplits));
+                List<String> oldSegments = new ArrayList<>(Arrays.asList(segmentSplits));
+                List<String> newSegments = new ArrayList<>();
+
+                if (!oldSegments.isEmpty()) {
+                    String first = oldSegments.getFirst();
+                    List<String> slice = oldSegments.subList(1, oldSegments.size());
+                    if (first.equals("jvm")) {
+                        newSegments.add("windows");
+                        newSegments.addAll(slice);
+                    } else {
+                        newSegments.addAll(oldSegments);
+                    }
+                }
+
+                path.addAll(newSegments);
 
                 String replaced = String.join("/", path);
                 return new Ok<>("#include \"" + replaced + ".h\"\n");
