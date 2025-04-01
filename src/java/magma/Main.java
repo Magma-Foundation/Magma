@@ -123,11 +123,20 @@ public class Main {
         String nameWithExt = relative.getFileName().toString();
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
 
-        Path target = targetParent.resolve(name + ".c");
-        return magma.io.Files.writeString(target, output.toString())
-                .map(ApplicationError::new)
+        return writeSafe(targetParent, name, ".c", output.toString())
+                .or(() ->  writeSafe(targetParent, name, ".h", output.toString()))
                 .<Result<Path, ApplicationError>>map(Err::new)
-                .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(target)));
+                .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(targetParent.resolve(name + ".c"))));
+    }
+
+    private static Optional<ApplicationError> writeSafe(
+            Path targetParent,
+            String name,
+            String header,
+            String output
+    ) {
+        Path resolve = targetParent.resolve(name + header);
+        return magma.io.Files.writeString(resolve, output).map(ApplicationError::new);
     }
 
     private static Optional<ApplicationError> ensureTargetParent(Path targetParent) {
@@ -160,6 +169,7 @@ public class Main {
 
         if (segment.contains("class ") || segment.contains("interface ") || segment.contains("record "))
             return new Ok<>("struct Temp {\n};\n");
+
         return new Err<>(new CompileError("Invalid root segment", segment));
     }
 }
