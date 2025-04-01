@@ -201,8 +201,14 @@ public class Main {
             String afterKeyword = segment.substring(interfaceIndex + "interface ".length());
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                return generateStruct(name);
+                String beforeContent = afterKeyword.substring(0, contentStart);
+                int extendsIndex = beforeContent.indexOf("extends ");
+
+                String name = extendsIndex >= 0
+                        ? beforeContent.substring(0, extendsIndex)
+                        : beforeContent;
+
+                return generateStruct(name.strip());
             }
         }
 
