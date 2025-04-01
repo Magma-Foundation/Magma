@@ -1,6 +1,15 @@
 package magma;
 
 import jvm.result.Results;
+import magma.compile.CompileError;
+import magma.compile.rule.InfixRule;
+import magma.compile.MapNode;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.PrefixRule;
+import magma.compile.rule.Rule;
+import magma.compile.context.StringContext;
+import magma.compile.rule.StringRule;
+import magma.compile.rule.SuffixRule;
 import magma.process.ExceptionalProcessError;
 import magma.process.ProcessError;
 import magma.process.Processes;

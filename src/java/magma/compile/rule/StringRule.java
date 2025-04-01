@@ -1,5 +1,8 @@
-package magma;
+package magma.compile.rule;
 
+import magma.compile.CompileError;
+import magma.compile.MapNode;
+import magma.compile.context.NodeContext;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;

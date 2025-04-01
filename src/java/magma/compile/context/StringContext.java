@@ -1,4 +1,4 @@
-package magma;
+package magma.compile.context;
 
 public final class StringContext implements Context {
     private final String input;

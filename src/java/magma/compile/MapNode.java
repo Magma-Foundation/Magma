@@ -1,4 +1,4 @@
-package magma;
+package magma.compile;
 
 import java.util.Collections;
 import java.util.HashMap;

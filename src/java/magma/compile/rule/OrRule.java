@@ -1,5 +1,11 @@
-package magma;
+package magma.compile.rule;
 
+import magma.compile.CompileError;
+import magma.compile.MapNode;
+import magma.compile.State;
+import magma.compile.context.Context;
+import magma.compile.context.NodeContext;
+import magma.compile.context.StringContext;
 import magma.result.Result;
 
 import java.util.List;

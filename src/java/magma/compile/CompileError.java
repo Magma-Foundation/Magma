@@ -1,5 +1,6 @@
-package magma;
+package magma.compile;
 
+import magma.compile.context.Context;
 import magma.error.Error;
 
 import java.util.Collections;
