@@ -4,6 +4,7 @@ import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.io.Paths;
 import jvm.process.Processes;
+import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.collect.set.SetCollector;
@@ -55,9 +56,18 @@ public class Main {
     }
 
     private static Map_<Location, Node> modifyTrees(Map_<Location, Node> trees) {
+        var collected = trees.streamValues()
+                .filter(node -> node.is("group"))
+                .flatMap(root -> {
+                    return root.findNodeList("expansions")
+                            .orElse(Lists.empty())
+                            .stream();
+                })
+                .collect(new ListCollector<>());
+
         Location location = new Location(Lists.of("magma"), "Generated");
-        MapNode block = new MapNode("block");
-        MapNode root = new MapNode("root");
+        Node block = new MapNode("block").withNodeList("children", collected);
+        Node root = new MapNode("root");
         return trees.with(location, root.withNode("content", block));
     }
 

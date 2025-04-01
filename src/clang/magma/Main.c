@@ -24,9 +24,18 @@ Option<ApplicationError> runWithFiles(Set_<Path_> files){Set_<Path_> collect = f
 }
 Option<ApplicationError> runWithSources(Set_<Path_> sources){return sources.stream().foldToResult(Maps.empty(), Main.preLoadSources).mapValue(Main.modifyTrees).match(Main.postLoadTrees, Some.new);
 }
-Map_<Location, Node> modifyTrees(Map_<Location, Node> trees){Location location = new Location(Lists.of("magma"), "Generated");
-        MapNode block = new MapNode("block");
-        MapNode root = new MapNode("root");return trees.with(location, root.withNode("content", block));
+Map_<Location, Node> modifyTrees(Map_<Location, Node> trees){var collected = trees.streamValues()
+                .filter(node -> node.is("group"))
+                .flatMap(root -> {
+                    return root.findNodeList("expansions")
+                            .orElse(Lists.empty())
+                            .stream();
+                })
+                .collect(new ListCollector<>());
+
+        Location location = new Location(Lists.of("magma"), "Generated");
+        Node block = new MapNode("block").withNodeList("children", collected);
+        Node root = new MapNode("root");return trees.with(location, root.withNode("content", block));
 }
 Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees){return trees.stream().foldToResult(Lists.empty(), Main.postLoadTree).match(Main.complete, Some.new);
 }

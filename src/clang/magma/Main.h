@@ -4,6 +4,7 @@
 #include "../windows/collect/map/Maps.h"
 #include "../windows/io/Paths.h"
 #include "../windows/process/Processes.h"
+#include "../magma/collect/list/ListCollector.h"
 #include "../magma/collect/list/List_.h"
 #include "../magma/collect/map/Map_.h"
 #include "../magma/collect/set/SetCollector.h"
