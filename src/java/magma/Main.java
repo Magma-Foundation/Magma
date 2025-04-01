@@ -4,6 +4,7 @@ import jvm.collect.list.Lists;
 import jvm.collect.map.Maps;
 import jvm.io.Paths;
 import jvm.process.Processes;
+import magma.collect.list.ListCollector;
 import magma.collect.list.List_;
 import magma.collect.map.Map_;
 import magma.collect.set.SetCollector;
@@ -12,6 +13,7 @@ import magma.collect.stream.Joiner;
 import magma.compile.Compiler;
 import magma.compile.MapNode;
 import magma.compile.Node;
+import magma.compile.lang.Qualified;
 import magma.compile.source.Location;
 import magma.compile.source.PathSource;
 import magma.compile.source.Source;
@@ -58,12 +60,36 @@ public class Main {
         var collected = trees.streamValues()
                 .filter(node -> node.is("group"))
                 .flatMap(root -> root.findNodeList("expansions").orElse(Lists.empty()).stream())
+                .map(expansion -> findExpansions(expansion, trees))
+                .flatMap(List_::stream)
                 .foldWithInitial(Lists.empty(), Main::foldUniquely);
 
         Location location = new Location(Lists.of("magma"), "Generated");
         Node block = new MapNode("block").withNodeList("children", collected);
         Node root = new MapNode("root");
         return trees.with(location, root.withNode("content", block));
+    }
+
+    private static List_<Node> findExpansions(Node expansion, Map_<Location, Node> trees) {
+        Node base = expansion.findNode("base").orElse(new MapNode());
+        List_<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
+
+        List_<String> qualified = Qualified.from(base);
+        Node rootOrGroup = trees.stream()
+                .filter(entry -> entry.left().equalsTo(qualified))
+                .next()
+                .map(Tuple::right)
+                .orElse(new MapNode());
+
+        if (!rootOrGroup.is("group")) return Lists.of(expansion);
+
+        return rootOrGroup.findNodeList("expansions")
+                .orElse(Lists.empty())
+                .stream()
+                .map(node -> findExpansions(node, trees))
+                .flatMap(List_::stream)
+                .collect(new ListCollector<>())
+                .add(expansion);
     }
 
     private static List_<Node> foldUniquely(List_<Node> nodeList, Node node) {
