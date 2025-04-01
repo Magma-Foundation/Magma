@@ -94,21 +94,26 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        StringBuilder output = new StringBuilder();
+        Result<StringBuilder, CompileError> builder = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            output.append(compile(segment));
+            builder = builder.and(() -> compile(segment)).mapValue(tuple -> {
+                tuple.left().append(tuple.right());
+                return tuple.left();
+            });
         }
 
-        Path relative = SOURCE_DIRECTORY.relativize(source);
-        Path parent = relative.getParent();
+        return builder.mapErr(ApplicationError::new).flatMapValue(output -> {
+            Path relative = SOURCE_DIRECTORY.relativize(source);
+            Path parent = relative.getParent();
 
-        Path targetParent = TARGET_DIRECTORY.resolve(parent);
-        return ensureTargetParent(targetParent)
-                .<Result<Path, ApplicationError>>map(Err::new)
-                .orElseGet(() -> getResult(relative, targetParent, output));
+            Path targetParent = TARGET_DIRECTORY.resolve(parent);
+            return ensureTargetParent(targetParent)
+                    .<Result<Path, ApplicationError>>map(Err::new)
+                    .orElseGet(() -> writeOutput(relative, targetParent, output));
+        });
     }
 
-    private static Result<Path, ApplicationError> getResult(Path relative, Path targetParent, StringBuilder output) {
+    private static Result<Path, ApplicationError> writeOutput(Path relative, Path targetParent, StringBuilder output) {
         String nameWithExt = relative.getFileName().toString();
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
 
