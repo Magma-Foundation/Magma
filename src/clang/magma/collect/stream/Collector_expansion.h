@@ -1,3 +1,0 @@
-#ifndef magma_collect_stream_Collector_expansion
-#define magma_collect_stream_Collector_expansion
-#endif
