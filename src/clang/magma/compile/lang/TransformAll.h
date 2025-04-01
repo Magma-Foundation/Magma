@@ -15,17 +15,17 @@
 #include "../../../magma/result/Result.h"
 struct TransformAll{int counter;
 };
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-int isFunctionalImport(magma.compile.Node child);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+int isFunctionalImport(Node child);
+Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node);
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 #endif

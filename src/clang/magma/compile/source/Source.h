@@ -4,7 +4,7 @@
 #include "../../../magma/result/Result.h"
 struct Source{
 };
-// expand magma.result.Result<String, magma.io.IOError>
-magma.compile.source.Location location();
-magma.result.Result<String, magma.io.IOError> readString();
+// expand Result<String, IOError>
+Location location();
+Result<String, IOError> readString();
 #endif

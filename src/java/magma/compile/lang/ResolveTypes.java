@@ -48,7 +48,7 @@ public class ResolveTypes implements Transformer {
     }
 
     private static Tuple<State, Node> wrapToTuple(State state, List_<String> newName) {
-        Node qualifiedNode = StringLists.toQualified(newName);
+        Node qualifiedNode = Qualified.to(newName);
         return new Tuple<>(state, qualifiedNode);
     }
 
@@ -77,7 +77,7 @@ public class ResolveTypes implements Transformer {
         }
 
         if (node.is("qualified")) {
-            List_<String> oldName = StringLists.fromQualifiedType(node);
+            List_<String> oldName = Qualified.from(node);
             if (oldName.isEmpty())
                 return new Err<>(new CompileError("At least one segment must be present", new NodeContext(node)));
 

@@ -12,21 +12,21 @@
 #include "../../../../magma/result/Result.h"
 struct OrRule{
 };
-// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
-// expand magma.compile.rule.tree.OrState<magma.compile.rule.tree.T>
-// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
-// expand magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.rule.Rule>
-// expand magma.result.Err<>
+// expand Result<T, CompileError>
+// expand OrState<T>
+// expand Result<T, CompileError>
+// expand Result<T, CompileError>
+// expand Result<Node, CompileError>
+// expand Result<String, CompileError>
+// expand List_<Rule>
+// expand Err<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();
 int __lambda3__();
 int __lambda4__();
 int __lambda5__();
-magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError> apply(magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>(*applicator)(magma.compile.rule.Rule), magma.compile.context.Context(*context)());
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input);
+Result<T, CompileError> apply(Result<T, CompileError>(*applicator)(Rule), Context(*context)());
+Result<Node, CompileError> parse(String input);
+Result<String, CompileError> generate(Node input);
 #endif

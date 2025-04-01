@@ -7,13 +7,13 @@
 #include "../../../../magma/compile/rule/locate/Locator.h"
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Result.h"
-struct InfixRule{magma.compile.rule.Rule left;String infix;magma.compile.rule.Rule right;magma.compile.rule.locate.Locator locator;
+struct InfixRule{Rule left;String infix;Rule right;Locator locator;
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
+// expand Result<Node, CompileError>
+// expand Result<String, CompileError>
 int __lambda0__();
 int __lambda1__();
-magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
+public InfixRule(Rule left, String infix, Rule right, Locator locator);
+Result<Node, CompileError> parse(String input);
+Result<String, CompileError> generate(Node node);
 #endif

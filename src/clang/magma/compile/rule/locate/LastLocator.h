@@ -5,6 +5,6 @@
 #include "../../../../magma/option/Some.h"
 struct LastLocator{
 };
-// expand magma.option.Option<int>
-magma.option.Option<int> locate(String input, String infix);
+// expand Option<int>
+Option<int> locate(String input, String infix);
 #endif

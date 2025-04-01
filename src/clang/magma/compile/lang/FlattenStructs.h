@@ -12,22 +12,22 @@
 #include "../../../magma/result/Result.h"
 struct FlattenStructs{
 };
-// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.option.Tuple<>
-// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> bucketClassMember(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node element);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+// expand Tuple<List_<Node>, List_<Node>>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand Tuple<>
+// expand Tuple<List_<Node>, List_<Node>>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+Tuple<List_<Node>, List_<Node>> bucketClassMember(Tuple<List_<Node>, List_<Node>> tuple, Node element);
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 #endif

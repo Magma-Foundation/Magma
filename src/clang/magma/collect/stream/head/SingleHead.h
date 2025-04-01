@@ -3,6 +3,6 @@
 #include "../../../../magma/option/None.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Some.h"
-// expand magma.option.Option<T>
-// expand magma.option.Some<>
+// expand Option<T>
+// expand Some<>
 #endif

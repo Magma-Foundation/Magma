@@ -3,6 +3,7 @@ package magma.compile;
 import jvm.collect.map.Maps;
 import magma.collect.map.Map_;
 import magma.compile.lang.CLang;
+import magma.compile.lang.Compacter;
 import magma.compile.lang.ExpandGenerics;
 import magma.compile.lang.FlattenRoot;
 import magma.compile.lang.FlattenStructs;
@@ -25,6 +26,7 @@ public class Compiler {
     public static Result<Map_<String, String>, CompileError> postLoad(State state, Node tree) {
         return new TreeTransformingStage(new FlattenStructs()).transform(state, tree)
                 .flatMapValue(transformUsing(new FlattenGroup()))
+                .flatMapValue(transformUsing(new Compacter()))
                 .flatMapValue(transformUsing(new Formatter()))
                 .flatMapValue(transformUsing(new FlattenRoot()))
                 .flatMapValue(transformUsing(new Sorter()))

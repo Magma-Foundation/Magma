@@ -21,23 +21,23 @@
 #include "../../../static magma/compile/lang/CommonLang/*.h"
 struct JavaLang{
 };
-magma.compile.rule.Rule createJavaRootRule();
-magma.compile.rule.tree.OrRule createJavaRootSegmentRule();
-magma.compile.rule.tree.TypeRule createRecordRule();
-magma.compile.rule.tree.TypeRule createInterfaceRule();
-magma.compile.rule.tree.TypeRule createClassRule();
-magma.compile.rule.Rule createClassMemberRule();
-magma.compile.rule.tree.TypeRule createInitializationRule();
-magma.compile.rule.tree.TypeRule createDefinitionStatementRule();
-magma.compile.rule.Rule createMethodRule();
-magma.compile.rule.tree.TypeRule createTypedDefinitionRule();
-magma.compile.rule.Rule createStatementRule();
-magma.compile.rule.Rule createValueRule(magma.compile.rule.LazyRule value, magma.compile.rule.Rule statement);
-magma.compile.rule.tree.TypeRule createQuantityRule(magma.compile.rule.LazyRule value);
-magma.compile.rule.tree.TypeRule createDataAccessRule(magma.compile.rule.LazyRule value);
-magma.compile.rule.Rule createLambdaRule(magma.compile.rule.Rule value, magma.compile.rule.Rule statement);
-magma.compile.rule.tree.TypeRule createConstructionRule(magma.compile.rule.LazyRule value);
-magma.compile.rule.Rule createTypeRule();
-magma.compile.rule.tree.TypeRule createArrayRule(magma.compile.rule.LazyRule type);
-magma.compile.rule.Rule createImportRule(String prefix, String type);
+Rule createJavaRootRule();
+OrRule createJavaRootSegmentRule();
+TypeRule createRecordRule();
+TypeRule createInterfaceRule();
+TypeRule createClassRule();
+Rule createClassMemberRule();
+TypeRule createInitializationRule();
+TypeRule createDefinitionStatementRule();
+Rule createMethodRule();
+TypeRule createTypedDefinitionRule();
+Rule createStatementRule();
+Rule createValueRule(LazyRule value, Rule statement);
+TypeRule createQuantityRule(LazyRule value);
+TypeRule createDataAccessRule(LazyRule value);
+Rule createLambdaRule(Rule value, Rule statement);
+TypeRule createConstructionRule(LazyRule value);
+Rule createTypeRule();
+TypeRule createArrayRule(LazyRule type);
+Rule createImportRule(String prefix, String type);
 #endif

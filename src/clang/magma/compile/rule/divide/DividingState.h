@@ -5,24 +5,24 @@
 #include "../../../../magma/option/Tuple.h"
 struct DividingState{
 };
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<char>
-magma.compile.rule.divide.DividingState append(char c);
+// expand List_<String>
+// expand Option<Tuple<char, DividingState>>
+// expand Tuple<char, DividingState>
+// expand Tuple<char, DividingState>
+// expand Option<DividingState>
+// expand Option<Tuple<char, DividingState>>
+// expand Tuple<char, DividingState>
+// expand Tuple<char, DividingState>
+// expand Option<char>
+DividingState append(char c);
 int isLevel();
-magma.compile.rule.divide.DividingState exit();
-magma.compile.rule.divide.DividingState enter();
-magma.compile.rule.divide.DividingState advance();
-magma.collect.list.List_<String> segments();
+DividingState exit();
+DividingState enter();
+DividingState advance();
+List_<String> segments();
 int isShallow();
-magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> append();
-magma.option.Option<magma.compile.rule.divide.DividingState> appendAndDiscard();
-magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> pop();
-magma.option.Option<char> peek();
+Option<Tuple<char, DividingState>> append();
+Option<DividingState> appendAndDiscard();
+Option<Tuple<char, DividingState>> pop();
+Option<char> peek();
 #endif

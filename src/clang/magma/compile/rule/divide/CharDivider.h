@@ -4,7 +4,7 @@
 #include "../../../../magma/collect/list/List_.h"
 struct CharDivider{
 };
-// expand magma.collect.list.List_<String>
-magma.collect.list.List_<String> divide(String input);
+// expand List_<String>
+List_<String> divide(String input);
 String join(String current, String element);
 #endif

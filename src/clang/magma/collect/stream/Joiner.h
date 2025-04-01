@@ -5,16 +5,16 @@
 #include "../../../magma/option/Some.h"
 struct Joiner{
 };
-// expand magma.collect.stream.Collector<String, magma.option.Option<String>>
-// expand magma.option.Option<String>
-// expand magma.option.Option<String>
-// expand magma.option.Option<String>
-// expand magma.option.None<>
-// expand magma.option.Option<String>
-// expand magma.option.Some<>
-// expand magma.option.Option<String>
+// expand Collector<String, Option<String>>
+// expand Option<String>
+// expand Option<String>
+// expand Option<String>
+// expand None<>
+// expand Option<String>
+// expand Some<>
+// expand Option<String>
 int __lambda0__();
-magma.collect.stream.public Joiner();
-magma.option.Option<String> createInitial();
-magma.option.Option<String> fold(magma.option.Option<String> maybeCurrent, String element);
+public Joiner();
+Option<String> createInitial();
+Option<String> fold(Option<String> maybeCurrent, String element);
 #endif

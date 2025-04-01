@@ -22,16 +22,16 @@
 #include "../../../static magma/compile/lang/CommonLang/*.h"
 struct CLang{
 };
-magma.compile.rule.Rule createCRootRule();
-magma.compile.rule.Rule createCRootSegmentRule();
-magma.compile.rule.tree.TypeRule createExpansionRule();
-magma.compile.rule.Rule createFunctionRule();
-magma.compile.rule.Rule createStatementRule();
-magma.compile.rule.Rule createValueRule();
-magma.compile.rule.Rule createStructRule();
-magma.compile.rule.Rule createStructMemberRule();
-magma.compile.rule.tree.OrRule createDefinitionsRule();
-magma.compile.rule.Rule createFunctionalDefinitionType();
-magma.compile.rule.Rule createTypeRule();
-magma.compile.rule.Rule createIncludeRule();
+Rule createCRootRule();
+Rule createCRootSegmentRule();
+TypeRule createExpansionRule();
+Rule createFunctionRule();
+Rule createStatementRule();
+Rule createValueRule();
+Rule createStructRule();
+Rule createStructMemberRule();
+OrRule createDefinitionsRule();
+Rule createFunctionalDefinitionType();
+Rule createTypeRule();
+Rule createIncludeRule();
 #endif

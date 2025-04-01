@@ -5,5 +5,5 @@
 struct StringContext{
 };
 String display0();
-magma.collect.string.String_ display();
+String_ display();
 #endif

@@ -5,9 +5,9 @@
 #include "../../../../magma/option/Tuple.h"
 struct DecoratedFolder{
 };
-// expand magma.option.Option<magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-magma.option.Option<magma.compile.rule.divide.DividingState> processSlash(magma.option.Tuple<char, magma.compile.rule.divide.DividingState> tuple);
-magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingState state, char c);
+// expand Option<DividingState>
+// expand Tuple<char, DividingState>
+Option<DividingState> processSlash(Tuple<char, DividingState> tuple);
+DividingState fold(DividingState state, char c);
 String join(String current, String element);
 #endif

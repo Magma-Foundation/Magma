@@ -7,8 +7,8 @@ import magma.collect.list.List_;
 import magma.compile.MapNode;
 import magma.compile.Node;
 
-public class StringLists {
-    public static Node toQualified(List_<String> list) {
+public class Qualified {
+    public static Node to(List_<String> list) {
         List_<Node> resolved = list.stream()
                 .map(segment -> new MapNode().withString("value", segment))
                 .collect(new ListCollector<Node>());
@@ -16,7 +16,7 @@ public class StringLists {
         return new MapNode("qualified").withNodeList("segments", resolved);
     }
 
-    public static List_<String> fromQualifiedType(Node node) {
+    public static List_<String> from(Node node) {
         return node.findNodeList("segments")
                 .orElse(Lists.empty())
                 .stream()

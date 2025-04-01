@@ -3,15 +3,15 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-// expand magma.collect.map.Map_<K, V>
-// expand magma.option.Option<V>
-// expand magma.collect.stream.Stream<magma.option.Tuple<K, V>>
-// expand magma.option.Tuple<K, V>
-// expand magma.option.Tuple<K, V>
-// expand magma.collect.map.Map_<K, V>
-// expand magma.collect.map.Map_<K, V>
-// expand magma.collect.map.Map_<K, V>
-// expand magma.collect.map.Map_<K, V>
-// expand magma.collect.stream.Stream<V>
-// expand magma.collect.stream.Stream<K>
+// expand Map_<K, V>
+// expand Option<V>
+// expand Stream<Tuple<K, V>>
+// expand Tuple<K, V>
+// expand Tuple<K, V>
+// expand Map_<K, V>
+// expand Map_<K, V>
+// expand Map_<K, V>
+// expand Map_<K, V>
+// expand Stream<V>
+// expand Stream<K>
 #endif

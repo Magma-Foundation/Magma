@@ -9,31 +9,31 @@
 #include "../../../magma/option/None.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Some.h"
-struct State{magma.collect.list.List_<magma.collect.list.List_<String>> imports;magma.collect.list.List_<magma.compile.transform.Frame> frames;magma.compile.source.Location location;
+struct State{List_<List_<String>> imports;List_<Frame> frames;Location location;
 };
-// expand magma.collect.list.List_<magma.collect.list.List_<String>>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<magma.compile.transform.Frame>
-// expand magma.collect.list.List_<magma.collect.list.List_<String>>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<magma.compile.transform.Frame>
-// expand magma.option.Option<magma.collect.list.List_<String>>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
+// expand List_<List_<String>>
+// expand List_<String>
+// expand List_<String>
+// expand List_<Frame>
+// expand List_<List_<String>>
+// expand List_<String>
+// expand List_<String>
+// expand List_<Frame>
+// expand Option<List_<String>>
+// expand List_<String>
+// expand List_<String>
+// expand List_<String>
 int __lambda0__();
 int __lambda1__();
-magma.compile.transform.public State(magma.compile.source.Location location, magma.collect.list.List_<magma.collect.list.List_<String>> imports, magma.collect.list.List_<magma.compile.transform.Frame> frames);
-magma.compile.transform.public State(magma.compile.source.Location location);
-magma.compile.transform.State defineImport(magma.compile.Node import_);
-magma.compile.transform.State clearImports();
-magma.option.Option<magma.collect.list.List_<String>> qualifyName(String name);
-magma.compile.transform.State defineType(magma.compile.Node type);
-magma.compile.transform.State enter();
-magma.compile.transform.State exit();
+public State(Location location, List_<List_<String>> imports, List_<Frame> frames);
+public State(Location location);
+State defineImport(Node import_);
+State clearImports();
+Option<List_<String>> qualifyName(String name);
+State defineType(Node type);
+State enter();
+State exit();
 int isTypeParamDefined(String type);
-magma.collect.list.List_<String> namespace();
+List_<String> namespace();
 String name();
 #endif

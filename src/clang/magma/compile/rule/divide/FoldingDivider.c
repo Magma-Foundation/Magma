@@ -1,7 +1,7 @@
 #include "FoldingDivider.h"
-magma.compile.rule.divide.public FoldingDivider(magma.compile.rule.divide.Folder folder){this.folder = folder;
+public FoldingDivider(Folder folder){this.folder = folder;
 }
-magma.collect.list.List_<String> divide(String input){List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
+List_<String> divide(String input){List_<Character> collector = Streams.fromString(input).collect(new ListCollector<>());
 
         DividingState current = new MutableDividingState(collector);while(true) {
             Tuple<Boolean, Tuple<Character, DividingState>> maybeNext = current

@@ -1,19 +1,19 @@
 #ifndef magma_option_None
 #define magma_option_None
-// expand magma.option.Option<magma.option.R>
-// expand magma.option.None<>
-// expand magma.option.Tuple<int, T>
-// expand magma.option.Tuple<>
-// expand magma.option.Option<T>
-// expand magma.option.None<>
-// expand magma.option.Option<T>
-// expand magma.option.Option<T>
-// expand magma.option.Option<magma.option.R>
-// expand magma.option.None<>
-// expand magma.option.Option<magma.option.R>
-// expand magma.option.Option<magma.option.Tuple<T, magma.option.R>>
-// expand magma.option.Tuple<T, magma.option.R>
-// expand magma.option.Tuple<T, magma.option.R>
-// expand magma.option.None<>
-// expand magma.option.Option<magma.option.R>
+// expand Option<R>
+// expand None<>
+// expand Tuple<int, T>
+// expand Tuple<>
+// expand Option<T>
+// expand None<>
+// expand Option<T>
+// expand Option<T>
+// expand Option<R>
+// expand None<>
+// expand Option<R>
+// expand Option<Tuple<T, R>>
+// expand Tuple<T, R>
+// expand Tuple<T, R>
+// expand None<>
+// expand Option<R>
 #endif

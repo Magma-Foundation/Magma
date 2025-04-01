@@ -11,10 +11,10 @@
 #include "../../../magma/result/Result.h"
 struct ExpandGenerics{
 };
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 #endif

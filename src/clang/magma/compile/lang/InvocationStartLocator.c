@@ -1,5 +1,5 @@
 #include "InvocationStartLocator.h"
-magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue){List_<Tuple<Integer, Character>> current = queue;while (true) {
+List_<Tuple<int, char>> skipDoubleQuotes(List_<Tuple<int, char>> queue){List_<Tuple<Integer, Character>> current = queue;while (true) {
             Tuple<Boolean, Tuple<Tuple<Integer, Character>, List_<Tuple<Integer, Character>>>> first = current.popFirst()
                     .toTuple(new Tuple<>(DEFAULT_PAIR, current));
 
@@ -16,7 +16,7 @@ magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.c
             }
         }return current;
 }
-magma.option.Option<int> locate(String input, String infix){List_<Tuple<Integer, Character>> queue = new HeadedStream<>(new RangeHead(input.length()))
+Option<int> locate(String input, String infix){List_<Tuple<Integer, Character>> queue = new HeadedStream<>(new RangeHead(input.length()))
                 .map(index -> input.length() - index - 1)
                 .map(index -> new Tuple<>(index, input.charAt(index)))
                 .collect(new ListCollector<>());

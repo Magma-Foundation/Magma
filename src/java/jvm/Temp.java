@@ -4,7 +4,7 @@ import jvm.collect.list.Lists;
 import magma.collect.list.List_;
 import magma.compile.MapNode;
 import magma.compile.Node;
-import magma.compile.lang.StringLists;
+import magma.compile.lang.Qualified;
 import magma.option.None;
 import magma.option.Option;
 
@@ -38,7 +38,7 @@ public class Temp {
 
         // This is the base type, so the base of Map<K, V> would be Map.
         Node qualifiedBaseType = expansion.findNode("base").orElse(new MapNode());
-        List_<String> listBaseType = StringLists.fromQualifiedType(qualifiedBaseType);
+        List_<String> listBaseType = Qualified.from(qualifiedBaseType);
 
         // These are the argument types, so for Map<K, V>, the types would be [ K, V ].
         List_<Node> argumentTypes = expansion.findNodeList("arguments").orElse(Lists.empty());

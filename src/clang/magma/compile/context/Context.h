@@ -3,5 +3,5 @@
 #include "../../../magma/collect/string/String_.h"
 struct Context{
 };
-magma.collect.string.String_ display();
+String_ display();
 #endif

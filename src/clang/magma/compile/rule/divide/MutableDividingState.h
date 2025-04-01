@@ -4,37 +4,37 @@
 #include "../../../../magma/collect/list/List_.h"
 #include "../../../../magma/option/Option.h"
 #include "../../../../magma/option/Tuple.h"
-struct MutableDividingState{magma.collect.list.List_<char> queue;magma.collect.list.List_<String> segments;magma.compile.rule.divide.StringBuilder buffer;int depth;
+struct MutableDividingState{List_<char> queue;List_<String> segments;StringBuilder buffer;int depth;
 };
-// expand magma.collect.list.List_<char>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<char>
-// expand magma.collect.list.List_<char>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
-// expand magma.option.Option<char>
-// expand magma.option.Option<magma.compile.rule.divide.DividingState>
-// expand magma.option.Tuple<>
-// expand magma.option.Tuple<>
+// expand List_<char>
+// expand List_<String>
+// expand List_<char>
+// expand List_<char>
+// expand List_<String>
+// expand List_<String>
+// expand Option<Tuple<char, DividingState>>
+// expand Tuple<char, DividingState>
+// expand Tuple<char, DividingState>
+// expand Option<Tuple<char, DividingState>>
+// expand Tuple<char, DividingState>
+// expand Tuple<char, DividingState>
+// expand Option<char>
+// expand Option<DividingState>
+// expand Tuple<>
+// expand Tuple<>
 int __lambda0__();
 int __lambda1__();
-magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue);
-magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue, magma.collect.list.List_<String> segments, magma.compile.rule.divide.StringBuilder buffer, int depth);
-magma.compile.rule.divide.DividingState append(char c);
+public MutableDividingState(List_<char> queue);
+public MutableDividingState(List_<char> queue, List_<String> segments, StringBuilder buffer, int depth);
+DividingState append(char c);
 int isLevel();
-magma.compile.rule.divide.DividingState exit();
-magma.compile.rule.divide.DividingState enter();
-magma.compile.rule.divide.DividingState advance();
-magma.collect.list.List_<String> segments();
+DividingState exit();
+DividingState enter();
+DividingState advance();
+List_<String> segments();
 int isShallow();
-magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> append();
-magma.option.Option<magma.option.Tuple<char, magma.compile.rule.divide.DividingState>> pop();
-magma.option.Option<char> peek();
-magma.option.Option<magma.compile.rule.divide.DividingState> appendAndDiscard();
+Option<Tuple<char, DividingState>> append();
+Option<Tuple<char, DividingState>> pop();
+Option<char> peek();
+Option<DividingState> appendAndDiscard();
 #endif

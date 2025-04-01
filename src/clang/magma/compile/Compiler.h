@@ -3,6 +3,7 @@
 #include "../../windows/collect/map/Maps.h"
 #include "../../magma/collect/map/Map_.h"
 #include "../../magma/compile/lang/CLang.h"
+#include "../../magma/compile/lang/Compacter.h"
 #include "../../magma/compile/lang/ExpandGenerics.h"
 #include "../../magma/compile/lang/FlattenRoot.h"
 #include "../../magma/compile/lang/FlattenStructs.h"
@@ -20,29 +21,29 @@
 #include "../../magma/result/Result.h"
 struct Compiler{
 };
-// expand magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.option.Tuple<String, magma.compile.Node>
-// expand magma.option.Tuple<>
+// expand Result<Map_<String, String>, CompileError>
+// expand Map_<String, String>
+// expand Map_<String, String>
+// expand Result<Node, CompileError>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Result<Map_<String, String>, CompileError>
+// expand Map_<String, String>
+// expand Map_<String, String>
+// expand Result<Map_<String, String>, CompileError>
+// expand Map_<String, String>
+// expand Map_<String, String>
+// expand Map_<String, String>
+// expand Tuple<String, Node>
+// expand Tuple<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>(*transformUsing)(magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>)(magma.compile.transform.Transformer transformer);
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateRoots(magma.compile.Node roots);
-magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> generateTarget(magma.collect.map.Map_<String, String> current, magma.option.Tuple<String, magma.compile.Node> tuple);
+Result<Map_<String, String>, CompileError> postLoad(State state, Node tree);
+Result<Node, CompileError> preLoad(String input, State state);
+Result<Tuple<State, Node>, CompileError>(*transformUsing)(Tuple<State, Node>)(Transformer transformer);
+Result<Map_<String, String>, CompileError> generateRoots(Node roots);
+Result<Map_<String, String>, CompileError> generateTarget(Map_<String, String> current, Tuple<String, Node> tuple);
 #endif

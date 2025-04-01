@@ -1,5 +1,5 @@
 #include "TransformAll.h"
-int isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return false;
+int isFunctionalImport(Node child){if (!child.is("import")) return false;
 
         List_<String> namespace = child.findNodeList("namespace")
                 .orElse(Lists.empty())
@@ -10,7 +10,7 @@ int isFunctionalImport(magma.compile.Node child){if (!child.is("import")) return
 
         return namespace.size() >= 3 && namespace.subList(0, 3).equalsTo(Lists.of("java", "util", "function"));
 }
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("root")) {
+Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node){if (node.is("root")) {
             Node content = node.findNode("content").orElse(new MapNode());
             List_<Node> children = content.findNodeList("children").orElse(Lists.empty());
             List_<Node> newChildren = children.stream()
@@ -24,7 +24,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 
         Node type = node.findNode("type").orElse(new MapNode());if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
 
-        List_<String> qualifiedName = StringLists.fromQualifiedType(type.findNode("base")
+        List_<String> qualifiedName = Qualified.from(type.findNode("base")
                 .orElse(new MapNode()));
 
         List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "BiFunction"))) {
@@ -51,7 +51,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
         }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Predicate"))) {
             Node param = arguments.get(0);
 
-            Node returns = StringLists.toQualified(Lists.of("int"));
+            Node returns = Qualified.to(Lists.of("int"));
             Node definition = node.retype("functional-definition")
                     .removeNode("type")
                     .withNode("return", returns)
@@ -61,7 +61,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
         }if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Consumer"))) {
             Node paramType = arguments.get(0);
 
-            Node qualified = StringLists.toQualified(Lists.of("void"));
+            Node qualified = Qualified.to(Lists.of("void"));
             Node definition = node.retype("functional-definition")
                     .removeNode("type")
                     .withNode("return", qualified)
@@ -78,7 +78,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             return new Ok<>(new Tuple<>(state, definition));
         }return ((state, node));
 }
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("method")) {
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node){if (node.is("method")) {
             return new Ok<>(new Tuple<>(state, node.retype("function")));
         }if (node.is("block")) {
             return new Ok<>(new Tuple<>(state, node.mapNodeList("children", children -> {
@@ -134,7 +134,8 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
-                    .withNode("type", StringLists.toQualified(Lists.of("int")));
+                    .withNode("type", Qualified.to(Lists.of("int")));
+
             Node function = new MapNode("function")
                     .withNode("definition", definition)
                     .withNode("content", propertyValue);
@@ -145,7 +146,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
         }if (node.is("method-access")) {
             return new Ok<>(new Tuple<>(state, node.retype("data-access")));
         }if (node.is("construction")) {
-            List_<String> list = StringLists.fromQualifiedType(node.findNode("type")
+            List_<String> list = Qualified.from(node.findNode("type")
                     .orElse(new MapNode()));
 
             Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));

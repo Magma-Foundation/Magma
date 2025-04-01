@@ -9,20 +9,20 @@
 #include "../../../../magma/result/Err.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-// expand magma.option.None<>
-// expand magma.compile.rule.tree.OrState<T>
-// expand magma.compile.rule.tree.OrState<>
-// expand magma.option.Some<>
-// expand magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.result.Result<T, magma.collect.list.List_<magma.compile.CompileError>>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.compile.rule.tree.OrState<T>
-// expand magma.compile.rule.tree.OrState<>
-// expand magma.option.Option<T>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.result.Err<>
+// expand None<>
+// expand OrState<T>
+// expand OrState<>
+// expand Some<>
+// expand Result<T, List_<CompileError>>
+// expand List_<CompileError>
+// expand List_<CompileError>
+// expand Result<T, List_<CompileError>>
+// expand List_<CompileError>
+// expand List_<CompileError>
+// expand OrState<T>
+// expand OrState<>
+// expand Option<T>
+// expand List_<CompileError>
+// expand Err<>
 int __lambda0__();
 #endif

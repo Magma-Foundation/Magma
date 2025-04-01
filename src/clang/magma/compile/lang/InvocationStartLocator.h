@@ -9,17 +9,17 @@
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Some.h"
 #include "../../../magma/option/Tuple.h"
-struct InvocationStartLocator{magma.option.Tuple<int, char> DEFAULT_PAIR;
+struct InvocationStartLocator{Tuple<int, char> DEFAULT_PAIR;
 };
-// expand magma.option.Tuple<int, char>
-// expand magma.collect.list.List_<magma.option.Tuple<int, char>>
-// expand magma.option.Tuple<int, char>
-// expand magma.option.Tuple<int, char>
-// expand magma.collect.list.List_<magma.option.Tuple<int, char>>
-// expand magma.option.Tuple<int, char>
-// expand magma.option.Tuple<int, char>
-// expand magma.option.Option<int>
-// expand magma.option.None<>
-magma.collect.list.List_<magma.option.Tuple<int, char>> skipDoubleQuotes(magma.collect.list.List_<magma.option.Tuple<int, char>> queue);
-magma.option.Option<int> locate(String input, String infix);
+// expand Tuple<int, char>
+// expand List_<Tuple<int, char>>
+// expand Tuple<int, char>
+// expand Tuple<int, char>
+// expand List_<Tuple<int, char>>
+// expand Tuple<int, char>
+// expand Tuple<int, char>
+// expand Option<int>
+// expand None<>
+List_<Tuple<int, char>> skipDoubleQuotes(List_<Tuple<int, char>> queue);
+Option<int> locate(String input, String infix);
 #endif

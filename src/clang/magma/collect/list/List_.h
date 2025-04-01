@@ -3,22 +3,22 @@
 #include "../../../magma/collect/stream/Stream.h"
 #include "../../../magma/option/Option.h"
 #include "../../../magma/option/Tuple.h"
-// expand magma.collect.stream.Stream<T>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.option.Option<T>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.option.Option<magma.option.Tuple<T, magma.collect.list.List_<T>>>
-// expand magma.option.Tuple<T, magma.collect.list.List_<T>>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.option.Tuple<T, magma.collect.list.List_<T>>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.collect.list.List_<T>
-// expand magma.option.Option<T>
-// expand magma.collect.list.List_<T>
+// expand Stream<T>
+// expand List_<T>
+// expand List_<T>
+// expand List_<T>
+// expand Option<T>
+// expand List_<T>
+// expand List_<T>
+// expand List_<T>
+// expand Option<Tuple<T, List_<T>>>
+// expand Tuple<T, List_<T>>
+// expand List_<T>
+// expand List_<T>
+// expand Tuple<T, List_<T>>
+// expand List_<T>
+// expand List_<T>
+// expand List_<T>
+// expand Option<T>
+// expand List_<T>
 #endif

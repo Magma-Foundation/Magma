@@ -5,7 +5,7 @@ int __lambda1__(){return CompileError("Failed to attach node '" + propertyKey + 
 }
 int __lambda2__(){return (CompileError("Node '" + propertyKey + "' not present", NodeContext(node)));
 }
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return childRule.parse(input).mapValue(__lambda0__.withNode(propertyKey, node)).mapErr(__lambda1__);
+Result<Node, CompileError> parse(String input){return childRule.parse(input).mapValue(__lambda0__.withNode(propertyKey, node)).mapErr(__lambda1__);
 }
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return node.findNode(propertyKey).map(childRule.generate).orElseGet(__lambda2__);
+Result<String, CompileError> generate(Node node){return node.findNode(propertyKey).map(childRule.generate).orElseGet(__lambda2__);
 }

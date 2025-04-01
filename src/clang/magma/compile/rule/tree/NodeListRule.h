@@ -15,12 +15,12 @@
 #include "../../../../magma/result/Result.h"
 struct NodeListRule{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Err<>
+// expand Result<Node, CompileError>
+// expand List_<Node>
+// expand Result<String, CompileError>
+// expand Result<String, CompileError>
+// expand List_<Node>
+// expand Err<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();
@@ -28,7 +28,7 @@ int __lambda3__();
 int __lambda4__();
 int __lambda5__();
 int __lambda6__();
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
-magma.result.Result<String, magma.compile.CompileError> generateChildren(magma.collect.list.List_<magma.compile.Node> children);
+Result<Node, CompileError> parse(String input);
+Result<String, CompileError> generate(Node node);
+Result<String, CompileError> generateChildren(List_<Node> children);
 #endif

@@ -1,12 +1,12 @@
 #include "PrefixRule.h"
 int __lambda0__(){return prefix;
 }
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> createPrefixErr(String input, String prefix){return (CompileError("Prefix '" + prefix + "' not present", StringContext(input)));
+Result<Node, CompileError> createPrefixErr(String input, String prefix){return (CompileError("Prefix '" + prefix + "' not present", StringContext(input)));
 }
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){if (!input.startsWith(prefix()))
+Result<Node, CompileError> parse(String input){if (!input.startsWith(prefix()))
             return createPrefixErr(input, prefix());
 
         String slice = input.substring(prefix().length());return childRule().parse(slice);
 }
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return childRule.generate(node).mapValue(__lambda0__+value);
+Result<String, CompileError> generate(Node node){return childRule.generate(node).mapValue(__lambda0__+value);
 }

@@ -49,7 +49,7 @@ public class TransformAll implements Transformer {
         Node type = node.findNode("type").orElse(new MapNode());
         if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
 
-        List_<String> qualifiedName = StringLists.fromQualifiedType(type.findNode("base")
+        List_<String> qualifiedName = Qualified.from(type.findNode("base")
                 .orElse(new MapNode()));
 
         List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);
@@ -81,7 +81,7 @@ public class TransformAll implements Transformer {
         if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Predicate"))) {
             Node param = arguments.get(0);
 
-            Node returns = StringLists.toQualified(Lists.of("int"));
+            Node returns = Qualified.to(Lists.of("int"));
             Node definition = node.retype("functional-definition")
                     .removeNode("type")
                     .withNode("return", returns)
@@ -93,7 +93,7 @@ public class TransformAll implements Transformer {
         if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "Consumer"))) {
             Node paramType = arguments.get(0);
 
-            Node qualified = StringLists.toQualified(Lists.of("void"));
+            Node qualified = Qualified.to(Lists.of("void"));
             Node definition = node.retype("functional-definition")
                     .removeNode("type")
                     .withNode("return", qualified)
@@ -182,7 +182,7 @@ public class TransformAll implements Transformer {
 
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
-                    .withNode("type", StringLists.toQualified(Lists.of("int")));
+                    .withNode("type", Qualified.to(Lists.of("int")));
 
             Node function = new MapNode("function")
                     .withNode("definition", definition)
@@ -198,7 +198,7 @@ public class TransformAll implements Transformer {
         }
 
         if (node.is("construction")) {
-            List_<String> list = StringLists.fromQualifiedType(node.findNode("type")
+            List_<String> list = Qualified.from(node.findNode("type")
                     .orElse(new MapNode()));
 
             Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));

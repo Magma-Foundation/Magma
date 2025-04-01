@@ -9,18 +9,18 @@
 #include "../../../magma/result/Result.h"
 struct Transformers{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Err<>
-// expand magma.result.Err<>
+// expand Result<Node, CompileError>
+// expand Result<Node, CompileError>
+// expand Result<List_<Node>, CompileError>
+// expand List_<Node>
+// expand List_<Node>
+// expand Result<List_<Node>, CompileError>
+// expand List_<Node>
+// expand List_<Node>
+// expand Err<>
+// expand Err<>
 int __lambda0__();
 int __lambda1__();
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> findNode(magma.compile.Node node, String propertyKey);
-magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey);
+Result<Node, CompileError> findNode(Node node, String propertyKey);
+Result<List_<Node>, CompileError> findNodeList(Node value, String propertyKey);
 #endif

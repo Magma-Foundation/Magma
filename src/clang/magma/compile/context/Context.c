@@ -1,2 +1,2 @@
 #include "Context.h"
-magma.collect.string.String_ display();
+String_ display();

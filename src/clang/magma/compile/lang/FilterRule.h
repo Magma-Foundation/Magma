@@ -6,11 +6,11 @@
 #include "../../../magma/compile/rule/Rule.h"
 #include "../../../magma/result/Err.h"
 #include "../../../magma/result/Result.h"
-struct FilterRule{magma.compile.rule.Rule rule;magma.compile.lang.Filter filter;
+struct FilterRule{Rule rule;Filter filter;
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Result<String, magma.compile.CompileError>
-magma.compile.lang.public FilterRule(magma.compile.lang.Filter filter, magma.compile.rule.Rule rule);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
+// expand Result<Node, CompileError>
+// expand Result<String, CompileError>
+public FilterRule(Filter filter, Rule rule);
+Result<Node, CompileError> parse(String input);
+Result<String, CompileError> generate(Node node);
 #endif

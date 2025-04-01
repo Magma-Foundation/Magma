@@ -6,9 +6,9 @@
 #include "../../../magma/compile/Node.h"
 struct Frame{
 };
-// expand magma.collect.list.List_<magma.compile.Node>
+// expand List_<Node>
 int __lambda0__();
-magma.compile.transform.public Frame();
-magma.compile.transform.Frame defineType(magma.compile.Node type);
+public Frame();
+Frame defineType(Node type);
 int isTypeDefined(String typeParam);
 #endif

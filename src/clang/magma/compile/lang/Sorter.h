@@ -13,36 +13,36 @@
 #include "../../../magma/result/Result.h"
 struct Sorter{
 };
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.option.Tuple<>
-// expand magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<>
-// expand magma.option.Tuple<>
+// expand List_<Node>
+// expand Result<Node, CompileError>
+// expand Ok<>
+// expand Tuple<List_<Node>, List_<Node>>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand Tuple<>
+// expand Tuple<List_<Node>, List_<Node>>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand List_<Node>
+// expand Result<Node, CompileError>
+// expand Ok<>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Tuple<>
+// expand Tuple<>
 int __lambda0__();
 int __lambda1__();
-magma.compile.Node asRoot(magma.collect.list.List_<magma.compile.Node> left);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node);
-magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> foldIntoBuckets(magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.list.List_<magma.compile.Node>> tuple, magma.compile.Node node);
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> beforePass0(magma.compile.transform.State state, magma.compile.Node node);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+Node asRoot(List_<Node> left);
+Result<Node, CompileError> afterPass0(State state, Node node);
+Tuple<List_<Node>, List_<Node>> foldIntoBuckets(Tuple<List_<Node>, List_<Node>> tuple, Node node);
+Result<Node, CompileError> beforePass0(State state, Node node);
+Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node);
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 #endif

@@ -1,5 +1,5 @@
 #include "ValueFolder.h"
-magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingState current, char c){if (c == ',' && current.isLevel()) return current.advance();
+DividingState fold(DividingState current, char c){if (c == ',' && current.isLevel()) return current.advance();
 
         DividingState appended = current.append(c);if(c == '-') {
             boolean isArrow = current.peek().filter(inner -> inner == '>').isPresent();

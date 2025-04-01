@@ -16,65 +16,65 @@
 #include "../../../magma/result/Result.h"
 struct ResolveTypes{
 };
-// expand magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Some<>
-// expand magma.result.Ok<>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<String>
-// expand magma.option.None<>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<>
-// expand magma.collect.list.List_<String>
-// expand magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-// expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-// expand magma.result.Ok<>
-// expand magma.option.Tuple<>
-// expand magma.result.Ok<>
-// expand magma.result.Err<>
+// expand Option<Result<List_<String>, CompileError>>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand Some<>
+// expand Ok<>
+// expand List_<String>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand List_<String>
+// expand Option<Result<List_<String>, CompileError>>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand List_<String>
+// expand Option<String>
+// expand None<>
+// expand Tuple<State, Node>
+// expand Tuple<>
+// expand List_<String>
+// expand Option<Result<List_<String>, CompileError>>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand Result<List_<String>, CompileError>
+// expand List_<String>
+// expand List_<String>
+// expand List_<String>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+// expand Result<Tuple<State, Node>, CompileError>
+// expand Tuple<State, Node>
+// expand Tuple<State, Node>
+// expand Ok<>
+// expand Tuple<>
+// expand Ok<>
+// expand Err<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name);
-magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError> resolveAsLocal(magma.compile.transform.State state, magma.collect.list.List_<String> name, magma.compile.Node node);
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsPrimitive(magma.collect.list.List_<String> oldName);
-magma.option.Option<String> resolvePrimitiveString(String maybePrimitive);
-magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> wrapToTuple(magma.compile.transform.State state, magma.collect.list.List_<String> newName);
-magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsTypeParam(magma.compile.transform.State state, magma.collect.list.List_<String> segments);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node);
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node);
+Option<Result<List_<String>, CompileError>> resolveAsImport(State state, List_<String> name);
+Result<List_<String>, CompileError> resolveAsLocal(State state, List_<String> name, Node node);
+Option<Result<List_<String>, CompileError>> resolveAsPrimitive(List_<String> oldName);
+Option<String> resolvePrimitiveString(String maybePrimitive);
+Tuple<State, Node> wrapToTuple(State state, List_<String> newName);
+Option<Result<List_<String>, CompileError>> resolveAsTypeParam(State state, List_<String> segments);
+Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node);
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node);
 #endif

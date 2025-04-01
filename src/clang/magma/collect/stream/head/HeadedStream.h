@@ -6,29 +6,29 @@
 #include "../../../../magma/option/Tuple.h"
 #include "../../../../magma/result/Ok.h"
 #include "../../../../magma/result/Result.h"
-// expand magma.collect.stream.Stream<T>
-// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
-// expand magma.collect.stream.head.HeadedStream<>
-// expand magma.collect.stream.Collector<T, magma.collect.stream.head.C>
-// expand magma.option.Option<T>
-// expand magma.option.Option<magma.collect.stream.head.R>
-// expand magma.collect.stream.Stream<T>
-// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
-// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
-// expand magma.collect.stream.head.HeadedStream<>
-// expand magma.collect.stream.head.EmptyHead<>
-// expand magma.collect.stream.Stream<magma.collect.stream.head.R>
-// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
-// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.collect.stream.head.R, magma.collect.stream.head.X>
-// expand magma.collect.stream.Stream<T>
-// expand magma.collect.stream.head.HeadedStream<>
-// expand magma.collect.stream.Stream<T>
-// expand magma.collect.stream.head.Head<T>
-// expand magma.collect.stream.head.HeadedStream<>
-// expand magma.collect.stream.head.SingleHead<>
-// expand magma.collect.stream.head.EmptyHead<>
+// expand Stream<T>
+// expand Stream<R>
+// expand HeadedStream<>
+// expand Collector<T, C>
+// expand Option<T>
+// expand Option<R>
+// expand Stream<T>
+// expand Stream<R>
+// expand Stream<R>
+// expand HeadedStream<>
+// expand EmptyHead<>
+// expand Stream<R>
+// expand Result<R, X>
+// expand Result<R, X>
+// expand Ok<>
+// expand Result<R, X>
+// expand Stream<T>
+// expand HeadedStream<>
+// expand Stream<T>
+// expand Head<T>
+// expand HeadedStream<>
+// expand SingleHead<>
+// expand EmptyHead<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();

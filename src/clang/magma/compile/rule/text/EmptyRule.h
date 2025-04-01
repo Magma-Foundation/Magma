@@ -10,11 +10,11 @@
 #include "../../../../magma/result/Result.h"
 struct EmptyRule{
 };
-// expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
-// expand magma.result.Ok<>
-// expand magma.result.Err<>
-// expand magma.result.Result<String, magma.compile.CompileError>
-// expand magma.result.Ok<>
-magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
-magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);
+// expand Result<Node, CompileError>
+// expand Ok<>
+// expand Err<>
+// expand Result<String, CompileError>
+// expand Ok<>
+Result<Node, CompileError> parse(String input);
+Result<String, CompileError> generate(Node node);
 #endif

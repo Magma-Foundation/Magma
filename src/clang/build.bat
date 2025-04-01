@@ -2,6 +2,8 @@ clang .\magma\compile\lang\CommonLang.c^
 	.\magma\compile\lang\CommonLang.c^
 	.\magma\compile\transform\FlattenGroup.c^
 	.\magma\compile\transform\FlattenGroup.c^
+	.\magma\compile\lang\Compacter.c^
+	.\magma\compile\lang\Compacter.c^
 	.\magma\collect\stream\head\RangeHead.c^
 	.\magma\collect\stream\head\RangeHead.c^
 	.\magma\compile\lang\ExpandGenerics.c^
@@ -66,6 +68,8 @@ clang .\magma\compile\lang\CommonLang.c^
 	.\magma\compile\lang\Filter.c^
 	.\magma\compile\context\StringContext.c^
 	.\magma\compile\context\StringContext.c^
+	.\magma\compile\lang\Qualified.c^
+	.\magma\compile\lang\Qualified.c^
 	.\magma\compile\rule\text\PrefixRule.c^
 	.\magma\compile\rule\text\PrefixRule.c^
 	.\magma\compile\lang\PruneTypeParameterized.c^
@@ -148,8 +152,6 @@ clang .\magma\compile\lang\CommonLang.c^
 	.\magma\compile\rule\divide\CharDivider.c^
 	.\magma\collect\set\Set_.c^
 	.\magma\collect\set\Set_.c^
-	.\magma\compile\lang\StringLists.c^
-	.\magma\compile\lang\StringLists.c^
 	.\magma\error\Error.c^
 	.\magma\error\Error.c^
 	.\magma\compile\transform\Transformer.c^

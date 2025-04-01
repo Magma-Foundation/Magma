@@ -1,5 +1,5 @@
 #include "Transformer.h"
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> beforePass(magma.compile.transform.State state, magma.compile.Node node){return ((state, node));
+Result<Tuple<State, Node>, CompileError> beforePass(State state, Node node){return ((state, node));
 }
-magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){return ((state, node));
+Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node){return ((state, node));
 }

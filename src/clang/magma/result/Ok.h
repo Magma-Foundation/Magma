@@ -4,21 +4,21 @@
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Some.h"
 #include "../../magma/option/Tuple.h"
-// expand magma.result.Result<T, X>
-// expand magma.option.Option<T>
-// expand magma.option.Some<>
-// expand magma.option.Option<X>
-// expand magma.option.None<>
-// expand magma.result.Result<magma.result.R, X>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.result.R, X>
-// expand magma.result.Result<magma.result.R, X>
-// expand magma.result.Result<T, magma.result.R>
-// expand magma.result.Ok<>
-// expand magma.result.Result<magma.option.Tuple<T, magma.result.R>, X>
-// expand magma.option.Tuple<T, magma.result.R>
-// expand magma.option.Tuple<T, magma.result.R>
-// expand magma.result.Result<magma.result.R, X>
-// expand magma.option.Tuple<>
+// expand Result<T, X>
+// expand Option<T>
+// expand Some<>
+// expand Option<X>
+// expand None<>
+// expand Result<R, X>
+// expand Ok<>
+// expand Result<R, X>
+// expand Result<R, X>
+// expand Result<T, R>
+// expand Ok<>
+// expand Result<Tuple<T, R>, X>
+// expand Tuple<T, R>
+// expand Tuple<T, R>
+// expand Result<R, X>
+// expand Tuple<>
 int __lambda0__();
 #endif

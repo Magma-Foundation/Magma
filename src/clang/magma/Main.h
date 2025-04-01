@@ -24,42 +24,42 @@
 #include "../magma/result/Err.h"
 #include "../magma/result/Ok.h"
 #include "../magma/result/Result.h"
-struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
+struct Main{Path_ SOURCE_DIRECTORY;Path_ TARGET_DIRECTORY;
 };
-// expand magma.option.Option<magma.ApplicationError>
-// expand magma.collect.set.Set_<magma.io.Path_>
-// expand magma.option.Option<magma.ApplicationError>
-// expand magma.collect.set.Set_<magma.io.Path_>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.option.Option<magma.ApplicationError>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.option.Tuple<magma.compile.source.Location, magma.compile.Node>
-// expand magma.result.Result<magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>, magma.ApplicationError>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.option.Option<magma.ApplicationError>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.option.Option<magma.ApplicationError>
-// expand magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.map.Map_<String, String>
-// expand magma.collect.list.List_<String>
-// expand magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.collect.list.List_<magma.io.Path_>
-// expand magma.result.Result<magma.io.Path_, magma.ApplicationError>
-// expand magma.result.Result<magma.io.Path_, magma.ApplicationError>
-// expand magma.option.Option<magma.io.IOError>
-// expand magma.option.None<>
-// expand magma.result.Ok<>
+// expand Option<ApplicationError>
+// expand Set_<Path_>
+// expand Option<ApplicationError>
+// expand Set_<Path_>
+// expand Map_<Location, Node>
+// expand Map_<Location, Node>
+// expand Option<ApplicationError>
+// expand Map_<Location, Node>
+// expand Result<List_<Path_>, ApplicationError>
+// expand List_<Path_>
+// expand List_<Path_>
+// expand List_<Path_>
+// expand Tuple<Location, Node>
+// expand Result<Map_<Location, Node>, ApplicationError>
+// expand Map_<Location, Node>
+// expand Map_<Location, Node>
+// expand Map_<Location, Node>
+// expand Option<ApplicationError>
+// expand List_<Path_>
+// expand Option<ApplicationError>
+// expand Result<List_<Path_>, ApplicationError>
+// expand List_<Path_>
+// expand List_<Path_>
+// expand Map_<String, String>
+// expand List_<String>
+// expand Result<List_<Path_>, ApplicationError>
+// expand List_<Path_>
+// expand List_<Path_>
+// expand List_<Path_>
+// expand Result<Path_, ApplicationError>
+// expand Result<Path_, ApplicationError>
+// expand Option<IOError>
+// expand None<>
+// expand Ok<>
 int __lambda0__();
 int __lambda1__();
 int __lambda2__();
@@ -68,18 +68,18 @@ int __lambda4__();
 int __lambda5__();
 int __lambda6__();
 int __lambda7__();
-magma.void main(String* args);
-magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files);
-magma.option.Option<magma.ApplicationError> runWithSources(magma.collect.set.Set_<magma.io.Path_> sources);
-magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> modifyTrees(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees);
-magma.option.Option<magma.ApplicationError> postLoadTrees(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees);
-magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> postLoadTree(magma.collect.list.List_<magma.io.Path_> relatives, magma.option.Tuple<magma.compile.source.Location, magma.compile.Node> pathNodeTuple);
-magma.result.Result<magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>, magma.ApplicationError> preLoadSources(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees, magma.io.Path_ path);
-magma.option.Option<magma.ApplicationError> complete(magma.collect.list.List_<magma.io.Path_> relatives);
-magma.option.Option<magma.ApplicationError> startCommand();
-magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> writeOutputs(magma.collect.map.Map_<String, String> output, magma.collect.list.List_<String> namespace, String name);
-magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> writeAndFoldOutput(magma.collect.list.List_<magma.io.Path_> current, magma.io.Path_ targetParent, String name, String extension, String output);
-magma.result.Result<magma.io.Path_, magma.ApplicationError> writeOutput(magma.io.Path_ parent, String name, String extension, String output);
-magma.option.Option<magma.io.IOError> ensureDirectories(magma.io.Path_ targetParent);
-int isPlatformDependent(magma.compile.source.Location location);
+void main(String* args);
+Option<ApplicationError> runWithFiles(Set_<Path_> files);
+Option<ApplicationError> runWithSources(Set_<Path_> sources);
+Map_<Location, Node> modifyTrees(Map_<Location, Node> trees);
+Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees);
+Result<List_<Path_>, ApplicationError> postLoadTree(List_<Path_> relatives, Tuple<Location, Node> pathNodeTuple);
+Result<Map_<Location, Node>, ApplicationError> preLoadSources(Map_<Location, Node> trees, Path_ path);
+Option<ApplicationError> complete(List_<Path_> relatives);
+Option<ApplicationError> startCommand();
+Result<List_<Path_>, ApplicationError> writeOutputs(Map_<String, String> output, List_<String> namespace, String name);
+Result<List_<Path_>, ApplicationError> writeAndFoldOutput(List_<Path_> current, Path_ targetParent, String name, String extension, String output);
+Result<Path_, ApplicationError> writeOutput(Path_ parent, String name, String extension, String output);
+Option<IOError> ensureDirectories(Path_ targetParent);
+int isPlatformDependent(Location location);
 #endif

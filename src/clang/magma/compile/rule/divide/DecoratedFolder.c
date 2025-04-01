@@ -1,11 +1,11 @@
 #include "DecoratedFolder.h"
-magma.option.Option<magma.compile.rule.divide.DividingState> processSlash(magma.option.Tuple<char, magma.compile.rule.divide.DividingState> tuple){if (tuple.left() == '\\') {
+Option<DividingState> processSlash(Tuple<char, DividingState> tuple){if (tuple.left() == '\\') {
             return tuple.right().appendAndDiscard();
         }else {
             return new Some<>(tuple.right());
         }
 }
-magma.compile.rule.divide.DividingState fold(magma.compile.rule.divide.DividingState state, char c){if (c == '\'') {
+DividingState fold(DividingState state, char c){if (c == '\'') {
             return state.append(c)
                     .append()
                     .flatMap(DecoratedFolder::processSlash)

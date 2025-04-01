@@ -11,16 +11,16 @@
 #include "../../magma/option/None.h"
 #include "../../magma/option/Option.h"
 #include "../../magma/option/Some.h"
-struct CompileError{String message;magma.option.Option<magma.compile.context.Context> maybeContext;magma.collect.list.List_<magma.compile.CompileError> errors;
+struct CompileError{String message;Option<Context> maybeContext;List_<CompileError> errors;
 };
-// expand magma.option.Option<magma.compile.context.Context>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-// expand magma.collect.list.List_<magma.compile.CompileError>
-magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext);
-magma.compile.public CompileError(String message, magma.compile.context.Context maybeContext, magma.collect.list.List_<magma.compile.CompileError> errors);
-magma.compile.public CompileError(String message);
-String format(int depth, int index, magma.collect.list.List_<magma.compile.CompileError> sorted);
+// expand Option<Context>
+// expand List_<CompileError>
+// expand List_<CompileError>
+// expand List_<CompileError>
+public CompileError(String message, Context maybeContext);
+public CompileError(String message, Context maybeContext, List_<CompileError> errors);
+public CompileError(String message);
+String format(int depth, int index, List_<CompileError> sorted);
 int depth();
 String display();
 String format(int depth);
