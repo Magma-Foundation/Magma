@@ -64,6 +64,8 @@ struct ResolveTypes{
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.result.Ok<>
 // expand magma.option.Tuple<>
+// expand magma.result.Ok<>
+// expand magma.result.Err<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

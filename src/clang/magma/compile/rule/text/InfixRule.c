@@ -1,6 +1,8 @@
 #include "InfixRule.h"
-auto __lambda0__();
-auto __lambda1__();
+auto __lambda0__(){return right;
+}
+auto __lambda1__(){return tuple;
+}
 magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator){this.left = left;
         this.infix = infix;
         this.right = right;

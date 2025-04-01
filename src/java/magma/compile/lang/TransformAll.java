@@ -9,6 +9,7 @@ import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.transform.State;
 import magma.compile.transform.Transformer;
+import magma.option.Option;
 import magma.option.Tuple;
 import magma.result.Ok;
 import magma.result.Result;
@@ -165,8 +166,16 @@ public class TransformAll implements Transformer {
         }
 
         if (node.is("lambda")) {
-            Node child = node.findNode("child")
-                    .orElse(new MapNode());
+            Option<Node> maybeChild = node.findNode("child");
+            Node propertyValue;
+            if (maybeChild.isPresent()) {
+                Node child = maybeChild.orElse(new MapNode());
+                propertyValue = new MapNode("block")
+                        .withNodeList("children", Lists.of(new MapNode("return")
+                                .withNode("child", child)));
+            } else {
+                propertyValue = node.findNode("content").orElse(new MapNode());
+            }
 
             String generatedName = "__lambda" + counter + "__";
             counter++;
@@ -174,9 +183,9 @@ public class TransformAll implements Transformer {
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
                     .withNode("type", StringLists.toQualified(Lists.of("auto")));
-
             Node function = new MapNode("function")
-                    .withNode("definition", definition);
+                    .withNode("definition", definition)
+                    .withNode("content", propertyValue);
 
             return new Ok<>(new Tuple<>(state, new MapNode("group")
                     .withNode("child", new MapNode("symbol-value").withString("value", generatedName))

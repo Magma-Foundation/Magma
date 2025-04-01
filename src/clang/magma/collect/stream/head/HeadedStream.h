@@ -26,6 +26,9 @@
 // expand magma.collect.stream.head.HeadedStream<>
 // expand magma.collect.stream.Stream<T>
 // expand magma.collect.stream.head.Head<T>
+// expand magma.collect.stream.head.HeadedStream<>
+// expand magma.collect.stream.head.SingleHead<>
+// expand magma.collect.stream.head.EmptyHead<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

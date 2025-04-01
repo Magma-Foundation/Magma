@@ -1,5 +1,6 @@
 #include "SuffixRule.h"
-auto __lambda0__();
+auto __lambda0__(){return result;
+}
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){if (!input.endsWith(suffix()))
             return new Err<>(new CompileError("Suffix '" + suffix() + "' not present", new StringContext(input)));
 

@@ -1,5 +1,6 @@
 #include "StripRule.h"
-auto __lambda0__();
+auto __lambda0__(){return attachPadding;
+}
 magma.compile.rule.text.public StripRule(magma.compile.rule.Rule childRule){this("", childRule, "");
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return childRule().parse(input.strip());

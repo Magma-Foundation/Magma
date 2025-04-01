@@ -1,6 +1,8 @@
 #include "FlattenGroup.h"
-auto __lambda0__();
-auto __lambda1__();
+auto __lambda0__(){return (state, value);
+}
+auto __lambda1__(){return (state, value);
+}
 magma.compile.transform.FlattenCache foldNodeProperty(magma.compile.transform.FlattenCache state, magma.option.Tuple<String, magma.compile.Node> property){String propertyKey = property.left();
         Node propertyValue = property.right();
 

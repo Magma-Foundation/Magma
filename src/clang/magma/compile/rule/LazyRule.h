@@ -17,6 +17,7 @@ struct LazyRule{magma.option.Option<magma.compile.rule.Rule> child;
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.result.Result<magma.compile.rule.T, magma.compile.CompileError>
 // expand magma.result.Result<magma.compile.rule.T, magma.compile.CompileError>
+// expand magma.result.Err<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

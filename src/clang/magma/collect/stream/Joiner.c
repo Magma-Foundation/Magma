@@ -1,5 +1,6 @@
 #include "Joiner.h"
-auto __lambda0__();
+auto __lambda0__(){return inner;
+}
 magma.collect.stream.public Joiner(){this("");
 }
 magma.option.Option<String> createInitial(){return ();

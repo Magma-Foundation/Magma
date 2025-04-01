@@ -1,5 +1,6 @@
 #include "StringLists.h"
-auto __lambda0__();
+auto __lambda0__(){return segment;
+}
 magma.compile.Node toQualified(magma.collect.list.List_<String> list){List_<Node> resolved = list.stream()
                 .map(segment -> new MapNode().withString("value", segment))
                 .collect(new ListCollector<Node>());return MapNode("qualified").withNodeList("segments", resolved);

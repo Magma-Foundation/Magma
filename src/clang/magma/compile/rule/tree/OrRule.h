@@ -19,6 +19,7 @@ struct OrRule{
 // expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.collect.list.List_<magma.compile.rule.Rule>
+// expand magma.result.Err<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

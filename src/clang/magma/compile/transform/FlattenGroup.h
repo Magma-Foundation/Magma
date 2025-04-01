@@ -36,6 +36,8 @@ struct FlattenGroup{
 // expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<>
 auto __lambda0__();
 auto __lambda1__();
 magma.compile.transform.FlattenCache foldNodeProperty(magma.compile.transform.FlattenCache state, magma.option.Tuple<String, magma.compile.Node> property);

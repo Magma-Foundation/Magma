@@ -6,7 +6,7 @@ magma.option.Tuple<magma.collect.list.List_<magma.compile.Node>, magma.collect.l
         }return (definitions, others.add(element));
 }
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> afterPass(magma.compile.transform.State state, magma.compile.Node node){if (node.is("interface") || node.is("record") || node.is("class")) {
-            return Transformers.find(node, "content").flatMapValue(value -> {
+            return Transformers.findNode(node, "content").flatMapValue(value -> {
                 return Transformers.findNodeList(value, "children").mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
                             .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), FlattenStructs::bucketClassMember);

@@ -1,7 +1,10 @@
 #include "Compiler.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
+auto __lambda0__(){return (state, tree);
+}
+auto __lambda1__(){return TreeTransformingStage(transformer);
+}
+auto __lambda2__(){return current;
+}
 magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree){return TreeTransformingStage(FlattenStructs()).transform(state, tree).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(Formatter())).flatMapValue(transformUsing(FlattenRoot())).flatMapValue(transformUsing(Sorter())).mapValue(Tuple.right).flatMapValue(Compiler.generateRoots);
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state){return JavaLang.createJavaRootRule().parse(input).mapValue(__lambda0__).flatMapValue(transformUsing(ResolveTypes())).flatMapValue(transformUsing(TransformAll())).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(ExpandGenerics())).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(PruneTypeParameterized())).mapValue(Tuple.right);

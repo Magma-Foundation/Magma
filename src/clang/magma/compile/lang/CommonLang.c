@@ -28,7 +28,7 @@ magma.compile.rule.tree.TypeRule createForRule(){return TypeRule("for", StripRul
 }
 magma.compile.rule.tree.TypeRule createIfRule(){return TypeRule("if", StripRule(PrefixRule("if", StringRule("content"))));
 }
-magma.compile.rule.tree.TypeRule createReturnRule(magma.compile.rule.Rule value){PrefixRule rule = new PrefixRule("return ", new SuffixRule(new NodeRule("value", value), ";"));return TypeRule("return", StripRule(rule));
+magma.compile.rule.tree.TypeRule createReturnRule(magma.compile.rule.Rule value){PrefixRule rule = new PrefixRule("return ", new SuffixRule(new NodeRule("child", value), ";"));return TypeRule("return", StripRule(rule));
 }
 magma.compile.rule.tree.TypeRule createWhileRule(){return TypeRule("while", StripRule(PrefixRule("while", StringRule("content"))));
 }

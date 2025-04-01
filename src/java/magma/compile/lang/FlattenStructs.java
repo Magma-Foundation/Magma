@@ -28,7 +28,7 @@ public class FlattenStructs implements Transformer {
     @Override
     public Result<Tuple<State, Node>, CompileError> afterPass(State state, Node node) {
         if (node.is("interface") || node.is("record") || node.is("class")) {
-            return Transformers.find(node, "content").flatMapValue(value -> {
+            return Transformers.findNode(node, "content").flatMapValue(value -> {
                 return Transformers.findNodeList(value, "children").mapValue(children -> {
                     Tuple<List_<Node>, List_<Node>> newChildren = children.stream()
                             .foldWithInitial(new Tuple<>(Lists.empty(), Lists.empty()), FlattenStructs::bucketClassMember);

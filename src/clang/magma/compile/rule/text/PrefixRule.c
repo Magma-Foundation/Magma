@@ -1,5 +1,6 @@
 #include "PrefixRule.h"
-auto __lambda0__();
+auto __lambda0__(){return prefix;
+}
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> createPrefixErr(String input, String prefix){return (CompileError("Prefix '" + prefix + "' not present", StringContext(input)));
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){if (!input.startsWith(prefix()))

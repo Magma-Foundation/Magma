@@ -1,11 +1,18 @@
 #include "TreeTransformingStage.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
+auto __lambda0__(){return transformNodes;
+}
+auto __lambda1__(){return transformNodeLists;
+}
+auto __lambda2__(){return transformNodeList;
+}
+auto __lambda3__(){return transformer;
+}
+auto __lambda4__(){return attachChildren;
+}
+auto __lambda5__(){return transformNodes;
+}
+auto __lambda6__(){return CompileError("Error when transforming", NodeContext(root), Lists.of(err));
+}
 magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer){this.transformer = transformer;
 }
 magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> attachChildren(magma.compile.Node node, String propertyKey, magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> children){State newState = children.left();

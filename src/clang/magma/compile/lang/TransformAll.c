@@ -118,8 +118,16 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
         }if (node.is("array")) {
             return new Ok<>(new Tuple<>(state, node.retype("ref")));
         }if (node.is("lambda")) {
-            Node child = node.findNode("child")
-                    .orElse(new MapNode());
+            Option<Node> maybeChild = node.findNode("child");
+            Node propertyValue;
+            if (maybeChild.isPresent()) {
+                Node child = maybeChild.orElse(new MapNode());
+                propertyValue = new MapNode("block")
+                        .withNodeList("children", Lists.of(new MapNode("return")
+                                .withNode("child", child)));
+            } else {
+                propertyValue = node.findNode("content").orElse(new MapNode());
+            }
 
             String generatedName = "__lambda" + counter + "__";
             counter++;
@@ -127,9 +135,9 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
                     .withNode("type", StringLists.toQualified(Lists.of("auto")));
-
             Node function = new MapNode("function")
-                    .withNode("definition", definition);
+                    .withNode("definition", definition)
+                    .withNode("content", propertyValue);
 
             return new Ok<>(new Tuple<>(state, new MapNode("group")
                     .withNode("child", new MapNode("symbol-value").withString("value", generatedName))

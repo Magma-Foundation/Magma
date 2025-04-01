@@ -35,6 +35,8 @@ struct Sorter{
 // expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<>
 auto __lambda0__();
 auto __lambda1__();
 magma.compile.Node asRoot(magma.collect.list.List_<magma.compile.Node> left);

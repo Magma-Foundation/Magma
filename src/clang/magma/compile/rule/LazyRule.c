@@ -1,7 +1,10 @@
 #include "LazyRule.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
+auto __lambda0__(){return inner;
+}
+auto __lambda1__(){return inner;
+}
+auto __lambda2__(){return (CompileError("Child not set", context));
+}
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return withChildSet(__lambda0__.parse(input), StringContext(input));
 }
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return withChildSet(__lambda1__.generate(node), NodeContext(node));

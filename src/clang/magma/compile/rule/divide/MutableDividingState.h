@@ -20,6 +20,8 @@ struct MutableDividingState{magma.collect.list.List_<char> queue;magma.collect.l
 // expand magma.option.Tuple<char, magma.compile.rule.divide.DividingState>
 // expand magma.option.Option<char>
 // expand magma.option.Option<magma.compile.rule.divide.DividingState>
+// expand magma.option.Tuple<>
+// expand magma.option.Tuple<>
 auto __lambda0__();
 auto __lambda1__();
 magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue);

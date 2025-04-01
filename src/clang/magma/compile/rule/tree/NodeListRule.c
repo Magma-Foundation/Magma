@@ -1,11 +1,18 @@
 #include "NodeListRule.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
+auto __lambda0__(){return childRule;
+}
+auto __lambda1__(){return MapNode();
+}
+auto __lambda2__(){return CompileError("Failed to attach node list '" + propertyKey + "'", StringContext(input), Lists.of(err));
+}
+auto __lambda3__(){return (CompileError("Node list '" + propertyKey + "' not present", NodeContext(node)));
+}
+auto __lambda4__(){return CompileError("Failed to generate node list '" + propertyKey + "'", NodeContext(node), Lists.of(err));
+}
+auto __lambda5__(){return childRule;
+}
+auto __lambda6__(){return divider;
+}
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){List_<String> segments = divider.divide(input);if (segments.isEmpty()) return new Ok<>(new MapNode());return segments.stream().foldToResult(Lists.empty(), __lambda0__().parse(element).mapValue(children.add)).mapValue(__lambda1__.withNodeList(propertyKey(), children)).mapErr(__lambda2__);
 }
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node){return node.findNodeList(propertyKey).map(this.generateChildren).orElseGet(__lambda3__).mapErr(__lambda4__);

@@ -36,6 +36,7 @@ struct Compiler{
 // expand magma.collect.map.Map_<String, String>
 // expand magma.collect.map.Map_<String, String>
 // expand magma.option.Tuple<String, magma.compile.Node>
+// expand magma.option.Tuple<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

@@ -1,6 +1,8 @@
 #include "Sorter.h"
-auto __lambda0__();
-auto __lambda1__();
+auto __lambda0__(){return (state, value);
+}
+auto __lambda1__(){return (state, value);
+}
 magma.compile.Node asRoot(magma.collect.list.List_<magma.compile.Node> left){Node node1 = new MapNode("block").withNodeList("children", left);return MapNode("root").withNode("content", node1);
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node){if (!node.is("root")) return new Ok<>(node);

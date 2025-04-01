@@ -1,8 +1,12 @@
 #include "MapNode.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
+auto __lambda0__(){return withNodeList;
+}
+auto __lambda1__(){return value;
+}
+auto __lambda2__(){return node;
+}
+auto __lambda3__(){return withNode;
+}
 magma.compile.public MapNode(){this((), Maps.empty(), Maps.empty(), Maps.empty());
 }
 magma.compile.public MapNode(magma.option.Option<String> maybeType, magma.collect.map.Map_<String, String> strings, magma.collect.map.Map_<String, magma.compile.Node> nodes, magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists){this.maybeType = maybeType;

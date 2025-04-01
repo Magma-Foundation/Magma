@@ -59,6 +59,7 @@ struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
 // expand magma.result.Result<magma.io.Path_, magma.ApplicationError>
 // expand magma.option.Option<magma.io.IOError>
 // expand magma.option.None<>
+// expand magma.result.Ok<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

@@ -9,7 +9,7 @@ import magma.result.Ok;
 import magma.result.Result;
 
 public class Transformers {
-    public static Result<Node, CompileError> find(Node node, String propertyKey) {
+    public static Result<Node, CompileError> findNode(Node node, String propertyKey) {
         return node.findNode(propertyKey)
                 .<Result<Node, CompileError>>map(Ok::new)
                 .orElseGet(() -> new Err<>(new CompileError("Node '" + propertyKey + "' not present", new NodeContext(node))));

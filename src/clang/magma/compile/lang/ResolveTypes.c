@@ -1,7 +1,10 @@
 #include "ResolveTypes.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
+auto __lambda0__(){return !value.isEmpty();
+}
+auto __lambda1__(){return (state.namespace().add(last));
+}
+auto __lambda2__(){return (CompileError("At least one name is required", NodeContext(node)));
+}
 magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name){if (name.size() == 1) {
             return state.qualifyName(name.findLast().orElse("")).map(Ok::new);
         }return ((name));

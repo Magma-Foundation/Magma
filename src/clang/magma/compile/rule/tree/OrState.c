@@ -1,2 +1,3 @@
 #include "OrState.h"
-auto __lambda0__();
+auto __lambda0__(){return (errors);
+}

@@ -83,7 +83,7 @@ public class CommonLang {
     }
 
     static TypeRule createReturnRule(Rule value) {
-        PrefixRule rule = new PrefixRule("return ", new SuffixRule(new NodeRule("value", value), ";"));
+        PrefixRule rule = new PrefixRule("return ", new SuffixRule(new NodeRule("child", value), ";"));
         return new TypeRule("return", new StripRule(rule));
     }
 

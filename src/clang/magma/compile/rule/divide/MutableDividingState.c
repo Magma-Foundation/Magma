@@ -1,6 +1,8 @@
 #include "MutableDividingState.h"
-auto __lambda0__();
-auto __lambda1__();
+auto __lambda0__(){return (tuple.left(), tuple.right().append(tuple.left()));
+}
+auto __lambda1__(){return (tuple.left(), MutableDividingState(tuple.right(), segments, buffer, depth));
+}
 magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue){this(queue, Lists.empty(), StringBuilder(), 0);
 }
 magma.compile.rule.divide.public MutableDividingState(magma.collect.list.List_<char> queue, magma.collect.list.List_<String> segments, magma.compile.rule.divide.StringBuilder buffer, int depth){this.queue = queue;

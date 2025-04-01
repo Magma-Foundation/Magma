@@ -20,6 +20,7 @@ struct NodeListRule{
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.result.Err<>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();

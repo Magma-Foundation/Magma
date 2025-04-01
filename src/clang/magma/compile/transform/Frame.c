@@ -1,5 +1,6 @@
 #include "Frame.h"
-auto __lambda0__();
+auto __lambda0__(){return node;
+}
 magma.compile.transform.public Frame(){this(Lists.empty());
 }
 magma.compile.transform.Frame defineType(magma.compile.Node type){return Frame(types.add(type));

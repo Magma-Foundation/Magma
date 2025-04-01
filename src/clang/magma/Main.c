@@ -1,12 +1,20 @@
 #include "Main.h"
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
-auto __lambda7__();
+auto __lambda0__(){return System;
+}
+auto __lambda1__(){return writeOutputs;
+}
+auto __lambda2__(){return Compiler;
+}
+auto __lambda3__(){return trees;
+}
+auto __lambda4__(){return output;
+}
+auto __lambda5__(){return writeAndFoldOutput;
+}
+auto __lambda6__(){return (TARGET_DIRECTORY.relativize(parent.resolve(name+".c")));
+}
+auto __lambda7__(){return first;
+}
 magma.void main(String* args){SOURCE_DIRECTORY.walk().mapErr(ApplicationError.new).match(Main.runWithFiles, Some.new).ifPresent(__lambda0__.err.println(error.display()));
 }
 magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files){Set_<Path_> collect = files.stream()
