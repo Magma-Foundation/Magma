@@ -144,7 +144,7 @@ public class Main {
             }
         }
 
-        if (segment.contains("class ")) return new Ok<>("struct Temp {\n};\n");
+        if (segment.contains("class ") || segment.contains("interface ") || segment.contains("record ")) return new Ok<>("struct Temp {\n};\n");
         return new Err<>(new CompileError("Invalid root segment", segment));
     }
 }

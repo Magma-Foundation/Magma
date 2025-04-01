@@ -1,1 +1,2 @@
-Ok[value=]Err[error=magma.CompileError@1de0aca6]
+struct Temp {
+};
