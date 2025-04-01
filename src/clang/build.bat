@@ -4,7 +4,6 @@ clang magma\io\IOErrors.c^
 	magma\process\Processes.c^
 	magma\result\Result.c^
 	magma\CompileError.c^
-	magma\result\ThrowableSupplier.c^
 	magma\io\Files.c^
 	magma\result\Err.c^
 	magma\ApplicationError.c^
@@ -13,6 +12,5 @@ clang magma\io\IOErrors.c^
 	magma\Main.c^
 	magma\result\Ok.c^
 	magma\process\ProcessError.c^
-	magma\result\ThrowableRunnable.c^
 	magma\process\ExceptionalProcessError.c^
 	-o main.exe
