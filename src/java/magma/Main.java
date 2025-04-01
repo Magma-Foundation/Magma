@@ -10,6 +10,7 @@ import magma.collect.set.SetCollector;
 import magma.collect.set.Set_;
 import magma.collect.stream.Joiner;
 import magma.compile.Compiler;
+import magma.compile.MapNode;
 import magma.compile.Node;
 import magma.compile.source.Location;
 import magma.compile.source.PathSource;
@@ -54,7 +55,10 @@ public class Main {
     }
 
     private static Map_<Location, Node> modifyTrees(Map_<Location, Node> trees) {
-        return trees;
+        Location location = new Location(Lists.of("magma"), "Generated");
+        MapNode block = new MapNode("block");
+        MapNode root = new MapNode("root");
+        return trees.with(location, root.withNode("content", block));
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees) {

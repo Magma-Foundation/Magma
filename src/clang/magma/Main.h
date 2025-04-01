@@ -10,6 +10,7 @@
 #include "../magma/collect/set/Set_.h"
 #include "../magma/collect/stream/Joiner.h"
 #include "../magma/compile/Compiler.h"
+#include "../magma/compile/MapNode.h"
 #include "../magma/compile/Node.h"
 #include "../magma/compile/source/Location.h"
 #include "../magma/compile/source/PathSource.h"

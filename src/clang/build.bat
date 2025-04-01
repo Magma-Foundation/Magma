@@ -184,6 +184,8 @@ clang .\magma\compile\lang\CommonLang.c^
 	.\magma\compile\lang\TypeSeparatorLocator.c^
 	.\magma\compile\source\Location.c^
 	.\magma\compile\source\Location.c^
+	.\magma\Generated.c^
+	.\magma\Generated.c^
 	.\magma\Main.c^
 	.\magma\Main.c^
 	 -o main.exe
