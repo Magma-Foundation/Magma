@@ -1,3 +1,3 @@
-#include "../../magma/result/Results.h"
+#include "../../jvm/result/Results.h"
 struct Temp {
 };

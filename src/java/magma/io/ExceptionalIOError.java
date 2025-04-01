@@ -1,6 +1,6 @@
 package magma.io;
 
-import magma.result.Results;
+import jvm.result.Results;
 
 import java.io.IOException;
 

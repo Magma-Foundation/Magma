@@ -1,13 +1,12 @@
-clang magma\error\Error.c^
+clang magma\io\IOErrors.c^
+	magma\error\Error.c^
 	magma\io\IOError.c^
-	magma\io\IOErrors.c^
 	magma\process\Processes.c^
 	magma\result\Result.c^
 	magma\CompileError.c^
 	magma\result\ThrowableSupplier.c^
 	magma\io\Files.c^
 	magma\result\Err.c^
-	magma\result\Results.c^
 	magma\ApplicationError.c^
 	magma\io\ExceptionalIOError.c^
 	magma\Tuple.c^

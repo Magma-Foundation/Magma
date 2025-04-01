@@ -2,7 +2,7 @@ package magma.process;
 
 import magma.io.ExceptionalIOError;
 import magma.result.Result;
-import magma.result.Results;
+import jvm.result.Results;
 
 import java.nio.file.Path;
 import java.util.List;

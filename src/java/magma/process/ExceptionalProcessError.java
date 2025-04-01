@@ -1,6 +1,6 @@
 package magma.process;
 
-import magma.result.Results;
+import jvm.result.Results;
 
 public record ExceptionalProcessError(InterruptedException exception) implements ProcessError {
     @Override

@@ -1,12 +1,12 @@
 package magma;
 
+import jvm.result.Results;
 import magma.process.ExceptionalProcessError;
 import magma.process.ProcessError;
 import magma.process.Processes;
 import magma.result.Err;
 import magma.result.Ok;
 import magma.result.Result;
-import magma.result.Results;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +54,10 @@ public class Main {
     private static Result<List<Path>, ApplicationError> runWithSources(Set<Path> sources) {
         Result<List<Path>, ApplicationError> targetPaths = new Ok<>(new ArrayList<>());
         for (Path source : sources) {
-            targetPaths = targetPaths.and(() -> runWithSource(source)).mapValue(tuple -> {
+            List<String> namespace = computeNamespace(source);
+            if (namespace.isEmpty() || namespace.getFirst().equals("jvm")) continue;
+
+            targetPaths = targetPaths.and(() -> runWithSource(source, namespace)).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
@@ -72,21 +75,13 @@ public class Main {
         return Results.wrapRunnable(process::waitFor).map(ExceptionalProcessError::new);
     }
 
-    private static Result<Path, ApplicationError> runWithSource(Path source) {
+    private static Result<Path, ApplicationError> runWithSource(Path source, List<String> namespace) {
         return magma.io.Files.readString(source)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(input -> compile(source, input));
+                .flatMapValue(input -> compile(source, namespace, input));
     }
 
-    private static Result<Path, ApplicationError> compile(Path source, String input) {
-        Path relative = SOURCE_DIRECTORY.relativize(source);
-        Path parent = relative.getParent();
-
-        List<String> namespace = new ArrayList<>();
-        for (int i = 0; i < parent.getNameCount(); i++) {
-            namespace.add(parent.getName(i).toString());
-        }
-
+    private static Result<Path, ApplicationError> compile(Path source, List<String> namespace, String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -112,11 +107,26 @@ public class Main {
         }
 
         return builder.mapErr(ApplicationError::new).flatMapValue(output -> {
-            Path targetParent = TARGET_DIRECTORY.resolve(parent);
+            Path targetParent = TARGET_DIRECTORY;
+            for (String s : namespace) {
+                targetParent = targetParent.resolve(s);
+            }
+
+            Path finalTargetParent = targetParent;
             return ensureTargetParent(targetParent)
                     .<Result<Path, ApplicationError>>map(Err::new)
-                    .orElseGet(() -> writeOutput(relative, targetParent, output));
+                    .orElseGet(() -> writeOutput(source, finalTargetParent, output));
         });
+    }
+
+    private static List<String> computeNamespace(Path source) {
+        List<String> namespace = new ArrayList<>();
+        Path relative = SOURCE_DIRECTORY.relativize(source);
+        Path parent = relative.getParent();
+        for (int i = 0; i < parent.getNameCount(); i++) {
+            namespace.add(parent.getName(i).toString());
+        }
+        return namespace;
     }
 
     private static Result<Path, ApplicationError> writeOutput(Path relative, Path targetParent, StringBuilder output) {
@@ -124,7 +134,7 @@ public class Main {
         String name = nameWithExt.substring(0, nameWithExt.lastIndexOf("."));
 
         return writeSafe(targetParent, name, ".c", output.toString())
-                .or(() ->  writeSafe(targetParent, name, ".h", output.toString()))
+                .or(() -> writeSafe(targetParent, name, ".h", output.toString()))
                 .<Result<Path, ApplicationError>>map(Err::new)
                 .orElseGet(() -> new Ok<>(TARGET_DIRECTORY.relativize(targetParent.resolve(name + ".c"))));
     }
@@ -160,6 +170,7 @@ public class Main {
                 for (int i = 0; i < namespace.size(); i++) {
                     path.add("..");
                 }
+
                 path.addAll(Arrays.asList(segmentSplits));
 
                 String replaced = String.join("/", path);
