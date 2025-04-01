@@ -7,3 +7,4 @@ auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
 auto __lambda7__();
+auto __lambda8__();

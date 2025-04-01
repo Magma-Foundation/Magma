@@ -20,3 +20,4 @@ magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> 
 magma.compile.Node removeNode(String propertyKey);
 int hasNode(String propertyKey);
 int hasNodeList(String propertyKey);
+int equalsTo(magma.compile.Node other);

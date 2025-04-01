@@ -23,7 +23,7 @@ magma.compile.rule.Rule createFunctionRule(){Rule definitionRule = createDefinit
 }
 magma.compile.rule.Rule createStatementRule(){return OrRule(Lists.of(createWhitespaceRule(), createReturnRule(createValueRule()), createIfRule(), SuffixRule(createInvocationRule(createValueRule()), ";"), createForRule(), createAssignmentRule(), createPostfixRule(), createElseRule(), createWhileRule()));
 }
-magma.compile.rule.Rule createValueRule(){LazyRule value = new LazyRule();value.set(OrRule(Lists.of(createSymbolValueRule(), createOperatorRule(value, "add", "+"), createOperatorRule(value, "subtract", "-"), createOperatorRule(value, "or", "||"), createInvocationRule(value), createAccessRule("data-access", ".", value), createStringRule(), createTernaryRule(value), createNumberRule(), createNotRule(value), createCharRule())));return value;
+magma.compile.rule.Rule createValueRule(){LazyRule value = new LazyRule();value.set(OrRule(Lists.of(createSymbolValueRule(), createOperatorRule(value, "add", "+"), createOperatorRule(value, "subtract", "-"), createOperatorRule(value, "and", "&&"), createOperatorRule(value, "or", "||"), createInvocationRule(value), createAccessRule("data-access", ".", value), createStringRule(), createTernaryRule(value), createNumberRule(), createNotRule(value), createCharRule())));return value;
 }
 magma.compile.rule.Rule createStructRule(){Rule name = CommonLang.createNamedWithTypeParams();
         Rule contentRule = CommonLang.createContentRule(name, createStructMemberRule());return TypeRule("struct", PrefixRule("struct ", SuffixRule(contentRule, ";\n")));

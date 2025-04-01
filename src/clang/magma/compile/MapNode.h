@@ -1,8 +1,10 @@
 #ifndef magma_compile_MapNode
 #define magma_compile_MapNode
+#include "../../windows/collect/list/Lists.h"
 #include "../../windows/collect/map/Maps.h"
 #include "../../windows/collect/stream/Streams.h"
 #include "../../magma/collect/list/List_.h"
+#include "../../magma/collect/map/MapCollector.h"
 #include "../../magma/collect/map/Map_.h"
 #include "../../magma/collect/stream/Joiner.h"
 #include "../../magma/collect/stream/Stream.h"
@@ -55,6 +57,8 @@ struct MapNode{magma.option.Option<String> maybeType;magma.collect.map.Map_<Stri
 // expand magma.collect.list.List_<magma.compile.Node>
 // expand magma.collect.list.List_<magma.compile.Node>
 // expand magma.collect.map.Map_<String, magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
+// expand magma.collect.list.List_<magma.compile.Node>
 auto __lambda0__();
 auto __lambda1__();
 auto __lambda2__();
@@ -85,4 +89,7 @@ magma.compile.Node withNodes(magma.collect.map.Map_<String, magma.compile.Node> 
 magma.compile.Node removeNode(String propertyKey);
 int hasNode(String propertyKey);
 int hasNodeList(String propertyKey);
+int equalsTo(magma.compile.Node other);
+int doNodeListsEqual(magma.collect.list.List_<magma.compile.Node> nodeList, magma.collect.list.List_<magma.compile.Node> nodeList2);
+String toString();
 #endif

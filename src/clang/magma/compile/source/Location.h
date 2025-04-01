@@ -5,4 +5,5 @@ struct Location{
 };
 // expand magma.collect.list.List_<String>
 magma.compile.source.Location resolveSibling(String otherName);
+magma.compile.source.Location resolveChild(String child);
 #endif

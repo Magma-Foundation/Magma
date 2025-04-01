@@ -4,17 +4,13 @@
 #include "../windows/collect/map/Maps.h"
 #include "../windows/io/Paths.h"
 #include "../windows/process/Processes.h"
-#include "../magma/collect/list/ListCollector.h"
 #include "../magma/collect/list/List_.h"
 #include "../magma/collect/map/Map_.h"
 #include "../magma/collect/set/SetCollector.h"
 #include "../magma/collect/set/Set_.h"
 #include "../magma/collect/stream/Joiner.h"
-#include "../magma/collect/stream/Stream.h"
 #include "../magma/compile/Compiler.h"
-#include "../magma/compile/MapNode.h"
 #include "../magma/compile/Node.h"
-#include "../magma/compile/lang/StringLists.h"
 #include "../magma/compile/source/Location.h"
 #include "../magma/compile/source/PathSource.h"
 #include "../magma/compile/source/Source.h"
@@ -36,23 +32,6 @@ struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
 // expand magma.collect.set.Set_<magma.io.Path_>
 // expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
 // expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.collect.list.List_<magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.source.Location, magma.compile.Node>
-// expand magma.option.Tuple<magma.compile.source.Location, magma.compile.Node>
-// expand magma.collect.list.List_<String>
-// expand magma.collect.stream.Stream<magma.compile.Node>
 // expand magma.option.Option<magma.ApplicationError>
 // expand magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>
 // expand magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError>
@@ -88,18 +67,10 @@ auto __lambda4__();
 auto __lambda5__();
 auto __lambda6__();
 auto __lambda7__();
-auto __lambda8__();
-auto __lambda9__();
-auto __lambda10__();
-auto __lambda11__();
 magma.void main(String* args);
 magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files);
 magma.option.Option<magma.ApplicationError> runWithSources(magma.collect.set.Set_<magma.io.Path_> sources);
-magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> getPathNodeMap(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees);
-magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>> foldIntoCache(magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>> cache, magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees, magma.compile.Node expansion);
-magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>> foldEntry(magma.collect.map.Map_<magma.compile.source.Location, magma.collect.list.List_<magma.compile.Node>> map, magma.option.Tuple<magma.compile.source.Location, magma.compile.Node> entry);
-int isDefined(magma.option.Tuple<magma.compile.source.Location, magma.compile.Node> entry, magma.collect.list.List_<String> segments);
-magma.collect.stream.Stream<magma.compile.Node> findExpansionsInTargetSet(magma.compile.Node value);
+magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> modifyTrees(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees);
 magma.option.Option<magma.ApplicationError> postLoadTrees(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees);
 magma.result.Result<magma.collect.list.List_<magma.io.Path_>, magma.ApplicationError> postLoadTree(magma.collect.list.List_<magma.io.Path_> relatives, magma.option.Tuple<magma.compile.source.Location, magma.compile.Node> pathNodeTuple);
 magma.result.Result<magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node>, magma.ApplicationError> preLoadSources(magma.collect.map.Map_<magma.compile.source.Location, magma.compile.Node> trees, magma.io.Path_ path);

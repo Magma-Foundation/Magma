@@ -24,7 +24,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 
         Node type = node.findNode("type").orElse(new MapNode());if (!type.is("generic")) return new Ok<>(new Tuple<>(state, node));
 
-        List_<String> qualifiedName = StringLists.fromQualified(type.findNode("base")
+        List_<String> qualifiedName = StringLists.fromQualifiedType(type.findNode("base")
                 .orElse(new MapNode()));
 
         List_<Node> arguments = type.findNodeList("arguments").orElseGet(Lists::empty);if (qualifiedName.equalsTo(Lists.of("java", "util", "function", "BiFunction"))) {
@@ -137,7 +137,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
         }if (node.is("method-access")) {
             return new Ok<>(new Tuple<>(state, node.retype("data-access")));
         }if (node.is("construction")) {
-            List_<String> list = StringLists.fromQualified(node.findNode("type")
+            List_<String> list = StringLists.fromQualifiedType(node.findNode("type")
                     .orElse(new MapNode()));
 
             Node caller = new MapNode("symbol-value").withString("value", list.findLast().orElse(""));

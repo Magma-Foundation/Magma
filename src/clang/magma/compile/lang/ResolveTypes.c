@@ -37,7 +37,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 
             return new Ok<>(new Tuple<>(nodeList, node));
         }if (node.is("qualified")) {
-            List_<String> oldName = StringLists.fromQualified(node);
+            List_<String> oldName = StringLists.fromQualifiedType(node);
             if (oldName.isEmpty())
                 return new Err<>(new CompileError("At least one segment must be present", new NodeContext(node)));
 

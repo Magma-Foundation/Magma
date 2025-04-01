@@ -13,4 +13,5 @@
 // expand magma.collect.map.Map_<K, V>
 // expand magma.collect.map.Map_<K, V>
 // expand magma.collect.stream.Stream<V>
+// expand magma.collect.stream.Stream<K>
 #endif

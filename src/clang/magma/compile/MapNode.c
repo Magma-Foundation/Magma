@@ -83,3 +83,13 @@ int hasNode(String propertyKey){return nodes.containsKey(propertyKey);
 }
 int hasNodeList(String propertyKey){return nodeLists.containsKey(propertyKey);
 }
+int equalsTo(magma.compile.Node other){boolean isType = maybeType.map(other::is).orElse(false);
+
+        Map_<String, String> stringsCopy = other.streamStrings().collect(new MapCollector<>());
+        Map_<String, Node> nodesCopy = other.streamNodes().collect(new MapCollector<>());
+        Map_<String, List_<Node>> nodeListCopy = other.streamNodeLists().collect(new MapCollector<>());return isType&&Maps.equalsTo(strings, stringsCopy, String.equals)&&Maps.equalsTo(nodes, nodesCopy, Node.equalsTo)&&Maps.equalsTo(nodeLists, nodeListCopy, this.doNodeListsEqual);
+}
+int doNodeListsEqual(magma.collect.list.List_<magma.compile.Node> nodeList, magma.collect.list.List_<magma.compile.Node> nodeList2){return Lists.equalsTo(nodeList, nodeList2, Node.equalsTo);
+}
+String toString(){return display();
+}
