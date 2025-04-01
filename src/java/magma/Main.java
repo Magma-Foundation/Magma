@@ -192,9 +192,28 @@ public class Main {
             }
         }
 
-        if (segment.contains("class ") || segment.contains("interface ") || segment.contains("record "))
-            return new Ok<>("struct Temp {\n};\n");
+        if (segment.contains("class ")) {
+            return generateStruct("Temp");
+        }
+
+        int interfaceIndex = segment.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            String afterKeyword = segment.substring(interfaceIndex + "interface ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                return generateStruct(name);
+            }
+        }
+
+        if (segment.contains("record ")) {
+            return generateStruct("Temp");
+        }
 
         return new Err<>(new CompileError("Invalid root segment", segment));
+    }
+
+    private static Ok<String, CompileError> generateStruct(String name) {
+        return new Ok<>("struct " + name + " {\n};\n");
     }
 }
