@@ -1,5 +1,5 @@
 #include "StringRule.h"
-auto __lambda0__(){return (CompileError("String '" + propertyKey + "' not present", NodeContext(input)));
+int __lambda0__(){return (CompileError("String '" + propertyKey + "' not present", NodeContext(input)));
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String value){return (MapNode().withString(propertyKey(), value));
 }

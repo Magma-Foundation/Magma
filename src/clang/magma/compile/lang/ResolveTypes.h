@@ -66,9 +66,9 @@ struct ResolveTypes{
 // expand magma.option.Tuple<>
 // expand magma.result.Ok<>
 // expand magma.result.Err<>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
 magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsImport(magma.compile.transform.State state, magma.collect.list.List_<String> name);
 magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError> resolveAsLocal(magma.compile.transform.State state, magma.collect.list.List_<String> name, magma.compile.Node node);
 magma.option.Option<magma.result.Result<magma.collect.list.List_<String>, magma.compile.CompileError>> resolveAsPrimitive(magma.collect.list.List_<String> oldName);

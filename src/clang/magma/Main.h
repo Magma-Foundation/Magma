@@ -60,14 +60,14 @@ struct Main{magma.io.Path_ SOURCE_DIRECTORY;magma.io.Path_ TARGET_DIRECTORY;
 // expand magma.option.Option<magma.io.IOError>
 // expand magma.option.None<>
 // expand magma.result.Ok<>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
-auto __lambda7__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
+int __lambda3__();
+int __lambda4__();
+int __lambda5__();
+int __lambda6__();
+int __lambda7__();
 magma.void main(String* args);
 magma.option.Option<magma.ApplicationError> runWithFiles(magma.collect.set.Set_<magma.io.Path_> files);
 magma.option.Option<magma.ApplicationError> runWithSources(magma.collect.set.Set_<magma.io.Path_> sources);

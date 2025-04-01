@@ -37,9 +37,9 @@ struct Compiler{
 // expand magma.collect.map.Map_<String, String>
 // expand magma.option.Tuple<String, magma.compile.Node>
 // expand magma.option.Tuple<>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
 magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree);
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> preLoad(String input, magma.compile.transform.State state);
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>(*transformUsing)(magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>)(magma.compile.transform.Transformer transformer);

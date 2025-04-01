@@ -1,7 +1,7 @@
 #include "Formatter.h"
-auto __lambda0__(){return (state, value);
+int __lambda0__(){return (state, value);
 }
-auto __lambda1__(){return (state, value);
+int __lambda1__(){return (state, value);
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> afterPass0(magma.compile.transform.State state, magma.compile.Node node){if (node.is("block")) {
             return new Ok<>(node.withString("after-children", "\n"));

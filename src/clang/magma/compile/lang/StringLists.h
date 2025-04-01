@@ -11,7 +11,7 @@ struct StringLists{
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.ListCollector<String>
-auto __lambda0__();
+int __lambda0__();
 magma.compile.Node toQualified(magma.collect.list.List_<String> list);
 magma.collect.list.List_<String> fromQualifiedType(magma.compile.Node node);
 #endif

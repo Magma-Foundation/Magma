@@ -1,7 +1,7 @@
 #include "TypeRule.h"
-auto __lambda0__(){return node;
+int __lambda0__(){return node;
 }
-auto __lambda1__(){return CompileError("Failed to parse of type '" + type + "'", StringContext(input), Lists.of(error));
+int __lambda1__(){return CompileError("Failed to parse of type '" + type + "'", StringContext(input), Lists.of(error));
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input){return rule.parse(input).mapValue(__lambda0__.retype(type)).mapErr(__lambda1__);
 }

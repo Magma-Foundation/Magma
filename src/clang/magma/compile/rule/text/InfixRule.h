@@ -11,8 +11,8 @@ struct InfixRule{magma.compile.rule.Rule left;String infix;magma.compile.rule.Ru
 };
 // expand magma.result.Result<magma.compile.Node, magma.compile.CompileError>
 // expand magma.result.Result<String, magma.compile.CompileError>
-auto __lambda0__();
-auto __lambda1__();
+int __lambda0__();
+int __lambda1__();
 magma.compile.rule.text.public InfixRule(magma.compile.rule.Rule left, String infix, magma.compile.rule.Rule right, magma.compile.rule.locate.Locator locator);
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node node);

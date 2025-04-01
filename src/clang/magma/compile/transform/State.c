@@ -1,7 +1,7 @@
 #include "State.h"
-auto __lambda0__(){return import_;
+int __lambda0__(){return import_;
 }
-auto __lambda1__(){return frame;
+int __lambda1__(){return frame;
 }
 magma.compile.transform.public State(magma.compile.source.Location location, magma.collect.list.List_<magma.collect.list.List_<String>> imports, magma.collect.list.List_<magma.compile.transform.Frame> frames){this.location = location;
         this.imports = imports;

@@ -1,9 +1,9 @@
 #include "Compiler.h"
-auto __lambda0__(){return (state, tree);
+int __lambda0__(){return (state, tree);
 }
-auto __lambda1__(){return TreeTransformingStage(transformer);
+int __lambda1__(){return TreeTransformingStage(transformer);
 }
-auto __lambda2__(){return current;
+int __lambda2__(){return current;
 }
 magma.result.Result<magma.collect.map.Map_<String, String>, magma.compile.CompileError> postLoad(magma.compile.transform.State state, magma.compile.Node tree){return TreeTransformingStage(FlattenStructs()).transform(state, tree).flatMapValue(transformUsing(FlattenGroup())).flatMapValue(transformUsing(Formatter())).flatMapValue(transformUsing(FlattenRoot())).flatMapValue(transformUsing(Sorter())).mapValue(Tuple.right).flatMapValue(Compiler.generateRoots);
 }

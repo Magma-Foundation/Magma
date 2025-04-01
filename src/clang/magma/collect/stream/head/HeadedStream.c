@@ -1,19 +1,19 @@
 #include "HeadedStream.h"
-auto __lambda0__(){return head;
+int __lambda0__(){return head;
 }
-auto __lambda1__(){return current;
+int __lambda1__(){return current;
 }
-auto __lambda2__(){return aBoolean;
+int __lambda2__(){return aBoolean;
 }
-auto __lambda3__(){return foldWithInitial;
+int __lambda3__(){return foldWithInitial;
 }
-auto __lambda4__(){return (predicate.test(element)?(element):());
+int __lambda4__(){return (predicate.test(element)?(element):());
 }
-auto __lambda5__(){return rStream;
+int __lambda5__(){return rStream;
 }
-auto __lambda6__(){return current;
+int __lambda6__(){return current;
 }
-auto __lambda7__(){return folder;
+int __lambda7__(){return folder;
 }
-auto __lambda8__(){return head;
+int __lambda8__(){return head;
 }

@@ -20,12 +20,12 @@ struct OrRule{
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.collect.list.List_<magma.compile.rule.Rule>
 // expand magma.result.Err<>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
+int __lambda3__();
+int __lambda4__();
+int __lambda5__();
 magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError> apply(magma.result.Result<magma.compile.rule.tree.T, magma.compile.CompileError>(*applicator)(magma.compile.rule.Rule), magma.compile.context.Context(*context)());
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String input);
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input);

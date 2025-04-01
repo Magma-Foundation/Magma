@@ -59,10 +59,10 @@ struct MapNode{magma.option.Option<String> maybeType;magma.collect.map.Map_<Stri
 // expand magma.collect.map.Map_<String, magma.compile.Node>
 // expand magma.collect.list.List_<magma.compile.Node>
 // expand magma.collect.list.List_<magma.compile.Node>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
+int __lambda3__();
 magma.compile.public MapNode();
 magma.compile.public MapNode(magma.option.Option<String> maybeType, magma.collect.map.Map_<String, String> strings, magma.collect.map.Map_<String, magma.compile.Node> nodes, magma.collect.map.Map_<String, magma.collect.list.List_<magma.compile.Node>> nodeLists);
 magma.compile.public MapNode(String type);

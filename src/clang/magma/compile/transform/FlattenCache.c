@@ -1,7 +1,7 @@
 #include "FlattenCache.h"
-auto __lambda0__(){return nodeList;
+int __lambda0__(){return nodeList;
 }
-auto __lambda1__(){return categoryValues;
+int __lambda1__(){return categoryValues;
 }
 magma.compile.transform.public FlattenCache(){this(Maps.empty(), Maps.empty(), Maps.empty());
 }

@@ -16,5 +16,5 @@
 // expand magma.option.Tuple<T, magma.option.R>
 // expand magma.option.Option<magma.option.R>
 // expand magma.option.Tuple<>
-auto __lambda0__();
+int __lambda0__();
 #endif

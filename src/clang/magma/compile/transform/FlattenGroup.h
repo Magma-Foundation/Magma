@@ -38,8 +38,8 @@ struct FlattenGroup{
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.option.Tuple<>
 // expand magma.option.Tuple<>
-auto __lambda0__();
-auto __lambda1__();
+int __lambda0__();
+int __lambda1__();
 magma.compile.transform.FlattenCache foldNodeProperty(magma.compile.transform.FlattenCache state, magma.option.Tuple<String, magma.compile.Node> property);
 magma.option.Tuple<magma.compile.Node, magma.compile.transform.FlattenCache> flattenNode(magma.compile.transform.FlattenCache cache, magma.compile.Node element);
 magma.compile.transform.FlattenCache flattenCategory(magma.compile.transform.FlattenCache current, magma.option.Tuple<String, magma.collect.list.List_<magma.compile.Node>> category);

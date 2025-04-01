@@ -24,5 +24,5 @@
 // expand magma.option.Option<T>
 // expand magma.collect.list.List_<magma.compile.CompileError>
 // expand magma.result.Err<>
-auto __lambda0__();
+int __lambda0__();
 #endif

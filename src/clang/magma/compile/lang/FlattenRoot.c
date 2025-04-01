@@ -1,7 +1,7 @@
 #include "FlattenRoot.h"
-auto __lambda0__(){return (state, value);
+int __lambda0__(){return (state, value);
 }
-auto __lambda1__(){return (state, value);
+int __lambda1__(){return (state, value);
 }
 magma.compile.Node afterPass0(magma.compile.Node node){if (!node.is("group")) return node;
         Node child = node.findNode("child").orElse(new MapNode());if (!child.is("root")) return node;

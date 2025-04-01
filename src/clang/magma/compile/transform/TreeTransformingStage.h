@@ -46,13 +46,13 @@ struct TreeTransformingStage{magma.compile.transform.Transformer transformer;
 // expand magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
 // expand magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
+int __lambda3__();
+int __lambda4__();
+int __lambda5__();
+int __lambda6__();
 magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer);
 magma.option.Tuple<magma.compile.transform.State, magma.compile.Node> attachChildren(magma.compile.Node node, String propertyKey, magma.option.Tuple<magma.compile.transform.State, magma.collect.list.List_<magma.compile.Node>> children);
 magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.compile.Node>, magma.compile.CompileError> transformNodes(magma.compile.transform.State state, magma.compile.Node root);

@@ -19,8 +19,8 @@ struct Transformers{
 // expand magma.collect.list.List_<magma.compile.Node>
 // expand magma.result.Err<>
 // expand magma.result.Err<>
-auto __lambda0__();
-auto __lambda1__();
+int __lambda0__();
+int __lambda1__();
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> findNode(magma.compile.Node node, String propertyKey);
 magma.result.Result<magma.collect.list.List_<magma.compile.Node>, magma.compile.CompileError> findNodeList(magma.compile.Node value, String propertyKey);
 #endif

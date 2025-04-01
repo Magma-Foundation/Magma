@@ -1,5 +1,5 @@
 #include "StripRule.h"
-auto __lambda0__(){return attachPadding;
+int __lambda0__(){return attachPadding;
 }
 magma.compile.rule.text.public StripRule(magma.compile.rule.Rule childRule){this("", childRule, "");
 }

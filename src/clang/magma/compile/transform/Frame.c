@@ -1,5 +1,5 @@
 #include "Frame.h"
-auto __lambda0__(){return node;
+int __lambda0__(){return node;
 }
 magma.compile.transform.public Frame(){this(Lists.empty());
 }

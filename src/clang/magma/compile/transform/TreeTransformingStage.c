@@ -1,17 +1,17 @@
 #include "TreeTransformingStage.h"
-auto __lambda0__(){return transformNodes;
+int __lambda0__(){return transformNodes;
 }
-auto __lambda1__(){return transformNodeLists;
+int __lambda1__(){return transformNodeLists;
 }
-auto __lambda2__(){return transformNodeList;
+int __lambda2__(){return transformNodeList;
 }
-auto __lambda3__(){return transformer;
+int __lambda3__(){return transformer;
 }
-auto __lambda4__(){return attachChildren;
+int __lambda4__(){return attachChildren;
 }
-auto __lambda5__(){return transformNodes;
+int __lambda5__(){return transformNodes;
 }
-auto __lambda6__(){return CompileError("Error when transforming", NodeContext(root), Lists.of(err));
+int __lambda6__(){return CompileError("Error when transforming", NodeContext(root), Lists.of(err));
 }
 magma.compile.transform.public TreeTransformingStage(magma.compile.transform.Transformer transformer){this.transformer = transformer;
 }

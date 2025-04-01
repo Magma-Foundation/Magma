@@ -1,19 +1,19 @@
 #include "Main.h"
-auto __lambda0__(){return System;
+int __lambda0__(){return System;
 }
-auto __lambda1__(){return writeOutputs;
+int __lambda1__(){return writeOutputs;
 }
-auto __lambda2__(){return Compiler;
+int __lambda2__(){return Compiler;
 }
-auto __lambda3__(){return trees;
+int __lambda3__(){return trees;
 }
-auto __lambda4__(){return output;
+int __lambda4__(){return output;
 }
-auto __lambda5__(){return writeAndFoldOutput;
+int __lambda5__(){return writeAndFoldOutput;
 }
-auto __lambda6__(){return (TARGET_DIRECTORY.relativize(parent.resolve(name+".c")));
+int __lambda6__(){return (TARGET_DIRECTORY.relativize(parent.resolve(name+".c")));
 }
-auto __lambda7__(){return first;
+int __lambda7__(){return first;
 }
 magma.void main(String* args){SOURCE_DIRECTORY.walk().mapErr(ApplicationError.new).match(Main.runWithFiles, Some.new).ifPresent(__lambda0__.err.println(error.display()));
 }

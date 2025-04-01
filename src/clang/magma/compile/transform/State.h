@@ -23,8 +23,8 @@ struct State{magma.collect.list.List_<magma.collect.list.List_<String>> imports;
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.List_<String>
 // expand magma.collect.list.List_<String>
-auto __lambda0__();
-auto __lambda1__();
+int __lambda0__();
+int __lambda1__();
 magma.compile.transform.public State(magma.compile.source.Location location, magma.collect.list.List_<magma.collect.list.List_<String>> imports, magma.collect.list.List_<magma.compile.transform.Frame> frames);
 magma.compile.transform.public State(magma.compile.source.Location location);
 magma.compile.transform.State defineImport(magma.compile.Node import_);

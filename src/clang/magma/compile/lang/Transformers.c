@@ -1,7 +1,7 @@
 #include "Transformers.h"
-auto __lambda0__(){return (CompileError("Node '" + propertyKey + "' not present", NodeContext(node)));
+int __lambda0__(){return (CompileError("Node '" + propertyKey + "' not present", NodeContext(node)));
 }
-auto __lambda1__(){return (CompileError("Node list '" + propertyKey + "' not present", NodeContext(value)));
+int __lambda1__(){return (CompileError("Node list '" + propertyKey + "' not present", NodeContext(value)));
 }
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> findNode(magma.compile.Node node, String propertyKey){return node.findNode(propertyKey).map(Ok.new).orElseGet(__lambda0__);
 }

@@ -1,11 +1,11 @@
 #include "MapNode.h"
-auto __lambda0__(){return withNodeList;
+int __lambda0__(){return withNodeList;
 }
-auto __lambda1__(){return value;
+int __lambda1__(){return value;
 }
-auto __lambda2__(){return node;
+int __lambda2__(){return node;
 }
-auto __lambda3__(){return withNode;
+int __lambda3__(){return withNode;
 }
 magma.compile.public MapNode(){this((), Maps.empty(), Maps.empty(), Maps.empty());
 }

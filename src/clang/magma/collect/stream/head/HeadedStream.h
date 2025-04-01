@@ -29,13 +29,13 @@
 // expand magma.collect.stream.head.HeadedStream<>
 // expand magma.collect.stream.head.SingleHead<>
 // expand magma.collect.stream.head.EmptyHead<>
-auto __lambda0__();
-auto __lambda1__();
-auto __lambda2__();
-auto __lambda3__();
-auto __lambda4__();
-auto __lambda5__();
-auto __lambda6__();
-auto __lambda7__();
-auto __lambda8__();
+int __lambda0__();
+int __lambda1__();
+int __lambda2__();
+int __lambda3__();
+int __lambda4__();
+int __lambda5__();
+int __lambda6__();
+int __lambda7__();
+int __lambda8__();
 #endif

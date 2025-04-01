@@ -15,7 +15,7 @@ struct StringRule{
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.result.Result<String, magma.compile.CompileError>
 // expand magma.result.Err<>
-auto __lambda0__();
+int __lambda0__();
 magma.result.Result<magma.compile.Node, magma.compile.CompileError> parse(String value);
 magma.result.Result<String, magma.compile.CompileError> generate(magma.compile.Node input);
 #endif

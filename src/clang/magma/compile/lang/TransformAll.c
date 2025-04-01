@@ -134,7 +134,7 @@ magma.result.Result<magma.option.Tuple<magma.compile.transform.State, magma.comp
 
             Node definition = new MapNode("definition")
                     .withString("name", generatedName)
-                    .withNode("type", StringLists.toQualified(Lists.of("auto")));
+                    .withNode("type", StringLists.toQualified(Lists.of("int")));
             Node function = new MapNode("function")
                     .withNode("definition", definition)
                     .withNode("content", propertyValue);

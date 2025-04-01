@@ -1,5 +1,5 @@
 #include "Joiner.h"
-auto __lambda0__(){return inner;
+int __lambda0__(){return inner;
 }
 magma.collect.stream.public Joiner(){this("");
 }
