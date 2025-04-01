@@ -58,7 +58,7 @@ public class Main {
         var collected = trees.streamValues()
                 .filter(node -> node.is("group"))
                 .flatMap(root -> root.findNodeList("expansions").orElse(Lists.empty()).stream())
-                .foldWithInitial(Lists.empty(), Main::getNodeList);
+                .foldWithInitial(Lists.empty(), Main::foldUniquely);
 
         Location location = new Location(Lists.of("magma"), "Generated");
         Node block = new MapNode("block").withNodeList("children", collected);
@@ -66,12 +66,19 @@ public class Main {
         return trees.with(location, root.withNode("content", block));
     }
 
-    private static List_<Node> getNodeList(List_<Node> nodeList, Node node) {
-        if (nodeList.contains(node, Node::equalsTo)) {
+    private static List_<Node> foldUniquely(List_<Node> nodeList, Node node) {
+        if (nodeList.contains(node, Node::equalsTo)) return nodeList;
+
+        if (hasTypeParam(node)) {
             return nodeList;
-        } else {
-            return nodeList.add(node);
         }
+        return nodeList.add(node);
+    }
+
+    private static boolean hasTypeParam(Node node) {
+        return node.is("type-param")
+                || node.streamNodes().map(Tuple::right).anyMatch(Main::hasTypeParam)
+                || node.streamNodeLists().map(Tuple::right).flatMap(List_::stream).anyMatch(Main::hasTypeParam);
     }
 
     private static Option<ApplicationError> postLoadTrees(Map_<Location, Node> trees) {

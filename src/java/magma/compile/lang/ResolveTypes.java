@@ -52,12 +52,16 @@ public class ResolveTypes implements Transformer {
         return new Tuple<>(state, qualifiedNode);
     }
 
-    private static Option<Result<List_<String>, CompileError>> resolveAsTypeParam(State state, List_<String> segments) {
-        if (state.isTypeParamDefined(segments.findLast().orElse(""))) {
-            return new Some<>(new Ok<>(segments));
+    private static Option<List_<String>> resolveAsTypeParam(State state, List_<String> segments) {
+        if (isTypeParamDefined(state, segments)) {
+            return new Some<>(segments);
         } else {
             return new None<>();
         }
+    }
+
+    private static boolean isTypeParamDefined(State state, List_<String> segments) {
+        return state.isTypeParamDefined(segments.findLast().orElse(""));
     }
 
     @Override
@@ -81,9 +85,12 @@ public class ResolveTypes implements Transformer {
             if (oldName.isEmpty())
                 return new Err<>(new CompileError("At least one segment must be present", new NodeContext(node)));
 
+            if (isTypeParamDefined(state, oldName)) {
+                return new Ok<>(new Tuple<>(state, node.retype("type-param")));
+            }
+
             return resolveAsImport(state, oldName)
                     .or(() -> resolveAsPrimitive(oldName))
-                    .or(() -> resolveAsTypeParam(state, oldName))
                     .orElseGet(() -> resolveAsLocal(state, oldName, node))
                     .mapValue(newName -> wrapToTuple(state, newName));
         }
