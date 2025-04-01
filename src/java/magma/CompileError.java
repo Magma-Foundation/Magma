@@ -2,17 +2,31 @@ package magma;
 
 import magma.error.Error;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class CompileError implements Error {
     private final String message;
-    private final String context;
+    private final Context context;
+    private final List<CompileError> errors;
 
-    public CompileError(String message, String context) {
+    public CompileError(String message, Context context) {
+        this(message, context, Collections.emptyList());
+    }
+
+    public CompileError(String message, Context context, List<CompileError> errors) {
         this.message = message;
         this.context = context;
+        this.errors = errors;
     }
 
     @Override
     public String display() {
-        return message + ": " + context;
+        String joinedChildren = errors.stream()
+                .map(CompileError::display)
+                .collect(Collectors.joining());
+
+        return message + ": " + context.display() + joinedChildren;
     }
 }

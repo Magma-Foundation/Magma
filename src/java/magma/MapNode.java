@@ -25,4 +25,14 @@ public final class MapNode {
     public Optional<String> findString(String propertyKey) {
         return Optional.ofNullable(strings.get(propertyKey));
     }
+
+    public MapNode merge(MapNode other) {
+        HashMap<String, String> copy = new HashMap<>(strings);
+        copy.putAll(other.strings);
+        return new MapNode(copy);
+    }
+
+    public String display() {
+        return strings.toString();
+    }
 }

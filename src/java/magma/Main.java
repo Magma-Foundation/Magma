@@ -197,38 +197,34 @@ public class Main {
         }
 
         if (segment.contains("class ")) {
-            return generateStruct(new MapNode().withString("name", "Temp"));
+            return createStructRule().generate(new MapNode().withString("name", "Temp"));
         }
 
         Result<String, CompileError> maybeInterface = compileInterface(segment);
         if (maybeInterface.isOk()) return maybeInterface;
 
         if (segment.contains("record ")) {
-            return generateStruct(new MapNode().withString("name", "Temp"));
+            return createStructRule().generate(new MapNode().withString("name", "Temp"));
         }
 
-        return new Err<>(new CompileError("Invalid root segment", segment));
+        return new Err<>(new CompileError("Invalid root segment", new StringContext(segment)));
     }
 
     private static Result<String, CompileError> compileInterface(String input) {
-        int interfaceIndex = input.indexOf("interface ");
-        if (interfaceIndex < 0) return new Err<>(new CompileError("Infix 'interface ' not present", input));
-
-        String afterKeyword = input.substring(interfaceIndex + "interface ".length());
-        int contentStart = afterKeyword.indexOf("{");
-        if (contentStart < 0) return new Err<>(new CompileError("Infix '{' not present", afterKeyword));
-
-        String beforeContent = afterKeyword.substring(0, contentStart);
-        int extendsIndex = beforeContent.indexOf("extends ");
-
-        String name = extendsIndex >= 0
-                ? beforeContent.substring(0, extendsIndex)
-                : beforeContent;
-
-        return generateStruct(new MapNode().withString("name", name.strip()));
+        return createInterfaceRule().parse(input).flatMapValue(mapNode -> createStructRule().generate(mapNode));
     }
 
-    private static Ok<String, CompileError> generateStruct(MapNode mapNode) {
-        return new Ok<>("struct " + mapNode.findString("name").orElse("") + " {\n};\n");
+    private static SuffixRule createStructRule() {
+        return new SuffixRule(new PrefixRule("struct ", new StringRule("name")), " {\n};\n");
+    }
+
+    private static Rule createInterfaceRule() {
+        Rule modifiers = new StringRule("modifiers");
+        Rule name = new StringRule("name");
+        Rule superType = new StringRule("super-type");
+
+        Rule withSuperType = new InfixRule(name, "extends ", superType);
+        Rule beforeContent = new OrRule(List.of(withSuperType, superType));
+        return new InfixRule(modifiers, "interface ", new InfixRule(beforeContent, "{", new StringRule("with-end")));
     }
 }
