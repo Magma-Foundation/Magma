@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -74,10 +75,18 @@ public class Main {
     private static Result<Path, ApplicationError> runWithSource(Path source) {
         return magma.io.Files.readString(source)
                 .mapErr(ApplicationError::new)
-                .flatMapValue(input -> getPathErrorResult(source, input));
+                .flatMapValue(input -> compile(source, input));
     }
 
-    private static Result<Path, ApplicationError> getPathErrorResult(Path source, String input) {
+    private static Result<Path, ApplicationError> compile(Path source, String input) {
+        Path relative = SOURCE_DIRECTORY.relativize(source);
+        Path parent = relative.getParent();
+
+        List<String> namespace = new ArrayList<>();
+        for (int i = 0; i < parent.getNameCount(); i++) {
+            namespace.add(parent.getName(i).toString());
+        }
+
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -96,16 +105,13 @@ public class Main {
 
         Result<StringBuilder, CompileError> builder = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            builder = builder.and(() -> compile(segment)).mapValue(tuple -> {
+            builder = builder.and(() -> compileRootSegment(segment, namespace)).mapValue(tuple -> {
                 tuple.left().append(tuple.right());
                 return tuple.left();
             });
         }
 
         return builder.mapErr(ApplicationError::new).flatMapValue(output -> {
-            Path relative = SOURCE_DIRECTORY.relativize(source);
-            Path parent = relative.getParent();
-
             Path targetParent = TARGET_DIRECTORY.resolve(parent);
             return ensureTargetParent(targetParent)
                     .<Result<Path, ApplicationError>>map(Err::new)
@@ -131,20 +137,29 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Result<String, CompileError> compile(String segment) {
+    private static Result<String, CompileError> compileRootSegment(String segment, List<String> namespace) {
         if (segment.startsWith("package ")) return new Ok<>("");
 
         String stripped = segment.strip();
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
-                String substring = right.substring(0, right.length() - ";".length());
-                String replaced = String.join("/", substring.split(Pattern.quote(".")));
+                String segmentString = right.substring(0, right.length() - ";".length());
+                String[] segmentSplits = segmentString.split(Pattern.quote("."));
+
+                ArrayList<String> path = new ArrayList<>();
+                for (int i = 0; i < namespace.size(); i++) {
+                    path.add("..");
+                }
+                path.addAll(Arrays.asList(segmentSplits));
+
+                String replaced = String.join("/", path);
                 return new Ok<>("#include \"" + replaced + ".h\"\n");
             }
         }
 
-        if (segment.contains("class ") || segment.contains("interface ") || segment.contains("record ")) return new Ok<>("struct Temp {\n};\n");
+        if (segment.contains("class ") || segment.contains("interface ") || segment.contains("record "))
+            return new Ok<>("struct Temp {\n};\n");
         return new Err<>(new CompileError("Invalid root segment", segment));
     }
 }

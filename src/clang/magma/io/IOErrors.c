@@ -1,4 +1,4 @@
-#include "magma/error/Error.h"
-#include "java/io/IOException.h"
+#include "../../magma/error/Error.h"
+#include "../../java/io/IOException.h"
 struct Temp {
 };
