@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class Main {
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "src", "java");
     public static final Path TARGET_DIRECTORY = Paths.get(".", "src", "clang");
+    public static final List<String> FUNCTIONAL_PACKAGE = List.of("java", "util", "function");
 
     public static void main(String[] args) {
         magma.io.Files.walk()
@@ -165,13 +166,16 @@ public class Main {
             if (right.endsWith(";")) {
                 String segmentString = right.substring(0, right.length() - ";".length());
                 String[] segmentSplits = segmentString.split(Pattern.quote("."));
+                List<String> oldSegments = new ArrayList<>(Arrays.asList(segmentSplits));
+                if (oldSegments.size() >= 3 && oldSegments.subList(0, 3).equals(FUNCTIONAL_PACKAGE)) {
+                    return new Ok<>("");
+                }
 
                 List<String> path = new ArrayList<>();
                 for (int i = 0; i < namespace.size(); i++) {
                     path.add("..");
                 }
 
-                List<String> oldSegments = new ArrayList<>(Arrays.asList(segmentSplits));
                 List<String> newSegments = new ArrayList<>();
 
                 if (!oldSegments.isEmpty()) {
