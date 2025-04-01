@@ -197,14 +197,14 @@ public class Main {
         }
 
         if (segment.contains("class ")) {
-            return generateStruct("Temp");
+            return generateStruct(new MapNode().withString("name", "Temp"));
         }
 
         Result<String, CompileError> maybeInterface = compileInterface(segment);
         if (maybeInterface.isOk()) return maybeInterface;
 
         if (segment.contains("record ")) {
-            return generateStruct("Temp");
+            return generateStruct(new MapNode().withString("name", "Temp"));
         }
 
         return new Err<>(new CompileError("Invalid root segment", segment));
@@ -225,10 +225,10 @@ public class Main {
                 ? beforeContent.substring(0, extendsIndex)
                 : beforeContent;
 
-        return generateStruct(name.strip());
+        return generateStruct(new MapNode().withString("name", name.strip()));
     }
 
-    private static Ok<String, CompileError> generateStruct(String name) {
-        return new Ok<>("struct " + name + " {\n};\n");
+    private static Ok<String, CompileError> generateStruct(MapNode mapNode) {
+        return new Ok<>("struct " + mapNode.findString("name").orElse("") + " {\n};\n");
     }
 }

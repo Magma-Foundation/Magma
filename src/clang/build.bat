@@ -9,6 +9,7 @@ clang magma\io\IOErrors.c^
 	magma\ApplicationError.c^
 	magma\io\ExceptionalIOError.c^
 	magma\Tuple.c^
+	magma\MapNode.c^
 	magma\Main.c^
 	magma\result\Ok.c^
 	magma\process\ProcessError.c^
