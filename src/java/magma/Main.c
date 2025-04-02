@@ -6,7 +6,6 @@
 #include "java/nio/file/Files.h"
 #include "java/nio/file/Path.h"
 #include "java/nio/file/Paths.h"
-#include "java/util/Arrays.h"
 #include "java/util/LinkedList.h"
 #include "java/util/List.h"
 #include "java/util/Optional.h"
@@ -17,7 +16,7 @@
 #include "java/util/stream/IntStream.h"
 struct Main {
 };
-void main(String[] args){
+void main(Array_String args){
 }
 Result<String, CompileException> compileRoot(String input){
 }
@@ -47,7 +46,9 @@ StringBuilder mergeValues(Tuple<StringBuilder, String> tuple){
 }
 Result<String, CompileException> compileDefinition(String definition){
 }
-Err<String, CompileException> createInfixError(String input, String infix){
+Result<String, CompileException> compileType(String type){
+}
+Result<String, CompileException> createInfixError(String input, String infix){
 }
 Result<String, CompileException> compileWhitespace(String input){
 }

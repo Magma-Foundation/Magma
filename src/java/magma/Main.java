@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -167,11 +166,11 @@ public class Main {
     }
 
     private static State divideValueChar(State state, Character c) {
-        if(c == ',' && state.isLevel()) return state.advance();
+        if (c == ',' && state.isLevel()) return state.advance();
 
         State appended = state.append(c);
-        if(c == '<') return appended.enter();
-        if(c == '>') return appended.exit();
+        if (c == '<') return appended.enter();
+        if (c == '>') return appended.exit();
         return appended;
     }
 
@@ -202,16 +201,23 @@ public class Main {
             }
         }
 
-        String type = maybeTypeSeparator
+        String innerType = maybeTypeSeparator
                 .map(typeSeparator -> beforeName.substring(typeSeparator + " ".length()))
                 .orElse(beforeName);
 
         String name = definition.substring(separator + 1).strip();
-        return new Ok<>(type + " " + name);
-
+        return compileType(innerType).mapValue(outerType -> outerType + " " + name);
     }
 
-    private static Err<String, CompileException> createInfixError(String input, String infix) {
+    private static Result<String, CompileException> compileType(String type) {
+        if (type.endsWith("[]")) {
+            return new Ok<>("Array_" + type.substring(0, type.length() - "[]".length()));
+        }
+
+        return new Ok<>(type);
+    }
+
+    private static Result<String, CompileException> createInfixError(String input, String infix) {
         return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
     }
 
