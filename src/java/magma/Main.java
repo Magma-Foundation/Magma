@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
+    private static final Map<String, String> expansions = new HashMap<>();
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -33,7 +38,25 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRoot(String input) throws CompileException {
-        return divideAndCompile(input, Main::compileRootSegment);
+        List<String> segments = divideByStatements(input);
+
+        return compileAllToList(segments, Main::compileRootSegment)
+                .<List<String>>mapValue(Main::addExpansions)
+                .mapValue(compiled -> mergeSegmentsAll(Main::mergeStatements, compiled));
+    }
+
+    private static ArrayList<String> addExpansions(List<String> list) {
+        String joined = expansions.entrySet()
+                .stream()
+                .map(entry -> {
+                    return "// expand " + entry.getKey() + " from " + entry.getValue() + "\n";
+                })
+                .collect(Collectors.joining());
+
+        ArrayList<String> copy = new ArrayList<>();
+        copy.add(joined);
+        copy.addAll(list);
+        return copy;
     }
 
     private static Result<String, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler) {
@@ -41,12 +64,28 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileAll(List<String> segments, Function<String, Result<String, CompileException>> compiler, Function<Tuple<StringBuilder, String>, StringBuilder> merger) {
-        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
-        for (String segment : segments) {
-            output = output.and(() -> compiler.apply(segment)).mapValue(merger);
+        Result<List<String>, CompileException> maybeCompiled = compileAllToList(segments, compiler);
+        return maybeCompiled.mapValue(compiled -> mergeSegmentsAll(merger, compiled));
+    }
+
+    private static String mergeSegmentsAll(Function<Tuple<StringBuilder, String>, StringBuilder> merger, List<String> compiled) {
+        StringBuilder output = new StringBuilder();
+        for (String segment : compiled) {
+            output = merger.apply(new Tuple<>(output, segment));
         }
 
-        return output.mapValue(StringBuilder::toString);
+        return output.toString();
+    }
+
+    private static Result<List<String>, CompileException> compileAllToList(List<String> segments, Function<String, Result<String, CompileException>> compiler) {
+        Result<List<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
+        for (String segment : segments) {
+            maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
+                tuple.left().add(tuple.right());
+                return tuple.left();
+            });
+        }
+        return maybeCompiled;
     }
 
     private static StringBuilder mergeStatements(Tuple<StringBuilder, String> tuple) {
@@ -225,14 +264,19 @@ public class Main {
                 String caller = withoutEnd.substring(0, start).strip();
                 String arguments = withoutEnd.substring(start + "<".length());
                 List<String> args = divide(arguments, Main::divideValueChar);
-                return compileAll(args, Main::compileType, tuple -> mergeDelimited(tuple, "_")).mapValue(inner -> {
-                    return caller + "__" + inner + "__";
+                Result<List<String>, CompileException> maybeCompiled = compileAllToList(args, Main::compileType);
+                return maybeCompiled.mapValue(segments -> {
+                    String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
+
+                    String expansion = caller + "__" + inner + "__";
+                    expansions.put(expansion, caller + "<" + String.join("_", segments) + ">");
+                    return expansion;
                 });
             }
         }
 
         String stripped = input.strip();
-        if(isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             return new Ok<>(stripped);
         }
 
@@ -242,7 +286,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if(Character.isLetter(c)) continue;
+            if (Character.isLetter(c)) continue;
             return false;
         }
 
