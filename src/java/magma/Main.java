@@ -9,12 +9,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,41 +55,44 @@ public class Main {
     }
 
     private static List<String> divideByStatements(String input) {
+        return divide(input, Main::divideStatementChar);
+    }
+
+    private static List<String> divide(String input, BiFunction<State, Character, State> divider) {
         State state = new State(IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)));
 
-        return getStrings(state);
-    }
-
-    private static List<String> getStrings(State state) {
-        while (!state.isEmpty()) {
-            char c = state.pop();
-            state.append(c);
+        State current = state;
+        while (!current.isEmpty()) {
+            char c = current.pop();
 
             if (c == '\'') {
-                char maybeSlash = state.pop();
-                state.append(maybeSlash);
+                current.append(c);
+
+                char maybeSlash = current.pop();
+                current.append(maybeSlash);
                 if (maybeSlash == '\\') {
-                    state.popAndAppend();
+                    current.popAndAppend();
                 }
 
-                state.popAndAppend();
+                current.popAndAppend();
                 continue;
             }
 
-            if (c == ';' && state.isLevel()) {
-                state.advance();
-            } else if (c == '}' && state.isShallow()) {
-                state.advance();
-                state.exit();
-            } else {
-                if (c == '{') state.enter();
-                if (c == '}') state.exit();
-            }
+            current = divider.apply(current, c);
         }
-        state.advance();
-        return state.segments();
+
+        return current.advance().segments();
+    }
+
+    private static State divideStatementChar(State state, char c) {
+        State appended = state.append(c);
+        if (c == ';' && appended.isLevel()) return appended.advance();
+        if (c == '}' && appended.isShallow()) return appended.advance().exit();
+        if (c == '{') return appended.enter();
+        if (c == '}') return appended.exit();
+        return appended;
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
@@ -145,7 +147,7 @@ public class Main {
             return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
-                    return compileValues(withParams, paramEnd).mapValue(newParams -> {
+                    return compileValues(withParams.substring(0, paramEnd)).mapValue(newParams -> {
                         return outputDefinition + "(" +
                                 newParams +
                                 "){\n}\n";
@@ -159,9 +161,18 @@ public class Main {
         return invalidate(input, "class segment");
     }
 
-    private static Result<String, CompileException> compileValues(String withParams, int paramEnd) {
-        List<String> args = Arrays.asList(withParams.substring(0, paramEnd).split(","));
+    private static Result<String, CompileException> compileValues(String input) {
+        List<String> args = divide(input, Main::divideValueChar);
         return compileAll(args, Main::compileDefinition, Main::mergeValues);
+    }
+
+    private static State divideValueChar(State state, Character c) {
+        if(c == ',' && state.isLevel()) return state.advance();
+
+        State appended = state.append(c);
+        if(c == '<') return appended.enter();
+        if(c == '>') return appended.exit();
+        return appended;
     }
 
     private static StringBuilder mergeValues(Tuple<StringBuilder, String> tuple) {

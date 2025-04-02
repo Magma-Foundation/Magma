@@ -21,33 +21,38 @@ public class State {
         this(queue, new ArrayList<>(), new StringBuilder(), 0);
     }
 
-    void popAndAppend() {
+    State popAndAppend() {
         buffer.append(pop());
+        return this;
     }
 
     boolean isEmpty() {
         return queue.isEmpty();
     }
 
-    void append(char c) {
+    State append(char c) {
         buffer.append(c);
+        return this;
     }
 
     Character pop() {
         return queue.pop();
     }
 
-    void advance() {
+    State advance() {
         segments().add(buffer.toString());
         this.buffer = new StringBuilder();
+        return this;
     }
 
-    void enter() {
+    State enter() {
         this.depth = depth + 1;
+        return this;
     }
 
-    void exit() {
+    State exit() {
         this.depth = depth - 1;
+        return this;
     }
 
     boolean isLevel() {
