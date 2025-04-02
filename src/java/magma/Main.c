@@ -8,6 +8,7 @@
 #include "java/nio/file/Paths.h"
 #include "java/util/ArrayList.h"
 #include "java/util/LinkedList.h"
+#include "java/util/Optional.h"
 #include "java/util/function/Function.h"
 #include "java/util/regex/Pattern.h"
 #include "java/util/stream/Collectors.h"
@@ -16,15 +17,15 @@ struct Main {
 };
 void main(){
 }
-CompileException> compileRoot(){
+Result<String, CompileException> compileRoot(){
 }
-CompileException> divideAndCompile(){
+Result<String, CompileException> divideAndCompile(){
 }
-CompileException> compileRootSegment(){
+Result<String, CompileException> compileRootSegment(){
 }
-CompileException> invalidate(){
+Err<String, CompileException> invalidate(){
 }
-CompileException> compileClassSegment(){
+Result<String, CompileException> compileClassSegment(){
 }
-CompileException> compileWhitespace(){
+Result<String, CompileException> compileWhitespace(){
 }

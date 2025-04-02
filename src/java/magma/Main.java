@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -131,11 +132,23 @@ public class Main {
             int separator = header.lastIndexOf(" ");
             if (separator >= 0) {
                 String beforeName = header.substring(0, separator);
-                int typeSeparator = beforeName.lastIndexOf(" ");
 
-                String type = typeSeparator >= 0
-                        ? beforeName.substring(typeSeparator + " ".length())
-                        : beforeName;
+                Optional<Integer> maybeTypeSeparator = Optional.empty();
+                int depth = 0;
+                for (int i = beforeName.length() - 1; i >= 0; i--) {
+                    char c = beforeName.charAt(i);
+                    if (c == ' ' && depth == 0) {
+                        maybeTypeSeparator = Optional.of(i);
+                        break;
+                    } else {
+                        if (c == '>') depth++;
+                        if (c == '<') depth--;
+                    }
+                }
+
+                String type = maybeTypeSeparator
+                        .map(typeSeparator -> beforeName.substring(typeSeparator + " ".length()))
+                        .orElse(beforeName);
 
                 String name = header.substring(separator + 1).strip();
                 return new Ok<>(type + " " + name + "(){\n}\n");
