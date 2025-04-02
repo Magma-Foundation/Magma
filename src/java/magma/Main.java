@@ -59,11 +59,11 @@ public class Main {
         return copy;
     }
 
-    private static Result<String, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler) {
+    private static Result<String, CompileException> divideAndCompile(String input, Rule compiler) {
         return compileAll(divideByStatements(input), compiler, Main::mergeStatements);
     }
 
-    private static Result<String, CompileException> compileAll(List<String> segments, Function<String, Result<String, CompileException>> compiler, Function<Tuple<StringBuilder, String>, StringBuilder> merger) {
+    private static Result<String, CompileException> compileAll(List<String> segments, Rule compiler, Function<Tuple<StringBuilder, String>, StringBuilder> merger) {
         Result<List<String>, CompileException> maybeCompiled = compileAllToList(segments, compiler);
         return maybeCompiled.mapValue(compiled -> mergeSegmentsAll(merger, compiled));
     }
@@ -77,7 +77,7 @@ public class Main {
         return output.toString();
     }
 
-    private static Result<List<String>, CompileException> compileAllToList(List<String> segments, Function<String, Result<String, CompileException>> compiler) {
+    private static Result<List<String>, CompileException> compileAllToList(List<String> segments, Rule compiler) {
         Result<List<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
@@ -222,7 +222,7 @@ public class Main {
         });
     }
 
-    private static Result<String, CompileException> compileValues(String input, Function<String, Result<String, CompileException>> compiler) {
+    private static Result<String, CompileException> compileValues(String input, Rule compiler) {
         List<String> args = divide(input, Main::divideValueChar);
         return compileAll(args, compiler, Main::mergeValues);
     }
@@ -287,8 +287,8 @@ public class Main {
                 String caller = withoutEnd.substring(0, start).strip();
                 String arguments = withoutEnd.substring(start + "<".length());
                 List<String> args = divide(arguments, Main::divideValueChar);
-                Result<List<String>, CompileException> maybeCompiled = compileAllToList(args, Main::compileType);
-                return maybeCompiled.mapValue(segments -> {
+
+                return compileAllToList(args, Main::compileType).mapValue(segments -> {
                     String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
 
                     String expansion = caller + "__" + inner + "__";
