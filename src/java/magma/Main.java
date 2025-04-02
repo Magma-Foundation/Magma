@@ -97,11 +97,10 @@ public class Main {
     }
 
     private static List<String> divide(String input, BiFunction<State, Character, State> divider) {
-        State state = new State(IntStream.range(0, input.length())
+        State current = new State(IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)));
 
-        State current = state;
         while (!current.isEmpty()) {
             char c = current.pop();
 
@@ -115,6 +114,21 @@ public class Main {
                 }
 
                 current.popAndAppend();
+                continue;
+            }
+
+            if (c == '"') {
+                current.append(c);
+
+                State withNext = current;
+                while (!withNext.isLevel()) {
+                    char popped = withNext.pop();
+                    withNext = withNext.append(popped);
+
+                    if (popped == '\\') withNext = withNext.popAndAppend();
+                    if (popped == '"') break;
+                }
+                current = withNext;
                 continue;
             }
 
@@ -177,26 +191,35 @@ public class Main {
         Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
         if (maybeWhitespace.isOk()) return maybeWhitespace;
 
-        int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String inputDefinition = input.substring(0, paramStart).strip();
-            String withParams = input.substring(paramStart + 1);
+        Result<String, CompileException> maybeMethod = compileMethod(input);
+        if (maybeMethod.isOk()) return maybeMethod;
 
-            return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
-                int paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    return compileValues(withParams.substring(0, paramEnd), Main::compileDefinition).mapValue(newParams -> {
-                        return outputDefinition + "(" +
-                                newParams +
-                                "){\n}\n";
-                    });
-                } else {
-                    return createInfixError(withParams, ")");
-                }
-            });
+        if (input.contains("=")) {
+            return new Ok<>("int value = temp;\n");
         }
 
         return invalidate(input, "class segment");
+    }
+
+    private static Result<String, CompileException> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart < 0) return createInfixError(input, "(");
+
+        String inputDefinition = input.substring(0, paramStart).strip();
+        String withParams = input.substring(paramStart + 1);
+
+        return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd >= 0) {
+                return compileValues(withParams.substring(0, paramEnd), Main::compileDefinition).mapValue(newParams -> {
+                    return outputDefinition + "(" +
+                            newParams +
+                            "){\n}\n";
+                });
+            } else {
+                return createInfixError(withParams, ")");
+            }
+        });
     }
 
     private static Result<String, CompileException> compileValues(String input, Function<String, Result<String, CompileException>> compiler) {
@@ -269,7 +292,7 @@ public class Main {
                     String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
 
                     String expansion = caller + "__" + inner + "__";
-                    expansions.put(expansion, caller + "<" + String.join("_", segments) + ">");
+                    expansions.put(expansion, caller + "<" + String.join(", ", segments) + ">");
                     return expansion;
                 });
             }
