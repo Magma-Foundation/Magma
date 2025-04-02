@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) {
@@ -43,7 +44,17 @@ public class Main {
 
     private static String compileRootSegment(String input) throws CompileException {
         if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+        String stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            String right = stripped.substring("import ".length());
+            if (right.endsWith(";")) {
+                String content = right.substring(0, right.length() - ";".length());
+                String[] segments = content.split(Pattern.quote("."));
+                String joined = String.join("/", segments);
+                return "#include \"" + joined + ".h\"\n";
+            }
+        }
+
         if (input.contains("class ")) return "struct Temp {\n};\n";
         throw new CompileException("Invalid root", input);
     }
