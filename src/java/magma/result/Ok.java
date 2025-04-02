@@ -31,4 +31,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public boolean isOk() {
         return true;
     }
+
+    @Override
+    public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+        return mapper.apply(value);
+    }
 }
