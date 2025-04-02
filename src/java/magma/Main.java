@@ -146,7 +146,7 @@ public class Main {
             return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
-                    return compileValues(withParams.substring(0, paramEnd)).mapValue(newParams -> {
+                    return compileValues(withParams.substring(0, paramEnd), Main::compileDefinition).mapValue(newParams -> {
                         return outputDefinition + "(" +
                                 newParams +
                                 "){\n}\n";
@@ -160,9 +160,9 @@ public class Main {
         return invalidate(input, "class segment");
     }
 
-    private static Result<String, CompileException> compileValues(String input) {
+    private static Result<String, CompileException> compileValues(String input, Function<String, Result<String, CompileException>> compiler) {
         List<String> args = divide(input, Main::divideValueChar);
-        return compileAll(args, Main::compileDefinition, Main::mergeValues);
+        return compileAll(args, compiler, Main::mergeValues);
     }
 
     private static State divideValueChar(State state, Character c) {
@@ -175,11 +175,15 @@ public class Main {
     }
 
     private static StringBuilder mergeValues(Tuple<StringBuilder, String> tuple) {
+        return mergeDelimited(tuple, ", ");
+    }
+
+    private static StringBuilder mergeDelimited(Tuple<StringBuilder, String> tuple, String delimiter) {
         StringBuilder buffer = tuple.left();
         String element = tuple.right();
 
         if (buffer.isEmpty()) return buffer.append(element);
-        return buffer.append(", ").append(element);
+        return buffer.append(delimiter).append(element);
     }
 
     private static Result<String, CompileException> compileDefinition(String definition) {
@@ -209,12 +213,40 @@ public class Main {
         return compileType(innerType).mapValue(outerType -> outerType + " " + name);
     }
 
-    private static Result<String, CompileException> compileType(String type) {
-        if (type.endsWith("[]")) {
-            return new Ok<>("Array_" + type.substring(0, type.length() - "[]".length()));
+    private static Result<String, CompileException> compileType(String input) {
+        if (input.endsWith("[]")) {
+            return new Ok<>("Array_" + input.substring(0, input.length() - "[]".length()));
         }
 
-        return new Ok<>(type);
+        if (input.endsWith(">")) {
+            String withoutEnd = input.substring(0, input.length() - ">".length());
+            int start = withoutEnd.indexOf("<");
+            if (start >= 0) {
+                String caller = withoutEnd.substring(0, start).strip();
+                String arguments = withoutEnd.substring(start + "<".length());
+                List<String> args = divide(arguments, Main::divideValueChar);
+                return compileAll(args, Main::compileType, tuple -> mergeDelimited(tuple, "_")).mapValue(inner -> {
+                    return caller + "__" + inner + "__";
+                });
+            }
+        }
+
+        String stripped = input.strip();
+        if(isSymbol(stripped)) {
+            return new Ok<>(stripped);
+        }
+
+        return invalidate("type", input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(Character.isLetter(c)) continue;
+            return false;
+        }
+
+        return true;
     }
 
     private static Result<String, CompileException> createInfixError(String input, String infix) {

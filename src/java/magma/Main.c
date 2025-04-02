@@ -18,37 +18,41 @@ struct Main {
 };
 void main(Array_String args){
 }
-Result<String, CompileException> compileRoot(String input){
+Result__String_CompileException__ compileRoot(String input){
 }
-Result<String, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler){
+Result__String_CompileException__ divideAndCompile(String input, Function__String_Result__String_CompileException____ compiler){
 }
-Result<String, CompileException> compileAll(List<String> segments, Function<String, Result<String, CompileException>> compiler, Function<Tuple<StringBuilder, String>, StringBuilder> merger){
+Result__String_CompileException__ compileAll(List__String__ segments, Function__String_Result__String_CompileException____ compiler, Function__Tuple__StringBuilder_String___StringBuilder__ merger){
 }
-StringBuilder mergeStatements(Tuple<StringBuilder, String> tuple){
+StringBuilder mergeStatements(Tuple__StringBuilder_String__ tuple){
 }
-List<String> divideByStatements(String input){
+List__String__ divideByStatements(String input){
 }
-List<String> divide(String input, BiFunction<State, Character, State> divider){
+List__String__ divide(String input, BiFunction__State_Character_State__ divider){
 }
 State divideStatementChar(State state, char c){
 }
-Result<String, CompileException> compileRootSegment(String input){
+Result__String_CompileException__ compileRootSegment(String input){
 }
-Result<String, CompileException> invalidate(String input, String type){
+Result__String_CompileException__ invalidate(String input, String type){
 }
-Result<String, CompileException> compileClassSegment(String input){
+Result__String_CompileException__ compileClassSegment(String input){
 }
-Result<String, CompileException> compileValues(String input){
+Result__String_CompileException__ compileValues(String input, Function__String_Result__String_CompileException____ compiler){
 }
 State divideValueChar(State state, Character c){
 }
-StringBuilder mergeValues(Tuple<StringBuilder, String> tuple){
+StringBuilder mergeValues(Tuple__StringBuilder_String__ tuple){
 }
-Result<String, CompileException> compileDefinition(String definition){
+StringBuilder mergeDelimited(Tuple__StringBuilder_String__ tuple, String delimiter){
 }
-Result<String, CompileException> compileType(String type){
+Result__String_CompileException__ compileDefinition(String definition){
 }
-Result<String, CompileException> createInfixError(String input, String infix){
+Result__String_CompileException__ compileType(String input){
 }
-Result<String, CompileException> compileWhitespace(String input){
+boolean isSymbol(String input){
+}
+Result__String_CompileException__ createInfixError(String input, String infix){
+}
+Result__String_CompileException__ compileWhitespace(String input){
 }
