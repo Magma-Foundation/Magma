@@ -16,15 +16,15 @@ struct Main {
 };
 void main(){
 }
-void compileRoot(){
+CompileException> compileRoot(){
 }
-void divideAndCompile(){
+CompileException> divideAndCompile(){
 }
-void compileRootSegment(){
+CompileException> compileRootSegment(){
 }
-void invalidate(){
+CompileException> invalidate(){
 }
-void compileClassSegment(){
+CompileException> compileClassSegment(){
 }
-void compileWhitespace(){
+CompileException> compileWhitespace(){
 }

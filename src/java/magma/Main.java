@@ -130,8 +130,15 @@ public class Main {
             String header = input.substring(0, paramStart).strip();
             int separator = header.lastIndexOf(" ");
             if (separator >= 0) {
+                String beforeName = header.substring(0, separator);
+                int typeSeparator = beforeName.lastIndexOf(" ");
+
+                String type = typeSeparator >= 0
+                        ? beforeName.substring(typeSeparator + " ".length())
+                        : beforeName;
+
                 String name = header.substring(separator + 1).strip();
-                return new Ok<>("void " + name + "(){\n}\n");
+                return new Ok<>(type + " " + name + "(){\n}\n");
             }
         }
 
