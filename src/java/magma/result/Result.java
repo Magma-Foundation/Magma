@@ -14,4 +14,6 @@ public interface Result<T, X> {
     Optional<T> findValue();
 
     Optional<X> findError();
+
+    boolean isOk();
 }

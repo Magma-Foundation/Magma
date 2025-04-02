@@ -26,4 +26,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public Optional<X> findError() {
         return Optional.empty();
     }
+
+    @Override
+    public boolean isOk() {
+        return true;
+    }
 }

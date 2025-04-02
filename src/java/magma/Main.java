@@ -10,8 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,9 +38,26 @@ public class Main {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            char c = queue.pop();
             buffer.append(c);
+
+            if (c == '\'') {
+                Character maybeSlash = queue.pop();
+                buffer.append(maybeSlash);
+                if (maybeSlash == '\\') {
+                    buffer.append(queue.pop());
+                }
+
+                buffer.append(queue.pop());
+                continue;
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -62,7 +82,11 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
+        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isOk()) return maybeWhitespace;
+
         if (input.startsWith("package ")) return new Ok<>("");
+
         String stripped = input.strip();
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
@@ -97,7 +121,25 @@ public class Main {
         return new Err<>(new CompileException(input, "Invalid " + type));
     }
 
-    private static Result<String, CompileException> compileClassSegment(String classSegment) {
-        return invalidate(classSegment, "class segment");
+    private static Result<String, CompileException> compileClassSegment(String input) {
+        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isOk()) return maybeWhitespace;
+
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String header = input.substring(0, paramStart).strip();
+            int separator = header.lastIndexOf(" ");
+            if (separator >= 0) {
+                String name = header.substring(separator + 1).strip();
+                return new Ok<>("void " + name + "(){\n}\n");
+            }
+        }
+
+        return invalidate(input, "class segment");
+    }
+
+    private static Result<String, CompileException> compileWhitespace(String input) {
+        if (input.isBlank()) return new Ok<>("");
+        return new Err<>(new CompileException("Input not blank", input));
     }
 }

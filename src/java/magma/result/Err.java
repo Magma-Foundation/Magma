@@ -26,4 +26,9 @@ public record Err<T, X>(X error) implements Result<T, X> {
     public Optional<X> findError() {
         return Optional.of(error);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
 }
