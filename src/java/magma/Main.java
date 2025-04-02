@@ -40,7 +40,21 @@ public class Main {
     private static Result<String, CompileException> compileRoot(String input) throws CompileException {
         List<String> segments = divideByStatements(input);
 
-        return compileAllToList(segments, Main::compileRootSegment)
+        return compileAllToList(segments, new Rule() {
+            @Override
+            public Result<String, CompileException> generate(Node input) {
+                return new Ok<>(input.value());
+            }
+
+            @Override
+            public Result<Node, CompileException> parse(String input) {
+                return compile0(input).mapValue(Node::new);
+            }
+
+            private Result<String, CompileException> compile0(String input1) {
+                return compileRootSegment(input1);
+            }
+        })
                 .<List<String>>mapValue(Main::addExpansions)
                 .mapValue(compiled -> mergeSegmentsAll(Main::mergeStatements, compiled));
     }
@@ -80,7 +94,7 @@ public class Main {
     private static Result<List<String>, CompileException> compileAllToList(List<String> segments, Rule compiler) {
         Result<List<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
         for (String segment : segments) {
-            maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
+            maybeCompiled = maybeCompiled.and(() -> compiler.parse(segment).flatMapValue(compiler::generate)).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
@@ -173,7 +187,17 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return divideAndCompile(inputContent, Main::compileClassSegment).mapValue(outputContent -> {
+                    return divideAndCompile(inputContent, new Rule() {
+                        @Override
+                        public Result<String, CompileException> generate(Node input) {
+                            return new Ok<>(input.value());
+                        }
+
+                        @Override
+                        public Result<Node, CompileException> parse(String input) {
+                            return compileClassSegment(input).mapValue(Node::new);
+                        }
+                    }).mapValue(outputContent -> {
                         return "struct " + name + " {\n};\n" + outputContent;
                     });
                 }
@@ -211,7 +235,21 @@ public class Main {
         return compileDefinition(inputDefinition).flatMapValue(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
-                return compileValues(withParams.substring(0, paramEnd), Main::compileDefinition).mapValue(newParams -> {
+                return compileValues(withParams.substring(0, paramEnd), new Rule() {
+                    @Override
+                    public Result<String, CompileException> generate(Node input) {
+                        return new Ok<>(input.value());
+                    }
+
+                    @Override
+                    public Result<Node, CompileException> parse(String input) {
+                        return compile0(input).mapValue(Node::new);
+                    }
+
+                    private Result<String, CompileException> compile0(String definition) {
+                        return compileDefinition(definition);
+                    }
+                }).mapValue(newParams -> {
                     return outputDefinition + "(" +
                             newParams +
                             "){\n}\n";
@@ -288,7 +326,21 @@ public class Main {
                 String arguments = withoutEnd.substring(start + "<".length());
                 List<String> args = divide(arguments, Main::divideValueChar);
 
-                return compileAllToList(args, Main::compileType).mapValue(segments -> {
+                return compileAllToList(args, new Rule() {
+                    @Override
+                    public Result<String, CompileException> generate(Node input) {
+                        return new Ok<>(input.value());
+                    }
+
+                    @Override
+                    public Result<Node, CompileException> parse(String input) {
+                        return compile0(input).mapValue(Node::new);
+                    }
+
+                    private Result<String, CompileException> compile0(String input1) {
+                        return compileType(input1);
+                    }
+                }).mapValue(segments -> {
                     String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
 
                     String expansion = caller + "__" + inner + "__";

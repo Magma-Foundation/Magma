@@ -3,5 +3,7 @@ package magma;
 import magma.result.Result;
 
 public interface Rule {
-    Result<String, CompileException> apply(String input);
+    Result<Node, CompileException> parse(String input);
+
+    Result<String, CompileException> generate(Node input);
 }
