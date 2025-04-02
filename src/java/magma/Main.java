@@ -1,10 +1,16 @@
 package magma;
 
+import magma.result.Err;
+import magma.result.Ok;
+import magma.result.Result;
+import magma.result.Results;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class Main {
@@ -12,7 +18,7 @@ public class Main {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
-            String string = divideAndCompile(input);
+            String string = Results.unwrap(compileRoot(input));
             Path target = source.resolveSibling("Main.c");
             Files.writeString(target, string);
         } catch (IOException | CompileException e) {
@@ -21,7 +27,11 @@ public class Main {
         }
     }
 
-    private static String divideAndCompile(String input) throws CompileException {
+    private static Result<String, CompileException> compileRoot(String input) throws CompileException {
+        return divideAndCompile(input, Main::compileRootSegment);
+    }
+
+    private static Result<String, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -31,6 +41,10 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -38,16 +52,17 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        StringBuilder output = new StringBuilder();
+        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output = output.and(() -> compiler.apply(segment))
+                    .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
-        String string = output.toString();
-        return string;
+
+        return output.mapValue(StringBuilder::toString);
     }
 
-    private static String compileRootSegment(String input) throws CompileException {
-        if (input.startsWith("package ")) return "";
+    private static Result<String, CompileException> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return new Ok<>("");
         String stripped = input.strip();
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
@@ -55,7 +70,7 @@ public class Main {
                 String content = right.substring(0, right.length() - ";".length());
                 String[] segments = content.split(Pattern.quote("."));
                 String joined = String.join("/", segments);
-                return "#include \"" + joined + ".h\"\n";
+                return new Ok<>("#include \"" + joined + ".h\"\n");
             }
         }
 
@@ -67,11 +82,22 @@ public class Main {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return "struct " + name + " {\n};\n";
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return divideAndCompile(inputContent, Main::compileClassSegment).mapValue(outputContent -> {
+                        return "struct " + name + " {\n};\n" + outputContent;
+                    });
                 }
             }
         }
-        throw new CompileException("Invalid root", input);
+
+        return invalidate(input, "root segment");
+    }
+
+    private static Err<String, CompileException> invalidate(String input, String type) {
+        return new Err<>(new CompileException(input, "Invalid " + type));
+    }
+
+    private static Result<String, CompileException> compileClassSegment(String classSegment) {
+        return invalidate(classSegment, "class segment");
     }
 }
