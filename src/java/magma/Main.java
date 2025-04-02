@@ -12,34 +12,38 @@ public class Main {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
-
-            ArrayList<String> segments = new ArrayList<>();
-            StringBuilder buffer = new StringBuilder();
-            int depth = 0;
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
-                buffer.append(c);
-                if (c == ';' && depth == 0) {
-                    segments.add(buffer.toString());
-                    buffer = new StringBuilder();
-                } else {
-                    if (c == '{') depth++;
-                    if (c == '}') depth--;
-                }
-            }
-            segments.add(buffer.toString());
-
-            StringBuilder output = new StringBuilder();
-            for (String segment : segments) {
-                output.append(compileRootSegment(segment));
-            }
-
+            String string = divideAndCompile(input);
             Path target = source.resolveSibling("Main.c");
-            Files.writeString(target, output.toString());
+            Files.writeString(target, string);
         } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static String divideAndCompile(String input) throws CompileException {
+        ArrayList<String> segments = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
+        int depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            buffer.append(c);
+            if (c == ';' && depth == 0) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+            }
+        }
+        segments.add(buffer.toString());
+
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            output.append(compileRootSegment(segment));
+        }
+        String string = output.toString();
+        return string;
     }
 
     private static String compileRootSegment(String input) throws CompileException {
@@ -61,7 +65,11 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return "struct " + name + " {\n};\n";
+                }
             }
         }
         throw new CompileException("Invalid root", input);
