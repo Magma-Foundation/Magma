@@ -11,27 +11,29 @@
 #include <temp.h>
 struct Main {
 };
-temp(){
+void static Result<String, CompileException> compile(){
 }
-temp(){
+void static Result<String, CompileException> compile(){
 }
-temp(){
+void static Result<String, CompileException> compileRootSegment(){
 }
-temp(){
+void static Err<String, CompileException> invalidate(){
 }
-temp(){
+void static Result<String, CompileException> compileClassSegment(){
 }
-temp(){
+void static void main(){
 }
-temp(){
+void static <T, X extends Throwable> T unwrap(){
 }
-temp(){
+void interface Result<T, X> {
+        <R> Result<Tuple<T, R>, X> and(){
 }
-temp(){
+void record Tuple<A, B>(){
 }
-temp(){
+void static class CompileException extends Exception {
+        public CompileException(){
 }
-temp(){
+void record Ok<T, X>(){
 }
-temp(){
+void record Err<T, X>(){
 }

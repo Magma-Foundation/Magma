@@ -104,8 +104,14 @@ public class Main {
     private static Result<String, CompileException> compileClassSegment(String input) {
         if (input.isBlank()) return new Ok<>("");
 
-        if (input.contains("(")) {
-            return new Ok<>("temp(){\n}\n");
+        int contentStart = input.indexOf("(");
+        if (contentStart >= 0) {
+            String definition = input.substring(0, contentStart).strip();
+            int nameSeparator = definition.indexOf(" ");
+            if (nameSeparator >= 0) {
+                String name = definition.substring(nameSeparator + " ".length());
+                return new Ok<>("void " + name + "(){\n}\n");
+            }
         }
 
         return invalidate("class segment", input);
