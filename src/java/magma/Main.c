@@ -11,29 +11,29 @@
 #include <temp.h>
 struct Main {
 };
-void compile(){
+Result<String, CompileException> compile(){
 }
-void compile(){
+Result<String, CompileException> compile(){
 }
-void compileRootSegment(){
+Result<String, CompileException> compileRootSegment(){
 }
-void generateStruct(){
+String generateStruct(){
 }
-void invalidate(){
+Err<String, CompileException> invalidate(){
 }
-void compileClassSegment(){
+Result<String, CompileException> compileClassSegment(){
 }
-void isSymbol(){
+boolean isSymbol(){
 }
 void main(){
 }
-void unwrap(){
+T unwrap(){
 }
-void and(){
+Result<Tuple<T, R>, X> and(){
 }
 struct Temp {
 };
-void CompileException(){
+public CompileException(){
 }
 struct Temp {
 };

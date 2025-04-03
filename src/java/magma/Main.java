@@ -113,9 +113,28 @@ public class Main {
             String definition = input.substring(0, contentStart).strip();
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String beforeName = definition.substring(0, nameSeparator);
+
+                int typeSeparator = -1;
+                int depth = 0;
+                for (int i = beforeName.length() - 1; i >= 0; i--) {
+                    char c = beforeName.charAt(i);
+                    if (c == ' ' && depth == 0) {
+                        typeSeparator = i;
+                        break;
+                    } else {
+                        if (c == '>') depth++;
+                        if (c == '<') depth--;
+                    }
+                }
+
+                String type = typeSeparator == -1
+                        ? beforeName
+                        : beforeName.substring(typeSeparator + " ".length());
+
                 String name = definition.substring(nameSeparator + " ".length()).strip();
                 if (isSymbol(name)) {
-                    return new Ok<>("void " + name + "(){\n}\n");
+                    return new Ok<>(type + " " + name + "(){\n}\n");
                 }
             }
         }
