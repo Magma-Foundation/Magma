@@ -349,7 +349,8 @@ public class Main {
 
         @Override
         public Result<Node, CompileException> parse(String input) {
-            compileArray(input);
+            Result<Node, CompileException> maybeArray = compileArray(input);
+            if (maybeArray.isOk()) return maybeArray;
 
             Result<Node, CompileException> maybeGeneric = compileGeneric(input);
             if (maybeGeneric.isOk()) return maybeGeneric;
