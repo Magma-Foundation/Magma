@@ -338,6 +338,10 @@ public class Main {
     }
 
     private static class TypeCompileRule implements Rule {
+        private static Result<Node, CompileException> createSuffixErr(String input, String suffix) {
+            return new Err<>(new CompileException("Suffix '" + suffix + "' not present", input));
+        }
+
         @Override
         public Result<String, CompileException> generate(Node input) {
             return new Ok<>(input.value());
@@ -345,10 +349,7 @@ public class Main {
 
         @Override
         public Result<Node, CompileException> parse(String input) {
-            if (input.endsWith("[]")) {
-                String inner = input.substring(0, input.length() - "[]".length());
-                return transformAndGenerateGeneric("Array", Collections.singletonList(inner));
-            }
+            compileArray(input);
 
             Result<Node, CompileException> maybeGeneric = compileGeneric(input);
             if (maybeGeneric.isOk()) return maybeGeneric;
@@ -359,8 +360,17 @@ public class Main {
             return invalidate("type", input);
         }
 
+        private Result<Node, CompileException> compileArray(String input) {
+            if (input.endsWith("[]")) {
+                String inner = input.substring(0, input.length() - "[]".length());
+                return transformAndGenerateGeneric("Array", Collections.singletonList(inner));
+            }
+
+            return createSuffixErr(input, "[]");
+        }
+
         private Result<Node, CompileException> compileGeneric(String input) {
-            if (!input.endsWith(">")) return new Err<>(new CompileException("Suffix '>' not present", input));
+            if (!input.endsWith(">")) return createSuffixErr(input, ">");
 
             String withoutEnd = input.substring(0, input.length() - ">".length());
             int start = withoutEnd.indexOf("<");
