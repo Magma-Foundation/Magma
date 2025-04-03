@@ -10,7 +10,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Main {
-    private static Result<String, CompileException> compile(String input) throws CompileException {
+    private static Result<String, CompileException> compile(String input) {
+        return compile(input, Main::compileRootSegment);
+    }
+
+    private static Result<String, CompileException> compile(String input, Function<String, Result<String, CompileException>> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -29,7 +33,7 @@ public class Main {
 
         Result<StringBuilder, CompileException> target = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            target = target.and(() -> compileRootSegment(segment)).mapValue(tuple -> {
+            target = target.and(() -> compiler.apply(segment)).mapValue(tuple -> {
                 return tuple.left().append(tuple.right());
             });
         }
@@ -48,12 +52,22 @@ public class Main {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "class ".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return new Ok<>("struct " + name + " {\n};\n");
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return compile(inputContent, Main::compileClassSegment).mapValue(outputContent -> {
+                        return "struct " + name + " {\n};\n" + outputContent;
+                    });
                 }
             }
         }
-        return new Err<>(new CompileException("Invalid root", input));
+        return invalidate("root segment", input);
+    }
+
+    private static Err<String, CompileException> invalidate(String type, String input) {
+        return new Err<>(new CompileException("Invalid " + type, input));
+    }
+
+    private static Result<String, CompileException> compileClassSegment(String input) {
+        return invalidate("class segment", input);
     }
 
     public static void main(String[] args) {
