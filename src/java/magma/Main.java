@@ -5,9 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static Result<String, CompileException> compile(String input) {
@@ -18,9 +21,35 @@ public class Main {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            char c = queue.pop();
             buffer.append(c);
+
+            if (c == '\'') {
+                char popped = queue.pop();
+                buffer.append(popped);
+
+                if (popped == '\\') buffer.append(queue.pop());
+
+                buffer.append(queue.pop());
+                continue;
+            }
+
+            if (c == '"') {
+                while (!queue.isEmpty()) {
+                    char next = queue.pop();
+                    buffer.append(next);
+
+                    if (next == '\\') buffer.append(queue.pop());
+                    if (next == '"') break;
+                }
+            }
+
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -46,8 +75,10 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
+        String stripped = input.strip();
+        if (stripped.isEmpty()) return new Ok<>("");
         if (input.startsWith("package ")) return new Ok<>("");
-        if (input.strip().startsWith("import ")) return new Ok<>("#include <temp.h>\n");
+        if (stripped.startsWith("import ")) return new Ok<>("#include <temp.h>\n");
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
             String afterKeyword = input.substring(classIndex + "class ".length());
@@ -71,6 +102,12 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileClassSegment(String input) {
+        if (input.isBlank()) return new Ok<>("");
+
+        if (input.contains("(")) {
+            return new Ok<>("temp(){\n}\n");
+        }
+
         return invalidate("class segment", input);
     }
 
