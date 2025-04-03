@@ -5,8 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -75,6 +77,8 @@ public class Main {
             return Optional.of(error);
         }
     }
+
+    private static final Set<String> structs = new HashSet<>();
 
     private static Result<String, CompileException> compile(String input) {
         return compile(input, Main::compileRootSegment);
@@ -211,11 +215,17 @@ public class Main {
                 int typeParamStart = beforeParams.indexOf("<");
 
                 if (typeParamStart >= 0) {
+                    String name = beforeParams.substring(0, typeParamStart).strip();
+                    structs.add(name);
                     return new Ok<>("");
                 }
 
                 return new Ok<>(generateStruct(beforeParams));
             }
+        }
+
+        if (input.contains("=")) {
+            return new Ok<>("int temp = value;\n");
         }
 
         return invalidate("class segment", input);
