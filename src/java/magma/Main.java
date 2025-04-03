@@ -21,8 +21,10 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
+    public static final String VALUE = "value";
     private static final Map<String, String> expansions = new HashMap<>();
 
     public static void main(String[] args) {
@@ -44,12 +46,12 @@ public class Main {
         return compileAllToList(segments, new Rule() {
             @Override
             public Result<String, CompileException> generate(Node input) {
-                return new Ok<>(input.value());
+                return new Ok<>(findValue(input));
             }
 
             @Override
             public Result<Node, CompileException> parse(String input) {
-                return compile0(input).mapValue(Node::new);
+                return compile0(input).mapValue(value -> new Node().withString(VALUE, value));
             }
 
             private Result<String, CompileException> compile0(String input1) {
@@ -191,12 +193,12 @@ public class Main {
                     return divideAndCompile(inputContent, new Rule() {
                         @Override
                         public Result<String, CompileException> generate(Node input) {
-                            return new Ok<>(input.value());
+                            return new Ok<>(findValue(input));
                         }
 
                         @Override
                         public Result<Node, CompileException> parse(String input) {
-                            return compileClassSegment(input).mapValue(Node::new);
+                            return compileClassSegment(input).mapValue(value -> new Node().withString(VALUE, value));
                         }
                     }).mapValue(outputContent -> {
                         return "struct " + name + " {\n};\n" + outputContent;
@@ -239,12 +241,12 @@ public class Main {
                 return compileValues(withParams.substring(0, paramEnd), new Rule() {
                     @Override
                     public Result<String, CompileException> generate(Node input) {
-                        return new Ok<>(input.value());
+                        return new Ok<>(findValue(input));
                     }
 
                     @Override
                     public Result<Node, CompileException> parse(String input) {
-                        return compile0(input).mapValue(Node::new);
+                        return compile0(input).mapValue(value -> new Node().withString(VALUE, value));
                     }
 
                     private Result<String, CompileException> compile0(String definition) {
@@ -337,6 +339,10 @@ public class Main {
         return new Err<>(new CompileException(input, "Input not blank"));
     }
 
+    private static String findValue(Node node) {
+        return node.findString(VALUE).orElse("");
+    }
+
     private static class TypeCompileRule implements Rule {
         private static Result<Node, CompileException> createSuffixErr(String input, String suffix) {
             return new Err<>(new CompileException("Suffix '" + suffix + "' not present", input));
@@ -344,7 +350,11 @@ public class Main {
 
         @Override
         public Result<String, CompileException> generate(Node input) {
-            return new Ok<>(input.value());
+            if (input.is("generic")) {
+                return generateExpansion(input);
+            }
+
+            return new Ok<>(findValue(input));
         }
 
         @Override
@@ -352,7 +362,7 @@ public class Main {
             Result<Node, CompileException> maybeArray = compileArray(input);
             if (maybeArray.isOk()) return maybeArray;
 
-            Result<Node, CompileException> maybeGeneric = compileGeneric(input);
+            Result<Node, CompileException> maybeGeneric = parseGeneric(input);
             if (maybeGeneric.isOk()) return maybeGeneric;
 
             Result<Node, CompileException> maybeSymbol = compileSymbol(input);
@@ -362,15 +372,17 @@ public class Main {
         }
 
         private Result<Node, CompileException> compileArray(String input) {
-            if (input.endsWith("[]")) {
-                String inner = input.substring(0, input.length() - "[]".length());
-                return transformAndGenerateGeneric("Array", Collections.singletonList(inner));
-            }
+            if (!input.endsWith("[]")) return createSuffixErr(input, "[]");
 
-            return createSuffixErr(input, "[]");
+            String inner = input.substring(0, input.length() - "[]".length());
+            List<Node> argsList = List.of(new Node().withString(VALUE, inner));
+
+            return new Ok<>(new Node("generic")
+                    .withString("caller", "Array")
+                    .withNodeList("args", argsList));
         }
 
-        private Result<Node, CompileException> compileGeneric(String input) {
+        private Result<Node, CompileException> parseGeneric(String input) {
             if (!input.endsWith(">")) return createSuffixErr(input, ">");
 
             String withoutEnd = input.substring(0, input.length() - ">".length());
@@ -378,26 +390,37 @@ public class Main {
             if (start < 0) return createInfixError(withoutEnd, "<");
 
             String caller = withoutEnd.substring(0, start).strip();
+            Node withCaller = new Node("generic").withString("caller", caller);
+
             String arguments = withoutEnd.substring(start + "<".length());
             List<String> args = divide(arguments, Main::divideValueChar);
+            List<Node> argsList = args.stream()
+                    .map(value -> new Node().withString(VALUE, value))
+                    .toList();
 
-            return transformAndGenerateGeneric(caller, args);
+            return new Ok<>(withCaller.withNodeList("args", argsList));
         }
 
-        private Result<Node, CompileException> transformAndGenerateGeneric(String caller, List<String> args) {
-            return compileAllToList(args, new TypeCompileRule()).mapValue(segments -> {
+        private Result<String, CompileException> generateExpansion(Node node) {
+            List<String> list = node.findNodeList("args").orElse(Collections.emptyList())
+                    .stream()
+                    .map(Main::findValue)
+                    .toList();
+
+            String caller = node.findString("caller").orElse("");
+            return compileAllToList(list, new TypeCompileRule()).mapValue(segments -> {
                 String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
 
                 String expansion = caller + "__" + inner + "__";
                 expansions.put(expansion, caller + "<" + String.join(", ", segments) + ">");
-                return new Node(expansion);
+                return expansion;
             });
         }
 
         private Result<Node, CompileException> compileSymbol(String input) {
             String stripped = input.strip();
             if (isSymbol(stripped)) {
-                return new Ok<>(new Node(stripped));
+                return new Ok<>(new Node().withString(VALUE, stripped));
             }
 
             return new Err<>(new CompileException("Not a symbol", stripped));

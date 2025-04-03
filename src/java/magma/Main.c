@@ -28,8 +28,10 @@
 #include "java/util/regex/Pattern.h"
 #include "java/util/stream/Collectors.h"
 #include "java/util/stream/IntStream.h"
+#include "java/util/stream/Stream.h"
 struct Main {
 };
+int value = temp;
 int value = temp;
 void main(Array__String__ args){
 }
@@ -76,6 +78,8 @@ boolean isSymbol(String input){
 Result__T_CompileException__ createInfixError(String input, String infix){
 }
 Result__String_CompileException__ compileWhitespace(String input){
+}
+String findValue(Node node){
 }
 Result__Node_CompileException__ createSuffixErr(String input, String suffix){
 }
