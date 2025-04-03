@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -207,8 +208,8 @@ public class Main {
         return invalidate(input, "root segment");
     }
 
-    private static Result<String, CompileException> invalidate(String input, String type) {
-        return new Err<>(new CompileException(input, "Invalid " + type));
+    private static <T> Result<T, CompileException> invalidate(String input, String type) {
+        return new Err<>(new CompileException("Invalid " + type, input));
     }
 
     private static Result<String, CompileException> compileClassSegment(String input) {
@@ -310,52 +311,11 @@ public class Main {
                 .orElse(beforeName);
 
         String name = definition.substring(separator + 1).strip();
-        return compileType(innerType).mapValue(outerType -> outerType + " " + name);
-    }
 
-    private static Result<String, CompileException> compileType(String input) {
-        if (input.endsWith("[]")) {
-            return new Ok<>("Array_" + input.substring(0, input.length() - "[]".length()));
-        }
-
-        if (input.endsWith(">")) {
-            String withoutEnd = input.substring(0, input.length() - ">".length());
-            int start = withoutEnd.indexOf("<");
-            if (start >= 0) {
-                String caller = withoutEnd.substring(0, start).strip();
-                String arguments = withoutEnd.substring(start + "<".length());
-                List<String> args = divide(arguments, Main::divideValueChar);
-
-                return compileAllToList(args, new Rule() {
-                    @Override
-                    public Result<String, CompileException> generate(Node input) {
-                        return new Ok<>(input.value());
-                    }
-
-                    @Override
-                    public Result<Node, CompileException> parse(String input) {
-                        return compile0(input).mapValue(Node::new);
-                    }
-
-                    private Result<String, CompileException> compile0(String input1) {
-                        return compileType(input1);
-                    }
-                }).mapValue(segments -> {
-                    String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
-
-                    String expansion = caller + "__" + inner + "__";
-                    expansions.put(expansion, caller + "<" + String.join(", ", segments) + ">");
-                    return expansion;
-                });
-            }
-        }
-
-        String stripped = input.strip();
-        if (isSymbol(stripped)) {
-            return new Ok<>(stripped);
-        }
-
-        return invalidate("type", input);
+        Rule typeRule = new TypeCompileRule();
+        return typeRule.parse(innerType)
+                .flatMapValue(typeRule::generate)
+                .mapValue(outerType -> outerType + " " + name);
     }
 
     private static boolean isSymbol(String input) {
@@ -368,12 +328,68 @@ public class Main {
         return true;
     }
 
-    private static Result<String, CompileException> createInfixError(String input, String infix) {
-        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
+    private static <T> Result<T, CompileException> createInfixError(String input, String infix) {
+        return new Err<>(new CompileException(input, "Infix '" + infix + "' not present"));
     }
 
     private static Result<String, CompileException> compileWhitespace(String input) {
         if (input.isBlank()) return new Ok<>("");
-        return new Err<>(new CompileException("Input not blank", input));
+        return new Err<>(new CompileException(input, "Input not blank"));
+    }
+
+    private static class TypeCompileRule implements Rule {
+        @Override
+        public Result<String, CompileException> generate(Node input) {
+            return new Ok<>(input.value());
+        }
+
+        @Override
+        public Result<Node, CompileException> parse(String input) {
+            if (input.endsWith("[]")) {
+                String inner = input.substring(0, input.length() - "[]".length());
+                return transformAndGenerateGeneric("Array", Collections.singletonList(inner));
+            }
+
+            Result<Node, CompileException> maybeGeneric = compileGeneric(input);
+            if (maybeGeneric.isOk()) return maybeGeneric;
+
+            Result<Node, CompileException> maybeSymbol = compileSymbol(input);
+            if (maybeSymbol.isOk()) return maybeSymbol;
+
+            return invalidate("type", input);
+        }
+
+        private Result<Node, CompileException> compileGeneric(String input) {
+            if (!input.endsWith(">")) return new Err<>(new CompileException("Suffix '>' not present", input));
+
+            String withoutEnd = input.substring(0, input.length() - ">".length());
+            int start = withoutEnd.indexOf("<");
+            if (start < 0) return createInfixError(withoutEnd, "<");
+
+            String caller = withoutEnd.substring(0, start).strip();
+            String arguments = withoutEnd.substring(start + "<".length());
+            List<String> args = divide(arguments, Main::divideValueChar);
+
+            return transformAndGenerateGeneric(caller, args);
+        }
+
+        private Result<Node, CompileException> transformAndGenerateGeneric(String caller, List<String> args) {
+            return compileAllToList(args, new TypeCompileRule()).mapValue(segments -> {
+                String inner = mergeSegmentsAll(tuple -> mergeDelimited(tuple, "_"), segments);
+
+                String expansion = caller + "__" + inner + "__";
+                expansions.put(expansion, caller + "<" + String.join(", ", segments) + ">");
+                return new Node(expansion);
+            });
+        }
+
+        private Result<Node, CompileException> compileSymbol(String input) {
+            String stripped = input.strip();
+            if (isSymbol(stripped)) {
+                return new Ok<>(new Node(stripped));
+            }
+
+            return new Err<>(new CompileException("Not a symbol", stripped));
+        }
     }
 }
