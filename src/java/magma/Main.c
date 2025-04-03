@@ -31,11 +31,11 @@ T unwrap(){
 }
 Result<Tuple<T, R>, X> and(){
 }
-struct Temp {
+struct Tuple<A, B> {
 };
 public CompileException(){
 }
-struct Temp {
+struct Ok<T, X> {
 };
-struct Temp {
+struct Err<T, X> {
 };

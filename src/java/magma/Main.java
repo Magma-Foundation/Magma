@@ -139,8 +139,14 @@ public class Main {
             }
         }
 
-        if (input.contains("record ")) {
-            return new Ok<>(generateStruct("Temp"));
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex >= 0) {
+            String afterKeyword = input.substring(recordIndex + "record ".length());
+            int paramStart = afterKeyword.indexOf("(".toString());
+            if (paramStart >= 0) {
+                String name = afterKeyword.substring(0, paramStart).strip();
+                return new Ok<>(generateStruct(name));
+            }
         }
 
         return invalidate("class segment", input);
