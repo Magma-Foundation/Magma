@@ -89,12 +89,16 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     return compile(inputContent, Main::compileClassSegment).mapValue(outputContent -> {
-                        return "struct " + name + " {\n};\n" + outputContent;
+                        return generateStruct(name) + outputContent;
                     });
                 }
             }
         }
         return invalidate("root segment", input);
+    }
+
+    private static String generateStruct(String name) {
+        return "struct " + name + " {\n};\n";
     }
 
     private static Err<String, CompileException> invalidate(String type, String input) {
@@ -107,14 +111,30 @@ public class Main {
         int contentStart = input.indexOf("(");
         if (contentStart >= 0) {
             String definition = input.substring(0, contentStart).strip();
-            int nameSeparator = definition.indexOf(" ");
+            int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                String name = definition.substring(nameSeparator + " ".length());
-                return new Ok<>("void " + name + "(){\n}\n");
+                String name = definition.substring(nameSeparator + " ".length()).strip();
+                if (isSymbol(name)) {
+                    return new Ok<>("void " + name + "(){\n}\n");
+                }
             }
         }
 
+        if (input.contains("record ")) {
+            return new Ok<>(generateStruct("Temp"));
+        }
+
         return invalidate("class segment", input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) continue;
+            return false;
+        }
+
+        return true;
     }
 
     public static void main(String[] args) {
