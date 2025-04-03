@@ -142,9 +142,15 @@ public class Main {
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {
             String afterKeyword = input.substring(recordIndex + "record ".length());
-            int paramStart = afterKeyword.indexOf("(".toString());
+            int paramStart = afterKeyword.indexOf("(");
             if (paramStart >= 0) {
-                String name = afterKeyword.substring(0, paramStart).strip();
+                String beforeParams = afterKeyword.substring(0, paramStart).strip();
+                int typeParamStart = beforeParams.indexOf("<");
+
+                String name = typeParamStart >= 0
+                        ? beforeParams.substring(0, typeParamStart)
+                        : beforeParams;
+
                 return new Ok<>(generateStruct(name));
             }
         }
