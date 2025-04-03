@@ -6,7 +6,7 @@
 // expand BiFunction__State_Character_State__ from BiFunction<State, Character, State>
 // expand Tuple__StringBuilder_String__ from Tuple<StringBuilder, String>
 // expand Result__List__String___CompileException__ from Result<List__String__, CompileException>
-// expand Err__Node_CompileException__ from Err<Node, CompileException>
+// expand Result__Node_CompileException__ from Result<Node, CompileException>
 // expand List__String__ from List<String>
 #include "magma/result/Err.h"
 #include "magma/result/Ok.h"
@@ -31,7 +31,8 @@
 struct Main {
 };
 int value = temp;
-int value = temp;
+void main(Array__String__ args){
+}
 Result__String_CompileException__ compileRoot(String input){
 }
 ArrayList__String__ addExpansions(List__String__ list){
@@ -76,5 +77,5 @@ Result__T_CompileException__ createInfixError(String input, String infix){
 }
 Result__String_CompileException__ compileWhitespace(String input){
 }
-Err__Node_CompileException__ createSuffixErr(String input, String suffix){
+Result__Node_CompileException__ createSuffixErr(String input, String suffix){
 }
