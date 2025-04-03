@@ -11,6 +11,10 @@
 #include <temp.h>
 struct Main {
 };
+Result<Tuple<T, R>, X> and(){
+}
+public CompileException(){
+}
 Result<String, CompileException> compile(){
 }
 Result<String, CompileException> compile(){
@@ -29,13 +33,3 @@ void main(){
 }
 T unwrap(){
 }
-Result<Tuple<T, R>, X> and(){
-}
-struct Tuple {
-};
-public CompileException(){
-}
-struct Ok {
-};
-struct Err {
-};

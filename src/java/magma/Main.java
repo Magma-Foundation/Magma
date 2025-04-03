@@ -13,6 +13,69 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
+    private interface Result<T, X> {
+        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        Optional<T> findValue();
+
+        Optional<X> findError();
+    }
+
+    private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static class CompileException extends Exception {
+        public CompileException(String message, String context) {
+            super(message + ": " + context);
+        }
+    }
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
+            return other.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(value));
+        }
+
+        @Override
+        public Optional<T> findValue() {
+            return Optional.of(value);
+        }
+
+        @Override
+        public Optional<X> findError() {
+            return Optional.empty();
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
+            return new Err<>(error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(error);
+        }
+
+        @Override
+        public Optional<T> findValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<X> findError() {
+            return Optional.of(error);
+        }
+    }
+
     private static Result<String, CompileException> compile(String input) {
         return compile(input, Main::compileRootSegment);
     }
@@ -147,11 +210,11 @@ public class Main {
                 String beforeParams = afterKeyword.substring(0, paramStart).strip();
                 int typeParamStart = beforeParams.indexOf("<");
 
-                String name = typeParamStart >= 0
-                        ? beforeParams.substring(0, typeParamStart)
-                        : beforeParams;
+                if (typeParamStart >= 0) {
+                    return new Ok<>("");
+                }
 
-                return new Ok<>(generateStruct(name));
+                return new Ok<>(generateStruct(beforeParams));
             }
         }
 
@@ -189,68 +252,5 @@ public class Main {
         if (maybeError.isPresent()) throw maybeError.get();
 
         throw new RuntimeException("Neither a value nor an error is present.");
-    }
-
-    private interface Result<T, X> {
-        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other);
-
-        <R> Result<R, X> mapValue(Function<T, R> mapper);
-
-        Optional<T> findValue();
-
-        Optional<X> findError();
-    }
-
-    private record Tuple<A, B>(A left, B right) {
-    }
-
-    private static class CompileException extends Exception {
-        public CompileException(String message, String context) {
-            super(message + ": " + context);
-        }
-    }
-
-    private record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
-            return other.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
-        }
-
-        @Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Ok<>(mapper.apply(value));
-        }
-
-        @Override
-        public Optional<T> findValue() {
-            return Optional.of(value);
-        }
-
-        @Override
-        public Optional<X> findError() {
-            return Optional.empty();
-        }
-    }
-
-    private record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
-            return new Err<>(error);
-        }
-
-        @Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Err<>(error);
-        }
-
-        @Override
-        public Optional<T> findValue() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<X> findError() {
-            return Optional.of(error);
-        }
     }
 }
