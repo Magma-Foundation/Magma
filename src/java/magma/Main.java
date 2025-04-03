@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -23,6 +24,10 @@ public class Main {
         Optional<T> findValue();
 
         Optional<X> findError();
+
+        boolean isOk();
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -31,6 +36,10 @@ public class Main {
     private static class CompileException extends Exception {
         public CompileException(String message, String context) {
             super(message + ": " + context);
+        }
+
+        public CompileException(String message, String context, CompileException cause) {
+            super(message + ": " + context, cause);
         }
     }
 
@@ -54,6 +63,16 @@ public class Main {
         public Optional<X> findError() {
             return Optional.empty();
         }
+
+        @Override
+        public boolean isOk() {
+            return true;
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(value);
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
@@ -76,15 +95,47 @@ public class Main {
         public Optional<X> findError() {
             return Optional.of(error);
         }
+
+        @Override
+        public boolean isOk() {
+            return false;
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(error));
+        }
     }
 
-    private static final Set<String> structs = new HashSet<>();
+    public static final List<String> structList = new ArrayList<String>();
+    private static final Set<String> structCache = new HashSet<>();
 
     private static Result<String, CompileException> compile(String input) {
         return compile(input, Main::compileRootSegment);
     }
 
     private static Result<String, CompileException> compile(String input, Function<String, Result<String, CompileException>> compiler) {
+        List<String> segments = divide(input);
+        Result<ArrayList<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
+        for (String segment : segments) {
+            maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
+                tuple.left().add(tuple.right);
+                return tuple.left;
+            });
+        }
+
+        return maybeCompiled.mapValue(compiledSegments -> {
+            StringBuilder output = new StringBuilder();
+            for (String compiled : compiledSegments) {
+                output.append(compiled);
+            }
+
+            return output.toString();
+        });
+
+    }
+
+    private static ArrayList<String> divide(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -130,15 +181,7 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        Result<StringBuilder, CompileException> target = new Ok<>(new StringBuilder());
-        for (String segment : segments) {
-            target = target.and(() -> compiler.apply(segment)).mapValue(tuple -> {
-                return tuple.left().append(tuple.right());
-            });
-        }
-
-        return target.mapValue(StringBuilder::toString);
+        return segments;
     }
 
     private static Result<String, CompileException> compileRootSegment(String input) {
@@ -175,36 +218,10 @@ public class Main {
     private static Result<String, CompileException> compileClassSegment(String input) {
         if (input.isBlank()) return new Ok<>("");
 
-        int contentStart = input.indexOf("(");
-        if (contentStart >= 0) {
-            String definition = input.substring(0, contentStart).strip();
-            int nameSeparator = definition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = definition.substring(0, nameSeparator);
+        Result<String, CompileException> maybeMethod = compileMethod(input)
+                .mapErr(err -> new CompileException("Invalid method", input, err));
 
-                int typeSeparator = -1;
-                int depth = 0;
-                for (int i = beforeName.length() - 1; i >= 0; i--) {
-                    char c = beforeName.charAt(i);
-                    if (c == ' ' && depth == 0) {
-                        typeSeparator = i;
-                        break;
-                    } else {
-                        if (c == '>') depth++;
-                        if (c == '<') depth--;
-                    }
-                }
-
-                String type = typeSeparator == -1
-                        ? beforeName
-                        : beforeName.substring(typeSeparator + " ".length());
-
-                String name = definition.substring(nameSeparator + " ".length()).strip();
-                if (isSymbol(name)) {
-                    return new Ok<>(type + " " + name + "(){\n}\n");
-                }
-            }
-        }
+        if (maybeMethod.isOk()) return maybeMethod;
 
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {
@@ -216,7 +233,7 @@ public class Main {
 
                 if (typeParamStart >= 0) {
                     String name = beforeParams.substring(0, typeParamStart).strip();
-                    structs.add(name);
+                    structCache.add(name);
                     return new Ok<>("");
                 }
 
@@ -228,7 +245,64 @@ public class Main {
             return new Ok<>("int temp = value;\n");
         }
 
+        if (input.contains("interface ")) {
+            return new Ok<>(generateStruct("Temp"));
+        }
+
         return invalidate("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileMethod(String input) {
+        int contentStart = input.indexOf("(");
+        if (contentStart < 0) return createInfixErr(input, "(");
+
+        String definition = input.substring(0, contentStart).strip();
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator < 0) return createInfixErr(definition, " ");
+
+        String beforeName = definition.substring(0, nameSeparator);
+        int typeSeparator = -1;
+        int depth = 0;
+        for (int i = beforeName.length() - 1; i >= 0; i--) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
+            } else {
+                if (c == '>') depth++;
+                if (c == '<') depth--;
+            }
+        }
+
+        String inputType = typeSeparator == -1
+                ? beforeName
+                : beforeName.substring(typeSeparator + " ".length());
+
+        String name = definition.substring(nameSeparator + " ".length()).strip();
+        if (isSymbol(name)) {
+            return compileType(inputType).mapValue(outputType -> outputType + " " + name + "(){\n}\n");
+        }
+
+        return createInfixErr(input, "(");
+    }
+
+    private static Err<String, CompileException> createInfixErr(String input, String infix) {
+        return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
+    }
+
+    private static Result<String, CompileException> compileType(String input) {
+        if (isSymbol(input)) return new Ok<>(input);
+
+        int argStart = input.indexOf("<");
+        if (argStart >= 0) {
+            String name = input.substring(0, argStart).strip();
+            if (structCache.contains(name)) {
+                structList.add(generateStruct(name));
+                return new Ok<>(name);
+            }
+        }
+
+        return invalidate("type", input);
     }
 
     private static boolean isSymbol(String input) {
