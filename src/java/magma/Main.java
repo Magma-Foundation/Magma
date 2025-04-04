@@ -225,15 +225,28 @@ public class Main {
         Result<String, CompileException> maybeRecord = compileRecord(input);
         if (maybeRecord.isOk()) return maybeRecord;
 
-        if (input.contains("=")) {
-            return new Ok<>("int temp = value;\n");
-        }
+        Result<String, CompileException> maybeInitialization = compileInitialization(input);
+        if (maybeInitialization.isOk()) return maybeInitialization;
 
+        Result<String, CompileException> maybeInterface = compileInterface(input);
+        if (maybeInterface.isOk()) return maybeInterface;
+
+        return invalidate("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileInterface(String input) {
         if (input.contains("interface ")) {
             return new Ok<>(generateStruct("Temp"));
         }
+        return new Err<>(new CompileException("Not an interface", input));
+    }
 
-        return invalidate("class segment", input);
+    private static Result<String, CompileException> compileInitialization(String input) {
+        if (input.contains("=")) {
+            return new Ok<>("int temp = value;\n");
+        } else {
+            return new Err<>(new CompileException("Not an assignment", input));
+        }
     }
 
     private static Result<String, CompileException> compileWhitespace(String input) {
