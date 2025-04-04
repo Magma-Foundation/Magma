@@ -26,7 +26,7 @@ public class Main {
     }
 
     private interface Result<T, X> {
-        <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other);
+        <R> Result<Pair<T, R>, X> and(Supplier<Result<R, X>> other);
 
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
@@ -76,7 +76,7 @@ public class Main {
 
     private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
-        public <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other) {
+        public <R> Result<Pair<T, R>, X> and(Supplier<Result<R, X>> other) {
             return other.get().mapValue(otherValue -> new PairRecord<>(value, otherValue));
         }
 
@@ -108,7 +108,7 @@ public class Main {
 
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
-        public <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other) {
+        public <R> Result<Pair<T, R>, X> and(Supplier<Result<R, X>> other) {
             return new Err<>(error);
         }
 
@@ -184,8 +184,8 @@ public class Main {
         }
     }
 
-    public static final List<String> structList = new ArrayList<String>();
-    private static final Set<String> structCache = new HashSet<>();
+    public static final List<String> structsGenerated = new ArrayList<String>();
+    private static final Set<String> structCached = new HashSet<>();
 
     private static Result<String, CompileException> compile(String input) {
         return compile(input, Main::compileRootSegment);
@@ -295,9 +295,21 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileInterface(String input) {
-        if (input.contains("interface ")) {
-            return new Ok<>(generateStruct("Temp"));
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            String afterKeyword = input.substring(interfaceIndex + "interface ".length());
+            int beforeContent = afterKeyword.indexOf("{");
+            if (beforeContent >= 0) {
+                String oldName = afterKeyword.substring(0, beforeContent);
+                String newName = oldName.contains("<")
+                        ? oldName.substring(0, oldName.indexOf("<"))
+                        : oldName;
+
+                structCached.add(newName);
+                return new Ok<>(generateStruct(newName));
+            }
         }
+
         return new Err<>(new CompileException("Not an interface", input));
     }
 
@@ -327,7 +339,7 @@ public class Main {
 
         if (typeParamStart >= 0) {
             String name = beforeParams.substring(0, typeParamStart).strip();
-            structCache.add(name);
+            structCached.add(name);
             return new Ok<>("");
         }
 
@@ -384,8 +396,8 @@ public class Main {
         if (argStart < 0) return createInfixErr(input, "<");
 
         String name = input.substring(0, argStart).strip();
-        if (structCache.contains(name)) {
-            structList.add(generateStruct(name));
+        if (structCached.contains(name)) {
+            structsGenerated.add(generateStruct(name));
             return new Ok<>(name);
         }
 
