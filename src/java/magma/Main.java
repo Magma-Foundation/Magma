@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,6 +39,8 @@ public class Main {
         <R> Result<T, R> mapErr(Function<X, R> mapper);
 
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
     }
 
     private interface Rule {
@@ -83,7 +87,6 @@ public class Main {
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
-
         @Override
         public <R> Result<Pair<T, R>, X> and(Supplier<Result<R, X>> other) {
             return other.get().mapValue(otherValue -> new PairRecord<>(value, otherValue));
@@ -112,6 +115,11 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(value);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(value);
         }
     }
 
@@ -144,6 +152,11 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(error);
         }
     }
 
@@ -228,11 +241,25 @@ public class Main {
 
     }
 
+    private static class LazyRule implements Rule {
+        private Option<Rule> maybeChild = new None<>();
+
+        @Override
+        public Result<String, CompileException> compile(String input) {
+            return maybeChild.map(child -> child.compile(input))
+                    .orElseGet(() -> new Err<>(new CompileException("Child not set", input)));
+        }
+
+        public void set(Rule rule) {
+            maybeChild = new Some<>(rule);
+        }
+    }
+
     public static final List<String> structsGenerated = new ArrayList<String>();
     private static final Map<String, Function<List<String>, String>> structCached = new HashMap<>();
 
     private static Result<String, CompileException> compile(String input) {
-        return divideAndCompile(input, Main::compileRootSegment)
+        return divideStatements(input, Main::compileRootSegment)
                 .mapValue(inner -> {
                     ArrayList<String> copy = new ArrayList<>();
                     copy.addAll(structsGenerated);
@@ -243,13 +270,16 @@ public class Main {
 
     }
 
-    private static Result<String, CompileException> compile(String input, Function<String, Result<String, CompileException>> compiler) {
-        return divideAndCompile(input, compiler).mapValue(Main::merge);
+    private static Result<String, CompileException> compileStatements(String input, Function<String, Result<String, CompileException>> compiler) {
+        return divideStatements(input, compiler).mapValue(Main::merge);
 
     }
 
-    private static Result<List<String>, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler) {
-        List<String> segments = divide(input);
+    private static Result<List<String>, CompileException> divideStatements(String input, Function<String, Result<String, CompileException>> compiler) {
+        return divideAndCompile(divideByStatements(input), compiler);
+    }
+
+    private static Result<List<String>, CompileException> divideAndCompile(List<String> segments, Function<String, Result<String, CompileException>> compiler) {
         Result<List<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
@@ -269,7 +299,7 @@ public class Main {
         return output.toString();
     }
 
-    private static ArrayList<String> divide(String input) {
+    private static List<String> divideByStatements(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -332,7 +362,7 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "class ".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return compile(inputContent, input1 -> new OrRule(List.of(
+                    return compileStatements(inputContent, input1 -> new OrRule(List.of(
                             Main::compileWhitespace,
                             Main::compileMethod,
                             Main::compileRecord,
@@ -447,20 +477,34 @@ public class Main {
     }
 
     private static Rule createTypeRule() {
-        return new OrRule(List.of(
+        LazyRule type = new LazyRule();
+        type.set(new OrRule(List.of(
                 Main::compileSymbol,
-                Main::compileGeneric
-        ));
+                input -> compileGeneric(input, type)
+        )));
+        return type;
     }
 
-    private static Result<String, CompileException> compileGeneric(String input) {
+    private static Result<String, CompileException> compileGeneric(String input, Rule type) {
         int argStart = input.indexOf("<");
         if (argStart < 0) return createInfixErr(input, "<");
 
         String name = input.substring(0, argStart).strip();
+        String withEnd = input.substring(argStart + "<".length()).strip();
+        if (!withEnd.endsWith(">")) return new Err<>(new CompileException("Suffix '>' not present", withEnd));
+        String inputArguments = withEnd.substring(0, withEnd.length() - ">".length());
+
+        return divideAndCompile(divideByValues(inputArguments), type::compile)
+                .flatMapValue(typeArguments -> generateGenericStruct(input, name, typeArguments));
+    }
+
+    private static List<String> divideByValues(String input) {
+        return Arrays.asList(input.split(Pattern.quote(",")));
+    }
+
+    private static Result<String, CompileException> generateGenericStruct(String input, String name, List<String> arguments) {
         if (structCached.containsKey(name)) {
-            List<String> typeArguments = Collections.emptyList();
-            String apply = structCached.get(name).apply(typeArguments);
+            String apply = structCached.get(name).apply(arguments);
             structsGenerated.add(apply);
             return new Ok<>(name);
         }
@@ -469,8 +513,9 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileSymbol(String input) {
-        if (isSymbol(input)) return new Ok<>(input);
-        return new Err<>(new CompileException("Not a symbol", input));
+        String stripped = input.strip();
+        if (isSymbol(stripped)) return new Ok<>(stripped);
+        return new Err<>(new CompileException("Not a symbol", stripped));
     }
 
     private static boolean isSymbol(String input) {
