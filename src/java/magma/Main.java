@@ -65,6 +65,7 @@ public class Main {
         public String display() {
             return message + ": " + context + causes.stream()
                     .map(CompileException::display)
+                    .map(value -> "\n" + value)
                     .collect(Collectors.joining());
         }
     }
@@ -292,15 +293,11 @@ public class Main {
                 }
             }
         }
-        return invalidate("root segment", input);
+        return new Err<>(new CompileException("Invalid " + "root segment", input));
     }
 
     private static String generateStruct(String name) {
         return "struct " + name + " {\n};\n";
-    }
-
-    private static Err<String, CompileException> invalidate(String type, String input) {
-        return new Err<>(new CompileException("Invalid " + type, input));
     }
 
     private static Result<String, CompileException> compileInterface(String input) {
@@ -371,7 +368,7 @@ public class Main {
 
         String name = definition.substring(nameSeparator + " ".length()).strip();
         if (isSymbol(name)) {
-            return compileType(inputType).mapValue(outputType -> outputType + " " + name + "(){\n}\n");
+            return createTypeRule().compile(inputType).mapValue(outputType -> outputType + " " + name + "(){\n}\n");
         }
 
         return createInfixErr(input, "(");
@@ -381,19 +378,29 @@ public class Main {
         return new Err<>(new CompileException("Infix '" + infix + "' not present", input));
     }
 
-    private static Result<String, CompileException> compileType(String input) {
-        if (isSymbol(input)) return new Ok<>(input);
+    private static Rule createTypeRule() {
+        return new OrRule(List.of(
+                Main::compileSymbol,
+                Main::compileGeneric
+        ));
+    }
 
+    private static Result<String, CompileException> compileGeneric(String input) {
         int argStart = input.indexOf("<");
-        if (argStart >= 0) {
-            String name = input.substring(0, argStart).strip();
-            if (structCache.contains(name)) {
-                structList.add(generateStruct(name));
-                return new Ok<>(name);
-            }
+        if (argStart < 0) return createInfixErr(input, "<");
+
+        String name = input.substring(0, argStart).strip();
+        if (structCache.contains(name)) {
+            structList.add(generateStruct(name));
+            return new Ok<>(name);
         }
 
-        return invalidate("type", input);
+        return createInfixErr(input, "<");
+    }
+
+    private static Result<String, CompileException> compileSymbol(String input) {
+        if (isSymbol(input)) return new Ok<>(input);
+        return new Err<>(new CompileException("Not a symbol", input));
     }
 
     private static boolean isSymbol(String input) {
