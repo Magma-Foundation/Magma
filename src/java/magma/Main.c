@@ -11,28 +11,61 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
 struct Main {
 };
-Result<Tuple<T, R>, X> and(){
-}
-public CompileException(){
+struct Pair {
+};
+struct Result {
+};
+struct Rule  {
+};
+struct Error  {
+};
+struct Option {
+};
+int temp = value;
+int temp = value;
+struct OrRule {
+};
+int temp = value;
+struct ApplicationError {
+};
+Option map(){
 }
 int temp = value;
-Result<String, CompileException> compile(){
+int temp = value;
+Result compile(){
 }
-Result<String, CompileException> compile(){
-}
-Result<String, CompileException> compileRootSegment(){
-}
+int temp = value;
+int temp = value;
+int temp = value;
 String generateStruct(){
 }
-Err<String, CompileException> invalidate(){
+struct ");
+        if (interfaceIndex >= 0)  {
+};
+int temp = value;
+Result compileWhitespace(){
 }
-Result<String, CompileException> compileClassSegment(){
+int temp = value;
+int temp = value;
+Err createInfixErr(){
 }
-boolean isSymbol(){
+Rule createTypeRule(){
 }
-void main(){
+int temp = value;
+Result compileSymbol(){
 }
-T unwrap(){
+int temp = value;
+int temp = value;
+Option compileAndWrite(){
+}
+int temp = value;
+Result readString(){
+}
+Option writeString(){
 }

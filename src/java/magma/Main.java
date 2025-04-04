@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -30,9 +30,9 @@ public class Main {
 
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
-        Optional<T> findValue();
+        Option<T> findValue();
 
-        Optional<X> findError();
+        Option<X> findError();
 
         <R> Result<T, R> mapErr(Function<X, R> mapper);
 
@@ -45,6 +45,14 @@ public class Main {
 
     private interface Error {
         String display();
+    }
+
+    interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        void ifPresent(Consumer<T> consumer);
+
+        T orElseGet(Supplier<T> other);
     }
 
     private record PairRecord<A, B>(A left, B right) implements Pair<A, B> {
@@ -75,6 +83,7 @@ public class Main {
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
+
         @Override
         public <R> Result<Pair<T, R>, X> and(Supplier<Result<R, X>> other) {
             return other.get().mapValue(otherValue -> new PairRecord<>(value, otherValue));
@@ -86,13 +95,13 @@ public class Main {
         }
 
         @Override
-        public Optional<T> findValue() {
-            return Optional.of(value);
+        public Option<T> findValue() {
+            return new Some<>(value);
         }
 
         @Override
-        public Optional<X> findError() {
-            return Optional.empty();
+        public Option<X> findError() {
+            return new None<>();
         }
 
         @Override
@@ -118,13 +127,13 @@ public class Main {
         }
 
         @Override
-        public Optional<T> findValue() {
-            return Optional.empty();
+        public Option<T> findValue() {
+            return new None<>();
         }
 
         @Override
-        public Optional<X> findError() {
-            return Optional.of(error);
+        public Option<X> findError() {
+            return new Some<>(error);
         }
 
         @Override
@@ -138,13 +147,13 @@ public class Main {
         }
     }
 
-    private record State(Optional<String> maybeValue, List<CompileException> errors) {
+    private record State(Option<String> maybeValue, List<CompileException> errors) {
         public State() {
-            this(Optional.empty(), new ArrayList<>());
+            this(new None<>(), new ArrayList<>());
         }
 
         public State withValue(String value) {
-            return new State(Optional.of(value), errors);
+            return new State(new Some<>(value), errors);
         }
 
         public State withError(CompileException error) {
@@ -182,6 +191,41 @@ public class Main {
         public String display() {
             return error.display();
         }
+    }
+
+    record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(value));
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(value);
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return value;
+        }
+
+    }
+
+    private static class None<T> implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
     }
 
     public static final List<String> structsGenerated = new ArrayList<String>();
@@ -424,17 +468,17 @@ public class Main {
         readString(source)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
-                .match(input -> compileAndWrite(source, input), Optional::of)
+                .match(input -> compileAndWrite(source, input), Some::new)
                 .ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Optional<ApplicationError> compileAndWrite(Path source, String input) {
+    private static Option<ApplicationError> compileAndWrite(Path source, String input) {
         return compile(input)
                 .mapErr(ApplicationError::new)
-                .match(output -> writeOutput(source, output), Optional::of);
+                .match(output -> writeOutput(source, output), Some::new);
     }
 
-    private static Optional<ApplicationError> writeOutput(Path source, String output) {
+    private static Option<ApplicationError> writeOutput(Path source, String output) {
         Path path = source.resolveSibling("Main.c");
         return writeString(output, path).map(ThrowableError::new).map(ApplicationError::new);
     }
@@ -447,22 +491,12 @@ public class Main {
         }
     }
 
-    private static Optional<IOException> writeString(String output, Path path) {
+    private static Option<IOException> writeString(String output, Path path) {
         try {
             Files.writeString(path, output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
-    }
-
-    private static <T, X extends Throwable> T unwrap(Result<T, X> result) throws X {
-        Optional<T> maybeValue = result.findValue();
-        if (maybeValue.isPresent()) return maybeValue.get();
-
-        Optional<X> maybeError = result.findError();
-        if (maybeError.isPresent()) throw maybeError.get();
-
-        throw new RuntimeException("Neither a value nor an throwable is present.");
     }
 }
