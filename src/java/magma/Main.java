@@ -8,10 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -229,31 +229,44 @@ public class Main {
     }
 
     public static final List<String> structsGenerated = new ArrayList<String>();
-    private static final Set<String> structCached = new HashSet<>();
+    private static final Map<String, Function<List<String>, String>> structCached = new HashMap<>();
 
     private static Result<String, CompileException> compile(String input) {
-        return compile(input, Main::compileRootSegment);
+        return divideAndCompile(input, Main::compileRootSegment)
+                .mapValue(inner -> {
+                    ArrayList<String> copy = new ArrayList<>();
+                    copy.addAll(structsGenerated);
+                    copy.addAll(inner);
+                    return copy;
+                })
+                .mapValue(Main::merge);
+
     }
 
     private static Result<String, CompileException> compile(String input, Function<String, Result<String, CompileException>> compiler) {
+        return divideAndCompile(input, compiler).mapValue(Main::merge);
+
+    }
+
+    private static Result<List<String>, CompileException> divideAndCompile(String input, Function<String, Result<String, CompileException>> compiler) {
         List<String> segments = divide(input);
-        Result<ArrayList<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
+        Result<List<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
         }
+        return maybeCompiled;
+    }
 
-        return maybeCompiled.mapValue(compiledSegments -> {
-            StringBuilder output = new StringBuilder();
-            for (String compiled : compiledSegments) {
-                output.append(compiled);
-            }
+    private static String merge(List<String> compiledSegments) {
+        StringBuilder output = new StringBuilder();
+        for (String compiled : compiledSegments) {
+            output.append(compiled);
+        }
 
-            return output.toString();
-        });
-
+        return output.toString();
     }
 
     private static ArrayList<String> divide(String input) {
@@ -345,16 +358,21 @@ public class Main {
             int beforeContent = afterKeyword.indexOf("{");
             if (beforeContent >= 0) {
                 String oldName = afterKeyword.substring(0, beforeContent);
-                String newName = oldName.contains("<")
-                        ? oldName.substring(0, oldName.indexOf("<"))
-                        : oldName;
+                if (oldName.contains("<")) {
+                    String newName = oldName.substring(0, oldName.indexOf("<"));
+                    structCached.put(newName, strings -> generateStruct(newName, strings));
+                    return new Ok<>("");
+                }
 
-                structCached.add(newName);
-                return new Ok<>(generateStruct(newName));
+                return new Ok<>(generateStruct(oldName));
             }
         }
 
         return new Err<>(new CompileException("Not an interface", input));
+    }
+
+    private static String generateStruct(String name, List<String> typeArguments) {
+        return generateStruct(name + "__" + String.join("_", typeArguments) + "__");
     }
 
     private static Result<String, CompileException> compileInitialization(String input) {
@@ -382,8 +400,8 @@ public class Main {
         int typeParamStart = beforeParams.indexOf("<");
 
         if (typeParamStart >= 0) {
-            String name = beforeParams.substring(0, typeParamStart).strip();
-            structCached.add(name);
+            String newName = beforeParams.substring(0, typeParamStart).strip();
+            structCached.put(newName, strings -> generateStruct(newName, strings));
             return new Ok<>("");
         }
 
@@ -440,8 +458,10 @@ public class Main {
         if (argStart < 0) return createInfixErr(input, "<");
 
         String name = input.substring(0, argStart).strip();
-        if (structCached.contains(name)) {
-            structsGenerated.add(generateStruct(name));
+        if (structCached.containsKey(name)) {
+            List<String> typeArguments = Collections.emptyList();
+            String apply = structCached.get(name).apply(typeArguments);
+            structsGenerated.add(apply);
             return new Ok<>(name);
         }
 

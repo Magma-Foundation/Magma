@@ -1,3 +1,39 @@
+struct Result____ {
+};
+struct Option____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Err____ {
+};
+struct Result____ {
+};
+struct Result____ {
+};
+struct Option____ {
+};
+struct Option____ {
+};
+struct Result____ {
+};
+struct Option____ {
+};
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
@@ -17,15 +53,9 @@
 #include <temp.h>
 struct Main {
 };
-struct Pair {
-};
-struct Result {
-};
 struct Rule  {
 };
 struct Error  {
-};
-struct Option {
 };
 int temp = value;
 int temp = value;
@@ -38,8 +68,10 @@ Option map(){
 }
 int temp = value;
 int temp = value;
+int temp = value;
 Result compile(){
 }
+int temp = value;
 int temp = value;
 int temp = value;
 int temp = value;
@@ -48,6 +80,8 @@ String generateStruct(){
 struct ");
         if (interfaceIndex >= 0)  {
 };
+String generateStruct(){
+}
 int temp = value;
 Result compileWhitespace(){
 }
