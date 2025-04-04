@@ -19,16 +19,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
+    private interface Pair<A, B> {
+        A left();
+
+        B right();
+    }
+
     private interface Result<T, X> {
-        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other);
+        <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other);
 
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
         Optional<T> findValue();
 
         Optional<X> findError();
-
-        boolean isOk();
 
         <R> Result<T, R> mapErr(Function<X, R> mapper);
 
@@ -43,7 +47,7 @@ public class Main {
         String display();
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    private record PairRecord<A, B>(A left, B right) implements Pair<A, B> {
     }
 
     private static class CompileException implements Error {
@@ -72,8 +76,8 @@ public class Main {
 
     private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
-            return other.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
+        public <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other) {
+            return other.get().mapValue(otherValue -> new PairRecord<>(value, otherValue));
         }
 
         @Override
@@ -92,11 +96,6 @@ public class Main {
         }
 
         @Override
-        public boolean isOk() {
-            return true;
-        }
-
-        @Override
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Ok<>(value);
         }
@@ -109,7 +108,7 @@ public class Main {
 
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
+        public <R> Result<Pair<T,R>, X> and(Supplier<Result<R, X>> other) {
             return new Err<>(error);
         }
 
@@ -126,11 +125,6 @@ public class Main {
         @Override
         public Optional<X> findError() {
             return Optional.of(error);
-        }
-
-        @Override
-        public boolean isOk() {
-            return false;
         }
 
         @Override
@@ -202,8 +196,8 @@ public class Main {
         Result<ArrayList<String>, CompileException> maybeCompiled = new Ok<>(new ArrayList<String>());
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
-                tuple.left().add(tuple.right);
-                return tuple.left;
+                tuple.left().add(tuple.right());
+                return tuple.left();
             });
         }
 
@@ -395,7 +389,7 @@ public class Main {
             return new Ok<>(name);
         }
 
-        return createInfixErr(input, "<");
+        return new Err<>(new CompileException("Struct '" + name + "' not defined", input));
     }
 
     private static Result<String, CompileException> compileSymbol(String input) {
