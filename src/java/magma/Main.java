@@ -245,7 +245,7 @@ public class Main {
         if (input.contains("=")) {
             return new Ok<>("int temp = value;\n");
         } else {
-            return new Err<>(new CompileException("Not an assignment", input));
+            return new Err<>(new CompileException("Not an initialization", input));
         }
     }
 
