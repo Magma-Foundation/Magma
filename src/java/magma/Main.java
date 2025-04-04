@@ -1,10 +1,13 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,18 +31,41 @@ public class Main {
         boolean isOk();
 
         <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private interface Rule {
+        Result<String, CompileException> compile(String input);
+    }
+
+    private interface Error {
+        String display();
     }
 
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private static class CompileException extends Exception {
-        public CompileException(String message, String context) {
-            super(message + ": " + context);
+    private static class CompileException implements Error {
+        private final String message;
+        private final String context;
+        private final List<CompileException> causes;
+
+        public CompileException(String message, String context, List<CompileException> causes) {
+            this.message = message;
+            this.context = context;
+            this.causes = causes;
         }
 
-        public CompileException(String message, String context, CompileException cause) {
-            super(message + ": " + context, cause);
+        public CompileException(String message, String context) {
+            this(message, context, Collections.emptyList());
+        }
+
+        @Override
+        public String display() {
+            return message + ": " + context + causes.stream()
+                    .map(CompileException::display)
+                    .collect(Collectors.joining());
         }
     }
 
@@ -73,6 +99,11 @@ public class Main {
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Ok<>(value);
         }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(value);
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
@@ -104,6 +135,57 @@ public class Main {
         @Override
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Err<>(mapper.apply(error));
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(error);
+        }
+    }
+
+    private record State(Optional<String> maybeValue, List<CompileException> errors) {
+        public State() {
+            this(Optional.empty(), new ArrayList<>());
+        }
+
+        public State withValue(String value) {
+            return new State(Optional.of(value), errors);
+        }
+
+        public State withError(CompileException error) {
+            ArrayList<CompileException> copy = new ArrayList<>(errors);
+            copy.add(error);
+            return new State(maybeValue, copy);
+        }
+
+        public Result<String, CompileException> toResult(String input) {
+            return maybeValue.<Result<String, CompileException>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileException("No valid combination found", input, errors)));
+        }
+    }
+
+    private record OrRule(List<Rule> rules) implements Rule {
+        @Override
+        public Result<String, CompileException> compile(String input) {
+            return rules().stream().reduce(new State(), (state, rule) -> {
+                return rule.compile(input).match(state::withValue, state::withError);
+            }, (_, next) -> next).toResult(input);
+        }
+    }
+
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return error.display();
         }
     }
 
@@ -198,7 +280,13 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "class ".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return compile(inputContent, Main::compileClassSegment).mapValue(outputContent -> {
+                    return compile(inputContent, input1 -> new OrRule(List.of(
+                            Main::compileWhitespace,
+                            Main::compileMethod,
+                            Main::compileRecord,
+                            Main::compileInitialization,
+                            Main::compileInterface
+                    )).compile(input1)).mapValue(outputContent -> {
                         return generateStruct(name) + outputContent;
                     });
                 }
@@ -213,25 +301,6 @@ public class Main {
 
     private static Err<String, CompileException> invalidate(String type, String input) {
         return new Err<>(new CompileException("Invalid " + type, input));
-    }
-
-    private static Result<String, CompileException> compileClassSegment(String input) {
-        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isOk()) return maybeWhitespace;
-
-        Result<String, CompileException> maybeMethod = compileMethod(input);
-        if (maybeMethod.isOk()) return maybeMethod;
-
-        Result<String, CompileException> maybeRecord = compileRecord(input);
-        if (maybeRecord.isOk()) return maybeRecord;
-
-        Result<String, CompileException> maybeInitialization = compileInitialization(input);
-        if (maybeInitialization.isOk()) return maybeInitialization;
-
-        Result<String, CompileException> maybeInterface = compileInterface(input);
-        if (maybeInterface.isOk()) return maybeInterface;
-
-        return invalidate("class segment", input);
     }
 
     private static Result<String, CompileException> compileInterface(String input) {
@@ -338,15 +407,39 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(input -> compileAndWrite(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Optional<ApplicationError> compileAndWrite(Path source, String input) {
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> writeOutput(source, output), Optional::of);
+    }
+
+    private static Optional<ApplicationError> writeOutput(Path source, String output) {
+        Path path = source.resolveSibling("Main.c");
+        return writeString(output, path).map(ThrowableError::new).map(ApplicationError::new);
+    }
+
+    private static Result<String, IOException> readString(Path source) {
         try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            String output = unwrap(compile(input));
-            Path path = source.resolveSibling("Main.c");
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Optional<IOException> writeString(String output, Path path) {
+        try {
             Files.writeString(path, output);
-        } catch (IOException | CompileException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
         }
     }
 
@@ -357,6 +450,6 @@ public class Main {
         Optional<X> maybeError = result.findError();
         if (maybeError.isPresent()) throw maybeError.get();
 
-        throw new RuntimeException("Neither a value nor an error is present.");
+        throw new RuntimeException("Neither a value nor an throwable is present.");
     }
 }
