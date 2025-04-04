@@ -216,30 +216,14 @@ public class Main {
     }
 
     private static Result<String, CompileException> compileClassSegment(String input) {
-        if (input.isBlank()) return new Ok<>("");
+        Result<String, CompileException> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isOk()) return maybeWhitespace;
 
-        Result<String, CompileException> maybeMethod = compileMethod(input)
-                .mapErr(err -> new CompileException("Invalid method", input, err));
-
+        Result<String, CompileException> maybeMethod = compileMethod(input);
         if (maybeMethod.isOk()) return maybeMethod;
 
-        int recordIndex = input.indexOf("record ");
-        if (recordIndex >= 0) {
-            String afterKeyword = input.substring(recordIndex + "record ".length());
-            int paramStart = afterKeyword.indexOf("(");
-            if (paramStart >= 0) {
-                String beforeParams = afterKeyword.substring(0, paramStart).strip();
-                int typeParamStart = beforeParams.indexOf("<");
-
-                if (typeParamStart >= 0) {
-                    String name = beforeParams.substring(0, typeParamStart).strip();
-                    structCache.add(name);
-                    return new Ok<>("");
-                }
-
-                return new Ok<>(generateStruct(beforeParams));
-            }
-        }
+        Result<String, CompileException> maybeRecord = compileRecord(input);
+        if (maybeRecord.isOk()) return maybeRecord;
 
         if (input.contains("=")) {
             return new Ok<>("int temp = value;\n");
@@ -250,6 +234,31 @@ public class Main {
         }
 
         return invalidate("class segment", input);
+    }
+
+    private static Result<String, CompileException> compileWhitespace(String input) {
+        if (input.isBlank()) return new Ok<>("");
+        return new Err<>(new CompileException("Not blank", input));
+    }
+
+    private static Result<String, CompileException> compileRecord(String input) {
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex < 0) return createInfixErr(input, "record ");
+
+        String afterKeyword = input.substring(recordIndex + "record ".length());
+        int paramStart = afterKeyword.indexOf("(");
+        if (paramStart < 0) return createInfixErr(afterKeyword, "(");
+
+        String beforeParams = afterKeyword.substring(0, paramStart).strip();
+        int typeParamStart = beforeParams.indexOf("<");
+
+        if (typeParamStart >= 0) {
+            String name = beforeParams.substring(0, typeParamStart).strip();
+            structCache.add(name);
+            return new Ok<>("");
+        }
+
+        return new Ok<>(generateStruct(beforeParams));
     }
 
     private static Result<String, CompileException> compileMethod(String input) {
