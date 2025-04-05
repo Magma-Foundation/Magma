@@ -363,18 +363,22 @@ public class Main {
             return compileValue(oldChild).map(newChild -> newChild + "." + property);
         }
 
-        int operatorIndex = value.indexOf("+");
-        if (operatorIndex >= 0) {
-            String leftString = value.substring(0, operatorIndex).strip();
-            String rightString = value.substring(operatorIndex + 1).strip();
-            return compileValue(leftString).flatMap(left -> {
-                return compileValue(rightString).map(right -> {
-                    return left + " + " + right;
-                });
-            });
-        }
+        return compileOperator(value, "-")
+                .or(() -> compileOperator(value, "+"))
+                .or(() -> invalidate("value", value));
+    }
 
-        return invalidate("value", value);
+    private static Optional<String> compileOperator(String value, String operator) {
+        int operatorIndex = value.indexOf(operator);
+        if (operatorIndex < 0) return Optional.empty();
+
+        String leftString = value.substring(0, operatorIndex).strip();
+        String rightString = value.substring(operatorIndex + 1).strip();
+        return compileValue(leftString).flatMap(left -> {
+            return compileValue(rightString).map(right -> {
+                return left + " " + operator + " " + right;
+            });
+        });
     }
 
     private static Optional<String> compileInvocation(String value) {

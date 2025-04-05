@@ -187,9 +187,14 @@ struct Temp Main_compileValue(){
 	struct int propertySeparator = value.indexOf(".");
 	if (1) {
 	}
-	struct int operatorIndex = value.indexOf("+");
+	return temp;
+}
+struct Temp Main_compileOperator(){
+	struct int operatorIndex = value.indexOf(operator);
 	if (1) {
 	}
+	struct String leftString = value.substring(0, operatorIndex).strip();
+	struct String rightString = value.substring(operatorIndex + 1).strip();
 	return temp;
 }
 struct Temp Main_compileInvocation(){
