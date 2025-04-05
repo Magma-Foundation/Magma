@@ -61,17 +61,14 @@ struct record Main_Node(){
 }
 struct Main new(){
 }
+struct Main new(){
+}
 int temp;
 struct void __main__(){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	magma.Files.readString(source)
-                .match(input -> runWithSource(source, input), Optional::of)
-                .ifPresent(__lambda0__)
+	__lambda1__.ifPresent(__lambda0__)
 }
-struct Temp Main_runWithSource(){
-	struct String string = compileStatements(input, __lambda1__).orElse("");
-	struct Path target = source.resolveSibling("main.c");
-	return temp;
+struct Main new(){
 }
 struct Temp Main_compileStatements(){
 	return temp;
@@ -86,9 +83,7 @@ struct StringBuilder Main_merge(){
 	return temp;
 }
 struct Temp Main_divideStatements(){
-	struct Temp queue = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(__lambda2__));
+	struct Temp queue = __lambda4__.collect(Collectors.toCollection(__lambda3__));
 	struct State state = Temp();
 	while(1) {
 	}
@@ -138,26 +133,9 @@ struct Temp Main_compileRootSegment(){
 	}
 	return temp;
 }
-struct Temp Main_compileClass(){
-	struct int classIndex = input.indexOf("class ");
-	if (1) {
-	}
-	struct String afterKeyword = input.substring(classIndex + "class ".length());
-	struct int contentStart = afterKeyword.indexOf("{");
-	if (1) {
-	}
-	struct String name = afterKeyword.substring(0, contentStart).strip();
-	if (1) {
-	}
-	struct String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-	if (1) {
-	}
-	struct String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-	return temp;
+struct Main new(){
 }
-struct Temp Main_invalidate(){
-	System.err.println("Invalid " + type + ": " + input)
-	return temp;
+struct Main new(){
 }
 struct Temp Main_compileClassSegment(){
 	struct Temp maybeWhitespace = compileWhitespace(input);
@@ -233,7 +211,7 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
-	struct int accessSeparator = value.indexOf(".");
+	struct int accessSeparator = value.lastIndexOf(".");
 	if (1) {
 	}
 	if (1) {
@@ -254,13 +232,15 @@ struct Temp Main_compileInvocation(){
 	struct String withoutEnd = value.substring(0, value.length() - ")".length());
 	struct int argsStart =  - 1;
 	struct int depth = 0;
-	for(;;){
+	struct Temp queue = __lambda6__;
+	while(1) {
 	}
+
 	if (1) {
 	}
 	struct String inputCaller = withoutEnd.substring(0, argsStart);
 	struct String inputArguments = withoutEnd.substring(argsStart + "(".length());
-	struct Temp arguments = divideStatements(inputArguments, __lambda3__);
+	struct Temp arguments = divideStatements(inputArguments, __lambda7__);
 	return temp;
 }
 struct State Main_divideValues(){

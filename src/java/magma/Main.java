@@ -98,6 +98,9 @@ public class Main {
     private record Node(String type, String name) {
     }
 
+    private record Tuple<A, B>(A left, B right) {
+    }
+
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
     private static int counter = 0;
 
@@ -209,7 +212,6 @@ public class Main {
         return invalidate("root segment", input);
     }
 
-
     private static Optional<String> compileClass(String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex < 0) return Optional.empty();
@@ -257,7 +259,6 @@ public class Main {
 
         return invalidate("class segment", input);
     }
-
 
     private static Optional<String> compileMethod(String input, String structName) {
         int paramStart = input.indexOf("(");
@@ -373,11 +374,13 @@ public class Main {
             return Optional.of(stripped);
         }
 
-        int accessSeparator = value.indexOf(".");
+        int accessSeparator = value.lastIndexOf(".");
         if (accessSeparator >= 0) {
             String oldChild = value.substring(0, accessSeparator);
-            String property = value.substring(accessSeparator + ".".length());
-            return compileValue(oldChild).map(newChild -> newChild + "." + property);
+            String property = value.substring(accessSeparator + ".".length()).strip();
+            if (isSymbol(property)) {
+                return compileValue(oldChild).map(newChild -> newChild + "." + property);
+            }
         }
 
         if (value.contains("::")) {
@@ -411,15 +414,36 @@ public class Main {
 
         int argsStart = -1;
         int depth = 0;
-        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
-            char c = withoutEnd.charAt(i);
+
+        Deque<Tuple<Integer, Character>> queue = IntStream.range(0, withoutEnd.length())
+                .map(index -> withoutEnd.length() - index - 1)
+                .mapToObj(index -> new Tuple<>(index, withoutEnd.charAt(index)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            Tuple<Integer, Character> tuple = queue.pop();
+            int i = tuple.left;
+            char c = tuple.right;
+
+            if (c == '"') {
+                queue.pop();
+
+                Tuple<Integer, Character> next = queue.peek();
+                if (next.right == '\\') {
+                    queue.pop();
+                }
+
+                queue.pop();
+                continue;
+            }
+
             if (c == '(' && depth == 0) {
                 argsStart = i;
                 break;
-            } else {
-                if (c == ')') depth++;
-                if (c == '(') depth--;
             }
+
+            if (c == ')') depth++;
+            if (c == '(') depth--;
         }
 
         if (argsStart < 0) return Optional.empty();
