@@ -408,7 +408,20 @@ public class Main {
         if (!value.endsWith(")")) return Optional.empty();
 
         String withoutEnd = value.substring(0, value.length() - ")".length());
-        int argsStart = withoutEnd.lastIndexOf("(");
+
+        int argsStart = -1;
+        int depth = 0;
+        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+            char c = withoutEnd.charAt(i);
+            if (c == '(' && depth == 0) {
+                argsStart = i;
+                break;
+            } else {
+                if (c == ')') depth++;
+                if (c == '(') depth--;
+            }
+        }
+
         if (argsStart < 0) return Optional.empty();
 
         String inputCaller = withoutEnd.substring(0, argsStart);

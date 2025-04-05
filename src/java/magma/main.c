@@ -22,7 +22,8 @@ int temp;
 int temp;
 struct State new(){
 }
-struct State new(){
+struct public State_State(){
+	this(queue, Temp(), Temp(), 0)
 }
 struct State State_popAndAppend(){
 	return temp;
@@ -76,7 +77,7 @@ struct Temp Main_compileStatements(){
 	return temp;
 }
 struct Temp Main_compile(){
-	struct Temp maybeOutput = Optional.of(new StringBuilder());
+	struct Temp maybeOutput = Optional.of(Temp());
 	for(;;){
 	}
 	return temp;
@@ -87,7 +88,7 @@ struct StringBuilder Main_merge(){
 struct Temp Main_divideStatements(){
 	struct Temp queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(__lambda2__);
+                .collect(Collectors.toCollection(__lambda2__));
 	struct State state = Temp();
 	while(1) {
 	}
@@ -191,7 +192,7 @@ struct Temp Main_parseDefinition(){
 	struct String beforeName = header.substring(0, nameSeparator).strip();
 	struct String oldName = header.substring(nameSeparator + " ".length()).strip();
 	struct int typeSeparator = beforeName.lastIndexOf(" ");
-	struct String inputType = condition ? whenTrue : whenFalse;
+	struct String inputType = condition ? whenTrue : whenFalse(typeSeparator + " ".length());
 	return temp;
 }
 struct Node Main_modifyDefinition(){
@@ -251,7 +252,10 @@ struct Temp Main_compileInvocation(){
 	if (1) {
 	}
 	struct String withoutEnd = value.substring(0, value.length() - ")".length());
-	struct int argsStart = withoutEnd.lastIndexOf("(");
+	struct int argsStart =  - 1;
+	struct int depth = 0;
+	for(;;){
+	}
 	if (1) {
 	}
 	struct String inputCaller = withoutEnd.substring(0, argsStart);
