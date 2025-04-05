@@ -1,7 +1,6 @@
 package magma;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,6 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
+    public interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
     private static class State {
         public final Deque<Character> queue;
         private final List<String> segments;
@@ -73,20 +76,33 @@ public class Main {
         }
     }
 
+    public record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(value);
+        }
+    }
+
+    public record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(error);
+        }
+    }
+
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
 
     public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        magma.Files.readString(source)
+                .match(input -> runWithSource(source, input), Optional::of)
+                .ifPresent(Throwable::printStackTrace);
+    }
 
-            String string = compile(input, Main::compileRootSegment).orElse("");
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
+    private static Optional<IOException> runWithSource(Path source, String input) {
+        String string = compile(input, Main::compileRootSegment).orElse("");
+        Path target = source.resolveSibling("main.c");
+        return magma.Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
     }
 
     private static Optional<String> compile(String input, Function<String, Optional<String>> compiler) {

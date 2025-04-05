@@ -9,9 +9,10 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
 struct Main {
 };
+struct Main new(){
+}
 struct State {
 };
 int temp;
@@ -57,6 +58,17 @@ struct Temp State_segments(){
 struct Main new(){
 }
 struct Main new(){
+}
+struct Main new(){
+}
+struct void __main__(){
+	int value = temp;
+	temp();
+}
+struct Temp Main_runWithSource(){
+	int value = temp;
+	int value = temp;
+	return temp;
 }
 struct Temp Main_compile(){
 	int value = temp;
