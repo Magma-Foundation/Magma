@@ -25,6 +25,8 @@ public class Main {
         <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
 
         <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        boolean isOk();
     }
 
     private interface Rule {
@@ -123,6 +125,11 @@ public class Main {
         public <R> Result<R, X> mapValue(Function<T, R> mapper) {
             return new Ok<>(mapper.apply(value));
         }
+
+        @Override
+        public boolean isOk() {
+            return true;
+        }
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
@@ -149,6 +156,11 @@ public class Main {
         @Override
         public <R> Result<R, X> mapValue(Function<T, R> mapper) {
             return new Err<>(error);
+        }
+
+        @Override
+        public boolean isOk() {
+            return false;
         }
     }
 
@@ -361,6 +373,30 @@ public class Main {
         }
     }
 
+    private static class WrappedRule implements Rule {
+        private final Function<String, Optional<String>> compiler;
+
+        public WrappedRule(Function<String, Optional<String>> compiler) {
+            this.compiler = compiler;
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return compiler.apply(input).<Result<String, CompileError>>map(Ok::new).orElseGet(() -> new Err<>(new CompileError("Invalid child", input)));
+        }
+    }
+
+    private record SuffixRule(Rule childRule, String suffix) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            if(input.endsWith(suffix)){
+                return childRule.compile(input.substring(0, input.length() - suffix.length()));
+            } else {
+                return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
+            }
+        }
+    }
+
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
     private static int counter = 0;
 
@@ -372,21 +408,9 @@ public class Main {
     }
 
     private static Optional<IOException> runWithSource(Path source, String input) {
-        String string = compileStatements(input, Main::compileRootSegment).orElse("");
+        String string = new DivideRule(input1 -> new WrappedRule(Main::compileRootSegment).compile(input1), Main::processStatementChar, Main::merge).compile(input).findValue().orElse("");
         Path target = source.resolveSibling("main.c");
         return Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
-    }
-
-    private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return getValue(input, Main::processStatementChar, input1 -> wrapPrevious(input1, compiler), Main::merge);
-    }
-
-    private static Optional<String> getValue(String input, DivideFolder processStatementChar, Rule rule, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return new DivideRule(rule, processStatementChar, merger).compile(input).findValue();
-    }
-
-    private static Result<String, CompileError> wrapPrevious(String input, Function<String, Optional<String>> compiler) {
-        return compiler.apply(input).<Result<String, CompileError>>map(Ok::new).orElseGet(() -> new Err<>(new CompileError("Invalid child", input)));
     }
 
     private static Result<String, CompileError> getString(List<String> segments, Rule childRule, BiFunction<StringBuilder, String, StringBuilder> merger) {
@@ -491,7 +515,7 @@ public class Main {
         if (!withEnd.endsWith("}")) return Optional.empty();
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return compileStatements(inputContent, input1 -> compileClassSegment(input1, name))
+        return new DivideRule(input1 -> new WrappedRule(input2 -> compileClassSegment(input2, name)).compile(input1), Main::processStatementChar, Main::merge).compile(inputContent).findValue()
                 .map(outputContent -> "struct " + name + " {\n};\n" + outputContent);
     }
 
@@ -540,7 +564,7 @@ public class Main {
             if (!withEnd.endsWith("}")) return Optional.empty();
 
             String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-            return compileStatements(inputContent, Main::compileStatement).map(
+            return new DivideRule(input1 -> new WrappedRule(Main::compileStatement).compile(input1), Main::processStatementChar, Main::merge).compile(inputContent).findValue().map(
                     outputContent -> generateMethod(definition, outputContent));
         });
     }
@@ -576,25 +600,42 @@ public class Main {
     }
 
     private static Optional<String> compileStatement(String input) {
-        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
-        if (maybeWhitespace.isPresent()) return maybeWhitespace;
+        return createStatementRule().compile(input).findValue();
+    }
 
-        String stripped = input.strip();
-        if (stripped.startsWith("if ")) return Optional.of("\n\tif (1) {\n\t}");
-        if (stripped.startsWith("return ")) return Optional.of("\n\treturn temp;");
-        if (stripped.startsWith("for")) return Optional.of("\n\tfor(;;){\n\t}");
+    private static OrRule createStatementRule() {
+        return new OrRule(List.of(
+                new StripRule(new EmptyRule()),
+                new StripRule(new WrappedRule(Main::compileIf)),
+                new StripRule(new WrappedRule(Main::compileReturn)),
+                new StripRule(new WrappedRule(Main::compileFor)),
+                new WrappedRule(Main::compileInitialization),
+                new SuffixRule(new InvocationRule(), ";"),
+                new WrappedRule(Main::compileWhile)
+        ));
+    }
 
-        Optional<String> maybeInitialization = compileInitialization(stripped);
-        if (maybeInitialization.isPresent()) return maybeInitialization;
+    private static Optional<String> compileIf(String stripped1) {
+        return stripped1.startsWith("if ")
+                ? Optional.of("\n\tif (1) {\n\t}")
+                : Optional.empty();
+    }
 
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            Optional<String> maybeInvocation = new InvocationRule().compile(withoutEnd).findValue();
-            if (maybeInvocation.isPresent()) return maybeInvocation.map(value -> "\n\t" + value);
-        }
+    private static Optional<String> compileReturn(String stripped1) {
+        return stripped1.startsWith("return ")
+                ? Optional.of("\n\treturn temp;")
+                : Optional.empty();
+    }
 
+    private static Optional<String> compileFor(String stripped1) {
+        return stripped1.startsWith("for ")
+                ? Optional.of("\n\tfor(;;){\n\t}")
+                : Optional.empty();
+    }
+
+    private static Optional<String> compileWhile(String stripped) {
         if (stripped.startsWith("while ")) return Optional.of("\n\twhile(1) {\n\t}\n");
-        return invalidate("statement", input);
+        return Optional.empty();
     }
 
     private static Optional<String> compileInitialization(String stripped) {
