@@ -11,6 +11,7 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
 struct Main {
 };
 struct Main new(){
@@ -61,14 +62,23 @@ struct record Main_Node(){
 }
 struct Main new(){
 }
-struct Main new(){
+struct void __main__(){
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+	temp();
 }
 struct Main new(){
 }
 struct Temp Main_compileStatements(){
 	return temp;
 }
-struct Main new(){
+struct Temp Main_compile(){
+	struct Temp maybeOutput = Optional.of(Temp());
+	for(;;){
+	}
+	return temp;
+}
+struct StringBuilder Main_merge(){
+	return temp;
 }
 struct Main new(){
 }
@@ -98,7 +108,7 @@ struct Temp Main_compileClassSegment(){
 	struct Temp maybeClass = compileClass(input);
 	if (1) {
 	}
-	struct Temp inputType = compileMethod(inputstructName);
+	struct Temp inputType = compileMethod(input, structName);
 	if (1) {
 	}
 	if (1) {
@@ -142,7 +152,6 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
-	struct int propertySeparator = value.indexOf(".");
 	if (1) {
 	}
 	struct String stripped = value.strip();
@@ -150,6 +159,14 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
+	if (1) {
+	}
+	struct int propertySeparator = value.indexOf(".");
+	if (1) {
+	}
+	return temp;
+}
+struct StringBuilder Main_mergeValues(){
 	if (1) {
 	}
 	return temp;

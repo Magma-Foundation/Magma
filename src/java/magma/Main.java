@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -111,18 +112,26 @@ public class Main {
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compile(divideStatements(input), compiler);
+        return compile(divideStatements(input), compiler, Main::merge);
     }
 
-    private static Optional<String> compile(List<String> segments, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compile(
+            List<String> segments,
+            Function<String, Optional<String>> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
         Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(output::append);
+                return compiler.apply(segment).map(str -> merger.apply(output, str));
             });
         }
 
         return maybeOutput.map(StringBuilder::toString);
+    }
+
+    private static StringBuilder merge(StringBuilder output, String str) {
+        return output.append(str);
     }
 
     private static List<String> divideStatements(String input) {
@@ -322,13 +331,15 @@ public class Main {
     }
 
     private static Optional<String> compileValue(String value) {
+        if (value.startsWith("new ")) return Optional.of("Temp()");
+
         if (value.endsWith(")")) {
             String withoutEnd = value.substring(0, value.length() - ")".length());
             int argsStart = withoutEnd.indexOf("(");
             if (argsStart >= 0) {
                 String inputCaller = withoutEnd.substring(0, argsStart);
                 String inputArguments = withoutEnd.substring(argsStart + "(".length());
-                return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue).flatMap(outputArguments -> {
+                return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
                     return compileValue(inputCaller).map(outputCaller -> {
                         return outputCaller + "(" + outputArguments + ")";
                     });
@@ -337,13 +348,6 @@ public class Main {
         }
 
         if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
-
-        int propertySeparator = value.indexOf(".");
-        if (propertySeparator >= 0) {
-            String oldChild = value.substring(0, propertySeparator);
-            String property = value.substring(propertySeparator + ".".length());
-            return compileValue(oldChild).map(newChild -> newChild + "." + property);
-        }
 
         String stripped = value.strip();
         if (isSymbol(stripped)) {
@@ -358,7 +362,19 @@ public class Main {
             return Optional.of(stripped);
         }
 
+        int propertySeparator = value.indexOf(".");
+        if (propertySeparator >= 0) {
+            String oldChild = value.substring(0, propertySeparator);
+            String property = value.substring(propertySeparator + ".".length());
+            return compileValue(oldChild).map(newChild -> newChild + "." + property);
+        }
+
         return invalidate("value", value);
+    }
+
+    private static StringBuilder mergeValues(StringBuilder output, String str) {
+        if (output.isEmpty()) return output.append(str);
+        return output.append(", ").append(str);
     }
 
     private static boolean isNumber(String input) {
