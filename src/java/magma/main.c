@@ -44,7 +44,7 @@ struct Temp segments(){
 }
 struct Main new(){
 }
-struct void main(){
+struct void __main__(){
 }
 struct Temp compile(){
 }
@@ -69,5 +69,6 @@ struct boolean isSymbol(){
 struct Temp compileWhitespace(){
 }
 int main(){
+	__main__();
 	return 0;
 }

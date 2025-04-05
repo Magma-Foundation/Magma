@@ -82,7 +82,7 @@ public class Main {
 
             String string = compile(input, Main::compileRootSegment).orElse("");
             Path target = source.resolveSibling("main.c");
-            Files.writeString(target, string + "int main(){\n\treturn 0;\n}\n");
+            Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
@@ -213,7 +213,10 @@ public class Main {
         if (nameSeparator < 0) return Optional.empty();
 
         String beforeName = header.substring(0, nameSeparator).strip();
-        String name = header.substring(nameSeparator + " ".length()).strip();
+        String oldName = header.substring(nameSeparator + " ".length()).strip();
+        String newName = oldName.equals("main")
+                ? "__main__"
+                : oldName;
 
         int typeSeparator = beforeName.lastIndexOf(" ");
         String inputType = typeSeparator == -1
@@ -221,7 +224,7 @@ public class Main {
                 : beforeName.substring(typeSeparator + " ".length());
 
         return compileType(inputType).map(outputType -> {
-            return generateMethod(outputType, name);
+            return generateMethod(outputType, newName);
         });
     }
 
