@@ -20,45 +20,45 @@ int temp;
 int temp;
 struct State new(){
 }
-struct public State(){
+struct public State_State(){
 	temp();
 }
-struct void popAndAppend(){
+struct void State_popAndAppend(){
 	temp();
 }
-struct Character pop(){
+struct Character State_pop(){
 	return temp;
 }
-struct boolean isEmpty(){
+struct boolean State_isEmpty(){
 	return temp;
 }
-struct void append(){
+struct void State_append(){
 	temp();
 }
-struct void enter(){
+struct void State_enter(){
 	int value = temp;
 }
-struct void exit(){
+struct void State_exit(){
 	int value = temp;
 }
-struct void advance(){
+struct void State_advance(){
 	temp();
 	int value = temp;
 }
-struct boolean isShallow(){
+struct boolean State_isShallow(){
 	return temp;
 }
-struct boolean isLevel(){
+struct boolean State_isLevel(){
 	return temp;
 }
-struct Temp segments(){
+struct Temp State_segments(){
 	return temp;
 }
 struct Main new(){
 }
 struct Main new(){
 }
-struct Temp compile(){
+struct Temp Main_compile(){
 	int value = temp;
 	int value = temp;
 	int value = temp;
@@ -68,7 +68,7 @@ struct Temp compile(){
 	}
 	return temp;
 }
-struct Temp compileRootSegment(){
+struct Temp Main_compileRootSegment(){
 	int value = temp;
 	if (1) {
 	}
@@ -81,7 +81,7 @@ struct Temp compileRootSegment(){
 	}
 	return temp;
 }
-struct Temp compileClass(){
+struct Temp Main_compileClass(){
 	int value = temp;
 	if (1) {
 	}
@@ -98,11 +98,11 @@ struct Temp compileClass(){
 	int value = temp;
 	return temp;
 }
-struct Temp invalidate(){
+struct Temp Main_invalidate(){
 	temp();
 	return temp;
 }
-struct Temp compileClassSegment(){
+struct Temp Main_compileClassSegment(){
 	int value = temp;
 	if (1) {
 	}
@@ -118,7 +118,7 @@ struct Temp compileClassSegment(){
 	}
 	return temp;
 }
-struct Temp compileMethod(){
+struct Temp Main_compileMethod(){
 	int value = temp;
 	if (1) {
 	}
@@ -137,7 +137,7 @@ struct Temp compileMethod(){
 	}
 	return temp;
 }
-struct Temp compileStatement(){
+struct Temp Main_compileStatement(){
 	int value = temp;
 	if (1) {
 	}
@@ -154,10 +154,10 @@ struct Temp compileStatement(){
 	}
 	return temp;
 }
-struct String generateMethod(){
+struct String Main_generateMethod(){
 	return temp;
 }
-struct Temp compileType(){
+struct Temp Main_compileType(){
 	int value = temp;
 	if (1) {
 	}
@@ -165,15 +165,15 @@ struct Temp compileType(){
 	}
 	return temp;
 }
-struct Temp generateStructType(){
+struct Temp Main_generateStructType(){
 	return temp;
 }
-struct boolean isSymbol(){
+struct boolean Main_isSymbol(){
 	for(;;){
 	}
 	return temp;
 }
-struct Temp compileWhitespace(){
+struct Temp Main_compileWhitespace(){
 	if (1) {
 	}
 	return temp;

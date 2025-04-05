@@ -182,18 +182,18 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileClassSegment(String input, String name) {
+    private static Optional<String> compileClassSegment(String input, String structName) {
         Optional<String> maybeWhitespace = compileWhitespace(input);
         if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         Optional<String> maybeClass = compileClass(input);
         if (maybeClass.isPresent()) return maybeClass;
 
-        Optional<String> inputType = compileMethod(input);
+        Optional<String> inputType = compileMethod(input, structName);
         if (inputType.isPresent()) return inputType;
 
         if (input.indexOf("(") >= 0) {
-            return generateStructType(name).map(type -> generateMethod(type, "new", ""));
+            return generateStructType(structName).map(type -> generateMethod(type, "new", ""));
         }
 
         if (input.endsWith(";")) {
@@ -204,7 +204,7 @@ public class Main {
     }
 
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<String> compileMethod(String input, String structName) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return Optional.empty();
 
@@ -216,7 +216,7 @@ public class Main {
         String oldName = header.substring(nameSeparator + " ".length()).strip();
         String newName = oldName.equals("main")
                 ? "__main__"
-                : oldName;
+                : structName + "_" + oldName;
 
         int typeSeparator = beforeName.lastIndexOf(" ");
         String inputType = typeSeparator == -1
