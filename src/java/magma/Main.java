@@ -617,14 +617,6 @@ public class Main {
                 });
     }
 
-    @Deprecated
-    private static Optional<String> unwrap(Result<String, CompileError> result) {
-        return result.match(Optional::of, error -> {
-            System.err.println(error.display());
-            return Optional.empty();
-        });
-    }
-
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(List.of(
