@@ -336,14 +336,14 @@ public class Main {
     }
 
     private static Optional<String> compileValue(String value) {
-        if (value.startsWith("new ")) return Optional.of("Temp()");
+        String stripped = value.strip();
+        if (stripped.startsWith("new ")) return Optional.of("Temp()");
 
         Optional<String> maybeInvocation = compileInvocation(value);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
         if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
 
-        String stripped = value.strip();
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
         }

@@ -24,7 +24,7 @@ int temp;
 int temp;
 struct State new(){
 }
-struct State new(){
+struct public State_State(){this(queue, Temp(), Temp(), 0)
 }
 struct void State_popAndAppend(){append(pop())
 }
@@ -75,7 +75,16 @@ struct Temp Main_compile(){
 struct StringBuilder Main_merge(){
 	return temp;
 }
-struct Main new(){
+struct Temp Main_divideStatements(){
+	struct Temp queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+	struct State state = Temp();
+	while(1) {
+	}
+state.advance()
+	struct Temp segments = state.segments;
+	return temp;
 }
 struct Temp Main_compileRootSegment(){
 	struct Temp maybeWhitespace = compileWhitespace(input);
@@ -170,6 +179,7 @@ struct Temp Main_compileStatement(){
 	return temp;
 }
 struct Temp Main_compileValue(){
+	struct String stripped = value.strip();
 	if (1) {
 	}
 	struct Temp maybeInvocation = compileInvocation(value);
@@ -177,7 +187,6 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
-	struct String stripped = value.strip();
 	if (1) {
 	}
 	if (1) {
