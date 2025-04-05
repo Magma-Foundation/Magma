@@ -1,0 +1,1 @@
+clang ./src/java/magma/main.c -o main.exe
