@@ -385,7 +385,7 @@ public class Main {
         if (!value.endsWith(")")) return Optional.empty();
 
         String withoutEnd = value.substring(0, value.length() - ")".length());
-        int argsStart = withoutEnd.indexOf("(");
+        int argsStart = withoutEnd.lastIndexOf("(");
         if (argsStart < 0) return Optional.empty();
 
         String inputCaller = withoutEnd.substring(0, argsStart);

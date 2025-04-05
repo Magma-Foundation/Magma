@@ -24,9 +24,9 @@ int temp;
 int temp;
 struct State new(){
 }
-struct public State_State(){this(queue, Temp(), Temp(), 0)
+struct State new(){
 }
-struct void State_popAndAppend(){append(pop())
+struct State new(){
 }
 struct Character State_pop(){
 	return temp;
@@ -67,7 +67,7 @@ struct Temp Main_compileStatements(){
 	return temp;
 }
 struct Temp Main_compile(){
-	struct Temp maybeOutput = Optional.of(Temp());
+	struct Temp maybeOutput = Optional.of(new StringBuilder());
 	for(;;){
 	}
 	return temp;
@@ -152,7 +152,7 @@ struct Temp Main_parseDefinition(){
 	struct String beforeName = header.substring(0, nameSeparator).strip();
 	struct String oldName = header.substring(nameSeparator + " ".length()).strip();
 	struct int typeSeparator = beforeName.lastIndexOf(" ");
-	struct String inputType = condition ? whenTrue : whenFalse(typeSeparator + " ".length());
+	struct String inputType = condition ? whenTrue : whenFalse;
 	return temp;
 }
 struct Node Main_modifyDefinition(){
@@ -210,7 +210,7 @@ struct Temp Main_compileInvocation(){
 	if (1) {
 	}
 	struct String withoutEnd = value.substring(0, value.length() - ")".length());
-	struct int argsStart = withoutEnd.indexOf("(");
+	struct int argsStart = withoutEnd.lastIndexOf("(");
 	if (1) {
 	}
 	struct String inputCaller = withoutEnd.substring(0, argsStart);
