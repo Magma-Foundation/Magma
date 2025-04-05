@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,10 +17,14 @@ import java.util.stream.IntStream;
 public class Main {
     public interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        Optional<T> findValue();
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
     private interface Rule {
-        Optional<String> compile(String input);
+        Result<String, CompileError> compile(String input);
     }
 
     private static class State {
@@ -90,12 +95,32 @@ public class Main {
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(value);
         }
+
+        @Override
+        public Optional<T> findValue() {
+            return Optional.of(value);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(value);
+        }
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
+        }
+
+        @Override
+        public Optional<T> findValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(error));
         }
     }
 
@@ -105,17 +130,61 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
+    private record OrState(Optional<String> maybeValue, List<CompileError> errors) {
+        public OrState() {
+            this(Optional.empty(), Collections.emptyList());
+        }
+
+        public OrState withValue(String value) {
+            return new OrState(Optional.of(value), errors);
+        }
+
+        public OrState withError(CompileError error) {
+            List<CompileError> copy = new ArrayList<>(errors);
+            copy.add(error);
+            return new OrState(maybeValue, copy);
+        }
+
+        public Result<String, List<CompileError>> toResult() {
+            return maybeValue.<Result<String, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(errors));
+        }
+    }
+
     private record OrRule(List<Rule> rules) implements Rule {
         @Override
-        public Optional<String> compile(String input) {
-            for (Rule rule : rules()) {
-                Optional<String> compile = rule.compile(input.strip());
-                if (compile.isPresent()) {
-                    return compile;
-                }
-            }
+        public Result<String, CompileError> compile(String input) {
+            return rules.stream()
+                    .reduce(new OrState(),
+                            (orState, rule) -> fold(orState, rule, input),
+                            (_, next) -> next)
+                    .toResult()
+                    .mapErr(errs -> new CompileError("No valid combination present", input, errs));
+        }
 
-            return invalidate("value", input);
+        private OrState fold(OrState orState, Rule rule, String input) {
+            return rule.compile(input).match(orState::withValue, orState::withError);
+        }
+    }
+
+    static class CompileError {
+        private final String message;
+        private final String context;
+        private final List<CompileError> children;
+
+        public CompileError(String message, String context) {
+            this(message, context, Collections.emptyList());
+        }
+
+        public CompileError(String message, String context, List<CompileError> children) {
+            this.message = message;
+            this.context = context;
+            this.children = children;
+        }
+
+        public String display() {
+            return message + context + children.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
         }
     }
 
@@ -124,7 +193,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        magma.Files.readString(source)
+        Files.readString(source)
                 .match(input -> runWithSource(source, input), Optional::of)
                 .ifPresent(Throwable::printStackTrace);
     }
@@ -132,7 +201,7 @@ public class Main {
     private static Optional<IOException> runWithSource(Path source, String input) {
         String string = compileStatements(input, Main::compileRootSegment).orElse("");
         Path target = source.resolveSibling("main.c");
-        return magma.Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
+        return Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
@@ -352,7 +421,10 @@ public class Main {
                 return parseDefinition(inputDefinition)
                         .flatMap(Main::generateDefinition)
                         .flatMap(outputDefinition -> {
-                            return compileValue(value).map(outputValue -> {
+                            return createValueRule().compile(value).<Optional<String>>match(Optional::of, error -> {
+                                System.err.println(error.display());
+                                return Optional.empty();
+                            }).map(outputValue -> {
                                 return "\n\t" +
                                         outputDefinition +
                                         " = " + outputValue + ";";
@@ -371,21 +443,129 @@ public class Main {
         return invalidate("statement", input);
     }
 
-    private static Optional<String> compileValue(String input) {
-        List<Rule> rules = List.of(
-                Main::compileConstructor,
-                Main::compileInvocation,
-                Main::compileTernary,
-                Main::compileSymbol,
-                Main::compileString,
-                Main::compileNumber,
-                Main::compileDataAccess,
-                Main::compileMethodAccess,
-                value -> compileOperator(value, "-"),
-                value -> compileOperator(value, "+")
-        );
+    private static OrRule createValueRule() {
+        return new OrRule(List.of(
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
 
-        return new OrRule(rules).compile(input);
+                    private Optional<String> compile0(String input1) {
+                        return compileConstructor(input1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value1) {
+                        return compileInvocation(value1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value1) {
+                        return compileTernary(value1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String stripped) {
+                        return compileSymbol(stripped);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String stripped) {
+                        return compileString(stripped);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String stripped) {
+                        return compileNumber(stripped);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value1) {
+                        return compileDataAccess(value1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value1) {
+                        return compileMethodAccess(value1);
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value) {
+                        return compileOperator(value, "-");
+                    }
+                },
+                new Rule() {
+                    @Override
+                    public Result<String, CompileError> compile(String input1) {
+                        return compile0(input1)
+                                .<Result<String, CompileError>>map(Ok::new)
+                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
+                    }
+
+                    private Optional<String> compile0(String value) {
+                        return compileOperator(value, "+");
+                    }
+                }
+        ));
     }
 
     private static Optional<String> compileSymbol(String stripped) {
@@ -415,7 +595,10 @@ public class Main {
             String oldChild = value.substring(0, accessSeparator);
             String property = value.substring(accessSeparator + ".".length()).strip();
             if (isSymbol(property)) {
-                return compileValue(oldChild).map(newChild -> newChild + "." + property);
+                return createValueRule().compile(oldChild).<Optional<String>>match(Optional::of, error -> {
+                    System.err.println(error.display());
+                    return Optional.empty();
+                }).map(newChild -> newChild + "." + property);
             }
         }
         return Optional.empty();
@@ -446,8 +629,14 @@ public class Main {
 
         String leftString = value.substring(0, operatorIndex).strip();
         String rightString = value.substring(operatorIndex + 1).strip();
-        return compileValue(leftString).flatMap(left -> {
-            return compileValue(rightString).map(right -> {
+        return createValueRule().compile(leftString).<Optional<String>>match(Optional::of, error1 -> {
+            System.err.println(error1.display());
+            return Optional.empty();
+        }).flatMap(left -> {
+            return createValueRule().compile(rightString).<Optional<String>>match(Optional::of, error -> {
+                System.err.println(error.display());
+                return Optional.empty();
+            }).map(right -> {
                 return left + " " + operator + " " + right;
             });
         });
@@ -498,8 +687,14 @@ public class Main {
         String inputArguments = withoutEnd.substring(argsStart + "(".length());
         List<String> arguments = divideStatements(inputArguments, Main::divideValues);
 
-        return compile(arguments, Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
-            return compileValue(inputCaller).map(outputCaller -> {
+        return compile(arguments, input -> createValueRule().compile(input).match(Optional::of, error -> {
+            System.err.println(error.display());
+            return Optional.empty();
+        }), Main::mergeValues).flatMap(outputArguments -> {
+            return createValueRule().compile(inputCaller).<Optional<String>>match(Optional::of, error -> {
+                System.err.println(error.display());
+                return Optional.empty();
+            }).map(outputCaller -> {
                 return outputCaller + "(" + outputArguments + ")";
             });
         });
