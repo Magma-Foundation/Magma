@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -103,12 +105,27 @@ public class Main {
     }
 
     private static Optional<IOException> runWithSource(Path source, String input) {
-        String string = compile(input, Main::compileRootSegment).orElse("");
+        String string = compileStatements(input, Main::compileRootSegment).orElse("");
         Path target = source.resolveSibling("main.c");
         return magma.Files.writeString(target, string + "int main(){\n\t__main__();\n\treturn 0;\n}\n");
     }
 
-    private static Optional<String> compile(String input, Function<String, Optional<String>> compiler) {
+    private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
+        return compile(divideStatements(input), compiler);
+    }
+
+    private static Optional<String> compile(List<String> segments, Function<String, Optional<String>> compiler) {
+        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
+        for (String segment : segments) {
+            maybeOutput = maybeOutput.flatMap(output -> {
+                return compiler.apply(segment).map(output::append);
+            });
+        }
+
+        return maybeOutput.map(StringBuilder::toString);
+    }
+
+    private static List<String> divideStatements(String input) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -149,17 +166,8 @@ public class Main {
             }
         }
         state.advance();
-
-        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
-        for (String segment : state.segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(compiled -> {
-                    return output.append(compiled);
-                });
-            });
-        }
-
-        return maybeOutput.map(StringBuilder::toString);
+        List<String> segments = state.segments;
+        return segments;
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -191,7 +199,7 @@ public class Main {
         if (!withEnd.endsWith("}")) return Optional.empty();
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return compile(inputContent, input1 -> compileClassSegment(input1, name)).map(outputContent -> {
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, name)).map(outputContent -> {
             return "struct " + name + " {\n};\n" + outputContent;
         });
     }
@@ -242,7 +250,7 @@ public class Main {
             if (!withEnd.endsWith("}")) return Optional.empty();
 
             String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-            return compile(inputContent, Main::compileStatement).map(outputContent -> {
+            return compileStatements(inputContent, Main::compileStatement).map(outputContent -> {
                 return generateMethod(definition, outputContent);
             });
         });
@@ -319,8 +327,11 @@ public class Main {
             int argsStart = withoutEnd.indexOf("(");
             if (argsStart >= 0) {
                 String inputCaller = withoutEnd.substring(0, argsStart);
-                return compileValue(inputCaller).map(outputCaller -> {
-                    return outputCaller + "()";
+                String inputArguments = withoutEnd.substring(argsStart + "(".length());
+                return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue).flatMap(outputArguments -> {
+                    return compileValue(inputCaller).map(outputCaller -> {
+                        return outputCaller + "(" + outputArguments + ")";
+                    });
                 });
             }
         }
@@ -339,7 +350,26 @@ public class Main {
             return Optional.of(stripped);
         }
 
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(stripped);
+        }
+
+        if (isNumber(stripped)) {
+            return Optional.of(stripped);
+        }
+
         return invalidate("value", value);
+    }
+
+    private static boolean isNumber(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static String generateMethod(String definition, String content) {
