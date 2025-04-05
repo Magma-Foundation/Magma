@@ -1,24 +1,10 @@
-package magma;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class Main {
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, input + "int main(){\n\treturn 0;\n}\n");
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-    }
-}
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+struct Temp {
+};
 int main(){
 	return 0;
 }
