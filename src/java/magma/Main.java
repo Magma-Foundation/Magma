@@ -294,18 +294,29 @@ public class Main {
             int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
                 String inputDefinition = withoutEnd.substring(0, valueSeparator).strip();
+                String value = withoutEnd.substring(valueSeparator + "=".length());
+
                 return parseDefinition(inputDefinition)
                         .flatMap(Main::generateDefinition)
-                        .map(outputDefinition -> {
-                    return "\n\t" +
-                            outputDefinition +
-                            " = temp;";
-                });
+                        .flatMap(outputDefinition -> {
+                            return compileValue(value).map(outputValue -> {
+                                return "\n\t" +
+                                        outputDefinition +
+                                        " = " + outputValue + ";";
+                            });
+                        });
             }
         }
 
         if (stripped.endsWith(");")) return Optional.of("\n\ttemp();");
+        if (stripped.startsWith("while ")) return Optional.of("while(1) {\n\t}\n");
         return invalidate("statement", input);
+    }
+
+    private static Optional<String> compileValue(String value) {
+        if (value.endsWith(")")) return Optional.of("caller()");
+        if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
+        return invalidate("value", value);
     }
 
     private static String generateMethod(String definition, String content) {
