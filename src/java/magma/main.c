@@ -10,8 +10,6 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
-#include <temp.h>
 struct Main {
 };
 struct Main new(){
@@ -26,15 +24,17 @@ struct State new(){
 }
 struct State new(){
 }
-struct State new(){
+struct State State_popAndAppend(){
+	return temp;
 }
-struct Character State_pop(){
+struct char State_pop(){
 	return temp;
 }
 struct boolean State_isEmpty(){
 	return temp;
 }
-struct void State_append(){buffer.append(c)
+struct State State_append(){buffer.append(c)
+	return temp;
 }
 struct State new(){
 }
@@ -82,8 +82,37 @@ struct Temp Main_divideStatements(){
 	struct State state = Temp();
 	while(1) {
 	}
-state.advance()
-	struct Temp segments = state.segments;
+
+	return temp;
+}
+struct Temp Main_divideSingleQuotes(){
+	if (1) {
+	}
+	struct State appended = state.append(c);
+	struct char maybeSlash = appended.pop();
+	struct State withMaybeSlash = appended.append(maybeSlash);
+	struct State withEscape = condition ? whenTrue : whenFalse;
+	return temp;
+}
+struct Temp Main_divideDoubleQuotes(){
+	if (1) {
+	}
+	struct State current = state.append(c);
+	while(1) {
+	}
+
+	return temp;
+}
+struct State Main_processStatementChar(){
+	struct State appended = state.append(c);
+	if (1) {
+	}
+	if (1) {
+	}
+	if (1) {
+	}
+	if (1) {
+	}
 	return temp;
 }
 struct Temp Main_compileRootSegment(){
@@ -206,15 +235,16 @@ struct Temp Main_compileOperator(){
 	struct String rightString = value.substring(operatorIndex + 1).strip();
 	return temp;
 }
-struct Temp Main_compileInvocation(){
+struct Main new(){
+}
+struct State Main_divideValues(){
 	if (1) {
 	}
-	struct String withoutEnd = value.substring(0, value.length() - ")".length());
-	struct int argsStart = withoutEnd.lastIndexOf("(");
+	struct State append = state.append(c);
 	if (1) {
 	}
-	struct String inputCaller = withoutEnd.substring(0, argsStart);
-	struct String inputArguments = withoutEnd.substring(argsStart + "(".length());
+	if (1) {
+	}
 	return temp;
 }
 struct StringBuilder Main_mergeValues(){

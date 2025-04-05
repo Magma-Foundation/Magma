@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,11 +35,11 @@ public class Main {
             this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private void popAndAppend() {
-            append(pop());
+        private State popAndAppend() {
+            return append(pop());
         }
 
-        private Character pop() {
+        private char pop() {
             return queue.pop();
         }
 
@@ -49,21 +47,25 @@ public class Main {
             return queue.isEmpty();
         }
 
-        private void append(char c) {
+        private State append(char c) {
             buffer.append(c);
+            return this;
         }
 
-        private void enter() {
+        private State enter() {
             this.depth = depth + 1;
+            return this;
         }
 
-        private void exit() {
+        private State exit() {
             this.depth = depth - 1;
+            return this;
         }
 
-        private void advance() {
+        private State advance() {
             segments().add(buffer.toString());
             this.buffer = new StringBuilder();
+            return this;
         }
 
         private boolean isShallow() {
@@ -112,7 +114,7 @@ public class Main {
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compile(divideStatements(input), compiler, Main::merge);
+        return compile(divideStatements(input, Main::processStatementChar), compiler, Main::merge);
     }
 
     private static Optional<String> compile(
@@ -134,7 +136,7 @@ public class Main {
         return output.append(str);
     }
 
-    private static List<String> divideStatements(String input) {
+    private static List<String> divideStatements(String input, BiFunction<State, Character, State> folder) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -142,41 +144,55 @@ public class Main {
         State state = new State(queue);
         while (!state.isEmpty()) {
             char c = state.pop();
-            state.append(c);
 
-            if (c == '\'') {
-                char popped = state.pop();
-                state.append(popped);
-
-                if (popped == '\\') state.popAndAppend();
-                state.popAndAppend();
-                continue;
-            }
-
-            if (c == '"') {
-                while (!state.isEmpty()) {
-                    char next = state.pop();
-                    state.append(next);
-
-                    if (next == '\\') state.append(state.pop());
-                    if (next == '"') break;
-                }
-                continue;
-            }
-
-            if (c == ';' && state.isLevel()) {
-                state.advance();
-            } else if (c == '}' && state.isShallow()) {
-                state.advance();
-                state.exit();
-            } else {
-                if (c == '{' || c == '(') state.enter();
-                if (c == '}' || c == ')') state.exit();
-            }
+            State finalState = state;
+            state = divideSingleQuotes(state, c)
+                    .or(() -> divideDoubleQuotes(finalState, c))
+                    .orElseGet(() -> folder.apply(finalState, c));
         }
-        state.advance();
-        List<String> segments = state.segments;
-        return segments;
+
+        return state.advance().segments;
+    }
+
+    private static Optional<State> divideSingleQuotes(State state, char c) {
+        if (c != '\'') return Optional.empty();
+        State appended = state.append(c);
+
+        char maybeSlash = appended.pop();
+        State withMaybeSlash = appended.append(maybeSlash);
+        State withEscape = maybeSlash == '\\'
+                ? withMaybeSlash.popAndAppend()
+                : withMaybeSlash;
+
+        return Optional.ofNullable(withEscape.popAndAppend());
+    }
+
+    private static Optional<State> divideDoubleQuotes(State state, char c) {
+        if (c != '"') return Optional.empty();
+
+        State current = state.append(c);
+        while (!current.isEmpty()) {
+            char next = current.pop();
+            current.append(next);
+
+            if (next == '\\') current.append(current.pop());
+            if (next == '"') break;
+        }
+
+        return Optional.of(current);
+    }
+
+    private static State processStatementChar(State state, char c) {
+        State appended = state.append(c);
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
+        if (c == '{' || c == '(') return appended.enter();
+        if (c == '}' || c == ')') return appended.exit();
+        return appended;
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -390,11 +406,22 @@ public class Main {
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + "(".length());
-        return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
+        List<String> arguments = divideStatements(inputArguments, Main::divideValues);
+
+        return compile(arguments, Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
             return compileValue(inputCaller).map(outputCaller -> {
                 return outputCaller + "(" + outputArguments + ")";
             });
         });
+    }
+
+    private static State divideValues(State state, char c) {
+        if (c == ',') return state.advance();
+
+        State append = state.append(c);
+        if (c == '(') return append.enter();
+        if (c == ')') return append.exit();
+        return append;
     }
 
     private static StringBuilder mergeValues(StringBuilder output, String str) {
