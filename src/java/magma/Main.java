@@ -75,7 +75,7 @@ public class Main {
 
             if (c == ';' && state.isLevel()) {
                 state.advance();
-            } else if(c == '}' && state.isShallow()) {
+            } else if (c == '}' && state.isShallow()) {
                 state.advance();
                 state.exit();
             } else {
@@ -121,6 +121,9 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
+        if (input.isBlank()) return "";
+        if (input.contains("(")) return "void temp(){\n}\n";
+
         return invalidate("class segment", input);
     }
 }

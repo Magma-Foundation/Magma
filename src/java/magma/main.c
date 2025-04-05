@@ -4,9 +4,51 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
 struct Main {
 };
-public static void main(String[] args) {
+private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        private void append(char c) {
+            buffer.append(c);
+        }
+
+        private void enter() {
+            this.depth = depth + 1;
+        }
+
+        private void exit() {
+            this.depth = depth - 1;
+        }
+
+        private void advance() {
+            segments().add(buffer.toString());
+            this.buffer = new StringBuilder();
+        }
+
+        private boolean isShallow() {
+            return depth == 1;
+        }
+
+        private boolean isLevel() {
+            return depth == 0;
+        }
+
+        public List<String> segments() {
+            return segments;
+        }
+    }
+
+    public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -23,23 +65,23 @@ public static void main(String[] args) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
+
+        State state = new State(segments, buffer, depth);
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            buffer.append(c);
+            state.append(c);
 
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
+            if (c == ';' && state.isLevel()) {
+                state.advance();
+            } else if (c == '}' && state.isShallow()) {
+                state.advance();
+                state.exit();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (c == '{') state.enter();
+                if (c == '}') state.exit();
             }
         }
-        segments.add(buffer.toString());
+        state.advance();
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
@@ -72,6 +114,9 @@ String afterKeyword = input.substring(classIndex + "class ".length());
     }
 
     private static String compileClassSegment(String input) {
+        if (input.isBlank()) return "";
+        if (input.contains("(")) return "void temp(){\n}\n";
+
         return invalidate("class segment", input);
     }
 }
