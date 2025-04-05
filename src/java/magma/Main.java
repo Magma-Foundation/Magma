@@ -105,6 +105,17 @@ public class Main {
                 continue;
             }
 
+            if (c == '"') {
+                while (!state.isEmpty()) {
+                    char next = state.pop();
+                    state.append(next);
+
+                    if (next == '\\') state.append(state.pop());
+                    if (next == '"') break;
+                }
+                continue;
+            }
+
             if (c == ';' && state.isLevel()) {
                 state.advance();
             } else if (c == '}' && state.isShallow()) {
@@ -140,9 +151,9 @@ public class Main {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    compile(content, Main::compileClassSegment);
-                    return "struct " + name + " {\n};\n" + content;
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compile(inputContent, Main::compileClassSegment);
+                    return "struct " + name + " {\n};\n" + outputContent;
                 }
             }
         }
