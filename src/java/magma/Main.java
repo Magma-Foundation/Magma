@@ -5,19 +5,42 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static class State {
+        public final Deque<Character> queue;
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+            this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+        }
+
+        public State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private void popAndAppend() {
+            append(pop());
+        }
+
+        private Character pop() {
+            return queue.pop();
+        }
+
+        private boolean isEmpty() {
+            return queue.isEmpty();
         }
 
         private void append(char c) {
@@ -64,14 +87,23 @@ public class Main {
     }
 
     private static String compile(String input, Function<String, String> compiler) {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
 
-        State state = new State(segments, buffer, depth);
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+        State state = new State(queue);
+        while (!state.isEmpty()) {
+            char c = state.pop();
             state.append(c);
+
+            if (c == '\'') {
+                char popped = state.pop();
+                state.append(popped);
+
+                if (popped == '\\') state.popAndAppend();
+                state.popAndAppend();
+                continue;
+            }
 
             if (c == ';' && state.isLevel()) {
                 state.advance();
@@ -86,7 +118,7 @@ public class Main {
         state.advance();
 
         StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
+        for (String segment : state.segments) {
             output.append(compiler.apply(segment));
         }
 
@@ -94,6 +126,9 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
+
         if (input.startsWith("package ")) return "";
         if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
 
@@ -121,10 +156,16 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        if (input.isBlank()) return "";
-        if (input.contains("(")) return "void temp(){\n}\n";
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
 
+        if (input.contains("(")) return "void temp(){\n}\n";
         return invalidate("class segment", input);
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) return Optional.of("");
+        return Optional.empty();
     }
 }
 
