@@ -363,6 +363,17 @@ public class Main {
             return compileValue(oldChild).map(newChild -> newChild + "." + property);
         }
 
+        int operatorIndex = value.indexOf("+");
+        if (operatorIndex >= 0) {
+            String leftString = value.substring(0, operatorIndex).strip();
+            String rightString = value.substring(operatorIndex + 1).strip();
+            return compileValue(leftString).flatMap(left -> {
+                return compileValue(rightString).map(right -> {
+                    return left + " + " + right;
+                });
+            });
+        }
+
         return invalidate("value", value);
     }
 

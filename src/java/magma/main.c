@@ -107,7 +107,8 @@ struct Temp Main_compileClass(){
 	struct String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
 	return temp;
 }
-struct Main new(){
+struct Temp Main_invalidate(){System.err.println("Invalid " + type + ": " + input)
+	return temp;
 }
 struct Temp Main_compileClassSegment(){
 	struct Temp maybeWhitespace = compileWhitespace(input);
@@ -142,7 +143,7 @@ struct Temp Main_parseDefinition(){
 	struct String beforeName = header.substring(0, nameSeparator).strip();
 	struct String oldName = header.substring(nameSeparator + " ".length()).strip();
 	struct int typeSeparator = beforeName.lastIndexOf(" ");
-	struct String inputType = condition ? whenTrue : whenFalse;
+	struct String inputType = condition ? whenTrue : whenFalse(typeSeparator + " ".length());
 	return temp;
 }
 struct Node Main_modifyDefinition(){
@@ -184,6 +185,9 @@ struct Temp Main_compileValue(){
 	if (1) {
 	}
 	struct int propertySeparator = value.indexOf(".");
+	if (1) {
+	}
+	struct int operatorIndex = value.indexOf("+");
 	if (1) {
 	}
 	return temp;
