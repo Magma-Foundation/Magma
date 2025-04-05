@@ -326,8 +326,12 @@ public class Main {
         }
 
         if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
-        if (value.contains(".")) {
-            return Optional.of("child.property");
+
+        int propertySeparator = value.indexOf(".");
+        if (propertySeparator >= 0) {
+            String oldChild = value.substring(0, propertySeparator);
+            String property = value.substring(propertySeparator + ".".length());
+            return compileValue(oldChild).map(newChild -> newChild + "." + property);
         }
 
         String stripped = value.strip();

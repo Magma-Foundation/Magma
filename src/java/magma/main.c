@@ -60,12 +60,12 @@ struct record Main_Node(){
 struct Main new(){
 }
 struct void __main__(){
-	struct Path source = child.property();
+	struct Path source = Paths.get();
 	temp();
 }
 struct Temp Main_runWithSource(){
 	struct String string = compile();
-	struct Path target = child.property();
+	struct Path target = source.resolveSibling();
 	return temp;
 }
 struct Main new(){
@@ -84,20 +84,20 @@ struct Temp Main_compileRootSegment(){
 	return temp;
 }
 struct Temp Main_compileClass(){
-	struct int classIndex = child.property();
+	struct int classIndex = input.indexOf();
 	if (1) {
 	}
-	struct String afterKeyword = child.property();
-	struct int contentStart = child.property();
+	struct String afterKeyword = input.substring();
+	struct int contentStart = afterKeyword.indexOf();
 	if (1) {
 	}
-	struct String name = child.property();
+	struct String name = afterKeyword.substring();
 	if (1) {
 	}
-	struct String withEnd = child.property();
+	struct String withEnd = afterKeyword.substring();
 	if (1) {
 	}
-	struct String inputContent = child.property();
+	struct String inputContent = withEnd.substring();
 	return temp;
 }
 struct Temp Main_invalidate(){
@@ -121,22 +121,22 @@ struct Temp Main_compileClassSegment(){
 	return temp;
 }
 struct Temp Main_compileMethod(){
-	struct int paramStart = child.property();
+	struct int paramStart = input.indexOf();
 	if (1) {
 	}
-	struct String header = child.property();
+	struct String header = input.substring();
 	return temp;
 }
 struct Temp Main_compileDefinition(){
 	return temp;
 }
 struct Temp Main_parseDefinition(){
-	struct int nameSeparator = child.property();
+	struct int nameSeparator = header.lastIndexOf();
 	if (1) {
 	}
-	struct String beforeName = child.property();
-	struct String oldName = child.property();
-	struct int typeSeparator = child.property();
+	struct String beforeName = header.substring();
+	struct String oldName = header.substring();
+	struct int typeSeparator = beforeName.lastIndexOf();
 	struct String inputType = condition ? whenTrue : whenFalse();
 	return temp;
 }
@@ -148,7 +148,7 @@ struct Temp Main_compileStatement(){
 	struct Temp maybeWhitespace = compileWhitespace();
 	if (1) {
 	}
-	struct String stripped = child.property();
+	struct String stripped = input.strip();
 	if (1) {
 	}
 	if (1) {
@@ -168,9 +168,10 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
+	struct int propertySeparator = value.indexOf();
 	if (1) {
 	}
-	struct String stripped = child.property();
+	struct String stripped = value.strip();
 	if (1) {
 	}
 	return temp;
@@ -182,7 +183,7 @@ struct Temp Main_generateDefinition(){
 	return temp;
 }
 struct Temp Main_compileType(){
-	struct String stripped = child.property();
+	struct String stripped = type.strip();
 	if (1) {
 	}
 	if (1) {
