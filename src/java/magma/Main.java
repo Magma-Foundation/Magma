@@ -90,6 +90,9 @@ public class Main {
         }
     }
 
+    private record Node(String type, String name) {
+    }
+
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
 
     public static void main(String[] args) {
@@ -209,7 +212,9 @@ public class Main {
         if (inputType.isPresent()) return inputType;
 
         if (input.indexOf("(") >= 0) {
-            return generateStructType(structName).map(type -> generateMethod(type, "new", ""));
+            return generateStructType(structName)
+                    .flatMap(type -> generateDefinition(new Node(type, "new")))
+                    .map(definition -> generateMethod(definition, ""));
         }
 
         if (input.endsWith(";")) {
@@ -225,38 +230,54 @@ public class Main {
         if (paramStart < 0) return Optional.empty();
 
         String header = input.substring(0, paramStart).strip();
+        return compileDefinition(header, structName).flatMap(definition -> {
+            String withParams = input.substring(paramStart + "(".length());
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) return Optional.empty();
+
+            String withBraces = withParams.substring(paramEnd + 1).strip();
+            if (!withBraces.startsWith("{")) return Optional.empty();
+
+            String withEnd = withBraces.substring(1);
+            if (!withEnd.endsWith("}")) return Optional.empty();
+
+            String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+            return compile(inputContent, Main::compileStatement).map(outputContent -> {
+                return generateMethod(definition, outputContent);
+            });
+        });
+    }
+
+    private static Optional<String> compileDefinition(String header, String structName) {
+        return parseDefinition(header).flatMap(node0 -> {
+            Node node = modifyDefinition(structName, node0);
+            return generateDefinition(node);
+        });
+    }
+
+    private static Optional<Node> parseDefinition(String header) {
         int nameSeparator = header.lastIndexOf(" ");
         if (nameSeparator < 0) return Optional.empty();
 
         String beforeName = header.substring(0, nameSeparator).strip();
         String oldName = header.substring(nameSeparator + " ".length()).strip();
-        String newName = oldName.equals("main")
-                ? "__main__"
-                : structName + "_" + oldName;
 
         int typeSeparator = beforeName.lastIndexOf(" ");
         String inputType = typeSeparator == -1
                 ? beforeName
                 : beforeName.substring(typeSeparator + " ".length());
 
-        String withParams = input.substring(paramStart + "(".length());
-        int paramEnd = withParams.indexOf(")");
-        if (paramEnd >= 0) {
-            String withBraces = withParams.substring(paramEnd + 1).strip();
-            if (withBraces.startsWith("{")) {
-                String withEnd = withBraces.substring(1);
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return compileType(inputType).flatMap(outputType -> {
-                        return compile(inputContent, Main::compileStatement).map(outputContent -> {
-                            return generateMethod(outputType, newName, outputContent);
-                        });
-                    });
-                }
-            }
-        }
+        return compileType(inputType).map(outputType -> {
+            return new Node(outputType, oldName);
+        });
+    }
 
-        return Optional.empty();
+    private static Node modifyDefinition(String structName, Node node) {
+        String newName = node.name.equals("main")
+                ? "__main__"
+                : structName + "_" + node.name;
+
+        return new Node(node.type, newName);
     }
 
     private static Optional<String> compileStatement(String input) {
@@ -267,13 +288,32 @@ public class Main {
         if (stripped.startsWith("if ")) return Optional.of("\n\tif (1) {\n\t}");
         if (stripped.startsWith("return ")) return Optional.of("\n\treturn temp;");
         if (stripped.startsWith("for")) return Optional.of("\n\tfor(;;){\n\t}");
-        if (stripped.contains("=")) return Optional.of("\n\tint value = temp;");
+
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            int valueSeparator = withoutEnd.indexOf("=");
+            if (valueSeparator >= 0) {
+                String inputDefinition = withoutEnd.substring(0, valueSeparator).strip();
+                return parseDefinition(inputDefinition)
+                        .flatMap(Main::generateDefinition)
+                        .map(outputDefinition -> {
+                    return "\n\t" +
+                            outputDefinition +
+                            " = temp;";
+                });
+            }
+        }
+
         if (stripped.endsWith(");")) return Optional.of("\n\ttemp();");
         return invalidate("statement", input);
     }
 
-    private static String generateMethod(String type, String name, String content) {
-        return type + " " + name + "(){" + content + "\n}\n";
+    private static String generateMethod(String definition, String content) {
+        return definition + "(){" + content + "\n}\n";
+    }
+
+    private static Optional<String> generateDefinition(Node node) {
+        return Optional.of(node.type() + " " + node.name());
     }
 
     private static Optional<String> compileType(String type) {

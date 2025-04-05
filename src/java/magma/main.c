@@ -36,15 +36,11 @@ struct boolean State_isEmpty(){
 struct void State_append(){
 	temp();
 }
-struct void State_enter(){
-	int value = temp;
+struct State new(){
 }
-struct void State_exit(){
-	int value = temp;
+struct State new(){
 }
-struct void State_advance(){
-	temp();
-	int value = temp;
+struct State new(){
 }
 struct boolean State_isShallow(){
 	return temp;
@@ -59,55 +55,49 @@ struct Main new(){
 }
 struct Main new(){
 }
+struct record Main_Node(){
+}
 struct Main new(){
 }
 struct void __main__(){
-	int value = temp;
+	struct Path source = temp;
 	temp();
 }
 struct Temp Main_runWithSource(){
-	int value = temp;
-	int value = temp;
+	struct String string = temp;
+	struct Path target = temp;
 	return temp;
 }
-struct Temp Main_compile(){
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	temp();
-	int value = temp;
-	for(;;){
-	}
-	return temp;
+struct Main new(){
 }
 struct Temp Main_compileRootSegment(){
-	int value = temp;
+	struct Temp maybeWhitespace = temp;
 	if (1) {
 	}
 	if (1) {
 	}
 	if (1) {
 	}
-	int value = temp;
+	struct Temp maybeClass = temp;
 	if (1) {
 	}
 	return temp;
 }
 struct Temp Main_compileClass(){
-	int value = temp;
+	struct int classIndex = temp;
 	if (1) {
 	}
-	int value = temp;
-	int value = temp;
+	struct String afterKeyword = temp;
+	struct int contentStart = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct String name = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct String withEnd = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct String inputContent = temp;
 	return temp;
 }
 struct Temp Main_invalidate(){
@@ -115,13 +105,13 @@ struct Temp Main_invalidate(){
 	return temp;
 }
 struct Temp Main_compileClassSegment(){
-	int value = temp;
+	struct Temp maybeWhitespace = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct Temp maybeClass = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct Temp inputType = temp;
 	if (1) {
 	}
 	if (1) {
@@ -131,29 +121,34 @@ struct Temp Main_compileClassSegment(){
 	return temp;
 }
 struct Temp Main_compileMethod(){
-	int value = temp;
+	struct int paramStart = temp;
 	if (1) {
 	}
-	int value = temp;
-	int value = temp;
+	struct String header = temp;
+	return temp;
+}
+struct Temp Main_compileDefinition(){
+	return temp;
+}
+struct Temp Main_parseDefinition(){
+	struct int nameSeparator = temp;
 	if (1) {
 	}
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	int value = temp;
-	if (1) {
-	}
+	struct String beforeName = temp;
+	struct String oldName = temp;
+	struct int typeSeparator = temp;
+	struct String inputType = temp;
+	return temp;
+}
+struct Node Main_modifyDefinition(){
+	struct String newName = temp;
 	return temp;
 }
 struct Temp Main_compileStatement(){
-	int value = temp;
+	struct Temp maybeWhitespace = temp;
 	if (1) {
 	}
-	int value = temp;
+	struct String stripped = temp;
 	if (1) {
 	}
 	if (1) {
@@ -169,8 +164,11 @@ struct Temp Main_compileStatement(){
 struct String Main_generateMethod(){
 	return temp;
 }
+struct Temp Main_generateDefinition(){
+	return temp;
+}
 struct Temp Main_compileType(){
-	int value = temp;
+	struct String stripped = temp;
 	if (1) {
 	}
 	if (1) {
