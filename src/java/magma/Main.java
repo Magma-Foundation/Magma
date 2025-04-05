@@ -99,6 +99,7 @@ public class Main {
     }
 
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
+    private static int counter = 0;
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -372,11 +373,17 @@ public class Main {
             return Optional.of(stripped);
         }
 
-        int propertySeparator = value.indexOf(".");
-        if (propertySeparator >= 0) {
-            String oldChild = value.substring(0, propertySeparator);
-            String property = value.substring(propertySeparator + ".".length());
+        int accessSeparator = value.indexOf(".");
+        if (accessSeparator >= 0) {
+            String oldChild = value.substring(0, accessSeparator);
+            String property = value.substring(accessSeparator + ".".length());
             return compileValue(oldChild).map(newChild -> newChild + "." + property);
+        }
+
+        if (value.contains("::")) {
+            int index = counter;
+            counter++;
+            return Optional.of("__lambda" + index + "__");
         }
 
         return compileOperator(value, "-")

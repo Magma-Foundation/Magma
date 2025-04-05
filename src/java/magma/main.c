@@ -59,9 +59,16 @@ struct record Main_Node(){
 }
 struct Main new(){
 }
-struct Main new(){
+int temp;
+struct void __main__(){
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");magma.Files.readString(source)
+                .match(input -> runWithSource(source, input), Optional::of)
+                .ifPresent(__lambda0__)
 }
-struct Main new(){
+struct Temp Main_runWithSource(){
+	struct String string = compileStatements(input, __lambda1__).orElse("");
+	struct Path target = source.resolveSibling("main.c");
+	return temp;
 }
 struct Temp Main_compileStatements(){
 	return temp;
@@ -78,7 +85,7 @@ struct StringBuilder Main_merge(){
 struct Temp Main_divideStatements(){
 	struct Temp queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toCollection(__lambda2__);
 	struct State state = Temp();
 	while(1) {
 	}
@@ -222,7 +229,9 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
-	struct int propertySeparator = value.indexOf(".");
+	struct int accessSeparator = value.indexOf(".");
+	if (1) {
+	}
 	if (1) {
 	}
 	return temp;
@@ -235,7 +244,17 @@ struct Temp Main_compileOperator(){
 	struct String rightString = value.substring(operatorIndex + 1).strip();
 	return temp;
 }
-struct Main new(){
+struct Temp Main_compileInvocation(){
+	if (1) {
+	}
+	struct String withoutEnd = value.substring(0, value.length() - ")".length());
+	struct int argsStart = withoutEnd.lastIndexOf("(");
+	if (1) {
+	}
+	struct String inputCaller = withoutEnd.substring(0, argsStart);
+	struct String inputArguments = withoutEnd.substring(argsStart + "(".length());
+	struct Temp arguments = divideStatements(inputArguments, __lambda3__);
+	return temp;
 }
 struct State Main_divideValues(){
 	if (1) {
