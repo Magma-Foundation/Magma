@@ -125,8 +125,8 @@ public class Main {
                 state.advance();
                 state.exit();
             } else {
-                if (c == '{') state.enter();
-                if (c == '}') state.exit();
+                if (c == '{' || c == '(') state.enter();
+                if (c == '}' || c == ')') state.exit();
             }
         }
         state.advance();
@@ -192,7 +192,7 @@ public class Main {
         Optional<String> inputType = compileMethod(input);
         if (inputType.isPresent()) return inputType;
 
-        if (input.indexOf("(".toString()) >= 0) {
+        if (input.indexOf("(") >= 0) {
             return generateStructType(name).map(type -> generateMethod(type, "new", ""));
         }
 
@@ -224,12 +224,12 @@ public class Main {
                 : beforeName.substring(typeSeparator + " ".length());
 
         String withParams = input.substring(paramStart + "(".length());
-        int paramEnd = withParams.indexOf(")".toString());
+        int paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
             String withBraces = withParams.substring(paramEnd + 1).strip();
-            if(withBraces.startsWith("{")) {
+            if (withBraces.startsWith("{")) {
                 String withEnd = withBraces.substring(1);
-                if(withEnd.endsWith("}")) {
+                if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     return compileType(inputType).flatMap(outputType -> {
                         return compile(inputContent, Main::compileStatement).map(outputContent -> {
@@ -243,12 +243,21 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileStatement(String statement) {
-        return invalidate("statement", statement);
+    private static Optional<String> compileStatement(String input) {
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) return maybeWhitespace;
+
+        String stripped = input.strip();
+        if (stripped.startsWith("if ")) return Optional.of("\n\tif (1) {\n\t}");
+        if (stripped.startsWith("return ")) return Optional.of("\n\treturn temp;");
+        if (stripped.startsWith("for")) return Optional.of("\n\tfor(;;){\n\t}");
+        if (stripped.contains("=")) return Optional.of("\n\tint value = temp;");
+        if (stripped.endsWith(");")) return Optional.of("\n\ttemp();");
+        return invalidate("statement", input);
     }
 
     private static String generateMethod(String type, String name, String content) {
-        return type + " " + name + "(){" + content + "}\n";
+        return type + " " + name + "(){" + content + "\n}\n";
     }
 
     private static Optional<String> compileType(String type) {
