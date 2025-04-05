@@ -50,19 +50,7 @@ struct Temp compile(){
 }
 struct Temp compileRootSegment(){
 }
-struct ");
-        if (classIndex < 0) return Optional.empty();
-
-        String afterKeyword = input.substring(classIndex + "class ".length());
-        int contentStart = afterKeyword.indexOf(" {
-};
-struct ");
-        if (classIndex < 0) return Optional.empty();
-
-        String afterKeyword = input.substring(classIndex + "class ".length());
-        int contentStart = afterKeyword.indexOf(" new(){
-}
-struct return Optional.empty(){
+struct Temp compileClass(){
 }
 struct Temp invalidate(){
 }

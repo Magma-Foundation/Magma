@@ -166,6 +166,8 @@ public class Main {
         if (contentStart < 0) return Optional.empty();
 
         String name = afterKeyword.substring(0, contentStart).strip();
+        if (!isSymbol(name)) return Optional.empty();
+
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) return Optional.empty();
 
