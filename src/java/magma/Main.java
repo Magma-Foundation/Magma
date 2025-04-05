@@ -18,6 +18,10 @@ public class Main {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
+    private interface Rule {
+        Optional<String> compile(String input);
+    }
+
     private static class State {
         public final Deque<Character> queue;
         private final List<String> segments;
@@ -99,6 +103,20 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    private record OrRule(List<Rule> rules) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            for (Rule rule : rules()) {
+                Optional<String> compile = rule.compile(input.strip());
+                if (compile.isPresent()) {
+                    return compile;
+                }
+            }
+
+            return invalidate("value", input);
+        }
     }
 
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
@@ -353,27 +371,45 @@ public class Main {
         return invalidate("statement", input);
     }
 
-    private static Optional<String> compileValue(String value) {
-        String stripped = value.strip();
-        if (stripped.startsWith("new ")) return Optional.of("Temp()");
+    private static Optional<String> compileValue(String input) {
+        List<Rule> rules = List.of(
+                Main::compileConstructor,
+                Main::compileInvocation,
+                Main::compileTernary,
+                Main::compileSymbol,
+                Main::compileString,
+                Main::compileNumber,
+                Main::compileDataAccess,
+                Main::compileMethodAccess,
+                value -> compileOperator(value, "-"),
+                value -> compileOperator(value, "+")
+        );
 
-        Optional<String> maybeInvocation = compileInvocation(value);
-        if (maybeInvocation.isPresent()) return maybeInvocation;
+        return new OrRule(rules).compile(input);
+    }
 
-        if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
-
+    private static Optional<String> compileSymbol(String stripped) {
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
         }
+        return Optional.empty();
+    }
 
+    private static Optional<String> compileString(String stripped) {
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return Optional.of(stripped);
         }
+        return Optional.empty();
+    }
 
+    private static Optional<String> compileNumber(String stripped) {
         if (isNumber(stripped)) {
             return Optional.of(stripped);
         }
+        return Optional.empty();
+    }
 
+    private static Optional<String> compileDataAccess(String value) {
         int accessSeparator = value.lastIndexOf(".");
         if (accessSeparator >= 0) {
             String oldChild = value.substring(0, accessSeparator);
@@ -382,16 +418,26 @@ public class Main {
                 return compileValue(oldChild).map(newChild -> newChild + "." + property);
             }
         }
+        return Optional.empty();
+    }
 
+    private static Optional<String> compileMethodAccess(String value) {
         if (value.contains("::")) {
             int index = counter;
             counter++;
             return Optional.of("__lambda" + index + "__");
         }
+        return Optional.empty();
+    }
 
-        return compileOperator(value, "-")
-                .or(() -> compileOperator(value, "+"))
-                .or(() -> invalidate("value", value));
+    private static Optional<String> compileTernary(String value) {
+        if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileConstructor(String input) {
+        if (input.startsWith("new ")) return Optional.of("Temp()");
+        return Optional.empty();
     }
 
     private static Optional<String> compileOperator(String value, String operator) {
