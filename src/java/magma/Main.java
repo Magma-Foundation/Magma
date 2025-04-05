@@ -488,7 +488,7 @@ public class Main {
     }
 
     private static Optional<String> compileRootSegment(String input) {
-        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
+        Optional<String> maybeWhitespace = createWhitespaceRule().compile(input).findValue();
         if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         if (input.startsWith("package ")) return Optional.of("");
@@ -515,7 +515,7 @@ public class Main {
         if (!withEnd.endsWith("}")) return Optional.empty();
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return new DivideRule(input1 -> new WrappedRule(input2 -> compileClassSegment(input2, name)).compile(input1), Main::processStatementChar, Main::merge).compile(inputContent).findValue()
+        return new DivideRule(input1 -> new WrappedRule(input2 -> createClassSegmentRule().compile(input2).findValue()).compile(input1), Main::processStatementChar, Main::merge).compile(inputContent).findValue()
                 .map(outputContent -> "struct " + name + " {\n};\n" + outputContent);
     }
 
@@ -524,27 +524,38 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileClassSegment(String input, String structName) {
-        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
-        if (maybeWhitespace.isPresent()) return maybeWhitespace;
+    private static OrRule createClassSegmentRule() {
+        return new OrRule(List.of(
+                createWhitespaceRule(),
+                new WrappedRule(input -> createClassSegmentRule().compile(input).findValue()),
+                new WrappedRule(Main::compileMethod0),
+                new WrappedRule(Main::compileConstructor0),
+                new WrappedRule(Main::compileDefinitionStatement0)
+        ));
+    }
 
-        Optional<String> maybeClass = compileClass(input);
-        if (maybeClass.isPresent()) return maybeClass;
+    private static StripRule createWhitespaceRule() {
+        return new StripRule(new EmptyRule());
+    }
 
-        Optional<String> inputType = compileMethod(input, structName);
-        if (inputType.isPresent()) return inputType;
-
-        if (input.contains("(")) {
-            return generateStructType(structName)
-                    .flatMap(type -> generateDefinition(new Node(type, "new")))
-                    .map(definition -> generateMethod(definition, ""));
-        }
-
+    private static Optional<String> compileDefinitionStatement0(String input) {
         if (input.endsWith(";")) {
             return Optional.of("int temp;\n");
         }
+        return null;
+    }
 
-        return invalidate("class segment", input);
+    private static Optional<String> compileConstructor0(String input) {
+        if (input.contains("(")) {
+            return generateStructType("Temp")
+                    .flatMap(type -> generateDefinition(new Node(type, "new")))
+                    .map(definition -> generateMethod(definition, ""));
+        }
+        return null;
+    }
+
+    private static Optional<String> compileMethod0(String input) {
+        return compileMethod(input, "Temp");
     }
 
     private static Optional<String> compileMethod(String input, String structName) {
@@ -605,7 +616,7 @@ public class Main {
 
     private static OrRule createStatementRule() {
         return new OrRule(List.of(
-                new StripRule(new EmptyRule()),
+                createWhitespaceRule(),
                 new StripRule(new WrappedRule(Main::compileIf)),
                 new StripRule(new WrappedRule(Main::compileReturn)),
                 new StripRule(new WrappedRule(Main::compileFor)),
