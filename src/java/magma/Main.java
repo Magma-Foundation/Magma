@@ -345,7 +345,7 @@ public class Main {
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             Optional<String> maybeInvocation = compileInvocation(withoutEnd);
-            if (maybeInvocation.isPresent()) return maybeInvocation;
+            if (maybeInvocation.isPresent()) return maybeInvocation.map(value -> "\n\t" + value);
         }
 
         if (stripped.startsWith("while ")) return Optional.of("\n\twhile(1) {\n\t}\n");

@@ -33,7 +33,8 @@ struct char State_pop(){
 struct boolean State_isEmpty(){
 	return temp;
 }
-struct State State_append(){buffer.append(c)
+struct State State_append(){
+	buffer.append(c)
 	return temp;
 }
 struct State new(){
@@ -61,7 +62,8 @@ struct Main new(){
 }
 int temp;
 struct void __main__(){
-	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");magma.Files.readString(source)
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+	magma.Files.readString(source)
                 .match(input -> runWithSource(source, input), Optional::of)
                 .ifPresent(__lambda0__)
 }
@@ -152,7 +154,8 @@ struct Temp Main_compileClass(){
 	struct String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
 	return temp;
 }
-struct Temp Main_invalidate(){System.err.println("Invalid " + type + ": " + input)
+struct Temp Main_invalidate(){
+	System.err.println("Invalid " + type + ": " + input)
 	return temp;
 }
 struct Temp Main_compileClassSegment(){
