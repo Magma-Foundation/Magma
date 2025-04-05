@@ -12,19 +12,73 @@
 #include <temp.h>
 struct Main {
 };
-private State(){
+struct State {
+};
+int temp;
+int temp;
+int temp;
+int temp;
+struct State new(){
 }
-void main(){
+struct public State(){
 }
-String compile(){
+struct void popAndAppend(){
 }
-String compileRootSegment(){
+struct Character pop(){
 }
-String invalidate(){
+struct boolean isEmpty(){
 }
-String compileClassSegment(){
+struct void append(){
 }
-Optional<String> compileWhitespace(){
+struct void enter(){
+}
+struct void exit(){
+}
+struct void advance(){
+}
+struct boolean isShallow(){
+}
+struct boolean isLevel(){
+}
+struct Temp segments(){
+}
+struct Main new(){
+}
+struct void main(){
+}
+struct Temp compile(){
+}
+struct Temp compileRootSegment(){
+}
+struct ");
+        if (classIndex < 0) return Optional.empty();
+
+        String afterKeyword = input.substring(classIndex + "class ".length());
+        int contentStart = afterKeyword.indexOf(" {
+};
+struct ");
+        if (classIndex < 0) return Optional.empty();
+
+        String afterKeyword = input.substring(classIndex + "class ".length());
+        int contentStart = afterKeyword.indexOf(" new(){
+}
+struct return Optional.empty(){
+}
+struct Temp invalidate(){
+}
+struct Temp compileClassSegment(){
+}
+struct Temp compileMethod(){
+}
+struct String generateMethod(){
+}
+struct Temp compileType(){
+}
+struct Temp generateStructType(){
+}
+struct boolean isSymbol(){
+}
+struct Temp compileWhitespace(){
 }
 int main(){
 	return 0;
