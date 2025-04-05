@@ -389,7 +389,7 @@ public class Main {
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
         @Override
         public Result<String, CompileError> compile(String input) {
-            if(input.endsWith(suffix)){
+            if (input.endsWith(suffix)) {
                 return childRule.compile(input.substring(0, input.length() - suffix.length()));
             } else {
                 return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
@@ -601,7 +601,9 @@ public class Main {
                 ? beforeName
                 : beforeName.substring(typeSeparator + " ".length());
 
-        return compileType(inputType).map(outputType -> new Node(outputType, oldName));
+        return createTypeRule()
+                .compile(inputType)
+                .findValue().map(outputType -> new Node(outputType, oldName));
     }
 
     private static Node modifyDefinition(String structName, Node node) {
@@ -674,18 +676,7 @@ public class Main {
     private static Rule createValueRule() {
         LazyRule value = new LazyRule();
         value.set(new OrRule(List.of(
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input1) {
-                        return compile0(input1)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
-                    }
-
-                    private Optional<String> compile0(String input1) {
-                        return compileConstructor(input1);
-                    }
-                },
+                new WrappedRule(Main::compileConstructor),
                 new TypeRule("invocation", new InvocationRule()),
                 new Rule() {
                     @Override
@@ -827,19 +818,24 @@ public class Main {
         return Optional.of(node.type() + " " + node.name());
     }
 
-    private static Optional<String> compileType(String type) {
-        String stripped = type.strip();
-        if (isSymbol(stripped)) {
-            if (!RESERVED_KEYWORDS.contains(stripped)) {
-                return generateStructType(stripped);
-            }
-        }
+    private static OrRule createTypeRule() {
+        return new OrRule(List.of(new WrappedRule(Main::compileSymbol0), new WrappedRule(Main::compileGeneric)));
+    }
 
+    private static Optional<String> compileSymbol0(String type) {
+        String stripped = type.strip();
+        if (!isSymbol(stripped)) return Optional.empty();
+
+        if (RESERVED_KEYWORDS.contains(stripped)) return Optional.empty();
+
+        return generateStructType(stripped);
+    }
+
+    private static Optional<String> compileGeneric(String type) {
         if (type.endsWith(">")) {
             return generateStructType("Temp");
         }
-
-        return invalidate("type", type);
+        return Optional.empty();
     }
 
     private static Optional<String> generateStructType(String name) {
