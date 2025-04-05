@@ -192,8 +192,8 @@ public class Main {
         Optional<String> inputType = compileMethod(input);
         if (inputType.isPresent()) return inputType;
 
-        if (input.contains("(")) {
-            return generateStructType(name).map(type -> generateMethod(type, "new"));
+        if (input.indexOf("(".toString()) >= 0) {
+            return generateStructType(name).map(type -> generateMethod(type, "new", ""));
         }
 
         if (input.endsWith(";")) {
@@ -223,13 +223,32 @@ public class Main {
                 ? beforeName
                 : beforeName.substring(typeSeparator + " ".length());
 
-        return compileType(inputType).map(outputType -> {
-            return generateMethod(outputType, newName);
-        });
+        String withParams = input.substring(paramStart + "(".length());
+        int paramEnd = withParams.indexOf(")".toString());
+        if (paramEnd >= 0) {
+            String withBraces = withParams.substring(paramEnd + 1).strip();
+            if(withBraces.startsWith("{")) {
+                String withEnd = withBraces.substring(1);
+                if(withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    return compileType(inputType).flatMap(outputType -> {
+                        return compile(inputContent, Main::compileStatement).map(outputContent -> {
+                            return generateMethod(outputType, newName, outputContent);
+                        });
+                    });
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
-    private static String generateMethod(String type, String name) {
-        return type + " " + name + "(){\n}\n";
+    private static Optional<String> compileStatement(String statement) {
+        return invalidate("statement", statement);
+    }
+
+    private static String generateMethod(String type, String name, String content) {
+        return type + " " + name + "(){" + content + "}\n";
     }
 
     private static Optional<String> compileType(String type) {
