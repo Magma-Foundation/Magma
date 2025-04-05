@@ -524,14 +524,16 @@ public class Main {
         return Optional.empty();
     }
 
-    private static OrRule createClassSegmentRule() {
-        return new OrRule(List.of(
+    private static Rule createClassSegmentRule() {
+        LazyRule classSegment = new LazyRule();
+        classSegment.set(new OrRule(List.of(
                 createWhitespaceRule(),
-                new WrappedRule(input -> createClassSegmentRule().compile(input).findValue()),
+                new WrappedRule(Main::compileClass),
                 new WrappedRule(Main::compileMethod0),
                 new WrappedRule(Main::compileConstructor0),
                 new WrappedRule(Main::compileDefinitionStatement0)
-        ));
+        )));
+        return classSegment;
     }
 
     private static StripRule createWhitespaceRule() {
@@ -542,7 +544,7 @@ public class Main {
         if (input.endsWith(";")) {
             return Optional.of("int temp;\n");
         }
-        return null;
+        return Optional.empty();
     }
 
     private static Optional<String> compileConstructor0(String input) {
@@ -551,7 +553,7 @@ public class Main {
                     .flatMap(type -> generateDefinition(new Node(type, "new")))
                     .map(definition -> generateMethod(definition, ""));
         }
-        return null;
+        return Optional.empty();
     }
 
     private static Optional<String> compileMethod0(String input) {

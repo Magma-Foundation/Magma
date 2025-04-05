@@ -13,210 +13,133 @@
 #include <temp.h>
 struct Main {
 };
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct State {
-};
-int temp;
-int temp;
-int temp;
-int temp;
-struct State new(){
+struct Temp new(){
 }
-struct State new(){
+struct Temp new(){
 }
-struct State State_popAndAppend(){
-	return temp;
+struct Temp new(){
 }
-struct char State_pop(){
-	return temp;
+struct Temp new(){
 }
-struct boolean State_hasNext(){
-	return temp;
+struct Temp new(){
 }
-struct State State_append(){
-	buffer.append(c)
-	return temp;
+struct Temp new(){
 }
-struct State new(){
+struct Temp new(){
 }
-struct State new(){
+struct Temp new(){
 }
-struct State new(){
+struct Temp new(){
 }
-struct boolean State_isShallow(){
-	return temp;
+struct Temp new(){
 }
-struct boolean State_isLevel(){
-	return temp;
+struct Temp new(){
 }
-struct Temp State_segments(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct record Main_Node(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
-}
-struct Main new(){
-}
-struct CompileError {
-};
-int temp;
-int temp;
-int temp;
-struct CompileError new(){
-}
-struct CompileError new(){
-}
-struct String CompileError_display(){
-	return temp;
-}
-struct String CompileError_format(){
-	return temp;
-}
-struct Main new(){
-}
-struct Main new(){
-}
-struct Main new(){
-}
-struct Main new(){
-}
-struct Main new(){
-}
-struct Main new(){
+struct Temp new(){
 }
 int temp;
-struct Main new(){
+int temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Temp Main_compileStatements(){
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_getValue(){
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_wrapPrevious(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct StringBuilder Main_merge(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Temp Main_compileDefinition(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Node Main_modifyDefinition(){
-	struct String newName = condition ? whenTrue : whenFalse.name;
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Temp Main_unwrap(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Temp Main_compileSymbol(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileString(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileNumber(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileMethodAccess(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileTernary(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileConstructor(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct StringBuilder Main_mergeValues(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
 }
-struct boolean Main_isNumber(){
-	for(;;){
-	}
-	return temp;
+struct Temp new(){
 }
-struct String Main_generateMethod(){
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_generateDefinition(){
-	return temp;
+struct Temp new(){
 }
-struct Main new(){
+struct Temp new(){
 }
-struct Temp Main_generateStructType(){
-	return temp;
+struct Temp new(){
 }
-struct boolean Main_isSymbol(){
-	for(;;){
-	}
-	return temp;
+struct Temp new(){
 }
-struct Temp Main_compileWhitespace(){
-	if (1) {
-	}
-	return temp;
+struct Temp new(){
+}
+struct Temp new(){
+}
+struct Temp new(){
+}
+struct Temp new(){
 }
 int main(){
 	__main__();
