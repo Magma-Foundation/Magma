@@ -325,7 +325,12 @@ public class Main {
             }
         }
 
-        if (stripped.endsWith(");")) return Optional.of("\n\ttemp();");
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd);
+            if (maybeInvocation.isPresent()) return maybeInvocation;
+        }
+
         if (stripped.startsWith("while ")) return Optional.of("\n\twhile(1) {\n\t}\n");
         return invalidate("statement", input);
     }
@@ -333,19 +338,8 @@ public class Main {
     private static Optional<String> compileValue(String value) {
         if (value.startsWith("new ")) return Optional.of("Temp()");
 
-        if (value.endsWith(")")) {
-            String withoutEnd = value.substring(0, value.length() - ")".length());
-            int argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                String inputCaller = withoutEnd.substring(0, argsStart);
-                String inputArguments = withoutEnd.substring(argsStart + "(".length());
-                return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
-                    return compileValue(inputCaller).map(outputCaller -> {
-                        return outputCaller + "(" + outputArguments + ")";
-                    });
-                });
-            }
-        }
+        Optional<String> maybeInvocation = compileInvocation(value);
+        if (maybeInvocation.isPresent()) return maybeInvocation;
 
         if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
 
@@ -370,6 +364,22 @@ public class Main {
         }
 
         return invalidate("value", value);
+    }
+
+    private static Optional<String> compileInvocation(String value) {
+        if (!value.endsWith(")")) return Optional.empty();
+
+        String withoutEnd = value.substring(0, value.length() - ")".length());
+        int argsStart = withoutEnd.indexOf("(");
+        if (argsStart < 0) return Optional.empty();
+
+        String inputCaller = withoutEnd.substring(0, argsStart);
+        String inputArguments = withoutEnd.substring(argsStart + "(".length());
+        return compile(Arrays.asList(inputArguments.split(Pattern.quote(","))), Main::compileValue, Main::mergeValues).flatMap(outputArguments -> {
+            return compileValue(inputCaller).map(outputCaller -> {
+                return outputCaller + "(" + outputArguments + ")";
+            });
+        });
     }
 
     private static StringBuilder mergeValues(StringBuilder output, String str) {

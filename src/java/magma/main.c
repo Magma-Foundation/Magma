@@ -24,11 +24,9 @@ int temp;
 int temp;
 struct State new(){
 }
-struct public State_State(){
-	temp();
+struct State new(){
 }
-struct void State_popAndAppend(){
-	temp();
+struct void State_popAndAppend(){append(pop())
 }
 struct Character State_pop(){
 	return temp;
@@ -36,8 +34,7 @@ struct Character State_pop(){
 struct boolean State_isEmpty(){
 	return temp;
 }
-struct void State_append(){
-	temp();
+struct void State_append(){buffer.append(c)
 }
 struct State new(){
 }
@@ -62,9 +59,7 @@ struct record Main_Node(){
 }
 struct Main new(){
 }
-struct void __main__(){
-	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	temp();
+struct Main new(){
 }
 struct Main new(){
 }
@@ -95,11 +90,24 @@ struct Temp Main_compileRootSegment(){
 	}
 	return temp;
 }
-struct Main new(){
-}
-struct Temp Main_invalidate(){
-	temp();
+struct Temp Main_compileClass(){
+	struct int classIndex = input.indexOf("class ");
+	if (1) {
+	}
+	struct String afterKeyword = input.substring(classIndex + "class ".length());
+	struct int contentStart = afterKeyword.indexOf("{");
+	if (1) {
+	}
+	struct String name = afterKeyword.substring(0, contentStart).strip();
+	if (1) {
+	}
+	struct String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+	if (1) {
+	}
+	struct String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
 	return temp;
+}
+struct Main new(){
 }
 struct Temp Main_compileClassSegment(){
 	struct Temp maybeWhitespace = compileWhitespace(input);
@@ -117,12 +125,25 @@ struct Temp Main_compileClassSegment(){
 	}
 	return temp;
 }
-struct Main new(){
+struct Temp Main_compileMethod(){
+	struct int paramStart = input.indexOf("(");
+	if (1) {
+	}
+	struct String header = input.substring(0, paramStart).strip();
+	return temp;
 }
 struct Temp Main_compileDefinition(){
 	return temp;
 }
-struct Main new(){
+struct Temp Main_parseDefinition(){
+	struct int nameSeparator = header.lastIndexOf(" ");
+	if (1) {
+	}
+	struct String beforeName = header.substring(0, nameSeparator).strip();
+	struct String oldName = header.substring(nameSeparator + " ".length()).strip();
+	struct int typeSeparator = beforeName.lastIndexOf(" ");
+	struct String inputType = condition ? whenTrue : whenFalse;
+	return temp;
 }
 struct Node Main_modifyDefinition(){
 	struct String newName = condition ? whenTrue : whenFalse;
@@ -150,6 +171,7 @@ struct Temp Main_compileStatement(){
 struct Temp Main_compileValue(){
 	if (1) {
 	}
+	struct Temp maybeInvocation = compileInvocation(value);
 	if (1) {
 	}
 	if (1) {
@@ -164,6 +186,17 @@ struct Temp Main_compileValue(){
 	struct int propertySeparator = value.indexOf(".");
 	if (1) {
 	}
+	return temp;
+}
+struct Temp Main_compileInvocation(){
+	if (1) {
+	}
+	struct String withoutEnd = value.substring(0, value.length() - ")".length());
+	struct int argsStart = withoutEnd.indexOf("(");
+	if (1) {
+	}
+	struct String inputCaller = withoutEnd.substring(0, argsStart);
+	struct String inputArguments = withoutEnd.substring(argsStart + "(".length());
 	return temp;
 }
 struct StringBuilder Main_mergeValues(){
