@@ -170,7 +170,15 @@ public class Main {
         Optional<String> maybeWhitespace = compileWhitespace(input);
         if (maybeWhitespace.isPresent()) return maybeWhitespace.get();
 
-        if (input.contains("(")) return "void temp(){\n}\n";
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String header = input.substring(0, paramStart).strip();
+            int nameSeparator = header.indexOf(" ");
+            if (nameSeparator >= 0) {
+                String name = header.substring(nameSeparator + " ".length()).strip();
+                return "void " + name + "(){\n}\n";
+            }
+        }
         return invalidate("class segment", input);
     }
 

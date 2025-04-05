@@ -12,19 +12,25 @@
 #include <temp.h>
 struct Main {
 };
-void temp(){
+void static class State {
+        public final Deque<Character> queue;
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(){
 }
-void temp(){
+void static void main(){
 }
-void temp(){
+void static String compile(){
 }
-void temp(){
+void static String compileRootSegment(){
 }
-void temp(){
+void static String invalidate(){
 }
-void temp(){
+void static String compileClassSegment(){
 }
-void temp(){
+void static Optional<String> compileWhitespace(){
 }
 int main(){
 	return 0;
