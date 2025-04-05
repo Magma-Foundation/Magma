@@ -309,7 +309,7 @@ public class Main {
         }
 
         if (stripped.endsWith(");")) return Optional.of("\n\ttemp();");
-        if (stripped.startsWith("while ")) return Optional.of("while(1) {\n\t}\n");
+        if (stripped.startsWith("while ")) return Optional.of("\n\twhile(1) {\n\t}\n");
         return invalidate("statement", input);
     }
 

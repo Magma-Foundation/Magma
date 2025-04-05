@@ -70,7 +70,8 @@ struct Temp Main_runWithSource(){
 }
 struct Temp Main_compile(){
 	struct Temp queue = caller();
-	struct State state = caller();while(1) {
+	struct State state = caller();
+	while(1) {
 	}
 
 	temp();
