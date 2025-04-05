@@ -175,8 +175,15 @@ public class Main {
             String header = input.substring(0, paramStart).strip();
             int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String inputType = header.substring(0, nameSeparator).strip();
                 String name = header.substring(nameSeparator + " ".length()).strip();
-                return "void " + name + "(){\n}\n";
+
+                int typeSeparator = inputType.lastIndexOf(" ");
+                String outputType = typeSeparator == -1
+                        ? inputType
+                        : inputType.substring(typeSeparator + " ".length());
+
+                return outputType + " " + name + "(){\n}\n";
             }
         }
         return invalidate("class segment", input);

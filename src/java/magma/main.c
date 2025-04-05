@@ -12,19 +12,19 @@
 #include <temp.h>
 struct Main {
 };
-void State(){
+private State(){
 }
 void main(){
 }
-void compile(){
+String compile(){
 }
-void compileRootSegment(){
+String compileRootSegment(){
 }
-void invalidate(){
+String invalidate(){
 }
-void compileClassSegment(){
+String compileClassSegment(){
 }
-void compileWhitespace(){
+Optional<String> compileWhitespace(){
 }
 int main(){
 	return 0;
