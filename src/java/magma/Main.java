@@ -173,7 +173,7 @@ public class Main {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String header = input.substring(0, paramStart).strip();
-            int nameSeparator = header.indexOf(" ");
+            int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
                 String name = header.substring(nameSeparator + " ".length()).strip();
                 return "void " + name + "(){\n}\n";
