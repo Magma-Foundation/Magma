@@ -314,8 +314,27 @@ public class Main {
     }
 
     private static Optional<String> compileValue(String value) {
-        if (value.endsWith(")")) return Optional.of("caller()");
+        if (value.endsWith(")")) {
+            String withoutEnd = value.substring(0, value.length() - ")".length());
+            int argsStart = withoutEnd.indexOf("(");
+            if (argsStart >= 0) {
+                String inputCaller = withoutEnd.substring(0, argsStart);
+                return compileValue(inputCaller).map(outputCaller -> {
+                    return outputCaller + "()";
+                });
+            }
+        }
+
         if (value.contains("?")) return Optional.of("condition ? whenTrue : whenFalse");
+        if (value.contains(".")) {
+            return Optional.of("child.property");
+        }
+
+        String stripped = value.strip();
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
+        }
+
         return invalidate("value", value);
     }
 

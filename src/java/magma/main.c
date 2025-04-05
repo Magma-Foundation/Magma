@@ -60,54 +60,44 @@ struct record Main_Node(){
 struct Main new(){
 }
 struct void __main__(){
-	struct Path source = caller();
+	struct Path source = child.property();
 	temp();
 }
 struct Temp Main_runWithSource(){
-	struct String string = caller();
-	struct Path target = caller();
+	struct String string = compile();
+	struct Path target = child.property();
 	return temp;
 }
-struct Temp Main_compile(){
-	struct Temp queue = caller();
-	struct State state = caller();
-	while(1) {
-	}
-
-	temp();
-	struct Temp maybeOutput = caller();
-	for(;;){
-	}
-	return temp;
+struct Main new(){
 }
 struct Temp Main_compileRootSegment(){
-	struct Temp maybeWhitespace = caller();
+	struct Temp maybeWhitespace = compileWhitespace();
 	if (1) {
 	}
 	if (1) {
 	}
 	if (1) {
 	}
-	struct Temp maybeClass = caller();
+	struct Temp maybeClass = compileClass();
 	if (1) {
 	}
 	return temp;
 }
 struct Temp Main_compileClass(){
-	struct int classIndex = caller();
+	struct int classIndex = child.property();
 	if (1) {
 	}
-	struct String afterKeyword = caller();
-	struct int contentStart = caller();
+	struct String afterKeyword = child.property();
+	struct int contentStart = child.property();
 	if (1) {
 	}
-	struct String name = caller();
+	struct String name = child.property();
 	if (1) {
 	}
-	struct String withEnd = caller();
+	struct String withEnd = child.property();
 	if (1) {
 	}
-	struct String inputContent = caller();
+	struct String inputContent = child.property();
 	return temp;
 }
 struct Temp Main_invalidate(){
@@ -115,13 +105,13 @@ struct Temp Main_invalidate(){
 	return temp;
 }
 struct Temp Main_compileClassSegment(){
-	struct Temp maybeWhitespace = caller();
+	struct Temp maybeWhitespace = compileWhitespace();
 	if (1) {
 	}
-	struct Temp maybeClass = caller();
+	struct Temp maybeClass = compileClass();
 	if (1) {
 	}
-	struct Temp inputType = caller();
+	struct Temp inputType = compileMethod();
 	if (1) {
 	}
 	if (1) {
@@ -131,23 +121,23 @@ struct Temp Main_compileClassSegment(){
 	return temp;
 }
 struct Temp Main_compileMethod(){
-	struct int paramStart = caller();
+	struct int paramStart = child.property();
 	if (1) {
 	}
-	struct String header = caller();
+	struct String header = child.property();
 	return temp;
 }
 struct Temp Main_compileDefinition(){
 	return temp;
 }
 struct Temp Main_parseDefinition(){
-	struct int nameSeparator = caller();
+	struct int nameSeparator = child.property();
 	if (1) {
 	}
-	struct String beforeName = caller();
-	struct String oldName = caller();
-	struct int typeSeparator = caller();
-	struct String inputType = caller();
+	struct String beforeName = child.property();
+	struct String oldName = child.property();
+	struct int typeSeparator = child.property();
+	struct String inputType = condition ? whenTrue : whenFalse();
 	return temp;
 }
 struct Node Main_modifyDefinition(){
@@ -155,10 +145,10 @@ struct Node Main_modifyDefinition(){
 	return temp;
 }
 struct Temp Main_compileStatement(){
-	struct Temp maybeWhitespace = caller();
+	struct Temp maybeWhitespace = compileWhitespace();
 	if (1) {
 	}
-	struct String stripped = caller();
+	struct String stripped = child.property();
 	if (1) {
 	}
 	if (1) {
@@ -178,6 +168,11 @@ struct Temp Main_compileValue(){
 	}
 	if (1) {
 	}
+	if (1) {
+	}
+	struct String stripped = child.property();
+	if (1) {
+	}
 	return temp;
 }
 struct String Main_generateMethod(){
@@ -187,7 +182,7 @@ struct Temp Main_generateDefinition(){
 	return temp;
 }
 struct Temp Main_compileType(){
-	struct String stripped = caller();
+	struct String stripped = child.property();
 	if (1) {
 	}
 	if (1) {
