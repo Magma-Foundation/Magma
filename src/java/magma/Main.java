@@ -21,10 +21,18 @@ public class Main {
         Optional<T> findValue();
 
         <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
     }
 
     private interface Rule {
         Result<String, CompileError> compile(String input);
+    }
+
+    private interface DivideFolder {
+        State fold(State state, Character c);
     }
 
     private static class State {
@@ -52,8 +60,8 @@ public class Main {
             return queue.pop();
         }
 
-        private boolean isEmpty() {
-            return queue.isEmpty();
+        private boolean hasNext() {
+            return !queue.isEmpty();
         }
 
         private State append(char c) {
@@ -105,6 +113,16 @@ public class Main {
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Ok<>(value);
         }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(value);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(value));
+        }
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
@@ -121,6 +139,16 @@ public class Main {
         @Override
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Err<>(mapper.apply(error));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(error);
         }
     }
 
@@ -147,6 +175,14 @@ public class Main {
 
         public Result<String, List<CompileError>> toResult() {
             return maybeValue.<Result<String, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(errors));
+        }
+    }
+
+    private record TypeRule(String type, Rule childRule) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return childRule.compile(input)
+                    .mapErr(err -> new CompileError("Not of type '" + type + "'", input, List.of(err)));
         }
     }
 
@@ -193,6 +229,138 @@ public class Main {
         }
     }
 
+    private static class InvocationRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input1) {
+            if (!input1.endsWith(")")) return new Err<>(new CompileError("Suffix ')' not present", input1));
+            String withoutEnd = input1.substring(0, input1.length() - ")".length());
+
+            return findArgStart(withoutEnd)
+                    .map(argsStart -> withArgStart(withoutEnd, argsStart))
+                    .orElseGet(() -> new Err<>(new CompileError("No param start present", input1)));
+        }
+
+        private Result<String, CompileError> withArgStart(String withoutEnd, int argsStart) {
+            String inputCaller = withoutEnd.substring(0, argsStart);
+            String inputArguments = withoutEnd.substring(argsStart + "(".length());
+
+            return new DivideRule(createValueRule(), Main::divideValues, Main::mergeValues).compile(inputArguments).flatMapValue(
+                    outputArguments -> createValueRule().compile(inputCaller).mapValue(
+                            outputCaller -> outputCaller + "(" + outputArguments + ")"));
+        }
+
+        private Optional<Integer> findArgStart(String withoutEnd) {
+            int depth = 0;
+
+            Deque<Tuple<Integer, Character>> queue = IntStream.range(0, withoutEnd.length())
+                    .map(index -> withoutEnd.length() - index - 1)
+                    .mapToObj(index -> new Tuple<>(index, withoutEnd.charAt(index)))
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            while (!queue.isEmpty()) {
+                Tuple<Integer, Character> tuple = queue.pop();
+                int i = tuple.left;
+                char c = tuple.right;
+
+                if (c == '"') {
+                    queue.pop();
+
+                    if (queue.isEmpty()) continue;
+                    Tuple<Integer, Character> next = queue.peek();
+                    if (next.right == '\\') {
+                        queue.pop();
+                    }
+
+                    queue.pop();
+                    continue;
+                }
+
+                if (c == '(' && depth == 0) {
+                    return Optional.of(i);
+                }
+
+                if (c == ')') depth++;
+                if (c == '(') depth--;
+            }
+            return Optional.empty();
+        }
+    }
+
+    private record DivideRule(
+            Rule rule,
+            DivideFolder folder,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return Main.getString(divideAll(input, folder), rule(), merger());
+        }
+    }
+
+    private static class DataAccessRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input1) {
+            int accessSeparator = input1.lastIndexOf(".");
+            if (accessSeparator < 0) return new Err<>(new CompileError("Infix '.' not present", input1));
+
+            String oldChild = input1.substring(0, accessSeparator);
+            String property = input1.substring(accessSeparator + ".".length()).strip();
+            if (isSymbol(property)) {
+                return createValueRule().compile(oldChild).mapValue(newChild -> newChild + "." + property);
+            }
+
+            return new Err<>(new CompileError("Not a symbol", property));
+        }
+    }
+
+    private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            int operatorIndex = input.indexOf(infix);
+            if (operatorIndex < 0) {
+                String format = "Infix '%s' not present";
+                String message = format.formatted(infix);
+                return new Err<>(new CompileError(message, input));
+            }
+
+            String leftString = input.substring(0, operatorIndex);
+            String rightString = input.substring(operatorIndex + infix.length());
+            return leftRule.compile(leftString)
+                    .flatMapValue(left -> rightRule.compile(rightString).mapValue(right -> left + infix + right));
+        }
+    }
+
+    private static class LazyRule implements Rule {
+        private Optional<Rule> maybeChildRule = Optional.empty();
+
+        public void set(Rule childRule) {
+            this.maybeChildRule = Optional.of(childRule);
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return maybeChildRule
+                    .map(rule -> rule.compile(input))
+                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)));
+        }
+    }
+
+    private static class EmptyRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return input.isEmpty()
+                    ? new Ok<>("")
+                    : new Err<>(new CompileError("Not empty", input));
+        }
+    }
+
+    private record StripRule(Rule childRule) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return childRule.compile(input.strip());
+        }
+    }
+
     public static final List<String> RESERVED_KEYWORDS = List.of("private");
     private static int counter = 0;
 
@@ -210,41 +378,45 @@ public class Main {
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compile(divideStatements(input, Main::processStatementChar), compiler, Main::merge);
+        return getValue(input, Main::processStatementChar, input1 -> wrapPrevious(input1, compiler), Main::merge);
     }
 
-    private static Optional<String> compile(
-            List<String> segments,
-            Function<String, Optional<String>> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
-        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
+    private static Optional<String> getValue(String input, DivideFolder processStatementChar, Rule rule, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return new DivideRule(rule, processStatementChar, merger).compile(input).findValue();
+    }
+
+    private static Result<String, CompileError> wrapPrevious(String input, Function<String, Optional<String>> compiler) {
+        return compiler.apply(input).<Result<String, CompileError>>map(Ok::new).orElseGet(() -> new Err<>(new CompileError("Invalid child", input)));
+    }
+
+    private static Result<String, CompileError> getString(List<String> segments, Rule childRule, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        Result<StringBuilder, CompileError> maybeOutput = new Ok<>(new StringBuilder());
         for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(str -> merger.apply(output, str));
-            });
+            maybeOutput = maybeOutput.flatMapValue(
+                    output -> childRule.compile(segment).mapValue(
+                            str -> merger.apply(output, str)));
         }
 
-        return maybeOutput.map(StringBuilder::toString);
+        return maybeOutput.mapValue(StringBuilder::toString);
     }
 
     private static StringBuilder merge(StringBuilder output, String str) {
         return output.append(str);
     }
 
-    private static List<String> divideStatements(String input, BiFunction<State, Character, State> folder) {
+    private static List<String> divideAll(String input, DivideFolder folder) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
 
         State state = new State(queue);
-        while (!state.isEmpty()) {
+        while (state.hasNext()) {
             char c = state.pop();
 
             State finalState = state;
             state = divideSingleQuotes(state, c)
                     .or(() -> divideDoubleQuotes(finalState, c))
-                    .orElseGet(() -> folder.apply(finalState, c));
+                    .orElseGet(() -> folder.fold(finalState, c));
         }
 
         return state.advance().segments;
@@ -267,7 +439,7 @@ public class Main {
         if (c != '"') return Optional.empty();
 
         State current = state.append(c);
-        while (!current.isEmpty()) {
+        while (current.hasNext()) {
             char next = current.pop();
             current.append(next);
 
@@ -292,7 +464,7 @@ public class Main {
     }
 
     private static Optional<String> compileRootSegment(String input) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
+        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
         if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         if (input.startsWith("package ")) return Optional.of("");
@@ -319,9 +491,8 @@ public class Main {
         if (!withEnd.endsWith("}")) return Optional.empty();
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return compileStatements(inputContent, input1 -> compileClassSegment(input1, name)).map(outputContent -> {
-            return "struct " + name + " {\n};\n" + outputContent;
-        });
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, name))
+                .map(outputContent -> "struct " + name + " {\n};\n" + outputContent);
     }
 
     private static Optional<String> invalidate(String type, String input) {
@@ -330,7 +501,7 @@ public class Main {
     }
 
     private static Optional<String> compileClassSegment(String input, String structName) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
+        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
         if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         Optional<String> maybeClass = compileClass(input);
@@ -339,7 +510,7 @@ public class Main {
         Optional<String> inputType = compileMethod(input, structName);
         if (inputType.isPresent()) return inputType;
 
-        if (input.indexOf("(") >= 0) {
+        if (input.contains("(")) {
             return generateStructType(structName)
                     .flatMap(type -> generateDefinition(new Node(type, "new")))
                     .map(definition -> generateMethod(definition, ""));
@@ -369,9 +540,8 @@ public class Main {
             if (!withEnd.endsWith("}")) return Optional.empty();
 
             String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-            return compileStatements(inputContent, Main::compileStatement).map(outputContent -> {
-                return generateMethod(definition, outputContent);
-            });
+            return compileStatements(inputContent, Main::compileStatement).map(
+                    outputContent -> generateMethod(definition, outputContent));
         });
     }
 
@@ -394,9 +564,7 @@ public class Main {
                 ? beforeName
                 : beforeName.substring(typeSeparator + " ".length());
 
-        return compileType(inputType).map(outputType -> {
-            return new Node(outputType, oldName);
-        });
+        return compileType(inputType).map(outputType -> new Node(outputType, oldName));
     }
 
     private static Node modifyDefinition(String structName, Node node) {
@@ -408,7 +576,7 @@ public class Main {
     }
 
     private static Optional<String> compileStatement(String input) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
+        Optional<String> maybeWhitespace = new StripRule(new EmptyRule()).compile(input).findValue();
         if (maybeWhitespace.isPresent()) return maybeWhitespace;
 
         String stripped = input.strip();
@@ -416,31 +584,12 @@ public class Main {
         if (stripped.startsWith("return ")) return Optional.of("\n\treturn temp;");
         if (stripped.startsWith("for")) return Optional.of("\n\tfor(;;){\n\t}");
 
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            int valueSeparator = withoutEnd.indexOf("=");
-            if (valueSeparator >= 0) {
-                String inputDefinition = withoutEnd.substring(0, valueSeparator).strip();
-                String value = withoutEnd.substring(valueSeparator + "=".length());
-
-                return parseDefinition(inputDefinition)
-                        .flatMap(Main::generateDefinition)
-                        .flatMap(outputDefinition -> {
-                            return createValueRule().compile(value).<Optional<String>>match(Optional::of, error -> {
-                                System.err.println(error.display());
-                                return Optional.empty();
-                            }).map(outputValue -> {
-                                return "\n\t" +
-                                        outputDefinition +
-                                        " = " + outputValue + ";";
-                            });
-                        });
-            }
-        }
+        Optional<String> maybeInitialization = compileInitialization(stripped);
+        if (maybeInitialization.isPresent()) return maybeInitialization;
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            Optional<String> maybeInvocation = compileInvocation(withoutEnd);
+            Optional<String> maybeInvocation = new InvocationRule().compile(withoutEnd).findValue();
             if (maybeInvocation.isPresent()) return maybeInvocation.map(value -> "\n\t" + value);
         }
 
@@ -448,8 +597,37 @@ public class Main {
         return invalidate("statement", input);
     }
 
-    private static OrRule createValueRule() {
-        return new OrRule(List.of(
+    private static Optional<String> compileInitialization(String stripped) {
+        if (!stripped.endsWith(";")) return Optional.empty();
+
+        String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        int valueSeparator = withoutEnd.indexOf("=");
+        if (valueSeparator < 0) return Optional.empty();
+
+        String inputDefinition = withoutEnd.substring(0, valueSeparator).strip();
+        String value = withoutEnd.substring(valueSeparator + "=".length());
+
+        return parseDefinition(inputDefinition)
+                .flatMap(Main::generateDefinition)
+                .flatMap(outputDefinition -> {
+                    return createValueRule().compile(value).mapValue(outputValue -> "\n\t" +
+                                    outputDefinition +
+                                    " = " + outputValue + ";")
+                            .findValue();
+                });
+    }
+
+    @Deprecated
+    private static Optional<String> unwrap(Result<String, CompileError> result) {
+        return result.match(Optional::of, error -> {
+            System.err.println(error.display());
+            return Optional.empty();
+        });
+    }
+
+    private static Rule createValueRule() {
+        LazyRule value = new LazyRule();
+        value.set(new OrRule(List.of(
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input1) {
@@ -462,18 +640,7 @@ public class Main {
                         return compileConstructor(input1);
                     }
                 },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input1) {
-                        return compile0(input1)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
-                    }
-
-                    private Optional<String> compile0(String value1) {
-                        return compileInvocation(value1);
-                    }
-                },
+                new TypeRule("invocation", new InvocationRule()),
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input1) {
@@ -522,18 +689,7 @@ public class Main {
                         return compileNumber(stripped);
                     }
                 },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input1) {
-                        return compile0(input1)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
-                    }
-
-                    private Optional<String> compile0(String value1) {
-                        return compileDataAccess(value1);
-                    }
-                },
+                new DataAccessRule(),
                 new Rule() {
                     @Override
                     public Result<String, CompileError> compile(String input1) {
@@ -546,31 +702,10 @@ public class Main {
                         return compileMethodAccess(value1);
                     }
                 },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input1) {
-                        return compile0(input1)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
-                    }
-
-                    private Optional<String> compile0(String value) {
-                        return compileOperator(value, "-");
-                    }
-                },
-                new Rule() {
-                    @Override
-                    public Result<String, CompileError> compile(String input1) {
-                        return compile0(input1)
-                                .<Result<String, CompileError>>map(Ok::new)
-                                .orElseGet(() -> new Err<>(new CompileError("Invalid", input1)));
-                    }
-
-                    private Optional<String> compile0(String value) {
-                        return compileOperator(value, "+");
-                    }
-                }
-        ));
+                new InfixRule(value, "-", value),
+                new InfixRule(value, "+", value)
+        )));
+        return value;
     }
 
     private static Optional<String> compileSymbol(String stripped) {
@@ -594,21 +729,6 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileDataAccess(String value) {
-        int accessSeparator = value.lastIndexOf(".");
-        if (accessSeparator >= 0) {
-            String oldChild = value.substring(0, accessSeparator);
-            String property = value.substring(accessSeparator + ".".length()).strip();
-            if (isSymbol(property)) {
-                return createValueRule().compile(oldChild).<Optional<String>>match(Optional::of, error -> {
-                    System.err.println(error.display());
-                    return Optional.empty();
-                }).map(newChild -> newChild + "." + property);
-            }
-        }
-        return Optional.empty();
-    }
-
     private static Optional<String> compileMethodAccess(String value) {
         if (value.contains("::")) {
             int index = counter;
@@ -626,83 +746,6 @@ public class Main {
     private static Optional<String> compileConstructor(String input) {
         if (input.startsWith("new ")) return Optional.of("Temp()");
         return Optional.empty();
-    }
-
-    private static Optional<String> compileOperator(String value, String operator) {
-        int operatorIndex = value.indexOf(operator);
-        if (operatorIndex < 0) return Optional.empty();
-
-        String leftString = value.substring(0, operatorIndex).strip();
-        String rightString = value.substring(operatorIndex + 1).strip();
-        return createValueRule().compile(leftString).<Optional<String>>match(Optional::of, error1 -> {
-            System.err.println(error1.display());
-            return Optional.empty();
-        }).flatMap(left -> {
-            return createValueRule().compile(rightString).<Optional<String>>match(Optional::of, error -> {
-                System.err.println(error.display());
-                return Optional.empty();
-            }).map(right -> {
-                return left + " " + operator + " " + right;
-            });
-        });
-    }
-
-    private static Optional<String> compileInvocation(String value) {
-        if (!value.endsWith(")")) return Optional.empty();
-
-        String withoutEnd = value.substring(0, value.length() - ")".length());
-
-        int argsStart = -1;
-        int depth = 0;
-
-        Deque<Tuple<Integer, Character>> queue = IntStream.range(0, withoutEnd.length())
-                .map(index -> withoutEnd.length() - index - 1)
-                .mapToObj(index -> new Tuple<>(index, withoutEnd.charAt(index)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        while (!queue.isEmpty()) {
-            Tuple<Integer, Character> tuple = queue.pop();
-            int i = tuple.left;
-            char c = tuple.right;
-
-            if (c == '"') {
-                queue.pop();
-
-                Tuple<Integer, Character> next = queue.peek();
-                if (next.right == '\\') {
-                    queue.pop();
-                }
-
-                queue.pop();
-                continue;
-            }
-
-            if (c == '(' && depth == 0) {
-                argsStart = i;
-                break;
-            }
-
-            if (c == ')') depth++;
-            if (c == '(') depth--;
-        }
-
-        if (argsStart < 0) return Optional.empty();
-
-        String inputCaller = withoutEnd.substring(0, argsStart);
-        String inputArguments = withoutEnd.substring(argsStart + "(".length());
-        List<String> arguments = divideStatements(inputArguments, Main::divideValues);
-
-        return compile(arguments, input -> createValueRule().compile(input).match(Optional::of, error -> {
-            System.err.println(error.display());
-            return Optional.empty();
-        }), Main::mergeValues).flatMap(outputArguments -> {
-            return createValueRule().compile(inputCaller).<Optional<String>>match(Optional::of, error -> {
-                System.err.println(error.display());
-                return Optional.empty();
-            }).map(outputCaller -> {
-                return outputCaller + "(" + outputArguments + ")";
-            });
-        });
     }
 
     private static State divideValues(State state, char c) {
@@ -765,11 +808,6 @@ public class Main {
             }
         }
         return true;
-    }
-
-    private static Optional<String> compileWhitespace(String input) {
-        if (input.isBlank()) return Optional.of("");
-        return Optional.empty();
     }
 }
 

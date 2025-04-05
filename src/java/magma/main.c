@@ -17,6 +17,8 @@ struct Main new(){
 }
 struct Main new(){
 }
+struct Main new(){
+}
 struct State {
 };
 int temp;
@@ -33,7 +35,7 @@ struct State State_popAndAppend(){
 struct char State_pop(){
 	return temp;
 }
-struct boolean State_isEmpty(){
+struct boolean State_hasNext(){
 	return temp;
 }
 struct State State_append(){
@@ -67,6 +69,8 @@ struct Main new(){
 }
 struct Main new(){
 }
+struct Main new(){
+}
 struct CompileError {
 };
 int temp;
@@ -84,12 +88,28 @@ struct String CompileError_format(){
 }
 struct Main new(){
 }
+struct Main new(){
+}
+struct Main new(){
+}
+struct Main new(){
+}
+struct Main new(){
+}
+struct Main new(){
+}
 int temp;
 struct Main new(){
 }
 struct Main new(){
 }
 struct Temp Main_compileStatements(){
+	return temp;
+}
+struct Temp Main_getValue(){
+	return temp;
+}
+struct Temp Main_wrapPrevious(){
 	return temp;
 }
 struct Main new(){
@@ -121,13 +141,17 @@ struct Temp Main_compileDefinition(){
 struct Main new(){
 }
 struct Node Main_modifyDefinition(){
-	struct String newName = condition ? whenTrue : whenFalse + "_" + node.name;
+	struct String newName = condition ? whenTrue : whenFalse.name;
 	return temp;
 }
 struct Main new(){
 }
-struct OrRule Main_createValueRule(){
+struct Main new(){
+}
+struct Temp Main_unwrap(){
 	return temp;
+}
+struct Main new(){
 }
 struct Temp Main_compileSymbol(){
 	if (1) {
@@ -144,8 +168,6 @@ struct Temp Main_compileNumber(){
 	}
 	return temp;
 }
-struct Main new(){
-}
 struct Temp Main_compileMethodAccess(){
 	if (1) {
 	}
@@ -160,8 +182,6 @@ struct Temp Main_compileConstructor(){
 	if (1) {
 	}
 	return temp;
-}
-struct Main new(){
 }
 struct Main new(){
 }
