@@ -11,7 +11,7 @@ public class Main {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
-            String output = getString(input) + "int main(){\n\treturn 0;\n}\n";
+            String output = getString(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 
             Path target = source.resolveSibling("main.c");
             Files.writeString(target, output);
@@ -48,9 +48,25 @@ public class Main {
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
         if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
-        if (input.contains("class ")) return "struct Temp {\n};\n";
+        int keywordIndex = input.indexOf("class ");
+        if (keywordIndex >= 0) {
+            String modifiers = input.substring(0, keywordIndex);
+            String right = input.substring(keywordIndex + "class ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                String body = right.substring(contentStart + "{".length()).strip();
+                if (body.endsWith("}")) {
+                    return generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" + generatePlaceholder(body);
+                }
+            }
+        }
 
         System.err.println("Invalid root segment: " + input);
-        return "/* " + input + " */\n";
+        return generatePlaceholder(input);
+    }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
     }
 }
