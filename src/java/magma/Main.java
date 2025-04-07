@@ -588,21 +588,31 @@ public class Main {
 
     private static final class Node {
         private final Map_<String, String> strings;
+        private final Map_<String, List_<Node>> nodeLists;
 
         private Node() {
-            this(Maps.empty());
+            this(Maps.empty(), Maps.empty());
         }
 
-        private Node(Map_<String, String> maps) {
+        private Node(Map_<String, String> maps, Map_<String, List_<Node>> nodeLists) {
             this.strings = maps;
+            this.nodeLists = nodeLists;
         }
 
         private Node withString(String propertyKey, String propertyValue) {
-            return new Node(strings.with(propertyKey, propertyValue));
+            return new Node(strings.with(propertyKey, propertyValue), nodeLists);
         }
 
-        public Option<String> find(String propertyKey) {
+        public Option<String> findString(String propertyKey) {
             return strings.find(propertyKey);
+        }
+
+        public Node withNodeList(String propertyKey, List_<Node> propertyValues) {
+            return new Node(strings, nodeLists.with(propertyKey, propertyValues));
+        }
+
+        public Option<List_<Node>> findNodeList(String propertyKey) {
+            return nodeLists.find(propertyKey);
         }
     }
 
@@ -1361,10 +1371,16 @@ public class Main {
             return compileType(state, beforeName).mapValue(outputType -> new Node().withString("type", outputType));
         }
 
-        String modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
+        String placeholder = beforeName.substring(0, typeSeparator);
         String inputType = beforeName.substring(typeSeparator + 1);
 
-        Node modifiers1 = new Node().withString("modifiers", modifiers);
+        List_<Node> modifiers = divideByChar(placeholder, ' ')
+                .stream()
+                .map(String::strip)
+                .map(value -> new Node().withString("value", value))
+                .collect(new ListCollector<>());
+
+        Node modifiers1 = new Node().withNodeList("modifiers", modifiers);
         return compileType(state, inputType).mapValue(outputType -> modifiers1.withString("type", outputType));
     }
 
@@ -1385,7 +1401,17 @@ public class Main {
     }
 
     private static Result<String, CompileError> generateDefinition(Node node) {
-        return new Ok<>(node.find("modifiers").orElse("") + node.find("type").orElse("") + " " + node.find("name").orElse(""));
+        String modifiers = node.findNodeList("modifiers").orElse(Lists.empty())
+                .stream()
+                .map(child -> child.findString("value").orElse(""))
+                .map(Main::generatePlaceholder)
+                .collect(new Joiner(" "))
+                .map(result -> result + " ")
+                .orElse("");
+
+        return new Ok<>(modifiers +
+                node.findString("type").orElse("") + " " +
+                node.findString("name").orElse(""));
     }
 
     private static Result<String, CompileError> compileType(ParseState state, String input) {
@@ -1505,6 +1531,6 @@ public class Main {
     }
 
     private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
+        return "/*" + input + "*/";
     }
 }
