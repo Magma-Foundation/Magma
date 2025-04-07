@@ -19,10 +19,15 @@
     private static final List<String> imports = new ArrayList<>(); *//* 
     private static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> functions = new ArrayList<>(); *//* 
-    private static final int lambdaCounter = 0; *//* 
-        segments.add(buffer.toString()); *//* 
-        return segments; *//* 
-     *//* String modifiers = input.substring(0, keywordIndex); *//* 
+    private static final int lambdaCounter = 0; *//* ' && appended.isShallow()) return appended.advance().exit(); *//* 
+        if (c == '{') return appended.enter();
+        if (c == '} *//* ') return appended.exit(); *//* 
+        return appended; *//* 
+     *//* 
+
+    private static boolean isEmpty(State state) {
+        return state.queue.isEmpty();
+    } *//* String modifiers = input.substring(0, keywordIndex); *//* 
             String right = input.substring(keywordIndex + "class ".length()); *//* 
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
@@ -88,7 +93,16 @@
     } *//* 
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(Arrays.asList(input.split(Pattern.quote(","))), compiler, Main::mergeValues);
+        return compileAll(divideAll(input, Main::divideValueChar), compiler, Main::mergeValues);
+    } *//* 
+
+    private static State divideValueChar(State state, Character c) {
+        if (c == ',' && state.isLevel()) return state.advance();
+
+        State appended = state.append(c);
+        if (c == '(') return appended.enter();
+        if (c == ')') return appended.exit();
+        return appended;
     } *//* 
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {
@@ -154,7 +168,7 @@
             addFunction(generateDefinition("", "auto", lambda), generateDefinition("", "auto", paramName), "{\n\treturn " +
                     value + ";\n" +
                     "}");
-            
+
             return Optional.of(lambda);
         }
 
@@ -254,6 +268,8 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
+#include <temp.h>
 /* 
 
 public  */struct Main {
@@ -272,13 +288,68 @@ public  */struct Main {
         int keywordIndex = input.indexOf(" */struct ");
         if (keywordIndex >= 0) {
 };
+/* private static class State {
+        private final Deque<Character> queue;
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        */struct private State(/* Deque<Character> */ queue){
+	this(queue, /* new ArrayList<> */(), /* new StringBuilder */(), /*  0 */);
+	/* }
+
+        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+           */struct  this.queue = queue;
+	/* this.segments */ = segments;
+	/* this.buffer */ = buffer;
+	/* this.depth */ = depth;
+	/* }
+
+        private State enter() {
+           */struct  this.depth = /*  depth + 1 */;/* 
+            return this; */
+	/* }
+
+        private State exit() {
+           */struct  this.depth = /*  depth - 1 */;/* 
+            return this; */
+	/* }
+
+        private State append(char c) {
+            buffer */.append(c);/* 
+            return this; */
+	/* }
+
+        private State advance() {
+            segments */.add(buffer.toString());
+	/* this.buffer */ = /* new StringBuilder */();/* 
+            return this; */
+	/* }
+
+        private boolean isLevel() {
+            */struct return depth = /* = 0 */;
+	/* }
+
+        private char getPop() {
+            return queue */.pop();
+	/* }
+
+        private boolean isShallow() {
+            */struct return depth = /* = 1 */;/* 
+        }
+
+        public List<String> segments() {
+            return segments; *//* 
+        }
+     */
+}
 auto __lambda0__(auto input){{
-	return  runWithInput(source;
+	return  runWithInput;
 }
 }
 /* public static */void main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda0__, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
+	readString(source).match(__lambda0__(source, input), /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
@@ -301,11 +372,11 @@ auto __lambda0__(auto input){{
         } */
 }
 auto __lambda0__(auto compiled){{
-	return  mergeAll(compiled;
+	return  mergeAll;
 }
 }
 /* private static */struct String compile(struct String input){
-	/* List<String> */ segments = divideStatements(input);/* 
+	/* List<String> */ segments = divideAll(input, /*  Main::divideStatementChar */);/* 
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     compiled.addAll(imports);
@@ -314,17 +385,17 @@ auto __lambda0__(auto compiled){{
                     return compiled;
                 } */
 	/* )
-                 */.map(__lambda0__, /*  Main::mergeStatements) */).orElse("");
+                 */.map(__lambda0__(compiled, /*  Main::mergeStatements */)).orElse("");
 }
 /* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
-	/* return compileAll */(divideStatements(input), compiler, /*  Main::mergeStatements */);
+	/* return compileAll */(divideAll(input, /*  Main::divideStatementChar */), compiler, /*  Main::mergeStatements */);
 }
 auto __lambda0__(auto compiled){{
-	return  mergeAll(compiled;
+	return  mergeAll;
 }
 }
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* return parseAll */(segments, compiler).map(__lambda0__, /*  merger) */);
+	/* return parseAll */(segments, compiler).map(__lambda0__(compiled, merger));
 }
 /* private static */struct String mergeAll(/* List<String> */ compiled, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
 	struct StringBuilder output = /* new StringBuilder */();/* 
@@ -349,25 +420,21 @@ auto __lambda0__(auto compiled){{
 /* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
 }
-/* private static *//* ArrayList<String> */ divideStatements(struct String input){
-	/* ArrayList<String> */ segments = /* new ArrayList<> */();
-	struct StringBuilder buffer = /* new StringBuilder */();
-	struct int depth = /*  0 */;
-	/* for *//* (int */ i = /*  0 */;
-	/* i < input */.length();/*  i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '} *//* ' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            } *//*  else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            } */
+/* private static *//* List<String> */ divideAll(struct String input, /* BiFunction<State */, /* Character */, /* State> */ divider){
+	/* LinkedList<Character> */ queue = IntStream.range(/* 0 */, input.length()).mapToObj(/* input::charAt */).collect(Collectors.toCollection(/* LinkedList::new */));
+	struct State state = /* new State */(queue);
+	struct State current = state;/* 
+        while (!isEmpty(current)) {
+            char c = current.getPop();
+            current = divider.apply(current, c);
+        } */
+	/* return current */.advance().segments();
+}
+/* private static */struct State divideStatementChar(struct State state, struct char c){
+	struct State appended = state.append(c);
+	struct if (c = /* = ' */;
+	/* ' && appended */.isLevel()) return appended.advance();/* 
+        if (c == ' */
 }
 int main(){
 	__main__();

@@ -5,12 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
@@ -28,6 +30,61 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
+        }
+    }
+
+    private static class State {
+        private final Deque<Character> queue;
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+            this.queue = queue;
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        private State enter() {
+            this.depth = depth + 1;
+            return this;
+        }
+
+        private State exit() {
+            this.depth = depth - 1;
+            return this;
+        }
+
+        private State append(char c) {
+            buffer.append(c);
+            return this;
+        }
+
+        private State advance() {
+            segments.add(buffer.toString());
+            this.buffer = new StringBuilder();
+            return this;
+        }
+
+        private boolean isLevel() {
+            return depth == 0;
+        }
+
+        private char getPop() {
+            return queue.pop();
+        }
+
+        private boolean isShallow() {
+            return depth == 1;
+        }
+
+        public List<String> segments() {
+            return segments;
         }
     }
 
@@ -68,7 +125,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        List<String> segments = divideStatements(input);
+        List<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     compiled.addAll(imports);
@@ -81,7 +138,7 @@ public class Main {
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(divideStatements(input), compiler, Main::mergeStatements);
+        return compileAll(divideAll(input, Main::divideStatementChar), compiler, Main::mergeStatements);
     }
 
     private static Optional<String> compileAll(
@@ -119,27 +176,32 @@ public class Main {
         return output.append(str);
     }
 
-    private static ArrayList<String> divideStatements(String input) {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> divider) {
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        State state = new State(queue);
+        State current = state;
+        while (!isEmpty(current)) {
+            char c = current.getPop();
+            current = divider.apply(current, c);
         }
-        segments.add(buffer.toString());
-        return segments;
+
+        return current.advance().segments();
+    }
+
+    private static State divideStatementChar(State state, char c) {
+        State appended = state.append(c);
+        if (c == ';' && appended.isLevel()) return appended.advance();
+        if (c == '}' && appended.isShallow()) return appended.advance().exit();
+        if (c == '{') return appended.enter();
+        if (c == '}') return appended.exit();
+        return appended;
+    }
+
+    private static boolean isEmpty(State state) {
+        return state.queue.isEmpty();
     }
 
     private static Optional<String> compileRootSegment(String input) {
@@ -219,7 +281,16 @@ public class Main {
     }
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
-        return compileAll(Arrays.asList(input.split(Pattern.quote(","))), compiler, Main::mergeValues);
+        return compileAll(divideAll(input, Main::divideValueChar), compiler, Main::mergeValues);
+    }
+
+    private static State divideValueChar(State state, Character c) {
+        if (c == ',' && state.isLevel()) return state.advance();
+
+        State appended = state.append(c);
+        if (c == '(') return appended.enter();
+        if (c == ')') return appended.exit();
+        return appended;
     }
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {
