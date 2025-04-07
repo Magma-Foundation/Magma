@@ -13,21 +13,21 @@
 
 public  */struct Main {
 };
-/* public static */void main(String[] args){
+/* public static */void main(struct String* args){
 }
-/* private static */String compile(String input){
+/* private static */struct String compile(struct String input){
 }
-/* private static */Optional<String> compileStatements(String input,  Function<String, /*  */Optional<String>> compiler){
+/* private static *//* Optional<String> */ compileStatements(struct String input, struct  Function<String, /*  *//* Optional<String>> */ compiler){
 }
-/* private static */Optional<String> compileAll(/* 
-            */List<String> segments, /* 
-           */ Function<String, /*  */Optional<String>> compiler, /* 
-           */ BiFunction<StringBuilder,  String, /*  StringBuilder> merger
-   */ ){
+/* private static *//* Optional<String> */ compileAll(/* 
+            *//* List<String> */ segments, /* 
+           */struct  Function<String, /*  *//* Optional<String>> */ compiler, /* 
+           */struct  BiFunction<StringBuilder, struct  String, /*  StringBuilder> merger
+   */struct  ){
 }
-/* private static */StringBuilder mergeStatements(StringBuilder output, /*  */String str){
+/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, /*  */struct String str){
 }
-/* private static */ArrayList<String> divideStatements(String input){
+/* private static *//* ArrayList<String> */ divideStatements(struct String input){
 }
 /* segments.add */(/* buffer.toString( */){
 }
@@ -41,15 +41,15 @@ public  */struct Main {
         int keywordIndex = input.indexOf(" */struct ");
         if (keywordIndex >= 0) {
 };
-/* String modifiers */= input.substring(/* 0 */,  keywordIndex){
+/* String modifiers *//* = */ input.substring(/* 0 */, struct  keywordIndex){
 }
-/* String right */= input.substring(/* keywordIndex + */"class ".length(){
+/* String right *//* = */ input.substring(/* keywordIndex + *//* "class */ ".length(){
 }
-/* int contentStart */= right.indexOf(/* "{" */){
+/* int contentStart *//* = */ right.indexOf(/* "{" */){
 }
 /* }
 
-        */return Optional.of(invalidate("root segment",  input){
+        */struct return Optional.of(/* invalidate("root */ segment", struct  input){
 }
 /* 
 
@@ -76,7 +76,7 @@ public  */struct Main {
             String paramString = withParams.substring(0, i);
             List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
 
-            return compileAll(inputParams, Main::compileDefinition, (output, str) -> mergeValues(output, str))
+            return compileAll(inputParams, Main::compileDefinition, Main::mergeValues)
                     .flatMap(outputParams -> {
                         return compileDefinition(header).map(definition -> {
                             return definition + "(" +
@@ -116,9 +116,31 @@ public  */struct Main {
             }
 
             String name = header.substring(nameSeparator + " ".length());
-            return Optional.of(modifiers + type + " " + name);
+            return Optional.of(modifiers + compileType(type) + " " + name);
         }
         return Optional.of(generatePlaceholder(header));
+    } *//* 
+
+    private static String compileType(String type) {
+        String stripped = type.strip();
+        if (stripped.equals("void")) return "void";
+        if (stripped.endsWith("[]")) return compileType(stripped.substring(0, stripped.length() - "[]".length())) + "*";
+
+        if (isSymbol(stripped)) {
+            return "struct " + stripped;
+        }
+
+        return generatePlaceholder(stripped);
+    } *//* 
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (!Character.isLetter(c)) {
+                return false;
+            }
+        }
+        return true;
     } *//* 
 
     private static String generatePlaceholder(String input) {

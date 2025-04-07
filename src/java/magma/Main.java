@@ -163,9 +163,31 @@ public class Main {
             }
 
             String name = header.substring(nameSeparator + " ".length());
-            return Optional.of(modifiers + type + " " + name);
+            return Optional.of(modifiers + compileType(type) + " " + name);
         }
         return Optional.of(generatePlaceholder(header));
+    }
+
+    private static String compileType(String type) {
+        String stripped = type.strip();
+        if (stripped.equals("void")) return "void";
+        if (stripped.endsWith("[]")) return compileType(stripped.substring(0, stripped.length() - "[]".length())) + "*";
+
+        if (isSymbol(stripped)) {
+            return "struct " + stripped;
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (!Character.isLetter(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String generatePlaceholder(String input) {
