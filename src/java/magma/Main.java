@@ -63,6 +63,8 @@ public class Main {
         T last();
 
         Stream_<Tuple<Integer, T>> streamWithIndices();
+
+        T first();
     }
 
     private interface Stream_<T> {
@@ -254,6 +256,11 @@ public class Main {
         public Stream_<Tuple<Integer, T>> streamWithIndices() {
             return new HeadedStream<>(new RangeHead(inner.size())).map(index -> new Tuple<>(index, inner.get(index)));
         }
+
+        @Override
+        public T first() {
+            return inner.getFirst();
+        }
     }
 
     private static class Lists {
@@ -344,6 +351,10 @@ public class Main {
 
         public List_<String> segments() {
             return segments;
+        }
+
+        public char peek() {
+            return queue.first();
         }
     }
 
@@ -826,6 +837,12 @@ public class Main {
         if (c == ',' && state.isLevel()) return state.advance();
 
         State appended = state.append(c);
+        if (c == '-') {
+            if (state.peek() == '>') {
+                return state.popAndAppend();
+            }
+        }
+
         if (c == '(' || c == '<') return appended.enter();
         if (c == ')' || c == '>') return appended.exit();
         return appended;
