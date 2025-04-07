@@ -12,7 +12,6 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
 /* private static */ struct Lists {
 };
 /* private static */ struct State {
@@ -64,7 +63,7 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 };
-/* private sealed */ struct Option_Integer {
+/* sealed public */ struct Option_Integer {
 	void ifPresent(void (*)(Integer) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(Integer) mapper);
 	/* <R> */Option_R map(R (*)(Integer) mapper);
@@ -126,7 +125,7 @@
 	int allMatch(Predicate_T predicate);
 	Stream__T filter(Predicate_T predicate);
 };
-/* private sealed */ struct Option_String {
+/* sealed public */ struct Option_String {
 	void ifPresent(void (*)(String) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(String) mapper);
 	/* <R> */Option_R map(R (*)(String) mapper);
@@ -140,7 +139,7 @@
 };
 /* private */ struct Tuple_A_B {
 };
-/* private sealed */ struct Option_IOException {
+/* sealed public */ struct Option_IOException {
 	void ifPresent(void (*)(IOException) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(IOException) mapper);
 	/* <R> */Option_R map(R (*)(IOException) mapper);
@@ -152,10 +151,7 @@
 	int isEmpty();
 	/* <R> */Option_Tuple_IOException_R and(Option_R (*)() other);
 };
-/* private sealed */ struct Result_String_IOException {
-	/* <R> */R match(R (*)(String) whenOk, R (*)(IOException) whenErr);
-};
-/* private sealed */ struct Option_List__String {
+/* sealed public */ struct Option_List__String {
 	void ifPresent(void (*)(List__String) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(List__String) mapper);
 	/* <R> */Option_R map(R (*)(List__String) mapper);
@@ -167,7 +163,7 @@
 	int isEmpty();
 	/* <R> */Option_Tuple_List__String_R and(Option_R (*)() other);
 };
-/* private sealed */ struct Option_State {
+/* sealed public */ struct Option_State {
 	void ifPresent(void (*)(State) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(State) mapper);
 	/* <R> */Option_R map(R (*)(State) mapper);
@@ -308,27 +304,12 @@ auto __lambda5__(auto some){
 }
 /* public static */void main(String* args){
 	Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda4__, __lambda5__).ifPresent(__lambda3__);
+	magma.Files.readString(source).match(__lambda4__, __lambda5__).ifPresent(__lambda3__);
 }
 /* private static */Option_IOException runWithInput(Path source, String input){
 	String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 	Path target = source.resolveSibling("main.c");
-	return writeString(target, output);
-}
-/* private static */Option_IOException writeString(Path target, String output){/* 
-        try {
-            Files.writeString(target, output);
-            return new None<>();
-        } *//*  catch (IOException e) {
-            return new Some<>(e);
-        } */
-}
-/* private static */Result_String_IOException readString(Path source){/* 
-        try {
-            return new Ok<>(Files.readString(source));
-        } *//*  catch (IOException e) {
-            return new Err<>(e);
-        } */
+	return magma.Files.writeString(target, output);
 }
 auto __lambda6__(auto main){
 	return Main.divideStatementChar(main);

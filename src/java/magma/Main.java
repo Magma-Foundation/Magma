@@ -1,7 +1,6 @@
 package magma;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,11 +16,11 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Main {
-    private sealed interface Result<T, X> permits Ok, Err {
+    sealed public interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
-    private sealed interface Option<T> permits Some, None {
+    sealed public interface Option<T> permits Some, None {
         void ifPresent(Consumer<T> ifPresent);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
@@ -102,14 +101,14 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record Ok<T, X>(T value) implements Result<T, X> {
+    public record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(value);
         }
     }
 
-    private record Err<T, X>(X error) implements Result<T, X> {
+    public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
@@ -354,7 +353,7 @@ public class Main {
         }
     }
 
-    private record Some<T>(T value) implements Option<T> {
+    public record Some<T>(T value) implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> ifPresent) {
             ifPresent.accept(value);
@@ -406,7 +405,7 @@ public class Main {
         }
     }
 
-    private static final class None<T> implements Option<T> {
+    public static final class None<T> implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> ifPresent) {
         }
@@ -539,7 +538,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readString(source)
+        magma.Files.readString(source)
                 .match(input -> runWithInput(source, input), Some::new)
                 .ifPresent(Throwable::printStackTrace);
     }
@@ -548,24 +547,7 @@ public class Main {
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 
         Path target = source.resolveSibling("main.c");
-        return writeString(target, output);
-    }
-
-    private static Option<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return new None<>();
-        } catch (IOException e) {
-            return new Some<>(e);
-        }
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+        return magma.Files.writeString(target, output);
     }
 
     private static String compile(String input) {
