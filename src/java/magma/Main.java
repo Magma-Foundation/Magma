@@ -5,16 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Main {
+
+
     private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
@@ -29,6 +27,45 @@ public class Main {
         T orElse(T other);
 
         boolean isPresent();
+
+        Tuple<Boolean, T> toTuple(T other);
+    }
+
+    private interface List_<T> {
+        List_<T> add(T element);
+
+        List_<T> addAll(List_<T> elements);
+
+        void forEach(Consumer<T> consumer);
+
+        Stream_<T> stream();
+
+        T popFirst();
+
+        boolean isEmpty();
+    }
+
+    private interface Stream_<T> {
+        <R> Stream_<R> map(Function<T, R> mapper);
+
+        <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
+
+        <C> C collect(Collector<T, C> collector);
+
+        <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder);
+    }
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private interface Head<T> {
+        Option<T> next();
+    }
+
+    private record Tuple<A, B>(A left, B right) {
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -45,21 +82,123 @@ public class Main {
         }
     }
 
+    private static final class RangeHead implements Head<Integer> {
+        private final int size;
+        private int counter = 0;
+
+        private RangeHead(int size) {
+            this.size = size;
+        }
+
+        @Override
+        public Option<Integer> next() {
+            if (counter < size) {
+                int value = counter;
+                counter++;
+                return new Some<>(value);
+            } else {
+                return new None<>();
+            }
+        }
+    }
+
+    private record HeadedStream<T>(Head<T> head) implements Stream_<T> {
+        @Override
+        public <R> Stream_<R> map(Function<T, R> mapper) {
+            return new HeadedStream<>(() -> head.next().map(mapper));
+        }
+
+        @Override
+        public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Tuple<Boolean, R> tuple = head.next()
+                        .map(inner -> folder.apply(finalCurrent, inner))
+                        .toTuple(current);
+
+                if (tuple.left) {
+                    current = tuple.right;
+                } else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return foldWithInitial(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder) {
+            return this.<Option<R>>foldWithInitial(new Some<>(initial), (rOption, t) -> rOption.flatMap(current -> folder.apply(current, t)));
+        }
+    }
+
+    private record JavaList<T>(List<T> inner) implements List_<T> {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        @Override
+        public List_<T> add(T element) {
+            inner.add(element);
+            return this;
+        }
+
+        @Override
+        public List_<T> addAll(List_<T> elements) {
+            elements.forEach(this::add);
+            return this;
+        }
+
+        @Override
+        public void forEach(Consumer<T> consumer) {
+            inner.forEach(consumer);
+        }
+
+        @Override
+        public Stream_<T> stream() {
+            return new HeadedStream<>(new RangeHead(inner.size())).map(inner::get);
+        }
+
+        @Override
+        public T popFirst() {
+            return inner.removeFirst();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return inner.isEmpty();
+        }
+    }
+
+    private static class Lists {
+        public static <T> List_<T> empty() {
+            return new JavaList<>();
+        }
+    }
+
     private static class State {
-        private final Deque<Character> queue;
-        private final List<String> segments;
+        private final List_<Character> queue;
+        private final List_<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(Deque<Character> queue) {
-            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+        private State(List_<Character> queue) {
+            this(queue, Lists.empty(), new StringBuilder(), 0);
         }
 
-        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+        private State(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+        }
+
+        private boolean isEmpty() {
+            return queue.isEmpty();
         }
 
         private State enter() {
@@ -88,14 +227,14 @@ public class Main {
         }
 
         private char getPop() {
-            return queue.pop();
+            return queue.popFirst();
         }
 
         private boolean isShallow() {
             return depth == 1;
         }
 
-        public List<String> segments() {
+        public List_<String> segments() {
             return segments;
         }
     }
@@ -125,6 +264,11 @@ public class Main {
         public boolean isPresent() {
             return true;
         }
+
+        @Override
+        public Tuple<Boolean, T> toTuple(T other) {
+            return new Tuple<>(true, value);
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -151,11 +295,34 @@ public class Main {
         public boolean isPresent() {
             return false;
         }
+
+        @Override
+        public Tuple<Boolean, T> toTuple(T other) {
+            return new Tuple<>(false, other);
+        }
     }
 
-    private static final List<String> imports = new ArrayList<>();
-    private static final List<String> structs = new ArrayList<>();
-    private static final List<String> functions = new ArrayList<>();
+    private static class Streams {
+        public static Stream_<Character> from(String value) {
+            return new HeadedStream<>(new RangeHead(value.length())).map(value::charAt);
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List_<T>> {
+        @Override
+        public List_<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List_<T> fold(List_<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
+    private static final List_<String> imports = Lists.empty();
+    private static final List_<String> structs = Lists.empty();
+    private static final List_<String> functions = Lists.empty();
     private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
@@ -190,7 +357,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        List<String> segments = divideAll(input, Main::divideStatementChar);
+        List_<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     compiled.addAll(imports);
@@ -207,48 +374,30 @@ public class Main {
     }
 
     private static Option<String> compileAll(
-            List<String> segments,
+            List_<String> segments,
             Function<String, Option<String>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
         return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
     }
 
-    private static String mergeAll(List<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        StringBuilder output = new StringBuilder();
-
-        for (String segment : compiled) {
-            output = merger.apply(output, segment);
-        }
-
-        return output.toString();
+    private static String mergeAll(List_<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return compiled.stream().foldWithInitial(new StringBuilder(), merger).toString();
     }
 
-    private static Option<List<String>> parseAll(List<String> segments, Function<String, Option<String>> compiler) {
-        Option<List<String>> maybeCompiled = new Some<>(new ArrayList<>());
-        for (String segment : segments) {
-            maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
-                return compiler.apply(segment).map(compiled -> {
-                    allCompiled.add(compiled);
-                    return allCompiled;
-                });
-            });
-        }
-        return maybeCompiled;
+    private static Option<List_<String>> parseAll(List_<String> segments, Function<String, Option<String>> compiler) {
+        return segments.stream().foldToOption(Lists.empty(), (compiled, segment) -> compiler.apply(segment).map(compiled::add));
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String str) {
         return output.append(str);
     }
 
-    private static List<String> divideAll(String input, BiFunction<State, Character, State> divider) {
-        LinkedList<Character> queue = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+    private static List_<String> divideAll(String input, BiFunction<State, Character, State> divider) {
+        List_<Character> queue = Streams.from(input).collect(new ListCollector<>());
 
-        State state = new State(queue);
-        State current = state;
-        while (!isEmpty(current)) {
+        State current = new State(queue);
+        while (!current.isEmpty()) {
             char c = current.getPop();
             current = divider.apply(current, c);
         }
@@ -263,10 +412,6 @@ public class Main {
         if (c == '{') return appended.enter();
         if (c == '}') return appended.exit();
         return appended;
-    }
-
-    private static boolean isEmpty(State state) {
-        return state.queue.isEmpty();
     }
 
     private static Option<String> compileRootSegment(String input) {
@@ -288,9 +433,7 @@ public class Main {
                 String body = right.substring(contentStart + "{".length()).strip();
                 if (body.endsWith("}")) {
                     String inputContent = body.substring(0, body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> {
-                        return generateStruct(modifiers, name) + outputContent;
-                    });
+                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> generateStruct(modifiers, name) + outputContent);
                 }
             }
         }
