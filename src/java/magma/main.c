@@ -12,35 +12,35 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/* private */ struct Rule {
+/* private */ typedef struct Rule {
 	Result_String_CompileError compile(String input);
-};
-/* private static */ struct State {
+} Rule;
+/* private static */ typedef struct State {
 	/* private final */List__Character queue;
 	/* private final */List__String segments;
 	/* private final */StringBuilder buffer;
 	/* private final */int depth;
-};
-/* private static */ struct Streams {
-};
-/* private */ struct Joiner {
-};
-/* private static */ struct Tuples {
-};
-/* private */ struct CompileError {
-};
-/* private */ struct OrState {
-};
-/* private static final */ struct Node {
+} State;
+/* private static */ typedef struct Streams {
+} Streams;
+/* private */ typedef struct Joiner {
+} Joiner;
+/* private static */ typedef struct Tuples {
+} Tuples;
+/* private */ typedef struct CompileError {
+} CompileError;
+/* private */ typedef struct OrState {
+} OrState;
+/* private static final */ typedef struct Node {
 	/* private final */Map__String_String strings;
-};
-/* private static */ struct Maps {
-};
-/* private */ struct ParseState {
-};
-/* public */ struct Main {
-};
-/* public */ struct List__T {
+} Node;
+/* private static */ typedef struct Maps {
+} Maps;
+/* private */ typedef struct ParseState {
+} ParseState;
+/* public */ typedef struct Main {
+} Main;
+/* public */ typedef struct List__T {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -52,8 +52,8 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* public */ struct Stream__R {
+} List__T;
+/* public */ typedef struct Stream__R {
 	/* <R> */Stream__R map(R (*)(T) mapper);
 	/* <R> */R foldWithInitial(R initial, R (*)(R, T) folder);
 	/* <C> */C collect(Collector_T_C collector);
@@ -64,8 +64,8 @@
 	int allMatch(Predicate_T predicate);
 	Stream__T filter(Predicate_T predicate);
 	/* <R, X> */Result_R_X foldToResult(R initial, Result_R_X (*)(R, T) folder);
-};
-/* sealed public */ struct Option_T {
+} Stream__R;
+/* sealed public */ typedef struct Option_T {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -76,23 +76,23 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* sealed public */ struct Result_String_CompileError {
+} Option_T;
+/* sealed public */ typedef struct Result_String_CompileError {
 	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
 	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
 	/* <R> */Result_R_X flatMapValue(Result_R_X (*)(T) mapper);
 	Option_X findError();
 	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
 	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
-};
-/* private */ struct Map__K_V {
+} Result_String_CompileError;
+/* private */ typedef struct Map__K_V {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
-};
-/* private */ struct Head_T {
+} Map__K_V;
+/* private */ typedef struct Head_T {
 	Option_T next();
-};
-/* public */ struct List__Character {
+} Head_T;
+/* public */ typedef struct List__Character {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -104,8 +104,8 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* public */ struct List__String {
+} List__Character;
+/* public */ typedef struct List__String {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -117,8 +117,8 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* public */ struct Stream__Character {
+} List__String;
+/* public */ typedef struct Stream__Character {
 	/* <R> */Stream__R map(R (*)(T) mapper);
 	/* <R> */R foldWithInitial(R initial, R (*)(R, T) folder);
 	/* <C> */C collect(Collector_T_C collector);
@@ -129,8 +129,8 @@
 	int allMatch(Predicate_T predicate);
 	Stream__T filter(Predicate_T predicate);
 	/* <R, X> */Result_R_X foldToResult(R initial, Result_R_X (*)(R, T) folder);
-};
-/* public */ struct Stream__T {
+} Stream__Character;
+/* public */ typedef struct Stream__T {
 	/* <R> */Stream__R map(R (*)(T) mapper);
 	/* <R> */R foldWithInitial(R initial, R (*)(R, T) folder);
 	/* <C> */C collect(Collector_T_C collector);
@@ -141,8 +141,8 @@
 	int allMatch(Predicate_T predicate);
 	Stream__T filter(Predicate_T predicate);
 	/* <R, X> */Result_R_X foldToResult(R initial, Result_R_X (*)(R, T) folder);
-};
-/* sealed public */ struct Option_String {
+} Stream__T;
+/* sealed public */ typedef struct Option_String {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -153,10 +153,10 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* public */ struct Tuple_A_B {
-};
-/* public */ struct List__CompileError {
+} Option_String;
+/* public */ typedef struct Tuple_A_B {
+} Tuple_A_B;
+/* public */ typedef struct List__CompileError {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -168,16 +168,16 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* sealed public */ struct Result_String_List__CompileError {
+} List__CompileError;
+/* sealed public */ typedef struct Result_String_List__CompileError {
 	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
 	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
 	/* <R> */Result_R_X flatMapValue(Result_R_X (*)(T) mapper);
 	Option_X findError();
 	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
 	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
-};
-/* sealed public */ struct Option_Integer {
+} Result_String_List__CompileError;
+/* sealed public */ typedef struct Option_Integer {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -188,16 +188,16 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* public */ struct Collector_T_C {
+} Option_Integer;
+/* public */ typedef struct Collector_T_C {
 	C createInitial();
 	C fold(C current, T element);
-};
-/* private */ struct Map__String_String {
+} Collector_T_C;
+/* private */ typedef struct Map__String_String {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
-};
-/* public */ struct List__List__String {
+} Map__String_String;
+/* public */ typedef struct List__List__String {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -209,10 +209,10 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* public */ struct Tuple_String_List__String {
-};
-/* public */ struct List__Tuple_String_List__String {
+} List__List__String;
+/* public */ typedef struct Tuple_String_List__String {
+} Tuple_String_List__String;
+/* public */ typedef struct List__Tuple_String_List__String {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -224,12 +224,12 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
-/* private */ struct Map__String_Result_String_CompileError (*)(List__String) {
+} List__Tuple_String_List__String;
+/* private */ typedef struct Map__String_Result_String_CompileError (*)(List__String) {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
-};
-/* sealed public */ struct Option_IOException {
+} Map__String_Result_String_CompileError (*)(List__String);
+/* sealed public */ typedef struct Option_IOException {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -240,16 +240,16 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* sealed public */ struct Result_List__String_CompileError {
+} Option_IOException;
+/* sealed public */ typedef struct Result_List__String_CompileError {
 	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
 	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
 	/* <R> */Result_R_X flatMapValue(Result_R_X (*)(T) mapper);
 	Option_X findError();
 	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
 	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
-};
-/* sealed public */ struct Option_CompileError {
+} Result_List__String_CompileError;
+/* sealed public */ typedef struct Option_CompileError {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -260,8 +260,8 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* sealed public */ struct Option_State {
+} Option_CompileError;
+/* sealed public */ typedef struct Option_State {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -272,8 +272,8 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* sealed public */ struct Option_Result_String_CompileError {
+} Option_State;
+/* sealed public */ typedef struct Option_Result_String_CompileError {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -284,10 +284,10 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* public */ struct Err_String_CompileError {
-};
-/* sealed public */ struct Option_List__String {
+} Option_Result_String_CompileError;
+/* public */ typedef struct Err_String_CompileError {
+} Err_String_CompileError;
+/* sealed public */ typedef struct Option_List__String {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -298,16 +298,16 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-};
-/* sealed public */ struct Result_Node_CompileError {
+} Option_List__String;
+/* sealed public */ typedef struct Result_Node_CompileError {
 	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
 	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
 	/* <R> */Result_R_X flatMapValue(Result_R_X (*)(T) mapper);
 	Option_X findError();
 	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
 	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
-};
-/* public */ struct List__Rule {
+} Result_Node_CompileError;
+/* public */ typedef struct List__Rule {
 	List__T add(T element);
 	List__T addAll(List__T elements);
 	Stream__T stream();
@@ -319,7 +319,7 @@
 	Stream__Tuple_Integer_T streamWithIndices();
 	T first();
 	List__T sort(Comparator_T comparator);
-};
+} List__Rule;
 
 	/* private static */List__Tuple_String_List__String expanded = Lists.empty();;
 
@@ -3869,9 +3869,11 @@ auto __lambda1045__(auto input1){
 }
 /* private static */String generateStruct(String modifiers, String name, String content){
 	String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
-	String generated = modifiersString + "struct " + name + " {" +
+	String generated = modifiersString + "typedef struct " + name + " {" +
                 content +
-                "\n};\n";
+                "\n} " +
+                name +
+                ";\n";
 	structs = structs.add(generated);
 	return "";
 }

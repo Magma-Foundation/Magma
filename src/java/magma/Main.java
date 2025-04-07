@@ -887,9 +887,7 @@ public class Main {
 
     private static String generateStruct(String modifiers, String name, String content) {
         String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
-        String generated = modifiersString + "struct " + name + " {" +
-                content +
-                "\n};\n";
+        String generated = "%stypedef struct %s {%s\n} %s;\n".formatted(modifiersString, name, content, name);
         structs = structs.add(generated);
         return "";
     }
