@@ -813,8 +813,8 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
-            return compileDefinition(header, typeParams, typeArguments).flatMap(definition -> {
+        return compileValues(paramString, input1 -> compileOrInvalidateDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
+            return compileOrInvalidateDefinition(header, typeParams, typeArguments).flatMap(definition -> {
                 String string = generateInvokable(definition, outputParams);
 
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
@@ -905,7 +905,7 @@ public class Main {
 
         String inputDefinition = withoutEnd.substring(0, separator);
         String inputValue = withoutEnd.substring(separator + "=".length());
-        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(
+        return compileOrInvalidateDefinition(inputDefinition, typeParams, typeArguments).flatMap(
                 outputDefinition -> compileValue(inputValue, typeParams, typeArguments).map(
                         outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
     }
@@ -998,7 +998,7 @@ public class Main {
 
         String inputValue = input.substring(arrowIndex + "->".length()).strip();
         Option<String> compiledValue;
-        if(inputValue.startsWith("{") && inputValue.endsWith("}")) {
+        if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
             compiledValue = compileStatements(substring, statement -> compileStatement(statement, typeParams, typeArguments));
         } else {
@@ -1077,6 +1077,10 @@ public class Main {
         return caller + "(" + arguments + ")";
     }
 
+    private static Option<String> compileOrInvalidateDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileDefinition(input, typeParams, typeArguments).or(() -> new Some<>(invalidate("definition", input)));
+    }
+
     private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
@@ -1110,12 +1114,10 @@ public class Main {
 
             String name = stripped.substring(nameSeparator + " ".length());
 
-            return compileType(inputType, typeParams, typeArguments).map(outputType -> {
-                return generateDefinition(modifiers, outputType, name);
-            });
+            return compileType(inputType, typeParams, typeArguments).map(
+                    outputType -> generateDefinition(modifiers, outputType, name));
         }
-
-        return new Some<>(invalidate("definition", stripped));
+        return new None<>();
     }
 
     private static String generateDefinition(String modifiers, String type, String name) {
@@ -1130,9 +1132,7 @@ public class Main {
             return Lists.indexOf(last, stripped, String::equals).map(index -> {
                 String argument = typeArguments.get(index);
                 return new Some<>(argument);
-            }).orElseGet(() -> {
-                return new Some<>(stripped);
-            });
+            }).orElseGet(() -> new Some<>(stripped));
         }
 
         if (stripped.equals("void")) return new Some<>("void");
