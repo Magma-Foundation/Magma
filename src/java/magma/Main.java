@@ -99,6 +99,10 @@ public class Main {
         Option<T> next();
     }
 
+    private interface Rule {
+        Option<String> apply(String input);
+    }
+
     public record Tuple<A, B>(A left, B right) {
     }
 
@@ -392,7 +396,6 @@ public class Main {
         }
     }
 
-
     private static class Streams {
         public static Stream_<Character> from(String value) {
             return new HeadedStream<>(new RangeHead(value.length())).map(value::charAt);
@@ -460,7 +463,6 @@ public class Main {
             return message + ": " + context;
         }
     }
-
     private static final Map<String, Function<List_<String>, Option<String>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -512,13 +514,13 @@ public class Main {
                 .addAll(functions);
     }
 
-    private static Option<String> compileStatements(String input, Function<String, Option<String>> compiler) {
+    private static Option<String> compileStatements(String input, Rule compiler) {
         return compileAll(divideAll(input, Main::divideStatementChar), compiler, Main::mergeStatements);
     }
 
     private static Option<String> compileAll(
             List_<String> segments,
-            Function<String, Option<String>> compiler,
+            Rule compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
         return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
@@ -528,7 +530,7 @@ public class Main {
         return compiled.stream().foldWithInitial(new StringBuilder(), merger).toString();
     }
 
-    private static Option<List_<String>> parseAll(List_<String> segments, Function<String, Option<String>> compiler) {
+    private static Option<List_<String>> parseAll(List_<String> segments, Rule compiler) {
         return segments.stream().foldToOption(Lists.empty(), (compiled, segment) -> compiler.apply(segment).map(compiled::add));
     }
 
@@ -764,7 +766,7 @@ public class Main {
         return definition + "(" + params + ")";
     }
 
-    private static Option<String> compileValues(String input, Function<String, Option<String>> compiler) {
+    private static Option<String> compileValues(String input, Rule compiler) {
         return compileAll(divideAll(input, Main::divideValueChar), compiler, Main::mergeValues);
     }
 
