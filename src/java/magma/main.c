@@ -13,48 +13,6 @@
 #include <temp.h>
 // Tuple<struct A, struct B>
 // Option<struct String>
-/* private sealed */ struct Result {
-	/* <R> */struct R match(struct R (*)(T) whenOk, struct R (*)(X) whenErr);
-};
-/* private sealed */ struct Option {
-	void ifPresent(void (*)(T) ifPresent);
-	/* <R> */Option__struct R__ flatMap(Option__struct R__ (*)(T) mapper);
-	/* <R> */Option__struct R__ map(struct R (*)(T) mapper);
-	T orElse(T other);
-	int isPresent(/*  */);
-	Tuple__int_T__ toTuple(T other);
-	T orElseGet(T (*)() other);
-	Option__T__ or(Option__T__ (*)() other);
-	int isEmpty(/*  */);
-};
-/* private */ struct List_ {
-	/* List_<T> */ add(T element);
-	/* List_<T> */ addAll(/* List_<T> */ elements);
-	void forEach(void (*)(T) consumer);
-	/* Stream_<T> */ stream(/*  */);
-	T popFirst(/*  */);
-	int isEmpty(/*  */);
-	T get(struct int index);
-	struct int size(/*  */);
-};
-/* private */ struct Stream_ {
-	/* <R> *//* Stream_<R> */ map(struct R (*)(T) mapper);
-	/* <R> */struct R foldWithInitial(struct R initial, struct R (*)(struct R, T) folder);
-	/* <C> */struct C collect(Collector__T_struct C__ collector);
-	/* <R> */Option__struct R__ foldToOption(struct R initial, Option__struct R__ (*)(struct R, T) folder);
-	int anyMatch(Predicate__T__ predicate);
-	/* <R> *//* Stream_<R> */ flatMap(/* Stream_<R> */ (*)(T) mapper);
-	/* Stream_<T> */ concat(/* Stream_<T> */ other);
-	Option__T__ next(/*  */);
-	int allMatch(Predicate__T__ predicate);
-};
-/* private */ struct Collector {
-	C createInitial(/*  */);
-	C fold(C current, T element);
-};
-/* private */ struct Head {
-	Option__T__ next(/*  */);
-};
 struct Temp {
 };
 struct Temp {
@@ -91,6 +49,7 @@ struct Temp {
 	/* private *//* static List_<String> structs = */ Lists.empty(/*  */);
 	/* private *//* static List_<String> functions = */ Lists.empty(/*  */);
 	/* private *//* static List_<Tuple<String, List_<String>>> expansions = */ Lists.empty(/*  */);
+	/* private *//* static List_<Tuple<String, Function<List_<String>, Option<String>>>> generators = */ Lists.empty(/*  */);
 	/* private *//* static List_<String> globals = */ Lists.empty(/*  */);
 };
 
@@ -425,9 +384,6 @@ auto __lambda12__(auto compiled){
         if (maybeClass.isPresent()) return maybeClass; */
 	/* return new Some<> */(invalidate("root segment", input));
 }
-auto __lambda13__(auto outputContent){
-	return /*  generateStruct(modifiers */;
-}
 /* private *//* static Option<String> */ compileTypedBlock(struct String input, struct String keyword, /* List_<List_<String>> */ typeParams){
 	struct int classIndex = input.indexOf(keyword);
 	/* if (classIndex < 0) return new None<> */();
@@ -453,12 +409,25 @@ auto __lambda13__(auto outputContent){
                         .stream()
                         .map(String::strip)
                         .collect(new ListCollector<>());
+
+                List_<String> finalClassTypeParams = classTypeParams;
+                generators = generators.add(new Tuple<>(name, typeArguments -> {
+                    return getStringOption(typeParams, finalClassTypeParams, right, contentStart, modifiers, name, typeArguments);
+                }));
+
+                return new Some<>("");
             } else {
                 name = withoutPermits;
             }
         } *//*  else {
             name = withoutPermits;
         } */
+	/* return getStringOption */(typeParams, classTypeParams, right, contentStart, modifiers, name, Lists.empty());
+}
+auto __lambda13__(auto outputContent){
+	return /*  generateStruct(modifiers */;
+}
+/* private *//* static Option<String> */ getStringOption(/* List_<List_<String>> */ typeParams, /* List_<String> */ classTypeParams, struct String right, struct int contentStart, struct String modifiers, struct String name, /* List_<String> */ typeArguments){
 	/* List_<List_<String>> */ merged = typeParams.add(classTypeParams);
 	struct String body = right.substring(/* contentStart + "{" */.length()).strip();
 	/* if (!body */.endsWith("}")) return new None<>();

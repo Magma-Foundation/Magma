@@ -15,8 +15,6 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Main {
-
-
     private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
@@ -466,7 +464,10 @@ public class Main {
     private static List_<String> imports = Lists.empty();
     private static List_<String> structs = Lists.empty();
     private static List_<String> functions = Lists.empty();
+
     private static List_<Tuple<String, List_<String>>> expansions = Lists.empty();
+    private static List_<Tuple<String, Function<List_<String>, Option<String>>>> generators = Lists.empty();
+
     private static List_<String> globals = Lists.empty();
 
     private static int lambdaCounter = 0;
@@ -639,6 +640,13 @@ public class Main {
                         .stream()
                         .map(String::strip)
                         .collect(new ListCollector<>());
+
+                List_<String> finalClassTypeParams = classTypeParams;
+                generators = generators.add(new Tuple<>(name, typeArguments -> {
+                    return getStringOption(typeParams, finalClassTypeParams, right, contentStart, modifiers, name, typeArguments);
+                }));
+
+                return new Some<>("");
             } else {
                 name = withoutPermits;
             }
@@ -646,6 +654,10 @@ public class Main {
             name = withoutPermits;
         }
 
+        return getStringOption(typeParams, classTypeParams, right, contentStart, modifiers, name, Lists.empty());
+    }
+
+    private static Option<String> getStringOption(List_<List_<String>> typeParams, List_<String> classTypeParams, String right, int contentStart, String modifiers, String name, List_<String> typeArguments) {
         List_<List_<String>> merged = typeParams.add(classTypeParams);
 
         String body = right.substring(contentStart + "{".length()).strip();
