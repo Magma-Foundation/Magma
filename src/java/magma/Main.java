@@ -924,7 +924,18 @@ public class Main {
         }
 
         if (input.startsWith("new ")) {
-            return new Some<>("Temp()");
+            String withoutNew = input.substring("new ".length());
+            if (withoutNew.endsWith(")")) {
+                String slice = withoutNew.substring(0, withoutNew.length() - ")".length());
+                int paramStart = slice.indexOf("(");
+                String caller = slice.substring(0, paramStart).strip();
+                String inputArguments = slice.substring(paramStart + "(".length());
+                return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(arguments -> {
+                    return compileType(caller, typeParams, typeArguments).map(type -> {
+                        return type + "(" + arguments + ")";
+                    });
+                });
+            }
         }
 
         Option<String> maybeLambda = compileLambda(input, typeParams, typeArguments);
@@ -1079,9 +1090,13 @@ public class Main {
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + 1);
-        return compileValues(inputArguments, input -> compileValue(input, typeParams, typeArguments)).flatMap(
+        return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(
                 outputValues -> compileValue(inputCaller, typeParams, typeArguments).map(
                         outputCaller -> generateInvocation(outputCaller, outputValues)));
+    }
+
+    private static Option<String> compileAllValues(String arguments, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileValues(arguments, input -> compileValue(input, typeParams, typeArguments));
     }
 
     private static String generateInvocation(String caller, String arguments) {
