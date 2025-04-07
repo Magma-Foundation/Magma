@@ -42,6 +42,9 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) return "";
+
+
         System.err.println("Invalid root segment: " + input);
         return "/* " + input + " */\n";
     }
