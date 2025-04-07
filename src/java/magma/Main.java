@@ -99,7 +99,7 @@ public class Main {
         Option<T> next();
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    public record Tuple<A, B>(A left, B right) {
     }
 
     public record Ok<T, X>(T value) implements Result<T, X> {
@@ -289,9 +289,9 @@ public class Main {
 
     private static class State {
         private final List_<Character> queue;
-        private List_<String> segments;
-        private StringBuilder buffer;
-        private int depth;
+        private final List_<String> segments;
+        private final StringBuilder buffer;
+        private final int depth;
 
         private State(List_<Character> queue) {
             this(queue, Lists.empty(), new StringBuilder(), 0);
@@ -313,24 +313,19 @@ public class Main {
         }
 
         private State enter() {
-            this.depth = depth + 1;
-            return this;
+            return new State(queue, segments, buffer, depth + 1);
         }
 
         private State exit() {
-            this.depth = depth - 1;
-            return this;
+            return new State(queue, segments, buffer, depth - 1);
         }
 
         private State append(char c) {
-            buffer.append(c);
-            return this;
+            return new State(queue, segments, buffer.append(c), depth);
         }
 
         private State advance() {
-            segments = segments.add(buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
+            return new State(queue, segments.add(buffer.toString()), new StringBuilder(), depth);
         }
 
         private boolean isLevel() {
@@ -807,18 +802,22 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(paramString, input1 -> compileOrInvalidateDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
-            return compileOrInvalidateDefinition(header, typeParams, typeArguments).flatMap(definition -> {
-                String string = generateInvokable(definition, outputParams);
+        return compileValues(paramString, input1 -> compileOrInvalidateDefinition(input1, typeParams, typeArguments))
+                .flatMap(outputParams -> getStringOption(typeParams, typeArguments, outputParams, header, withBody));
+    }
 
-                if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-                    return new Some<>(generateStatement(string));
+    private static Option<String> getStringOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String header, String withBody) {
+        return compileOrInvalidateDefinition(header, typeParams, typeArguments)
+                .flatMap(definition -> getOption(typeParams, typeArguments, outputParams, withBody, definition));
+    }
 
-                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> {
-                    return addFunction(statement, string);
-                });
-            });
-        });
+    private static Option<String> getOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String withBody, String definition) {
+        String string = generateInvokable(definition, outputParams);
+
+        if (!withBody.startsWith("{") || !withBody.endsWith("}"))
+            return new Some<>(generateStatement(string));
+
+        return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> addFunction(statement, string));
     }
 
     private static String addFunction(String content, String string) {
@@ -965,7 +964,7 @@ public class Main {
             return compileValue(object, typeParams, typeArguments).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
-                return generateLambda(new JavaList<String>(List.of(paramName)), generateInvocation(caller, paramName));
+                return generateLambda(new JavaList<>(List.of(paramName)), generateInvocation(caller, paramName));
             });
         }
 
@@ -1007,7 +1006,7 @@ public class Main {
         }
 
         if (isSymbol(beforeArrow)) {
-            return new Some<>(new JavaList<String>(List.of(beforeArrow)));
+            return new Some<>(new JavaList<>(List.of(beforeArrow)));
         }
 
         return new None<>();
@@ -1080,11 +1079,9 @@ public class Main {
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + 1);
-        return compileValues(inputArguments, input -> compileValue(input, typeParams, typeArguments)).flatMap(outputValues -> {
-            return compileValue(inputCaller, typeParams, typeArguments).map(outputCaller -> {
-                return generateInvocation(outputCaller, outputValues);
-            });
-        });
+        return compileValues(inputArguments, input -> compileValue(input, typeParams, typeArguments)).flatMap(
+                outputValues -> compileValue(inputCaller, typeParams, typeArguments).map(
+                        outputCaller -> generateInvocation(outputCaller, outputValues)));
     }
 
     private static String generateInvocation(String caller, String arguments) {
@@ -1172,19 +1169,19 @@ public class Main {
                     String oldArguments = withoutEnd.substring(genStart + "<".length());
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
                     return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
-                        if (base.equals("Function")) {
-                            return generateFunctionalType(newArguments.get(1), new JavaList<String>(Collections.singletonList(newArguments.get(0))));
-                        }
-                        if (base.equals("BiFunction")) {
-                            return generateFunctionalType(newArguments.get(2), new JavaList<String>(Arrays.asList(newArguments.get(0), newArguments.get(1))));
-                        }
-
-                        if (base.equals("Consumer")) {
-                            return generateFunctionalType("void", new JavaList<String>(Collections.singletonList(newArguments.get(0))));
-                        }
-
-                        if (base.equals("Supplier")) {
-                            return generateFunctionalType(newArguments.get(0), Lists.empty());
+                        switch (base) {
+                            case "Function" -> {
+                                return generateFunctionalType(newArguments.get(1), new JavaList<>(Collections.singletonList(newArguments.get(0))));
+                            }
+                            case "BiFunction" -> {
+                                return generateFunctionalType(newArguments.get(2), new JavaList<>(Arrays.asList(newArguments.get(0), newArguments.get(1))));
+                            }
+                            case "Consumer" -> {
+                                return generateFunctionalType("void", new JavaList<>(Collections.singletonList(newArguments.get(0))));
+                            }
+                            case "Supplier" -> {
+                                return generateFunctionalType(newArguments.get(0), Lists.empty());
+                            }
                         }
 
                         if (hasNoTypeParams(frames)) {
@@ -1226,9 +1223,7 @@ public class Main {
     }
 
     private static boolean isTypeParam(List_<List_<String>> frames, String stripped) {
-        return frames.stream().anyMatch(frame -> {
-            return Lists.contains(frame, stripped, String::equals);
-        });
+        return frames.stream().anyMatch(frame -> Lists.contains(frame, stripped, String::equals));
     }
 
     private static String generateFunctionalType(String returns, List_<String> newArguments) {
