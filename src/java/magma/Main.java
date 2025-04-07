@@ -37,6 +37,8 @@ public class Main {
         T orElseGet(Supplier<T> other);
 
         Option<T> or(Supplier<Option<T>> other);
+
+        boolean isEmpty();
     }
 
     private interface List_<T> {
@@ -65,6 +67,12 @@ public class Main {
         <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder);
 
         boolean anyMatch(Predicate<T> predicate);
+
+        <R> Stream_<R> flatMap(Function<T, Stream_<R>> mapper);
+
+        Stream_<T> concat(Stream_<T> other);
+
+        Option<T> next();
     }
 
     private interface Collector<T, C> {
@@ -150,6 +158,21 @@ public class Main {
         @Override
         public boolean anyMatch(Predicate<T> predicate) {
             return foldWithInitial(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        }
+
+        @Override
+        public <R> Stream_<R> flatMap(Function<T, Stream_<R>> mapper) {
+            return this.map(mapper).foldWithInitial(Streams.empty(), Stream_::concat);
+        }
+
+        @Override
+        public Stream_<T> concat(Stream_<T> other) {
+            return new HeadedStream<>(() -> head.next().or(other::next));
+        }
+
+        @Override
+        public Option<T> next() {
+            return head.next();
         }
     }
 
@@ -313,6 +336,11 @@ public class Main {
         public Option<T> or(Supplier<Option<T>> other) {
             return this;
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -354,11 +382,28 @@ public class Main {
         public Option<T> or(Supplier<Option<T>> other) {
             return other.get();
         }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
     }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
 
     private static class Streams {
         public static Stream_<Character> from(String value) {
             return new HeadedStream<>(new RangeHead(value.length())).map(value::charAt);
+        }
+
+        public static <T> Stream_<T> empty() {
+            return new HeadedStream<>(new EmptyHead<>());
         }
     }
 
@@ -873,7 +918,9 @@ public class Main {
                             return generateFunctionalType(newArguments.get(0), Lists.empty());
                         }
 
-                        expansions = expansions.add(new Tuple<>(base, newArguments));
+                        if (hasNoTypeParams(frames)) {
+                            expansions = expansions.add(new Tuple<>(base, newArguments));
+                        }
 
                         String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
                         return base + "__" + String.join("_", joined) + "__";
@@ -883,6 +930,13 @@ public class Main {
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static boolean hasNoTypeParams(List_<List_<String>> frames) {
+        Option<String> next = frames.stream()
+                .flatMap(List_::stream)
+                .next();
+        return next.isEmpty();
     }
 
     private static boolean isTypeParam(List_<List_<String>> frames, String stripped) {

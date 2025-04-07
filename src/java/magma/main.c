@@ -11,25 +11,13 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-// Option<struct R>
-// Option<struct R>
-// Option<struct R>
-// Tuple<int, T>
-// Option<T>
-// Option<T>
-// BiFunction<struct R, T, struct R>
-// Collector<T, struct C>
-// Option<struct R>
-// BiFunction<struct R, T, Option__struct R__>
-// Option<struct R>
-// Predicate<T>
-// Option<T>
 // Option<struct String>
 // Option<struct String>
 // BiFunction<struct StringBuilder, struct String, struct StringBuilder>
 // BiFunction<struct StringBuilder, struct String, struct StringBuilder>
 // Option<struct String>
 // BiFunction<struct State, struct Character, struct State>
+// Option<struct String>
 // Option<struct String>
 // Option<struct String>
 // Option<struct String>
@@ -45,6 +33,7 @@
 	Tuple__int_T__ toTuple(T other);
 	T orElseGet(T (*)() other);
 	Option__T__ or(Option__T__ (*)() other);
+	int isEmpty(/*  */);
 };
 /* private */ struct List_ {
 	/* List_<T> */ add(T element);
@@ -61,6 +50,9 @@
 	/* <C> */struct C collect(Collector__T_struct C__ collector);
 	/* <R> */Option__struct R__ foldToOption(struct R initial, BiFunction__struct R_T_Option__struct R____ folder);
 	int anyMatch(Predicate__T__ predicate);
+	/* <R> *//* Stream_<R> */ flatMap(/* Stream_<R> */ (*)(T) mapper);
+	/* Stream_<T> */ concat(/* Stream_<T> */ other);
+	Option__T__ next(/*  */);
 };
 /* private */ struct Collector {
 	C createInitial(/*  */);
@@ -244,6 +236,18 @@ auto __lambda0__(auto child){
         public Option<T> or(Supplier<Option<T>> other) {
             return other */.get();/* 
         }
+
+        @Override
+        public boolean isEmpty() {
+            return true; *//* 
+        }
+     */
+}
+/* private *//* static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> */ next(/*  */){
+	/* return new None<> */();/* 
+        }
      */
 }
 auto __lambda1__(auto value){
@@ -251,7 +255,11 @@ auto __lambda1__(auto value){
 }
 /* private *//* static class Streams {
         public static Stream_<Character> */ from(struct String value){
-	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda1__);/* 
+	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda1__);
+	/* }
+
+        public static <T> Stream_<T> empty() {
+            return new HeadedStream<> */(/* new EmptyHead<> */());/* 
         }
      */
 }
@@ -691,7 +699,9 @@ auto __lambda15__(auto value){
                             return generateFunctionalType(newArguments.get(0), Lists.empty());
                         }
 
-                        expansions = expansions.add(new Tuple<>(base, newArguments));
+                        if (hasNoTypeParams(frames)) {
+                            expansions = expansions.add(new Tuple<>(base, newArguments));
+                        }
 
                         String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
                         return base + "__" + String.join("_", joined) + "__";
@@ -700,6 +710,13 @@ auto __lambda15__(auto value){
             }
         } */
 	/* return new Some<> */(invalidate("type", stripped));
+}
+auto __lambda16__(auto /* list_ */){
+	return /* List_ */.stream(/* list_ */);
+}
+/* private *//* static boolean */ hasNoTypeParams(/* List_<List_<String>> */ frames){
+	Option__struct String__ next = frames.stream().flatMap(__lambda16__).next();
+	/* return next */.isEmpty();
 }
 /* private *//* static boolean */ isTypeParam(/* List_<List_<String>> */ frames, struct String stripped){/* 
         return frames.stream().anyMatch(frame -> {
