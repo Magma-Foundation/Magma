@@ -1,59 +1,4 @@
-/* private sealed interface Result<T, X> permits Ok, Err {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-    } *//* 
-
-    private sealed interface Option<T> permits Some, None {
-        void ifPresent(Consumer<T> ifPresent);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        <R> Option<R> map(Function<T, R> mapper);
-
-        T orElse(T other);
-
-        boolean isPresent();
-    } *//* 
-
-    private record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(value);
-        }
-    } *//* 
-
-    private record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(error);
-        }
-    } *//* 
-
-    private record Some<T>(T value) implements Option<T> {
-        @Override
-        public void ifPresent(Consumer<T> ifPresent) {
-            ifPresent.accept(value);
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(value);
-        }
-
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(value));
-        }
-
-        @Override
-        public T orElse(T other) {
-            return value;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-    } *//* 
+/* 
 
     private static final List<String> imports = new ArrayList<>(); *//* 
     private static final List<String> structs = new ArrayList<>(); *//* 
@@ -66,8 +11,8 @@
 
     private static boolean isEmpty(State state) {
         return state.queue.isEmpty();
-    } *//* String modifiers = input.substring(0, keywordIndex); *//* 
-            String right = input.substring(keywordIndex + "class ".length()); *//* 
+    } *//* String modifiers = input.substring(0, classIndex); *//* 
+            String right = input.substring(classIndex + "class ".length()); *//* 
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
@@ -98,6 +43,16 @@
     private static Option<String> compileClassSegment(String input) {
         Option<String> maybeMethod = compileMethod(input);
         if (maybeMethod.isPresent()) return maybeMethod;
+
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            return new Some<>(generateStruct("", "Temp"));
+        }
+
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex >= 0) {
+            return new Some<>(generateStruct("", "Temp"));
+        }
 
         return new Some<>(invalidate("class segment", input));
     } *//* 
@@ -333,6 +288,16 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+/*  */struct Temp {
+};
+/*  */struct Temp {
+};
+/*  */struct Temp {
+};
+/*  */struct Temp {
+};
+/*  */struct Temp {
+};
 /* 
 
 public  */struct Main {
@@ -348,8 +313,8 @@ public  */struct Main {
             return new Some<>("");
         }
 
-        int keywordIndex = input.indexOf(" */struct ");
-        if (keywordIndex >= 0) {
+        int classIndex = input.indexOf(" */struct ");
+        if (classIndex >= 0) {
 };
 /* private static class State {
         private final Deque<Character> queue;

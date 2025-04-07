@@ -278,10 +278,10 @@ public class Main {
             return new Some<>("");
         }
 
-        int keywordIndex = input.indexOf("class ");
-        if (keywordIndex >= 0) {
-            String modifiers = input.substring(0, keywordIndex);
-            String right = input.substring(keywordIndex + "class ".length());
+        int classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = input.substring(0, classIndex);
+            String right = input.substring(classIndex + "class ".length());
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
                 String name = right.substring(0, contentStart).strip();
@@ -312,6 +312,16 @@ public class Main {
     private static Option<String> compileClassSegment(String input) {
         Option<String> maybeMethod = compileMethod(input);
         if (maybeMethod.isPresent()) return maybeMethod;
+
+        int interfaceIndex = input.indexOf("interface ");
+        if (interfaceIndex >= 0) {
+            return new Some<>(generateStruct("", "Temp"));
+        }
+
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex >= 0) {
+            return new Some<>(generateStruct("", "Temp"));
+        }
 
         return new Some<>(invalidate("class segment", input));
     }
