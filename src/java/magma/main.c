@@ -1,4 +1,3 @@
-#include "./java/util/Collections.h"
 #include "./java/util/Comparator.h"
 #include "./java/util/HashMap.h"
 #include "./java/util/Map.h"
@@ -11213,7 +11212,7 @@ auto __lambda3102__(auto type1){
                     return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.of(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null)));
                 }
                 case "Consumer" -> {
-                    return generateFunctionalType("void", Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
+                    return generateFunctionalType("void", Lists.of(newArguments.apply(0).orElse(null)));
                 }
                 case "Supplier" -> {
                     return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
