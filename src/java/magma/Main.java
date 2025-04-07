@@ -846,18 +846,18 @@ public class Main {
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams, typeArguments);
-            if (maybeAssignment.isPresent()) return maybeAssignment;
-
-            Option<String> maybeInvocation = compileInvocation(withoutEnd);
-            if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
-
             if (withoutEnd.startsWith("return ")) {
                 String value = withoutEnd.substring("return ".length());
                 return compileValue(value)
                         .map(inner -> "return " + inner)
                         .map(Main::generateStatement);
             }
+
+            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams, typeArguments);
+            if (maybeAssignment.isPresent()) return maybeAssignment;
+
+            Option<String> maybeInvocation = compileInvocation(withoutEnd);
+            if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
         return new Some<>(invalidate("statement", input));
