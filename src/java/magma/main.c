@@ -231,7 +231,7 @@ auto __lambda2__(auto tuple){
 	return list.streamWithIndices().filter(__lambda2__).next().map(__lambda1__);
 }
 private State(List___Character__ queue){
-	this(queue, Lists.empty(), Temp()(), /*  0 */);
+	this(queue, Lists.empty(), Temp()(), 0);
 }
 private State(List___Character__ queue, List___String__ segments, StringBuilder buffer, int depth){
 	/* this.queue */ = queue;
@@ -246,7 +246,7 @@ private State(List___Character__ queue, List___String__ segments, StringBuilder 
 	return /* !queue */.isEmpty();
 }
 /* private */State enter(){
-	/* this.depth */ = depth + /*  1 */;
+	/* this.depth */ = depth + 1;
 	return this;
 }
 /* private */State exit(){
@@ -453,15 +453,15 @@ if (1) {
 	int classIndex = input.indexOf(keyword);if (1) {
 }
 
-	String modifiers = input.substring(/* 0 */, classIndex).strip();
+	String modifiers = input.substring(0, classIndex).strip();
 	String afterKeyword = input.substring(classIndex + keyword.length());
 	int contentStart = afterKeyword.indexOf("{");if (1) {
 }
 
-	String beforeContent = afterKeyword.substring(/* 0 */, contentStart).strip();
+	String beforeContent = afterKeyword.substring(0, contentStart).strip();
 	int permitsIndex = beforeContent.indexOf("permits");
 	String withoutPermits = /* permitsIndex >= 0
-                ? beforeContent */.substring(/* 0 */, permitsIndex).strip()
+                ? beforeContent */.substring(0, permitsIndex).strip()
                 : beforeContent;
 	int paramStart = withoutPermits.indexOf("(");
 	String withoutPermits1 = /* paramStart >= 0
@@ -478,11 +478,11 @@ auto __lambda15__(auto string){
 /* private static */Option__String__ compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List___List___String____ typeParams){if (1) {
 }
 
-	String withoutEnd = withoutPermits.substring(/* 0 */, withoutPermits.length() - ">".length());
+	String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
 	int genStart = withoutEnd.indexOf("<");if (1) {
 }
 
-	String name = withoutEnd.substring(/* 0 */, genStart);
+	String name = withoutEnd.substring(0, genStart);
 	String substring = withoutEnd.substring(genStart + "<".length());
 	List___String__ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda15__).collect(Temp());
 	/* generators.put(name, typeArguments -> {
@@ -498,7 +498,7 @@ auto __lambda16__(auto outputContent){
 	List___List___String____ merged = outerTypeParams.add(innerTypeParams);if (1) {
 }
 
-	String inputContent = body.substring(/* 0 */, body.length() - "}".length());
+	String inputContent = body.substring(0, body.length() - "}".length());
 	return compileStatements(inputContent, /* input1 -> compileClassSegment */(/* input1 */, merged, typeArguments)).map(__lambda16__);
 }
 /* private static */String generateStruct(String modifiers, String name, String content){
@@ -521,7 +521,7 @@ auto __lambda17__(auto outputParams){
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
                     return new Some<>(generateStatement(string));
 
-                return compileStatements(withBody.substring(/* 1 */, withBody.length() - 1), /* input1 -> compileStatement */(/* input1 */, typeParams, typeArguments)).map(statement -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), /* input1 -> compileStatement */(/* input1 */, typeParams, typeArguments)).map(statement -> {
                     return addFunction(statement, string);
                 });
             });
@@ -531,12 +531,12 @@ auto __lambda17__(auto outputParams){
 	int paramStart = input.indexOf("(");if (1) {
 }
 
-	String header = input.substring(/* 0 */, paramStart).strip();
+	String header = input.substring(0, paramStart).strip();
 	String withParams = input.substring(paramStart + "(".length());
 	int paramEnd = withParams.indexOf(")");if (1) {
 }
 
-	String paramString = withParams.substring(/* 0 */, paramEnd);
+	String paramString = withParams.substring(0, paramEnd);
 	String withBody = withParams.substring(paramEnd + ")".length()).strip();
 	return compileValues(paramString, /* input1 -> compileDefinition */(/* input1 */, typeParams, typeArguments)).flatMap(__lambda17__);
 }
@@ -597,7 +597,7 @@ auto __lambda20__(auto outputDefinition){
 	int separator = input.indexOf("=");if (1) {
 }
 
-	String inputDefinition = input.substring(/* 0 */, separator);
+	String inputDefinition = input.substring(0, separator);
 	String inputValue = input.substring(separator + "=".length());
 	return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(__lambda20__);
 }
@@ -626,8 +626,15 @@ if (1) {
 }
 if (1) {
 }
+if (1) {
+}
 
 	return Temp();
+}
+/* private static */int isNumber(String stripped){for (;;) {
+}
+
+	return true;
 }
 /* private static */String generateLambda(String paramName, String lambdaValue){
 	String lambda = "__lambda" + lambdaCounter + "__";/* 
@@ -652,13 +659,13 @@ auto __lambda22__(auto main){
 
 	String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 	int argsStart = /*  -1 */;
-	int depth = /*  0 */;for (;;) {
+	int depth = 0;for (;;) {
 }
 if (1) {
 }
 
-	String inputCaller = withoutEnd.substring(/* 0 */, argsStart);
-	String inputArguments = withoutEnd.substring(argsStart + /*  1 */);
+	String inputCaller = withoutEnd.substring(0, argsStart);
+	String inputArguments = withoutEnd.substring(argsStart + 1);
 	return compileValues(inputArguments, __lambda22__).flatMap(__lambda21__);
 }
 /* private static */String generateInvocation(String caller, String arguments){

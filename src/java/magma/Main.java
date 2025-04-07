@@ -952,7 +952,22 @@ public class Main {
             return new Some<>(stripped);
         }
 
+        if (isNumber(stripped)) {
+            return new Some<>(stripped);
+        }
+
         return new Some<>(invalidate("value", input));
+    }
+
+    private static boolean isNumber(String stripped) {
+        for (int i = 0; i < stripped.length(); i++) {
+            char c = stripped.charAt(i);
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static String generateLambda(String paramName, String lambdaValue) {
