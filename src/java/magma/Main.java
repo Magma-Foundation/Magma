@@ -936,6 +936,21 @@ public class Main {
         Option<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
+        int ternaryIndex = stripped.indexOf("?");
+        if (ternaryIndex >= 0) {
+            String condition = stripped.substring(0, ternaryIndex).strip();
+            String cases = stripped.substring(ternaryIndex + "?".length());
+            int caseIndex = cases.indexOf(":");
+            if (caseIndex >= 0) {
+                String ifTrue = cases.substring(0, caseIndex).strip();
+                String ifFalse = cases.substring(caseIndex + ":".length()).strip();
+                return compileValue(condition)
+                        .and(() -> compileValue(ifTrue))
+                        .and(() -> compileValue(ifFalse))
+                        .map(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
+            }
+        }
+
         int dataSeparator = stripped.lastIndexOf(".");
         if (dataSeparator >= 0) {
             String object = stripped.substring(0, dataSeparator);
