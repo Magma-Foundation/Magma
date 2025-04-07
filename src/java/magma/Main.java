@@ -5,8 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,10 +27,34 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compile(input, Main::compileRootSegment);
+        Optional<String> s = compileStatements(input, Main::compileRootSegment);
+        return s.orElse("");
     }
 
-    private static String compile(String input, Function<String, String> compiler) {
+    private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(divideStatements(input), compiler, Main::mergeStatements);
+    }
+
+    private static Optional<String> compileAll(
+            List<String> segments,
+            Function<String, Optional<String>> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
+        for (String segment : segments) {
+            maybeOutput = maybeOutput.flatMap(output -> {
+                return compiler.apply(segment).map(str -> merger.apply(output, str));
+            });
+        }
+
+        return maybeOutput.map(StringBuilder::toString);
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder output, String str) {
+        return output.append(str);
+    }
+
+    private static ArrayList<String> divideStatements(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -46,18 +74,12 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            output.append(compiler.apply(segment));
-        }
-
-        return output.toString();
+        return segments;
     }
 
-    private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) return "";
-        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+    private static Optional<String> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return Optional.of("");
+        if (input.strip().startsWith("import ")) return Optional.of("#include <temp.h>\n");
         int keywordIndex = input.indexOf("class ");
         if (keywordIndex >= 0) {
             String modifiers = input.substring(0, keywordIndex);
@@ -68,13 +90,14 @@ public class Main {
                 String body = right.substring(contentStart + "{".length()).strip();
                 if (body.endsWith("}")) {
                     String inputContent = body.substring(0, body.length() - "}".length());
-                    String outputContent = compile(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" + outputContent;
+                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> {
+                        return generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" + outputContent;
+                    });
                 }
             }
         }
 
-        return invalidate("root segment", input);
+        return Optional.of(invalidate("root segment", input));
     }
 
     private static String invalidate(String type, String input) {
@@ -82,15 +105,44 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static String compileClassSegment(String input) {
-        int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String header = input.substring(0, paramStart).strip();
-            Optional<String> maybeDefinition = compileDefinition(header);
-            if (maybeDefinition.isPresent()) return maybeDefinition.get() + "(){\n}\n";
-        }
+    private static Optional<String> compileClassSegment(String input) {
+        Optional<String> maybeMethod = compileMethod(input);
+        if (maybeMethod.isPresent()) return maybeMethod;
 
-        return invalidate("class segment", input);
+        return Optional.of(invalidate("class segment", input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart < 0) return Optional.empty();
+
+        String header = input.substring(0, paramStart).strip();
+        String withParams = input.substring(paramStart + "(".length());
+        int i = withParams.indexOf(")");
+        if (i >= 0) {
+            String paramString = withParams.substring(0, i);
+            List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
+
+            return compileAll(inputParams, Main::compileDefinition, Main::mergeValues)
+                    .flatMap(outputParams -> {
+                        return compileDefinition(header).map(definition -> {
+                            return definition + "(" +
+                                    outputParams +
+                                    "){\n}\n";
+                        });
+                    });
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static StringBuilder mergeValues(StringBuilder buffer, String element) {
+        if (buffer.isEmpty()) return buffer.append(element);
+        return buffer.append(", ").append(element);
+    }
+
+    private static String compileStatement(String input) {
+        return invalidate("statement", input);
     }
 
     private static Optional<String> compileDefinition(String header) {
@@ -113,7 +165,7 @@ public class Main {
             String name = header.substring(nameSeparator + " ".length());
             return Optional.of(modifiers + type + " " + name);
         }
-        return Optional.empty();
+        return Optional.of(generatePlaceholder(header));
     }
 
     private static String generatePlaceholder(String input) {
