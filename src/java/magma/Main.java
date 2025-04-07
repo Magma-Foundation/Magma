@@ -901,6 +901,11 @@ public class Main {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
 
+
+        if (stripped.startsWith("!")) {
+            return compileValue(stripped.substring(1)).map(result -> "!" + result);
+        }
+
         if (input.startsWith("new ")) {
             return new Some<>("Temp()");
         }
@@ -939,24 +944,22 @@ public class Main {
             });
         }
 
-        int operatorIndex = stripped.indexOf("+");
-        if (operatorIndex >= 0) {
-            String left = stripped.substring(0, operatorIndex);
-            String right = stripped.substring(operatorIndex + "+".length());
-            return compileValue(left)
-                    .and(() -> compileValue(right))
-                    .map(tuple -> tuple.left + " + " + tuple.right);
-        }
+        return compileOperator(input, "+")
+                .or(() -> compileOperator(input, "-"))
+                .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
+                .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
+                .or(() -> new Some<>(invalidate("value", input)));
+    }
 
-        if (isSymbol(stripped)) {
-            return new Some<>(stripped);
-        }
+    private static Option<String> compileOperator(String input, String operator) {
+        int operatorIndex = input.indexOf(operator);
+        if (operatorIndex < 0) return new None<>();
 
-        if (isNumber(stripped)) {
-            return new Some<>(stripped);
-        }
-
-        return new Some<>(invalidate("value", input));
+        String left = input.substring(0, operatorIndex);
+        String right = input.substring(operatorIndex + operator.length());
+        return compileValue(left)
+                .and(() -> compileValue(right))
+                .map(tuple -> tuple.left + " " + operator + " " + tuple.right);
     }
 
     private static boolean isNumber(String stripped) {
