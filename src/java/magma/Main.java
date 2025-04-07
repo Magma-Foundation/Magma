@@ -463,6 +463,7 @@ public class Main {
             return message + ": " + context;
         }
     }
+
     private static final Map<String, Function<List_<String>, Option<String>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -737,12 +738,12 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(paramString, input1 -> compileOrInvalidateDefinition(input1, typeParams, typeArguments))
+        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments))
                 .flatMap(outputParams -> getStringOption(typeParams, typeArguments, outputParams, header, withBody));
     }
 
     private static Option<String> getStringOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String header, String withBody) {
-        return compileOrInvalidateDefinition(header, typeParams, typeArguments)
+        return compileDefinition(header, typeParams, typeArguments)
                 .flatMap(definition -> getOption(typeParams, typeArguments, outputParams, withBody, definition));
     }
 
@@ -869,7 +870,7 @@ public class Main {
 
         String inputDefinition = withoutEnd.substring(0, separator);
         String inputValue = withoutEnd.substring(separator + "=".length());
-        return compileOrInvalidateDefinition(inputDefinition, typeParams, typeArguments).flatMap(
+        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(
                 outputDefinition -> compileValue(inputValue, typeParams, typeArguments).findValue().map(
                         outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
     }
@@ -966,7 +967,7 @@ public class Main {
 
         String inputArguments = slice.substring(paramStart + "(".length());
         return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(arguments -> {
-            return compileType(caller, typeParams, typeArguments).map(type -> {
+            return compileType(caller, typeParams, typeArguments).findValue().map(type -> {
                 return type + "(" + arguments + ")";
             });
         });
@@ -1101,16 +1102,6 @@ public class Main {
         return caller + "(" + arguments + ")";
     }
 
-    private static Option<String> compileOrInvalidateDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileDefinition(input, typeParams, typeArguments).or(() -> {
-            System.err.println(new Err<>(new CompileError("Invalid " + "definition", input))
-                    .error
-                    .display());
-
-            return new Some<>(generatePlaceholder(input));
-        });
-    }
-
     private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
@@ -1144,7 +1135,7 @@ public class Main {
 
             String name = stripped.substring(nameSeparator + " ".length());
 
-            return compileType(inputType, typeParams, typeArguments).map(
+            return compileType(inputType, typeParams, typeArguments).findValue().map(
                     outputType -> generateDefinition(modifiers, outputType, name));
         }
         return new None<>();
@@ -1154,67 +1145,79 @@ public class Main {
         return modifiers + type + " " + name;
     }
 
-    private static Option<String> compileType(String type, List_<List_<String>> frames, List_<String> typeArguments) {
-        String stripped = type.strip();
+    private static Result<String, CompileError> compileType(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        return compileTypeParam(type, frames, typeArguments)
+                .or(() -> compilePrimitive(type))
+                .or(() -> compileArray(type, frames, typeArguments))
+                .or(() -> compileSymbolType(type))
+                .or(() -> compileGeneric(type, frames, typeArguments))
+                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid " + "type", type.strip())));
+    }
 
-        if (isTypeParam(frames, stripped)) {
-            List_<String> last = frames.last();
-            return Lists.indexOf(last, stripped, String::equals).map(index -> {
-                String argument = typeArguments.apply(index).orElse(null);
-                return new Some<>(argument);
-            }).orElseGet(() -> new Some<>(stripped));
-        }
+    private static Option<String> compilePrimitive(String type) {
+        if (type.strip().equals("void")) return new Some<>("void");
+        if (type.strip().equals("boolean") || type.strip().equals("Boolean")) return new Some<>("int");
+        return new None<>();
+    }
 
-        if (stripped.equals("void")) return new Some<>("void");
-        if (stripped.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
+    private static Option<String> compileArray(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        if (type.strip().endsWith("[]"))
+            return compileType(type.strip().substring(0, type.strip().length() - "[]".length()), frames, typeArguments).findValue().map(value -> value + "*");
+        return new None<>();
+    }
 
-        if (stripped.endsWith("[]"))
-            return compileType(stripped.substring(0, stripped.length() - "[]".length()), frames, typeArguments).map(value -> value + "*");
+    private static Option<String> compileSymbolType(String type) {
+        if (isSymbol(type.strip())) return new Some<>(type.strip());
+        return new None<>();
+    }
 
-        if (isSymbol(stripped)) return new Some<>(stripped);
+    private static Option<String> compileGeneric(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        if (!type.strip().endsWith(">")) return new None<>();
 
-        if (stripped.endsWith(">")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-            int genStart = withoutEnd.indexOf("<");
-            if (genStart >= 0) {
-                String base = withoutEnd.substring(0, genStart).strip();
-                if (isSymbol(base)) {
-                    String oldArguments = withoutEnd.substring(genStart + "<".length());
-                    List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                    return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
-                        switch (base) {
-                            case "Function" -> {
-                                return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
-                            }
-                            case "BiFunction" -> {
-                                return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.fromNative(Arrays.asList(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null))));
-                            }
-                            case "Consumer" -> {
-                                return generateFunctionalType("void", Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
-                            }
-                            case "Supplier" -> {
-                                return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
-                            }
-                        }
+        String withoutEnd = type.strip().substring(0, type.strip().length() - ">".length());
+        int genStart = withoutEnd.indexOf("<");
+        if (genStart < 0) return new None<>();
 
-                        if (hasNoTypeParams(frames)) {
-                            Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                            if (!isDefined(toExpand, tuple)) {
-                                toExpand = toExpand.add(tuple);
-                            }
-                        }
+        String base = withoutEnd.substring(0, genStart).strip();
+        if (!isSymbol(base)) return new None<>();
 
-                        return generateGenericName(base, newArguments);
-                    });
+        String oldArguments = withoutEnd.substring(genStart + "<".length());
+        List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
+        return parseAll(segments, type1 -> compileType(type1, frames, typeArguments).findValue()).map(newArguments -> {
+            switch (base) {
+                case "Function" -> {
+                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
+                }
+                case "BiFunction" -> {
+                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.fromNative(Arrays.asList(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null))));
+                }
+                case "Consumer" -> {
+                    return generateFunctionalType("void", Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
+                }
+                case "Supplier" -> {
+                    return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
                 }
             }
-        }
 
-        System.err.println(new Err<>(new CompileError("Invalid " + "type", stripped))
-                .error
-                .display());
+            if (hasNoTypeParams(frames)) {
+                Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
+                if (!isDefined(toExpand, tuple)) {
+                    toExpand = toExpand.add(tuple);
+                }
+            }
 
-        return new Some<>(generatePlaceholder(stripped));
+            return generateGenericName(base, newArguments);
+        });
+    }
+
+    private static Option<String> compileTypeParam(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        if (!isTypeParam(frames, type.strip())) return new None<>();
+
+        List_<String> last = frames.last();
+        return Lists.indexOf(last, type.strip(), String::equals).map(index -> {
+            String argument = typeArguments.apply(index).orElse(null);
+            return new Some<>(argument);
+        }).orElseGet(() -> new Some<>(type.strip()));
     }
 
     private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {
