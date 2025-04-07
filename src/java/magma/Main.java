@@ -808,7 +808,10 @@ public class Main {
 
     private static Result<String, CompileError> compilePrefix(String input, String prefix, Rule childRule) {
         if (input.startsWith(prefix)) return childRule.compile(input.substring(prefix.length()));
-        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
+
+        String format = "Prefix '%s' not present";
+        String message = format.formatted(prefix);
+        return new Err<>(new CompileError(message, input));
     }
 
     private static Result<String, CompileError> compileClass(String input) {
@@ -1224,9 +1227,13 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileString(String input) {
-        return input.strip().startsWith("\"") && input.strip().endsWith("\"")
-                ? new Ok<>(input.strip())
-                : new Err<>(new CompileError("Not a string", input));
+        return compilePrefix(input.strip(), "\"", right -> {
+            return compileSuffix(right, "\"", inner -> {
+                return new Ok<String, CompileError>(inner)
+                        .mapValue(value -> "\"" + value)
+                        .mapValue(value -> value + "\"");
+            });
+        });
     }
 
     private static Result<String, CompileError> compileLambda(ParseState parseState, String input) {
@@ -1385,7 +1392,20 @@ public class Main {
     }
 
     private static Result<Node, CompileError> parseDivide(String input) {
-        return divideByChar(input, ' ')
+        if (input.endsWith(">")) {
+            String substring = input.substring(0, input.length() - ">".length());
+            int genStart = substring.indexOf("<");
+            if (genStart >= 0) {
+                String slice = substring.substring(0, genStart);
+                return parseModifiers(slice);
+            }
+        }
+
+        return parseModifiers(input);
+    }
+
+    private static Result<Node, CompileError> parseModifiers(String input) {
+        return divideByChar(input.strip(), ' ')
                 .stream()
                 .map(String::strip)
                 .map(Main::compileModifier)
@@ -1395,7 +1415,9 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileModifier(String modifier) {
-        return Lists.contains(MODIFIERS, modifier, String::equals) ? new Ok<>(modifier) : new Err<>(new CompileError("Not a modifier", modifier));
+        return Lists.contains(MODIFIERS, modifier, String::equals)
+                ? new Ok<>(modifier)
+                : new Err<>(new CompileError("Not a modifier", modifier));
     }
 
     private static Result<String, CompileError> createNotASymbol(String value) {
