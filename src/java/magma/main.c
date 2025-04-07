@@ -1,5 +1,3 @@
-#include "./java/nio/file/Path.h"
-#include "./java/nio/file/Paths.h"
 #include "./java/util/Arrays.h"
 #include "./java/util/Collections.h"
 #include "./java/util/Comparator.h"
@@ -14,6 +12,14 @@
 /* private */ typedef struct Rule {
 	Result_String_CompileError compile(String input);
 } Rule;
+/* public */ typedef struct Error {
+	String display();
+} Error;
+/* public */ typedef struct Path_ {
+	Option_IOError writeString(String output);
+	Result_String_IOError readString();
+	Path_ resolveSibling(String sibling);
+} Path_;
 /* private static */ typedef struct State {
 	/* private final */List__Character queue;
 	/* private final */List__String segments;
@@ -37,6 +43,8 @@
 } Maps;
 /* private */ typedef struct ParseState {
 } ParseState;
+/* private */ typedef struct ApplicationError {
+} ApplicationError;
 /* public */ typedef struct Main {
 } Main;
 /* public */ typedef struct List__T {
@@ -88,6 +96,26 @@
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
 } Map__K_V;
+/* sealed public */ typedef struct Option_IOError {
+	void ifPresent(void (*)(T) ifPresent);
+	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
+	/* <R> */Option_R map(R (*)(T) mapper);
+	T orElse(T other);
+	int isPresent();
+	Tuple_int_T toTuple(T other);
+	T orElseGet(T (*)() other);
+	Option_T or(Option_T (*)() other);
+	int isEmpty();
+	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
+} Option_IOError;
+/* sealed public */ typedef struct Result_String_IOError {
+	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
+	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
+	/* <R> */Result_R_X flatMapValue(Result_R_X (*)(T) mapper);
+	Option_X findError();
+	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
+	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
+} Result_String_IOError;
 /* private */ typedef struct Head_T {
 	Option_T next();
 } Head_T;
@@ -228,7 +256,7 @@
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
 } Map__String_Result_String_CompileError (*)(List__String);
-/* sealed public */ typedef struct Option_IOError {
+/* sealed public */ typedef struct Option_ApplicationError {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option_R flatMap(Option_R (*)(T) mapper);
 	/* <R> */Option_R map(R (*)(T) mapper);
@@ -239,7 +267,7 @@
 	Option_T or(Option_T (*)() other);
 	int isEmpty();
 	/* <R> */R match(R (*)(T) whenPresent, R (*)() whenEmpty);
-} Option_IOError;
+} Option_ApplicationError;
 /* sealed public */ typedef struct Result_List__String_CompileError {
 	/* <R> */R match(R (*)(T) whenOk, R (*)(X) whenErr);
 	/* <R> */Result_R_X mapValue(R (*)(T) mapper);
@@ -685,7 +713,8 @@ auto __lambda84__(auto compileerror){
 /* private */int depth(){
 	return 1 + children.stream().map(__lambda22__).collect(Max()).orElse(0);
 }
-/* public */String display(){
+/* @Override
+        public */String display(){
 	return format(0);
 }
 auto __lambda85__(auto compileerror){
@@ -2874,6 +2903,10 @@ auto __lambda793__(auto string){
 /* private */ParseState define(List__String frame){
 	return ParseState(frames.add(frame), typeArguments);
 }
+/* @Override
+        public */String display(){
+	return child.display();
+}
 auto __lambda794__(auto error){
 	return System.err.println(error.display());
 }
@@ -2905,688 +2938,2290 @@ auto __lambda803__(auto some){
 	return Some.new(some);
 }
 auto __lambda804__(auto param){
-	return Files.readString(source).match(input -> runWithInput(source, input), Some.new)(param);
+	return source.readString().match(input -> runWithInput(source, input), Some.new)(param);
 }
 auto __lambda805__(auto param){
-	return Files.readString(source).match(input -> runWithInput(source, input), Some.new)
+	return source.readString().match(input -> runWithInput(source, input), Some.new)
                 .ifPresent(param);
 }
 /* public static */void main(String* args){
-	Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	Files.readString(source).match(__lambda801__, __lambda803__).ifPresent(__lambda794__);
+	Path_ source = Paths.get(".", "src", "java", "magma", "Main.java");
+	source.readString().match(__lambda801__, __lambda803__).ifPresent(__lambda794__);
 }
-auto __lambda806__(auto value){
-	return value;
+auto __lambda806__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda807__(auto err){
+auto __lambda807__(auto param){
+	return target.writeString(output).map(ApplicationError.new)(param);
+}
+auto __lambda808__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda809__(auto output){
 	return 
-	System.err.println(err.display());
-	return "";;
+	Path_ target = source.resolveSibling("main.c");
+	return target.writeString(output).map(__lambda806__);;
 }
-auto __lambda808__(auto value){
-	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+auto __lambda810__(auto some){
+	return Some.new(some);
 }
-auto __lambda809__(auto value){
-	return value;
-}
-auto __lambda810__(auto value){
-	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
-}
-auto __lambda811__(auto value){
-	return value;
+auto __lambda811__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
 auto __lambda812__(auto value){
-	return value;
-}
-auto __lambda813__(auto err){
-	return 
-	System.err.println(err.display());
-	return "";;
-}
-auto __lambda814__(auto value){
-	return value;
-}
-auto __lambda815__(auto err){
-	return 
-	System.err.println(err.display());
-	return "";;
-}
-auto __lambda816__(auto value){
-	return value;
-}
-auto __lambda817__(auto err){
-	return 
-	System.err.println(err.display());
-	return "";;
-}
-auto __lambda818__(auto value){
 	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda819__(auto value){
+auto __lambda813__(auto value){
 	return value;
 }
-/* private static */Option_IOError runWithInput(Path source, String input){
-	String output = compile(input).mapValue(__lambda808__).match(__lambda806__, __lambda807__);
-	Path target = source.resolveSibling("main.c");
-	return Files.writeString(target, output);
+auto __lambda814__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda820__(auto main){
-	return Main.divideStatementChar(main);
+auto __lambda815__(auto value){
+	return value;
 }
-auto __lambda821__(auto main){
-	return Main.divideStatementChar(main);
+auto __lambda816__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda822__(auto main){
-	return Main.mergeStatements(main);
+auto __lambda817__(auto value){
+	return value;
 }
-auto __lambda823__(auto compiled){
-	return mergeAll(compiled, __lambda822__);
+auto __lambda818__(auto param){
+	return compile(input).mapValue(__lambda816__).mapErr(ApplicationError.new)(param);
 }
-auto __lambda824__(auto main){
-	return Main.mergeStatements(main);
+auto __lambda819__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda825__(auto compiled){
-	return mergeAll;
+auto __lambda820__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda826__(auto main){
-	return Main.mergeStatements(main);
+auto __lambda821__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda827__(auto main){
-	return Main.generate(main);
+auto __lambda822__(auto value){
+	return value;
 }
-auto __lambda828__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda823__(auto param){
+	return compile(input).mapValue(__lambda821__).mapErr(ApplicationError.new)
+                .match(param);
 }
-auto __lambda829__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda824__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda830__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda825__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda831__(auto param){
-	return parseAll(segments, __lambda830__).flatMapValue(Main.generate)(param);
+auto __lambda826__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda832__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda827__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda828__(auto value){
+	return value;
+}
+auto __lambda829__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda830__(auto value){
+	return value;
+}
+auto __lambda831__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda832__(auto value){
+	return value;
 }
 auto __lambda833__(auto param){
-	return parseAll(segments, __lambda832__).flatMapValue(Main.generate)
-                .mapValue(param);
+	return compile(input).mapValue(__lambda831__).mapErr(ApplicationError.new)(param);
 }
-auto __lambda834__(auto main){
-	return Main.generate(main);
+auto __lambda834__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda835__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda835__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda836__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda836__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda837__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda837__(auto value){
+	return value;
 }
 auto __lambda838__(auto param){
-	return parseAll(segments, __lambda837__).flatMapValue(Main.generate)(param);
+	return compile(input).mapValue(__lambda836__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
 }
-auto __lambda839__(auto main){
-	return Main.generate(main);
+auto __lambda839__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda840__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda840__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda841__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda841__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda842__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda842__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda843__(auto param){
-	return parseAll(segments, __lambda842__).flatMapValue(Main.generate)(param);
+auto __lambda843__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda844__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda844__(auto value){
+	return value;
 }
 auto __lambda845__(auto param){
-	return parseAll(segments, __lambda844__).flatMapValue(Main.generate)
-                .mapValue(compiled -> mergeAll(compiled, Main(param);
+	return compile(input).mapValue(__lambda843__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
 }
-auto __lambda846__(auto main){
-	return Main.generate(main);
+auto __lambda846__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda847__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda847__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda848__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda848__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda849__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda849__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda850__(auto param){
-	return parseAll(segments, __lambda849__).flatMapValue(Main.generate)(param);
+auto __lambda850__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda851__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda851__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda852__(auto param){
-	return parseAll(segments, __lambda851__).flatMapValue(Main.generate)
-                .mapValue(compiled(param);
+auto __lambda852__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 }
-auto __lambda853__(auto param){
-	return parseAll(segments, __lambda840__).flatMapValue(__lambda839__).mapValue(compiled -> mergeAll(compiled, Main.mergeStatements))(param);
+auto __lambda853__(auto value){
+	return value;
 }
-auto __lambda854__(auto main){
-	return Main.generate(main);
+auto __lambda854__(auto param){
+	return compile(input).mapValue(__lambda852__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
 }
-auto __lambda855__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda855__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda856__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda856__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda857__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda857__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda858__(auto param){
-	return parseAll(segments, __lambda857__).flatMapValue(Main.generate)(param);
+auto __lambda858__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda859__(auto main){
-	return Main.compileRootSegment(main);
+auto __lambda859__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda860__(auto param){
-	return parseAll(segments, __lambda859__).flatMapValue(Main.generate)
-                .mapValue(compiled(param);
+auto __lambda860__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
 }
-auto __lambda861__(auto main){
+auto __lambda861__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda862__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda863__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda864__(auto value){
+	return value;
+}
+auto __lambda865__(auto param){
+	return compile(input).mapValue(__lambda863__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(param);
+}
+auto __lambda866__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda867__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda868__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda869__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda870__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda871__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda872__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda873__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda874__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda875__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda876__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda877__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda878__(auto value){
+	return value;
+}
+auto __lambda879__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda880__(auto value){
+	return value;
+}
+auto __lambda881__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda882__(auto value){
+	return value;
+}
+auto __lambda883__(auto param){
+	return compile(input).mapValue(__lambda881__).mapErr(ApplicationError.new)(param);
+}
+auto __lambda884__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda885__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda886__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda887__(auto value){
+	return value;
+}
+auto __lambda888__(auto param){
+	return compile(input).mapValue(__lambda886__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
+}
+auto __lambda889__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda890__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda891__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda892__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda893__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda894__(auto value){
+	return value;
+}
+auto __lambda895__(auto param){
+	return compile(input).mapValue(__lambda893__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
+}
+auto __lambda896__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda897__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda898__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda899__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda900__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda901__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda902__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda903__(auto value){
+	return value;
+}
+auto __lambda904__(auto param){
+	return compile(input).mapValue(__lambda902__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
+}
+auto __lambda905__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda906__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda907__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda908__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda909__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda910__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda911__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda912__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda913__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda914__(auto value){
+	return value;
+}
+auto __lambda915__(auto param){
+	return compile(input).mapValue(__lambda913__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output)(param);
+}
+auto __lambda916__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda917__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda918__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda919__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda920__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda921__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda922__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda923__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda924__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda925__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda926__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda927__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda928__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda929__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda930__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda931__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda932__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda933__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda934__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda935__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda936__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda937__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda938__(auto value){
+	return value;
+}
+auto __lambda939__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda940__(auto value){
+	return value;
+}
+auto __lambda941__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda942__(auto value){
+	return value;
+}
+auto __lambda943__(auto param){
+	return compile(input).mapValue(__lambda941__).mapErr(ApplicationError.new)(param);
+}
+auto __lambda944__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda945__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda946__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda947__(auto value){
+	return value;
+}
+auto __lambda948__(auto param){
+	return compile(input).mapValue(__lambda946__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
+}
+auto __lambda949__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda950__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda951__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda952__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda953__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda954__(auto value){
+	return value;
+}
+auto __lambda955__(auto param){
+	return compile(input).mapValue(__lambda953__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
+}
+auto __lambda956__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda957__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda958__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda959__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda960__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda961__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda962__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda963__(auto value){
+	return value;
+}
+auto __lambda964__(auto param){
+	return compile(input).mapValue(__lambda962__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
+}
+auto __lambda965__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda966__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda967__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda968__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda969__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda970__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda971__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda972__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda973__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda974__(auto value){
+	return value;
+}
+auto __lambda975__(auto param){
+	return compile(input).mapValue(__lambda973__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(param);
+}
+auto __lambda976__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda977__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda978__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda979__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda980__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda981__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda982__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda983__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda984__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda985__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda986__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda987__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda988__(auto value){
+	return value;
+}
+auto __lambda989__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda990__(auto value){
+	return value;
+}
+auto __lambda991__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda992__(auto value){
+	return value;
+}
+auto __lambda993__(auto param){
+	return compile(input).mapValue(__lambda991__).mapErr(ApplicationError.new)(param);
+}
+auto __lambda994__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda995__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda996__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda997__(auto value){
+	return value;
+}
+auto __lambda998__(auto param){
+	return compile(input).mapValue(__lambda996__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
+}
+auto __lambda999__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1000__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1001__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1002__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1003__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1004__(auto value){
+	return value;
+}
+auto __lambda1005__(auto param){
+	return compile(input).mapValue(__lambda1003__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
+}
+auto __lambda1006__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1007__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1008__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1009__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1010__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1011__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1012__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1013__(auto value){
+	return value;
+}
+auto __lambda1014__(auto param){
+	return compile(input).mapValue(__lambda1012__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
+}
+auto __lambda1015__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1016__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1017__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1018__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1019__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1020__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1021__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1022__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1023__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1024__(auto value){
+	return value;
+}
+auto __lambda1025__(auto param){
+	return compile(input).mapValue(__lambda1023__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output)(param);
+}
+auto __lambda1026__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1027__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1028__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1029__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1030__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1031__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1032__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1033__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1034__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1035__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1036__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1037__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1038__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1039__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1040__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1041__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1042__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1043__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1044__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1045__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1046__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1047__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1048__(auto value){
+	return value;
+}
+auto __lambda1049__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1050__(auto value){
+	return value;
+}
+auto __lambda1051__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1052__(auto value){
+	return value;
+}
+auto __lambda1053__(auto param){
+	return compile(input).mapValue(__lambda1051__).mapErr(ApplicationError.new)(param);
+}
+auto __lambda1054__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1055__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1056__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1057__(auto value){
+	return value;
+}
+auto __lambda1058__(auto param){
+	return compile(input).mapValue(__lambda1056__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
+}
+auto __lambda1059__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1060__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1061__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1062__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1063__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1064__(auto value){
+	return value;
+}
+auto __lambda1065__(auto param){
+	return compile(input).mapValue(__lambda1063__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
+}
+auto __lambda1066__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1067__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1068__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1069__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1070__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1071__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1072__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1073__(auto value){
+	return value;
+}
+auto __lambda1074__(auto param){
+	return compile(input).mapValue(__lambda1072__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
+}
+auto __lambda1075__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1076__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1077__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1078__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1079__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1080__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1081__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1082__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1083__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1084__(auto value){
+	return value;
+}
+auto __lambda1085__(auto param){
+	return compile(input).mapValue(__lambda1083__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(param);
+}
+auto __lambda1086__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1087__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1088__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1089__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1090__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1091__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1092__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1093__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1094__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1095__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1096__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1097__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1098__(auto value){
+	return value;
+}
+auto __lambda1099__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1100__(auto value){
+	return value;
+}
+auto __lambda1101__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1102__(auto value){
+	return value;
+}
+auto __lambda1103__(auto param){
+	return compile(input).mapValue(__lambda1101__).mapErr(ApplicationError.new)(param);
+}
+auto __lambda1104__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1105__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1106__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1107__(auto value){
+	return value;
+}
+auto __lambda1108__(auto param){
+	return compile(input).mapValue(__lambda1106__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source(param);
+}
+auto __lambda1109__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1110__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1111__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1112__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1113__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1114__(auto value){
+	return value;
+}
+auto __lambda1115__(auto param){
+	return compile(input).mapValue(__lambda1113__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main(param);
+}
+auto __lambda1116__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1117__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1118__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1119__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1120__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1121__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1122__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1123__(auto value){
+	return value;
+}
+auto __lambda1124__(auto param){
+	return compile(input).mapValue(__lambda1122__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target(param);
+}
+auto __lambda1125__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1126__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1127__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1128__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1129__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1130__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1131__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1132__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1133__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1134__(auto value){
+	return value;
+}
+auto __lambda1135__(auto param){
+	return compile(input).mapValue(__lambda1133__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output)(param);
+}
+auto __lambda1136__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1137__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1138__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1139__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1140__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1141__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1142__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1143__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1144__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1145__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1146__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1147__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1148__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1149__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1150__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1151__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1152__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1153__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1154__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1155__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1156__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1157__(auto value){
+	return value;
+}
+auto __lambda1158__(auto param){
+	return compile(input).mapValue(__lambda1156__).mapErr(ApplicationError.new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError(param);
+}
+auto __lambda1159__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1160__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1161__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1162__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1163__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1164__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1165__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1166__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1167__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1168__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1169__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1170__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1171__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1172__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1173__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1174__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1175__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1176__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1177__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1178__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1179__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1180__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1181__(auto param){
+	return compile(input).mapValue(__lambda1047__).mapErr(__lambda1046__).match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError.new);
+                }, Some(param);
+}
+auto __lambda1182__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1183__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1184__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1185__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1186__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1187__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1188__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1189__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1190__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1191__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1192__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1193__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1194__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1195__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1196__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1197__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1198__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1199__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1200__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1201__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1202__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1203__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1204__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1205__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1206__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1207__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1208__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1209__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1210__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1211__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1212__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1213__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1214__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1215__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1216__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1217__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1218__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1219__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1220__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1221__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1222__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1223__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1224__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1225__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1226__(auto param){
+	return compile(input).mapValue(__lambda937__).mapErr(__lambda936__).match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError::new);
+                }, Some.new)(param);
+}
+auto __lambda1227__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1228__(auto param){
+	return target.writeString(output).map(ApplicationError.new)(param);
+}
+auto __lambda1229__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1230__(auto output){
+	return 
+	Path_ target = source.resolveSibling("main.c");
+	return target.writeString(output).map(__lambda1227__);;
+}
+auto __lambda1231__(auto some){
+	return Some.new(some);
+}
+auto __lambda1232__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1233__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1234__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1235__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1236__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1237__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1238__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1239__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1240__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1241__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1242__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1243__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1244__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1245__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1246__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1247__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1248__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1249__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1250__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1251__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1252__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1253__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1254__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1255__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1256__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1257__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1258__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1259__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1260__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1261__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1262__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1263__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1264__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1265__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1266__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1267__(auto param){
+	return target.writeString(output).map(ApplicationError.new)(param);
+}
+auto __lambda1268__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1269__(auto output){
+	return 
+	Path_ target = source.resolveSibling("main.c");
+	return target.writeString(output).map(__lambda1266__);;
+}
+auto __lambda1270__(auto some){
+	return Some.new(some);
+}
+auto __lambda1271__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1272__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1273__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1274__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1275__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1276__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1277__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1278__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1279__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1280__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1281__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1282__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1283__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1284__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1285__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1286__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1287__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1288__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1289__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1290__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1291__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1292__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1293__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1294__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1295__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1296__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1297__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1298__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1299__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1300__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1301__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1302__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1303__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1304__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1305__(auto param){
+	return source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError.new);
+                }, Some(param);
+}
+auto __lambda1306__(auto param){
+	return source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError::new);
+                }, Some.new)(param);
+}
+auto __lambda1307__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1308__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1309__(auto value){
+	return value;
+}
+auto __lambda1310__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1311__(auto value){
+	return value;
+}
+auto __lambda1312__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1313__(auto value){
+	return value;
+}
+auto __lambda1314__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1315__(auto value){
+	return value;
+}
+auto __lambda1316__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1317__(auto param){
+	return target.writeString(output).map(ApplicationError.new)(param);
+}
+auto __lambda1318__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1319__(auto output){
+	return 
+	Path_ target = source.resolveSibling("main.c");
+	return target.writeString(output).map(__lambda1316__);;
+}
+auto __lambda1320__(auto some){
+	return Some.new(some);
+}
+auto __lambda1321__(auto applicationerror){
+	return ApplicationError.new(applicationerror);
+}
+auto __lambda1322__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1323__(auto value){
+	return value;
+}
+auto __lambda1324__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1325__(auto value){
+	return value;
+}
+auto __lambda1326__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1327__(auto value){
+	return value;
+}
+auto __lambda1328__(auto value){
+	return value + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+}
+auto __lambda1329__(auto value){
+	return value;
+}
+/* private static */Option_ApplicationError runWithInput(Path_ source, String input){
+	return compile(input).mapValue(__lambda812__).mapErr(__lambda811__).match(__lambda809__, __lambda810__);
+}
+auto __lambda1330__(auto main){
+	return Main.divideStatementChar(main);
+}
+auto __lambda1331__(auto main){
+	return Main.divideStatementChar(main);
+}
+auto __lambda1332__(auto main){
 	return Main.mergeStatements(main);
 }
-auto __lambda862__(auto compiled){
-	return mergeAll(compiled, __lambda861__);
+auto __lambda1333__(auto compiled){
+	return mergeAll(compiled, __lambda1332__);
 }
-auto __lambda863__(auto main){
+auto __lambda1334__(auto main){
 	return Main.mergeStatements(main);
 }
-auto __lambda864__(auto compiled){
+auto __lambda1335__(auto compiled){
 	return mergeAll;
 }
-auto __lambda865__(auto main){
+auto __lambda1336__(auto main){
 	return Main.mergeStatements(main);
 }
-auto __lambda866__(auto main){
+auto __lambda1337__(auto main){
 	return Main.generate(main);
 }
-auto __lambda867__(auto main){
+auto __lambda1338__(auto main){
 	return Main.compileRootSegment(main);
 }
-auto __lambda868__(auto main){
+auto __lambda1339__(auto main){
 	return Main.compileRootSegment(main);
 }
-auto __lambda869__(auto main){
+auto __lambda1340__(auto main){
 	return Main.compileRootSegment(main);
 }
-auto __lambda870__(auto main){
+auto __lambda1341__(auto param){
+	return parseAll(segments, __lambda1340__).flatMapValue(Main.generate)(param);
+}
+auto __lambda1342__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1343__(auto param){
+	return parseAll(segments, __lambda1342__).flatMapValue(Main.generate)
+                .mapValue(param);
+}
+auto __lambda1344__(auto main){
+	return Main.generate(main);
+}
+auto __lambda1345__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1346__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1347__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1348__(auto param){
+	return parseAll(segments, __lambda1347__).flatMapValue(Main.generate)(param);
+}
+auto __lambda1349__(auto main){
+	return Main.generate(main);
+}
+auto __lambda1350__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1351__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1352__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1353__(auto param){
+	return parseAll(segments, __lambda1352__).flatMapValue(Main.generate)(param);
+}
+auto __lambda1354__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1355__(auto param){
+	return parseAll(segments, __lambda1354__).flatMapValue(Main.generate)
+                .mapValue(compiled -> mergeAll(compiled, Main(param);
+}
+auto __lambda1356__(auto main){
+	return Main.generate(main);
+}
+auto __lambda1357__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1358__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1359__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1360__(auto param){
+	return parseAll(segments, __lambda1359__).flatMapValue(Main.generate)(param);
+}
+auto __lambda1361__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1362__(auto param){
+	return parseAll(segments, __lambda1361__).flatMapValue(Main.generate)
+                .mapValue(compiled(param);
+}
+auto __lambda1363__(auto param){
+	return parseAll(segments, __lambda1350__).flatMapValue(__lambda1349__).mapValue(compiled -> mergeAll(compiled, Main.mergeStatements))(param);
+}
+auto __lambda1364__(auto main){
+	return Main.generate(main);
+}
+auto __lambda1365__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1366__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1367__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1368__(auto param){
+	return parseAll(segments, __lambda1367__).flatMapValue(Main.generate)(param);
+}
+auto __lambda1369__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1370__(auto param){
+	return parseAll(segments, __lambda1369__).flatMapValue(Main.generate)
+                .mapValue(compiled(param);
+}
+auto __lambda1371__(auto main){
+	return Main.mergeStatements(main);
+}
+auto __lambda1372__(auto compiled){
+	return mergeAll(compiled, __lambda1371__);
+}
+auto __lambda1373__(auto main){
+	return Main.mergeStatements(main);
+}
+auto __lambda1374__(auto compiled){
+	return mergeAll;
+}
+auto __lambda1375__(auto main){
+	return Main.mergeStatements(main);
+}
+auto __lambda1376__(auto main){
+	return Main.generate(main);
+}
+auto __lambda1377__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1378__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1379__(auto main){
+	return Main.compileRootSegment(main);
+}
+auto __lambda1380__(auto main){
 	return Main.compileRootSegment(main);
 }
 /* private static */Result_String_CompileError compile(String input){
-	List__String segments = divideAll(input, __lambda820__);
-	return parseAll(segments, __lambda828__).flatMapValue(__lambda827__).mapValue(__lambda823__);
+	List__String segments = divideAll(input, __lambda1330__);
+	return parseAll(segments, __lambda1338__).flatMapValue(__lambda1337__).mapValue(__lambda1333__);
 }
-auto __lambda871__(auto err){
+auto __lambda1381__(auto err){
 	return Err.new(err);
 }
-auto __lambda872__(auto ){
+auto __lambda1382__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll(globals).addAll(functions));
 }
-auto __lambda873__(auto ){
+auto __lambda1383__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll(globals);
 }
-auto __lambda874__(auto ){
+auto __lambda1384__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll;
 }
-auto __lambda875__(auto ){
+auto __lambda1385__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs);
 }
-auto __lambda876__(auto ){
+auto __lambda1386__(auto ){
 	return Ok(compiled.addAll(imports).addAll;
 }
-auto __lambda877__(auto ){
+auto __lambda1387__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda878__(auto ){
+auto __lambda1388__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda879__(auto ){
+auto __lambda1389__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs);
 }
-auto __lambda880__(auto ){
+auto __lambda1390__(auto ){
 	return Ok(compiled.addAll(imports).addAll;
 }
-auto __lambda881__(auto ){
+auto __lambda1391__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda882__(auto ){
+auto __lambda1392__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda883__(auto param){
+auto __lambda1393__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda884__(auto param){
+auto __lambda1394__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda885__(auto param){
+auto __lambda1395__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda886__(auto param){
+auto __lambda1396__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(param);
 }
-auto __lambda887__(auto param){
+auto __lambda1397__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda888__(auto param){
+auto __lambda1398__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda889__(auto param){
+auto __lambda1399__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda890__(auto param){
+auto __lambda1400__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda891__(auto param){
+auto __lambda1401__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda892__(auto param){
+auto __lambda1402__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)(param);
 }
-auto __lambda893__(auto param){
+auto __lambda1403__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda894__(auto param){
+auto __lambda1404__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda895__(auto param){
+auto __lambda1405__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(param);
 }
-auto __lambda896__(auto param){
+auto __lambda1406__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda897__(auto param){
+auto __lambda1407__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda898__(auto param){
+auto __lambda1408__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda899__(auto param){
+auto __lambda1409__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda900__(auto param){
+auto __lambda1410__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda901__(auto param){
+auto __lambda1411__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(param);
 }
-auto __lambda902__(auto param){
+auto __lambda1412__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda903__(auto param){
+auto __lambda1413__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda904__(auto param){
+auto __lambda1414__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda905__(auto param){
+auto __lambda1415__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda906__(auto param){
+auto __lambda1416__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda907__(auto param){
+auto __lambda1417__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)(param);
 }
-auto __lambda908__(auto param){
+auto __lambda1418__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda909__(auto param){
+auto __lambda1419__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda910__(auto param){
+auto __lambda1420__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(structs)(param);
 }
-auto __lambda911__(auto param){
+auto __lambda1421__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda912__(auto param){
+auto __lambda1422__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda913__(auto param){
+auto __lambda1423__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(structs)
                 .addAll(param);
 }
-auto __lambda914__(auto param){
+auto __lambda1424__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda915__(auto param){
+auto __lambda1425__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda916__(auto param){
+auto __lambda1426__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda917__(auto param){
+auto __lambda1427__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda918__(auto param){
+auto __lambda1428__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda919__(auto param){
+auto __lambda1429__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(param);
 }
-auto __lambda920__(auto param){
+auto __lambda1430__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda921__(auto param){
+auto __lambda1431__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda922__(auto param){
+auto __lambda1432__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda923__(auto param){
+auto __lambda1433__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda924__(auto param){
+auto __lambda1434__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda925__(auto param){
+auto __lambda1435__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)(param);
 }
-auto __lambda926__(auto param){
+auto __lambda1436__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda927__(auto param){
+auto __lambda1437__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda928__(auto param){
+auto __lambda1438__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(param);
 }
-auto __lambda929__(auto param){
+auto __lambda1439__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda930__(auto param){
+auto __lambda1440__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda931__(auto param){
+auto __lambda1441__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda932__(auto param){
+auto __lambda1442__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda933__(auto param){
+auto __lambda1443__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda934__(auto param){
+auto __lambda1444__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(param);
 }
-auto __lambda935__(auto param){
+auto __lambda1445__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda936__(auto param){
+auto __lambda1446__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda937__(auto param){
+auto __lambda1447__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled(param);
 }
-auto __lambda938__(auto param){
+auto __lambda1448__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda939__(auto param){
+auto __lambda1449__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda940__(auto param){
+auto __lambda1450__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)(param);
 }
-auto __lambda941__(auto param){
+auto __lambda1451__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda942__(auto param){
+auto __lambda1452__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda943__(auto param){
+auto __lambda1453__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(structs)(param);
 }
-auto __lambda944__(auto param){
+auto __lambda1454__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda945__(auto param){
+auto __lambda1455__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda946__(auto param){
+auto __lambda1456__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(structs)
                 .addAll(globals)(param);
 }
-auto __lambda947__(auto param){
+auto __lambda1457__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda948__(auto param){
+auto __lambda1458__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda949__(auto param){
+auto __lambda1459__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, () -> new Ok<>(compiled.addAll(imports)
                 .addAll(structs)
                 .addAll(globals)
                 .addAll(functions)))(param);
 }
-auto __lambda950__(auto param){
+auto __lambda1460__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new,(param);
 }
-auto __lambda951__(auto param){
+auto __lambda1461__(auto param){
 	return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err.new, ()(param);
 }
-auto __lambda952__(auto err){
+auto __lambda1462__(auto err){
 	return Err.new(err);
 }
-auto __lambda953__(auto ){
+auto __lambda1463__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll(globals).addAll(functions));
 }
-auto __lambda954__(auto ){
+auto __lambda1464__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll(globals);
 }
-auto __lambda955__(auto ){
+auto __lambda1465__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs).addAll;
 }
-auto __lambda956__(auto ){
+auto __lambda1466__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs);
 }
-auto __lambda957__(auto ){
+auto __lambda1467__(auto ){
 	return Ok(compiled.addAll(imports).addAll;
 }
-auto __lambda958__(auto ){
+auto __lambda1468__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda959__(auto ){
+auto __lambda1469__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda960__(auto ){
+auto __lambda1470__(auto ){
 	return Ok(compiled.addAll(imports).addAll(structs);
 }
-auto __lambda961__(auto ){
+auto __lambda1471__(auto ){
 	return Ok(compiled.addAll(imports).addAll;
 }
-auto __lambda962__(auto ){
+auto __lambda1472__(auto ){
 	return Ok(compiled.addAll(imports);
 }
-auto __lambda963__(auto ){
+auto __lambda1473__(auto ){
 	return Ok(compiled.addAll(imports);
 }
 /* private static */Result_List__String_CompileError generate(List__String compiled){
-	return expandAllGenerics().<Result<List_<String>, CompileError>>match(__lambda871__, __lambda872__);
+	return expandAllGenerics().<Result<List_<String>, CompileError>>match(__lambda1381__, __lambda1382__);
 }
 /* private static */Option_CompileError expandAllGenerics(){
 	while (1) {
 	}
 	return None();
 }
-auto __lambda964__(auto main){
+auto __lambda1474__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda965__(auto main){
+auto __lambda1475__(auto main){
 	return Main.mergeStatements(main);
 }
-auto __lambda966__(auto main){
+auto __lambda1476__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda967__(auto main){
+auto __lambda1477__(auto main){
 	return Main.mergeStatements(main);
 }
 /* private static */Result_String_CompileError compileStatements(String input, Rule compiler){
-	return compileAll(divideAll(input, __lambda964__), compiler, __lambda965__);
+	return compileAll(divideAll(input, __lambda1474__), compiler, __lambda1475__);
 }
-auto __lambda968__(auto compiled){
+auto __lambda1478__(auto compiled){
 	return mergeAll(compiled, merger);
 }
-auto __lambda969__(auto compiled){
+auto __lambda1479__(auto compiled){
 	return mergeAll;
 }
-auto __lambda970__(auto compiled){
+auto __lambda1480__(auto compiled){
 	return mergeAll(compiled, merger);
 }
-auto __lambda971__(auto compiled){
+auto __lambda1481__(auto compiled){
 	return mergeAll;
 }
 /* private static */Result_String_CompileError compileAll(List__String segments, Rule compiler, StringBuilder (*)(StringBuilder, String) merger){
-	return parseAll(segments, compiler).mapValue(__lambda968__);
+	return parseAll(segments, compiler).mapValue(__lambda1478__);
 }
 /* private static */String mergeAll(List__String compiled, StringBuilder (*)(StringBuilder, String) merger){
 	return compiled.stream().foldWithInitial(StringBuilder(), merger).toString();
 }
-auto __lambda972__(auto compiled){
+auto __lambda1482__(auto compiled){
 	return compiled.add(compiled);
 }
-auto __lambda973__(auto param){
+auto __lambda1483__(auto param){
 	return compiler.compile(segment).mapValue(compiled.add)(param);
 }
-auto __lambda974__(auto compiled, auto segment){
-	return compiler.compile(segment).mapValue(__lambda972__);
+auto __lambda1484__(auto compiled, auto segment){
+	return compiler.compile(segment).mapValue(__lambda1482__);
 }
-auto __lambda975__(auto compiled){
+auto __lambda1485__(auto compiled){
 	return compiled.add(compiled);
 }
-auto __lambda976__(auto compiled, auto segment){
+auto __lambda1486__(auto compiled, auto segment){
 	return compiler.compile(segment).mapValue;
 }
-auto __lambda977__(auto compiled, auto segment){
+auto __lambda1487__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda978__(auto compiled, auto segment){
+auto __lambda1488__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda979__(auto compiled, auto segment){
+auto __lambda1489__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda980__(auto compiled, auto segment){
+auto __lambda1490__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda981__(auto compiled, auto segment){
+auto __lambda1491__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda982__(auto compiled, auto segment){
+auto __lambda1492__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda983__(auto compiled, auto segment){
+auto __lambda1493__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda984__(auto compiled, auto segment){
+auto __lambda1494__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda985__(auto compiled, auto segment){
+auto __lambda1495__(auto compiled, auto segment){
 	return compiler.compile(segment).mapValue(compiled;
 }
-auto __lambda986__(auto compiled, auto segment){
+auto __lambda1496__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda987__(auto compiled, auto segment){
+auto __lambda1497__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda988__(auto compiled, auto segment){
+auto __lambda1498__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda989__(auto compiled, auto segment){
+auto __lambda1499__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda990__(auto __lambda985__){
-	return __lambda985__.add)(__lambda985__);
+auto __lambda1500__(auto __lambda1495__){
+	return __lambda1495__.add)(__lambda1495__);
 }
-auto __lambda991__(auto compiled){
+auto __lambda1501__(auto compiled){
 	return compiled.add(compiled);
 }
-auto __lambda992__(auto param){
+auto __lambda1502__(auto param){
 	return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.compile(segment).mapValue(compiled.add))(param);
 }
-auto __lambda993__(auto compiled){
+auto __lambda1503__(auto compiled){
 	return compiled.add(compiled);
 }
-auto __lambda994__(auto param){
+auto __lambda1504__(auto param){
 	return compiler.compile(segment).mapValue(compiled.add)(param);
 }
-auto __lambda995__(auto compiled, auto segment){
-	return compiler.compile(segment).mapValue(__lambda993__);
+auto __lambda1505__(auto compiled, auto segment){
+	return compiler.compile(segment).mapValue(__lambda1503__);
 }
-auto __lambda996__(auto compiled){
+auto __lambda1506__(auto compiled){
 	return compiled.add(compiled);
 }
-auto __lambda997__(auto compiled, auto segment){
+auto __lambda1507__(auto compiled, auto segment){
 	return compiler.compile(segment).mapValue;
 }
-auto __lambda998__(auto compiled, auto segment){
+auto __lambda1508__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda999__(auto compiled, auto segment){
+auto __lambda1509__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda1000__(auto compiled, auto segment){
+auto __lambda1510__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1001__(auto compiled, auto segment){
+auto __lambda1511__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1002__(auto compiled, auto segment){
+auto __lambda1512__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda1003__(auto compiled, auto segment){
+auto __lambda1513__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda1004__(auto compiled, auto segment){
+auto __lambda1514__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1005__(auto compiled, auto segment){
+auto __lambda1515__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1006__(auto compiled, auto segment){
+auto __lambda1516__(auto compiled, auto segment){
 	return compiler.compile(segment).mapValue(compiled;
 }
-auto __lambda1007__(auto compiled, auto segment){
+auto __lambda1517__(auto compiled, auto segment){
 	return compiler.compile(segment);
 }
-auto __lambda1008__(auto compiled, auto segment){
+auto __lambda1518__(auto compiled, auto segment){
 	return compiler.compile;
 }
-auto __lambda1009__(auto compiled, auto segment){
+auto __lambda1519__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1010__(auto compiled, auto segment){
+auto __lambda1520__(auto compiled, auto segment){
 	return compiler;
 }
-auto __lambda1011__(auto __lambda1006__){
-	return __lambda1006__.add)(__lambda1006__);
+auto __lambda1521__(auto __lambda1516__){
+	return __lambda1516__.add)(__lambda1516__);
 }
-auto __lambda1012__(auto compiled){
+auto __lambda1522__(auto compiled){
 	return compiled.add(compiled);
 }
 /* private static */Result_List__String_CompileError parseAll(List__String segments, Rule compiler){
-	return segments.stream().foldToResult(Lists.empty(), __lambda974__);
+	return segments.stream().foldToResult(Lists.empty(), __lambda1484__);
 }
 /* private static */StringBuilder mergeStatements(StringBuilder output, String str){
 	return output.append(str);
@@ -3627,37 +5262,37 @@ auto __lambda1012__(auto compiled){
 	}
 	return appended;
 }
-auto __lambda1013__(auto main){
+auto __lambda1523__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1014__(auto main){
+auto __lambda1524__(auto main){
 	return Main.compilePackage(main);
 }
-auto __lambda1015__(auto main){
+auto __lambda1525__(auto main){
 	return Main.compileImport(main);
 }
-auto __lambda1016__(auto main){
+auto __lambda1526__(auto main){
 	return Main.compileClass(main);
 }
-auto __lambda1017__(auto param){
+auto __lambda1527__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1018__(auto param){
+auto __lambda1528__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compilePackage,
                 Main(param);
 }
-auto __lambda1019__(auto param){
+auto __lambda1529__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
                 Main.compileImport,
                 Main(param);
 }
-auto __lambda1020__(auto param){
+auto __lambda1530__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
@@ -3665,37 +5300,37 @@ auto __lambda1020__(auto param){
                 Main.compileClass
         )(param);
 }
-auto __lambda1021__(auto main){
+auto __lambda1531__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1022__(auto main){
+auto __lambda1532__(auto main){
 	return Main.compilePackage(main);
 }
-auto __lambda1023__(auto main){
+auto __lambda1533__(auto main){
 	return Main.compileImport(main);
 }
-auto __lambda1024__(auto main){
+auto __lambda1534__(auto main){
 	return Main.compileClass(main);
 }
-auto __lambda1025__(auto param){
+auto __lambda1535__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1026__(auto param){
+auto __lambda1536__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compilePackage,
                 Main(param);
 }
-auto __lambda1027__(auto param){
+auto __lambda1537__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
                 Main.compileImport,
                 Main(param);
 }
-auto __lambda1028__(auto param){
+auto __lambda1538__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
@@ -3704,7 +5339,7 @@ auto __lambda1028__(auto param){
         )(param);
 }
 /* private static */Result_String_CompileError compileRootSegment(String value){
-	return compileOr(value, Lists.of(__lambda1013__, __lambda1014__, __lambda1015__, __lambda1016__));
+	return compileOr(value, Lists.of(__lambda1523__, __lambda1524__, __lambda1525__, __lambda1526__));
 }
 /* private static */Result_String_CompileError compilePackage(String input){
 	if (1) {
@@ -3734,16 +5369,16 @@ auto __lambda1028__(auto param){
 	}
 	return Err(CompileError("Not whitespace", input));
 }
-auto __lambda1029__(auto ){
+auto __lambda1539__(auto ){
 	return compileToStruct(state.define(Lists.empty()), modifiers, withoutParams, body);
 }
-auto __lambda1030__(auto ){
+auto __lambda1540__(auto ){
 	return compileToStruct;
 }
-auto __lambda1031__(auto ){
+auto __lambda1541__(auto ){
 	return compileToStruct(state.define(Lists.empty()), modifiers, withoutParams, body);
 }
-auto __lambda1032__(auto ){
+auto __lambda1542__(auto ){
 	return compileToStruct;
 }
 /* private static */Result_String_CompileError compileTypedBlock(ParseState state, String keyword, String input){
@@ -3761,38 +5396,38 @@ auto __lambda1032__(auto ){
 	String withoutPermits = permitsIndex >= 0 ? beforeContent.substring(0, permitsIndex).strip() : beforeContent;
 	int paramStart = withoutPermits.indexOf("(");
 	String withoutParams = paramStart >= 0 ? withoutPermits.substring(0, paramStart) : withoutPermits;
-	return compileTypedBlockBody(state, modifiers, withoutParams, body).orElseGet(__lambda1029__);
+	return compileTypedBlockBody(state, modifiers, withoutParams, body).orElseGet(__lambda1539__);
 }
-auto __lambda1033__(auto string){
+auto __lambda1543__(auto string){
 	return String.strip(string);
 }
-auto __lambda1034__(auto param){
+auto __lambda1544__(auto param){
 	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)(param);
 }
-auto __lambda1035__(auto param){
+auto __lambda1545__(auto param){
 	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)
                 .collect(param);
 }
-auto __lambda1036__(auto string){
+auto __lambda1546__(auto string){
 	return String.strip(string);
 }
-auto __lambda1037__(auto param){
+auto __lambda1547__(auto param){
 	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)(param);
 }
-auto __lambda1038__(auto param){
+auto __lambda1548__(auto param){
 	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)
                 .collect(new ListCollector<>())(param);
 }
-auto __lambda1039__(auto string){
+auto __lambda1549__(auto string){
 	return String.strip(string);
 }
-auto __lambda1040__(auto typeArguments){
+auto __lambda1550__(auto typeArguments){
 	return 
 	String joined = generateGenericName(name, typeArguments);
 	ParseState state1 = state.withTypeArguments(typeArguments);
 	return compileToStruct(state1.define(finalClassTypeParams), modifiers, joined, body);;
 }
-auto __lambda1041__(auto typeArguments){
+auto __lambda1551__(auto typeArguments){
 	return 
 	String joined = generateGenericName(name, typeArguments);
 	ParseState state1 = state.withTypeArguments(typeArguments);
@@ -3807,45 +5442,45 @@ auto __lambda1041__(auto typeArguments){
 	}
 	String name = withoutEnd.substring(0, genStart);
 	String substring = withoutEnd.substring(genStart + "<".length());
-	List__String finalClassTypeParams = Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(__lambda1033__).collect(ListCollector());
-	generators = generators.with(name, __lambda1040__);
+	List__String finalClassTypeParams = Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(__lambda1543__).collect(ListCollector());
+	generators = generators.with(name, __lambda1550__);
 	return Some(Ok(""));
 }
-auto __lambda1042__(auto outputContent){
+auto __lambda1552__(auto outputContent){
 	return generateStruct(modifiers, name, outputContent);
 }
-auto __lambda1043__(auto outputContent){
+auto __lambda1553__(auto outputContent){
 	return generateStruct;
 }
-auto __lambda1044__(auto input1){
+auto __lambda1554__(auto input1){
 	return compileClassSegment(defined, input1);
 }
-auto __lambda1045__(auto input1){
+auto __lambda1555__(auto input1){
 	return compileClassSegment;
 }
-auto __lambda1046__(auto input1){
+auto __lambda1556__(auto input1){
 	return compileClassSegment(defined, input1);
 }
-auto __lambda1047__(auto input1){
+auto __lambda1557__(auto input1){
 	return compileClassSegment;
 }
-auto __lambda1048__(auto outputContent){
+auto __lambda1558__(auto outputContent){
 	return generateStruct(modifiers, name, outputContent);
 }
-auto __lambda1049__(auto outputContent){
+auto __lambda1559__(auto outputContent){
 	return generateStruct;
 }
-auto __lambda1050__(auto input1){
+auto __lambda1560__(auto input1){
 	return compileClassSegment(defined, input1);
 }
-auto __lambda1051__(auto input1){
+auto __lambda1561__(auto input1){
 	return compileClassSegment;
 }
 /* private static */Result_String_CompileError compileToStruct(ParseState defined, String modifiers, String name, String body){
 	if (1) {
 	}
 	String inputContent = body.substring(0, body.length() - "}".length());
-	return compileStatements(inputContent, __lambda1044__).mapValue(__lambda1042__);
+	return compileStatements(inputContent, __lambda1554__).mapValue(__lambda1552__);
 }
 /* private static */Result_String_CompileError createSuffixErr(String input, String suffix){
 	return Err(CompileError("Suffix '" + suffix + "' not present", input));
@@ -3856,46 +5491,46 @@ auto __lambda1051__(auto input1){
 	structs = structs.add(generated);
 	return "";
 }
-auto __lambda1052__(auto main){
+auto __lambda1562__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1053__(auto input){
+auto __lambda1563__(auto input){
 	return compileTypedBlock(state, "class", input);
 }
-auto __lambda1054__(auto input){
+auto __lambda1564__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1055__(auto input){
+auto __lambda1565__(auto input){
 	return compileTypedBlock(state, "interface ", input);
 }
-auto __lambda1056__(auto input){
+auto __lambda1566__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1057__(auto input){
+auto __lambda1567__(auto input){
 	return compileTypedBlock(state, "record ", input);
 }
-auto __lambda1058__(auto input){
+auto __lambda1568__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1059__(auto input){
+auto __lambda1569__(auto input){
 	return compileMethod(state, input);
 }
-auto __lambda1060__(auto input){
+auto __lambda1570__(auto input){
 	return compileMethod;
 }
-auto __lambda1061__(auto input){
+auto __lambda1571__(auto input){
 	return compileGlobal(state, input);
 }
-auto __lambda1062__(auto input){
+auto __lambda1572__(auto input){
 	return compileGlobal;
 }
-auto __lambda1063__(auto input){
+auto __lambda1573__(auto input){
 	return compileDefinitionStatement(state, input);
 }
-auto __lambda1064__(auto input){
+auto __lambda1574__(auto input){
 	return compileDefinitionStatement;
 }
-auto __lambda1065__(auto param){
+auto __lambda1575__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 input -> compileTypedBlock(state, "class", input),
@@ -3906,51 +5541,51 @@ auto __lambda1065__(auto param){
                 input -> compileDefinitionStatement(state, input)
         )(param);
 }
-auto __lambda1066__(auto param){
+auto __lambda1576__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 input(param);
 }
-auto __lambda1067__(auto main){
+auto __lambda1577__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1068__(auto input){
+auto __lambda1578__(auto input){
 	return compileTypedBlock(state, "class", input);
 }
-auto __lambda1069__(auto input){
+auto __lambda1579__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1070__(auto input){
+auto __lambda1580__(auto input){
 	return compileTypedBlock(state, "interface ", input);
 }
-auto __lambda1071__(auto input){
+auto __lambda1581__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1072__(auto input){
+auto __lambda1582__(auto input){
 	return compileTypedBlock(state, "record ", input);
 }
-auto __lambda1073__(auto input){
+auto __lambda1583__(auto input){
 	return compileTypedBlock;
 }
-auto __lambda1074__(auto input){
+auto __lambda1584__(auto input){
 	return compileMethod(state, input);
 }
-auto __lambda1075__(auto input){
+auto __lambda1585__(auto input){
 	return compileMethod;
 }
-auto __lambda1076__(auto input){
+auto __lambda1586__(auto input){
 	return compileGlobal(state, input);
 }
-auto __lambda1077__(auto input){
+auto __lambda1587__(auto input){
 	return compileGlobal;
 }
-auto __lambda1078__(auto input){
+auto __lambda1588__(auto input){
 	return compileDefinitionStatement(state, input);
 }
-auto __lambda1079__(auto input){
+auto __lambda1589__(auto input){
 	return compileDefinitionStatement;
 }
-auto __lambda1080__(auto param){
+auto __lambda1590__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 input -> compileTypedBlock(state, "class", input),
@@ -3961,208 +5596,208 @@ auto __lambda1080__(auto param){
                 input -> compileDefinitionStatement(state, input)
         )(param);
 }
-auto __lambda1081__(auto param){
+auto __lambda1591__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 input(param);
 }
 /* private static */Result_String_CompileError compileClassSegment(ParseState state, String value){
-	return compileOr(value, Lists.of(__lambda1052__, __lambda1053__, __lambda1055__, __lambda1057__, __lambda1059__, __lambda1061__, __lambda1063__));
+	return compileOr(value, Lists.of(__lambda1562__, __lambda1563__, __lambda1565__, __lambda1567__, __lambda1569__, __lambda1571__, __lambda1573__));
 }
-auto __lambda1082__(auto main){
+auto __lambda1592__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1083__(auto param){
+auto __lambda1593__(auto param){
 	return compileDefinition(sliced, state).mapValue(Main.generateStatement)(param);
 }
-auto __lambda1084__(auto main){
+auto __lambda1594__(auto main){
 	return Main.generateStatement(main);
 }
 /* private static */Result_String_CompileError compileDefinitionStatement(ParseState state, String input){
 	if (1) {
 	}
 	String sliced = input.substring(0, input.length() - ";".length());
-	return compileDefinition(sliced, state).mapValue(__lambda1082__);
+	return compileDefinition(sliced, state).mapValue(__lambda1592__);
 }
-auto __lambda1085__(auto result){
+auto __lambda1595__(auto result){
 	return 
 	globals = result;
 	return "";;
 }
-auto __lambda1086__(auto globals){
+auto __lambda1596__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1087__(auto value){
+auto __lambda1597__(auto value){
 	return value + ";\n";
 }
-auto __lambda1088__(auto value){
+auto __lambda1598__(auto value){
 	return value;
 }
-auto __lambda1089__(auto value){
+auto __lambda1599__(auto value){
 	return value + ";\n";
 }
-auto __lambda1090__(auto value){
+auto __lambda1600__(auto value){
 	return value;
 }
-auto __lambda1091__(auto value){
+auto __lambda1601__(auto value){
 	return value + ";\n";
 }
-auto __lambda1092__(auto value){
+auto __lambda1602__(auto value){
 	return value;
 }
-auto __lambda1093__(auto param){
-	return maybeInitialization.mapValue(__lambda1091__).mapValue(globals.add)(param);
+auto __lambda1603__(auto param){
+	return maybeInitialization.mapValue(__lambda1601__).mapValue(globals.add)(param);
 }
-auto __lambda1094__(auto globals){
+auto __lambda1604__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1095__(auto globals){
+auto __lambda1605__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1096__(auto value){
+auto __lambda1606__(auto value){
 	return value + ";\n";
 }
-auto __lambda1097__(auto value){
+auto __lambda1607__(auto value){
 	return value;
 }
-auto __lambda1098__(auto param){
-	return maybeInitialization.mapValue(__lambda1096__).mapValue(globals.add)
+auto __lambda1608__(auto param){
+	return maybeInitialization.mapValue(__lambda1606__).mapValue(globals.add)
                 .mapValue(param);
 }
-auto __lambda1099__(auto globals){
+auto __lambda1609__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1100__(auto globals){
+auto __lambda1610__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1101__(auto globals){
+auto __lambda1611__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1102__(auto value){
+auto __lambda1612__(auto value){
 	return value + ";\n";
 }
-auto __lambda1103__(auto value){
+auto __lambda1613__(auto value){
 	return value;
 }
-auto __lambda1104__(auto value){
+auto __lambda1614__(auto value){
 	return value + ";\n";
 }
-auto __lambda1105__(auto value){
+auto __lambda1615__(auto value){
 	return value;
 }
-auto __lambda1106__(auto value){
+auto __lambda1616__(auto value){
 	return value + ";\n";
 }
-auto __lambda1107__(auto value){
+auto __lambda1617__(auto value){
 	return value;
 }
-auto __lambda1108__(auto param){
-	return maybeInitialization.mapValue(__lambda1106__).mapValue(globals.add)(param);
+auto __lambda1618__(auto param){
+	return maybeInitialization.mapValue(__lambda1616__).mapValue(globals.add)(param);
 }
-auto __lambda1109__(auto globals){
+auto __lambda1619__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1110__(auto globals){
+auto __lambda1620__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1111__(auto value){
+auto __lambda1621__(auto value){
 	return value + ";\n";
 }
-auto __lambda1112__(auto value){
+auto __lambda1622__(auto value){
 	return value;
 }
-auto __lambda1113__(auto param){
-	return maybeInitialization.mapValue(__lambda1111__).mapValue(globals.add)
+auto __lambda1623__(auto param){
+	return maybeInitialization.mapValue(__lambda1621__).mapValue(globals.add)
                 .mapValue(result -> {
                     globals = result;
                     return "";
                 })(param);
 }
-auto __lambda1114__(auto result){
+auto __lambda1624__(auto result){
 	return 
 	globals = result;
 	return "";;
 }
-auto __lambda1115__(auto globals){
+auto __lambda1625__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1116__(auto globals){
+auto __lambda1626__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1117__(auto globals){
+auto __lambda1627__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1118__(auto result){
+auto __lambda1628__(auto result){
 	return 
 	globals = result;
 	return "";;
 }
-auto __lambda1119__(auto globals){
+auto __lambda1629__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1120__(auto globals){
+auto __lambda1630__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1121__(auto globals){
+auto __lambda1631__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1122__(auto globals){
+auto __lambda1632__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1123__(auto value){
+auto __lambda1633__(auto value){
 	return value + ";\n";
 }
-auto __lambda1124__(auto value){
+auto __lambda1634__(auto value){
 	return value;
 }
-auto __lambda1125__(auto value){
+auto __lambda1635__(auto value){
 	return value + ";\n";
 }
-auto __lambda1126__(auto value){
+auto __lambda1636__(auto value){
 	return value;
 }
-auto __lambda1127__(auto value){
+auto __lambda1637__(auto value){
 	return value + ";\n";
 }
-auto __lambda1128__(auto value){
+auto __lambda1638__(auto value){
 	return value;
 }
-auto __lambda1129__(auto value){
+auto __lambda1639__(auto value){
 	return value + ";\n";
 }
-auto __lambda1130__(auto value){
+auto __lambda1640__(auto value){
 	return value;
 }
-auto __lambda1131__(auto result){
+auto __lambda1641__(auto result){
 	return 
 	globals = result;
 	return "";;
 }
-auto __lambda1132__(auto globals){
+auto __lambda1642__(auto globals){
 	return globals.add(globals);
 }
-auto __lambda1133__(auto value){
+auto __lambda1643__(auto value){
 	return value + ";\n";
 }
-auto __lambda1134__(auto value){
+auto __lambda1644__(auto value){
 	return value;
 }
-auto __lambda1135__(auto value){
+auto __lambda1645__(auto value){
 	return value + ";\n";
 }
-auto __lambda1136__(auto value){
+auto __lambda1646__(auto value){
 	return value;
 }
-auto __lambda1137__(auto value){
+auto __lambda1647__(auto value){
 	return value + ";\n";
 }
-auto __lambda1138__(auto value){
+auto __lambda1648__(auto value){
 	return value;
 }
-auto __lambda1139__(auto value){
+auto __lambda1649__(auto value){
 	return value + ";\n";
 }
-auto __lambda1140__(auto value){
+auto __lambda1650__(auto value){
 	return value;
 }
 /* private static */Result_String_CompileError compileGlobal(ParseState state, String input){
@@ -4170,36 +5805,36 @@ auto __lambda1140__(auto value){
 	}
 	String substring = input.substring(0, input.length() - ";".length());
 	Result_String_CompileError maybeInitialization = compileInitialization(state, substring);
-	return maybeInitialization.mapValue(__lambda1087__).mapValue(__lambda1086__).mapValue(__lambda1085__);
+	return maybeInitialization.mapValue(__lambda1597__).mapValue(__lambda1596__).mapValue(__lambda1595__);
 }
-auto __lambda1141__(auto outputParams){
+auto __lambda1651__(auto outputParams){
 	return compileMethodWithDefinition(state, outputParams, header, withBody);
 }
-auto __lambda1142__(auto outputParams){
+auto __lambda1652__(auto outputParams){
 	return compileMethodWithDefinition;
 }
-auto __lambda1143__(auto input1){
+auto __lambda1653__(auto input1){
 	return compileDefinition(input1, state);
 }
-auto __lambda1144__(auto input1){
+auto __lambda1654__(auto input1){
 	return compileDefinition;
 }
-auto __lambda1145__(auto input1){
+auto __lambda1655__(auto input1){
 	return compileDefinition(input1, state);
 }
-auto __lambda1146__(auto input1){
+auto __lambda1656__(auto input1){
 	return compileDefinition;
 }
-auto __lambda1147__(auto outputParams){
+auto __lambda1657__(auto outputParams){
 	return compileMethodWithDefinition(state, outputParams, header, withBody);
 }
-auto __lambda1148__(auto outputParams){
+auto __lambda1658__(auto outputParams){
 	return compileMethodWithDefinition;
 }
-auto __lambda1149__(auto input1){
+auto __lambda1659__(auto input1){
 	return compileDefinition(input1, state);
 }
-auto __lambda1150__(auto input1){
+auto __lambda1660__(auto input1){
 	return compileDefinition;
 }
 /* private static */Result_String_CompileError compileMethod(ParseState state, String input){
@@ -4213,61 +5848,61 @@ auto __lambda1150__(auto input1){
 	}
 	String paramString = withParams.substring(0, paramEnd);
 	String withBody = withParams.substring(paramEnd + ")".length()).strip();
-	return compileValues(paramString, __lambda1143__).flatMapValue(__lambda1141__);
+	return compileValues(paramString, __lambda1653__).flatMapValue(__lambda1651__);
 }
-auto __lambda1151__(auto definition){
+auto __lambda1661__(auto definition){
 	return compileMethodBody(state, definition, outputParams, withBody);
 }
-auto __lambda1152__(auto definition){
+auto __lambda1662__(auto definition){
 	return compileMethodBody;
 }
-auto __lambda1153__(auto definition){
+auto __lambda1663__(auto definition){
 	return compileMethodBody(state, definition, outputParams, withBody);
 }
-auto __lambda1154__(auto definition){
+auto __lambda1664__(auto definition){
 	return compileMethodBody;
 }
 /* private static */Result_String_CompileError compileMethodWithDefinition(ParseState state, String outputParams, String header, String withBody){
-	return getStringCompileErrorResult(state, header).flatMapValue(__lambda1151__);
+	return getStringCompileErrorResult(state, header).flatMapValue(__lambda1661__);
 }
 /* private static */Result_String_CompileError getStringCompileErrorResult(ParseState state, String header){
 	return compileDefinition(header, state.withTypeArguments(state.typeArguments));
 }
-auto __lambda1155__(auto statement){
+auto __lambda1665__(auto statement){
 	return addFunction(statement, string);
 }
-auto __lambda1156__(auto statement){
+auto __lambda1666__(auto statement){
 	return addFunction;
 }
-auto __lambda1157__(auto input1){
+auto __lambda1667__(auto input1){
 	return compileStatementOrBlock(state, input1);
 }
-auto __lambda1158__(auto input1){
+auto __lambda1668__(auto input1){
 	return compileStatementOrBlock;
 }
-auto __lambda1159__(auto input1){
+auto __lambda1669__(auto input1){
 	return compileStatementOrBlock(state, input1);
 }
-auto __lambda1160__(auto input1){
+auto __lambda1670__(auto input1){
 	return compileStatementOrBlock;
 }
-auto __lambda1161__(auto statement){
+auto __lambda1671__(auto statement){
 	return addFunction(statement, string);
 }
-auto __lambda1162__(auto statement){
+auto __lambda1672__(auto statement){
 	return addFunction;
 }
-auto __lambda1163__(auto input1){
+auto __lambda1673__(auto input1){
 	return compileStatementOrBlock(state, input1);
 }
-auto __lambda1164__(auto input1){
+auto __lambda1674__(auto input1){
 	return compileStatementOrBlock;
 }
 /* private static */Result_String_CompileError compileMethodBody(ParseState state, String definition, String outputParams, String withBody){
 	String string = generateInvokable(definition, outputParams);
 	if (1) {
 	}
-	return compileStatements(withBody.substring(1, withBody.length() - 1), __lambda1157__).mapValue(__lambda1155__);
+	return compileStatements(withBody.substring(1, withBody.length() - 1), __lambda1667__).mapValue(__lambda1665__);
 }
 /* private static */String addFunction(String content, String string){
 	String function = string + "{" + content + "\n}\n";
@@ -4277,20 +5912,20 @@ auto __lambda1164__(auto input1){
 /* private static */String generateInvokable(String definition, String params){
 	return definition + "(" + params + ")";
 }
-auto __lambda1165__(auto main){
+auto __lambda1675__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda1166__(auto main){
+auto __lambda1676__(auto main){
 	return Main.mergeValues(main);
 }
-auto __lambda1167__(auto main){
+auto __lambda1677__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda1168__(auto main){
+auto __lambda1678__(auto main){
 	return Main.mergeValues(main);
 }
 /* private static */Result_String_CompileError compileValues(String input, Rule compiler){
-	return compileAll(divideAll(input, __lambda1165__), compiler, __lambda1166__);
+	return compileAll(divideAll(input, __lambda1675__), compiler, __lambda1676__);
 }
 /* private static */State divideValueChar(State state, Character c){
 	if (1) {
@@ -4309,49 +5944,49 @@ auto __lambda1168__(auto main){
 	}
 	return buffer.append(", ").append(element);
 }
-auto __lambda1169__(auto main){
+auto __lambda1679__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1170__(auto main){
+auto __lambda1680__(auto main){
 	return Main.compileIf(main);
 }
-auto __lambda1171__(auto main){
+auto __lambda1681__(auto main){
 	return Main.compileWhile(main);
 }
-auto __lambda1172__(auto main){
+auto __lambda1682__(auto main){
 	return Main.compileFor(main);
 }
-auto __lambda1173__(auto main){
+auto __lambda1683__(auto main){
 	return Main.compileElse(main);
 }
-auto __lambda1174__(auto main){
+auto __lambda1684__(auto main){
 	return Main.compilePostFix(main);
 }
-auto __lambda1175__(auto input){
+auto __lambda1685__(auto input){
 	return compileStatement(state, input);
 }
-auto __lambda1176__(auto input){
+auto __lambda1686__(auto input){
 	return compileStatement;
 }
-auto __lambda1177__(auto param){
+auto __lambda1687__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1178__(auto param){
+auto __lambda1688__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compileIf,
                 Main(param);
 }
-auto __lambda1179__(auto param){
+auto __lambda1689__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
                 Main.compileWhile,
                 Main(param);
 }
-auto __lambda1180__(auto param){
+auto __lambda1690__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4359,7 +5994,7 @@ auto __lambda1180__(auto param){
                 Main.compileFor,
                 Main(param);
 }
-auto __lambda1181__(auto param){
+auto __lambda1691__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4368,7 +6003,7 @@ auto __lambda1181__(auto param){
                 Main.compileElse,
                 Main(param);
 }
-auto __lambda1182__(auto param){
+auto __lambda1692__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4379,25 +6014,25 @@ auto __lambda1182__(auto param){
                 input -> compileStatement(state, input)
         )(param);
 }
-auto __lambda1183__(auto param){
+auto __lambda1693__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1184__(auto param){
+auto __lambda1694__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compileIf,
                 Main(param);
 }
-auto __lambda1185__(auto param){
+auto __lambda1695__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
                 Main.compileWhile,
                 Main(param);
 }
-auto __lambda1186__(auto param){
+auto __lambda1696__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4405,7 +6040,7 @@ auto __lambda1186__(auto param){
                 Main.compileFor,
                 Main(param);
 }
-auto __lambda1187__(auto param){
+auto __lambda1697__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4414,7 +6049,7 @@ auto __lambda1187__(auto param){
                 Main.compileElse,
                 Main(param);
 }
-auto __lambda1188__(auto param){
+auto __lambda1698__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4424,49 +6059,49 @@ auto __lambda1188__(auto param){
                 Main.compilePostFix,
                 input(param);
 }
-auto __lambda1189__(auto main){
+auto __lambda1699__(auto main){
 	return Main.compileWhitespace(main);
 }
-auto __lambda1190__(auto main){
+auto __lambda1700__(auto main){
 	return Main.compileIf(main);
 }
-auto __lambda1191__(auto main){
+auto __lambda1701__(auto main){
 	return Main.compileWhile(main);
 }
-auto __lambda1192__(auto main){
+auto __lambda1702__(auto main){
 	return Main.compileFor(main);
 }
-auto __lambda1193__(auto main){
+auto __lambda1703__(auto main){
 	return Main.compileElse(main);
 }
-auto __lambda1194__(auto main){
+auto __lambda1704__(auto main){
 	return Main.compilePostFix(main);
 }
-auto __lambda1195__(auto input){
+auto __lambda1705__(auto input){
 	return compileStatement(state, input);
 }
-auto __lambda1196__(auto input){
+auto __lambda1706__(auto input){
 	return compileStatement;
 }
-auto __lambda1197__(auto param){
+auto __lambda1707__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1198__(auto param){
+auto __lambda1708__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compileIf,
                 Main(param);
 }
-auto __lambda1199__(auto param){
+auto __lambda1709__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
                 Main.compileWhile,
                 Main(param);
 }
-auto __lambda1200__(auto param){
+auto __lambda1710__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4474,7 +6109,7 @@ auto __lambda1200__(auto param){
                 Main.compileFor,
                 Main(param);
 }
-auto __lambda1201__(auto param){
+auto __lambda1711__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4483,7 +6118,7 @@ auto __lambda1201__(auto param){
                 Main.compileElse,
                 Main(param);
 }
-auto __lambda1202__(auto param){
+auto __lambda1712__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4494,25 +6129,25 @@ auto __lambda1202__(auto param){
                 input -> compileStatement(state, input)
         )(param);
 }
-auto __lambda1203__(auto param){
+auto __lambda1713__(auto param){
 	return Lists.of(
                 Main.compileWhitespace,
                 Main(param);
 }
-auto __lambda1204__(auto param){
+auto __lambda1714__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main.compileIf,
                 Main(param);
 }
-auto __lambda1205__(auto param){
+auto __lambda1715__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
                 Main.compileWhile,
                 Main(param);
 }
-auto __lambda1206__(auto param){
+auto __lambda1716__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4520,7 +6155,7 @@ auto __lambda1206__(auto param){
                 Main.compileFor,
                 Main(param);
 }
-auto __lambda1207__(auto param){
+auto __lambda1717__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4529,7 +6164,7 @@ auto __lambda1207__(auto param){
                 Main.compileElse,
                 Main(param);
 }
-auto __lambda1208__(auto param){
+auto __lambda1718__(auto param){
 	return Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
@@ -4540,7 +6175,7 @@ auto __lambda1208__(auto param){
                 input(param);
 }
 /* private static */Result_String_CompileError compileStatementOrBlock(ParseState state, String value){
-	return compileOr(value, Lists.of(__lambda1169__, __lambda1170__, __lambda1171__, __lambda1172__, __lambda1173__, __lambda1174__, __lambda1175__));
+	return compileOr(value, Lists.of(__lambda1679__, __lambda1680__, __lambda1681__, __lambda1682__, __lambda1683__, __lambda1684__, __lambda1685__));
 }
 /* private static */Result_String_CompileError compilePostFix(String input){
 	if (1) {
@@ -4569,52 +6204,52 @@ auto __lambda1208__(auto param){
 	}
 	return createPrefixErr(stripped, "if ");
 }
-auto __lambda1209__(auto withoutEnd){
+auto __lambda1719__(auto withoutEnd){
 	return compileReturn(state, withoutEnd);
 }
-auto __lambda1210__(auto withoutEnd){
+auto __lambda1720__(auto withoutEnd){
 	return compileReturn;
 }
-auto __lambda1211__(auto withoutEnd){
+auto __lambda1721__(auto withoutEnd){
 	return compileInitialization(state, withoutEnd);
 }
-auto __lambda1212__(auto withoutEnd){
+auto __lambda1722__(auto withoutEnd){
 	return compileInitialization;
 }
-auto __lambda1213__(auto withoutEnd){
+auto __lambda1723__(auto withoutEnd){
 	return compileAssignment(state, withoutEnd);
 }
-auto __lambda1214__(auto withoutEnd){
+auto __lambda1724__(auto withoutEnd){
 	return compileAssignment;
 }
-auto __lambda1215__(auto withoutEnd){
+auto __lambda1725__(auto withoutEnd){
 	return compileInvocationStatement(state, withoutEnd);
 }
-auto __lambda1216__(auto withoutEnd){
+auto __lambda1726__(auto withoutEnd){
 	return compileInvocationStatement;
 }
-auto __lambda1217__(auto withoutEnd){
+auto __lambda1727__(auto withoutEnd){
 	return compileReturn(state, withoutEnd);
 }
-auto __lambda1218__(auto withoutEnd){
+auto __lambda1728__(auto withoutEnd){
 	return compileReturn;
 }
-auto __lambda1219__(auto withoutEnd){
+auto __lambda1729__(auto withoutEnd){
 	return compileInitialization(state, withoutEnd);
 }
-auto __lambda1220__(auto withoutEnd){
+auto __lambda1730__(auto withoutEnd){
 	return compileInitialization;
 }
-auto __lambda1221__(auto withoutEnd){
+auto __lambda1731__(auto withoutEnd){
 	return compileAssignment(state, withoutEnd);
 }
-auto __lambda1222__(auto withoutEnd){
+auto __lambda1732__(auto withoutEnd){
 	return compileAssignment;
 }
-auto __lambda1223__(auto withoutEnd){
+auto __lambda1733__(auto withoutEnd){
 	return compileInvocationStatement(state, withoutEnd);
 }
-auto __lambda1224__(auto withoutEnd){
+auto __lambda1734__(auto withoutEnd){
 	return compileInvocationStatement;
 }
 /* private static */Result_String_CompileError compileStatement(ParseState state, String input){
@@ -4622,431 +6257,431 @@ auto __lambda1224__(auto withoutEnd){
 	if (1) {
 	}
 	String slice = stripped.substring(0, stripped.length() - ";".length());
-	return compileOr(slice, Lists.of(__lambda1209__, __lambda1211__, __lambda1213__, __lambda1215__));
+	return compileOr(slice, Lists.of(__lambda1719__, __lambda1721__, __lambda1723__, __lambda1725__));
 }
 /* private static */Result_String_CompileError compileReturn(ParseState state, String withoutEnd){
 	if (1) {
 	}
 	return createPrefixErr(withoutEnd, "return ");
 }
-auto __lambda1225__(auto main){
+auto __lambda1735__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1226__(auto param){
+auto __lambda1736__(auto param){
 	return compileInvocation(state, withoutEnd).mapValue(Main.generateStatement)(param);
 }
-auto __lambda1227__(auto main){
+auto __lambda1737__(auto main){
 	return Main.generateStatement(main);
 }
 /* private static */Result_String_CompileError compileInvocationStatement(ParseState state, String withoutEnd){
-	return compileInvocation(state, withoutEnd).mapValue(__lambda1225__);
+	return compileInvocation(state, withoutEnd).mapValue(__lambda1735__);
 }
-auto __lambda1228__(auto main){
+auto __lambda1738__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1229__(auto tuple){
+auto __lambda1739__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1230__(auto tuple){
+auto __lambda1740__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1231__(auto tuple){
+auto __lambda1741__(auto tuple){
 	return tuple;
 }
-auto __lambda1232__(auto tuple){
+auto __lambda1742__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1233__(auto tuple){
+auto __lambda1743__(auto tuple){
 	return tuple;
 }
-auto __lambda1234__(auto tuple){
+auto __lambda1744__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1235__(auto tuple){
+auto __lambda1745__(auto tuple){
 	return tuple;
 }
-auto __lambda1236__(auto ){
+auto __lambda1746__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1237__(auto ){
+auto __lambda1747__(auto ){
 	return compileValue;
 }
-auto __lambda1238__(auto ){
+auto __lambda1748__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1239__(auto ){
+auto __lambda1749__(auto ){
 	return compileValue;
 }
-auto __lambda1240__(auto ){
+auto __lambda1750__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1241__(auto ){
+auto __lambda1751__(auto ){
 	return compileValue;
 }
-auto __lambda1242__(auto ){
+auto __lambda1752__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1243__(auto ){
+auto __lambda1753__(auto ){
 	return compileValue;
 }
-auto __lambda1244__(auto tuple){
+auto __lambda1754__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1245__(auto tuple){
+auto __lambda1755__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1246__(auto tuple){
+auto __lambda1756__(auto tuple){
 	return tuple;
 }
-auto __lambda1247__(auto tuple){
+auto __lambda1757__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1248__(auto tuple){
+auto __lambda1758__(auto tuple){
 	return tuple;
 }
-auto __lambda1249__(auto tuple){
+auto __lambda1759__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1250__(auto tuple){
+auto __lambda1760__(auto tuple){
 	return tuple;
 }
-auto __lambda1251__(auto ){
+auto __lambda1761__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1252__(auto ){
+auto __lambda1762__(auto ){
 	return compileValue;
 }
-auto __lambda1253__(auto tuple){
+auto __lambda1763__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1254__(auto tuple){
+auto __lambda1764__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1255__(auto tuple){
+auto __lambda1765__(auto tuple){
 	return tuple;
 }
-auto __lambda1256__(auto tuple){
+auto __lambda1766__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1257__(auto tuple){
+auto __lambda1767__(auto tuple){
 	return tuple;
 }
-auto __lambda1258__(auto tuple){
+auto __lambda1768__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1259__(auto tuple){
+auto __lambda1769__(auto tuple){
 	return tuple;
 }
-auto __lambda1260__(auto tuple){
+auto __lambda1770__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1261__(auto tuple){
+auto __lambda1771__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1262__(auto tuple){
+auto __lambda1772__(auto tuple){
 	return tuple;
 }
-auto __lambda1263__(auto tuple){
+auto __lambda1773__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1264__(auto tuple){
+auto __lambda1774__(auto tuple){
 	return tuple;
 }
-auto __lambda1265__(auto tuple){
+auto __lambda1775__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1266__(auto tuple){
+auto __lambda1776__(auto tuple){
 	return tuple;
 }
-auto __lambda1267__(auto ){
+auto __lambda1777__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1268__(auto ){
+auto __lambda1778__(auto ){
 	return compileValue;
 }
-auto __lambda1269__(auto ){
+auto __lambda1779__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1270__(auto ){
+auto __lambda1780__(auto ){
 	return compileValue;
 }
-auto __lambda1271__(auto ){
+auto __lambda1781__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1272__(auto ){
+auto __lambda1782__(auto ){
 	return compileValue;
 }
-auto __lambda1273__(auto ){
+auto __lambda1783__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1274__(auto ){
+auto __lambda1784__(auto ){
 	return compileValue;
 }
-auto __lambda1275__(auto tuple){
+auto __lambda1785__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1276__(auto tuple){
+auto __lambda1786__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1277__(auto tuple){
+auto __lambda1787__(auto tuple){
 	return tuple;
 }
-auto __lambda1278__(auto tuple){
+auto __lambda1788__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1279__(auto tuple){
+auto __lambda1789__(auto tuple){
 	return tuple;
 }
-auto __lambda1280__(auto tuple){
+auto __lambda1790__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1281__(auto tuple){
+auto __lambda1791__(auto tuple){
 	return tuple;
 }
-auto __lambda1282__(auto tuple){
+auto __lambda1792__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1283__(auto tuple){
+auto __lambda1793__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1284__(auto tuple){
+auto __lambda1794__(auto tuple){
 	return tuple;
 }
-auto __lambda1285__(auto tuple){
+auto __lambda1795__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1286__(auto tuple){
+auto __lambda1796__(auto tuple){
 	return tuple;
 }
-auto __lambda1287__(auto tuple){
+auto __lambda1797__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1288__(auto tuple){
+auto __lambda1798__(auto tuple){
 	return tuple;
 }
-auto __lambda1289__(auto ){
+auto __lambda1799__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1290__(auto ){
+auto __lambda1800__(auto ){
 	return compileValue;
 }
-auto __lambda1291__(auto ){
+auto __lambda1801__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1292__(auto ){
+auto __lambda1802__(auto ){
 	return compileValue;
 }
-auto __lambda1293__(auto ){
+auto __lambda1803__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1294__(auto ){
+auto __lambda1804__(auto ){
 	return compileValue;
 }
-auto __lambda1295__(auto ){
+auto __lambda1805__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1296__(auto ){
+auto __lambda1806__(auto ){
 	return compileValue;
 }
-auto __lambda1297__(auto tuple){
+auto __lambda1807__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1298__(auto tuple){
+auto __lambda1808__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1299__(auto tuple){
+auto __lambda1809__(auto tuple){
 	return tuple;
 }
-auto __lambda1300__(auto tuple){
+auto __lambda1810__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1301__(auto tuple){
+auto __lambda1811__(auto tuple){
 	return tuple;
 }
-auto __lambda1302__(auto tuple){
+auto __lambda1812__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1303__(auto tuple){
+auto __lambda1813__(auto tuple){
 	return tuple;
 }
-auto __lambda1304__(auto ){
+auto __lambda1814__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1305__(auto ){
+auto __lambda1815__(auto ){
 	return compileValue;
 }
-auto __lambda1306__(auto tuple){
+auto __lambda1816__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1307__(auto tuple){
+auto __lambda1817__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1308__(auto tuple){
+auto __lambda1818__(auto tuple){
 	return tuple;
 }
-auto __lambda1309__(auto tuple){
+auto __lambda1819__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1310__(auto tuple){
+auto __lambda1820__(auto tuple){
 	return tuple;
 }
-auto __lambda1311__(auto tuple){
+auto __lambda1821__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1312__(auto tuple){
+auto __lambda1822__(auto tuple){
 	return tuple;
 }
-auto __lambda1313__(auto param){
-	return compileValue(destination, state).and(__lambda1289__).mapValue(__lambda1282__).mapValue(Main.generateStatement)(param);
+auto __lambda1823__(auto param){
+	return compileValue(destination, state).and(__lambda1799__).mapValue(__lambda1792__).mapValue(Main.generateStatement)(param);
 }
-auto __lambda1314__(auto ){
+auto __lambda1824__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1315__(auto ){
+auto __lambda1825__(auto ){
 	return compileValue;
 }
-auto __lambda1316__(auto main){
+auto __lambda1826__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1317__(auto param){
+auto __lambda1827__(auto param){
 	return " = " + tuple.right).mapValue(Main.generateStatement)(param);
 }
-auto __lambda1318__(auto main){
+auto __lambda1828__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1319__(auto param){
+auto __lambda1829__(auto param){
 	return tuple.right).mapValue(Main.generateStatement)(param);
 }
-auto __lambda1320__(auto main){
+auto __lambda1830__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1321__(auto tuple){
+auto __lambda1831__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1322__(auto tuple){
+auto __lambda1832__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1323__(auto tuple){
+auto __lambda1833__(auto tuple){
 	return tuple;
 }
-auto __lambda1324__(auto tuple){
+auto __lambda1834__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1325__(auto tuple){
+auto __lambda1835__(auto tuple){
 	return tuple;
 }
-auto __lambda1326__(auto tuple){
+auto __lambda1836__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1327__(auto tuple){
+auto __lambda1837__(auto tuple){
 	return tuple;
 }
-auto __lambda1328__(auto tuple){
+auto __lambda1838__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1329__(auto tuple){
+auto __lambda1839__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1330__(auto tuple){
+auto __lambda1840__(auto tuple){
 	return tuple;
 }
-auto __lambda1331__(auto tuple){
+auto __lambda1841__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1332__(auto tuple){
+auto __lambda1842__(auto tuple){
 	return tuple;
 }
-auto __lambda1333__(auto tuple){
+auto __lambda1843__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1334__(auto tuple){
+auto __lambda1844__(auto tuple){
 	return tuple;
 }
-auto __lambda1335__(auto tuple){
+auto __lambda1845__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1336__(auto tuple){
+auto __lambda1846__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1337__(auto tuple){
+auto __lambda1847__(auto tuple){
 	return tuple;
 }
-auto __lambda1338__(auto tuple){
+auto __lambda1848__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1339__(auto tuple){
+auto __lambda1849__(auto tuple){
 	return tuple;
 }
-auto __lambda1340__(auto tuple){
+auto __lambda1850__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1341__(auto tuple){
+auto __lambda1851__(auto tuple){
 	return tuple;
 }
-auto __lambda1342__(auto ){
+auto __lambda1852__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1343__(auto ){
+auto __lambda1853__(auto ){
 	return compileValue;
 }
-auto __lambda1344__(auto ){
+auto __lambda1854__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1345__(auto ){
+auto __lambda1855__(auto ){
 	return compileValue;
 }
-auto __lambda1346__(auto main){
+auto __lambda1856__(auto main){
 	return Main.generateStatement(main);
 }
-auto __lambda1347__(auto tuple){
+auto __lambda1857__(auto tuple){
 	return tuple.left + " = " + tuple.right;
 }
-auto __lambda1348__(auto tuple){
+auto __lambda1858__(auto tuple){
 	return tuple.left + " = " + tuple;
 }
-auto __lambda1349__(auto tuple){
+auto __lambda1859__(auto tuple){
 	return tuple;
 }
-auto __lambda1350__(auto tuple){
+auto __lambda1860__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1351__(auto tuple){
+auto __lambda1861__(auto tuple){
 	return tuple;
 }
-auto __lambda1352__(auto tuple){
+auto __lambda1862__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1353__(auto tuple){
+auto __lambda1863__(auto tuple){
 	return tuple;
 }
-auto __lambda1354__(auto ){
+auto __lambda1864__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1355__(auto ){
+auto __lambda1865__(auto ){
 	return compileValue;
 }
-auto __lambda1356__(auto ){
+auto __lambda1866__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1357__(auto ){
+auto __lambda1867__(auto ){
 	return compileValue;
 }
-auto __lambda1358__(auto ){
+auto __lambda1868__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1359__(auto ){
+auto __lambda1869__(auto ){
 	return compileValue;
 }
-auto __lambda1360__(auto ){
+auto __lambda1870__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1361__(auto ){
+auto __lambda1871__(auto ){
 	return compileValue;
 }
-auto __lambda1362__(auto ){
+auto __lambda1872__(auto ){
 	return compileValue(value, state);
 }
-auto __lambda1363__(auto ){
+auto __lambda1873__(auto ){
 	return compileValue;
 }
 /* private static */Result_String_CompileError compileAssignment(ParseState state, String withoutEnd){
@@ -5055,98 +6690,98 @@ auto __lambda1363__(auto ){
 	}
 	String destination = withoutEnd.substring(0, valueSeparator).strip();
 	String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
-	return compileValue(destination, state).and(__lambda1236__).mapValue(__lambda1229__).mapValue(__lambda1228__);
+	return compileValue(destination, state).and(__lambda1746__).mapValue(__lambda1739__).mapValue(__lambda1738__);
 }
-auto __lambda1364__(auto outputValue){
+auto __lambda1874__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1365__(auto outputValue){
+auto __lambda1875__(auto outputValue){
 	return generateStatement;
 }
-auto __lambda1366__(auto outputDefinition){
-	return compileValue(inputValue, state).mapValue(__lambda1364__);
+auto __lambda1876__(auto outputDefinition){
+	return compileValue(inputValue, state).mapValue(__lambda1874__);
 }
-auto __lambda1367__(auto outputValue){
+auto __lambda1877__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1368__(auto outputValue){
+auto __lambda1878__(auto outputValue){
 	return generateStatement;
 }
-auto __lambda1369__(auto outputDefinition){
+auto __lambda1879__(auto outputDefinition){
 	return compileValue(inputValue, state).mapValue;
 }
-auto __lambda1370__(auto outputDefinition){
+auto __lambda1880__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1371__(auto outputDefinition){
+auto __lambda1881__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1372__(auto outputDefinition){
+auto __lambda1882__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1373__(auto outputDefinition){
+auto __lambda1883__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1374__(auto outputDefinition){
+auto __lambda1884__(auto outputDefinition){
 	return compileValue(inputValue, state).mapValue(
                         outputValue -> generateStatement(outputDefinition;
 }
-auto __lambda1375__(auto outputDefinition){
+auto __lambda1885__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1376__(auto outputDefinition){
+auto __lambda1886__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1377__(auto outputValue){
+auto __lambda1887__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1378__(auto outputValue){
+auto __lambda1888__(auto outputValue){
 	return generateStatement;
 }
-auto __lambda1379__(auto outputValue){
+auto __lambda1889__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1380__(auto outputValue){
+auto __lambda1890__(auto outputValue){
 	return generateStatement;
 }
-auto __lambda1381__(auto outputDefinition){
-	return compileValue(inputValue, state).mapValue(__lambda1379__);
+auto __lambda1891__(auto outputDefinition){
+	return compileValue(inputValue, state).mapValue(__lambda1889__);
 }
-auto __lambda1382__(auto outputValue){
+auto __lambda1892__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1383__(auto outputValue){
+auto __lambda1893__(auto outputValue){
 	return generateStatement;
 }
-auto __lambda1384__(auto outputDefinition){
+auto __lambda1894__(auto outputDefinition){
 	return compileValue(inputValue, state).mapValue;
 }
-auto __lambda1385__(auto outputDefinition){
+auto __lambda1895__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1386__(auto outputDefinition){
+auto __lambda1896__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1387__(auto outputDefinition){
+auto __lambda1897__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1388__(auto outputDefinition){
+auto __lambda1898__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1389__(auto outputDefinition){
+auto __lambda1899__(auto outputDefinition){
 	return compileValue(inputValue, state).mapValue(
                         outputValue -> generateStatement(outputDefinition;
 }
-auto __lambda1390__(auto outputDefinition){
+auto __lambda1900__(auto outputDefinition){
 	return compileValue(inputValue, state);
 }
-auto __lambda1391__(auto outputDefinition){
+auto __lambda1901__(auto outputDefinition){
 	return compileValue;
 }
-auto __lambda1392__(auto outputValue){
+auto __lambda1902__(auto outputValue){
 	return generateStatement(outputDefinition + " = " + outputValue);
 }
-auto __lambda1393__(auto outputValue){
+auto __lambda1903__(auto outputValue){
 	return generateStatement;
 }
 /* private static */Result_String_CompileError compileInitialization(ParseState state, String withoutEnd){
@@ -5155,108 +6790,108 @@ auto __lambda1393__(auto outputValue){
 	}
 	String inputDefinition = withoutEnd.substring(0, separator);
 	String inputValue = withoutEnd.substring(separator + "=".length());
-	return compileDefinition(inputDefinition, state).flatMapValue(__lambda1366__);
+	return compileDefinition(inputDefinition, state).flatMapValue(__lambda1876__);
 }
 /* private static */String generateStatement(String value){
 	return "\n\t" + value + ";";
 }
-auto __lambda1394__(auto main){
+auto __lambda1904__(auto main){
 	return Main.compileString(main);
 }
-auto __lambda1395__(auto main){
+auto __lambda1905__(auto main){
 	return Main.compileChar(main);
 }
-auto __lambda1396__(auto main){
+auto __lambda1906__(auto main){
 	return Main.compileSymbol(main);
 }
-auto __lambda1397__(auto main){
+auto __lambda1907__(auto main){
 	return Main.compileNumber(main);
 }
-auto __lambda1398__(auto input){
+auto __lambda1908__(auto input){
 	return compileNot(state, input);
 }
-auto __lambda1399__(auto input){
+auto __lambda1909__(auto input){
 	return compileNot;
 }
-auto __lambda1400__(auto input){
+auto __lambda1910__(auto input){
 	return compileConstruction(state, input);
 }
-auto __lambda1401__(auto input){
+auto __lambda1911__(auto input){
 	return compileConstruction;
 }
-auto __lambda1402__(auto input){
+auto __lambda1912__(auto input){
 	return compileLambda(state, input);
 }
-auto __lambda1403__(auto input){
+auto __lambda1913__(auto input){
 	return compileLambda;
 }
-auto __lambda1404__(auto input){
+auto __lambda1914__(auto input){
 	return compileInvocation(state, input);
 }
-auto __lambda1405__(auto input){
+auto __lambda1915__(auto input){
 	return compileInvocation;
 }
-auto __lambda1406__(auto input){
+auto __lambda1916__(auto input){
 	return compileTernary(state, input);
 }
-auto __lambda1407__(auto input){
+auto __lambda1917__(auto input){
 	return compileTernary;
 }
-auto __lambda1408__(auto input){
+auto __lambda1918__(auto input){
 	return compileDataAccess(input, state);
 }
-auto __lambda1409__(auto input){
+auto __lambda1919__(auto input){
 	return compileDataAccess;
 }
-auto __lambda1410__(auto input){
+auto __lambda1920__(auto input){
 	return compileMethodAccess(state, input);
 }
-auto __lambda1411__(auto input){
+auto __lambda1921__(auto input){
 	return compileMethodAccess;
 }
-auto __lambda1412__(auto input){
+auto __lambda1922__(auto input){
 	return compileOperator(state, input, "+");
 }
-auto __lambda1413__(auto input){
+auto __lambda1923__(auto input){
 	return compileOperator;
 }
-auto __lambda1414__(auto input){
+auto __lambda1924__(auto input){
 	return compileOperator(state, input, "-");
 }
-auto __lambda1415__(auto input){
+auto __lambda1925__(auto input){
 	return compileOperator;
 }
-auto __lambda1416__(auto input){
+auto __lambda1926__(auto input){
 	return compileOperator(state, input, "==");
 }
-auto __lambda1417__(auto input){
+auto __lambda1927__(auto input){
 	return compileOperator;
 }
-auto __lambda1418__(auto input){
+auto __lambda1928__(auto input){
 	return compileOperator(state, input, ">=");
 }
-auto __lambda1419__(auto input){
+auto __lambda1929__(auto input){
 	return compileOperator;
 }
-auto __lambda1420__(auto param){
+auto __lambda1930__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1421__(auto param){
+auto __lambda1931__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1422__(auto param){
+auto __lambda1932__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1423__(auto param){
+auto __lambda1933__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5275,25 +6910,25 @@ auto __lambda1423__(auto param){
                 input -> compileOperator(state, input, ">=")
         )(param);
 }
-auto __lambda1424__(auto param){
+auto __lambda1934__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1425__(auto param){
+auto __lambda1935__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1426__(auto param){
+auto __lambda1936__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1427__(auto param){
+auto __lambda1937__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5308,25 +6943,25 @@ auto __lambda1427__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1428__(auto param){
+auto __lambda1938__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1429__(auto param){
+auto __lambda1939__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1430__(auto param){
+auto __lambda1940__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1431__(auto param){
+auto __lambda1941__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5334,25 +6969,25 @@ auto __lambda1431__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1432__(auto param){
+auto __lambda1942__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1433__(auto param){
+auto __lambda1943__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1434__(auto param){
+auto __lambda1944__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1435__(auto param){
+auto __lambda1945__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5360,25 +6995,25 @@ auto __lambda1435__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1436__(auto param){
+auto __lambda1946__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1437__(auto param){
+auto __lambda1947__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1438__(auto param){
+auto __lambda1948__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1439__(auto param){
+auto __lambda1949__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5395,25 +7030,25 @@ auto __lambda1439__(auto param){
                 input -> compileOperator(state, input, "-"),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1440__(auto param){
+auto __lambda1950__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1441__(auto param){
+auto __lambda1951__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1442__(auto param){
+auto __lambda1952__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1443__(auto param){
+auto __lambda1953__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5428,25 +7063,25 @@ auto __lambda1443__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1444__(auto param){
+auto __lambda1954__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1445__(auto param){
+auto __lambda1955__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1446__(auto param){
+auto __lambda1956__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1447__(auto param){
+auto __lambda1957__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5454,25 +7089,25 @@ auto __lambda1447__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1448__(auto param){
+auto __lambda1958__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1449__(auto param){
+auto __lambda1959__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1450__(auto param){
+auto __lambda1960__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1451__(auto param){
+auto __lambda1961__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5480,25 +7115,25 @@ auto __lambda1451__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1452__(auto param){
+auto __lambda1962__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1453__(auto param){
+auto __lambda1963__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1454__(auto param){
+auto __lambda1964__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1455__(auto param){
+auto __lambda1965__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5516,25 +7151,25 @@ auto __lambda1455__(auto param){
                 input -> compileOperator(state, input, "=="),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1456__(auto param){
+auto __lambda1966__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1457__(auto param){
+auto __lambda1967__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1458__(auto param){
+auto __lambda1968__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1459__(auto param){
+auto __lambda1969__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5549,25 +7184,25 @@ auto __lambda1459__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1460__(auto param){
+auto __lambda1970__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1461__(auto param){
+auto __lambda1971__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1462__(auto param){
+auto __lambda1972__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1463__(auto param){
+auto __lambda1973__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5575,25 +7210,25 @@ auto __lambda1463__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1464__(auto param){
+auto __lambda1974__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1465__(auto param){
+auto __lambda1975__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1466__(auto param){
+auto __lambda1976__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1467__(auto param){
+auto __lambda1977__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5601,25 +7236,25 @@ auto __lambda1467__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1468__(auto param){
+auto __lambda1978__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1469__(auto param){
+auto __lambda1979__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1470__(auto param){
+auto __lambda1980__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1471__(auto param){
+auto __lambda1981__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5636,25 +7271,25 @@ auto __lambda1471__(auto param){
                 input -> compileOperator(state, input, "-"),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1472__(auto param){
+auto __lambda1982__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1473__(auto param){
+auto __lambda1983__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1474__(auto param){
+auto __lambda1984__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1475__(auto param){
+auto __lambda1985__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5669,25 +7304,25 @@ auto __lambda1475__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1476__(auto param){
+auto __lambda1986__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1477__(auto param){
+auto __lambda1987__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1478__(auto param){
+auto __lambda1988__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1479__(auto param){
+auto __lambda1989__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5695,25 +7330,25 @@ auto __lambda1479__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1480__(auto param){
+auto __lambda1990__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1481__(auto param){
+auto __lambda1991__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1482__(auto param){
+auto __lambda1992__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1483__(auto param){
+auto __lambda1993__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5721,103 +7356,103 @@ auto __lambda1483__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1484__(auto main){
+auto __lambda1994__(auto main){
 	return Main.compileString(main);
 }
-auto __lambda1485__(auto main){
+auto __lambda1995__(auto main){
 	return Main.compileChar(main);
 }
-auto __lambda1486__(auto main){
+auto __lambda1996__(auto main){
 	return Main.compileSymbol(main);
 }
-auto __lambda1487__(auto main){
+auto __lambda1997__(auto main){
 	return Main.compileNumber(main);
 }
-auto __lambda1488__(auto input){
+auto __lambda1998__(auto input){
 	return compileNot(state, input);
 }
-auto __lambda1489__(auto input){
+auto __lambda1999__(auto input){
 	return compileNot;
 }
-auto __lambda1490__(auto input){
+auto __lambda2000__(auto input){
 	return compileConstruction(state, input);
 }
-auto __lambda1491__(auto input){
+auto __lambda2001__(auto input){
 	return compileConstruction;
 }
-auto __lambda1492__(auto input){
+auto __lambda2002__(auto input){
 	return compileLambda(state, input);
 }
-auto __lambda1493__(auto input){
+auto __lambda2003__(auto input){
 	return compileLambda;
 }
-auto __lambda1494__(auto input){
+auto __lambda2004__(auto input){
 	return compileInvocation(state, input);
 }
-auto __lambda1495__(auto input){
+auto __lambda2005__(auto input){
 	return compileInvocation;
 }
-auto __lambda1496__(auto input){
+auto __lambda2006__(auto input){
 	return compileTernary(state, input);
 }
-auto __lambda1497__(auto input){
+auto __lambda2007__(auto input){
 	return compileTernary;
 }
-auto __lambda1498__(auto input){
+auto __lambda2008__(auto input){
 	return compileDataAccess(input, state);
 }
-auto __lambda1499__(auto input){
+auto __lambda2009__(auto input){
 	return compileDataAccess;
 }
-auto __lambda1500__(auto input){
+auto __lambda2010__(auto input){
 	return compileMethodAccess(state, input);
 }
-auto __lambda1501__(auto input){
+auto __lambda2011__(auto input){
 	return compileMethodAccess;
 }
-auto __lambda1502__(auto input){
+auto __lambda2012__(auto input){
 	return compileOperator(state, input, "+");
 }
-auto __lambda1503__(auto input){
+auto __lambda2013__(auto input){
 	return compileOperator;
 }
-auto __lambda1504__(auto input){
+auto __lambda2014__(auto input){
 	return compileOperator(state, input, "-");
 }
-auto __lambda1505__(auto input){
+auto __lambda2015__(auto input){
 	return compileOperator;
 }
-auto __lambda1506__(auto input){
+auto __lambda2016__(auto input){
 	return compileOperator(state, input, "==");
 }
-auto __lambda1507__(auto input){
+auto __lambda2017__(auto input){
 	return compileOperator;
 }
-auto __lambda1508__(auto input){
+auto __lambda2018__(auto input){
 	return compileOperator(state, input, ">=");
 }
-auto __lambda1509__(auto input){
+auto __lambda2019__(auto input){
 	return compileOperator;
 }
-auto __lambda1510__(auto param){
+auto __lambda2020__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1511__(auto param){
+auto __lambda2021__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1512__(auto param){
+auto __lambda2022__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1513__(auto param){
+auto __lambda2023__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5836,25 +7471,25 @@ auto __lambda1513__(auto param){
                 input -> compileOperator(state, input, ">=")
         )(param);
 }
-auto __lambda1514__(auto param){
+auto __lambda2024__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1515__(auto param){
+auto __lambda2025__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1516__(auto param){
+auto __lambda2026__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1517__(auto param){
+auto __lambda2027__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5869,25 +7504,25 @@ auto __lambda1517__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1518__(auto param){
+auto __lambda2028__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1519__(auto param){
+auto __lambda2029__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1520__(auto param){
+auto __lambda2030__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1521__(auto param){
+auto __lambda2031__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5895,25 +7530,25 @@ auto __lambda1521__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1522__(auto param){
+auto __lambda2032__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1523__(auto param){
+auto __lambda2033__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1524__(auto param){
+auto __lambda2034__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1525__(auto param){
+auto __lambda2035__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5921,25 +7556,25 @@ auto __lambda1525__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1526__(auto param){
+auto __lambda2036__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1527__(auto param){
+auto __lambda2037__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1528__(auto param){
+auto __lambda2038__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1529__(auto param){
+auto __lambda2039__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5956,25 +7591,25 @@ auto __lambda1529__(auto param){
                 input -> compileOperator(state, input, "-"),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1530__(auto param){
+auto __lambda2040__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1531__(auto param){
+auto __lambda2041__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1532__(auto param){
+auto __lambda2042__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1533__(auto param){
+auto __lambda2043__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -5989,25 +7624,25 @@ auto __lambda1533__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1534__(auto param){
+auto __lambda2044__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1535__(auto param){
+auto __lambda2045__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1536__(auto param){
+auto __lambda2046__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1537__(auto param){
+auto __lambda2047__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6015,25 +7650,25 @@ auto __lambda1537__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1538__(auto param){
+auto __lambda2048__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1539__(auto param){
+auto __lambda2049__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1540__(auto param){
+auto __lambda2050__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1541__(auto param){
+auto __lambda2051__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6041,25 +7676,25 @@ auto __lambda1541__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1542__(auto param){
+auto __lambda2052__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1543__(auto param){
+auto __lambda2053__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1544__(auto param){
+auto __lambda2054__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1545__(auto param){
+auto __lambda2055__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6077,25 +7712,25 @@ auto __lambda1545__(auto param){
                 input -> compileOperator(state, input, "=="),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1546__(auto param){
+auto __lambda2056__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1547__(auto param){
+auto __lambda2057__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1548__(auto param){
+auto __lambda2058__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1549__(auto param){
+auto __lambda2059__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6110,25 +7745,25 @@ auto __lambda1549__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1550__(auto param){
+auto __lambda2060__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1551__(auto param){
+auto __lambda2061__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1552__(auto param){
+auto __lambda2062__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1553__(auto param){
+auto __lambda2063__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6136,25 +7771,25 @@ auto __lambda1553__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1554__(auto param){
+auto __lambda2064__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1555__(auto param){
+auto __lambda2065__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1556__(auto param){
+auto __lambda2066__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1557__(auto param){
+auto __lambda2067__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6162,25 +7797,25 @@ auto __lambda1557__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1558__(auto param){
+auto __lambda2068__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1559__(auto param){
+auto __lambda2069__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1560__(auto param){
+auto __lambda2070__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1561__(auto param){
+auto __lambda2071__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6197,25 +7832,25 @@ auto __lambda1561__(auto param){
                 input -> compileOperator(state, input, "-"),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1562__(auto param){
+auto __lambda2072__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1563__(auto param){
+auto __lambda2073__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1564__(auto param){
+auto __lambda2074__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1565__(auto param){
+auto __lambda2075__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6230,25 +7865,25 @@ auto __lambda1565__(auto param){
                 input -> compileMethodAccess(state, input),
                 input -> compileOperator(state, input, "(param);
 }
-auto __lambda1566__(auto param){
+auto __lambda2076__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1567__(auto param){
+auto __lambda2077__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1568__(auto param){
+auto __lambda2078__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1569__(auto param){
+auto __lambda2079__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6256,25 +7891,25 @@ auto __lambda1569__(auto param){
                 Main.compileNumber,
                 input(param);
 }
-auto __lambda1570__(auto param){
+auto __lambda2080__(auto param){
 	return Lists.of(
                 Main.compileString,
                 Main(param);
 }
-auto __lambda1571__(auto param){
+auto __lambda2081__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main.compileChar,
                 Main(param);
 }
-auto __lambda1572__(auto param){
+auto __lambda2082__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main.compileSymbol,
                 Main(param);
 }
-auto __lambda1573__(auto param){
+auto __lambda2083__(auto param){
 	return Lists.of(
                 Main::compileString,
                 Main::compileChar,
@@ -6283,7 +7918,7 @@ auto __lambda1573__(auto param){
                 input(param);
 }
 /* private static */Result_String_CompileError compileValue(String wrapped, ParseState state){
-	return compileOr(wrapped, Lists.of(__lambda1394__, __lambda1395__, __lambda1396__, __lambda1397__, __lambda1398__, __lambda1400__, __lambda1402__, __lambda1404__, __lambda1406__, __lambda1408__, __lambda1410__, __lambda1412__, __lambda1414__, __lambda1416__, __lambda1418__));
+	return compileOr(wrapped, Lists.of(__lambda1904__, __lambda1905__, __lambda1906__, __lambda1907__, __lambda1908__, __lambda1910__, __lambda1912__, __lambda1914__, __lambda1916__, __lambda1918__, __lambda1920__, __lambda1922__, __lambda1924__, __lambda1926__, __lambda1928__));
 }
 /* private static */Result_String_CompileError compileNumber(String input){
 	String stripped = input.strip();
@@ -6293,113 +7928,113 @@ auto __lambda1573__(auto param){
 	String stripped = input.strip();
 	return isSymbol(stripped) ? Ok(stripped) : Err(CompileError("Not a symbol", input));
 }
-auto __lambda1574__(auto param){
+auto __lambda2084__(auto param){
 	return "."(param);
 }
-auto __lambda1575__(auto param){
+auto __lambda2085__(auto param){
 	return stripped.lastIndexOf(".")(param);
 }
-auto __lambda1576__(auto param){
+auto __lambda2086__(auto param){
 	return "."(param);
 }
-auto __lambda1577__(auto param){
+auto __lambda2087__(auto param){
 	return "."(param);
 }
-auto __lambda1578__(auto param){
+auto __lambda2088__(auto param){
 	return methodSeparator + "."(param);
 }
-auto __lambda1579__(auto param){
+auto __lambda2089__(auto param){
 	return "."(param);
 }
-auto __lambda1580__(auto param){
+auto __lambda2090__(auto param){
 	return methodSeparator + ".".length(param);
 }
-auto __lambda1581__(auto param){
+auto __lambda2091__(auto param){
 	return "."(param);
 }
-auto __lambda1582__(auto param){
+auto __lambda2092__(auto param){
 	return ".".length(param);
 }
-auto __lambda1583__(auto param){
+auto __lambda2093__(auto param){
 	return methodSeparator + "."(param);
 }
-auto __lambda1584__(auto param){
+auto __lambda2094__(auto param){
 	return "."(param);
 }
-auto __lambda1585__(auto param){
+auto __lambda2095__(auto param){
 	return methodSeparator + ".".length()(param);
 }
-auto __lambda1586__(auto param){
+auto __lambda2096__(auto param){
 	return "."(param);
 }
-auto __lambda1587__(auto param){
+auto __lambda2097__(auto param){
 	return ".".length(param);
 }
-auto __lambda1588__(auto param){
+auto __lambda2098__(auto param){
 	return "."(param);
 }
-auto __lambda1589__(auto param){
+auto __lambda2099__(auto param){
 	return ".".length()(param);
 }
-auto __lambda1590__(auto param){
+auto __lambda2100__(auto param){
 	return stripped.substring(methodSeparator + "."(param);
 }
-auto __lambda1591__(auto param){
+auto __lambda2101__(auto param){
 	return "."(param);
 }
-auto __lambda1592__(auto param){
+auto __lambda2102__(auto param){
 	return stripped.substring(methodSeparator + ".".length())(param);
 }
-auto __lambda1593__(auto param){
+auto __lambda2103__(auto param){
 	return "."(param);
 }
-auto __lambda1594__(auto param){
+auto __lambda2104__(auto param){
 	return ".".length())(param);
 }
-auto __lambda1595__(auto param){
+auto __lambda2105__(auto param){
 	return methodSeparator + "."(param);
 }
-auto __lambda1596__(auto param){
+auto __lambda2106__(auto param){
 	return "."(param);
 }
-auto __lambda1597__(auto param){
+auto __lambda2107__(auto param){
 	return methodSeparator + ".".length(param);
 }
-auto __lambda1598__(auto param){
+auto __lambda2108__(auto param){
 	return "."(param);
 }
-auto __lambda1599__(auto param){
+auto __lambda2109__(auto param){
 	return ".".length(param);
 }
-auto __lambda1600__(auto param){
+auto __lambda2110__(auto param){
 	return methodSeparator + "."(param);
 }
-auto __lambda1601__(auto param){
+auto __lambda2111__(auto param){
 	return "."(param);
 }
-auto __lambda1602__(auto param){
+auto __lambda2112__(auto param){
 	return methodSeparator + ".".length()(param);
 }
-auto __lambda1603__(auto param){
+auto __lambda2113__(auto param){
 	return "."(param);
 }
-auto __lambda1604__(auto param){
+auto __lambda2114__(auto param){
 	return ".".length(param);
 }
-auto __lambda1605__(auto param){
+auto __lambda2115__(auto param){
 	return "."(param);
 }
-auto __lambda1606__(auto param){
+auto __lambda2116__(auto param){
 	return ".".length()(param);
 }
-auto __lambda1607__(auto newObject){
+auto __lambda2117__(auto newObject){
 	return 
 	String caller = newObject + "." + property;
 	String lower = newObject.toLowerCase();
 	String paramName = isSymbol(lower) ? lower : "param";
 	return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));;
 }
-auto __lambda1608__(auto newObject){
+auto __lambda2118__(auto newObject){
 	return 
 	String caller = newObject + "." + property;
 	String lower = newObject.toLowerCase();
@@ -6412,31 +8047,31 @@ auto __lambda1608__(auto newObject){
 	if (1) {
 	}
 	String object = stripped.substring(0, methodSeparator);
-	String property = stripped.substring(__lambda1578__.length());
-	return compileValue(object, state).flatMapValue(__lambda1607__);
+	String property = stripped.substring(__lambda2088__.length());
+	return compileValue(object, state).flatMapValue(__lambda2117__);
 }
-auto __lambda1609__(auto newObject){
+auto __lambda2119__(auto newObject){
 	return newObject + "." + property;
 }
-auto __lambda1610__(auto newObject){
+auto __lambda2120__(auto newObject){
 	return newObject + ";
 }
-auto __lambda1611__(auto newObject){
+auto __lambda2121__(auto newObject){
 	return newObject;
 }
-auto __lambda1612__(auto newObject){
+auto __lambda2122__(auto newObject){
 	return newObject;
 }
-auto __lambda1613__(auto newObject){
+auto __lambda2123__(auto newObject){
 	return newObject + "." + property;
 }
-auto __lambda1614__(auto newObject){
+auto __lambda2124__(auto newObject){
 	return newObject + ";
 }
-auto __lambda1615__(auto newObject){
+auto __lambda2125__(auto newObject){
 	return newObject;
 }
-auto __lambda1616__(auto newObject){
+auto __lambda2126__(auto newObject){
 	return newObject;
 }
 /* private static */Result_String_CompileError compileDataAccess(String input, ParseState state){
@@ -6446,834 +8081,834 @@ auto __lambda1616__(auto newObject){
 	}
 	String object = stripped.substring(0, dataSeparator);
 	String property = stripped.substring(dataSeparator + ".".length());
-	return compileValue(object, state).mapValue(__lambda1609__);
+	return compileValue(object, state).mapValue(__lambda2119__);
 }
-auto __lambda1617__(auto tuple){
+auto __lambda2127__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right;
 }
-auto __lambda1618__(auto tuple){
+auto __lambda2128__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1619__(auto tuple){
+auto __lambda2129__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1620__(auto tuple){
+auto __lambda2130__(auto tuple){
 	return tuple;
 }
-auto __lambda1621__(auto tuple){
+auto __lambda2131__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1622__(auto tuple){
+auto __lambda2132__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1623__(auto tuple){
+auto __lambda2133__(auto tuple){
 	return tuple;
 }
-auto __lambda1624__(auto tuple){
+auto __lambda2134__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple;
 }
-auto __lambda1625__(auto tuple){
+auto __lambda2135__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1626__(auto tuple){
+auto __lambda2136__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1627__(auto tuple){
+auto __lambda2137__(auto tuple){
 	return tuple;
 }
-auto __lambda1628__(auto tuple){
+auto __lambda2138__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1629__(auto tuple){
+auto __lambda2139__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1630__(auto tuple){
+auto __lambda2140__(auto tuple){
 	return tuple;
 }
-auto __lambda1631__(auto tuple){
+auto __lambda2141__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left;
 }
-auto __lambda1632__(auto tuple){
+auto __lambda2142__(auto tuple){
 	return tuple.left.left + " ? " + tuple;
 }
-auto __lambda1633__(auto tuple){
+auto __lambda2143__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1634__(auto tuple){
+auto __lambda2144__(auto tuple){
 	return tuple;
 }
-auto __lambda1635__(auto tuple){
+auto __lambda2145__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1636__(auto tuple){
+auto __lambda2146__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1637__(auto tuple){
+auto __lambda2147__(auto tuple){
 	return tuple;
 }
-auto __lambda1638__(auto tuple){
+auto __lambda2148__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1639__(auto tuple){
+auto __lambda2149__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1640__(auto tuple){
+auto __lambda2150__(auto tuple){
 	return tuple;
 }
-auto __lambda1641__(auto tuple){
+auto __lambda2151__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1642__(auto tuple){
+auto __lambda2152__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1643__(auto tuple){
+auto __lambda2153__(auto tuple){
 	return tuple;
 }
-auto __lambda1644__(auto tuple){
+auto __lambda2154__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1645__(auto tuple){
+auto __lambda2155__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1646__(auto tuple){
+auto __lambda2156__(auto tuple){
 	return tuple;
 }
-auto __lambda1647__(auto ){
+auto __lambda2157__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1648__(auto ){
+auto __lambda2158__(auto ){
 	return compileValue;
 }
-auto __lambda1649__(auto ){
+auto __lambda2159__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1650__(auto ){
+auto __lambda2160__(auto ){
 	return compileValue;
 }
-auto __lambda1651__(auto ){
+auto __lambda2161__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1652__(auto ){
+auto __lambda2162__(auto ){
 	return compileValue;
 }
-auto __lambda1653__(auto ){
+auto __lambda2163__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1654__(auto ){
+auto __lambda2164__(auto ){
 	return compileValue;
 }
-auto __lambda1655__(auto ){
+auto __lambda2165__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1656__(auto ){
+auto __lambda2166__(auto ){
 	return compileValue;
 }
-auto __lambda1657__(auto ){
+auto __lambda2167__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1658__(auto ){
+auto __lambda2168__(auto ){
 	return compileValue;
 }
-auto __lambda1659__(auto ){
+auto __lambda2169__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1660__(auto ){
+auto __lambda2170__(auto ){
 	return compileValue;
 }
-auto __lambda1661__(auto ){
+auto __lambda2171__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1662__(auto ){
+auto __lambda2172__(auto ){
 	return compileValue;
 }
-auto __lambda1663__(auto ){
+auto __lambda2173__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1664__(auto ){
+auto __lambda2174__(auto ){
 	return compileValue;
 }
-auto __lambda1665__(auto ){
+auto __lambda2175__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1666__(auto ){
+auto __lambda2176__(auto ){
 	return compileValue;
 }
-auto __lambda1667__(auto ){
+auto __lambda2177__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1668__(auto ){
+auto __lambda2178__(auto ){
 	return compileValue;
 }
-auto __lambda1669__(auto ){
+auto __lambda2179__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1670__(auto ){
+auto __lambda2180__(auto ){
 	return compileValue;
 }
-auto __lambda1671__(auto ){
+auto __lambda2181__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1672__(auto ){
+auto __lambda2182__(auto ){
 	return compileValue;
 }
-auto __lambda1673__(auto ){
+auto __lambda2183__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1674__(auto ){
+auto __lambda2184__(auto ){
 	return compileValue;
 }
-auto __lambda1675__(auto ){
+auto __lambda2185__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1676__(auto ){
+auto __lambda2186__(auto ){
 	return compileValue;
 }
-auto __lambda1677__(auto ){
+auto __lambda2187__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1678__(auto ){
+auto __lambda2188__(auto ){
 	return compileValue;
 }
-auto __lambda1679__(auto ){
+auto __lambda2189__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1680__(auto ){
+auto __lambda2190__(auto ){
 	return compileValue;
 }
-auto __lambda1681__(auto ){
+auto __lambda2191__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1682__(auto ){
+auto __lambda2192__(auto ){
 	return compileValue;
 }
-auto __lambda1683__(auto ){
+auto __lambda2193__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1684__(auto ){
+auto __lambda2194__(auto ){
 	return compileValue;
 }
-auto __lambda1685__(auto ){
+auto __lambda2195__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1686__(auto ){
+auto __lambda2196__(auto ){
 	return compileValue;
 }
-auto __lambda1687__(auto ){
+auto __lambda2197__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1688__(auto ){
+auto __lambda2198__(auto ){
 	return compileValue;
 }
-auto __lambda1689__(auto ){
+auto __lambda2199__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1690__(auto ){
+auto __lambda2200__(auto ){
 	return compileValue;
 }
-auto __lambda1691__(auto ){
+auto __lambda2201__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1692__(auto ){
+auto __lambda2202__(auto ){
 	return compileValue;
 }
-auto __lambda1693__(auto ){
+auto __lambda2203__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1694__(auto ){
+auto __lambda2204__(auto ){
 	return compileValue;
 }
-auto __lambda1695__(auto ){
+auto __lambda2205__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1696__(auto ){
+auto __lambda2206__(auto ){
 	return compileValue;
 }
-auto __lambda1697__(auto ){
+auto __lambda2207__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1698__(auto ){
+auto __lambda2208__(auto ){
 	return compileValue;
 }
-auto __lambda1699__(auto ){
+auto __lambda2209__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1700__(auto ){
+auto __lambda2210__(auto ){
 	return compileValue;
 }
-auto __lambda1701__(auto ){
+auto __lambda2211__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1702__(auto ){
+auto __lambda2212__(auto ){
 	return compileValue;
 }
-auto __lambda1703__(auto ){
+auto __lambda2213__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1704__(auto ){
+auto __lambda2214__(auto ){
 	return compileValue;
 }
-auto __lambda1705__(auto ){
+auto __lambda2215__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1706__(auto ){
+auto __lambda2216__(auto ){
 	return compileValue;
 }
-auto __lambda1707__(auto ){
+auto __lambda2217__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1708__(auto ){
+auto __lambda2218__(auto ){
 	return compileValue;
 }
-auto __lambda1709__(auto ){
+auto __lambda2219__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1710__(auto ){
+auto __lambda2220__(auto ){
 	return compileValue;
 }
-auto __lambda1711__(auto ){
+auto __lambda2221__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1712__(auto ){
+auto __lambda2222__(auto ){
 	return compileValue;
 }
-auto __lambda1713__(auto ){
+auto __lambda2223__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1714__(auto ){
+auto __lambda2224__(auto ){
 	return compileValue;
 }
-auto __lambda1715__(auto ){
+auto __lambda2225__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1716__(auto ){
+auto __lambda2226__(auto ){
 	return compileValue;
 }
-auto __lambda1717__(auto ){
+auto __lambda2227__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1718__(auto ){
+auto __lambda2228__(auto ){
 	return compileValue;
 }
-auto __lambda1719__(auto ){
+auto __lambda2229__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1720__(auto ){
+auto __lambda2230__(auto ){
 	return compileValue;
 }
-auto __lambda1721__(auto ){
+auto __lambda2231__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1722__(auto ){
+auto __lambda2232__(auto ){
 	return compileValue;
 }
-auto __lambda1723__(auto ){
+auto __lambda2233__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1724__(auto ){
+auto __lambda2234__(auto ){
 	return compileValue;
 }
-auto __lambda1725__(auto ){
+auto __lambda2235__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1726__(auto ){
+auto __lambda2236__(auto ){
 	return compileValue;
 }
-auto __lambda1727__(auto ){
+auto __lambda2237__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1728__(auto ){
+auto __lambda2238__(auto ){
 	return compileValue;
 }
-auto __lambda1729__(auto ){
+auto __lambda2239__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1730__(auto ){
+auto __lambda2240__(auto ){
 	return compileValue;
 }
-auto __lambda1731__(auto ){
+auto __lambda2241__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1732__(auto ){
+auto __lambda2242__(auto ){
 	return compileValue;
 }
-auto __lambda1733__(auto ){
+auto __lambda2243__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1734__(auto ){
+auto __lambda2244__(auto ){
 	return compileValue;
 }
-auto __lambda1735__(auto ){
+auto __lambda2245__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1736__(auto ){
+auto __lambda2246__(auto ){
 	return compileValue;
 }
-auto __lambda1737__(auto ){
+auto __lambda2247__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1738__(auto ){
+auto __lambda2248__(auto ){
 	return compileValue;
 }
-auto __lambda1739__(auto ){
+auto __lambda2249__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1740__(auto ){
+auto __lambda2250__(auto ){
 	return compileValue;
 }
-auto __lambda1741__(auto ){
+auto __lambda2251__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1742__(auto ){
+auto __lambda2252__(auto ){
 	return compileValue;
 }
-auto __lambda1743__(auto ){
+auto __lambda2253__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1744__(auto ){
+auto __lambda2254__(auto ){
 	return compileValue;
 }
-auto __lambda1745__(auto ){
+auto __lambda2255__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1746__(auto ){
+auto __lambda2256__(auto ){
 	return compileValue;
 }
-auto __lambda1747__(auto ){
+auto __lambda2257__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1748__(auto ){
+auto __lambda2258__(auto ){
 	return compileValue;
 }
-auto __lambda1749__(auto ){
+auto __lambda2259__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1750__(auto ){
+auto __lambda2260__(auto ){
 	return compileValue;
 }
-auto __lambda1751__(auto ){
+auto __lambda2261__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1752__(auto ){
+auto __lambda2262__(auto ){
 	return compileValue;
 }
-auto __lambda1753__(auto ){
+auto __lambda2263__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1754__(auto ){
+auto __lambda2264__(auto ){
 	return compileValue;
 }
-auto __lambda1755__(auto ){
+auto __lambda2265__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1756__(auto ){
+auto __lambda2266__(auto ){
 	return compileValue;
 }
-auto __lambda1757__(auto ){
+auto __lambda2267__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1758__(auto ){
+auto __lambda2268__(auto ){
 	return compileValue;
 }
-auto __lambda1759__(auto ){
+auto __lambda2269__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1760__(auto ){
+auto __lambda2270__(auto ){
 	return compileValue;
 }
-auto __lambda1761__(auto ){
+auto __lambda2271__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1762__(auto ){
+auto __lambda2272__(auto ){
 	return compileValue;
 }
-auto __lambda1763__(auto ){
+auto __lambda2273__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1764__(auto ){
+auto __lambda2274__(auto ){
 	return compileValue;
 }
-auto __lambda1765__(auto ){
+auto __lambda2275__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1766__(auto ){
+auto __lambda2276__(auto ){
 	return compileValue;
 }
-auto __lambda1767__(auto ){
+auto __lambda2277__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1768__(auto ){
+auto __lambda2278__(auto ){
 	return compileValue;
 }
-auto __lambda1769__(auto ){
+auto __lambda2279__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1770__(auto ){
+auto __lambda2280__(auto ){
 	return compileValue;
 }
-auto __lambda1771__(auto ){
+auto __lambda2281__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1772__(auto ){
+auto __lambda2282__(auto ){
 	return compileValue;
 }
-auto __lambda1773__(auto ){
+auto __lambda2283__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1774__(auto ){
+auto __lambda2284__(auto ){
 	return compileValue;
 }
-auto __lambda1775__(auto ){
+auto __lambda2285__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1776__(auto ){
+auto __lambda2286__(auto ){
 	return compileValue;
 }
-auto __lambda1777__(auto ){
+auto __lambda2287__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1778__(auto ){
+auto __lambda2288__(auto ){
 	return compileValue;
 }
-auto __lambda1779__(auto ){
+auto __lambda2289__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1780__(auto ){
+auto __lambda2290__(auto ){
 	return compileValue;
 }
-auto __lambda1781__(auto ){
+auto __lambda2291__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1782__(auto ){
+auto __lambda2292__(auto ){
 	return compileValue;
 }
-auto __lambda1783__(auto ){
+auto __lambda2293__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1784__(auto ){
+auto __lambda2294__(auto ){
 	return compileValue;
 }
-auto __lambda1785__(auto ){
+auto __lambda2295__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1786__(auto ){
+auto __lambda2296__(auto ){
 	return compileValue;
 }
-auto __lambda1787__(auto ){
+auto __lambda2297__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1788__(auto ){
+auto __lambda2298__(auto ){
 	return compileValue;
 }
-auto __lambda1789__(auto ){
+auto __lambda2299__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1790__(auto ){
+auto __lambda2300__(auto ){
 	return compileValue;
 }
-auto __lambda1791__(auto ){
+auto __lambda2301__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1792__(auto ){
+auto __lambda2302__(auto ){
 	return compileValue;
 }
-auto __lambda1793__(auto ){
+auto __lambda2303__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1794__(auto ){
+auto __lambda2304__(auto ){
 	return compileValue;
 }
-auto __lambda1795__(auto ){
+auto __lambda2305__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1796__(auto ){
+auto __lambda2306__(auto ){
 	return compileValue;
 }
-auto __lambda1797__(auto ){
+auto __lambda2307__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1798__(auto ){
+auto __lambda2308__(auto ){
 	return compileValue;
 }
-auto __lambda1799__(auto ){
+auto __lambda2309__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1800__(auto ){
+auto __lambda2310__(auto ){
 	return compileValue;
 }
-auto __lambda1801__(auto ){
+auto __lambda2311__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1802__(auto ){
+auto __lambda2312__(auto ){
 	return compileValue;
 }
-auto __lambda1803__(auto ){
+auto __lambda2313__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1804__(auto ){
+auto __lambda2314__(auto ){
 	return compileValue;
 }
-auto __lambda1805__(auto ){
+auto __lambda2315__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1806__(auto ){
+auto __lambda2316__(auto ){
 	return compileValue;
 }
-auto __lambda1807__(auto tuple){
+auto __lambda2317__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right;
 }
-auto __lambda1808__(auto tuple){
+auto __lambda2318__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1809__(auto tuple){
+auto __lambda2319__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1810__(auto tuple){
+auto __lambda2320__(auto tuple){
 	return tuple;
 }
-auto __lambda1811__(auto tuple){
+auto __lambda2321__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1812__(auto tuple){
+auto __lambda2322__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1813__(auto tuple){
+auto __lambda2323__(auto tuple){
 	return tuple;
 }
-auto __lambda1814__(auto tuple){
+auto __lambda2324__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple;
 }
-auto __lambda1815__(auto tuple){
+auto __lambda2325__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1816__(auto tuple){
+auto __lambda2326__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1817__(auto tuple){
+auto __lambda2327__(auto tuple){
 	return tuple;
 }
-auto __lambda1818__(auto tuple){
+auto __lambda2328__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1819__(auto tuple){
+auto __lambda2329__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1820__(auto tuple){
+auto __lambda2330__(auto tuple){
 	return tuple;
 }
-auto __lambda1821__(auto tuple){
+auto __lambda2331__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left;
 }
-auto __lambda1822__(auto tuple){
+auto __lambda2332__(auto tuple){
 	return tuple.left.left + " ? " + tuple;
 }
-auto __lambda1823__(auto tuple){
+auto __lambda2333__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1824__(auto tuple){
+auto __lambda2334__(auto tuple){
 	return tuple;
 }
-auto __lambda1825__(auto tuple){
+auto __lambda2335__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1826__(auto tuple){
+auto __lambda2336__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1827__(auto tuple){
+auto __lambda2337__(auto tuple){
 	return tuple;
 }
-auto __lambda1828__(auto tuple){
+auto __lambda2338__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1829__(auto tuple){
+auto __lambda2339__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1830__(auto tuple){
+auto __lambda2340__(auto tuple){
 	return tuple;
 }
-auto __lambda1831__(auto tuple){
+auto __lambda2341__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1832__(auto tuple){
+auto __lambda2342__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1833__(auto tuple){
+auto __lambda2343__(auto tuple){
 	return tuple;
 }
-auto __lambda1834__(auto tuple){
+auto __lambda2344__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1835__(auto tuple){
+auto __lambda2345__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1836__(auto tuple){
+auto __lambda2346__(auto tuple){
 	return tuple;
 }
-auto __lambda1837__(auto ){
+auto __lambda2347__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1838__(auto ){
+auto __lambda2348__(auto ){
 	return compileValue;
 }
-auto __lambda1839__(auto ){
+auto __lambda2349__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1840__(auto ){
+auto __lambda2350__(auto ){
 	return compileValue;
 }
-auto __lambda1841__(auto ){
+auto __lambda2351__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1842__(auto ){
+auto __lambda2352__(auto ){
 	return compileValue;
 }
-auto __lambda1843__(auto ){
+auto __lambda2353__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1844__(auto ){
+auto __lambda2354__(auto ){
 	return compileValue;
 }
-auto __lambda1845__(auto ){
+auto __lambda2355__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1846__(auto ){
+auto __lambda2356__(auto ){
 	return compileValue;
 }
-auto __lambda1847__(auto ){
+auto __lambda2357__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1848__(auto ){
+auto __lambda2358__(auto ){
 	return compileValue;
 }
-auto __lambda1849__(auto ){
+auto __lambda2359__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1850__(auto ){
+auto __lambda2360__(auto ){
 	return compileValue;
 }
-auto __lambda1851__(auto ){
+auto __lambda2361__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1852__(auto ){
+auto __lambda2362__(auto ){
 	return compileValue;
 }
-auto __lambda1853__(auto ){
+auto __lambda2363__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1854__(auto ){
+auto __lambda2364__(auto ){
 	return compileValue;
 }
-auto __lambda1855__(auto ){
+auto __lambda2365__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1856__(auto ){
+auto __lambda2366__(auto ){
 	return compileValue;
 }
-auto __lambda1857__(auto tuple){
+auto __lambda2367__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right;
 }
-auto __lambda1858__(auto tuple){
+auto __lambda2368__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1859__(auto tuple){
+auto __lambda2369__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1860__(auto tuple){
+auto __lambda2370__(auto tuple){
 	return tuple;
 }
-auto __lambda1861__(auto tuple){
+auto __lambda2371__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1862__(auto tuple){
+auto __lambda2372__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1863__(auto tuple){
+auto __lambda2373__(auto tuple){
 	return tuple;
 }
-auto __lambda1864__(auto tuple){
+auto __lambda2374__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left.right + " : " + tuple;
 }
-auto __lambda1865__(auto tuple){
+auto __lambda2375__(auto tuple){
 	return tuple.left.left + ";
 }
-auto __lambda1866__(auto tuple){
+auto __lambda2376__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1867__(auto tuple){
+auto __lambda2377__(auto tuple){
 	return tuple;
 }
-auto __lambda1868__(auto tuple){
+auto __lambda2378__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1869__(auto tuple){
+auto __lambda2379__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1870__(auto tuple){
+auto __lambda2380__(auto tuple){
 	return tuple;
 }
-auto __lambda1871__(auto tuple){
+auto __lambda2381__(auto tuple){
 	return tuple.left.left + " ? " + tuple.left;
 }
-auto __lambda1872__(auto tuple){
+auto __lambda2382__(auto tuple){
 	return tuple.left.left + " ? " + tuple;
 }
-auto __lambda1873__(auto tuple){
+auto __lambda2383__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1874__(auto tuple){
+auto __lambda2384__(auto tuple){
 	return tuple;
 }
-auto __lambda1875__(auto tuple){
+auto __lambda2385__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1876__(auto tuple){
+auto __lambda2386__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1877__(auto tuple){
+auto __lambda2387__(auto tuple){
 	return tuple;
 }
-auto __lambda1878__(auto tuple){
+auto __lambda2388__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1879__(auto tuple){
+auto __lambda2389__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1880__(auto tuple){
+auto __lambda2390__(auto tuple){
 	return tuple;
 }
-auto __lambda1881__(auto tuple){
+auto __lambda2391__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1882__(auto tuple){
+auto __lambda2392__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1883__(auto tuple){
+auto __lambda2393__(auto tuple){
 	return tuple;
 }
-auto __lambda1884__(auto tuple){
+auto __lambda2394__(auto tuple){
 	return tuple.left.left;
 }
-auto __lambda1885__(auto tuple){
+auto __lambda2395__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1886__(auto tuple){
+auto __lambda2396__(auto tuple){
 	return tuple;
 }
-auto __lambda1887__(auto ){
+auto __lambda2397__(auto ){
 	return compileValue(ifFalse, state);
 }
-auto __lambda1888__(auto ){
+auto __lambda2398__(auto ){
 	return compileValue;
 }
-auto __lambda1889__(auto ){
+auto __lambda2399__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1890__(auto ){
+auto __lambda2400__(auto ){
 	return compileValue;
 }
-auto __lambda1891__(auto ){
+auto __lambda2401__(auto ){
 	return compileValue(ifTrue, state);
 }
-auto __lambda1892__(auto ){
+auto __lambda2402__(auto ){
 	return compileValue;
 }
 /* private static */Result_String_CompileError compileTernary(ParseState state, String input){
@@ -7288,96 +8923,96 @@ auto __lambda1892__(auto ){
 	}
 	String ifTrue = cases.substring(0, caseIndex).strip();
 	String ifFalse = cases.substring(caseIndex + ":".length()).strip();
-	return compileValue(condition, state).and(__lambda1649__).and(__lambda1647__).mapValue(__lambda1617__);
+	return compileValue(condition, state).and(__lambda2159__).and(__lambda2157__).mapValue(__lambda2127__);
 }
-auto __lambda1893__(auto type){
+auto __lambda2403__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1894__(auto type){
+auto __lambda2404__(auto type){
 	return type;
 }
-auto __lambda1895__(auto arguments){
-	return compileType(state, caller).mapValue(__lambda1893__);
+auto __lambda2405__(auto arguments){
+	return compileType(state, caller).mapValue(__lambda2403__);
 }
-auto __lambda1896__(auto type){
+auto __lambda2406__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1897__(auto type){
+auto __lambda2407__(auto type){
 	return type;
 }
-auto __lambda1898__(auto arguments){
+auto __lambda2408__(auto arguments){
 	return compileType(state, caller).mapValue;
 }
-auto __lambda1899__(auto arguments){
+auto __lambda2409__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1900__(auto arguments){
+auto __lambda2410__(auto arguments){
 	return compileType;
 }
-auto __lambda1901__(auto arguments){
+auto __lambda2411__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1902__(auto arguments){
+auto __lambda2412__(auto arguments){
 	return compileType;
 }
-auto __lambda1903__(auto arguments){
+auto __lambda2413__(auto arguments){
 	return compileType(state, caller).mapValue(type -> type;
 }
-auto __lambda1904__(auto arguments){
+auto __lambda2414__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1905__(auto arguments){
+auto __lambda2415__(auto arguments){
 	return compileType;
 }
-auto __lambda1906__(auto type){
+auto __lambda2416__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1907__(auto type){
+auto __lambda2417__(auto type){
 	return type;
 }
-auto __lambda1908__(auto type){
+auto __lambda2418__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1909__(auto type){
+auto __lambda2419__(auto type){
 	return type;
 }
-auto __lambda1910__(auto arguments){
-	return compileType(state, caller).mapValue(__lambda1908__);
+auto __lambda2420__(auto arguments){
+	return compileType(state, caller).mapValue(__lambda2418__);
 }
-auto __lambda1911__(auto type){
+auto __lambda2421__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1912__(auto type){
+auto __lambda2422__(auto type){
 	return type;
 }
-auto __lambda1913__(auto arguments){
+auto __lambda2423__(auto arguments){
 	return compileType(state, caller).mapValue;
 }
-auto __lambda1914__(auto arguments){
+auto __lambda2424__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1915__(auto arguments){
+auto __lambda2425__(auto arguments){
 	return compileType;
 }
-auto __lambda1916__(auto arguments){
+auto __lambda2426__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1917__(auto arguments){
+auto __lambda2427__(auto arguments){
 	return compileType;
 }
-auto __lambda1918__(auto arguments){
+auto __lambda2428__(auto arguments){
 	return compileType(state, caller).mapValue(type -> type;
 }
-auto __lambda1919__(auto arguments){
+auto __lambda2429__(auto arguments){
 	return compileType(state, caller);
 }
-auto __lambda1920__(auto arguments){
+auto __lambda2430__(auto arguments){
 	return compileType;
 }
-auto __lambda1921__(auto type){
+auto __lambda2431__(auto type){
 	return type + "(" + arguments + ")";
 }
-auto __lambda1922__(auto type){
+auto __lambda2432__(auto type){
 	return type;
 }
 /* private static */Result_String_CompileError compileConstruction(ParseState state, String input){
@@ -7392,28 +9027,28 @@ auto __lambda1922__(auto type){
 	String rawCaller = slice.substring(0, paramStart).strip();
 	String caller = rawCaller.endsWith("<>") ? rawCaller.substring(0, rawCaller.length() - "<>".length()) : rawCaller;
 	String inputArguments = slice.substring(paramStart + "(".length());
-	return compileAllValues(state, inputArguments).flatMapValue(__lambda1895__);
+	return compileAllValues(state, inputArguments).flatMapValue(__lambda2405__);
 }
 /* private static */Result_String_CompileError createPrefixErr(String input, String prefix){
 	return Err(CompileError("Prefix '" + prefix + "' not present", input));
 }
-auto __lambda1923__(auto result){
+auto __lambda2433__(auto result){
 	return "!" + result;
 }
-auto __lambda1924__(auto result){
+auto __lambda2434__(auto result){
 	return "!";
 }
-auto __lambda1925__(auto result){
+auto __lambda2435__(auto result){
 	return "!" + result;
 }
-auto __lambda1926__(auto result){
+auto __lambda2436__(auto result){
 	return "!";
 }
 /* private static */Result_String_CompileError compileNot(ParseState state, String input){
 	String stripped = input.strip();
 	if (1) {
 	}
-	return compileValue(stripped.substring(1), state).mapValue(__lambda1923__);
+	return compileValue(stripped.substring(1), state).mapValue(__lambda2433__);
 }
 /* private static */Result_String_CompileError compileChar(String input){
 	if (1) {
@@ -7425,90 +9060,90 @@ auto __lambda1926__(auto result){
                 ? new Ok<>(input.strip())
                 : new Err<>(CompileError("Not a string", input));
 }
-auto __lambda1927__(auto ){
+auto __lambda2437__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1928__(auto outputValue){
+auto __lambda2438__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1929__(auto outputValue){
+auto __lambda2439__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1930__(auto outputValue){
+auto __lambda2440__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1931__(auto outputValue){
+auto __lambda2441__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1932__(auto paramNames){
+auto __lambda2442__(auto paramNames){
 	return 
 	String inputValue = input.substring(arrowIndex + "->".length()).strip();
-	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda1928__);;
+	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda2438__);;
 }
-auto __lambda1933__(auto outputValue){
+auto __lambda2443__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1934__(auto outputValue){
+auto __lambda2444__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1935__(auto outputValue){
+auto __lambda2445__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1936__(auto outputValue){
+auto __lambda2446__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1937__(auto paramNames){
+auto __lambda2447__(auto paramNames){
 	return 
 	String inputValue = input.substring(arrowIndex + "->".length()).strip();
-	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda1933__);;
+	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda2443__);;
 }
-auto __lambda1938__(auto ){
+auto __lambda2448__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1939__(auto ){
+auto __lambda2449__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1940__(auto ){
+auto __lambda2450__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1941__(auto ){
+auto __lambda2451__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1942__(auto ){
+auto __lambda2452__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1943__(auto ){
+auto __lambda2453__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1944__(auto ){
+auto __lambda2454__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1945__(auto ){
+auto __lambda2455__(auto ){
 	return Err(CompileError("Not a lambda statement", input));
 }
-auto __lambda1946__(auto outputValue){
+auto __lambda2456__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1947__(auto outputValue){
+auto __lambda2457__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1948__(auto outputValue){
+auto __lambda2458__(auto outputValue){
 	return generateLambda(paramNames, outputValue);
 }
-auto __lambda1949__(auto outputValue){
+auto __lambda2459__(auto outputValue){
 	return generateLambda;
 }
-auto __lambda1950__(auto paramNames){
+auto __lambda2460__(auto paramNames){
 	return 
 	String inputValue = input.substring(arrowIndex + "->".length()).strip();
-	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda1946__);;
+	return compileLambdaBody(parseState, inputValue).flatMapValue(__lambda2456__);;
 }
 /* private static */Result_String_CompileError compileLambda(ParseState parseState, String input){
 	int arrowIndex = input.indexOf("->");
 	if (1) {
 	}
 	String beforeArrow = input.substring(0, arrowIndex).strip();
-	return findLambdaParams(beforeArrow).map(__lambda1932__).orElseGet(__lambda1927__);
+	return findLambdaParams(beforeArrow).map(__lambda2442__).orElseGet(__lambda2437__);
 }
 /* private static */Err_String_CompileError createInfixRule(String input, String infix){
 	return Err(CompileError("Infix '" + infix + "' not present", input));
@@ -7525,97 +9160,97 @@ auto __lambda1950__(auto paramNames){
 	}
 	else {}
 }
-auto __lambda1951__(auto tuple){
+auto __lambda2461__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple.right;
 }
-auto __lambda1952__(auto tuple){
+auto __lambda2462__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple;
 }
-auto __lambda1953__(auto tuple){
+auto __lambda2463__(auto tuple){
 	return tuple;
 }
-auto __lambda1954__(auto tuple){
+auto __lambda2464__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1955__(auto tuple){
+auto __lambda2465__(auto tuple){
 	return tuple;
 }
-auto __lambda1956__(auto tuple){
+auto __lambda2466__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1957__(auto tuple){
+auto __lambda2467__(auto tuple){
 	return tuple;
 }
-auto __lambda1958__(auto ){
+auto __lambda2468__(auto ){
 	return compileValue(right, state);
 }
-auto __lambda1959__(auto ){
+auto __lambda2469__(auto ){
 	return compileValue;
 }
-auto __lambda1960__(auto ){
+auto __lambda2470__(auto ){
 	return compileValue(right, state);
 }
-auto __lambda1961__(auto ){
+auto __lambda2471__(auto ){
 	return compileValue;
 }
-auto __lambda1962__(auto ){
+auto __lambda2472__(auto ){
 	return compileValue(right, state);
 }
-auto __lambda1963__(auto ){
+auto __lambda2473__(auto ){
 	return compileValue;
 }
-auto __lambda1964__(auto ){
+auto __lambda2474__(auto ){
 	return compileValue(right, state);
 }
-auto __lambda1965__(auto ){
+auto __lambda2475__(auto ){
 	return compileValue;
 }
-auto __lambda1966__(auto tuple){
+auto __lambda2476__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple.right;
 }
-auto __lambda1967__(auto tuple){
+auto __lambda2477__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple;
 }
-auto __lambda1968__(auto tuple){
+auto __lambda2478__(auto tuple){
 	return tuple;
 }
-auto __lambda1969__(auto tuple){
+auto __lambda2479__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1970__(auto tuple){
+auto __lambda2480__(auto tuple){
 	return tuple;
 }
-auto __lambda1971__(auto tuple){
+auto __lambda2481__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1972__(auto tuple){
+auto __lambda2482__(auto tuple){
 	return tuple;
 }
-auto __lambda1973__(auto tuple){
+auto __lambda2483__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple.right;
 }
-auto __lambda1974__(auto tuple){
+auto __lambda2484__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple;
 }
-auto __lambda1975__(auto tuple){
+auto __lambda2485__(auto tuple){
 	return tuple;
 }
-auto __lambda1976__(auto tuple){
+auto __lambda2486__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1977__(auto tuple){
+auto __lambda2487__(auto tuple){
 	return tuple;
 }
-auto __lambda1978__(auto tuple){
+auto __lambda2488__(auto tuple){
 	return tuple.left;
 }
-auto __lambda1979__(auto tuple){
+auto __lambda2489__(auto tuple){
 	return tuple;
 }
-auto __lambda1980__(auto ){
+auto __lambda2490__(auto ){
 	return compileValue(right, state);
 }
-auto __lambda1981__(auto ){
+auto __lambda2491__(auto ){
 	return compileValue;
 }
 /* private static */Result_String_CompileError compileOperator(ParseState state, String input, String operator){
@@ -7624,195 +9259,195 @@ auto __lambda1981__(auto ){
 	}
 	String left = input.substring(0, operatorIndex);
 	String right = input.substring(operatorIndex + operator.length());
-	return compileValue(left, state).and(__lambda1958__).mapValue(__lambda1951__);
+	return compileValue(left, state).and(__lambda2468__).mapValue(__lambda2461__);
 }
 /* private static */int isNumber(String stripped){
 	for (;;) {
 	}
 	return true;
 }
-auto __lambda1982__(auto inner){
+auto __lambda2492__(auto inner){
 	return inner.orElse("");
 }
-auto __lambda1983__(auto inner){
+auto __lambda2493__(auto inner){
 	return inner.orElse;
 }
-auto __lambda1984__(auto inner){
+auto __lambda2494__(auto inner){
 	return inner;
 }
-auto __lambda1985__(auto inner){
+auto __lambda2495__(auto inner){
 	return inner;
 }
-auto __lambda1986__(auto name){
+auto __lambda2496__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda1987__(auto name){
+auto __lambda2497__(auto name){
 	return generateDefinition;
 }
-auto __lambda1988__(auto name){
+auto __lambda2498__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda1989__(auto name){
+auto __lambda2499__(auto name){
 	return generateDefinition;
 }
-auto __lambda1990__(auto name){
+auto __lambda2500__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda1991__(auto name){
+auto __lambda2501__(auto name){
 	return generateDefinition;
 }
-auto __lambda1992__(auto name){
+auto __lambda2502__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda1993__(auto name){
+auto __lambda2503__(auto name){
 	return generateDefinition;
 }
-auto __lambda1994__(auto inner){
+auto __lambda2504__(auto inner){
 	return inner.orElse("");
 }
-auto __lambda1995__(auto inner){
+auto __lambda2505__(auto inner){
 	return inner.orElse;
 }
-auto __lambda1996__(auto inner){
+auto __lambda2506__(auto inner){
 	return inner;
 }
-auto __lambda1997__(auto inner){
+auto __lambda2507__(auto inner){
 	return inner;
 }
-auto __lambda1998__(auto inner){
+auto __lambda2508__(auto inner){
 	return inner.orElse("");
 }
-auto __lambda1999__(auto inner){
+auto __lambda2509__(auto inner){
 	return inner.orElse;
 }
-auto __lambda2000__(auto inner){
+auto __lambda2510__(auto inner){
 	return inner;
 }
-auto __lambda2001__(auto inner){
+auto __lambda2511__(auto inner){
 	return inner;
 }
-auto __lambda2002__(auto name){
+auto __lambda2512__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda2003__(auto name){
+auto __lambda2513__(auto name){
 	return generateDefinition;
 }
-auto __lambda2004__(auto name){
+auto __lambda2514__(auto name){
 	return generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", name));
 }
-auto __lambda2005__(auto name){
+auto __lambda2515__(auto name){
 	return generateDefinition;
 }
-auto __lambda2006__(auto tuple){
+auto __lambda2516__(auto tuple){
 	return 
 	addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(tuple.left, tuple.right));
 	return lambda;;
 }
-auto __lambda2007__(auto ){
+auto __lambda2517__(auto ){
 	return params;
 }
-auto __lambda2008__(auto ){
+auto __lambda2518__(auto ){
 	return params;
 }
-auto __lambda2009__(auto ){
+auto __lambda2519__(auto ){
 	return params;
 }
-auto __lambda2010__(auto ){
+auto __lambda2520__(auto ){
 	return params;
 }
-auto __lambda2011__(auto ){
+auto __lambda2521__(auto ){
 	return params;
 }
-auto __lambda2012__(auto tuple){
+auto __lambda2522__(auto tuple){
 	return 
 	addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(tuple.left, tuple.right));
 	return lambda;;
 }
-auto __lambda2013__(auto tuple){
+auto __lambda2523__(auto tuple){
 	return 
 	addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(tuple.left, tuple.right));
 	return lambda;;
 }
-auto __lambda2014__(auto ){
+auto __lambda2524__(auto ){
 	return params;
 }
 /* private static */Result_String_CompileError generateLambda(List__String paramNames, String lambdaValue){
 	String lambda = "__lambda" + lambdaCounter + "__";
 	temp++;
 	Result_String_CompileError definition = generateDefinition(Node().withString("modifiers", "").withString("type", "auto").withString("name", lambda));
-	Result_String_CompileError params = paramNames.stream().map(__lambda1986__).collect(Exceptional(Joiner(", "))).mapValue(__lambda1982__);
-	return definition.and(__lambda2007__).mapValue(__lambda2006__);
+	Result_String_CompileError params = paramNames.stream().map(__lambda2496__).collect(Exceptional(Joiner(", "))).mapValue(__lambda2492__);
+	return definition.and(__lambda2517__).mapValue(__lambda2516__);
 }
-auto __lambda2015__(auto outputCaller){
+auto __lambda2525__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2016__(auto outputCaller){
+auto __lambda2526__(auto outputCaller){
 	return generateInvocation;
 }
-auto __lambda2017__(auto outputValues){
-	return compileValue(inputCaller, state).mapValue(__lambda2015__);
+auto __lambda2527__(auto outputValues){
+	return compileValue(inputCaller, state).mapValue(__lambda2525__);
 }
-auto __lambda2018__(auto outputCaller){
+auto __lambda2528__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2019__(auto outputCaller){
+auto __lambda2529__(auto outputCaller){
 	return generateInvocation;
 }
-auto __lambda2020__(auto outputValues){
+auto __lambda2530__(auto outputValues){
 	return compileValue(inputCaller, state).mapValue;
 }
-auto __lambda2021__(auto outputValues){
+auto __lambda2531__(auto outputValues){
 	return compileValue(inputCaller, state);
 }
-auto __lambda2022__(auto outputValues){
+auto __lambda2532__(auto outputValues){
 	return compileValue;
 }
-auto __lambda2023__(auto outputValues){
+auto __lambda2533__(auto outputValues){
 	return compileValue(inputCaller, state);
 }
-auto __lambda2024__(auto outputValues){
+auto __lambda2534__(auto outputValues){
 	return compileValue;
 }
-auto __lambda2025__(auto outputCaller){
+auto __lambda2535__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2026__(auto outputCaller){
+auto __lambda2536__(auto outputCaller){
 	return generateInvocation;
 }
-auto __lambda2027__(auto outputCaller){
+auto __lambda2537__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2028__(auto outputCaller){
+auto __lambda2538__(auto outputCaller){
 	return generateInvocation;
 }
-auto __lambda2029__(auto outputValues){
-	return compileValue(inputCaller, state).mapValue(__lambda2027__);
+auto __lambda2539__(auto outputValues){
+	return compileValue(inputCaller, state).mapValue(__lambda2537__);
 }
-auto __lambda2030__(auto outputCaller){
+auto __lambda2540__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2031__(auto outputCaller){
+auto __lambda2541__(auto outputCaller){
 	return generateInvocation;
 }
-auto __lambda2032__(auto outputValues){
+auto __lambda2542__(auto outputValues){
 	return compileValue(inputCaller, state).mapValue;
 }
-auto __lambda2033__(auto outputValues){
+auto __lambda2543__(auto outputValues){
 	return compileValue(inputCaller, state);
 }
-auto __lambda2034__(auto outputValues){
+auto __lambda2544__(auto outputValues){
 	return compileValue;
 }
-auto __lambda2035__(auto outputValues){
+auto __lambda2545__(auto outputValues){
 	return compileValue(inputCaller, state);
 }
-auto __lambda2036__(auto outputValues){
+auto __lambda2546__(auto outputValues){
 	return compileValue;
 }
-auto __lambda2037__(auto outputCaller){
+auto __lambda2547__(auto outputCaller){
 	return generateInvocation(outputCaller, outputValues);
 }
-auto __lambda2038__(auto outputCaller){
+auto __lambda2548__(auto outputCaller){
 	return generateInvocation;
 }
 /* private static */Result_String_CompileError compileInvocation(ParseState state, String input){
@@ -7828,36 +9463,36 @@ auto __lambda2038__(auto outputCaller){
 	}
 	String inputCaller = withoutEnd.substring(0, argsStart);
 	String inputArguments = withoutEnd.substring(argsStart + 1);
-	return compileAllValues(state, inputArguments).flatMapValue(__lambda2017__);
+	return compileAllValues(state, inputArguments).flatMapValue(__lambda2527__);
 }
-auto __lambda2039__(auto input){
+auto __lambda2549__(auto input){
 	return compileValue(input, state);
 }
-auto __lambda2040__(auto input){
+auto __lambda2550__(auto input){
 	return compileValue;
 }
-auto __lambda2041__(auto input){
+auto __lambda2551__(auto input){
 	return compileValue(input, state);
 }
-auto __lambda2042__(auto input){
+auto __lambda2552__(auto input){
 	return compileValue;
 }
 /* private static */Result_String_CompileError compileAllValues(ParseState state, String arguments){
-	return compileValues(arguments, __lambda2039__);
+	return compileValues(arguments, __lambda2549__);
 }
 /* private static */String generateInvocation(String caller, String arguments){
 	return caller + "(" + arguments + ")";
 }
-auto __lambda2043__(auto node){
+auto __lambda2553__(auto node){
 	return generateDefinition(node.withString("name", name));
 }
-auto __lambda2044__(auto node){
+auto __lambda2554__(auto node){
 	return generateDefinition;
 }
-auto __lambda2045__(auto node){
+auto __lambda2555__(auto node){
 	return generateDefinition(node.withString("name", name));
 }
-auto __lambda2046__(auto node){
+auto __lambda2556__(auto node){
 	return generateDefinition;
 }
 /* private static */Result_String_CompileError compileDefinition(String input, ParseState state){
@@ -7869,30 +9504,30 @@ auto __lambda2046__(auto node){
 	}
 	String beforeName = stripped.substring(0, nameSeparator);
 	String name = stripped.substring(nameSeparator + " ".length());
-	return compileBeforeName(state, beforeName).flatMapValue(__lambda2043__);
+	return compileBeforeName(state, beforeName).flatMapValue(__lambda2553__);
 }
-auto __lambda2047__(auto outputType){
+auto __lambda2557__(auto outputType){
 	return modifiers1.withString("type", outputType);
 }
-auto __lambda2048__(auto outputType){
+auto __lambda2558__(auto outputType){
 	return modifiers1.withString;
 }
-auto __lambda2049__(auto outputType){
+auto __lambda2559__(auto outputType){
 	return modifiers1;
 }
-auto __lambda2050__(auto outputType){
+auto __lambda2560__(auto outputType){
 	return modifiers1;
 }
-auto __lambda2051__(auto outputType){
+auto __lambda2561__(auto outputType){
 	return modifiers1.withString("type", outputType);
 }
-auto __lambda2052__(auto outputType){
+auto __lambda2562__(auto outputType){
 	return modifiers1.withString;
 }
-auto __lambda2053__(auto outputType){
+auto __lambda2563__(auto outputType){
 	return modifiers1;
 }
-auto __lambda2054__(auto outputType){
+auto __lambda2564__(auto outputType){
 	return modifiers1;
 }
 /* private static */Result_Node_CompileError compileBeforeName(ParseState state, String beforeName){
@@ -7902,7 +9537,7 @@ auto __lambda2054__(auto outputType){
 	String modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
 	String inputType = beforeName.substring(typeSeparator + 1);
 	Node modifiers1 = Node().withString("modifiers", modifiers);
-	return compileType(state, inputType).mapValue(__lambda2047__);
+	return compileType(state, inputType).mapValue(__lambda2557__);
 }
 /* private static */int findTypeSeparator(String beforeName){
 	int typeSeparator =  - 1;
@@ -7914,36 +9549,36 @@ auto __lambda2054__(auto outputType){
 /* private static */Result_String_CompileError generateDefinition(Node node){
 	return Ok(node.find("modifiers").orElse("") + node.find("type").orElse("") + " " + node.find("name").orElse(""));
 }
-auto __lambda2055__(auto main){
+auto __lambda2565__(auto main){
 	return Main.compilePrimitive(main);
 }
-auto __lambda2056__(auto main){
+auto __lambda2566__(auto main){
 	return Main.compileSymbolType(main);
 }
-auto __lambda2057__(auto type){
+auto __lambda2567__(auto type){
 	return compileTypeParam(state, type);
 }
-auto __lambda2058__(auto type){
+auto __lambda2568__(auto type){
 	return compileTypeParam;
 }
-auto __lambda2059__(auto type){
+auto __lambda2569__(auto type){
 	return compileArray(state, type);
 }
-auto __lambda2060__(auto type){
+auto __lambda2570__(auto type){
 	return compileArray;
 }
-auto __lambda2061__(auto type){
+auto __lambda2571__(auto type){
 	return compileGeneric(state, type);
 }
-auto __lambda2062__(auto type){
+auto __lambda2572__(auto type){
 	return compileGeneric;
 }
-auto __lambda2063__(auto param){
+auto __lambda2573__(auto param){
 	return Lists.of(
                 Main.compilePrimitive,
                 Main(param);
 }
-auto __lambda2064__(auto param){
+auto __lambda2574__(auto param){
 	return Lists.of(
                 Main::compilePrimitive,
                 Main.compileSymbolType,
@@ -7952,47 +9587,47 @@ auto __lambda2064__(auto param){
                 type -> compileGeneric(state, type)
         )(param);
 }
-auto __lambda2065__(auto param){
+auto __lambda2575__(auto param){
 	return Lists.of(
                 Main.compilePrimitive,
                 Main(param);
 }
-auto __lambda2066__(auto param){
+auto __lambda2576__(auto param){
 	return Lists.of(
                 Main::compilePrimitive,
                 Main.compileSymbolType,
                 type(param);
 }
-auto __lambda2067__(auto main){
+auto __lambda2577__(auto main){
 	return Main.compilePrimitive(main);
 }
-auto __lambda2068__(auto main){
+auto __lambda2578__(auto main){
 	return Main.compileSymbolType(main);
 }
-auto __lambda2069__(auto type){
+auto __lambda2579__(auto type){
 	return compileTypeParam(state, type);
 }
-auto __lambda2070__(auto type){
+auto __lambda2580__(auto type){
 	return compileTypeParam;
 }
-auto __lambda2071__(auto type){
+auto __lambda2581__(auto type){
 	return compileArray(state, type);
 }
-auto __lambda2072__(auto type){
+auto __lambda2582__(auto type){
 	return compileArray;
 }
-auto __lambda2073__(auto type){
+auto __lambda2583__(auto type){
 	return compileGeneric(state, type);
 }
-auto __lambda2074__(auto type){
+auto __lambda2584__(auto type){
 	return compileGeneric;
 }
-auto __lambda2075__(auto param){
+auto __lambda2585__(auto param){
 	return Lists.of(
                 Main.compilePrimitive,
                 Main(param);
 }
-auto __lambda2076__(auto param){
+auto __lambda2586__(auto param){
 	return Lists.of(
                 Main::compilePrimitive,
                 Main.compileSymbolType,
@@ -8001,1560 +9636,1560 @@ auto __lambda2076__(auto param){
                 type -> compileGeneric(state, type)
         )(param);
 }
-auto __lambda2077__(auto param){
+auto __lambda2587__(auto param){
 	return Lists.of(
                 Main.compilePrimitive,
                 Main(param);
 }
-auto __lambda2078__(auto param){
+auto __lambda2588__(auto param){
 	return Lists.of(
                 Main::compilePrimitive,
                 Main.compileSymbolType,
                 type(param);
 }
 /* private static */Result_String_CompileError compileType(ParseState state, String input){
-	return compileOr(input, Lists.of(__lambda2055__, __lambda2056__, __lambda2057__, __lambda2059__, __lambda2061__));
+	return compileOr(input, Lists.of(__lambda2565__, __lambda2566__, __lambda2567__, __lambda2569__, __lambda2571__));
 }
-auto __lambda2079__(auto main){
+auto __lambda2589__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda2080__(auto main){
+auto __lambda2590__(auto main){
 	return Main.divideValueChar(main);
-}
-auto __lambda2081__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2082__(auto type1){
-	return compileType;
-}
-auto __lambda2083__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2084__(auto type1){
-	return compileType;
-}
-auto __lambda2085__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2086__(auto type1){
-	return compileType;
-}
-auto __lambda2087__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2088__(auto type1){
-	return compileType;
-}
-auto __lambda2089__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2090__(auto type1){
-	return compileType;
-}
-auto __lambda2091__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2092__(auto type1){
-	return compileType;
-}
-auto __lambda2093__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2094__(auto type1){
-	return compileType;
-}
-auto __lambda2095__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2096__(auto type1){
-	return compileType;
-}
-auto __lambda2097__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2098__(auto type1){
-	return compileType;
-}
-auto __lambda2099__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2100__(auto type1){
-	return compileType;
-}
-auto __lambda2101__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2102__(auto type1){
-	return compileType;
-}
-auto __lambda2103__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2104__(auto type1){
-	return compileType;
-}
-auto __lambda2105__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2106__(auto type1){
-	return compileType;
-}
-auto __lambda2107__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2108__(auto type1){
-	return compileType;
-}
-auto __lambda2109__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2110__(auto type1){
-	return compileType;
-}
-auto __lambda2111__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2112__(auto type1){
-	return compileType;
-}
-auto __lambda2113__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2114__(auto type1){
-	return compileType;
-}
-auto __lambda2115__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2116__(auto type1){
-	return compileType;
-}
-auto __lambda2117__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2118__(auto type1){
-	return compileType;
-}
-auto __lambda2119__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2120__(auto type1){
-	return compileType;
-}
-auto __lambda2121__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2122__(auto type1){
-	return compileType;
-}
-auto __lambda2123__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2124__(auto type1){
-	return compileType;
-}
-auto __lambda2125__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2126__(auto type1){
-	return compileType;
-}
-auto __lambda2127__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2128__(auto type1){
-	return compileType;
-}
-auto __lambda2129__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2130__(auto type1){
-	return compileType;
-}
-auto __lambda2131__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2132__(auto type1){
-	return compileType;
-}
-auto __lambda2133__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2134__(auto type1){
-	return compileType;
-}
-auto __lambda2135__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2136__(auto type1){
-	return compileType;
-}
-auto __lambda2137__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2138__(auto type1){
-	return compileType;
-}
-auto __lambda2139__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2140__(auto type1){
-	return compileType;
-}
-auto __lambda2141__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2142__(auto type1){
-	return compileType;
-}
-auto __lambda2143__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2144__(auto type1){
-	return compileType;
-}
-auto __lambda2145__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2146__(auto type1){
-	return compileType;
-}
-auto __lambda2147__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2148__(auto type1){
-	return compileType;
-}
-auto __lambda2149__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2150__(auto type1){
-	return compileType;
-}
-auto __lambda2151__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2152__(auto type1){
-	return compileType;
-}
-auto __lambda2153__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2154__(auto type1){
-	return compileType;
-}
-auto __lambda2155__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2156__(auto type1){
-	return compileType;
-}
-auto __lambda2157__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2158__(auto type1){
-	return compileType;
-}
-auto __lambda2159__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2160__(auto type1){
-	return compileType;
-}
-auto __lambda2161__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2162__(auto type1){
-	return compileType;
-}
-auto __lambda2163__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2164__(auto type1){
-	return compileType;
-}
-auto __lambda2165__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2166__(auto type1){
-	return compileType;
-}
-auto __lambda2167__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2168__(auto type1){
-	return compileType;
-}
-auto __lambda2169__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2170__(auto type1){
-	return compileType;
-}
-auto __lambda2171__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2172__(auto type1){
-	return compileType;
-}
-auto __lambda2173__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2174__(auto type1){
-	return compileType;
-}
-auto __lambda2175__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2176__(auto type1){
-	return compileType;
-}
-auto __lambda2177__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2178__(auto type1){
-	return compileType;
-}
-auto __lambda2179__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2180__(auto type1){
-	return compileType;
-}
-auto __lambda2181__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2182__(auto type1){
-	return compileType;
-}
-auto __lambda2183__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2184__(auto type1){
-	return compileType;
-}
-auto __lambda2185__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2186__(auto type1){
-	return compileType;
-}
-auto __lambda2187__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2188__(auto type1){
-	return compileType;
-}
-auto __lambda2189__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2190__(auto type1){
-	return compileType;
-}
-auto __lambda2191__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2192__(auto type1){
-	return compileType;
-}
-auto __lambda2193__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2194__(auto type1){
-	return compileType;
-}
-auto __lambda2195__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2196__(auto type1){
-	return compileType;
-}
-auto __lambda2197__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2198__(auto type1){
-	return compileType;
-}
-auto __lambda2199__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2200__(auto type1){
-	return compileType;
-}
-auto __lambda2201__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2202__(auto type1){
-	return compileType;
-}
-auto __lambda2203__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2204__(auto type1){
-	return compileType;
-}
-auto __lambda2205__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2206__(auto type1){
-	return compileType;
-}
-auto __lambda2207__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2208__(auto type1){
-	return compileType;
-}
-auto __lambda2209__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2210__(auto type1){
-	return compileType;
-}
-auto __lambda2211__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2212__(auto type1){
-	return compileType;
-}
-auto __lambda2213__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2214__(auto type1){
-	return compileType;
-}
-auto __lambda2215__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2216__(auto type1){
-	return compileType;
-}
-auto __lambda2217__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2218__(auto type1){
-	return compileType;
-}
-auto __lambda2219__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2220__(auto type1){
-	return compileType;
-}
-auto __lambda2221__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2222__(auto type1){
-	return compileType;
-}
-auto __lambda2223__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2224__(auto type1){
-	return compileType;
-}
-auto __lambda2225__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2226__(auto type1){
-	return compileType;
-}
-auto __lambda2227__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2228__(auto type1){
-	return compileType;
-}
-auto __lambda2229__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2230__(auto type1){
-	return compileType;
-}
-auto __lambda2231__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2232__(auto type1){
-	return compileType;
-}
-auto __lambda2233__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2234__(auto type1){
-	return compileType;
-}
-auto __lambda2235__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2236__(auto type1){
-	return compileType;
-}
-auto __lambda2237__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2238__(auto type1){
-	return compileType;
-}
-auto __lambda2239__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2240__(auto type1){
-	return compileType;
-}
-auto __lambda2241__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2242__(auto type1){
-	return compileType;
-}
-auto __lambda2243__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2244__(auto type1){
-	return compileType;
-}
-auto __lambda2245__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2246__(auto type1){
-	return compileType;
-}
-auto __lambda2247__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2248__(auto type1){
-	return compileType;
-}
-auto __lambda2249__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2250__(auto type1){
-	return compileType;
-}
-auto __lambda2251__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2252__(auto type1){
-	return compileType;
-}
-auto __lambda2253__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2254__(auto type1){
-	return compileType;
-}
-auto __lambda2255__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2256__(auto type1){
-	return compileType;
-}
-auto __lambda2257__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2258__(auto type1){
-	return compileType;
-}
-auto __lambda2259__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2260__(auto type1){
-	return compileType;
-}
-auto __lambda2261__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2262__(auto type1){
-	return compileType;
-}
-auto __lambda2263__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2264__(auto type1){
-	return compileType;
-}
-auto __lambda2265__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2266__(auto type1){
-	return compileType;
-}
-auto __lambda2267__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2268__(auto type1){
-	return compileType;
-}
-auto __lambda2269__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2270__(auto type1){
-	return compileType;
-}
-auto __lambda2271__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2272__(auto type1){
-	return compileType;
-}
-auto __lambda2273__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2274__(auto type1){
-	return compileType;
-}
-auto __lambda2275__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2276__(auto type1){
-	return compileType;
-}
-auto __lambda2277__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2278__(auto type1){
-	return compileType;
-}
-auto __lambda2279__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2280__(auto type1){
-	return compileType;
-}
-auto __lambda2281__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2282__(auto type1){
-	return compileType;
-}
-auto __lambda2283__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2284__(auto type1){
-	return compileType;
-}
-auto __lambda2285__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2286__(auto type1){
-	return compileType;
-}
-auto __lambda2287__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2288__(auto type1){
-	return compileType;
-}
-auto __lambda2289__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2290__(auto type1){
-	return compileType;
-}
-auto __lambda2291__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2292__(auto type1){
-	return compileType;
-}
-auto __lambda2293__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2294__(auto type1){
-	return compileType;
-}
-auto __lambda2295__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2296__(auto type1){
-	return compileType;
-}
-auto __lambda2297__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2298__(auto type1){
-	return compileType;
-}
-auto __lambda2299__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2300__(auto type1){
-	return compileType;
-}
-auto __lambda2301__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2302__(auto type1){
-	return compileType;
-}
-auto __lambda2303__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2304__(auto type1){
-	return compileType;
-}
-auto __lambda2305__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2306__(auto type1){
-	return compileType;
-}
-auto __lambda2307__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2308__(auto type1){
-	return compileType;
-}
-auto __lambda2309__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2310__(auto type1){
-	return compileType;
-}
-auto __lambda2311__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2312__(auto type1){
-	return compileType;
-}
-auto __lambda2313__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2314__(auto type1){
-	return compileType;
-}
-auto __lambda2315__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2316__(auto type1){
-	return compileType;
-}
-auto __lambda2317__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2318__(auto type1){
-	return compileType;
-}
-auto __lambda2319__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2320__(auto type1){
-	return compileType;
-}
-auto __lambda2321__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2322__(auto type1){
-	return compileType;
-}
-auto __lambda2323__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2324__(auto type1){
-	return compileType;
-}
-auto __lambda2325__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2326__(auto type1){
-	return compileType;
-}
-auto __lambda2327__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2328__(auto type1){
-	return compileType;
-}
-auto __lambda2329__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2330__(auto type1){
-	return compileType;
-}
-auto __lambda2331__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2332__(auto type1){
-	return compileType;
-}
-auto __lambda2333__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2334__(auto type1){
-	return compileType;
-}
-auto __lambda2335__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2336__(auto type1){
-	return compileType;
-}
-auto __lambda2337__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2338__(auto type1){
-	return compileType;
-}
-auto __lambda2339__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2340__(auto type1){
-	return compileType;
-}
-auto __lambda2341__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2342__(auto type1){
-	return compileType;
-}
-auto __lambda2343__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2344__(auto type1){
-	return compileType;
-}
-auto __lambda2345__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2346__(auto type1){
-	return compileType;
-}
-auto __lambda2347__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2348__(auto type1){
-	return compileType;
-}
-auto __lambda2349__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2350__(auto type1){
-	return compileType;
-}
-auto __lambda2351__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2352__(auto type1){
-	return compileType;
-}
-auto __lambda2353__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2354__(auto type1){
-	return compileType;
-}
-auto __lambda2355__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2356__(auto type1){
-	return compileType;
-}
-auto __lambda2357__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2358__(auto type1){
-	return compileType;
-}
-auto __lambda2359__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2360__(auto type1){
-	return compileType;
-}
-auto __lambda2361__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2362__(auto type1){
-	return compileType;
-}
-auto __lambda2363__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2364__(auto type1){
-	return compileType;
-}
-auto __lambda2365__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2366__(auto type1){
-	return compileType;
-}
-auto __lambda2367__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2368__(auto type1){
-	return compileType;
-}
-auto __lambda2369__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2370__(auto type1){
-	return compileType;
-}
-auto __lambda2371__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2372__(auto type1){
-	return compileType;
-}
-auto __lambda2373__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2374__(auto type1){
-	return compileType;
-}
-auto __lambda2375__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2376__(auto type1){
-	return compileType;
-}
-auto __lambda2377__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2378__(auto type1){
-	return compileType;
-}
-auto __lambda2379__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2380__(auto type1){
-	return compileType;
-}
-auto __lambda2381__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2382__(auto type1){
-	return compileType;
-}
-auto __lambda2383__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2384__(auto type1){
-	return compileType;
-}
-auto __lambda2385__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2386__(auto type1){
-	return compileType;
-}
-auto __lambda2387__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2388__(auto type1){
-	return compileType;
-}
-auto __lambda2389__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2390__(auto type1){
-	return compileType;
-}
-auto __lambda2391__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2392__(auto type1){
-	return compileType;
-}
-auto __lambda2393__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2394__(auto type1){
-	return compileType;
-}
-auto __lambda2395__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2396__(auto type1){
-	return compileType;
-}
-auto __lambda2397__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2398__(auto type1){
-	return compileType;
-}
-auto __lambda2399__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2400__(auto type1){
-	return compileType;
-}
-auto __lambda2401__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2402__(auto type1){
-	return compileType;
-}
-auto __lambda2403__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2404__(auto type1){
-	return compileType;
-}
-auto __lambda2405__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2406__(auto type1){
-	return compileType;
-}
-auto __lambda2407__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2408__(auto type1){
-	return compileType;
-}
-auto __lambda2409__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2410__(auto type1){
-	return compileType;
-}
-auto __lambda2411__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2412__(auto type1){
-	return compileType;
-}
-auto __lambda2413__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2414__(auto type1){
-	return compileType;
-}
-auto __lambda2415__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2416__(auto type1){
-	return compileType;
-}
-auto __lambda2417__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2418__(auto type1){
-	return compileType;
-}
-auto __lambda2419__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2420__(auto type1){
-	return compileType;
-}
-auto __lambda2421__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2422__(auto type1){
-	return compileType;
-}
-auto __lambda2423__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2424__(auto type1){
-	return compileType;
-}
-auto __lambda2425__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2426__(auto type1){
-	return compileType;
-}
-auto __lambda2427__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2428__(auto type1){
-	return compileType;
-}
-auto __lambda2429__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2430__(auto type1){
-	return compileType;
-}
-auto __lambda2431__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2432__(auto type1){
-	return compileType;
-}
-auto __lambda2433__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2434__(auto type1){
-	return compileType;
-}
-auto __lambda2435__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2436__(auto type1){
-	return compileType;
-}
-auto __lambda2437__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2438__(auto type1){
-	return compileType;
-}
-auto __lambda2439__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2440__(auto type1){
-	return compileType;
-}
-auto __lambda2441__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2442__(auto type1){
-	return compileType;
-}
-auto __lambda2443__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2444__(auto type1){
-	return compileType;
-}
-auto __lambda2445__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2446__(auto type1){
-	return compileType;
-}
-auto __lambda2447__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2448__(auto type1){
-	return compileType;
-}
-auto __lambda2449__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2450__(auto type1){
-	return compileType;
-}
-auto __lambda2451__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2452__(auto type1){
-	return compileType;
-}
-auto __lambda2453__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2454__(auto type1){
-	return compileType;
-}
-auto __lambda2455__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2456__(auto type1){
-	return compileType;
-}
-auto __lambda2457__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2458__(auto type1){
-	return compileType;
-}
-auto __lambda2459__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2460__(auto type1){
-	return compileType;
-}
-auto __lambda2461__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2462__(auto type1){
-	return compileType;
-}
-auto __lambda2463__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2464__(auto type1){
-	return compileType;
-}
-auto __lambda2465__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2466__(auto type1){
-	return compileType;
-}
-auto __lambda2467__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2468__(auto type1){
-	return compileType;
-}
-auto __lambda2469__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2470__(auto type1){
-	return compileType;
-}
-auto __lambda2471__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2472__(auto type1){
-	return compileType;
-}
-auto __lambda2473__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2474__(auto type1){
-	return compileType;
-}
-auto __lambda2475__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2476__(auto type1){
-	return compileType;
-}
-auto __lambda2477__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2478__(auto type1){
-	return compileType;
-}
-auto __lambda2479__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2480__(auto type1){
-	return compileType;
-}
-auto __lambda2481__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2482__(auto type1){
-	return compileType;
-}
-auto __lambda2483__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2484__(auto type1){
-	return compileType;
-}
-auto __lambda2485__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2486__(auto type1){
-	return compileType;
-}
-auto __lambda2487__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2488__(auto type1){
-	return compileType;
-}
-auto __lambda2489__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2490__(auto type1){
-	return compileType;
-}
-auto __lambda2491__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2492__(auto type1){
-	return compileType;
-}
-auto __lambda2493__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2494__(auto type1){
-	return compileType;
-}
-auto __lambda2495__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2496__(auto type1){
-	return compileType;
-}
-auto __lambda2497__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2498__(auto type1){
-	return compileType;
-}
-auto __lambda2499__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2500__(auto type1){
-	return compileType;
-}
-auto __lambda2501__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2502__(auto type1){
-	return compileType;
-}
-auto __lambda2503__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2504__(auto type1){
-	return compileType;
-}
-auto __lambda2505__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2506__(auto type1){
-	return compileType;
-}
-auto __lambda2507__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2508__(auto type1){
-	return compileType;
-}
-auto __lambda2509__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2510__(auto type1){
-	return compileType;
-}
-auto __lambda2511__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2512__(auto type1){
-	return compileType;
-}
-auto __lambda2513__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2514__(auto type1){
-	return compileType;
-}
-auto __lambda2515__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2516__(auto type1){
-	return compileType;
-}
-auto __lambda2517__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2518__(auto type1){
-	return compileType;
-}
-auto __lambda2519__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2520__(auto type1){
-	return compileType;
-}
-auto __lambda2521__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2522__(auto type1){
-	return compileType;
-}
-auto __lambda2523__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2524__(auto type1){
-	return compileType;
-}
-auto __lambda2525__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2526__(auto type1){
-	return compileType;
-}
-auto __lambda2527__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2528__(auto type1){
-	return compileType;
-}
-auto __lambda2529__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2530__(auto type1){
-	return compileType;
-}
-auto __lambda2531__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2532__(auto type1){
-	return compileType;
-}
-auto __lambda2533__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2534__(auto type1){
-	return compileType;
-}
-auto __lambda2535__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2536__(auto type1){
-	return compileType;
-}
-auto __lambda2537__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2538__(auto type1){
-	return compileType;
-}
-auto __lambda2539__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2540__(auto type1){
-	return compileType;
-}
-auto __lambda2541__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2542__(auto type1){
-	return compileType;
-}
-auto __lambda2543__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2544__(auto type1){
-	return compileType;
-}
-auto __lambda2545__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2546__(auto type1){
-	return compileType;
-}
-auto __lambda2547__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2548__(auto type1){
-	return compileType;
-}
-auto __lambda2549__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2550__(auto type1){
-	return compileType;
-}
-auto __lambda2551__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2552__(auto type1){
-	return compileType;
-}
-auto __lambda2553__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2554__(auto type1){
-	return compileType;
-}
-auto __lambda2555__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2556__(auto type1){
-	return compileType;
-}
-auto __lambda2557__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2558__(auto type1){
-	return compileType;
-}
-auto __lambda2559__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2560__(auto type1){
-	return compileType;
-}
-auto __lambda2561__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2562__(auto type1){
-	return compileType;
-}
-auto __lambda2563__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2564__(auto type1){
-	return compileType;
-}
-auto __lambda2565__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2566__(auto type1){
-	return compileType;
-}
-auto __lambda2567__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2568__(auto type1){
-	return compileType;
-}
-auto __lambda2569__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2570__(auto type1){
-	return compileType;
-}
-auto __lambda2571__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2572__(auto type1){
-	return compileType;
-}
-auto __lambda2573__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2574__(auto type1){
-	return compileType;
-}
-auto __lambda2575__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2576__(auto type1){
-	return compileType;
-}
-auto __lambda2577__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2578__(auto type1){
-	return compileType;
-}
-auto __lambda2579__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2580__(auto type1){
-	return compileType;
-}
-auto __lambda2581__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2582__(auto type1){
-	return compileType;
-}
-auto __lambda2583__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2584__(auto type1){
-	return compileType;
-}
-auto __lambda2585__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2586__(auto type1){
-	return compileType;
-}
-auto __lambda2587__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2588__(auto type1){
-	return compileType;
-}
-auto __lambda2589__(auto type1){
-	return compileType(parseState, type1);
-}
-auto __lambda2590__(auto type1){
-	return compileType;
 }
 auto __lambda2591__(auto type1){
 	return compileType(parseState, type1);
 }
 auto __lambda2592__(auto type1){
+	return compileType;
+}
+auto __lambda2593__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2594__(auto type1){
+	return compileType;
+}
+auto __lambda2595__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2596__(auto type1){
+	return compileType;
+}
+auto __lambda2597__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2598__(auto type1){
+	return compileType;
+}
+auto __lambda2599__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2600__(auto type1){
+	return compileType;
+}
+auto __lambda2601__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2602__(auto type1){
+	return compileType;
+}
+auto __lambda2603__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2604__(auto type1){
+	return compileType;
+}
+auto __lambda2605__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2606__(auto type1){
+	return compileType;
+}
+auto __lambda2607__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2608__(auto type1){
+	return compileType;
+}
+auto __lambda2609__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2610__(auto type1){
+	return compileType;
+}
+auto __lambda2611__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2612__(auto type1){
+	return compileType;
+}
+auto __lambda2613__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2614__(auto type1){
+	return compileType;
+}
+auto __lambda2615__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2616__(auto type1){
+	return compileType;
+}
+auto __lambda2617__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2618__(auto type1){
+	return compileType;
+}
+auto __lambda2619__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2620__(auto type1){
+	return compileType;
+}
+auto __lambda2621__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2622__(auto type1){
+	return compileType;
+}
+auto __lambda2623__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2624__(auto type1){
+	return compileType;
+}
+auto __lambda2625__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2626__(auto type1){
+	return compileType;
+}
+auto __lambda2627__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2628__(auto type1){
+	return compileType;
+}
+auto __lambda2629__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2630__(auto type1){
+	return compileType;
+}
+auto __lambda2631__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2632__(auto type1){
+	return compileType;
+}
+auto __lambda2633__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2634__(auto type1){
+	return compileType;
+}
+auto __lambda2635__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2636__(auto type1){
+	return compileType;
+}
+auto __lambda2637__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2638__(auto type1){
+	return compileType;
+}
+auto __lambda2639__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2640__(auto type1){
+	return compileType;
+}
+auto __lambda2641__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2642__(auto type1){
+	return compileType;
+}
+auto __lambda2643__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2644__(auto type1){
+	return compileType;
+}
+auto __lambda2645__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2646__(auto type1){
+	return compileType;
+}
+auto __lambda2647__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2648__(auto type1){
+	return compileType;
+}
+auto __lambda2649__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2650__(auto type1){
+	return compileType;
+}
+auto __lambda2651__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2652__(auto type1){
+	return compileType;
+}
+auto __lambda2653__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2654__(auto type1){
+	return compileType;
+}
+auto __lambda2655__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2656__(auto type1){
+	return compileType;
+}
+auto __lambda2657__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2658__(auto type1){
+	return compileType;
+}
+auto __lambda2659__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2660__(auto type1){
+	return compileType;
+}
+auto __lambda2661__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2662__(auto type1){
+	return compileType;
+}
+auto __lambda2663__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2664__(auto type1){
+	return compileType;
+}
+auto __lambda2665__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2666__(auto type1){
+	return compileType;
+}
+auto __lambda2667__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2668__(auto type1){
+	return compileType;
+}
+auto __lambda2669__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2670__(auto type1){
+	return compileType;
+}
+auto __lambda2671__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2672__(auto type1){
+	return compileType;
+}
+auto __lambda2673__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2674__(auto type1){
+	return compileType;
+}
+auto __lambda2675__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2676__(auto type1){
+	return compileType;
+}
+auto __lambda2677__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2678__(auto type1){
+	return compileType;
+}
+auto __lambda2679__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2680__(auto type1){
+	return compileType;
+}
+auto __lambda2681__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2682__(auto type1){
+	return compileType;
+}
+auto __lambda2683__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2684__(auto type1){
+	return compileType;
+}
+auto __lambda2685__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2686__(auto type1){
+	return compileType;
+}
+auto __lambda2687__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2688__(auto type1){
+	return compileType;
+}
+auto __lambda2689__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2690__(auto type1){
+	return compileType;
+}
+auto __lambda2691__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2692__(auto type1){
+	return compileType;
+}
+auto __lambda2693__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2694__(auto type1){
+	return compileType;
+}
+auto __lambda2695__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2696__(auto type1){
+	return compileType;
+}
+auto __lambda2697__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2698__(auto type1){
+	return compileType;
+}
+auto __lambda2699__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2700__(auto type1){
+	return compileType;
+}
+auto __lambda2701__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2702__(auto type1){
+	return compileType;
+}
+auto __lambda2703__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2704__(auto type1){
+	return compileType;
+}
+auto __lambda2705__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2706__(auto type1){
+	return compileType;
+}
+auto __lambda2707__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2708__(auto type1){
+	return compileType;
+}
+auto __lambda2709__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2710__(auto type1){
+	return compileType;
+}
+auto __lambda2711__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2712__(auto type1){
+	return compileType;
+}
+auto __lambda2713__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2714__(auto type1){
+	return compileType;
+}
+auto __lambda2715__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2716__(auto type1){
+	return compileType;
+}
+auto __lambda2717__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2718__(auto type1){
+	return compileType;
+}
+auto __lambda2719__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2720__(auto type1){
+	return compileType;
+}
+auto __lambda2721__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2722__(auto type1){
+	return compileType;
+}
+auto __lambda2723__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2724__(auto type1){
+	return compileType;
+}
+auto __lambda2725__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2726__(auto type1){
+	return compileType;
+}
+auto __lambda2727__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2728__(auto type1){
+	return compileType;
+}
+auto __lambda2729__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2730__(auto type1){
+	return compileType;
+}
+auto __lambda2731__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2732__(auto type1){
+	return compileType;
+}
+auto __lambda2733__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2734__(auto type1){
+	return compileType;
+}
+auto __lambda2735__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2736__(auto type1){
+	return compileType;
+}
+auto __lambda2737__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2738__(auto type1){
+	return compileType;
+}
+auto __lambda2739__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2740__(auto type1){
+	return compileType;
+}
+auto __lambda2741__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2742__(auto type1){
+	return compileType;
+}
+auto __lambda2743__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2744__(auto type1){
+	return compileType;
+}
+auto __lambda2745__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2746__(auto type1){
+	return compileType;
+}
+auto __lambda2747__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2748__(auto type1){
+	return compileType;
+}
+auto __lambda2749__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2750__(auto type1){
+	return compileType;
+}
+auto __lambda2751__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2752__(auto type1){
+	return compileType;
+}
+auto __lambda2753__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2754__(auto type1){
+	return compileType;
+}
+auto __lambda2755__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2756__(auto type1){
+	return compileType;
+}
+auto __lambda2757__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2758__(auto type1){
+	return compileType;
+}
+auto __lambda2759__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2760__(auto type1){
+	return compileType;
+}
+auto __lambda2761__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2762__(auto type1){
+	return compileType;
+}
+auto __lambda2763__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2764__(auto type1){
+	return compileType;
+}
+auto __lambda2765__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2766__(auto type1){
+	return compileType;
+}
+auto __lambda2767__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2768__(auto type1){
+	return compileType;
+}
+auto __lambda2769__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2770__(auto type1){
+	return compileType;
+}
+auto __lambda2771__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2772__(auto type1){
+	return compileType;
+}
+auto __lambda2773__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2774__(auto type1){
+	return compileType;
+}
+auto __lambda2775__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2776__(auto type1){
+	return compileType;
+}
+auto __lambda2777__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2778__(auto type1){
+	return compileType;
+}
+auto __lambda2779__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2780__(auto type1){
+	return compileType;
+}
+auto __lambda2781__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2782__(auto type1){
+	return compileType;
+}
+auto __lambda2783__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2784__(auto type1){
+	return compileType;
+}
+auto __lambda2785__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2786__(auto type1){
+	return compileType;
+}
+auto __lambda2787__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2788__(auto type1){
+	return compileType;
+}
+auto __lambda2789__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2790__(auto type1){
+	return compileType;
+}
+auto __lambda2791__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2792__(auto type1){
+	return compileType;
+}
+auto __lambda2793__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2794__(auto type1){
+	return compileType;
+}
+auto __lambda2795__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2796__(auto type1){
+	return compileType;
+}
+auto __lambda2797__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2798__(auto type1){
+	return compileType;
+}
+auto __lambda2799__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2800__(auto type1){
+	return compileType;
+}
+auto __lambda2801__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2802__(auto type1){
+	return compileType;
+}
+auto __lambda2803__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2804__(auto type1){
+	return compileType;
+}
+auto __lambda2805__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2806__(auto type1){
+	return compileType;
+}
+auto __lambda2807__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2808__(auto type1){
+	return compileType;
+}
+auto __lambda2809__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2810__(auto type1){
+	return compileType;
+}
+auto __lambda2811__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2812__(auto type1){
+	return compileType;
+}
+auto __lambda2813__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2814__(auto type1){
+	return compileType;
+}
+auto __lambda2815__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2816__(auto type1){
+	return compileType;
+}
+auto __lambda2817__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2818__(auto type1){
+	return compileType;
+}
+auto __lambda2819__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2820__(auto type1){
+	return compileType;
+}
+auto __lambda2821__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2822__(auto type1){
+	return compileType;
+}
+auto __lambda2823__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2824__(auto type1){
+	return compileType;
+}
+auto __lambda2825__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2826__(auto type1){
+	return compileType;
+}
+auto __lambda2827__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2828__(auto type1){
+	return compileType;
+}
+auto __lambda2829__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2830__(auto type1){
+	return compileType;
+}
+auto __lambda2831__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2832__(auto type1){
+	return compileType;
+}
+auto __lambda2833__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2834__(auto type1){
+	return compileType;
+}
+auto __lambda2835__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2836__(auto type1){
+	return compileType;
+}
+auto __lambda2837__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2838__(auto type1){
+	return compileType;
+}
+auto __lambda2839__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2840__(auto type1){
+	return compileType;
+}
+auto __lambda2841__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2842__(auto type1){
+	return compileType;
+}
+auto __lambda2843__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2844__(auto type1){
+	return compileType;
+}
+auto __lambda2845__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2846__(auto type1){
+	return compileType;
+}
+auto __lambda2847__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2848__(auto type1){
+	return compileType;
+}
+auto __lambda2849__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2850__(auto type1){
+	return compileType;
+}
+auto __lambda2851__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2852__(auto type1){
+	return compileType;
+}
+auto __lambda2853__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2854__(auto type1){
+	return compileType;
+}
+auto __lambda2855__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2856__(auto type1){
+	return compileType;
+}
+auto __lambda2857__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2858__(auto type1){
+	return compileType;
+}
+auto __lambda2859__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2860__(auto type1){
+	return compileType;
+}
+auto __lambda2861__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2862__(auto type1){
+	return compileType;
+}
+auto __lambda2863__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2864__(auto type1){
+	return compileType;
+}
+auto __lambda2865__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2866__(auto type1){
+	return compileType;
+}
+auto __lambda2867__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2868__(auto type1){
+	return compileType;
+}
+auto __lambda2869__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2870__(auto type1){
+	return compileType;
+}
+auto __lambda2871__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2872__(auto type1){
+	return compileType;
+}
+auto __lambda2873__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2874__(auto type1){
+	return compileType;
+}
+auto __lambda2875__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2876__(auto type1){
+	return compileType;
+}
+auto __lambda2877__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2878__(auto type1){
+	return compileType;
+}
+auto __lambda2879__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2880__(auto type1){
+	return compileType;
+}
+auto __lambda2881__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2882__(auto type1){
+	return compileType;
+}
+auto __lambda2883__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2884__(auto type1){
+	return compileType;
+}
+auto __lambda2885__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2886__(auto type1){
+	return compileType;
+}
+auto __lambda2887__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2888__(auto type1){
+	return compileType;
+}
+auto __lambda2889__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2890__(auto type1){
+	return compileType;
+}
+auto __lambda2891__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2892__(auto type1){
+	return compileType;
+}
+auto __lambda2893__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2894__(auto type1){
+	return compileType;
+}
+auto __lambda2895__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2896__(auto type1){
+	return compileType;
+}
+auto __lambda2897__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2898__(auto type1){
+	return compileType;
+}
+auto __lambda2899__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2900__(auto type1){
+	return compileType;
+}
+auto __lambda2901__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2902__(auto type1){
+	return compileType;
+}
+auto __lambda2903__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2904__(auto type1){
+	return compileType;
+}
+auto __lambda2905__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2906__(auto type1){
+	return compileType;
+}
+auto __lambda2907__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2908__(auto type1){
+	return compileType;
+}
+auto __lambda2909__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2910__(auto type1){
+	return compileType;
+}
+auto __lambda2911__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2912__(auto type1){
+	return compileType;
+}
+auto __lambda2913__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2914__(auto type1){
+	return compileType;
+}
+auto __lambda2915__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2916__(auto type1){
+	return compileType;
+}
+auto __lambda2917__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2918__(auto type1){
+	return compileType;
+}
+auto __lambda2919__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2920__(auto type1){
+	return compileType;
+}
+auto __lambda2921__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2922__(auto type1){
+	return compileType;
+}
+auto __lambda2923__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2924__(auto type1){
+	return compileType;
+}
+auto __lambda2925__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2926__(auto type1){
+	return compileType;
+}
+auto __lambda2927__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2928__(auto type1){
+	return compileType;
+}
+auto __lambda2929__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2930__(auto type1){
+	return compileType;
+}
+auto __lambda2931__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2932__(auto type1){
+	return compileType;
+}
+auto __lambda2933__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2934__(auto type1){
+	return compileType;
+}
+auto __lambda2935__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2936__(auto type1){
+	return compileType;
+}
+auto __lambda2937__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2938__(auto type1){
+	return compileType;
+}
+auto __lambda2939__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2940__(auto type1){
+	return compileType;
+}
+auto __lambda2941__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2942__(auto type1){
+	return compileType;
+}
+auto __lambda2943__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2944__(auto type1){
+	return compileType;
+}
+auto __lambda2945__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2946__(auto type1){
+	return compileType;
+}
+auto __lambda2947__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2948__(auto type1){
+	return compileType;
+}
+auto __lambda2949__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2950__(auto type1){
+	return compileType;
+}
+auto __lambda2951__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2952__(auto type1){
+	return compileType;
+}
+auto __lambda2953__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2954__(auto type1){
+	return compileType;
+}
+auto __lambda2955__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2956__(auto type1){
+	return compileType;
+}
+auto __lambda2957__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2958__(auto type1){
+	return compileType;
+}
+auto __lambda2959__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2960__(auto type1){
+	return compileType;
+}
+auto __lambda2961__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2962__(auto type1){
+	return compileType;
+}
+auto __lambda2963__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2964__(auto type1){
+	return compileType;
+}
+auto __lambda2965__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2966__(auto type1){
+	return compileType;
+}
+auto __lambda2967__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2968__(auto type1){
+	return compileType;
+}
+auto __lambda2969__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2970__(auto type1){
+	return compileType;
+}
+auto __lambda2971__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2972__(auto type1){
+	return compileType;
+}
+auto __lambda2973__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2974__(auto type1){
+	return compileType;
+}
+auto __lambda2975__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2976__(auto type1){
+	return compileType;
+}
+auto __lambda2977__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2978__(auto type1){
+	return compileType;
+}
+auto __lambda2979__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2980__(auto type1){
+	return compileType;
+}
+auto __lambda2981__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2982__(auto type1){
+	return compileType;
+}
+auto __lambda2983__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2984__(auto type1){
+	return compileType;
+}
+auto __lambda2985__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2986__(auto type1){
+	return compileType;
+}
+auto __lambda2987__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2988__(auto type1){
+	return compileType;
+}
+auto __lambda2989__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2990__(auto type1){
+	return compileType;
+}
+auto __lambda2991__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2992__(auto type1){
+	return compileType;
+}
+auto __lambda2993__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2994__(auto type1){
+	return compileType;
+}
+auto __lambda2995__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2996__(auto type1){
+	return compileType;
+}
+auto __lambda2997__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda2998__(auto type1){
+	return compileType;
+}
+auto __lambda2999__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3000__(auto type1){
+	return compileType;
+}
+auto __lambda3001__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3002__(auto type1){
+	return compileType;
+}
+auto __lambda3003__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3004__(auto type1){
+	return compileType;
+}
+auto __lambda3005__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3006__(auto type1){
+	return compileType;
+}
+auto __lambda3007__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3008__(auto type1){
+	return compileType;
+}
+auto __lambda3009__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3010__(auto type1){
+	return compileType;
+}
+auto __lambda3011__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3012__(auto type1){
+	return compileType;
+}
+auto __lambda3013__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3014__(auto type1){
+	return compileType;
+}
+auto __lambda3015__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3016__(auto type1){
+	return compileType;
+}
+auto __lambda3017__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3018__(auto type1){
+	return compileType;
+}
+auto __lambda3019__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3020__(auto type1){
+	return compileType;
+}
+auto __lambda3021__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3022__(auto type1){
+	return compileType;
+}
+auto __lambda3023__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3024__(auto type1){
+	return compileType;
+}
+auto __lambda3025__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3026__(auto type1){
+	return compileType;
+}
+auto __lambda3027__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3028__(auto type1){
+	return compileType;
+}
+auto __lambda3029__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3030__(auto type1){
+	return compileType;
+}
+auto __lambda3031__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3032__(auto type1){
+	return compileType;
+}
+auto __lambda3033__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3034__(auto type1){
+	return compileType;
+}
+auto __lambda3035__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3036__(auto type1){
+	return compileType;
+}
+auto __lambda3037__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3038__(auto type1){
+	return compileType;
+}
+auto __lambda3039__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3040__(auto type1){
+	return compileType;
+}
+auto __lambda3041__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3042__(auto type1){
+	return compileType;
+}
+auto __lambda3043__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3044__(auto type1){
+	return compileType;
+}
+auto __lambda3045__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3046__(auto type1){
+	return compileType;
+}
+auto __lambda3047__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3048__(auto type1){
+	return compileType;
+}
+auto __lambda3049__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3050__(auto type1){
+	return compileType;
+}
+auto __lambda3051__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3052__(auto type1){
+	return compileType;
+}
+auto __lambda3053__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3054__(auto type1){
+	return compileType;
+}
+auto __lambda3055__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3056__(auto type1){
+	return compileType;
+}
+auto __lambda3057__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3058__(auto type1){
+	return compileType;
+}
+auto __lambda3059__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3060__(auto type1){
+	return compileType;
+}
+auto __lambda3061__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3062__(auto type1){
+	return compileType;
+}
+auto __lambda3063__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3064__(auto type1){
+	return compileType;
+}
+auto __lambda3065__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3066__(auto type1){
+	return compileType;
+}
+auto __lambda3067__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3068__(auto type1){
+	return compileType;
+}
+auto __lambda3069__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3070__(auto type1){
+	return compileType;
+}
+auto __lambda3071__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3072__(auto type1){
+	return compileType;
+}
+auto __lambda3073__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3074__(auto type1){
+	return compileType;
+}
+auto __lambda3075__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3076__(auto type1){
+	return compileType;
+}
+auto __lambda3077__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3078__(auto type1){
+	return compileType;
+}
+auto __lambda3079__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3080__(auto type1){
+	return compileType;
+}
+auto __lambda3081__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3082__(auto type1){
+	return compileType;
+}
+auto __lambda3083__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3084__(auto type1){
+	return compileType;
+}
+auto __lambda3085__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3086__(auto type1){
+	return compileType;
+}
+auto __lambda3087__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3088__(auto type1){
+	return compileType;
+}
+auto __lambda3089__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3090__(auto type1){
+	return compileType;
+}
+auto __lambda3091__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3092__(auto type1){
+	return compileType;
+}
+auto __lambda3093__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3094__(auto type1){
+	return compileType;
+}
+auto __lambda3095__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3096__(auto type1){
+	return compileType;
+}
+auto __lambda3097__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3098__(auto type1){
+	return compileType;
+}
+auto __lambda3099__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3100__(auto type1){
+	return compileType;
+}
+auto __lambda3101__(auto type1){
+	return compileType(parseState, type1);
+}
+auto __lambda3102__(auto type1){
 	return compileType;
 }
 /* private static */Result_String_CompileError compileGeneric(ParseState parseState, String type){
@@ -9569,8 +11204,8 @@ auto __lambda2592__(auto type1){
 	if (1) {
 	}
 	String oldArguments = withoutEnd.substring(genStart + "<".length());
-	List__String segments = divideAll(oldArguments, __lambda2079__);
-	return parseAll(segments, __lambda2081__).mapValue(newArguments -> {
+	List__String segments = divideAll(oldArguments, __lambda2589__);
+	return parseAll(segments, __lambda2591__).mapValue(newArguments -> {
             switch (base) {
                 case "Function" -> {
                     return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
@@ -9602,643 +11237,643 @@ auto __lambda2592__(auto type1){
 	}
 	return createSuffixErr(stripped, "[]");
 }
-auto __lambda2593__(auto errors){
+auto __lambda3103__(auto errors){
 	return CompileError("No valid combination present", input, errors);
 }
-auto __lambda2594__(auto orstate){
+auto __lambda3104__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2595__(auto orstate){
+auto __lambda3105__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2596__(auto param){
+auto __lambda3106__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2597__(auto param){
+auto __lambda3107__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2598__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2594__, __lambda2595__);
+auto __lambda3108__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3104__, __lambda3105__);
 }
-auto __lambda2599__(auto orstate){
+auto __lambda3109__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2600__(auto orstate){
+auto __lambda3110__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2601__(auto orState, auto rule){
+auto __lambda3111__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2602__(auto orState, auto rule){
+auto __lambda3112__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2603__(auto orState, auto rule){
+auto __lambda3113__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2604__(auto orState, auto rule){
+auto __lambda3114__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2605__(auto orState, auto rule){
+auto __lambda3115__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2606__(auto orState, auto rule){
+auto __lambda3116__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2607__(auto orState, auto rule){
+auto __lambda3117__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2608__(auto orState, auto rule){
+auto __lambda3118__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2609__(auto orState, auto rule){
+auto __lambda3119__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2610__(auto param){
+auto __lambda3120__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2611__(auto orState, auto rule){
+auto __lambda3121__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2612__(auto orState, auto rule){
+auto __lambda3122__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2613__(auto orState, auto rule){
+auto __lambda3123__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2614__(auto orState, auto rule){
+auto __lambda3124__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2615__(auto orState, auto rule){
+auto __lambda3125__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2616__(auto orState, auto rule){
+auto __lambda3126__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2617__(auto orState, auto rule){
+auto __lambda3127__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2618__(auto orState, auto rule){
+auto __lambda3128__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2619__(auto orState, auto rule){
+auto __lambda3129__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2620__(auto orState, auto rule){
+auto __lambda3130__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2621__(auto __lambda2616__){
-	return __lambda2616__.withValue, orState(__lambda2616__);
+auto __lambda3131__(auto __lambda3126__){
+	return __lambda3126__.withValue, orState(__lambda3126__);
 }
-auto __lambda2622__(auto __lambda2611__){
-	return __lambda2611__.withError)(__lambda2611__);
+auto __lambda3132__(auto __lambda3121__){
+	return __lambda3121__.withError)(__lambda3121__);
 }
-auto __lambda2623__(auto orstate){
+auto __lambda3133__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2624__(auto orstate){
+auto __lambda3134__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2625__(auto param){
+auto __lambda3135__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2626__(auto param){
+auto __lambda3136__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))(param);
 }
-auto __lambda2627__(auto param){
+auto __lambda3137__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2628__(auto param){
+auto __lambda3138__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult(param);
 }
-auto __lambda2629__(auto orstate){
+auto __lambda3139__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2630__(auto orstate){
+auto __lambda3140__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2631__(auto param){
+auto __lambda3141__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2632__(auto param){
+auto __lambda3142__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2633__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2629__, __lambda2630__);
+auto __lambda3143__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3139__, __lambda3140__);
 }
-auto __lambda2634__(auto orstate){
+auto __lambda3144__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2635__(auto orstate){
+auto __lambda3145__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2636__(auto orState, auto rule){
+auto __lambda3146__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2637__(auto orState, auto rule){
+auto __lambda3147__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2638__(auto orState, auto rule){
+auto __lambda3148__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2639__(auto orState, auto rule){
+auto __lambda3149__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2640__(auto orState, auto rule){
+auto __lambda3150__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2641__(auto orState, auto rule){
+auto __lambda3151__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2642__(auto orState, auto rule){
+auto __lambda3152__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2643__(auto orState, auto rule){
+auto __lambda3153__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2644__(auto orState, auto rule){
+auto __lambda3154__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2645__(auto param){
+auto __lambda3155__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2646__(auto orState, auto rule){
+auto __lambda3156__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2647__(auto orState, auto rule){
+auto __lambda3157__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2648__(auto orState, auto rule){
+auto __lambda3158__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2649__(auto orState, auto rule){
+auto __lambda3159__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2650__(auto orState, auto rule){
+auto __lambda3160__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2651__(auto orState, auto rule){
+auto __lambda3161__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2652__(auto orState, auto rule){
+auto __lambda3162__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2653__(auto orState, auto rule){
+auto __lambda3163__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2654__(auto orState, auto rule){
+auto __lambda3164__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2655__(auto orState, auto rule){
+auto __lambda3165__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2656__(auto __lambda2651__){
-	return __lambda2651__.withValue, orState(__lambda2651__);
+auto __lambda3166__(auto __lambda3161__){
+	return __lambda3161__.withValue, orState(__lambda3161__);
 }
-auto __lambda2657__(auto __lambda2646__){
-	return __lambda2646__.withError)(__lambda2646__);
+auto __lambda3167__(auto __lambda3156__){
+	return __lambda3156__.withError)(__lambda3156__);
 }
-auto __lambda2658__(auto orstate){
+auto __lambda3168__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2659__(auto orstate){
+auto __lambda3169__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2660__(auto param){
+auto __lambda3170__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2661__(auto param){
+auto __lambda3171__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))(param);
 }
-auto __lambda2662__(auto param){
+auto __lambda3172__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2663__(auto param){
+auto __lambda3173__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult()(param);
 }
-auto __lambda2664__(auto param){
+auto __lambda3174__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2665__(auto param){
+auto __lambda3175__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult()
                 .mapErr(param);
 }
-auto __lambda2666__(auto orstate){
+auto __lambda3176__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2667__(auto orstate){
+auto __lambda3177__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2668__(auto param){
+auto __lambda3178__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2669__(auto param){
+auto __lambda3179__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2670__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2666__, __lambda2667__);
+auto __lambda3180__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3176__, __lambda3177__);
 }
-auto __lambda2671__(auto orstate){
+auto __lambda3181__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2672__(auto orstate){
+auto __lambda3182__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2673__(auto orState, auto rule){
+auto __lambda3183__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2674__(auto orState, auto rule){
+auto __lambda3184__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2675__(auto orState, auto rule){
+auto __lambda3185__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2676__(auto orState, auto rule){
+auto __lambda3186__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2677__(auto orState, auto rule){
+auto __lambda3187__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2678__(auto orState, auto rule){
+auto __lambda3188__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2679__(auto orState, auto rule){
+auto __lambda3189__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2680__(auto orState, auto rule){
+auto __lambda3190__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2681__(auto orState, auto rule){
+auto __lambda3191__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2682__(auto param){
+auto __lambda3192__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2683__(auto orState, auto rule){
+auto __lambda3193__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2684__(auto orState, auto rule){
+auto __lambda3194__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2685__(auto orState, auto rule){
+auto __lambda3195__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2686__(auto orState, auto rule){
+auto __lambda3196__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2687__(auto orState, auto rule){
+auto __lambda3197__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2688__(auto orState, auto rule){
+auto __lambda3198__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2689__(auto orState, auto rule){
+auto __lambda3199__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2690__(auto orState, auto rule){
+auto __lambda3200__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2691__(auto orState, auto rule){
+auto __lambda3201__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2692__(auto orState, auto rule){
+auto __lambda3202__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2693__(auto __lambda2688__){
-	return __lambda2688__.withValue, orState(__lambda2688__);
+auto __lambda3203__(auto __lambda3198__){
+	return __lambda3198__.withValue, orState(__lambda3198__);
 }
-auto __lambda2694__(auto __lambda2683__){
-	return __lambda2683__.withError)(__lambda2683__);
+auto __lambda3204__(auto __lambda3193__){
+	return __lambda3193__.withError)(__lambda3193__);
 }
-auto __lambda2695__(auto orstate){
+auto __lambda3205__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2696__(auto orstate){
+auto __lambda3206__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2697__(auto param){
+auto __lambda3207__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2698__(auto param){
+auto __lambda3208__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))(param);
 }
-auto __lambda2699__(auto param){
+auto __lambda3209__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2700__(auto param){
+auto __lambda3210__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult(param);
 }
-auto __lambda2701__(auto orstate){
+auto __lambda3211__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2702__(auto orstate){
+auto __lambda3212__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2703__(auto param){
+auto __lambda3213__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2704__(auto param){
+auto __lambda3214__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2705__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2701__, __lambda2702__);
+auto __lambda3215__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3211__, __lambda3212__);
 }
-auto __lambda2706__(auto orstate){
+auto __lambda3216__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2707__(auto orstate){
+auto __lambda3217__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2708__(auto orState, auto rule){
+auto __lambda3218__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2709__(auto orState, auto rule){
+auto __lambda3219__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2710__(auto orState, auto rule){
+auto __lambda3220__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2711__(auto orState, auto rule){
+auto __lambda3221__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2712__(auto orState, auto rule){
+auto __lambda3222__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2713__(auto orState, auto rule){
+auto __lambda3223__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2714__(auto orState, auto rule){
+auto __lambda3224__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2715__(auto orState, auto rule){
+auto __lambda3225__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2716__(auto orState, auto rule){
+auto __lambda3226__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2717__(auto param){
+auto __lambda3227__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2718__(auto orState, auto rule){
+auto __lambda3228__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2719__(auto orState, auto rule){
+auto __lambda3229__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2720__(auto orState, auto rule){
+auto __lambda3230__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2721__(auto orState, auto rule){
+auto __lambda3231__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2722__(auto orState, auto rule){
+auto __lambda3232__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2723__(auto orState, auto rule){
+auto __lambda3233__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2724__(auto orState, auto rule){
+auto __lambda3234__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2725__(auto orState, auto rule){
+auto __lambda3235__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2726__(auto orState, auto rule){
+auto __lambda3236__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2727__(auto orState, auto rule){
+auto __lambda3237__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2728__(auto __lambda2723__){
-	return __lambda2723__.withValue, orState(__lambda2723__);
+auto __lambda3238__(auto __lambda3233__){
+	return __lambda3233__.withValue, orState(__lambda3233__);
 }
-auto __lambda2729__(auto __lambda2718__){
-	return __lambda2718__.withError)(__lambda2718__);
+auto __lambda3239__(auto __lambda3228__){
+	return __lambda3228__.withError)(__lambda3228__);
 }
-auto __lambda2730__(auto orstate){
+auto __lambda3240__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2731__(auto orstate){
+auto __lambda3241__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2732__(auto param){
+auto __lambda3242__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2733__(auto param){
+auto __lambda3243__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))(param);
 }
-auto __lambda2734__(auto param){
+auto __lambda3244__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2735__(auto param){
+auto __lambda3245__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult()(param);
 }
-auto __lambda2736__(auto param){
+auto __lambda3246__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2737__(auto param){
+auto __lambda3247__(auto param){
 	return rules.stream().foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState.withError))
                 .toResult()
                 .mapErr(errors -> new CompileError("No valid combination present", input, errors))(param);
 }
-auto __lambda2738__(auto errors){
+auto __lambda3248__(auto errors){
 	return CompileError("No valid combination present", input, errors);
 }
-auto __lambda2739__(auto errors){
+auto __lambda3249__(auto errors){
 	return CompileError("No valid combination present", input, errors);
 }
-auto __lambda2740__(auto orstate){
+auto __lambda3250__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2741__(auto orstate){
+auto __lambda3251__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2742__(auto param){
+auto __lambda3252__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2743__(auto param){
+auto __lambda3253__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2744__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2740__, __lambda2741__);
+auto __lambda3254__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3250__, __lambda3251__);
 }
-auto __lambda2745__(auto orstate){
+auto __lambda3255__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2746__(auto orstate){
+auto __lambda3256__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2747__(auto orState, auto rule){
+auto __lambda3257__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2748__(auto orState, auto rule){
+auto __lambda3258__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2749__(auto orState, auto rule){
+auto __lambda3259__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2750__(auto orState, auto rule){
+auto __lambda3260__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2751__(auto orState, auto rule){
+auto __lambda3261__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2752__(auto orState, auto rule){
+auto __lambda3262__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2753__(auto orState, auto rule){
+auto __lambda3263__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2754__(auto orState, auto rule){
+auto __lambda3264__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2755__(auto orState, auto rule){
+auto __lambda3265__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2756__(auto param){
+auto __lambda3266__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2757__(auto orState, auto rule){
+auto __lambda3267__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2758__(auto orState, auto rule){
+auto __lambda3268__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2759__(auto orState, auto rule){
+auto __lambda3269__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2760__(auto orState, auto rule){
+auto __lambda3270__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2761__(auto orState, auto rule){
+auto __lambda3271__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2762__(auto orState, auto rule){
+auto __lambda3272__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2763__(auto orState, auto rule){
+auto __lambda3273__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2764__(auto orState, auto rule){
+auto __lambda3274__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2765__(auto orState, auto rule){
+auto __lambda3275__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2766__(auto orState, auto rule){
+auto __lambda3276__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2767__(auto __lambda2762__){
-	return __lambda2762__.withValue, orState(__lambda2762__);
+auto __lambda3277__(auto __lambda3272__){
+	return __lambda3272__.withValue, orState(__lambda3272__);
 }
-auto __lambda2768__(auto __lambda2757__){
-	return __lambda2757__.withError)(__lambda2757__);
+auto __lambda3278__(auto __lambda3267__){
+	return __lambda3267__.withError)(__lambda3267__);
 }
-auto __lambda2769__(auto orstate){
+auto __lambda3279__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2770__(auto orstate){
+auto __lambda3280__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2771__(auto orstate){
+auto __lambda3281__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2772__(auto orstate){
+auto __lambda3282__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2773__(auto param){
+auto __lambda3283__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2774__(auto param){
+auto __lambda3284__(auto param){
 	return rule.compile(input).match(orState::withValue, orState.withError)(param);
 }
-auto __lambda2775__(auto orState, auto rule){
-	return rule.compile(input).match(__lambda2771__, __lambda2772__);
+auto __lambda3285__(auto orState, auto rule){
+	return rule.compile(input).match(__lambda3281__, __lambda3282__);
 }
-auto __lambda2776__(auto orstate){
+auto __lambda3286__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2777__(auto orstate){
+auto __lambda3287__(auto orstate){
 	return orState.withError(orstate);
 }
-auto __lambda2778__(auto orState, auto rule){
+auto __lambda3288__(auto orState, auto rule){
 	return rule.compile(input).match;
 }
-auto __lambda2779__(auto orState, auto rule){
+auto __lambda3289__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2780__(auto orState, auto rule){
+auto __lambda3290__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2781__(auto orState, auto rule){
+auto __lambda3291__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2782__(auto orState, auto rule){
+auto __lambda3292__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2783__(auto orState, auto rule){
+auto __lambda3293__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2784__(auto orState, auto rule){
+auto __lambda3294__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2785__(auto orState, auto rule){
+auto __lambda3295__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2786__(auto orState, auto rule){
+auto __lambda3296__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2787__(auto param){
+auto __lambda3297__(auto param){
 	return rule.compile(input).match(orState.withValue, orState(param);
 }
-auto __lambda2788__(auto orState, auto rule){
+auto __lambda3298__(auto orState, auto rule){
 	return rule.compile(input).match(orState::withValue, orState;
 }
-auto __lambda2789__(auto orState, auto rule){
+auto __lambda3299__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2790__(auto orState, auto rule){
+auto __lambda3300__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2791__(auto orState, auto rule){
+auto __lambda3301__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2792__(auto orState, auto rule){
+auto __lambda3302__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2793__(auto orState, auto rule){
+auto __lambda3303__(auto orState, auto rule){
 	return rule.compile(input).match(orState;
 }
-auto __lambda2794__(auto orState, auto rule){
+auto __lambda3304__(auto orState, auto rule){
 	return rule.compile(input);
 }
-auto __lambda2795__(auto orState, auto rule){
+auto __lambda3305__(auto orState, auto rule){
 	return rule.compile;
 }
-auto __lambda2796__(auto orState, auto rule){
+auto __lambda3306__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2797__(auto orState, auto rule){
+auto __lambda3307__(auto orState, auto rule){
 	return rule;
 }
-auto __lambda2798__(auto __lambda2793__){
-	return __lambda2793__.withValue, orState(__lambda2793__);
+auto __lambda3308__(auto __lambda3303__){
+	return __lambda3303__.withValue, orState(__lambda3303__);
 }
-auto __lambda2799__(auto __lambda2788__){
-	return __lambda2788__.withError)(__lambda2788__);
+auto __lambda3309__(auto __lambda3298__){
+	return __lambda3298__.withError)(__lambda3298__);
 }
-auto __lambda2800__(auto orstate){
+auto __lambda3310__(auto orstate){
 	return orState.withValue(orstate);
 }
-auto __lambda2801__(auto orstate){
+auto __lambda3311__(auto orstate){
 	return orState.withError(orstate);
 }
 /* private static */Result_String_CompileError compileOr(String input, List__Rule rules){
-	return rules.stream().foldWithInitial(OrState(), __lambda2598__).toResult().mapErr(__lambda2593__);
+	return rules.stream().foldWithInitial(OrState(), __lambda3108__).toResult().mapErr(__lambda3103__);
 }
 /* private static */Result_String_CompileError compilePrimitive(String type){
 	if (1) {
@@ -10258,540 +11893,540 @@ auto __lambda2801__(auto orstate){
 	}
 	return Ok(state.findArgumentValue(stripped).orElse(stripped));
 }
-auto __lambda2802__(auto string){
+auto __lambda3312__(auto string){
 	return String.equals(string);
 }
-auto __lambda2803__(auto string){
+auto __lambda3313__(auto string){
 	return String.equals(string);
 }
-auto __lambda2804__(auto param){
+auto __lambda3314__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2805__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2803__);
+auto __lambda3315__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3313__);
 }
-auto __lambda2806__(auto string){
+auto __lambda3316__(auto string){
 	return String.equals(string);
 }
-auto __lambda2807__(auto typeParams, auto typeParams2){
+auto __lambda3317__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2808__(auto typeParams, auto typeParams2){
+auto __lambda3318__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2809__(auto typeParams, auto typeParams2){
+auto __lambda3319__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2810__(auto typeParams, auto typeParams2){
+auto __lambda3320__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2811__(auto typeParams, auto typeParams2){
+auto __lambda3321__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2812__(auto __lambda2810__){
-	return __lambda2810__.equals)(__lambda2810__);
+auto __lambda3322__(auto __lambda3320__){
+	return __lambda3320__.equals)(__lambda3320__);
 }
-auto __lambda2813__(auto string){
+auto __lambda3323__(auto string){
 	return String.equals(string);
 }
-auto __lambda2814__(auto param){
+auto __lambda3324__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2815__(auto param){
+auto __lambda3325__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2816__(auto param){
+auto __lambda3326__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2817__(auto param){
+auto __lambda3327__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2818__(auto param){
+auto __lambda3328__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2819__(auto param){
+auto __lambda3329__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2820__(auto param){
+auto __lambda3330__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(param);
 }
-auto __lambda2821__(auto param){
+auto __lambda3331__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2822__(auto param){
+auto __lambda3332__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2823__(auto param){
+auto __lambda3333__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String.equals))(param);
 }
-auto __lambda2824__(auto param){
+auto __lambda3334__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2825__(auto param){
+auto __lambda3335__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2826__(auto stringListTuple, auto stringListTuple2){
-	return Tuples.equalsTo(stringListTuple, stringListTuple2, __lambda2802__, __lambda2805__);
+auto __lambda3336__(auto stringListTuple, auto stringListTuple2){
+	return Tuples.equalsTo(stringListTuple, stringListTuple2, __lambda3312__, __lambda3315__);
 }
-auto __lambda2827__(auto string){
+auto __lambda3337__(auto string){
 	return String.equals(string);
 }
-auto __lambda2828__(auto string){
+auto __lambda3338__(auto string){
 	return String.equals(string);
 }
-auto __lambda2829__(auto param){
+auto __lambda3339__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2830__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2828__);
+auto __lambda3340__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3338__);
 }
-auto __lambda2831__(auto string){
+auto __lambda3341__(auto string){
 	return String.equals(string);
 }
-auto __lambda2832__(auto typeParams, auto typeParams2){
+auto __lambda3342__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2833__(auto typeParams, auto typeParams2){
+auto __lambda3343__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2834__(auto typeParams, auto typeParams2){
+auto __lambda3344__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2835__(auto typeParams, auto typeParams2){
+auto __lambda3345__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2836__(auto typeParams, auto typeParams2){
+auto __lambda3346__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2837__(auto __lambda2835__){
-	return __lambda2835__.equals)(__lambda2835__);
+auto __lambda3347__(auto __lambda3345__){
+	return __lambda3345__.equals)(__lambda3345__);
 }
-auto __lambda2838__(auto string){
+auto __lambda3348__(auto string){
 	return String.equals(string);
 }
-auto __lambda2839__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3349__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo;
 }
-auto __lambda2840__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3350__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2841__(auto param){
+auto __lambda3351__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2842__(auto param){
+auto __lambda3352__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2843__(auto param){
+auto __lambda3353__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2844__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3354__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists;
 }
-auto __lambda2845__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3355__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2846__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3356__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2847__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3357__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2848__(auto __lambda2846__){
-	return __lambda2846__.equals,
-                        (typeParams, typeParams2) -> Lists(__lambda2846__);
+auto __lambda3358__(auto __lambda3356__){
+	return __lambda3356__.equals,
+                        (typeParams, typeParams2) -> Lists(__lambda3356__);
 }
-auto __lambda2849__(auto param){
+auto __lambda3359__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2850__(auto param){
+auto __lambda3360__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2851__(auto param){
+auto __lambda3361__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2852__(auto param){
+auto __lambda3362__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(param);
 }
-auto __lambda2853__(auto param){
+auto __lambda3363__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2854__(auto param){
+auto __lambda3364__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2855__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3365__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2856__(auto param){
+auto __lambda3366__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2857__(auto param){
+auto __lambda3367__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2858__(auto param){
+auto __lambda3368__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2859__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3369__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists;
 }
-auto __lambda2860__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3370__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2861__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3371__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2862__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3372__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2863__(auto __lambda2861__){
-	return __lambda2861__.equals,
-                        (typeParams, typeParams2) -> Lists(__lambda2861__);
+auto __lambda3373__(auto __lambda3371__){
+	return __lambda3371__.equals,
+                        (typeParams, typeParams2) -> Lists(__lambda3371__);
 }
-auto __lambda2864__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3374__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2865__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3375__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2866__(auto __lambda2864__){
-	return __lambda2864__.equals,
-                        (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(__lambda2864__);
+auto __lambda3376__(auto __lambda3374__){
+	return __lambda3374__.equals,
+                        (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(__lambda3374__);
 }
-auto __lambda2867__(auto __lambda2855__){
-	return __lambda2855__.equals))(__lambda2855__);
+auto __lambda3377__(auto __lambda3365__){
+	return __lambda3365__.equals))(__lambda3365__);
 }
-auto __lambda2868__(auto string){
+auto __lambda3378__(auto string){
 	return String.equals(string);
 }
-auto __lambda2869__(auto string){
+auto __lambda3379__(auto string){
 	return String.equals(string);
 }
-auto __lambda2870__(auto param){
+auto __lambda3380__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2871__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2869__);
+auto __lambda3381__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3379__);
 }
-auto __lambda2872__(auto string){
+auto __lambda3382__(auto string){
 	return String.equals(string);
 }
-auto __lambda2873__(auto typeParams, auto typeParams2){
+auto __lambda3383__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2874__(auto typeParams, auto typeParams2){
+auto __lambda3384__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2875__(auto typeParams, auto typeParams2){
+auto __lambda3385__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2876__(auto typeParams, auto typeParams2){
+auto __lambda3386__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2877__(auto typeParams, auto typeParams2){
+auto __lambda3387__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2878__(auto __lambda2876__){
-	return __lambda2876__.equals)(__lambda2876__);
+auto __lambda3388__(auto __lambda3386__){
+	return __lambda3386__.equals)(__lambda3386__);
 }
-auto __lambda2879__(auto string){
+auto __lambda3389__(auto string){
 	return String.equals(string);
 }
-auto __lambda2880__(auto param){
+auto __lambda3390__(auto param){
 	return Lists.contains(toExpand, tuple,
                 (stringListTuple, stringListTuple2) -> Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2881__(auto param){
+auto __lambda3391__(auto param){
 	return Lists.contains(toExpand, tuple,
                 (stringListTuple, stringListTuple2) -> Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2882__(auto param){
+auto __lambda3392__(auto param){
 	return Lists.contains(toExpand, tuple,
                 (stringListTuple, stringListTuple2) -> Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(param);
 }
-auto __lambda2883__(auto param){
+auto __lambda3393__(auto param){
 	return Lists.contains(toExpand, tuple,
                 (stringListTuple, stringListTuple2) -> Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String.equals)))(param);
 }
-auto __lambda2884__(auto string){
+auto __lambda3394__(auto string){
 	return String.equals(string);
 }
-auto __lambda2885__(auto string){
+auto __lambda3395__(auto string){
 	return String.equals(string);
 }
-auto __lambda2886__(auto param){
+auto __lambda3396__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2887__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2885__);
+auto __lambda3397__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3395__);
 }
-auto __lambda2888__(auto string){
+auto __lambda3398__(auto string){
 	return String.equals(string);
 }
-auto __lambda2889__(auto typeParams, auto typeParams2){
+auto __lambda3399__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2890__(auto typeParams, auto typeParams2){
+auto __lambda3400__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2891__(auto typeParams, auto typeParams2){
+auto __lambda3401__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2892__(auto typeParams, auto typeParams2){
+auto __lambda3402__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2893__(auto typeParams, auto typeParams2){
+auto __lambda3403__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2894__(auto __lambda2892__){
-	return __lambda2892__.equals)(__lambda2892__);
+auto __lambda3404__(auto __lambda3402__){
+	return __lambda3402__.equals)(__lambda3402__);
 }
-auto __lambda2895__(auto string){
+auto __lambda3405__(auto string){
 	return String.equals(string);
 }
-auto __lambda2896__(auto param){
+auto __lambda3406__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2897__(auto param){
+auto __lambda3407__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2898__(auto param){
+auto __lambda3408__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2899__(auto param){
+auto __lambda3409__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2900__(auto param){
+auto __lambda3410__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2901__(auto param){
+auto __lambda3411__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2902__(auto param){
+auto __lambda3412__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(param);
 }
-auto __lambda2903__(auto param){
+auto __lambda3413__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2904__(auto param){
+auto __lambda3414__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2905__(auto param){
+auto __lambda3415__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String.equals))(param);
 }
-auto __lambda2906__(auto param){
+auto __lambda3416__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2907__(auto param){
+auto __lambda3417__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2908__(auto stringListTuple, auto stringListTuple2){
-	return Tuples.equalsTo(stringListTuple, stringListTuple2, __lambda2884__, __lambda2887__);
+auto __lambda3418__(auto stringListTuple, auto stringListTuple2){
+	return Tuples.equalsTo(stringListTuple, stringListTuple2, __lambda3394__, __lambda3397__);
 }
-auto __lambda2909__(auto string){
+auto __lambda3419__(auto string){
 	return String.equals(string);
 }
-auto __lambda2910__(auto string){
+auto __lambda3420__(auto string){
 	return String.equals(string);
 }
-auto __lambda2911__(auto param){
+auto __lambda3421__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2912__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2910__);
+auto __lambda3422__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3420__);
 }
-auto __lambda2913__(auto string){
+auto __lambda3423__(auto string){
 	return String.equals(string);
 }
-auto __lambda2914__(auto typeParams, auto typeParams2){
+auto __lambda3424__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2915__(auto typeParams, auto typeParams2){
+auto __lambda3425__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2916__(auto typeParams, auto typeParams2){
+auto __lambda3426__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2917__(auto typeParams, auto typeParams2){
+auto __lambda3427__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2918__(auto typeParams, auto typeParams2){
+auto __lambda3428__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2919__(auto __lambda2917__){
-	return __lambda2917__.equals)(__lambda2917__);
+auto __lambda3429__(auto __lambda3427__){
+	return __lambda3427__.equals)(__lambda3427__);
 }
-auto __lambda2920__(auto string){
+auto __lambda3430__(auto string){
 	return String.equals(string);
 }
-auto __lambda2921__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3431__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo;
 }
-auto __lambda2922__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3432__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2923__(auto param){
+auto __lambda3433__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2924__(auto param){
+auto __lambda3434__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2925__(auto param){
+auto __lambda3435__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2926__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3436__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists;
 }
-auto __lambda2927__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3437__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2928__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3438__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2929__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3439__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2930__(auto __lambda2928__){
-	return __lambda2928__.equals,
-                        (typeParams, typeParams2) -> Lists(__lambda2928__);
+auto __lambda3440__(auto __lambda3438__){
+	return __lambda3438__.equals,
+                        (typeParams, typeParams2) -> Lists(__lambda3438__);
 }
-auto __lambda2931__(auto param){
+auto __lambda3441__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2932__(auto param){
+auto __lambda3442__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2933__(auto param){
+auto __lambda3443__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2934__(auto param){
+auto __lambda3444__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(param);
 }
-auto __lambda2935__(auto param){
+auto __lambda3445__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2936__(auto param){
+auto __lambda3446__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2937__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3447__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2938__(auto param){
+auto __lambda3448__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2) -> Lists(param);
 }
-auto __lambda2939__(auto param){
+auto __lambda3449__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,(param);
 }
-auto __lambda2940__(auto param){
+auto __lambda3450__(auto param){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String.equals,
                         (typeParams, typeParams2)(param);
 }
-auto __lambda2941__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3451__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
                         (typeParams, typeParams2) -> Lists;
 }
-auto __lambda2942__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3452__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2943__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3453__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2944__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3454__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2945__(auto __lambda2943__){
-	return __lambda2943__.equals,
-                        (typeParams, typeParams2) -> Lists(__lambda2943__);
+auto __lambda3455__(auto __lambda3453__){
+	return __lambda3453__.equals,
+                        (typeParams, typeParams2) -> Lists(__lambda3453__);
 }
-auto __lambda2946__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3456__(auto stringListTuple, auto stringListTuple2){
 	return Tuples.equalsTo(stringListTuple, stringListTuple2, String;
 }
-auto __lambda2947__(auto stringListTuple, auto stringListTuple2){
+auto __lambda3457__(auto stringListTuple, auto stringListTuple2){
 	return Tuples;
 }
-auto __lambda2948__(auto __lambda2946__){
-	return __lambda2946__.equals,
-                        (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(__lambda2946__);
+auto __lambda3458__(auto __lambda3456__){
+	return __lambda3456__.equals,
+                        (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String(__lambda3456__);
 }
-auto __lambda2949__(auto __lambda2937__){
-	return __lambda2937__.equals))(__lambda2937__);
+auto __lambda3459__(auto __lambda3447__){
+	return __lambda3447__.equals))(__lambda3447__);
 }
-auto __lambda2950__(auto string){
+auto __lambda3460__(auto string){
 	return String.equals(string);
 }
-auto __lambda2951__(auto string){
+auto __lambda3461__(auto string){
 	return String.equals(string);
 }
-auto __lambda2952__(auto param){
+auto __lambda3462__(auto param){
 	return Lists.equalsTo(typeParams, typeParams2, String.equals)(param);
 }
-auto __lambda2953__(auto typeParams, auto typeParams2){
-	return Lists.equalsTo(typeParams, typeParams2, __lambda2951__);
+auto __lambda3463__(auto typeParams, auto typeParams2){
+	return Lists.equalsTo(typeParams, typeParams2, __lambda3461__);
 }
-auto __lambda2954__(auto string){
+auto __lambda3464__(auto string){
 	return String.equals(string);
 }
-auto __lambda2955__(auto typeParams, auto typeParams2){
+auto __lambda3465__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo;
 }
-auto __lambda2956__(auto typeParams, auto typeParams2){
+auto __lambda3466__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2957__(auto typeParams, auto typeParams2){
+auto __lambda3467__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2958__(auto typeParams, auto typeParams2){
+auto __lambda3468__(auto typeParams, auto typeParams2){
 	return Lists.equalsTo(typeParams, typeParams2, String;
 }
-auto __lambda2959__(auto typeParams, auto typeParams2){
+auto __lambda3469__(auto typeParams, auto typeParams2){
 	return Lists;
 }
-auto __lambda2960__(auto __lambda2958__){
-	return __lambda2958__.equals)(__lambda2958__);
+auto __lambda3470__(auto __lambda3468__){
+	return __lambda3468__.equals)(__lambda3468__);
 }
-auto __lambda2961__(auto string){
+auto __lambda3471__(auto string){
 	return String.equals(string);
 }
 /* private static */int isDefined(List__Tuple_String_List__String toExpand, Tuple_String_List__String tuple){
-	return Lists.contains(toExpand, tuple, __lambda2826__);
+	return Lists.contains(toExpand, tuple, __lambda3336__);
 }
 /* private static */String generateGenericName(String base, List__String newArguments){
 	String joined = newArguments.stream().collect(Joiner("_")).orElse("");
