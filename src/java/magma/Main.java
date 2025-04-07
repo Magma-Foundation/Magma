@@ -1,7 +1,5 @@
 package magma;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -115,6 +113,18 @@ public class Main {
         Map_<K, V> with(K key, V value);
 
         Option<V> find(K key);
+    }
+
+    public interface Error {
+        String display();
+    }
+
+    public interface Path_ {
+        Option<IOError> writeString(String output);
+
+        Result<String, IOError> readString();
+
+        Path_ resolveSibling(String sibling);
     }
 
     public record Tuple<A, B>(A left, B right) {
@@ -506,7 +516,7 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, String context, List_<CompileError> children) {
+    private record CompileError(String message, String context, List_<CompileError> children) implements Error {
         public CompileError(String message, String context) {
             this(message, context, Lists.empty());
         }
@@ -518,6 +528,7 @@ public class Main {
                     .orElse(0);
         }
 
+        @Override
         public String display() {
             return format(0);
         }
@@ -652,6 +663,13 @@ public class Main {
         }
     }
 
+    private record ApplicationError(Error child) implements Error {
+        @Override
+        public String display() {
+            return child.display();
+        }
+    }
+
     private static List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static Map_<String, Function<List_<String>, Result<String, CompileError>>> generators = Maps.empty();
     private static List_<String> imports = Lists.empty();
@@ -662,20 +680,20 @@ public class Main {
     private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
-        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        Files.readString(source)
+        Path_ source = Paths.get(".", "src", "java", "magma", "Main.java");
+        source.readString()
                 .match(input -> runWithInput(source, input), Some::new)
                 .ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Option<IOError> runWithInput(Path source, String input) {
-        String output = compile(input).mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n").match(value -> value, err -> {
-            System.err.println(err.display());
-            return "";
-        });
-
-        Path target = source.resolveSibling("main.c");
-        return Files.writeString(target, output);
+    private static Option<ApplicationError> runWithInput(Path_ source, String input) {
+        return compile(input)
+                .mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n")
+                .mapErr(ApplicationError::new)
+                .match(output -> {
+                    Path_ target = source.resolveSibling("main.c");
+                    return target.writeString(output).map(ApplicationError::new);
+                }, Some::new);
     }
 
     private static Result<String, CompileError> compile(String input) {
