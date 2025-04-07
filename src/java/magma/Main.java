@@ -55,6 +55,8 @@ public class Main {
         boolean isEmpty();
 
         T get(int index);
+
+        int size();
     }
 
     private interface Stream_<T> {
@@ -73,6 +75,8 @@ public class Main {
         Stream_<T> concat(Stream_<T> other);
 
         Option<T> next();
+
+        boolean allMatch(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -174,6 +178,11 @@ public class Main {
         public Option<T> next() {
             return head.next();
         }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.foldWithInitial(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+        }
     }
 
     private record JavaList<T>(List<T> inner) implements List_<T> {
@@ -217,6 +226,11 @@ public class Main {
         public T get(int index) {
             return inner.get(index);
         }
+
+        @Override
+        public int size() {
+            return inner.size();
+        }
     }
 
     private static class Lists {
@@ -230,6 +244,13 @@ public class Main {
 
         public static <T> boolean contains(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
             return list.stream().anyMatch(child -> equator.apply(element, child));
+        }
+
+        public static <T> boolean equalsTo(List_<T> elements, List_<T> other, BiFunction<T, T, Boolean> equator) {
+            if (elements.size() != other.size()) return false;
+
+            return new HeadedStream<>(new RangeHead(elements.size()))
+                    .allMatch(index -> equator.apply(elements.get(index), other.get(index)));
         }
     }
 
@@ -428,6 +449,17 @@ public class Main {
         @Override
         public Option<String> fold(Option<String> current, String element) {
             return new Some<>(current.map(inner -> inner + delimiter + element).orElse(element));
+        }
+    }
+
+    private static class Tuples {
+        public static <A, B> boolean equalsTo(
+                Tuple<A, B> left,
+                Tuple<A, B> right,
+                BiFunction<A, A, Boolean> leftEquator,
+                BiFunction<B, B, Boolean> rightEquator) {
+            return leftEquator.apply(left.left, right.left) &&
+                    rightEquator.apply(left.right, right.right);
         }
     }
 
@@ -919,7 +951,20 @@ public class Main {
                         }
 
                         if (hasNoTypeParams(frames)) {
-                            expansions = expansions.add(new Tuple<>(base, newArguments));
+                            Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
+                            if (!Lists.contains(expansions, tuple, new BiFunction<Tuple<String, List_<String>>, Tuple<String, List_<String>>, Boolean>() {
+                                @Override
+                                public Boolean apply(Tuple<String, List_<String>> stringListTuple, Tuple<String, List_<String>> stringListTuple2) {
+                                    return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals, new BiFunction<List_<String>, List_<String>, Boolean>() {
+                                        @Override
+                                        public Boolean apply(List_<String> typeParams, List_<String> typeParams2) {
+                                            return Lists.equalsTo(typeParams, typeParams2, String::equals);
+                                        }
+                                    });
+                                }
+                            })) {
+                                expansions = expansions.add(tuple);
+                            }
                         }
 
                         String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
