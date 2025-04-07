@@ -146,30 +146,34 @@
         int arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             String paramName = stripped.substring(0, arrowIndex).strip();
+            String inputValue = stripped.substring(arrowIndex + "->".length());
             if (isSymbol(paramName)) {
-                String inputValue = stripped.substring(arrowIndex + "->".length());
-                String lambda = "__lambda" + lambdaCounter + "__";
-
-                return compileValue(inputValue).map(outputValue -> {
-                    String definition = generateDefinition("", "auto", lambda);
-                    String param = generateDefinition("", "auto", paramName);
-                    addFunction(definition, param, "\n\treturn " + outputValue + ";");
-
-                    return lambda;
-                });
+                return compileValue(inputValue).map(outputValue -> generateLambda(paramName, outputValue));
             }
         }
 
         Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
-        int separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            String object = stripped.substring(0, separator);
-            String property = stripped.substring(separator + ".".length());
+        int dataSeparator = stripped.lastIndexOf(".");
+        if (dataSeparator >= 0) {
+            String object = stripped.substring(0, dataSeparator);
+            String property = stripped.substring(dataSeparator + ".".length());
 
             return compileValue(object).map(newObject -> {
                 return newObject + "." + property;
+            });
+        }
+
+        int methodSeparator = stripped.lastIndexOf("::");
+        if (methodSeparator >= 0) {
+            String object = stripped.substring(0, methodSeparator);
+            String property = stripped.substring(methodSeparator + "::".length());
+
+            return compileValue(object).map(newObject -> {
+                String caller = newObject + "." + property;
+                String paramName = newObject.toLowerCase();
+                return generateLambda(paramName, generateInvocation(caller, paramName));
             });
         }
 
@@ -178,6 +182,16 @@
         }
 
         return Optional.of(invalidate("value", input));
+    } *//* 
+
+    private static String generateLambda(String paramName, String lambdaValue) {
+        String lambda = "__lambda" + lambdaCounter + "__";
+
+        String definition = generateDefinition("", "auto", lambda);
+        String param = generateDefinition("", "auto", paramName);
+        addFunction(definition, param, "\n\treturn " + lambdaValue + ";");
+
+        return lambda;
     } *//* 
 
     private static Optional<String> compileInvocation(String stripped) {
@@ -203,9 +217,13 @@
         String inputArguments = withoutEnd.substring(argsStart + 1);
         return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
             return compileValue(inputCaller).map(outputCaller -> {
-                return outputCaller + "(" + outputValues + ")";
+                return generateInvocation(outputCaller, outputValues);
             });
         });
+    } *//* 
+
+    private static String generateInvocation(String caller, String arguments) {
+        return caller + "(" + arguments + ")";
     } *//* 
 
     private static Optional<String> compileDefinition(String input) {
@@ -348,12 +366,18 @@ public  */struct Main {
         }
      */
 }
+auto __lambda0__(auto throwable){
+	return Throwable.printStackTrace(throwable);
+}
 auto __lambda0__(auto input){
 	return runWithInput(source, input);
 }
+auto __lambda0__(auto optional){
+	return Optional.of(optional);
+}
 /* public static */void main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda0__, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
+	readString(source).match(__lambda0__, __lambda0__).ifPresent(__lambda0__);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
@@ -375,11 +399,17 @@ auto __lambda0__(auto input){
             return new Err<>(e);
         } */
 }
+auto __lambda0__(auto main){
+	return Main.divideStatementChar(main);
+}
+auto __lambda0__(auto main){
+	return Main.mergeStatements(main);
+}
 auto __lambda0__(auto compiled){
-	return mergeAll(compiled, /*  Main::mergeStatements */);
+	return mergeAll(compiled, __lambda0__);
 }
 /* private static */struct String compile(struct String input){
-	/* List<String> */ segments = divideAll(input, /*  Main::divideStatementChar */);/* 
+	/* List<String> */ segments = divideAll(input, __lambda0__);/* 
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     compiled.addAll(imports);
@@ -390,8 +420,14 @@ auto __lambda0__(auto compiled){
 	/* )
                  */.map(__lambda0__).orElse("");
 }
+auto __lambda0__(auto main){
+	return Main.divideStatementChar(main);
+}
+auto __lambda0__(auto main){
+	return Main.mergeStatements(main);
+}
 /* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
-	/* return compileAll */(divideAll(input, /*  Main::divideStatementChar */), compiler, /*  Main::mergeStatements */);
+	/* return compileAll */(divideAll(input, __lambda0__), compiler, __lambda0__);
 }
 auto __lambda0__(auto compiled){
 	return mergeAll(compiled, merger);
@@ -422,8 +458,14 @@ auto __lambda0__(auto compiled){
 /* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
 }
+auto __lambda0__(auto linkedlist){
+	return LinkedList.new(linkedlist);
+}
+auto __lambda0__(auto input){
+	return input.charAt(input);
+}
 /* private static *//* List<String> */ divideAll(struct String input, /* BiFunction<State */, /* Character */, /* State> */ divider){
-	/* LinkedList<Character> */ queue = IntStream.range(/* 0 */, input.length()).mapToObj(/* input::charAt */).collect(Collectors.toCollection(/* LinkedList::new */));
+	/* LinkedList<Character> */ queue = IntStream.range(/* 0 */, input.length()).mapToObj(__lambda0__).collect(Collectors.toCollection(__lambda0__));
 	struct State state = /* new State */(queue);
 	struct State current = state;/* 
         while (!isEmpty(current)) {

@@ -334,30 +334,34 @@ public class Main {
         int arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             String paramName = stripped.substring(0, arrowIndex).strip();
+            String inputValue = stripped.substring(arrowIndex + "->".length());
             if (isSymbol(paramName)) {
-                String inputValue = stripped.substring(arrowIndex + "->".length());
-                String lambda = "__lambda" + lambdaCounter + "__";
-
-                return compileValue(inputValue).map(outputValue -> {
-                    String definition = generateDefinition("", "auto", lambda);
-                    String param = generateDefinition("", "auto", paramName);
-                    addFunction(definition, param, "\n\treturn " + outputValue + ";");
-
-                    return lambda;
-                });
+                return compileValue(inputValue).map(outputValue -> generateLambda(paramName, outputValue));
             }
         }
 
         Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
-        int separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            String object = stripped.substring(0, separator);
-            String property = stripped.substring(separator + ".".length());
+        int dataSeparator = stripped.lastIndexOf(".");
+        if (dataSeparator >= 0) {
+            String object = stripped.substring(0, dataSeparator);
+            String property = stripped.substring(dataSeparator + ".".length());
 
             return compileValue(object).map(newObject -> {
                 return newObject + "." + property;
+            });
+        }
+
+        int methodSeparator = stripped.lastIndexOf("::");
+        if (methodSeparator >= 0) {
+            String object = stripped.substring(0, methodSeparator);
+            String property = stripped.substring(methodSeparator + "::".length());
+
+            return compileValue(object).map(newObject -> {
+                String caller = newObject + "." + property;
+                String paramName = newObject.toLowerCase();
+                return generateLambda(paramName, generateInvocation(caller, paramName));
             });
         }
 
@@ -366,6 +370,16 @@ public class Main {
         }
 
         return Optional.of(invalidate("value", input));
+    }
+
+    private static String generateLambda(String paramName, String lambdaValue) {
+        String lambda = "__lambda" + lambdaCounter + "__";
+
+        String definition = generateDefinition("", "auto", lambda);
+        String param = generateDefinition("", "auto", paramName);
+        addFunction(definition, param, "\n\treturn " + lambdaValue + ";");
+
+        return lambda;
     }
 
     private static Optional<String> compileInvocation(String stripped) {
@@ -391,9 +405,13 @@ public class Main {
         String inputArguments = withoutEnd.substring(argsStart + 1);
         return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
             return compileValue(inputCaller).map(outputCaller -> {
-                return outputCaller + "(" + outputValues + ")";
+                return generateInvocation(outputCaller, outputValues);
             });
         });
+    }
+
+    private static String generateInvocation(String caller, String arguments) {
+        return caller + "(" + arguments + ")";
     }
 
     private static Optional<String> compileDefinition(String input) {
