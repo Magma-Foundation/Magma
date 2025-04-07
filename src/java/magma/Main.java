@@ -1595,9 +1595,9 @@ public class Main {
     private static Rule createTypeRule() {
         return new OrRule(Lists.of(
                 createPrimitiveRule(),
-                (state, type2) -> createSymbolTypeRule().compile(state, type2),
+                createSymbolTypeRule(),
                 (state, type) -> compileTypeParam(state, type),
-                (state, type) -> createArrayRule().compile(state, type.strip()),
+                 createArrayRule(),
                 (state, type) -> compileGeneric(state, type)
         ));
     }
@@ -1643,9 +1643,9 @@ public class Main {
     }
 
     private static Rule createArrayRule() {
-        return new SuffixRule((state, slice) -> {
+        return new StripRule(new SuffixRule((state, slice) -> {
             return createTypeRule().compile(state, slice).mapValue(value -> value + "*");
-        }, "[]");
+        }, "[]"));
     }
 
     private static StripRule createPrimitiveRule() {
