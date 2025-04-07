@@ -1,5 +1,5 @@
 /* 
- *//*  */#include <temp.h>
+ */#include <temp.h>
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
@@ -9,40 +9,38 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/*  */struct Temp {
+struct Temp {
 };
-/* 
-
-public  */struct Main {
+/* public */ struct Main {
 };
 
 	/* private static final *//* List_<String> */ imports = Lists.empty();;;
 
 	/* private static final *//* List_<String> */ structs = Lists.empty();;;
 
-	/* private static *//* List_<String> */ globals = Lists.empty();;;
-
 	/* private static final *//* List_<String> */ functions = Lists.empty();;;
+
+	/* private static *//* List_<String> */ globals = Lists.empty();;;
 
 	/* private static */struct int lambdaCounter = /*  0; */;;
 /* private record *//* Tuple<A, */ B>(struct A left, struct B right){
@@ -322,16 +320,18 @@ auto __lambda10__(auto compiled){
         return appended; */
 }
 /* private static *//* Option<String> */ compileRootSegment(struct String input){
+	struct String stripped = input.strip();
+	/* if (stripped */.isEmpty()) return new Some<>("");
 	/* if (input */.startsWith("package ")) return new Some<>("");/* 
 
-        if (input.strip().startsWith("import ")) {
+        if (stripped.startsWith("import ")) {
             String value = "#include <temp.h>\n";
             imports.add(value);
             return new Some<>("");
         } */
 	struct int classIndex = input.indexOf("class ");/* 
         if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex);
+            String modifiers = input.substring(0, classIndex).strip();
             String right = input.substring(classIndex + "class ".length());
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
@@ -346,7 +346,8 @@ auto __lambda10__(auto compiled){
 	/* return new Some<> */(invalidate("root segment", input));
 }
 /* private static */struct String generateStruct(struct String modifiers, struct String name){
-	struct String generated = /*  generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" */;
+	struct String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
+	struct String generated = /*  modifiersString + "struct " + name + " {\n};\n" */;
 	structs.add(generated);/* 
         return ""; */
 }
@@ -367,11 +368,11 @@ auto __lambda10__(auto compiled){
         } */
 	/* Option<String> */ maybeAssignment = compileAssignment(input);/* 
         if (maybeAssignment.isPresent()) {
-             globals = maybeAssignment.map(value -> value + ";\n")
-                     .map(globals::add)
-                     .orElse(globals);
+            globals = maybeAssignment.map(value -> value + ";\n")
+                    .map(globals::add)
+                    .orElse(globals);
 
-             return new Some<>("");
+            return new Some<>("");
         } */
 	/* return new Some<> */(invalidate("class segment", input));
 }

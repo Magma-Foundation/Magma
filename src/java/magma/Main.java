@@ -351,8 +351,8 @@ public class Main {
 
     private static final List_<String> imports = Lists.empty();
     private static final List_<String> structs = Lists.empty();
-    private static List_<String> globals = Lists.empty();
     private static final List_<String> functions = Lists.empty();
+    private static List_<String> globals = Lists.empty();
     private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
@@ -476,9 +476,11 @@ public class Main {
     }
 
     private static Option<String> compileRootSegment(String input) {
+        String stripped = input.strip();
+        if (stripped.isEmpty()) return new Some<>("");
         if (input.startsWith("package ")) return new Some<>("");
 
-        if (input.strip().startsWith("import ")) {
+        if (stripped.startsWith("import ")) {
             String value = "#include <temp.h>\n";
             imports.add(value);
             return new Some<>("");
@@ -486,7 +488,7 @@ public class Main {
 
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex);
+            String modifiers = input.substring(0, classIndex).strip();
             String right = input.substring(classIndex + "class ".length());
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
@@ -503,7 +505,8 @@ public class Main {
     }
 
     private static String generateStruct(String modifiers, String name) {
-        String generated = generatePlaceholder(modifiers) + "struct " + name + " {\n};\n";
+        String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
+        String generated = modifiersString + "struct " + name + " {\n};\n";
         structs.add(generated);
         return "";
     }
@@ -529,11 +532,11 @@ public class Main {
 
         Option<String> maybeAssignment = compileAssignment(input);
         if (maybeAssignment.isPresent()) {
-             globals = maybeAssignment.map(value -> value + ";\n")
-                     .map(globals::add)
-                     .orElse(globals);
+            globals = maybeAssignment.map(value -> value + ";\n")
+                    .map(globals::add)
+                    .orElse(globals);
 
-             return new Some<>("");
+            return new Some<>("");
         }
 
         return new Some<>(invalidate("class segment", input));
