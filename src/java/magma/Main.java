@@ -574,6 +574,18 @@ public class Main {
         }
     }
 
+    private record Exceptional<T, C, X>(Collector<T, C> collector) implements Collector<Result<T, X>, Result<C, X>> {
+        @Override
+        public Result<C, X> createInitial() {
+            return new Ok<>(collector.createInitial());
+        }
+
+        @Override
+        public Result<C, X> fold(Result<C, X> current, Result<T, X> element) {
+            return current.flatMapValue(inner -> element.mapValue(result -> collector.fold(inner, result)));
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Result<String, CompileError>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -603,11 +615,18 @@ public class Main {
     private static Result<String, CompileError> compile(String input) {
         List_<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
-                .mapValue(Main::generate)
+                .flatMapValue(Main::generate)
                 .mapValue(compiled -> mergeAll(compiled, Main::mergeStatements));
     }
 
-    private static List_<String> generate(List_<String> compiled) {
+    private static Result<List_<String>, CompileError> generate(List_<String> compiled) {
+        return expandAllGenerics().<Result<List_<String>, CompileError>>match(Err::new, () -> new Ok<>(compiled.addAll(imports)
+                .addAll(structs)
+                .addAll(globals)
+                .addAll(functions)));
+    }
+
+    private static Option<CompileError> expandAllGenerics() {
         while (toExpand.hasElements()) {
             Tuple<String, List_<String>> tuple = toExpand.popFirst();
             if (isDefined(expanded, tuple)) continue;
@@ -615,16 +634,14 @@ public class Main {
             expanded.add(tuple);
             if (generators.containsKey(tuple.left)) {
                 Function<List_<String>, Result<String, CompileError>> generator = generators.get(tuple.left);
-                generator.apply(tuple.right).findError();
+                Option<CompileError> maybeError = generator.apply(tuple.right).findError();
+                if (maybeError.isPresent()) return maybeError;
             } else {
-                System.err.println(tuple.left + " is not a generic type");
+                return new Some<>(new CompileError("No generic found", tuple.left));
             }
         }
 
-        return compiled.addAll(imports)
-                .addAll(structs)
-                .addAll(globals)
-                .addAll(functions);
+        return new None<>();
     }
 
     private static Result<String, CompileError> compileStatements(String input, Rule compiler) {
@@ -1001,8 +1018,10 @@ public class Main {
 
     private static Result<String, CompileError> compileValue(String wrapped, List_<List_<String>> typeParams, List_<String> typeArguments) {
         return compileOr(wrapped, Lists.of(
-                input -> compileString(input),
-                input -> compileChar(input),
+                Main::compileString,
+                Main::compileChar,
+                Main::compileSymbol,
+                Main::compileNumber,
                 input -> compileNot(input, typeParams, typeArguments),
                 input -> compileConstruction(input, typeParams, typeArguments),
                 input -> compileLambda(input, typeParams, typeArguments),
@@ -1013,9 +1032,7 @@ public class Main {
                 input -> compileOperator(input, "+", typeParams, typeArguments),
                 input -> compileOperator(input, "-", typeParams, typeArguments),
                 input -> compileOperator(input, "==", typeParams, typeArguments),
-                input -> compileOperator(input, ">=", typeParams, typeArguments),
-                input -> compileSymbol(input),
-                input -> compileNumber(input)
+                input -> compileOperator(input, ">=", typeParams, typeArguments)
         ));
     }
 
@@ -1037,7 +1054,7 @@ public class Main {
         String object = stripped.substring(0, methodSeparator);
         String property = stripped.substring(methodSeparator + "::".length());
 
-        return compileValue(object, typeParams, typeArguments).mapValue(newObject -> {
+        return compileValue(object, typeParams, typeArguments).flatMapValue(newObject -> {
             String caller = newObject + "." + property;
             String paramName = newObject.toLowerCase();
             return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
@@ -1074,9 +1091,10 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileConstruction(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (!input.startsWith("new ")) return createPrefixErr(input, "new ");
+        String stripped = input.strip();
+        if (!stripped.startsWith("new ")) return createPrefixErr(stripped, "new ");
 
-        String withoutNew = input.substring("new ".length());
+        String withoutNew = stripped.substring("new ".length());
         if (!withoutNew.endsWith(")")) return createSuffixErr(withoutNew, ")");
 
         String slice = withoutNew.substring(0, withoutNew.length() - ")".length());
@@ -1123,10 +1141,8 @@ public class Main {
         return findLambdaParams(beforeArrow).map(paramNames -> {
             String inputValue = input.substring(arrowIndex + "->".length()).strip();
             return compileLambdaBody(inputValue, typeParams, typeArguments)
-                    .mapValue(outputValue -> generateLambda(paramNames, outputValue));
-        }).orElseGet(() -> {
-            return new Err<>(new CompileError("Not a lambda statement", input));
-        });
+                    .flatMapValue(outputValue -> generateLambda(paramNames, outputValue));
+        }).orElseGet(() -> new Err<>(new CompileError("Not a lambda statement", input)));
     }
 
     private static Err<String, CompileError> createInfixRule(String input, String infix) {
@@ -1179,19 +1195,20 @@ public class Main {
         return true;
     }
 
-    private static String generateLambda(List_<String> paramNames, String lambdaValue) {
+    private static Result<String, CompileError> generateLambda(List_<String> paramNames, String lambdaValue) {
         String lambda = "__lambda" + lambdaCounter + "__";
         lambdaCounter++;
 
-        String definition = generateDefinition("", "auto", lambda);
-
-        String params = paramNames.stream()
+        Result<String, CompileError> definition = generateDefinition("", "auto", lambda);
+        Result<String, CompileError> params = paramNames.stream()
                 .map(name -> generateDefinition("", "auto", name))
-                .collect(new Joiner(", "))
-                .orElse("");
+                .collect(new Exceptional<>(new Joiner(", ")))
+                .mapValue(inner -> inner.orElse(""));
 
-        addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, params));
-        return lambda;
+        return definition.and(() -> params).mapValue(tuple -> {
+            addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(tuple.left, tuple.right));
+            return lambda;
+        });
     }
 
     private static Result<String, CompileError> compileInvocation(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -1262,19 +1279,19 @@ public class Main {
         }
 
         String name = stripped.substring(nameSeparator + " ".length());
-        return compileType(inputType, typeParams, typeArguments).mapValue(outputType -> generateDefinition(modifiers, outputType, name));
+        return compileType(inputType, typeParams, typeArguments).flatMapValue(outputType -> generateDefinition(modifiers, outputType, name));
     }
 
-    private static String generateDefinition(String modifiers, String type, String name) {
-        return modifiers + type + " " + name;
+    private static Result<String, CompileError> generateDefinition(String modifiers, String type, String name) {
+        return new Ok<>(modifiers + type + " " + name);
     }
 
     private static Result<String, CompileError> compileType(String input, List_<List_<String>> frames, List_<String> typeArguments) {
         return compileOr(input, Lists.of(
                 type -> compileTypeParam(type, frames, typeArguments),
-                type -> compilePrimitive(type),
+                Main::compilePrimitive,
                 type -> compileArray(type, frames, typeArguments),
-                type -> compileSymbolType(type),
+                Main::compileSymbolType,
                 type -> compileGeneric(type, frames, typeArguments)
         ));
     }
