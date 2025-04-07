@@ -53,7 +53,7 @@ struct Temp {
 	/* private *//* static List_<Tuple<String, List_<String>>> toExpand = */ Lists.empty(/*  */);
 	/* private *//* static List_<String> globals = */ Lists.empty(/*  */);
 };
-/* private sealed */ struct Option {
+/* private sealed */ struct Option__struct String__ {
 	void ifPresent(void (*)(T) ifPresent);
 	/* <R> */Option__struct R__ flatMap(Option__struct R__ (*)(T) mapper);
 	/* <R> */Option__struct R__ map(struct R (*)(T) mapper);
@@ -470,7 +470,8 @@ auto __lambda19__(auto string){
 	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda19__).collect(/* new ListCollector<> */());/* 
 
         generators.put(name, typeArguments -> {
-            return compileToStruct(modifiers, name, body, typeParams, finalClassTypeParams, typeArguments);
+            String joined = generateGenericName(name, typeArguments);
+            return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);
         } *//* ); */
 	/* return new Some<> */("");
 }
@@ -731,7 +732,7 @@ auto __lambda23__(auto value){
 
                         if (hasNoTypeParams(frames)) {
                             Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                            if (!Lists.contains(toExpand, tuple, new BiFunction<Tuple<String, List_<String>>, Tuple<String, List_<String>>, Boolean>() {
+                            if (!Lists.contains(toExpand, tuple, new BiFunction<>() {
                                 @Override
                                 public Boolean apply(Tuple<String, List_<String>> stringListTuple, Tuple<String, List_<String>> stringListTuple2) {
                                     return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals, new BiFunction<List_<String>, List_<String>, Boolean>() {
@@ -746,13 +747,16 @@ auto __lambda23__(auto value){
                             }
                         }
 
-                        String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
-                        return base + "__" + String.join("_", joined) + "__";
+                        return generateGenericName(base, newArguments);
                     });
                 }
             }
         } */
 	/* return new Some<> */(invalidate("type", stripped));
+}
+/* private *//* static String */ generateGenericName(struct String base, /* List_<String> */ newArguments){
+	struct String joined = newArguments.stream().collect(/* new Joiner */("_")).orElse("");/* 
+        return base + "__" + String.join("_", joined) + "__"; */
 }
 auto __lambda24__(auto /* list_ */){
 	return /* List_ */.stream(/* list_ */);

@@ -688,7 +688,8 @@ public class Main {
                 .collect(new ListCollector<>());
 
         generators.put(name, typeArguments -> {
-            return compileToStruct(modifiers, name, body, typeParams, finalClassTypeParams, typeArguments);
+            String joined = generateGenericName(name, typeArguments);
+            return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);
         });
 
         return new Some<>("");
@@ -1003,7 +1004,7 @@ public class Main {
 
                         if (hasNoTypeParams(frames)) {
                             Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                            if (!Lists.contains(toExpand, tuple, new BiFunction<Tuple<String, List_<String>>, Tuple<String, List_<String>>, Boolean>() {
+                            if (!Lists.contains(toExpand, tuple, new BiFunction<>() {
                                 @Override
                                 public Boolean apply(Tuple<String, List_<String>> stringListTuple, Tuple<String, List_<String>> stringListTuple2) {
                                     return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals, new BiFunction<List_<String>, List_<String>, Boolean>() {
@@ -1018,14 +1019,18 @@ public class Main {
                             }
                         }
 
-                        String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
-                        return base + "__" + String.join("_", joined) + "__";
+                        return generateGenericName(base, newArguments);
                     });
                 }
             }
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static String generateGenericName(String base, List_<String> newArguments) {
+        String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
+        return base + "__" + String.join("_", joined) + "__";
     }
 
     private static boolean hasNoTypeParams(List_<List_<String>> frames) {
