@@ -31,7 +31,7 @@
 
         Option<String> maybeClass = compileTypedBlock(input, " */ struct ", typeParams);
         if  {
-	/* globals *//* = */ maybeAssignment.map(/* value -> value *//* + */ ";\n");
+	/* globals *//* = */ maybeInitialization.map(/* value -> value *//* + */ ";\n");
 	/* return */new Some<>(/* "" */);
 	/* }
 
@@ -203,7 +203,7 @@
 	Tuple__String_List___String____ first();
 };
 
-	/* private static */int lambdaCounter = /*  0; */;;
+	/* private static */int lambdaCounter = 0;;
 /* public static <T> */List___T__ empty(){
 	return Temp();
 }
@@ -263,13 +263,13 @@ private State(List___Character__ queue, List___String__ segments, StringBuilder 
 	return this;
 }
 /* private */int isLevel(){
-	return /* depth == 0 */;
+	return depth == 0;
 }
 /* private */char pop(){
 	return queue.popFirst();
 }
 /* private */int isShallow(){
-	return /* depth == 1 */;
+	return depth == 1;
 }
 /* public */List___String__ segments(){
 	return segments;
@@ -421,7 +421,7 @@ auto __lambda14__(auto compiled){
 	State appended = current.append(c);
 	char maybeEscape = current.pop();
 	State withNext = appended.append(maybeEscape);
-	State appended1 = /* maybeEscape == '\\' ? withNext */.popAndAppend() : withNext;
+	State appended1 = maybeEscape == /*  '\\' ? withNext */.popAndAppend() : withNext;
 	return Temp();
 }
 /* private static */State divideStatementChar(State state, char c){
@@ -513,6 +513,12 @@ auto __lambda16__(auto outputContent){
 	System.err.println("Invalid " + type + ": " + input);
 	return generatePlaceholder(input);
 }
+/* private static */Option__String__ compileInitializationStatement(String input, List___List___String____ typeParams, List___String__ typeArguments){if (1) {
+}
+/*  else {
+            return new None<>();
+        } */
+}
 auto __lambda17__(auto outputParams){
 	return /* {
             return compileDefinition */(header, typeParams, typeArguments).flatMap(definition -> {
@@ -593,12 +599,12 @@ auto __lambda20__(auto outputDefinition){
             });
         };
 }
-/* private static */Option__String__ compileAssignment(String input, List___List___String____ typeParams, List___String__ typeArguments){
-	int separator = input.indexOf("=");if (1) {
+/* private static */Option__String__ compileInitialization(String withoutEnd, List___List___String____ typeParams, List___String__ typeArguments){
+	int separator = withoutEnd.indexOf("=");if (1) {
 }
 
-	String inputDefinition = input.substring(0, separator);
-	String inputValue = input.substring(separator + "=".length());
+	String inputDefinition = withoutEnd.substring(0, separator);
+	String inputValue = withoutEnd.substring(separator + "=".length());
 	return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(__lambda20__);
 }
 /* private static */String generateStatement(String value){
@@ -624,7 +630,7 @@ if (1) {
 	int methodSeparator = stripped.lastIndexOf("::");if (1) {
 }
 
-	return compileOperator(input, "+").or(() - /* > compileOperator */(input, "-")).or(() - /* > isSymbol(stripped) ? new Some<>(stripped) : new None<> */()).or(() - /* > isNumber(stripped) ? new Some<>(stripped) : new None<> */()).or(() - /* > new Some<> */(invalidate("value", input)));
+	return compileOperator(input, "+").or(() - /* > compileOperator */(input, "-")).or(() - /* > compileOperator */(input, "==")).or(() - /* > isSymbol(stripped) ? new Some<>(stripped) : new None<> */()).or(() - /* > isNumber(stripped) ? new Some<>(stripped) : new None<> */()).or(() - /* > new Some<> */(invalidate("value", input)));
 }
 auto __lambda21__(auto tuple){
 	return tuple.left + " " + operator + " " + tuple.right;

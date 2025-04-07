@@ -781,9 +781,9 @@ public class Main {
         Option<String> maybeMethod = compileMethod(input, typeParams, typeArguments);
         if (maybeMethod.isPresent()) return maybeMethod;
 
-        Option<String> maybeAssignment = compileAssignment(input, typeParams, typeArguments);
-        if (maybeAssignment.isPresent()) {
-            globals = maybeAssignment.map(value -> value + ";\n")
+        Option<String> maybeInitialization = compileInitializationStatement(input, typeParams, typeArguments);
+        if (maybeInitialization.isPresent()) {
+            globals = maybeInitialization.map(value -> value + ";\n")
                     .map(globals::add)
                     .orElse(globals);
 
@@ -791,6 +791,15 @@ public class Main {
         }
 
         return new Some<>(invalidate("class segment", input));
+    }
+
+    private static Option<String> compileInitializationStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (input.endsWith(";")) {
+            String substring = input.substring(0, input.length() - ";".length());
+            return compileInitialization(substring, typeParams, typeArguments);
+        } else {
+            return new None<>();
+        }
     }
 
     private static Option<String> compileMethod(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -870,8 +879,19 @@ public class Main {
                         .map(Main::generateStatement);
             }
 
-            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams, typeArguments);
-            if (maybeAssignment.isPresent()) return maybeAssignment;
+            Option<String> maybeInitialization = compileInitialization(withoutEnd, typeParams, typeArguments);
+            if (maybeInitialization.isPresent()) return maybeInitialization;
+
+            int valueSeparator = withoutEnd.indexOf("=");
+            if (valueSeparator >= 0) {
+                String destination = withoutEnd.substring(0, valueSeparator).strip();
+                String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
+
+                return compileValue(destination)
+                        .and(() -> compileValue(value))
+                        .map(tuple -> tuple.left + " = " + tuple.right)
+                        .map(Main::generateStatement);
+            }
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
@@ -880,12 +900,12 @@ public class Main {
         return new Some<>(invalidate("statement", input));
     }
 
-    private static Option<String> compileAssignment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        int separator = input.indexOf("=");
+    private static Option<String> compileInitialization(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        int separator = withoutEnd.indexOf("=");
         if (separator < 0) return new None<>();
 
-        String inputDefinition = input.substring(0, separator);
-        String inputValue = input.substring(separator + "=".length());
+        String inputDefinition = withoutEnd.substring(0, separator);
+        String inputValue = withoutEnd.substring(separator + "=".length());
         return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
             return compileValue(inputValue).map(outputValue -> {
                 return generateStatement(outputDefinition + " = " + outputValue);
