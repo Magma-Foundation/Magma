@@ -114,6 +114,12 @@ public class Main {
         Result<String, CompileError> compile(String input);
     }
 
+    private interface Map_<K, V> {
+        Map_<K, V> with(K key, V value);
+
+        Option<V> find(K key);
+    }
+
     public record Tuple<A, B>(A left, B right) {
     }
 
@@ -587,32 +593,55 @@ public class Main {
     }
 
     private static final class Node {
-        private final Map<String, String> strings;
+        private final Map_<String, String> strings;
 
         private Node() {
-            this(new HashMap<>());
+            this(Maps.empty());
         }
 
-        private Node(Map<String, String> maps) {
+        private Node(Map_<String, String> maps) {
             this.strings = maps;
         }
 
         private Node withString(String propertyKey, String propertyValue) {
-            strings.put(propertyKey, propertyValue);
-            return this;
+            return new Node(strings.with(propertyKey, propertyValue));
         }
 
         public Option<String> find(String propertyKey) {
-            if (strings.containsKey(propertyKey)) {
-                return new Some<>(strings.get(propertyKey));
+            return strings.find(propertyKey);
+        }
+    }
+
+    private record JavaMap<K, V>(Map<K, V> inner) implements Map_<K, V> {
+        public JavaMap() {
+            this(new HashMap<>());
+        }
+
+        @Override
+        public Map_<K, V> with(K key, V value) {
+            HashMap<K, V> copy = new HashMap<>(inner);
+            copy.put(key, value);
+            return new JavaMap<>(copy);
+        }
+
+        @Override
+        public Option<V> find(K key) {
+            if (inner.containsKey(key)) {
+                return new Some<>(inner.get(key));
             } else {
                 return new None<>();
             }
         }
     }
 
-    private static final Map<String, Function<List_<String>, Result<String, CompileError>>> generators = new HashMap<>();
-    private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
+    private static class Maps {
+        public static <K, V> Map_<K, V> empty() {
+            return new JavaMap<>();
+        }
+    }
+
+    private static List_<Tuple<String, List_<String>>> expanded = Lists.empty();
+    private static Map_<String, Function<List_<String>, Result<String, CompileError>>> generators = Maps.empty();
     private static List_<String> imports = Lists.empty();
     private static List_<String> structs = Lists.empty();
     private static List_<String> functions = Lists.empty();
@@ -656,14 +685,12 @@ public class Main {
             Tuple<String, List_<String>> tuple = toExpand.popFirst();
             if (isDefined(expanded, tuple)) continue;
 
-            expanded.add(tuple);
-            if (generators.containsKey(tuple.left)) {
-                Function<List_<String>, Result<String, CompileError>> generator = generators.get(tuple.left);
-                Option<CompileError> maybeError = generator.apply(tuple.right).findError();
-                if (maybeError.isPresent()) return maybeError;
-            } else {
-                return new Some<>(new CompileError("No generic found", tuple.left));
-            }
+            expanded = expanded.add(tuple);
+            Option<CompileError> maybeError = generators.find(tuple.left)
+                    .map(generator -> generator.apply(tuple.right))
+                    .flatMap(Result::findError);
+
+            if (maybeError.isPresent()) return maybeError;
         }
 
         return new None<>();
@@ -819,7 +846,7 @@ public class Main {
                 .map(String::strip)
                 .collect(new ListCollector<>());
 
-        generators.put(name, typeArguments -> {
+        generators = generators.with(name, typeArguments -> {
             String joined = generateGenericName(name, typeArguments);
             return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);
         });
