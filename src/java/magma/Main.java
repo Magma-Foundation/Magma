@@ -1127,7 +1127,8 @@ public class Main {
 
         return compileValue(object, state).flatMapValue(newObject -> {
             String caller = newObject + "." + property;
-            String paramName = newObject.toLowerCase();
+            String lower = newObject.toLowerCase();
+            String paramName = isSymbol(lower) ? lower : "param";
             return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
         });
     }
