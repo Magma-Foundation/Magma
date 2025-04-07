@@ -9,6 +9,27 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+// Option<struct R>
+// Option<struct R>
+// Option<struct R>
+// Tuple<int, struct T>
+// Option<struct T>
+// Option<struct T>
+// BiFunction<struct R, struct T, struct R>
+// Collector<struct T, struct C>
+// Option<struct R>
+// BiFunction<struct R, struct T, Option__struct R__>
+// Option<struct R>
+// Option<struct T>
+// Option<struct String>
+// Option<struct String>
+// BiFunction<struct StringBuilder, struct String, struct StringBuilder>
+// BiFunction<struct StringBuilder, struct String, struct StringBuilder>
+// Option<struct String>
+// BiFunction<struct State, struct Character, struct State>
+// Option<struct String>
+// Option<struct String>
+// Option<struct String>
 /* private sealed */ struct Result<T, X> permits Ok, Err {
 	/* <R> */struct R match(struct R (*)(struct T) whenOk, struct R (*)(struct X) whenErr);
 };
@@ -23,16 +44,16 @@
 	Option__struct T__ or(Option__struct T__ (*)() other);
 };
 /* private */ struct List_<T> {
-	List___struct T__ add(struct T element);
-	List___struct T__ addAll(List___struct T__ elements);
+	/* List_<T> */ add(struct T element);
+	/* List_<T> */ addAll(/* List_<T> */ elements);
 	void forEach(void (*)(struct T) consumer);
-	Stream___struct T__ stream(/*  */);
+	/* Stream_<T> */ stream(/*  */);
 	struct T popFirst(/*  */);
 	int isEmpty(/*  */);
 	struct T get(struct int index);
 };
 /* private */ struct Stream_<T> {
-	/* <R> */Stream___struct R__ map(struct R (*)(struct T) mapper);
+	/* <R> *//* Stream_<R> */ map(struct R (*)(struct T) mapper);
 	/* <R> */struct R foldWithInitial(struct R initial, BiFunction__struct R_struct T_struct R__ folder);
 	/* <C> */struct C collect(Collector__struct T_struct C__ collector);
 	/* <R> */Option__struct R__ foldToOption(struct R initial, BiFunction__struct R_struct T_Option__struct R____ folder);
@@ -84,67 +105,6 @@ struct Temp {
 };
 
 	/* private *//* static int */ lambdaCounter = /*  0; */;;
-// Option<struct R>
-// Option<struct R>
-// Option<struct R>
-// Tuple<int, struct T>
-// Option<struct T>
-// Option<struct T>
-// List_<struct T>
-// List_<struct T>
-// List_<struct T>
-// Stream_<struct T>
-// Stream_<struct R>
-// BiFunction<struct R, struct T, struct R>
-// Collector<struct T, struct C>
-// Option<struct R>
-// BiFunction<struct R, struct T, Option__struct R__>
-// Option<struct R>
-// Option<struct T>
-// static class Lists {
-        public static</* T> List_<T */>
-// List_<struct Character>
-// static class Streams {
-        public static Stream_<struct Character>
-// static class ListCollector</* T> implements Collector<T */, /* List_<T>> {
-        @Override
-        public List_<T */>
-// static Option<struct IOException>
-// static Option<struct IOException>
-// static Result<struct String, struct IOException>
-// List_<struct String>
-// Option<struct String>
-// static Option<struct String>
-// List_<struct String>
-// Option<struct String>
-// BiFunction<struct StringBuilder, struct String, struct StringBuilder>
-// static Option<struct String>
-// List_<struct String>
-// BiFunction<struct StringBuilder, struct String, struct StringBuilder>
-// List_<struct String>
-// Option<struct String>
-// List_<struct String>
-// static Option<List___struct String__>
-// BiFunction<struct State, struct Character, struct State>
-// static List_<struct String>
-// List_<struct Character>
-// static Option<struct State>
-// static Option<struct State>
-// static Option<struct String>
-// Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// static Option<struct String>
-// List_<struct String>
-// List_<struct String>
 /* private *//* static final class RangeHead implements Head<Integer> {
         private final int size;
         private int counter = 0;
@@ -165,8 +125,8 @@ struct Temp {
         }
      */
 }
-/* private */static class Lists {
-        public static__/* T> List_<T */__ empty(/*  */){
+/* private *//* static class Lists {
+        public static <T> List_<T> */ empty(/*  */){
 	/* return new JavaList<> */();
 	/* }
 
@@ -181,7 +141,7 @@ struct Temp {
         private StringBuilder buffer;
         private int depth;
 
-        private */ State(List___struct Character__ queue){
+        private */ State(/* List_<Character> */ queue){
 	this(queue, Lists.empty(), /* new StringBuilder */(), /*  0 */);
 	/* }
 
@@ -279,15 +239,15 @@ struct Temp {
 auto __lambda0__(auto value){
 	return value.charAt(value);
 }
-/* private */static class Streams {
-        public static Stream___struct Character__ from(struct String value){
+/* private *//* static class Streams {
+        public static Stream_<Character> */ from(struct String value){
 	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda0__);/* 
         }
      */
 }
-/* private */static class ListCollector__/* T> implements Collector<T */_/* List_<T>> {
+/* private *//* static class ListCollector<T> implements Collector<T, List_<T>> {
         @Override
-        public List_<T */__ createInitial(/*  */){
+        public List_<T> */ createInitial(/*  */){
 	/* return Lists */.empty();
 	/* }
 
@@ -310,12 +270,12 @@ auto __lambda3__(auto /* input), some */){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
 	readString(source).match(__lambda2__, __lambda3__).ifPresent(__lambda1__);
 }
-/* private */static Option__struct IOException__ runWithInput(struct Path source, struct String input){
+/* private *//* static Option<IOException> */ runWithInput(struct Path source, struct String input){
 	struct String output = /*  compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n" */;
 	struct Path target = source.resolveSibling("main.c");
 	/* return writeString */(target, output);
 }
-/* private */static Option__struct IOException__ writeString(struct Path target, struct String output){/* 
+/* private *//* static Option<IOException> */ writeString(struct Path target, struct String output){/* 
         try {
             Files.writeString(target, output);
             return new None<>();
@@ -323,7 +283,7 @@ auto __lambda3__(auto /* input), some */){
             return new Some<>(e);
         } */
 }
-/* private */static Result__struct String_struct IOException__ readString(struct Path source){/* 
+/* private *//* static Result<String, IOException> */ readString(struct Path source){/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
@@ -340,7 +300,7 @@ auto __lambda6__(auto main){
 	return Main.mergeStatements)(main);
 }
 /* private *//* static String */ compile(struct String input){
-	List___struct String__ segments = divideAll(input, __lambda4__);/* 
+	/* List_<String> */ segments = divideAll(input, __lambda4__);/* 
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     List_<String> generated = expansions.stream()
@@ -348,9 +308,9 @@ auto __lambda6__(auto main){
                             .collect(new ListCollector<>());
 
                     return compiled.addAll(imports)
+                            .addAll(generated)
                             .addAll(structs)
                             .addAll(globals)
-                            .addAll(generated)
                             .addAll(functions);
                 } */
 	/* )
@@ -362,29 +322,29 @@ auto __lambda7__(auto main){
 auto __lambda8__(auto main){
 	return Main.mergeStatements(main);
 }
-/* private */static Option__struct String__ compileStatements(struct String input, Option__struct String__ (*)(struct String) compiler){
+/* private *//* static Option<String> */ compileStatements(struct String input, Option__struct String__ (*)(struct String) compiler){
 	/* return compileAll */(divideAll(input, __lambda7__), compiler, __lambda8__);
 }
 auto __lambda9__(auto compiled){
 	return /*  mergeAll(compiled */;
 }
-/* private */static Option__struct String__ compileAll(List___struct String__ segments, Option__struct String__ (*)(struct String) compiler, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
+/* private *//* static Option<String> */ compileAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
 	/* return parseAll */(segments, compiler).map(__lambda9__, /*  merger) */);
 }
-/* private *//* static String */ mergeAll(List___struct String__ compiled, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
+/* private *//* static String */ mergeAll(/* List_<String> */ compiled, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
 	/* return compiled */.stream().foldWithInitial(/* new StringBuilder */(), merger).toString();
 }
 auto __lambda10__(auto compiled){
 	return compiled.add(compiled);
 }
-/* private */static Option__List___struct String____ parseAll(List___struct String__ segments, Option__struct String__ (*)(struct String) compiler){
+/* private *//* static Option<List_<String>> */ parseAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler){
 	/* return segments */.stream().foldToOption(Lists.empty(), /* (compiled, segment) -> compiler */.apply(segment).map(__lambda10__));
 }
 /* private *//* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
 }
-/* private */static List___struct String__ divideAll(struct String input, BiFunction__struct State_struct Character_struct State__ divider){
-	List___struct Character__ queue = Streams.from(input).collect(/* new ListCollector<> */());
+/* private *//* static List_<String> */ divideAll(struct String input, BiFunction__struct State_struct Character_struct State__ divider){
+	/* List_<Character> */ queue = Streams.from(input).collect(/* new ListCollector<> */());
 	struct State current = /* new State */(queue);/* 
         while (current.hasNext()) {
             char c = current.pop();
@@ -396,7 +356,7 @@ auto __lambda10__(auto compiled){
         } */
 	/* return current */.advance().segments();
 }
-/* private */static Option__struct State__ divideDoubleQuotes(struct State state, struct char c){
+/* private *//* static Option<State> */ divideDoubleQuotes(struct State state, struct char c){
 	/* if *//* (c */ ! = /* '"') return new None<> */();
 	struct State current = state.append(c);/* 
         while (current.hasNext()) {
@@ -408,7 +368,7 @@ auto __lambda10__(auto compiled){
         } */
 	/* return new Some<> */(current);
 }
-/* private */static Option__struct State__ divideSingleQuotes(struct State current, struct char c){
+/* private *//* static Option<State> */ divideSingleQuotes(struct State current, struct char c){
 	/* if *//* (c */ ! = /* '\'') return new None<> */();
 	struct State appended = current.append(c);
 	struct char maybeEscape = current.pop();
@@ -424,7 +384,7 @@ auto __lambda10__(auto compiled){
 	struct if (c = /* = '}') return appended */.exit();/* 
         return appended; */
 }
-/* private */static Option__struct String__ compileRootSegment(struct String input){
+/* private *//* static Option<String> */ compileRootSegment(struct String input){
 	struct String stripped = input.strip();
 	/* if (stripped */.isEmpty()) return new Some<>("");
 	/* if (input */.startsWith("package ")) return new Some<>("");/* 
@@ -444,7 +404,7 @@ auto __lambda11__(auto outputContent){
 auto __lambda12__(auto main){
 	return Main.compileClassSegment(main);
 }
-/* private */static Option__struct String__ compileTypedBlock(struct String input, struct String keyword){
+/* private *//* static Option<String> */ compileTypedBlock(struct String input, struct String keyword){
 	struct int classIndex = input.indexOf(keyword);
 	/* if (classIndex < 0) return new None<> */();
 	struct String modifiers = input.substring(/* 0 */, classIndex).strip();
@@ -469,7 +429,7 @@ auto __lambda12__(auto main){
 	System.err.println(/* "Invalid " + type + ": " + input */);
 	/* return generatePlaceholder */(input);
 }
-/* private */static Option__struct String__ compileMethod(struct String input){
+/* private *//* static Option<String> */ compileMethod(struct String input){
 	struct int paramStart = input.indexOf("(");
 	/* if (paramStart < 0) return new None<> */();
 	struct String header = input.substring(/* 0 */, paramStart).strip();
@@ -506,7 +466,7 @@ auto __lambda13__(auto main){
 auto __lambda14__(auto main){
 	return Main.mergeValues(main);
 }
-/* private */static Option__struct String__ compileValues(struct String input, Option__struct String__ (*)(struct String) compiler){
+/* private *//* static Option<String> */ compileValues(struct String input, Option__struct String__ (*)(struct String) compiler){
 	/* return compileAll */(divideAll(input, __lambda13__), compiler, __lambda14__);
 }
 /* private *//* static State */ divideValueChar(struct State state, struct Character c){
@@ -520,7 +480,7 @@ auto __lambda14__(auto main){
 	/* if (buffer */.isEmpty()) return buffer.append(element);
 	/* return buffer */.append(", ").append(element);
 }
-/* private */static Option__struct String__ compileStatement(struct String input){
+/* private *//* static Option<String> */ compileStatement(struct String input){
 	struct String stripped = input.strip();
 	/* if (stripped */.isEmpty()) return new Some<>("");/* 
 
@@ -535,7 +495,7 @@ auto __lambda14__(auto main){
         } */
 	/* return new Some<> */(invalidate("statement", input));
 }
-/* private */static Option__struct String__ compileAssignment(struct String input){
+/* private *//* static Option<String> */ compileAssignment(struct String input){
 	struct int separator = input.indexOf("=");
 	/* if (separator < 0) return new None<> */();
 	struct String inputDefinition = input.substring(/* 0 */, separator);
@@ -549,7 +509,7 @@ auto __lambda14__(auto main){
 /* private *//* static String */ generateStatement(struct String value){/* 
         return "\n\t" + value + ";"; */
 }
-/* private */static Option__struct String__ compileValue(struct String input){
+/* private *//* static Option<String> */ compileValue(struct String input){
 	struct String stripped = input.strip();
 	/* if (stripped */.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
 	struct int arrowIndex = stripped.indexOf("->");/* 
@@ -597,7 +557,7 @@ auto __lambda14__(auto main){
 
         return lambda; */
 }
-/* private */static Option__struct String__ compileInvocation(struct String stripped){
+/* private *//* static Option<String> */ compileInvocation(struct String stripped){
 	/* if (!stripped */.endsWith(")")) return new None<>();
 	struct String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 	struct int argsStart = /*  -1 */;
@@ -625,7 +585,7 @@ auto __lambda14__(auto main){
 /* private *//* static String */ generateInvocation(struct String caller, struct String arguments){/* 
         return caller + "(" + arguments + ")"; */
 }
-/* private */static Option__struct String__ compileDefinition(struct String input){
+/* private *//* static Option<String> */ compileDefinition(struct String input){
 	struct String stripped = input.strip();
 	struct int nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
@@ -668,7 +628,7 @@ auto __lambda14__(auto main){
 auto __lambda15__(auto value){
 	return /*  value + "*" */;
 }
-/* private */static Option__struct String__ compileType(struct String type){
+/* private *//* static Option<String> */ compileType(struct String type){
 	struct String stripped = type.strip();
 	/* if (stripped */.equals("void")) return new Some<>("void");
 	/* if (stripped */.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
@@ -680,34 +640,36 @@ auto __lambda15__(auto value){
             int genStart = withoutEnd.indexOf("<");
             if (genStart >= 0) {
                 String base = withoutEnd.substring(0, genStart).strip();
-                String oldArguments = withoutEnd.substring(genStart + "<".length());
-                List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                return parseAll(segments, Main::compileType).map(newArguments -> {
-                    if (base.equals("Function")) {
-                        return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
-                    }
+                if (isSymbol(base)) {
+                    String oldArguments = withoutEnd.substring(genStart + "<".length());
+                    List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
+                    return parseAll(segments, Main::compileType).map(newArguments -> {
+                        if (base.equals("Function")) {
+                            return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                        }
 
-                    if (base.equals("Consumer")) {
-                        return generateFunctionalType("void", Lists.of(newArguments.get(0)));
-                    }
+                        if (base.equals("Consumer")) {
+                            return generateFunctionalType("void", Lists.of(newArguments.get(0)));
+                        }
 
-                    if (base.equals("Supplier")) {
-                        return generateFunctionalType(newArguments.get(0), Lists.empty());
-                    }
+                        if (base.equals("Supplier")) {
+                            return generateFunctionalType(newArguments.get(0), Lists.empty());
+                        }
 
-                    expansions.add(new Tuple<>(base, newArguments));
+                        expansions.add(new Tuple<>(base, newArguments));
 
-                    String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
-                    return base + "__" + String.join("_", joined) + "__";
-                });
+                        String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
+                        return base + "__" + String.join("_", joined) + "__";
+                    });
+                }
             }
         } */
 	/* return new Some<> */(invalidate("type", stripped));
 }
-/* private *//* static String */ generateGeneric(struct String base, List___struct String__ newArguments){/* 
+/* private *//* static String */ generateGeneric(struct String base, /* List_<String> */ newArguments){/* 
         return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">"; */
 }
-/* private *//* static String */ generateFunctionalType(struct String returns, List___struct String__ newArguments){
+/* private *//* static String */ generateFunctionalType(struct String returns, /* List_<String> */ newArguments){
 	struct String joined = newArguments.stream().collect(/* new Joiner */(", ")).orElse("");/* 
         return returns + " (*)(" + joined + ")"; */
 }

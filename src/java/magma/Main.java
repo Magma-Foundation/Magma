@@ -420,9 +420,9 @@ public class Main {
                             .collect(new ListCollector<>());
 
                     return compiled.addAll(imports)
+                            .addAll(generated)
                             .addAll(structs)
                             .addAll(globals)
-                            .addAll(generated)
                             .addAll(functions);
                 })
                 .map(compiled -> mergeAll(compiled, Main::mergeStatements))
@@ -812,26 +812,28 @@ public class Main {
             int genStart = withoutEnd.indexOf("<");
             if (genStart >= 0) {
                 String base = withoutEnd.substring(0, genStart).strip();
-                String oldArguments = withoutEnd.substring(genStart + "<".length());
-                List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                return parseAll(segments, Main::compileType).map(newArguments -> {
-                    if (base.equals("Function")) {
-                        return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
-                    }
+                if (isSymbol(base)) {
+                    String oldArguments = withoutEnd.substring(genStart + "<".length());
+                    List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
+                    return parseAll(segments, Main::compileType).map(newArguments -> {
+                        if (base.equals("Function")) {
+                            return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                        }
 
-                    if (base.equals("Consumer")) {
-                        return generateFunctionalType("void", Lists.of(newArguments.get(0)));
-                    }
+                        if (base.equals("Consumer")) {
+                            return generateFunctionalType("void", Lists.of(newArguments.get(0)));
+                        }
 
-                    if (base.equals("Supplier")) {
-                        return generateFunctionalType(newArguments.get(0), Lists.empty());
-                    }
+                        if (base.equals("Supplier")) {
+                            return generateFunctionalType(newArguments.get(0), Lists.empty());
+                        }
 
-                    expansions.add(new Tuple<>(base, newArguments));
+                        expansions.add(new Tuple<>(base, newArguments));
 
-                    String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
-                    return base + "__" + String.join("_", joined) + "__";
-                });
+                        String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
+                        return base + "__" + String.join("_", joined) + "__";
+                    });
+                }
             }
         }
 
