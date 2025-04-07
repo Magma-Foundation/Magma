@@ -1,17 +1,17 @@
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
+#include "./java/io/IOException.h"
+#include "./java/nio/file/Path.h"
+#include "./java/nio/file/Paths.h"
+#include "./java/util/Arrays.h"
+#include "./java/util/Collections.h"
+#include "./java/util/Comparator.h"
+#include "./java/util/HashMap.h"
+#include "./java/util/Map.h"
+#include "./java/util/function/BiFunction.h"
+#include "./java/util/function/Consumer.h"
+#include "./java/util/function/Function.h"
+#include "./java/util/function/Predicate.h"
+#include "./java/util/function/Supplier.h"
+#include "./java/util/regex/Pattern.h"
 /* private */ typedef struct Rule {
 	Result_String_CompileError compile(String input);
 } Rule;
@@ -3702,7 +3702,13 @@ auto __lambda1022__(auto param){
 	String stripped = input.strip();
 	if (1) {
 	}
-	String value = "#include <temp.h>\n";
+	String right = stripped.substring("import ".length());
+	if (1) {
+	}
+	String left = right.substring(0, right.length() - ";".length());
+	String* slices = left.split(Pattern.quote("."));
+	String joined = String.join("/", slices);
+	String value = "#include \"./%s.h\"\n".formatted(joined);
 	imports = imports.add(value);
 	return Ok("");
 }

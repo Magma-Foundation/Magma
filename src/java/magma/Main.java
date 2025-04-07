@@ -806,8 +806,14 @@ public class Main {
     private static Result<String, CompileError> compileImport(String input) {
         String stripped = input.strip();
         if (!stripped.startsWith("import ")) return createPrefixErr(stripped, "import ");
+        String right = stripped.substring("import ".length());
 
-        String value = "#include <temp.h>\n";
+        if (!right.endsWith(";")) return createSuffixErr(right, ";");
+        String left = right.substring(0, right.length() - ";".length());
+
+        String[] slices = left.split(Pattern.quote("."));
+        String joined = String.join("/", slices);
+        String value = "#include \"./%s.h\"\n".formatted(joined);
         imports = imports.add(value);
         return new Ok<>("");
     }
