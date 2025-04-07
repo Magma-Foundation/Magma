@@ -736,27 +736,30 @@ public class Main {
             int depth = 0;
             for (int i = 0; i < beforeName.length(); i++) {
                 char c = beforeName.charAt(i);
-                if(c == ' ' && depth == 0) {
+                if (c == ' ' && depth == 0) {
                     typeSeparator = i;
                     break;
                 } else {
-                    if(c == '>') depth++;
-                    if(c == '<') depth--;
+                    if (c == '>') depth++;
+                    if (c == '<') depth--;
                 }
             }
 
             String modifiers;
-            String type;
+            String inputType;
             if (typeSeparator >= 0) {
                 modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
-                type = beforeName.substring(typeSeparator + 1);
+                inputType = beforeName.substring(typeSeparator + 1);
             } else {
                 modifiers = "";
-                type = beforeName;
+                inputType = beforeName;
             }
 
             String name = stripped.substring(nameSeparator + " ".length());
-            return new Some<>(generateDefinition(modifiers, compileType(type), name));
+
+            return compileType(inputType).map(outputType -> {
+                return generateDefinition(modifiers, outputType, name);
+            });
         }
 
         return new Some<>(invalidate("definition", stripped));
@@ -766,17 +769,24 @@ public class Main {
         return modifiers + type + " " + name;
     }
 
-    private static String compileType(String type) {
+    private static Option<String> compileType(String type) {
         String stripped = type.strip();
-        if (stripped.equals("void")) return "void";
-        if (stripped.endsWith("[]")) return compileType(stripped.substring(0, stripped.length() - "[]".length())) + "*";
+        if (stripped.equals("void")) return new Some<>("void");
+        if (stripped.endsWith("[]"))
+            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
 
-        if (isSymbol(stripped)) return "struct " + stripped;
+        if (isSymbol(stripped)) return new Some<>("struct " + stripped);
         if (stripped.endsWith(">")) {
-            return "Generic";
+            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            int genStart = withoutEnd.indexOf("<");
+            if (genStart >= 0) {
+                String base = withoutEnd.substring(0, genStart).strip();
+                String oldArguments = withoutEnd.substring(genStart + "<".length());
+                return compileValues(oldArguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
+            }
         }
 
-        return invalidate("type", stripped);
+        return new Some<>(invalidate("type", stripped));
     }
 
     private static boolean isSymbol(String input) {
