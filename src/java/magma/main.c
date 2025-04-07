@@ -1,29 +1,37 @@
-/* 
 
-    private static final List<String> imports = new ArrayList<>(); *//* 
-    private static final List<String> structs = new ArrayList<>(); *//* 
-    private static final List<String> functions = new ArrayList<>(); *//* 
-    private static int lambdaCounter = 0; *//* ' && appended.isShallow()) return appended.advance().exit(); *//* 
-        if (c == '{') return appended.enter();
-        if (c == '} *//* ') return appended.exit(); *//* 
+	/* private static final *//* List<String> */ imports = /*  new ArrayList<>(); */;;
+
+	/* private static final *//* List<String> */ structs = /*  new ArrayList<>(); */;;
+
+	/* private static final *//* List<String> */ functions = /*  new ArrayList<>(); */;;
+
+	/* private static */struct int lambdaCounter = /*  0; */;;
+/* ' && appended.isShallow()) return appended.advance().exit(); */
+	struct if (c = /* = '{') return appended */.enter();
+        if (c == '};;
+/* ') return appended.exit(); *//* 
         return appended; *//* 
      *//* 
 
     private static boolean isEmpty(State state) {
         return state.queue.isEmpty();
-    } *//* String modifiers = input.substring(0, classIndex); *//* 
-            String right = input.substring(classIndex + "class ".length()); *//* 
-            int contentStart = right.indexOf("{");
+    } */
+	struct String modifiers = input.substring(0, classIndex);;;
+
+	struct String right = input.substring(classIndex + "class ".length());;;
+
+	struct int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                String body = right.substring(contentStart + "{".length()).strip();
+                String name = right.substring(/* 0 */, contentStart).strip();
+                String body = right.substring(/* contentStart + "{" */.length()).strip();
                 if (body.endsWith("}")) {
                     String inputContent = body.substring(0, body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> {
+                    return compileStatements(inputContent, __lambda11__).map(outputContent -> {
                         return generateStruct(modifiers, name) + outputContent;
                     });
                 }
-            } *//* 
+            };;
+/* 
         }
 
         return new Some<>(invalidate("root segment", input));
@@ -53,6 +61,9 @@
         if (recordIndex >= 0) {
             return new Some<>(generateStruct("", "Temp"));
         }
+
+        Option<String> maybeAssignment = compileAssignment(input);
+        if (maybeAssignment.isPresent()) return maybeAssignment.map(value -> value + ";\n");
 
         return new Some<>(invalidate("class segment", input));
     } *//* 
@@ -111,22 +122,27 @@
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            int separator = withoutEnd.indexOf("=");
-            if (separator >= 0) {
-                String inputDefinition = withoutEnd.substring(0, separator);
-                String inputValue = withoutEnd.substring(separator + "=".length());
-                return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-                    return compileValue(inputValue).map(outputValue -> {
-                        return generateStatement(outputDefinition + " = " + outputValue);
-                    });
-                });
-            }
+            Option<String> maybeAssignment = compileAssignment(withoutEnd);
+            if (maybeAssignment.isPresent()) return maybeAssignment;
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
         return new Some<>(invalidate("statement", input));
+    } *//* 
+
+    private static Option<String> compileAssignment(String input) {
+        int separator = input.indexOf("=");
+        if (separator < 0) return new None<>();
+
+        String inputDefinition = input.substring(0, separator);
+        String inputValue = input.substring(separator + "=".length());
+        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+            return compileValue(inputValue).map(outputValue -> {
+                return generateStatement(outputDefinition + " = " + outputValue);
+            });
+        });
     } *//* 
 
     private static String generateStatement(String value) {
@@ -510,6 +526,9 @@ auto __lambda10__(auto input){
 	struct if (c = /* = ' */;
 	/* ' && appended */.isLevel()) return appended.advance();/* 
         if (c == ' */
+}
+auto __lambda11__(auto main){
+	return Main.compileClassSegment(main);
 }
 int main(){
 	__main__();

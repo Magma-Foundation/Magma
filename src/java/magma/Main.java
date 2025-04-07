@@ -323,6 +323,9 @@ public class Main {
             return new Some<>(generateStruct("", "Temp"));
         }
 
+        Option<String> maybeAssignment = compileAssignment(input);
+        if (maybeAssignment.isPresent()) return maybeAssignment.map(value -> value + ";\n");
+
         return new Some<>(invalidate("class segment", input));
     }
 
@@ -380,22 +383,27 @@ public class Main {
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            int separator = withoutEnd.indexOf("=");
-            if (separator >= 0) {
-                String inputDefinition = withoutEnd.substring(0, separator);
-                String inputValue = withoutEnd.substring(separator + "=".length());
-                return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-                    return compileValue(inputValue).map(outputValue -> {
-                        return generateStatement(outputDefinition + " = " + outputValue);
-                    });
-                });
-            }
+            Option<String> maybeAssignment = compileAssignment(withoutEnd);
+            if (maybeAssignment.isPresent()) return maybeAssignment;
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
         return new Some<>(invalidate("statement", input));
+    }
+
+    private static Option<String> compileAssignment(String input) {
+        int separator = input.indexOf("=");
+        if (separator < 0) return new None<>();
+
+        String inputDefinition = input.substring(0, separator);
+        String inputValue = input.substring(separator + "=".length());
+        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+            return compileValue(inputValue).map(outputValue -> {
+                return generateStatement(outputDefinition + " = " + outputValue);
+            });
+        });
     }
 
     private static String generateStatement(String value) {
