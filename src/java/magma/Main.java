@@ -65,6 +65,8 @@ public class Main {
         T first();
 
         List_<T> sort(BiFunction<T, T, Integer> comparator);
+
+        Option<List_<T>> subList(int fromInclusive, int toExclusive);
     }
 
     public interface Stream_<T> {
@@ -795,11 +797,18 @@ public class Main {
         String left = right.substring(0, right.length() - ";".length());
 
         List_<String> slices = divideByChar(left, '.');
+        if (isFunctionalImport(slices)) return new Ok<>("");
 
         String joined = slices.stream().collect(new Joiner("/")).orElse("");
         String value = "#include \"./%s.h\"\n".formatted(joined);
         imports = imports.add(value);
         return new Ok<>("");
+    }
+
+    private static boolean isFunctionalImport(List_<String> slices) {
+        return slices.subList(0, 3)
+                .map(slice -> Lists.equalsTo(slice, Lists.of("java", "util", "function"), String::equals))
+                .isPresent();
     }
 
     private static List_<String> divideByChar(String value, char delimiter) {

@@ -64,6 +64,15 @@ record JavaList<T>(List<T> inner) implements Main.List_<T> {
     }
 
     @Override
+    public Main.Option<Main.List_<T>> subList(int fromInclusive, int toExclusive) {
+        if (fromInclusive < 0 || fromInclusive >= size()) return new Main.None<>();
+        if (toExclusive < 0 || toExclusive >= size()) return new Main.None<>();
+        if (fromInclusive > toExclusive) return new Main.None<>();
+
+        return new Main.Some<>(new JavaList<>(inner.subList(fromInclusive, toExclusive)));
+    }
+
+    @Override
     public Main.Option<T> apply(int index) {
         if (index < 0 || index >= size()) return new Main.None<>();
         return new Main.Some<>(inner.get(index));
