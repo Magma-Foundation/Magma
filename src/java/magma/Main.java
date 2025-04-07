@@ -1,7 +1,5 @@
 package magma;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -106,7 +104,7 @@ public class Main {
         Result<String, CompileError> compile(String input);
     }
 
-    private interface Map_<K, V> {
+    public interface Map_<K, V> {
         Map_<K, V> with(K key, V value);
 
         Option<V> find(K key);
@@ -604,34 +602,6 @@ public class Main {
 
         public Option<String> find(String propertyKey) {
             return strings.find(propertyKey);
-        }
-    }
-
-    private record JavaMap<K, V>(Map<K, V> inner) implements Map_<K, V> {
-        public JavaMap() {
-            this(new HashMap<>());
-        }
-
-        @Override
-        public Map_<K, V> with(K key, V value) {
-            HashMap<K, V> copy = new HashMap<>(inner);
-            copy.put(key, value);
-            return new JavaMap<>(copy);
-        }
-
-        @Override
-        public Option<V> find(K key) {
-            if (inner.containsKey(key)) {
-                return new Some<>(inner.get(key));
-            } else {
-                return new None<>();
-            }
-        }
-    }
-
-    private static class Maps {
-        public static <K, V> Map_<K, V> empty() {
-            return new JavaMap<>();
         }
     }
 

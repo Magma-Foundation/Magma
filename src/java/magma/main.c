@@ -1,5 +1,3 @@
-#include "./java/util/HashMap.h"
-#include "./java/util/Map.h"
 #include "./java/util/function/BiFunction.h"
 #include "./java/util/function/Consumer.h"
 #include "./java/util/function/Function.h"
@@ -36,8 +34,6 @@
 /* private static final */ typedef struct Node {
 	/* private final */Map__String_String strings;
 } Node;
-/* private static */ typedef struct Maps {
-} Maps;
 /* private */ typedef struct ParseState {
 } ParseState;
 /* private */ typedef struct ApplicationError {
@@ -89,7 +85,7 @@
 	/* <R> */Result_T_R mapErr(R (*)(X) mapper);
 	/* <R> */Result_Tuple_T_R_X and(Result_R_X (*)() mapper);
 } Result_String_CompileError;
-/* private */ typedef struct Map__K_V {
+/* public */ typedef struct Map__K_V {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
 } Map__K_V;
@@ -217,7 +213,7 @@
 	C createInitial();
 	C fold(C current, T element);
 } Collector_T_C;
-/* private */ typedef struct Map__String_String {
+/* public */ typedef struct Map__String_String {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
 } Map__String_String;
@@ -249,7 +245,7 @@
 	T first();
 	List__T sort(Integer (*)(T, T) comparator);
 } List__Tuple_String_List__String;
-/* private */ typedef struct Map__String_Result_String_CompileError (*)(List__String) {
+/* public */ typedef struct Map__String_Result_String_CompileError (*)(List__String) {
 	Map__K_V with(K key, V value);
 	Option_V find(K key);
 } Map__String_Result_String_CompileError (*)(List__String);
@@ -2741,9 +2737,6 @@ private Node(Map__String_String maps){
 }
 /* public */Option_String find(String propertyKey){
 	return strings.find(propertyKey);
-}
-/* public static <K, V> */Map__K_V empty(){
-	return JavaMap();
 }
 auto __lambda750__(auto list_){
 	return List_.stream(list_);
