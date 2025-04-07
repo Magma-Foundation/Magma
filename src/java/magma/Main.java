@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -73,6 +74,8 @@ public class Main {
         Stream_<Tuple<Integer, T>> streamWithIndices();
 
         T first();
+
+        List_<T> sort(Comparator<T> comparator);
     }
 
     public interface Stream_<T> {
@@ -81,8 +84,6 @@ public class Main {
         <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
 
         <C> C collect(Collector<T, C> collector);
-
-        <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder);
 
         boolean anyMatch(Predicate<T> predicate);
 
@@ -229,11 +230,6 @@ public class Main {
         }
 
         @Override
-        public <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder) {
-            return this.<Option<R>>foldWithInitial(new Some<>(initial), (rOption, t) -> rOption.flatMap(current -> folder.apply(current, t)));
-        }
-
-        @Override
         public boolean anyMatch(Predicate<T> predicate) {
             return foldWithInitial(false, (aBoolean, t) -> aBoolean || predicate.test(t));
         }
@@ -265,12 +261,7 @@ public class Main {
 
         @Override
         public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
-            return this.foldWithInitial(new Ok<>(initial), new BiFunction<Result<R, X>, T, Result<R, X>>() {
-                @Override
-                public Result<R, X> apply(Result<R, X> result, T t) {
-                    return result.flatMapValue(current -> folder.apply(current, t));
-                }
-            });
+            return this.<Result<R, X>>foldWithInitial(new Ok<>(initial), (result, t) -> result.flatMapValue(current -> folder.apply(current, t)));
         }
     }
 
@@ -527,9 +518,19 @@ public class Main {
             this(message, context, Lists.empty());
         }
 
+        private int depth() {
+            return 1 + children.stream()
+                    .map(CompileError::depth)
+                    .collect(new Max())
+                    .orElse(0);
+        }
+
         public String display() {
-            String joined = children.stream()
+            List_<CompileError> sorted = children.sort(Comparator.comparingInt(CompileError::depth));
+
+            String joined = sorted.stream()
                     .map(CompileError::display)
+                    .map(result -> result + "\n")
                     .collect(new Joiner())
                     .orElse("");
 
@@ -557,6 +558,18 @@ public class Main {
         }
     }
 
+    private static class Max implements Collector<Integer, Option<Integer>> {
+        @Override
+        public Option<Integer> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Integer> fold(Option<Integer> current, Integer element) {
+            return new Some<>(current.map(inner -> Math.max(inner, element)).orElse(element));
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Result<String, CompileError>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -574,9 +587,7 @@ public class Main {
     }
 
     private static Option<IOException> runWithInput(Path source, String input) {
-        String output = compile(input).mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n").match(value -> {
-            return value;
-        }, err -> {
+        String output = compile(input).mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n").match(value -> value, err -> {
             System.err.println(err.display());
             return "";
         });

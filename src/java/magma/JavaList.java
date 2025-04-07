@@ -1,6 +1,7 @@
 package magma;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 record JavaList<T>(List<T> inner) implements Main.List_<T> {
@@ -53,6 +54,13 @@ record JavaList<T>(List<T> inner) implements Main.List_<T> {
     @Override
     public T first() {
         return inner.getFirst();
+    }
+
+    @Override
+    public Main.List_<T> sort(Comparator<T> comparator) {
+        ArrayList<T> copy = new ArrayList<>(inner);
+        copy.sort(comparator);
+        return new JavaList<>(copy);
     }
 
     @Override
