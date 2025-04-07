@@ -187,13 +187,33 @@ public class Main {
     }
 
     private static Optional<String> compileStatement(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            int separator = withoutEnd.indexOf("=");
+            if (separator >= 0) {
+                String inputDefinition = withoutEnd.substring(0, separator);
+                String inputValue = withoutEnd.substring(separator + "=".length());
+                return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                    return compileValue(inputValue).map(outputValue -> {
+                        return "\n\t" + outputDefinition + " = " + outputValue + ";";
+                    });
+                });
+            }
+        }
+
         return Optional.of(invalidate("statement", input));
     }
 
-    private static Optional<String> compileDefinition(String header) {
-        int nameSeparator = header.lastIndexOf(" ");
+    private static Optional<String> compileValue(String input) {
+        return Optional.of(generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileDefinition(String input) {
+        String stripped = input.strip();
+        int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
-            String beforeName = header.substring(0, nameSeparator);
+            String beforeName = stripped.substring(0, nameSeparator);
 
             int space = beforeName.lastIndexOf(" ");
 
@@ -207,10 +227,10 @@ public class Main {
                 type = beforeName;
             }
 
-            String name = header.substring(nameSeparator + " ".length());
+            String name = stripped.substring(nameSeparator + " ".length());
             return Optional.of(modifiers + compileType(type) + " " + name);
         }
-        return Optional.of(generatePlaceholder(header));
+        return Optional.of(generatePlaceholder(stripped));
     }
 
     private static String compileType(String type) {
