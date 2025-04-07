@@ -564,20 +564,26 @@ public class Main {
 
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
+                String string = generateInvokable(definition, outputParams);
+
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-                    return new Some<>(generateStatement(definition));
+                    return new Some<>(generateStatement(string));
 
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                    return addFunction(definition, outputParams, statement);
+                    return addFunction(statement, string);
                 });
             });
         });
     }
 
-    private static String addFunction(String definition, String params, String content) {
-        String function = definition + "(" + params + "){" + content + "\n}\n";
+    private static String addFunction(String content, String string) {
+        String function = string + "{" + content + "\n}\n";
         functions.add(function);
         return "";
+    }
+
+    private static String generateInvokable(String definition, String params) {
+        return definition + "(" + params + ")";
     }
 
     private static Option<String> compileValues(String input, Function<String, Option<String>> compiler) {
@@ -683,7 +689,7 @@ public class Main {
 
         String definition = generateDefinition("", "auto", lambda);
         String param = generateDefinition("", "auto", paramName);
-        addFunction(definition, param, "\n\treturn " + lambdaValue + ";");
+        addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, param));
 
         return lambda;
     }

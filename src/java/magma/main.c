@@ -9,38 +9,38 @@
 #include <temp.h>
 #include <temp.h>
 /* private sealed */ struct Result<T, X> permits Ok, Err {
-	/* <R> */struct R match;
+	/* <R> */struct R match(/* Function<T */, /* R> */ whenOk, /* Function<X */, /* R> */ whenErr);
 };
 /* private sealed */ struct Option<T> permits Some, None {
-	void ifPresent;
-	/* <R> *//* Option<R> */ flatMap;
-	/* <R> *//* Option<R> */ map;
-	struct T orElse;
-	struct boolean isPresent;
-	/* Tuple<Boolean, *//* T> */ toTuple;
-	struct T orElseGet;
-	/* Option<T> */ or;
+	void ifPresent(/* Consumer<T> */ ifPresent);
+	/* <R> *//* Option<R> */ flatMap(/* Function<T */, /* Option<R>> */ mapper);
+	/* <R> *//* Option<R> */ map(/* Function<T */, /* R> */ mapper);
+	struct T orElse(struct T other);
+	struct boolean isPresent(/*  */);
+	/* Tuple<Boolean, *//* T> */ toTuple(struct T other);
+	struct T orElseGet(/* Supplier<T> */ other);
+	/* Option<T> */ or(/* Supplier<Option<T>> */ other);
 };
 /* private */ struct List_<T> {
-	/* List_<T> */ add;
-	/* List_<T> */ addAll;
-	void forEach;
-	/* Stream_<T> */ stream;
-	struct T popFirst;
-	struct boolean isEmpty;
+	/* List_<T> */ add(struct T element);
+	/* List_<T> */ addAll(/* List_<T> */ elements);
+	void forEach(/* Consumer<T> */ consumer);
+	/* Stream_<T> */ stream(/*  */);
+	struct T popFirst(/*  */);
+	struct boolean isEmpty(/*  */);
 };
 /* private */ struct Stream_<T> {
-	/* <R> *//* Stream_<R> */ map;
-	/* <R> */struct R foldWithInitial;
-	/* <C> */struct C collect;
-	/* <R> *//* Option<R> */ foldToOption;
+	/* <R> *//* Stream_<R> */ map(/* Function<T */, /* R> */ mapper);
+	/* <R> */struct R foldWithInitial(struct R initial, /* BiFunction<R */, /* T */, /* R> */ folder);
+	/* <C> */struct C collect(/* Collector<T */, /* C> */ collector);
+	/* <R> *//* Option<R> */ foldToOption(struct R initial, /* BiFunction<R */, /* T */, /* Option<R>> */ folder);
 };
 /* private */ struct Collector<T, C> {
-	struct C createInitial;
-	struct C fold;
+	struct C createInitial(/*  */);
+	struct C fold(struct C current, struct T element);
 };
 /* private */ struct Head<T> {
-	/* Option<T> */ next;
+	/* Option<T> */ next(/*  */);
 };
 struct Temp {
 };
@@ -62,20 +62,20 @@ struct Temp {
 
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {
-	/* return */struct new Some<>;
+	/* return */struct new Some<>(/* generateStruct("", *//* "Temp", */ "");
 	/* }
 
-        Option<String> maybeMethod *//* = */ compileMethod;
-	/* return */struct new Some<>;
+        Option<String> maybeMethod *//* = */ compileMethod(/* input */);
+	/* return */struct new Some<>(/* "" */);
 	/* }
 
-        return */struct new Some<>;
+        return */struct new Some<>(/* invalidate("class *//* segment", */ input);
 };
 /* public */ struct Main {
-	/* private static final List_<String> imports *//* = */ Lists.empty;
-	/* private static final List_<String> structs *//* = */ Lists.empty;
-	/* private static final List_<String> functions *//* = */ Lists.empty;
-	/* private static List_<String> globals *//* = */ Lists.empty;
+	/* private static final List_<String> imports *//* = */ Lists.empty(/*  */);
+	/* private static final List_<String> structs *//* = */ Lists.empty(/*  */);
+	/* private static final List_<String> functions *//* = */ Lists.empty(/*  */);
+	/* private static List_<String> globals *//* = */ Lists.empty(/*  */);
 };
 
 	/* private static */struct int lambdaCounter = /*  0; */;;
@@ -410,19 +410,24 @@ auto __lambda12__(auto main){
 
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
+                String string = generateInvokable(definition, outputParams);
+
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-                    return new Some<>(generateStatement(definition));
+                    return new Some<>(generateStatement(string));
 
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                    return addFunction(definition, outputParams, statement);
+                    return addFunction(statement, string);
                 });
             });
         } *//* ); */
 }
-/* private static */struct String addFunction(struct String definition, struct String params, struct String content){
-	struct String function = /*  definition + "(" + params + "){" + content + "\n}\n" */;
+/* private static */struct String addFunction(struct String content, struct String string){
+	struct String function = /*  string + "{" + content + "\n}\n" */;
 	functions.add(function);/* 
         return ""; */
+}
+/* private static */struct String generateInvokable(struct String definition, struct String params){/* 
+        return definition + "(" + params + ")"; */
 }
 auto __lambda13__(auto main){
 	return Main.divideValueChar(main);
@@ -517,7 +522,7 @@ auto __lambda14__(auto main){
         lambdaCounter++; */
 	struct String definition = generateDefinition("", "auto", lambda);
 	struct String param = generateDefinition("", "auto", paramName);
-	addFunction(definition, param, "\n\treturn " + lambdaValue + ";");/* 
+	addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, param));/* 
 
         return lambda; */
 }
