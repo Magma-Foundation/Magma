@@ -843,6 +843,13 @@ public class Main {
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
+
+            if(withoutEnd.startsWith("return ")) {
+                String value = withoutEnd.substring("return ".length());
+                return compileValue(value)
+                        .map(inner -> "return " + inner)
+                        .map(Main::generateStatement);
+            }
         }
 
         return new Some<>(invalidate("statement", input));
