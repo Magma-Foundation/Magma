@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 public class Main {
     sealed public interface Result<T, X> permits Ok, Err {
@@ -795,11 +794,28 @@ public class Main {
         if (!right.endsWith(";")) return createSuffixErr(right, ";");
         String left = right.substring(0, right.length() - ";".length());
 
-        String[] slices = left.split(Pattern.quote("."));
-        String joined = String.join("/", slices);
+        List_<String> slices = divideByChar(left, '.');
+
+        String joined = slices.stream().collect(new Joiner("/")).orElse("");
         String value = "#include \"./%s.h\"\n".formatted(joined);
         imports = imports.add(value);
         return new Ok<>("");
+    }
+
+    private static List_<String> divideByChar(String value, char delimiter) {
+        List_<String> slices = Lists.empty();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == delimiter) {
+                slices = slices.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                buffer.append(c);
+            }
+        }
+        slices = slices.add(buffer.toString());
+        return slices;
     }
 
     private static Result<String, CompileError> compileWhitespace(String input) {
@@ -849,10 +865,7 @@ public class Main {
 
         String name = withoutEnd.substring(0, genStart);
         String substring = withoutEnd.substring(genStart + "<".length());
-        List_<String> finalClassTypeParams = Lists.of(substring.split(Pattern.quote(",")))
-                .stream()
-                .map(String::strip)
-                .collect(new ListCollector<>());
+        List_<String> finalClassTypeParams = splitParams(substring);
 
         generators = generators.with(name, typeArguments -> {
             String joined = generateGenericName(name, typeArguments);
@@ -1213,10 +1226,9 @@ public class Main {
 
     private static Option<List_<String>> findLambdaParams(String beforeArrow) {
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-            return new Some<>(Lists.of(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
-                    .stream()
-                    .map(String::strip)
-                    .collect(new ListCollector<>()));
+            String substring = beforeArrow.substring(1, beforeArrow.length() - 1);
+            List_<String> collect = splitParams(substring);
+            return new Some<>(collect);
         }
 
         if (isSymbol(beforeArrow)) {
@@ -1224,6 +1236,13 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static List_<String> splitParams(String params) {
+        return divideByChar(params, ',')
+                .stream()
+                .map(String::strip)
+                .collect(new ListCollector<>());
     }
 
     private static Result<String, CompileError> compileLambdaBody(ParseState state, String inputValue) {
