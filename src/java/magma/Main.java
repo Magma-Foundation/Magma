@@ -486,22 +486,27 @@ public class Main {
             return new Some<>("");
         }
 
-        int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex).strip();
-            String right = input.substring(classIndex + "class ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                String body = right.substring(contentStart + "{".length()).strip();
-                if (body.endsWith("}")) {
-                    String inputContent = body.substring(0, body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> generateStruct(modifiers, name) + outputContent);
-                }
-            }
-        }
+        Option<String> maybeClass = compileTypedBlock(input, "class ");
+        if (maybeClass.isPresent()) return maybeClass;
 
         return new Some<>(invalidate("root segment", input));
+    }
+
+    private static Option<String> compileTypedBlock(String input, String keyword) {
+        int classIndex = input.indexOf(keyword);
+        if (classIndex < 0) return new None<>();
+
+        String modifiers = input.substring(0, classIndex).strip();
+        String right = input.substring(classIndex + keyword.length());
+        int contentStart = right.indexOf("{");
+        if (contentStart < 0) return new None<>();
+
+        String name = right.substring(0, contentStart).strip();
+        String body = right.substring(contentStart + "{".length()).strip();
+        if (!body.endsWith("}")) return new None<>();
+
+        String inputContent = body.substring(0, body.length() - "}".length());
+        return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> generateStruct(modifiers, name) + outputContent);
     }
 
     private static String generateStruct(String modifiers, String name) {
@@ -520,10 +525,8 @@ public class Main {
         Option<String> maybeMethod = compileMethod(input);
         if (maybeMethod.isPresent()) return maybeMethod;
 
-        int interfaceIndex = input.indexOf("interface ");
-        if (interfaceIndex >= 0) {
-            return new Some<>(generateStruct("", "Temp"));
-        }
+        Option<String> maybeInterface = compileTypedBlock(input, "interface ");
+        if (maybeInterface.isPresent()) return maybeInterface;
 
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {

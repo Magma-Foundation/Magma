@@ -1,4 +1,42 @@
-/* 
+/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
+     *//* void ifPresent(Consumer<T> ifPresent); *//* 
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper); *//* 
+
+        <R> Option<R> map(Function<T, R> mapper); *//* 
+
+        T orElse(T other); *//* 
+
+        boolean isPresent(); *//* 
+
+        Tuple<Boolean, T> toTuple(T other); *//* 
+
+        T orElseGet(Supplier<T> other); *//* 
+
+        Option<T> or(Supplier<Option<T>> other); *//* 
+     *//* List_<T> add(T element); *//* 
+
+        List_<T> addAll(List_<T> elements); *//* 
+
+        void forEach(Consumer<T> consumer); *//* 
+
+        Stream_<T> stream(); *//* 
+
+        T popFirst(); *//* 
+
+        boolean isEmpty(); *//* 
+     *//* <R> Stream_<R> map(Function<T, R> mapper); *//* 
+
+        <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder); *//* 
+
+        <C> C collect(Collector<T, C> collector); *//* 
+
+        <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder); *//* 
+     *//* C createInitial(); *//* 
+
+        C fold(C current, T element); *//* 
+     *//* Option<T> next(); *//* 
+     *//* 
  */#include <temp.h>
 #include <temp.h>
 #include <temp.h>
@@ -9,17 +47,17 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-struct Temp {
+/* private sealed */ struct Result<T, X> permits Ok, Err {
 };
-struct Temp {
+/* private sealed */ struct Option<T> permits Some, None {
 };
-struct Temp {
+/* private */ struct List_<T> {
 };
-struct Temp {
+/* private */ struct Stream_<T> {
 };
-struct Temp {
+/* private */ struct Collector<T, C> {
 };
-struct Temp {
+/* private */ struct Head<T> {
 };
 struct Temp {
 };
@@ -329,21 +367,28 @@ auto __lambda10__(auto compiled){
             imports.add(value);
             return new Some<>("");
         } */
-	struct int classIndex = input.indexOf("class ");/* 
-        if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex).strip();
-            String right = input.substring(classIndex + "class ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                String body = right.substring(contentStart + "{".length()).strip();
-                if (body.endsWith("}")) {
-                    String inputContent = body.substring(0, body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> generateStruct(modifiers, name) + outputContent);
-                }
-            }
-        } */
+	/* Option<String> */ maybeClass = compileTypedBlock(input, "class ");/* 
+        if (maybeClass.isPresent()) return maybeClass; */
 	/* return new Some<> */(invalidate("root segment", input));
+}
+auto __lambda11__(auto outputContent){
+	return /*  generateStruct(modifiers, name) + outputContent */;
+}
+auto __lambda12__(auto main){
+	return Main.compileClassSegment(main);
+}
+/* private static *//* Option<String> */ compileTypedBlock(struct String input, struct String keyword){
+	struct int classIndex = input.indexOf(keyword);
+	/* if (classIndex < 0) return new None<> */();
+	struct String modifiers = input.substring(/* 0 */, classIndex).strip();
+	struct String right = input.substring(/* classIndex + keyword */.length());
+	struct int contentStart = right.indexOf("{");
+	/* if (contentStart < 0) return new None<> */();
+	struct String name = right.substring(/* 0 */, contentStart).strip();
+	struct String body = right.substring(/* contentStart + "{" */.length()).strip();
+	/* if (!body */.endsWith("}")) return new None<>();
+	struct String inputContent = body.substring(/* 0 */, body.length() - "}".length());
+	/* return compileStatements */(inputContent, __lambda12__).map(__lambda11__);
 }
 /* private static */struct String generateStruct(struct String modifiers, struct String name){
 	struct String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
@@ -358,10 +403,8 @@ auto __lambda10__(auto compiled){
 /* private static *//* Option<String> */ compileClassSegment(struct String input){
 	/* Option<String> */ maybeMethod = compileMethod(input);/* 
         if (maybeMethod.isPresent()) return maybeMethod; */
-	struct int interfaceIndex = input.indexOf("interface ");/* 
-        if (interfaceIndex >= 0) {
-            return new Some<>(generateStruct("", "Temp"));
-        } */
+	/* Option<String> */ maybeInterface = compileTypedBlock(input, "interface ");/* 
+        if (maybeInterface.isPresent()) return maybeInterface; */
 	struct int recordIndex = input.indexOf("record ");/* 
         if (recordIndex >= 0) {
             return new Some<>(generateStruct("", "Temp"));
@@ -400,14 +443,14 @@ auto __lambda10__(auto compiled){
 	functions.add(function);/* 
         return ""; */
 }
-auto __lambda11__(auto main){
+auto __lambda13__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda12__(auto main){
+auto __lambda14__(auto main){
 	return Main.mergeValues(main);
 }
 /* private static *//* Option<String> */ compileValues(struct String input, /* Function<String */, /* Option<String>> */ compiler){
-	/* return compileAll */(divideAll(input, __lambda11__), compiler, __lambda12__);
+	/* return compileAll */(divideAll(input, __lambda13__), compiler, __lambda14__);
 }
 /* private static */struct State divideValueChar(struct State state, struct Character c){
 	struct if (c = /* = ',' && state */.isLevel()) return state.advance();
