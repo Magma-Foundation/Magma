@@ -138,6 +138,12 @@ public class Main {
         StringBuilder apply(StringBuilder cache, String element);
     }
 
+    private interface Filter {
+        boolean qualifies(String input);
+
+        String createErrorMessage();
+    }
+
     public record Tuple<A, B>(A left, B right) {
     }
 
@@ -866,6 +872,52 @@ public class Main {
         }
     }
 
+    private record EqualsRule(String value) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return input.equals(value) ? new Ok<>(input) : new Err<>(new CompileError("Not equal to '" + value + "'", input));
+        }
+    }
+
+    private static class SymbolFilter implements Filter {
+        @Override
+        public boolean qualifies(String input) {
+
+
+            if (input.isEmpty()) return false;
+            if (input.equals("static")) return false;
+
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String createErrorMessage() {
+            return "Not a symbol";
+        }
+    }
+
+    public static class StringRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<String, CompileError>(input);
+        }
+    }
+
+    private record FilterRule(Filter filter, Rule childRule) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            if (filter().qualifies(input)) return childRule().compile(state, input);
+            return new Err<>(new CompileError(filter().createErrorMessage(), input));
+        }
+    }
+
     public static final List_<String> MODIFIERS = Lists.of(
             "private",
             "static",
@@ -1214,7 +1266,7 @@ public class Main {
 
     private static Result<String, CompileError> compileSymbol(String input) {
         String stripped = input.strip();
-        return isSymbol(stripped) ? new Ok<>(stripped) : createNotASymbol(input);
+        return new SymbolFilter().qualifies(stripped) ? new Ok<>(stripped) : createNotASymbol(input);
     }
 
     private static Result<String, CompileError> compileMethodAccess(ParseState state, String input) {
@@ -1228,7 +1280,7 @@ public class Main {
         return createValueRule().compile(state, object).flatMapValue(newObject -> {
             String caller = newObject + "." + property;
             String lower = newObject.toLowerCase();
-            String paramName = isSymbol(lower) ? lower : "param";
+            String paramName = new SymbolFilter().qualifies(lower) ? lower : "param";
             return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
         });
     }
@@ -1323,7 +1375,7 @@ public class Main {
             return new Some<>(collect);
         }
 
-        if (isSymbol(beforeArrow)) {
+        if (new SymbolFilter().qualifies(beforeArrow)) {
             return new Some<>(Lists.<String>empty().add(beforeArrow));
         }
 
@@ -1542,8 +1594,8 @@ public class Main {
 
     private static Rule createTypeRule() {
         return new OrRule(Lists.of(
-                (state, type1) -> compilePrimitive(type1),
-                (state, type2) -> compileSymbolType(type2),
+                createPrimitiveRule(),
+                (state, type2) -> createSymbolTypeRule().compile(state, type2),
                 (state, type) -> compileTypeParam(state, type),
                 (state, type) -> createArrayRule().compile(state, type.strip()),
                 (state, type) -> compileGeneric(state, type)
@@ -1559,7 +1611,7 @@ public class Main {
         if (genStart < 0) return new Err<>(new CompileError("Infix '<' not present", withoutEnd));
         String base = withoutEnd.substring(0, genStart).strip();
 
-        if (!isSymbol(base)) return createNotASymbol(base);
+        if (!new SymbolFilter().qualifies(base)) return createNotASymbol(base);
         String oldArguments = withoutEnd.substring(genStart + "<".length());
 
         List_<String> segments = createValueDivider().divide(oldArguments);
@@ -1596,15 +1648,18 @@ public class Main {
         }, "[]");
     }
 
-    private static Result<String, CompileError> compilePrimitive(String type) {
-        if (type.strip().equals("void")) return new Ok<>("void");
-        if (type.strip().equals("boolean") || type.strip().equals("Boolean")) return new Ok<>("int");
-        return new Err<>(new CompileError("Not a primitive", type));
+    private static StripRule createPrimitiveRule() {
+        return new StripRule(new OrRule(Lists.of(
+                new EqualsRule("void"),
+                (state, input) -> new OrRule(Lists.of(
+                        new EqualsRule("boolean"),
+                        new EqualsRule("Bool")
+                )).compile(state, input).mapValue(_ -> "int")
+        )));
     }
 
-    private static Result<String, CompileError> compileSymbolType(String type) {
-        if (isSymbol(type.strip())) return new Ok<>(type.strip());
-        return createNotASymbol(type);
+    private static StripRule createSymbolTypeRule() {
+        return new StripRule(new FilterRule(new SymbolFilter(), new StringRule()));
     }
 
     private static Result<String, CompileError> compileTypeParam(ParseState state, String type) {
@@ -1629,20 +1684,6 @@ public class Main {
     private static String generateFunctionalType(String returns, List_<String> newArguments) {
         String joined = newArguments.stream().collect(new Joiner(", ")).orElse("");
         return returns + " (*)(" + joined + ")";
-    }
-
-    private static boolean isSymbol(String input) {
-        if (input.isEmpty()) return false;
-        if (input.equals("static")) return false;
-
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
-                continue;
-            }
-            return false;
-        }
-        return true;
     }
 
     private static String generatePlaceholder(String input) {
