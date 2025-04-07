@@ -930,14 +930,8 @@ public class Main {
             return new Some<>("Temp()");
         }
 
-        int arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            String paramName = stripped.substring(0, arrowIndex).strip();
-            String inputValue = stripped.substring(arrowIndex + "->".length());
-            if (isSymbol(paramName)) {
-                return compileValue(inputValue).map(outputValue -> generateLambda(paramName, outputValue));
-            }
-        }
+        Option<String> maybeLambda = compileLambda(input);
+        if (maybeLambda.isPresent()) return maybeLambda;
 
         Option<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
@@ -960,7 +954,7 @@ public class Main {
             return compileValue(object).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
-                return generateLambda(paramName, generateInvocation(caller, paramName));
+                return generateLambda(Lists.of(paramName), generateInvocation(caller, paramName));
             });
         }
 
@@ -970,6 +964,29 @@ public class Main {
                 .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> new Some<>(invalidate("value", input)));
+    }
+
+    private static Option<String> compileLambda(String input) {
+        int arrowIndex = input.indexOf("->");
+        if (arrowIndex < 0) return new None<>();
+
+        String beforeArrow = input.substring(0, arrowIndex).strip();
+
+        List_<String> paramNames;
+        if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+            List<String> list = Arrays.asList(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")));
+            paramNames = new JavaList<>(list)
+                    .stream()
+                    .map(String::strip)
+                    .collect(new ListCollector<>());
+        } else if (isSymbol(beforeArrow)) {
+            paramNames = Lists.of(beforeArrow);
+        } else {
+            return new None<>();
+        }
+
+        String inputValue = input.substring(arrowIndex + "->".length());
+        return compileValue(inputValue).map(outputValue -> generateLambda(paramNames, outputValue));
     }
 
     private static Option<String> compileOperator(String input, String operator) {
@@ -994,14 +1011,18 @@ public class Main {
         return true;
     }
 
-    private static String generateLambda(String paramName, String lambdaValue) {
+    private static String generateLambda(List_<String> paramNames, String lambdaValue) {
         String lambda = "__lambda" + lambdaCounter + "__";
         lambdaCounter++;
 
         String definition = generateDefinition("", "auto", lambda);
-        String param = generateDefinition("", "auto", paramName);
-        addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, param));
 
+        String params = paramNames.stream()
+                .map(name -> generateDefinition("", "auto", name))
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, params));
         return lambda;
     }
 
