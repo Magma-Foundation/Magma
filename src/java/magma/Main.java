@@ -955,6 +955,8 @@ public class Main {
 
     private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
+        if (stripped.isEmpty()) return new Some<>("");
+
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             String beforeName = stripped.substring(0, nameSeparator);

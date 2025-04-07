@@ -27,24 +27,24 @@
  *//* return new */ Some<>(/* invalidate("class *//* segment", */ input);
 };
 /* public */ struct Main {
-	/* private *//* static final Map<String, Function<List_<String>, Option<String>>> generators = new */ HashMap<>(/*  */);
-	/* private *//* static final List_<Tuple<String, List_<String>>> expanded = */ Lists.empty(/*  */);
-	/* private *//* static List_<String> imports = */ Lists.empty(/*  */);
-	/* private *//* static List_<String> structs = */ Lists.empty(/*  */);
-	/* private *//* static List_<String> functions = */ Lists.empty(/*  */);
-	/* private *//* static List_<Tuple<String, List_<String>>> toExpand = */ Lists.empty(/*  */);
-	/* private *//* static List_<String> globals = */ Lists.empty(/*  */);
+	/* private *//* static final Map<String, Function<List_<String>, Option<String>>> generators = new */ HashMap<>();
+	/* private *//* static final List_<Tuple<String, List_<String>>> expanded = */ Lists.empty();
+	/* private *//* static List_<String> imports = */ Lists.empty();
+	/* private *//* static List_<String> structs = */ Lists.empty();
+	/* private *//* static List_<String> functions = */ Lists.empty();
+	/* private *//* static List_<Tuple<String, List_<String>>> toExpand = */ Lists.empty();
+	/* private *//* static List_<String> globals = */ Lists.empty();
 };
 /* private sealed */ struct Option__String__ {
 	void ifPresent(void (*)(String) ifPresent);
 	/* <R> */Option__R__ flatMap(Option__R__ (*)(String) mapper);
 	/* <R> */Option__R__ map(R (*)(String) mapper);
 	String orElse(String other);
-	int isPresent(/*  */);
+	int isPresent();
 	Tuple__int_String__ toTuple(String other);
 	String orElseGet(String (*)() other);
 	Option__String__ or(Option__String__ (*)() other);
-	int isEmpty(/*  */);
+	int isEmpty();
 };
 /* private */ struct Tuple__A_B__ {
 };
@@ -85,7 +85,7 @@ auto __lambda3__(auto tuple){
 	return equator.apply(tuple.right;
 }
 /* private *//* static class Lists {
-        public static <T> List_<T> */ empty(/*  */){
+        public static <T> List_<T> */ empty(){
 	/* return new JavaList<> */();
 	/* }
 
@@ -214,7 +214,7 @@ auto __lambda3__(auto tuple){
 }
 /* private *//* static class EmptyHead<T> implements Head<T> {
         @Override
-        public Option<T> */ next(/*  */){
+        public Option<T> */ next(){
 	/* return new None<> */();/* 
         }
      */
@@ -244,7 +244,7 @@ auto __lambda6__(auto singlehead){
 }
 /* private *//* static class ListCollector<T> implements Collector<T, List_<T>> {
         @Override
-        public List_<T> */ createInitial(/*  */){
+        public List_<T> */ createInitial(){
 	/* return Lists */.empty();
 	/* }
 
@@ -255,7 +255,7 @@ auto __lambda6__(auto singlehead){
      */
 }
 /* @Override
- *//* public Option<String> */ createInitial(/*  */){
+ *//* public Option<String> */ createInitial(){
 	/* return new None<> */();
 }
 auto __lambda7__(auto inner){
@@ -665,6 +665,7 @@ auto __lambda25__(auto main){
 }
 /* private *//* static Option<String> */ compileDefinition(String input, /* List_<List_<String>> */ typeParams, /* List_<String> */ typeArguments){
 	String stripped = input.strip();
+	/* if (stripped */.isEmpty()) return new Some<>("");
 	int nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
             String beforeName = stripped.substring(0, nameSeparator);
