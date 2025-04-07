@@ -526,11 +526,15 @@ public class Main {
         }
 
         public String display() {
+            return format(0);
+        }
+
+        private String format(int depth) {
             List_<CompileError> sorted = children.sort(Comparator.comparingInt(CompileError::depth));
 
-            String joined = sorted.stream()
-                    .map(CompileError::display)
-                    .map(result -> result + "\n")
+            String joined = sorted.streamWithIndices()
+                    .map(compileError -> "\t".repeat(depth) + compileError.left + ") " + compileError.right.format(depth + 1))
+                    .map(result -> "\n" + result)
                     .collect(new Joiner())
                     .orElse("");
 
