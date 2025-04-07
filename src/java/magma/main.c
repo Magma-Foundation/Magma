@@ -1,37 +1,3 @@
-/* <R> */struct R match;
-void ifPresent;
-/* <R> *//* Option<R> */ flatMap;
-/* <R> *//* Option<R> */ map;
-struct T orElse;
-struct boolean isPresent;
-/* Tuple<Boolean, *//* T> */ toTuple;
-struct T orElseGet;
-/* Option<T> */ or;
-/* List_<T> */ add;
-/* List_<T> */ addAll;
-void forEach;
-/* Stream_<T> */ stream;
-struct T popFirst;
-struct boolean isEmpty;
-/* <R> *//* Stream_<R> */ map;
-/* <R> */struct R foldWithInitial;
-/* <C> */struct C collect;
-/* <R> *//* Option<R> */ foldToOption;
-struct C createInitial;
-struct C fold;
-/* Option<T> */ next;
-/* private static final List_<String> imports *//* = */ Lists.empty;
-/* private static final List_<String> structs *//* = */ Lists.empty;
-/* private static final List_<String> functions *//* = */ Lists.empty;
-/* private static List_<String> globals *//* = */ Lists.empty;
-/* return */struct new Some<>;
-/* }
-
-        Option<String> maybeMethod *//* = */ compileMethod;
-/* return */struct new Some<>;
-/* }
-
-        return */struct new Some<>;
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
@@ -43,16 +9,38 @@ struct C fold;
 #include <temp.h>
 #include <temp.h>
 /* private sealed */ struct Result<T, X> permits Ok, Err {
+	/* <R> */struct R match;
 };
 /* private sealed */ struct Option<T> permits Some, None {
+	void ifPresent;
+	/* <R> *//* Option<R> */ flatMap;
+	/* <R> *//* Option<R> */ map;
+	struct T orElse;
+	struct boolean isPresent;
+	/* Tuple<Boolean, *//* T> */ toTuple;
+	struct T orElseGet;
+	/* Option<T> */ or;
 };
 /* private */ struct List_<T> {
+	/* List_<T> */ add;
+	/* List_<T> */ addAll;
+	void forEach;
+	/* Stream_<T> */ stream;
+	struct T popFirst;
+	struct boolean isEmpty;
 };
 /* private */ struct Stream_<T> {
+	/* <R> *//* Stream_<R> */ map;
+	/* <R> */struct R foldWithInitial;
+	/* <C> */struct C collect;
+	/* <R> *//* Option<R> */ foldToOption;
 };
 /* private */ struct Collector<T, C> {
+	struct C createInitial;
+	struct C fold;
 };
 /* private */ struct Head<T> {
+	/* Option<T> */ next;
 };
 struct Temp {
 };
@@ -74,8 +62,20 @@ struct Temp {
 
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {
+	/* return */struct new Some<>;
+	/* }
+
+        Option<String> maybeMethod *//* = */ compileMethod;
+	/* return */struct new Some<>;
+	/* }
+
+        return */struct new Some<>;
 };
 /* public */ struct Main {
+	/* private static final List_<String> imports *//* = */ Lists.empty;
+	/* private static final List_<String> structs *//* = */ Lists.empty;
+	/* private static final List_<String> functions *//* = */ Lists.empty;
+	/* private static List_<String> globals *//* = */ Lists.empty;
 };
 
 	/* private static */struct int lambdaCounter = /*  0; */;;
@@ -368,7 +368,7 @@ auto __lambda10__(auto compiled){
 	/* return new Some<> */(invalidate("root segment", input));
 }
 auto __lambda11__(auto outputContent){
-	return /*  generateStruct(modifiers, name) + outputContent */;
+	return generateStruct(modifiers, name, outputContent);
 }
 auto __lambda12__(auto main){
 	return Main.compileClassSegment(main);
@@ -386,9 +386,11 @@ auto __lambda12__(auto main){
 	struct String inputContent = body.substring(/* 0 */, body.length() - "}".length());
 	/* return compileStatements */(inputContent, __lambda12__).map(__lambda11__);
 }
-/* private static */struct String generateStruct(struct String modifiers, struct String name){
+/* private static */struct String generateStruct(struct String modifiers, struct String name, struct String content){
 	struct String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
-	struct String generated = /*  modifiersString + "struct " + name + " {\n};\n" */;
+	struct String generated = /*  modifiersString + "struct " + name + " {" +
+                content +
+                "\n};\n" */;
 	structs.add(generated);/* 
         return ""; */
 }
@@ -409,7 +411,8 @@ auto __lambda12__(auto main){
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-                    return new Some<>(definition + ";\n");
+                    return new Some<>(generateStatement(definition));
+
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
                     return addFunction(definition, outputParams, statement);
                 });

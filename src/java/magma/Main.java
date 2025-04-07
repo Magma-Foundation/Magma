@@ -506,12 +506,15 @@ public class Main {
         if (!body.endsWith("}")) return new None<>();
 
         String inputContent = body.substring(0, body.length() - "}".length());
-        return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> generateStruct(modifiers, name) + outputContent);
+        return compileStatements(inputContent, Main::compileClassSegment)
+                .map(outputContent -> generateStruct(modifiers, name, outputContent));
     }
 
-    private static String generateStruct(String modifiers, String name) {
+    private static String generateStruct(String modifiers, String name, String content) {
         String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
-        String generated = modifiersString + "struct " + name + " {\n};\n";
+        String generated = modifiersString + "struct " + name + " {" +
+                content +
+                "\n};\n";
         structs.add(generated);
         return "";
     }
@@ -529,7 +532,7 @@ public class Main {
 
         int recordIndex = input.indexOf("record ");
         if (recordIndex >= 0) {
-            return new Some<>(generateStruct("", "Temp"));
+            return new Some<>(generateStruct("", "Temp", ""));
         }
 
         Option<String> maybeMethod = compileMethod(input);
@@ -562,7 +565,7 @@ public class Main {
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-                    return new Some<>(definition + ";\n");
+                    return new Some<>(generateStatement(definition));
 
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
                     return addFunction(definition, outputParams, statement);
