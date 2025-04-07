@@ -1,8 +1,8 @@
 package magma;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
 
 record JavaList<T>(List<T> inner) implements Main.List_<T> {
     public JavaList() {
@@ -57,9 +57,9 @@ record JavaList<T>(List<T> inner) implements Main.List_<T> {
     }
 
     @Override
-    public Main.List_<T> sort(Comparator<T> comparator) {
+    public Main.List_<T> sort(BiFunction<T, T, Integer> comparator) {
         ArrayList<T> copy = new ArrayList<>(inner);
-        copy.sort(comparator);
+        copy.sort(comparator::apply);
         return new JavaList<>(copy);
     }
 

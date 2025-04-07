@@ -1,6 +1,5 @@
 package magma;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -68,7 +67,7 @@ public class Main {
 
         T first();
 
-        List_<T> sort(Comparator<T> comparator);
+        List_<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
     public interface Stream_<T> {
@@ -532,7 +531,7 @@ public class Main {
         }
 
         private String format(int depth) {
-            List_<CompileError> sorted = children.sort(Comparator.comparingInt(CompileError::depth));
+            List_<CompileError> sorted = children.sort((first, second) -> first.depth() - second.depth());
 
             String joined = sorted.streamWithIndices()
                     .map(compileError -> "\t".repeat(depth) + compileError.left + ") " + compileError.right.format(depth + 1))
