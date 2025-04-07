@@ -756,6 +756,9 @@ public class Main {
     private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (input.isBlank()) return new Some<>("");
 
+        Option<String> maybeClass = compileTypedBlock(input, "class ", typeParams);
+        if (maybeClass.isPresent()) return maybeClass;
+
         Option<String> maybeInterface = compileTypedBlock(input, "interface ", typeParams);
         if (maybeInterface.isPresent()) return maybeInterface;
 

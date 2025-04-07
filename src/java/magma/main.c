@@ -13,12 +13,23 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+/* private static */ struct Lists {
+};
+/* private static */ struct State {/* private final List_<Character> queue; *//* 
+        private List_<String> segments; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; */
+};
+/* private static */ struct Streams {
+};
 /* private */ struct Joiner {
+};
+/* private static */ struct Tuples {
 };
 /* private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (input.isBlank()) return new Some<>("");
 
-        Option<String> maybeInterface = compileTypedBlock(input, " */ struct ", typeParams);
+        Option<String> maybeClass = compileTypedBlock(input, " */ struct ", typeParams);
         if  {
 	/* globals *//* = */ maybeAssignment.map(/* value *//* -> value + */ ";\n");
 	/* return */new Some<>(/* "" */);
@@ -34,6 +45,17 @@
 	/* private *//* static List_<String> functions = */ Lists.empty();
 	/* private *//* static List_<Tuple<String, List_<String>>> toExpand = */ Lists.empty();
 	/* private *//* static List_<String> globals = */ Lists.empty();
+};
+/* private sealed */ struct Option__T__ {
+	void ifPresent(void (*)(T) ifPresent);
+	/* <R> */Option__R__ flatMap(Option__R__ (*)(T) mapper);
+	/* <R> */Option__R__ map(R (*)(T) mapper);
+	T orElse(T other);
+	int isPresent();
+	Tuple__int_T__ toTuple(T other);
+	T orElseGet(T (*)() other);
+	Option__T__ or(Option__T__ (*)() other);
+	int isEmpty();
 };
 /* private sealed */ struct Option__String__ {
 	void ifPresent(void (*)(String) ifPresent);
@@ -52,31 +74,24 @@
 };
 
 	/* private *//* static int */ lambdaCounter = /*  0; */;;
-/* private *//* static final class RangeHead implements Head<Integer> {
-        private final int size;
-        private int counter = 0;
-
-        private */ RangeHead(int size){
-	/* this.size */ = size;/* 
-        }
-
-        @Override
-        public Option<Integer> next() {
-            if (counter < size) {
-                int value = counter;
-                counter++;
-                return new Some<>(value);
-            } *//*  else {
-                return new None<>();
-            } *//* 
-        }
-     */
+/* public */static__/* T> List_<T */__ empty(){
+	/* return new JavaList<> */();
+}
+/* public */static__/* T> List_<T */__ of(/* T... */ elements){
+	/* return new JavaList<> */(Arrays.asList(elements));
 }
 auto __lambda0__(auto child){
 	return equator.apply(element;
 }
+/* public *//* static <T> boolean */ contains(/* List_<T> */ list, T element, int (*)(T, T) equator){
+	/* return list */.stream().anyMatch(__lambda0__, /*  child) */);
+}
 auto __lambda1__(auto index){
 	return equator.apply(elements.get(index);
+}
+/* public *//* static <T> boolean */ equalsTo(/* List_<T> */ elements, /* List_<T> */ other, int (*)(T, T) equator){
+	/* if *//* (elements.size() */ ! = other.size()) return false;
+	/* return new HeadedStream<> */(/* new RangeHead */(elements.size())).allMatch(__lambda1__, other.get(index)));
 }
 auto __lambda2__(auto tuple){
 	return Tuple.left(tuple);
@@ -84,143 +99,61 @@ auto __lambda2__(auto tuple){
 auto __lambda3__(auto tuple){
 	return equator.apply(tuple.right;
 }
-/* private *//* static class Lists {
-        public static <T> List_<T> */ empty(){
-	/* return new JavaList<> */();
-	/* }
-
-        public static <T> List_<T> of(T */... elements) {
-            return new JavaList<>(Arrays.asList(elements));
-	/* }
-
-        public static <T> boolean contains(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
-            return list */.stream().anyMatch(__lambda0__, /*  child) */);
-	/* }
-
- *//* public static <T> boolean equalsTo(List_<T> elements, List_<T> other, BiFunction<T, T, Boolean> equator) {
-            if (elements.size() */ ! = other.size()) return false;
-	/* return new HeadedStream<> */(/* new RangeHead */(elements.size())).allMatch(__lambda1__, other.get(index)));
-	/* }
-
-        public static <T> Option<Integer> indexOf(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
-            return list */.streamWithIndices().filter(__lambda3__, /*  element) */).next().map(__lambda2__);/* 
-        }
-     */
+/* public */static__/* T> Option<Integer */__ indexOf(/* List_<T> */ list, T element, int (*)(T, T) equator){
+	/* return list */.streamWithIndices().filter(__lambda3__, /*  element) */).next().map(__lambda2__);
 }
-/* private *//* static class State {
-        private final List_<Character> queue;
-        private List_<String> segments;
-        private StringBuilder buffer;
-        private int depth;
-
-        private */ State(/* List_<Character> */ queue){
+private State(/* List_<Character> */ queue){
 	this(queue, Lists.empty(), /* new StringBuilder */(), /*  0 */);
-	/* }
-
- *//* private State(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) { */ this.queue = queue;
+}
+private State(/* List_<Character> */ queue, /* List_<String> */ segments, StringBuilder buffer, int depth){
+	/* this.queue */ = queue;
 	/* this.segments */ = segments;
 	/* this.buffer */ = buffer;
 	/* this.depth */ = depth;
-	/* }
-
-        private State popAndAppend() {
-            return append */(pop());
-	/* }
-
-        private boolean hasNext() {
-            return !queue */.isEmpty();
-	/* }
-
- *//* private State enter() { */ this.depth = /*  depth + 1 */;
+}
+/* private */State popAndAppend(){
+	/* return append */(pop());
+}
+/* private */int hasNext(){
+	/* return !queue */.isEmpty();
+}
+/* private */State enter(){
+	/* this.depth */ = /*  depth + 1 */;
 	return this;
-	/* }
-
- *//* private State exit() { */ this.depth = /*  depth - 1 */;
+}
+/* private */State exit(){
+	/* this.depth */ = /*  depth - 1 */;
 	return this;
-	/* }
-
-        private State append(char c) {
-            buffer */.append(c);
+}
+/* private */State append(char c){
+	buffer.append(c);
 	return this;
-	/* }
-
- *//* private State advance() { */ segments = segments.add(buffer.toString());
+}
+/* private */State advance(){
+	/* segments */ = segments.add(buffer.toString());
 	/* this.buffer */ = /* new StringBuilder */();
 	return this;
-	/* }
-
- *//* private boolean isLevel() {
-            return */ depth = /* = 0 */;
-	/* }
-
-        private char pop() {
-            return queue */.popFirst();
-	/* }
-
- *//* private boolean isShallow() {
-            return */ depth = /* = 1 */;/* 
-        }
-
-        public List_<String> segments() {
-            return segments; *//* 
-        }
-     */
 }
-/* private *//* static final class None<T> implements Option<T> {
-        @Override
-        public void */ ifPresent(void (*)(T) ifPresent){
-	/* }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<> */();
-	/* }
-
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<> */();/* 
-        }
-
-        @Override
-        public T orElse(T other) {
-            return other; *//* 
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false; */
-	/* }
-
-        @Override
-        public Tuple<Boolean, T> toTuple(T other) {
-            return new Tuple<> */(false, other);
-	/* }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return other */.get();
-	/* }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other */.get();/* 
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true; *//* 
-        }
-     */
+/* private */int isLevel(){
+	return depth = /* = 0 */;
 }
-/* private *//* static class EmptyHead<T> implements Head<T> {
-        @Override
-        public Option<T> */ next(){
-	/* return new None<> */();/* 
-        }
-     */
+/* private */char pop(){
+	/* return queue */.popFirst();
+}
+/* private */int isShallow(){
+	return depth = /* = 1 */;
+}
+/* public *//* List_<String> */ segments(){
+	return segments;
 }
 auto __lambda4__(auto value){
 	return value.charAt(value);
+}
+/* public *//* static Stream_<Character> */ from(String value){
+	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda4__);
+}
+/* public */static__/* T> Stream_<T */__ empty(){
+	/* return new HeadedStream<> */(/* new EmptyHead<> */());
 }
 auto __lambda5__(auto emptyhead){
 	return EmptyHead.new(emptyhead);
@@ -228,31 +161,8 @@ auto __lambda5__(auto emptyhead){
 auto __lambda6__(auto singlehead){
 	return SingleHead.new(singlehead);
 }
-/* private *//* static class Streams {
-        public static Stream_<Character> */ from(String value){
-	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda4__);
-	/* }
-
-        public static <T> Stream_<T> empty() {
-            return new HeadedStream<> */(/* new EmptyHead<> */());
-	/* }
-
-        public static <T> Stream_<T> fromOption(Option<T> option) {
-            return new HeadedStream<> */(option.<Head<T>>map(__lambda6__).orElseGet(__lambda5__));/* 
-        }
-     */
-}
-/* private *//* static class ListCollector<T> implements Collector<T, List_<T>> {
-        @Override
-        public List_<T> */ createInitial(){
-	/* return Lists */.empty();
-	/* }
-
-        @Override
-        public List_<T> fold(List_<T> current, T element) {
-            return current */.add(element);/* 
-        }
-     */
+/* public */static__/* T> Stream_<T */__ fromOption(Option__T__ option){
+	/* return new HeadedStream<> */(option.<Head<T>>map(__lambda6__).orElseGet(__lambda5__));
 }
 /* @Override
  *//* public Option<String> */ createInitial(){
@@ -265,28 +175,9 @@ auto __lambda7__(auto inner){
  *//* public Option<String> */ fold(Option__String__ current, String element){
 	/* return new Some<> */(current.map(__lambda7__).orElse(element));
 }
-/* private *//* static class Tuples {
-        public static <A, B> boolean */ equalsTo(Tuple__A_B__ left, Tuple__A_B__ right, int (*)(A, A) leftEquator, int (*)(B, B) rightEquator){
+/* public *//* static <A, B> boolean */ equalsTo(Tuple__A_B__ left, Tuple__A_B__ right, int (*)(A, A) leftEquator, int (*)(B, B) rightEquator){
 	/* return leftEquator */.apply(left.left, right.left) &&
-                    rightEquator.apply(left.right, right.right);/* 
-        }
-     */
-}
-/* private *//* static class SingleHead<T> implements Head<T> {
-        private final T value;
-        private boolean retrieved = false;
-
-        public */ SingleHead(T value){
-	/* this.value */ = value;
-	/* }
-
-        @Override
-        public Option<T> next() {
-            if (retrieved) return new None<> */();
-	/* retrieved */ = true;
-	/* return new Some<> */(value);/* 
-        }
-     */
+                    rightEquator.apply(left.right, right.right);
 }
 auto __lambda8__(auto throwable){
 	return Throwable.printStackTrace(throwable);
@@ -573,7 +464,9 @@ auto __lambda25__(auto main){
 
             if(withoutEnd.startsWith("return ")) {
                 String value = withoutEnd.substring("return ".length());
-                return compileValue(value).map(inner -> "return " + inner).map(Main::generateStatement);
+                return compileValue(value)
+                        .map(inner -> "return " + inner)
+                        .map(Main::generateStatement);
             }
         } */
 	/* return new Some<> */(invalidate("statement", input));
