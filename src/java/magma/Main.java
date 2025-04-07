@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -61,6 +63,8 @@ public class Main {
         <C> C collect(Collector<T, C> collector);
 
         <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder);
+
+        boolean anyMatch(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -142,6 +146,11 @@ public class Main {
         public <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder) {
             return this.<Option<R>>foldWithInitial(new Some<>(initial), (rOption, t) -> rOption.flatMap(current -> folder.apply(current, t)));
         }
+
+        @Override
+        public boolean anyMatch(Predicate<T> predicate) {
+            return foldWithInitial(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        }
     }
 
     private record JavaList<T>(List<T> inner) implements List_<T> {
@@ -151,14 +160,14 @@ public class Main {
 
         @Override
         public List_<T> add(T element) {
-            inner.add(element);
-            return this;
+            List<T> copy = new ArrayList<>(inner);
+            copy.add(element);
+            return new JavaList<>(copy);
         }
 
         @Override
         public List_<T> addAll(List_<T> elements) {
-            elements.forEach(this::add);
-            return this;
+            return elements.stream().<List_<T>>foldWithInitial(this, List_::add);
         }
 
         @Override
@@ -195,11 +204,15 @@ public class Main {
         public static <T> List_<T> of(T... elements) {
             return new JavaList<>(Arrays.asList(elements));
         }
+
+        public static <T> boolean contains(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
+            return list.stream().anyMatch(child -> equator.apply(element, child));
+        }
     }
 
     private static class State {
         private final List_<Character> queue;
-        private final List_<String> segments;
+        private List_<String> segments;
         private StringBuilder buffer;
         private int depth;
 
@@ -238,7 +251,7 @@ public class Main {
         }
 
         private State advance() {
-            segments.add(buffer.toString());
+            segments = segments.add(buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -373,11 +386,12 @@ public class Main {
         }
     }
 
-    private static final List_<String> imports = Lists.empty();
-    private static final List_<String> structs = Lists.empty();
-    private static final List_<String> functions = Lists.empty();
-    private static final List_<Tuple<String, List_<String>>> expansions = Lists.empty();
+    private static List_<String> imports = Lists.empty();
+    private static List_<String> structs = Lists.empty();
+    private static List_<String> functions = Lists.empty();
+    private static List_<Tuple<String, List_<String>>> expansions = Lists.empty();
     private static List_<String> globals = Lists.empty();
+
     private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
@@ -511,17 +525,17 @@ public class Main {
 
         if (stripped.startsWith("import ")) {
             String value = "#include <temp.h>\n";
-            imports.add(value);
+            imports = imports.add(value);
             return new Some<>("");
         }
 
-        Option<String> maybeClass = compileTypedBlock(input, "class ");
+        Option<String> maybeClass = compileTypedBlock(input, "class ", Lists.of(Lists.empty()));
         if (maybeClass.isPresent()) return maybeClass;
 
         return new Some<>(invalidate("root segment", input));
     }
 
-    private static Option<String> compileTypedBlock(String input, String keyword) {
+    private static Option<String> compileTypedBlock(String input, String keyword, List_<List_<String>> typeParams) {
         int classIndex = input.indexOf(keyword);
         if (classIndex < 0) return new None<>();
 
@@ -530,12 +544,38 @@ public class Main {
         int contentStart = right.indexOf("{");
         if (contentStart < 0) return new None<>();
 
-        String name = right.substring(0, contentStart).strip();
+        String beforeContent = right.substring(0, contentStart).strip();
+        int permitsIndex = beforeContent.indexOf("permits");
+        String withoutPermits = permitsIndex >= 0
+                ? beforeContent.substring(0, permitsIndex).strip()
+                : beforeContent;
+
+        String name;
+        List_<String> classTypeParams = Lists.empty();
+        if (withoutPermits.endsWith(">")) {
+            String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
+            int genStart = withoutEnd.indexOf("<");
+            if (genStart >= 0) {
+                name = withoutEnd.substring(0, genStart);
+                String substring = withoutEnd.substring(genStart + "<".length());
+                classTypeParams = Lists.of(substring.split(Pattern.quote(",")))
+                        .stream()
+                        .map(String::strip)
+                        .collect(new ListCollector<>());
+            } else {
+                name = withoutPermits;
+            }
+        } else {
+            name = withoutPermits;
+        }
+
+        List_<List_<String>> merged = typeParams.add(classTypeParams);
+
         String body = right.substring(contentStart + "{".length()).strip();
         if (!body.endsWith("}")) return new None<>();
 
         String inputContent = body.substring(0, body.length() - "}".length());
-        return compileStatements(inputContent, Main::compileClassSegment)
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged))
                 .map(outputContent -> generateStruct(modifiers, name, outputContent));
     }
 
@@ -544,7 +584,7 @@ public class Main {
         String generated = modifiersString + "struct " + name + " {" +
                 content +
                 "\n};\n";
-        structs.add(generated);
+        structs = structs.add(generated);
         return "";
     }
 
@@ -553,10 +593,10 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static Option<String> compileClassSegment(String input) {
+    private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams) {
         if (input.isBlank()) return new Some<>("");
 
-        Option<String> maybeInterface = compileTypedBlock(input, "interface ");
+        Option<String> maybeInterface = compileTypedBlock(input, "interface ", typeParams);
         if (maybeInterface.isPresent()) return maybeInterface;
 
         int recordIndex = input.indexOf("record ");
@@ -564,10 +604,10 @@ public class Main {
             return new Some<>(generateStruct("", "Temp", ""));
         }
 
-        Option<String> maybeMethod = compileMethod(input);
+        Option<String> maybeMethod = compileMethod(input, typeParams);
         if (maybeMethod.isPresent()) return maybeMethod;
 
-        Option<String> maybeAssignment = compileAssignment(input);
+        Option<String> maybeAssignment = compileAssignment(input, typeParams);
         if (maybeAssignment.isPresent()) {
             globals = maybeAssignment.map(value -> value + ";\n")
                     .map(globals::add)
@@ -579,7 +619,7 @@ public class Main {
         return new Some<>(invalidate("class segment", input));
     }
 
-    private static Option<String> compileMethod(String input) {
+    private static Option<String> compileMethod(String input, List_<List_<String>> typeParams) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return new None<>();
 
@@ -591,14 +631,14 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
-            return compileDefinition(header).flatMap(definition -> {
+        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams)).flatMap(outputParams -> {
+            return compileDefinition(header, typeParams).flatMap(definition -> {
                 String string = generateInvokable(definition, outputParams);
 
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
                     return new Some<>(generateStatement(string));
 
-                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams)).map(statement -> {
                     return addFunction(statement, string);
                 });
             });
@@ -607,7 +647,7 @@ public class Main {
 
     private static String addFunction(String content, String string) {
         String function = string + "{" + content + "\n}\n";
-        functions.add(function);
+        functions = functions.add(function);
         return "";
     }
 
@@ -633,14 +673,14 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static Option<String> compileStatement(String input) {
+    private static Option<String> compileStatement(String input, List_<List_<String>> typeParams) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            Option<String> maybeAssignment = compileAssignment(withoutEnd);
+            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams);
             if (maybeAssignment.isPresent()) return maybeAssignment;
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
@@ -650,13 +690,13 @@ public class Main {
         return new Some<>(invalidate("statement", input));
     }
 
-    private static Option<String> compileAssignment(String input) {
+    private static Option<String> compileAssignment(String input, List_<List_<String>> typeParams) {
         int separator = input.indexOf("=");
         if (separator < 0) return new None<>();
 
         String inputDefinition = input.substring(0, separator);
         String inputValue = input.substring(separator + "=".length());
-        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+        return compileDefinition(inputDefinition, typeParams).flatMap(outputDefinition -> {
             return compileValue(inputValue).map(outputValue -> {
                 return generateStatement(outputDefinition + " = " + outputValue);
             });
@@ -755,7 +795,7 @@ public class Main {
         return caller + "(" + arguments + ")";
     }
 
-    private static Option<String> compileDefinition(String input) {
+    private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -786,7 +826,7 @@ public class Main {
 
             String name = stripped.substring(nameSeparator + " ".length());
 
-            return compileType(inputType).map(outputType -> {
+            return compileType(inputType, typeParams).map(outputType -> {
                 return generateDefinition(modifiers, outputType, name);
             });
         }
@@ -798,13 +838,18 @@ public class Main {
         return modifiers + type + " " + name;
     }
 
-    private static Option<String> compileType(String type) {
+    private static Option<String> compileType(String type, List_<List_<String>> frames) {
         String stripped = type.strip();
+
+        if (isTypeParam(frames, stripped)) {
+            return new Some<>(stripped);
+        }
+
         if (stripped.equals("void")) return new Some<>("void");
         if (stripped.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 
         if (stripped.endsWith("[]"))
-            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()), frames).map(value -> value + "*");
 
         if (isSymbol(stripped)) return new Some<>("struct " + stripped);
         if (stripped.endsWith(">")) {
@@ -815,7 +860,7 @@ public class Main {
                 if (isSymbol(base)) {
                     String oldArguments = withoutEnd.substring(genStart + "<".length());
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                    return parseAll(segments, Main::compileType).map(newArguments -> {
+                    return parseAll(segments, type1 -> compileType(type1, frames)).map(newArguments -> {
                         if (base.equals("Function")) {
                             return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
                         }
@@ -828,7 +873,7 @@ public class Main {
                             return generateFunctionalType(newArguments.get(0), Lists.empty());
                         }
 
-                        expansions.add(new Tuple<>(base, newArguments));
+                        expansions = expansions.add(new Tuple<>(base, newArguments));
 
                         String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
                         return base + "__" + String.join("_", joined) + "__";
@@ -838,6 +883,12 @@ public class Main {
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static boolean isTypeParam(List_<List_<String>> frames, String stripped) {
+        return frames.stream().anyMatch(frame -> {
+            return Lists.contains(frame, stripped, String::equals);
+        });
     }
 
     private static String generateGeneric(String base, List_<String> newArguments) {
