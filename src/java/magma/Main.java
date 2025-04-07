@@ -39,6 +39,8 @@ public class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         boolean isEmpty();
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     private interface List_<T> {
@@ -390,6 +392,11 @@ public class Main {
         public boolean isEmpty() {
             return false;
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(value, otherValue));
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -436,6 +443,11 @@ public class Main {
         public boolean isEmpty() {
             return true;
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return new None<>();
+        }
     }
 
     private static class EmptyHead<T> implements Head<T> {
@@ -453,10 +465,6 @@ public class Main {
 
         public static <T> Stream_<T> empty() {
             return new HeadedStream<>(new EmptyHead<>());
-        }
-
-        public static <T> Stream_<T> fromOption(Option<T> option) {
-            return new HeadedStream<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         }
     }
 
@@ -876,6 +884,10 @@ public class Main {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
 
+        if (input.startsWith("new ")) {
+            return new Some<>("Temp()");
+        }
+
         int arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             String paramName = stripped.substring(0, arrowIndex).strip();
@@ -908,6 +920,15 @@ public class Main {
                 String paramName = newObject.toLowerCase();
                 return generateLambda(paramName, generateInvocation(caller, paramName));
             });
+        }
+
+        int operatorIndex = stripped.indexOf("+");
+        if (operatorIndex >= 0) {
+            String left = stripped.substring(0, operatorIndex);
+            String right = stripped.substring(operatorIndex + "+".length());
+            return compileValue(left)
+                    .and(() -> compileValue(right))
+                    .map(tuple -> tuple.left + " + " + tuple.right);
         }
 
         if (isSymbol(stripped)) {
