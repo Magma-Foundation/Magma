@@ -946,6 +946,7 @@ public class Main {
 
         return compileOperator(input, "+")
                 .or(() -> compileOperator(input, "-"))
+                .or(() -> compileOperator(input, "=="))
                 .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> new Some<>(invalidate("value", input)));
