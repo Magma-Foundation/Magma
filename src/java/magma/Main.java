@@ -682,20 +682,21 @@ public class Main {
         if (contentStart < 0) return new None<>();
 
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
+        String body = afterKeyword.substring(contentStart + "{".length()).strip();
+
         int permitsIndex = beforeContent.indexOf("permits");
         String withoutPermits = permitsIndex >= 0
                 ? beforeContent.substring(0, permitsIndex).strip()
                 : beforeContent;
 
         int paramStart = withoutPermits.indexOf("(");
-        String withoutPermits1 = paramStart >= 0
+
+        String withoutParams = paramStart >= 0
                 ? withoutPermits.substring(0, paramStart)
                 : withoutPermits;
 
-        String body = afterKeyword.substring(contentStart + "{".length()).strip();
-
-        return compileGenericTypedBlock(withoutPermits1, modifiers, body, typeParams).or(
-                () -> compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists.empty(), Lists.empty()));
+        return compileGenericTypedBlock(withoutParams, modifiers, body, typeParams).or(
+                () -> compileToStruct(modifiers, withoutParams, body, typeParams, Lists.empty(), Lists.empty()));
     }
 
     private static Option<String> compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List_<List_<String>> typeParams) {
