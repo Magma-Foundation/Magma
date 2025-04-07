@@ -817,16 +817,15 @@ public class Main {
         if (!stripped.startsWith("import ")) return createPrefixErr(stripped, "import ");
         String right = stripped.substring("import ".length());
 
-        if (!right.endsWith(";")) return createSuffixErr(right, ";");
-        String left = right.substring(0, right.length() - ";".length());
+        return compileSuffix(right, ";", left -> {
+            List_<String> slices = divideByChar(left, '.');
+            if (isFunctionalImport(slices)) return new Ok<>("");
 
-        List_<String> slices = divideByChar(left, '.');
-        if (isFunctionalImport(slices)) return new Ok<>("");
-
-        String joined = slices.stream().collect(new Joiner("/")).orElse("");
-        String value = "#include \"./%s.h\"\n".formatted(joined);
-        imports = imports.add(value);
-        return new Ok<>("");
+            String joined = slices.stream().collect(new Joiner("/")).orElse("");
+            String value = "#include \"./%s.h\"\n".formatted(joined);
+            imports = imports.add(value);
+            return new Ok<>("");
+        });
     }
 
     private static boolean isFunctionalImport(List_<String> slices) {
@@ -910,15 +909,21 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileToStruct(ParseState defined, String modifiers, String name, String body) {
-        if (!body.endsWith("}")) return createSuffixErr(body, "}");
-        String inputContent = body.substring(0, body.length() - "}".length());
+        return compileSuffix(body, "}", inputContent -> Main.getStringCompileErrorResult(inputContent, defined, modifiers, name));
+    }
 
+    private static Result<String, CompileError> getStringCompileErrorResult(String inputContent, ParseState defined, String modifiers, String name) {
         return compileStatements(inputContent, input1 -> compileClassSegment(defined, input1))
                 .mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
     }
 
-    private static Result<String, CompileError> createSuffixErr(String input, String suffix) {
-        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
+    private static Result<String, CompileError> compileSuffix(String input, String suffix, Rule rule) {
+        if (input.endsWith(suffix)) {
+            String slice = input.substring(0, input.length() - suffix.length());
+            return rule.compile(slice);
+        } else {
+            return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
+        }
     }
 
     private static String generateStruct(String modifiers, String name, String content) {
@@ -945,24 +950,19 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileDefinitionStatement(ParseState state, String input) {
-        if (!input.endsWith(";")) return createSuffixErr(input, ";");
-
-        String sliced = input.substring(0, input.length() - ";".length());
-        return compileDefinition(sliced, state).mapValue(Main::generateStatement);
+        return compileSuffix(input, ";", sliced -> compileDefinition(sliced, state).mapValue(Main::generateStatement));
     }
 
     private static Result<String, CompileError> compileGlobal(ParseState state, String input) {
-        if (!input.endsWith(";")) return createSuffixErr(input, ";");
-
-        String substring = input.substring(0, input.length() - ";".length());
-        Result<String, CompileError> maybeInitialization = compileInitialization(state, substring);
-
-        return maybeInitialization.mapValue(value -> value + ";\n")
-                .mapValue(globals::add)
-                .mapValue(result -> {
-                    globals = result;
-                    return "";
-                });
+        return compileSuffix(input, ";", substring -> {
+            return compileInitialization(state, substring)
+                    .mapValue(value -> value + ";\n")
+                    .mapValue(globals::add)
+                    .mapValue(result -> {
+                        globals = result;
+                        return "";
+                    });
+        });
     }
 
     private static Result<String, CompileError> compileMethod(ParseState state, String input) {
@@ -1046,8 +1046,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compilePostFix(String input) {
-        if (input.strip().endsWith("++;")) return new Ok<>("\n\ttemp++;");
-        return createSuffixErr(input.strip(), "++;");
+        return compileSuffix(input, "++;", rule -> new Ok<>("\n\ttemp++;"));
     }
 
     private static Result<String, CompileError> compileElse(String input) {
@@ -1073,16 +1072,14 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileStatement(ParseState state, String input) {
-        String stripped = input.strip();
-        if (!stripped.endsWith(";")) return createSuffixErr(stripped, ";");
-
-        String slice = stripped.substring(0, stripped.length() - ";".length());
-        return compileOr(slice, Lists.of(
-                withoutEnd -> compileReturn(state, withoutEnd),
-                withoutEnd -> compileInitialization(state, withoutEnd),
-                withoutEnd -> compileAssignment(state, withoutEnd),
-                withoutEnd -> compileInvocationStatement(state, withoutEnd)
-        ));
+        return compileSuffix(input, ";", slice -> {
+            return compileOr(slice, Lists.of(
+                    withoutEnd -> compileReturn(state, withoutEnd),
+                    withoutEnd -> compileInitialization(state, withoutEnd),
+                    withoutEnd -> compileAssignment(state, withoutEnd),
+                    withoutEnd -> compileInvocationStatement(state, withoutEnd)
+            ));
+        });
     }
 
     private static Result<String, CompileError> compileReturn(ParseState state, String withoutEnd) {
@@ -1207,18 +1204,18 @@ public class Main {
         if (!stripped.startsWith("new ")) return createPrefixErr(stripped, "new ");
 
         String withoutNew = stripped.substring("new ".length());
-        if (!withoutNew.endsWith(")")) return createSuffixErr(withoutNew, ")");
 
-        String slice = withoutNew.substring(0, withoutNew.length() - ")".length());
-        int paramStart = slice.indexOf("(");
+        return compileSuffix(withoutNew, ")", slice -> {
+            int paramStart = slice.indexOf("(");
 
-        String rawCaller = slice.substring(0, paramStart).strip();
-        String caller = rawCaller.endsWith("<>")
-                ? rawCaller.substring(0, rawCaller.length() - "<>".length())
-                : rawCaller;
+            String rawCaller = slice.substring(0, paramStart).strip();
+            String caller = rawCaller.endsWith("<>")
+                    ? rawCaller.substring(0, rawCaller.length() - "<>".length())
+                    : rawCaller;
 
-        String inputArguments = slice.substring(paramStart + "(".length());
-        return compileAllValues(state, inputArguments).flatMapValue(arguments -> compileType(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+            String inputArguments = slice.substring(paramStart + "(".length());
+            return compileAllValues(state, inputArguments).flatMapValue(arguments -> compileType(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+        });
     }
 
     private static Result<String, CompileError> createPrefixErr(String input, String prefix) {
@@ -1337,9 +1334,20 @@ public class Main {
 
     private static Result<String, CompileError> compileInvocation(ParseState state, String input) {
         String stripped = input.strip();
-        if (!stripped.endsWith(")")) return createSuffixErr(stripped, ")");
-        String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
+        return compileSuffix(stripped, ")", withoutEnd -> {
+            int argsStart = findArgStart(withoutEnd);
+            if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
+
+            String inputCaller = withoutEnd.substring(0, argsStart);
+            String inputArguments = withoutEnd.substring(argsStart + 1);
+            return compileAllValues(state, inputArguments).flatMapValue(
+                    outputValues -> compileValue(inputCaller, state).mapValue(
+                            outputCaller -> generateInvocation(outputCaller, outputValues)));
+        });
+    }
+
+    private static int findArgStart(String withoutEnd) {
         int argsStart = -1;
         int depth = 0;
         for (int i = withoutEnd.length() - 1; i >= 0; i--) {
@@ -1352,14 +1360,7 @@ public class Main {
                 if (c == '(') depth--;
             }
         }
-
-        if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
-
-        String inputCaller = withoutEnd.substring(0, argsStart);
-        String inputArguments = withoutEnd.substring(argsStart + 1);
-        return compileAllValues(state, inputArguments).flatMapValue(
-                outputValues -> compileValue(inputCaller, state).mapValue(
-                        outputCaller -> generateInvocation(outputCaller, outputValues)));
+        return argsStart;
     }
 
     private static Result<String, CompileError> compileAllValues(ParseState state, String arguments) {
@@ -1494,13 +1495,9 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileArray(ParseState parseState, String type) {
-        String stripped = type.strip();
-        if (stripped.endsWith("[]")) {
-            String slice = stripped.substring(0, stripped.length() - "[]".length());
+        return compileSuffix(type.strip(), "[]", slice -> {
             return compileType(parseState, slice).mapValue(value -> value + "*");
-        }
-
-        return createSuffixErr(stripped, "[]");
+        });
     }
 
     private static Result<String, CompileError> compileOr(String input, List_<Rule> rules) {
