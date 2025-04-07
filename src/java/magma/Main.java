@@ -648,6 +648,13 @@ public class Main {
         }
     }
 
+    private record TypeRule(String type, Rule childRule) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return childRule.compile(input).mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
+        }
+    }
+
     private static List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static Map_<String, Function<List_<String>, Result<String, CompileError>>> generators = Maps.empty();
     private static List_<String> imports = Lists.empty();
@@ -920,7 +927,7 @@ public class Main {
                 input -> compileTypedBlock(state, "class", input),
                 input -> compileTypedBlock(state, "interface ", input),
                 input -> compileTypedBlock(state, "record ", input),
-                input -> compileMethod(state, input),
+                new TypeRule("method", input -> compileMethod(state, input)),
                 input -> compileGlobal(state, input),
                 input -> compileDefinitionStatement(state, input)
         ));
