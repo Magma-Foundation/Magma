@@ -675,7 +675,7 @@ public class Main {
         Path_ source = Paths.get(".", "src", "java", "magma", "Main.java");
         source.readString()
                 .match(input -> runWithInput(source, input), Some::new)
-                .ifPresent(error -> System.err.println(error.display()));
+                .ifPresent(Files::writeToDebug);
     }
 
     private static Option<ApplicationError> runWithInput(Path_ source, String input) {
@@ -1135,10 +1135,10 @@ public class Main {
                 input -> compileTernary(state, input),
                 input -> compileDataAccess(input, state),
                 input -> compileMethodAccess(state, input),
-                input -> compileOperator(state, input, "+"),
-                input -> compileOperator(state, input, "-"),
-                input -> compileOperator(state, input, "=="),
-                input -> compileOperator(state, input, ">=")
+                new TypeRule("add", input -> compileOperator(state, input, "+")),
+                new TypeRule("subtract", input -> compileOperator(state, input, "-")),
+                new TypeRule("equals", input -> compileOperator(state, input, "==")),
+                new TypeRule("greater-than-or-equals", input -> compileOperator(state, input, ">="))
         ));
     }
 

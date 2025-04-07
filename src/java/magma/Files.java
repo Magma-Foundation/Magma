@@ -20,4 +20,10 @@ public class Files {
             return new Main.Err<>(new ExceptionalIOError(e));
         }
     }
+
+    static void writeToDebug(Main.Error error) {
+        Paths.get(".", "debug.txt")
+                .writeString(error.display())
+                .ifPresent(inner -> System.err.println(inner.display()));
+    }
 }
