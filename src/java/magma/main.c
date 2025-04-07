@@ -1,43 +1,38 @@
-/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
-     *//* void ifPresent(Consumer<T> ifPresent); *//* 
+/* <R> */struct R match;
+void ifPresent;
+/* <R> *//* Option<R> */ flatMap;
+/* <R> *//* Option<R> */ map;
+struct T orElse;
+struct boolean isPresent;
+/* Tuple<Boolean, *//* T> */ toTuple;
+struct T orElseGet;
+/* Option<T> */ or;
+/* List_<T> */ add;
+/* List_<T> */ addAll;
+void forEach;
+/* Stream_<T> */ stream;
+struct T popFirst;
+struct boolean isEmpty;
+/* <R> *//* Stream_<R> */ map;
+/* <R> */struct R foldWithInitial;
+/* <C> */struct C collect;
+/* <R> *//* Option<R> */ foldToOption;
+struct C createInitial;
+struct C fold;
+/* Option<T> */ next;
+/* private static final List_<String> imports *//* = */ Lists.empty;
+/* private static final List_<String> structs *//* = */ Lists.empty;
+/* private static final List_<String> functions *//* = */ Lists.empty;
+/* private static List_<String> globals *//* = */ Lists.empty;
+/* return */struct new Some<>;
+/* }
 
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper); *//* 
+        Option<String> maybeMethod *//* = */ compileMethod;
+/* return */struct new Some<>;
+/* }
 
-        <R> Option<R> map(Function<T, R> mapper); *//* 
-
-        T orElse(T other); *//* 
-
-        boolean isPresent(); *//* 
-
-        Tuple<Boolean, T> toTuple(T other); *//* 
-
-        T orElseGet(Supplier<T> other); *//* 
-
-        Option<T> or(Supplier<Option<T>> other); *//* 
-     *//* List_<T> add(T element); *//* 
-
-        List_<T> addAll(List_<T> elements); *//* 
-
-        void forEach(Consumer<T> consumer); *//* 
-
-        Stream_<T> stream(); *//* 
-
-        T popFirst(); *//* 
-
-        boolean isEmpty(); *//* 
-     *//* <R> Stream_<R> map(Function<T, R> mapper); *//* 
-
-        <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder); *//* 
-
-        <C> C collect(Collector<T, C> collector); *//* 
-
-        <R> Option<R> foldToOption(R initial, BiFunction<R, T, Option<R>> folder); *//* 
-     *//* C createInitial(); *//* 
-
-        C fold(C current, T element); *//* 
-     *//* Option<T> next(); *//* 
-     *//* 
- */#include <temp.h>
+        return */struct new Some<>;
+#include <temp.h>
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
@@ -69,20 +64,21 @@ struct Temp {
 };
 struct Temp {
 };
+struct Temp {
+};
+/* private static Option<String> compileClassSegment(String input) {
+        if (input.isBlank()) return new Some<>("");
+
+        Option<String> maybeInterface = compileTypedBlock(input, " */ struct ");
+        if (maybeInterface.isPresent()) return maybeInterface;
+
+        int recordIndex = input.indexOf("record ");
+        if (recordIndex >= 0) {
+};
 /* public */ struct Main {
 };
 
-	/* private static final *//* List_<String> */ imports = Lists.empty();;;
-
-	/* private static final *//* List_<String> */ structs = Lists.empty();;;
-
-	/* private static final *//* List_<String> */ functions = Lists.empty();;;
-
-	/* private static *//* List_<String> */ globals = Lists.empty();;;
-
 	/* private static */struct int lambdaCounter = /*  0; */;;
-/* private record *//* Tuple<A, */ B>(struct A left, struct B right){
-}
 /* private static final class RangeHead implements Head<Integer> {
         private final int size;
         private int counter = 0;
@@ -400,25 +396,6 @@ auto __lambda12__(auto main){
 	System.err.println(/* "Invalid " + type + ": " + input */);
 	/* return generatePlaceholder */(input);
 }
-/* private static *//* Option<String> */ compileClassSegment(struct String input){
-	/* Option<String> */ maybeMethod = compileMethod(input);/* 
-        if (maybeMethod.isPresent()) return maybeMethod; */
-	/* Option<String> */ maybeInterface = compileTypedBlock(input, "interface ");/* 
-        if (maybeInterface.isPresent()) return maybeInterface; */
-	struct int recordIndex = input.indexOf("record ");/* 
-        if (recordIndex >= 0) {
-            return new Some<>(generateStruct("", "Temp"));
-        } */
-	/* Option<String> */ maybeAssignment = compileAssignment(input);/* 
-        if (maybeAssignment.isPresent()) {
-            globals = maybeAssignment.map(value -> value + ";\n")
-                    .map(globals::add)
-                    .orElse(globals);
-
-            return new Some<>("");
-        } */
-	/* return new Some<> */(invalidate("class segment", input));
-}
 /* private static *//* Option<String> */ compileMethod(struct String input){
 	struct int paramStart = input.indexOf("(");
 	/* if (paramStart < 0) return new None<> */();
@@ -427,11 +404,12 @@ auto __lambda12__(auto main){
 	struct int paramEnd = withParams.indexOf(")");
 	/* if (paramEnd < 0) return new None<> */();
 	struct String paramString = withParams.substring(/* 0 */, paramEnd);
-	struct String withBody = withParams.substring(paramEnd + ")".length()).strip();
-	/* if (!withBody */.startsWith("{") || !withBody.endsWith("}")) return new None<>();/* 
+	struct String withBody = withParams.substring(paramEnd + ")".length()).strip();/* 
 
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
+                if (!withBody.startsWith("{") || !withBody.endsWith("}"))
+                    return new Some<>(definition + ";\n");
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
                     return addFunction(definition, outputParams, statement);
                 });

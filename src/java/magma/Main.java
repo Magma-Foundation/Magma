@@ -522,8 +522,7 @@ public class Main {
     }
 
     private static Option<String> compileClassSegment(String input) {
-        Option<String> maybeMethod = compileMethod(input);
-        if (maybeMethod.isPresent()) return maybeMethod;
+        if (input.isBlank()) return new Some<>("");
 
         Option<String> maybeInterface = compileTypedBlock(input, "interface ");
         if (maybeInterface.isPresent()) return maybeInterface;
@@ -532,6 +531,9 @@ public class Main {
         if (recordIndex >= 0) {
             return new Some<>(generateStruct("", "Temp"));
         }
+
+        Option<String> maybeMethod = compileMethod(input);
+        if (maybeMethod.isPresent()) return maybeMethod;
 
         Option<String> maybeAssignment = compileAssignment(input);
         if (maybeAssignment.isPresent()) {
@@ -557,10 +559,11 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        if (!withBody.startsWith("{") || !withBody.endsWith("}")) return new None<>();
-
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
+                if (!withBody.startsWith("{") || !withBody.endsWith("}"))
+                    return new Some<>(definition + ";\n");
+
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
                     return addFunction(definition, outputParams, statement);
                 });
