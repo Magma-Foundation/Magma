@@ -1,18 +1,3 @@
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-/* 
-
-public  */struct Main {
-};
 /* private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     } *//* 
@@ -29,81 +14,14 @@ public  */struct Main {
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
         }
-    } *//* public static */void main(struct String* args){
-	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
-}
-/* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
-        String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
-	struct Path target = source.resolveSibling("main.c");
-	/* return writeString */(target, output);
-}
-/* private static *//* Optional<IOException> */ writeString(struct Path target, struct String output){/* 
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } *//*  catch (IOException e) {
-            return Optional.of(e);
-        } */
-}
-/* private static Result<String, *//* IOException> */ readString(struct Path source){/* 
-        try {
-            return new Ok<>(Files.readString(source));
-        } *//*  catch (IOException e) {
-            return new Err<>(e);
-        } */
-}
-/* private static */struct String compile(struct String input){
-	/* Optional<String> */ s = compileStatements(input, /*  Main::compileRootSegment */);
-	/* return s */.orElse("");
-}
-/* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
-	/* return compileAll */(divideStatements(input), compiler, /*  Main::mergeStatements */);
-}
-/* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* Optional<StringBuilder> */ maybeOutput = Optional.of(/* new StringBuilder */());/* 
-        for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(str -> merger.apply(output, str));
-            });
-        } */
-	/* return maybeOutput */.map(/* StringBuilder::toString */);
-}
-/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
-	/* return output */.append(str);
-}
-/* private static *//* ArrayList<String> */ divideStatements(struct String input){
-	/* ArrayList<String> */ segments = /* new ArrayList<> */();
-	struct StringBuilder buffer = /* new StringBuilder */();
-	struct int depth = /*  0 */;
-	/* for *//* (int */ i = /*  0 */;
-	/* i < input */.length();/*  i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '} *//* ' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            } *//*  else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            } */
-}
-/* 
+    } *//* 
+
+    private static final List<String> imports = new ArrayList<>(); *//* 
+    private static final List<String> structs = new ArrayList<>(); *//* 
+    private static final List<String> functions = new ArrayList<>(); *//* 
         segments.add(buffer.toString()); *//* 
         return segments; *//* 
-     *//* 
-
-    private static Optional<String> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return Optional.of("");
-        if (input.strip().startsWith("import ")) return Optional.of("#include <temp.h>\n");
-        int keywordIndex = input.indexOf(" */struct ");
-        if (keywordIndex >= 0) {
-};
-/* String modifiers = input.substring(0, keywordIndex); *//* 
+     *//* String modifiers = input.substring(0, keywordIndex); *//* 
             String right = input.substring(keywordIndex + "class ".length()); *//* 
             int contentStart = right.indexOf("{");
             if (contentStart >= 0) {
@@ -112,7 +30,7 @@ public  */struct Main {
                 if (body.endsWith("}")) {
                     String inputContent = body.substring(0, body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> {
-                        return generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" + outputContent;
+                        return generateStruct(modifiers, name) + outputContent;
                     });
                 }
             } *//* 
@@ -120,6 +38,12 @@ public  */struct Main {
 
         return Optional.of(invalidate("root segment", input));
      *//* 
+
+    private static String generateStruct(String modifiers, String name) {
+        String generated = generatePlaceholder(modifiers) + "struct " + name + " {\n};\n";
+        structs.add(generated);
+        return "";
+    } *//* 
 
     private static String invalidate(String type, String input) {
         System.err.println("Invalid " + type + ": " + input);
@@ -140,29 +64,26 @@ public  */struct Main {
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
         int paramEnd = withParams.indexOf(")");
-        if (paramEnd >= 0) {
-            String paramString = withParams.substring(0, paramEnd);
-            String withBody = withParams.substring(paramEnd + ")".length()).strip();
+        if (paramEnd < 0) return Optional.empty();
 
-            if (withBody.startsWith("{") && withBody.endsWith("}")) {
-                return compileValues(paramString, Main::compileDefinition)
-                        .flatMap(outputParams -> {
-                            return compileDefinition(header).flatMap(definition -> {
-                                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                                    return definition + "(" +
-                                            outputParams +
-                                            "){" +
-                                            statement +
-                                            "\n}\n";
-                                });
-                            });
-                        });
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
+        String paramString = withParams.substring(0, paramEnd);
+        String withBody = withParams.substring(paramEnd + ")".length()).strip();
+
+        if (!withBody.startsWith("{") || !withBody.endsWith("}")) return Optional.empty();
+
+        return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
+            return compileDefinition(header).flatMap(definition -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
+                    return generateFunction(definition, outputParams, statement);
+                });
+            });
+        });
+    } *//* 
+
+    private static String generateFunction(String definition, String params, String content) {
+        String function = definition + "(" + params + "){" + content + "\n}\n";
+        functions.add(function);
+        return "";
     } *//* 
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
@@ -305,7 +226,121 @@ public  */struct Main {
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */";
     } *//* 
-} */int main(){
+} */#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+/* 
+
+public  */struct Main {
+};
+/* 
+
+    private static Optional<String> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return Optional.of("");
+
+        if (input.strip().startsWith("import ")) {
+            String value = "#include <temp.h>\n";
+            imports.add(value);
+            return Optional.of("");
+        }
+
+        int keywordIndex = input.indexOf(" */struct ");
+        if (keywordIndex >= 0) {
+};
+/* public static */void main(struct String* args){
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+	readString(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
+}
+/* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
+        String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
+	struct Path target = source.resolveSibling("main.c");
+	/* return writeString */(target, output);
+}
+/* private static *//* Optional<IOException> */ writeString(struct Path target, struct String output){/* 
+        try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } *//*  catch (IOException e) {
+            return Optional.of(e);
+        } */
+}
+/* private static Result<String, *//* IOException> */ readString(struct Path source){/* 
+        try {
+            return new Ok<>(Files.readString(source));
+        } *//*  catch (IOException e) {
+            return new Err<>(e);
+        } */
+}
+/* private static */struct String compile(struct String input){
+	/* List<String> */ segments = divideStatements(input);/* 
+        return parseAll(segments, Main::compileRootSegment)
+                .map(compiled -> {
+                    compiled.addAll(imports);
+                    compiled.addAll(structs);
+                    compiled.addAll(functions);
+                    return compiled;
+                } */
+	/* )
+                 */.map(/* compiled -> mergeAll(compiled */, /*  Main::mergeStatements) */).orElse("");
+}
+/* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
+	/* return compileAll */(divideStatements(input), compiler, /*  Main::mergeStatements */);
+}
+/* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
+	/* return parseAll */(segments, compiler).map(/* compiled -> mergeAll(compiled */, /*  merger) */);
+}
+/* private static */struct String mergeAll(/* List<String> */ compiled, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
+	struct StringBuilder output = /* new StringBuilder */();/* 
+
+        for (String segment : compiled) {
+            output = merger.apply(output, segment);
+        } */
+	/* return output */.toString();
+}
+/* private static *//* Optional<List<String>> */ parseAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler){
+	/* Optional<List<String>> */ maybeCompiled = Optional.of(/* new ArrayList<String> */());/* 
+        for (String segment : segments) {
+            maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
+                return compiler.apply(segment).map(compiled -> {
+                    allCompiled.add(compiled);
+                    return allCompiled;
+                });
+            });
+        } *//* 
+        return maybeCompiled; */
+}
+/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
+	/* return output */.append(str);
+}
+/* private static *//* ArrayList<String> */ divideStatements(struct String input){
+	/* ArrayList<String> */ segments = /* new ArrayList<> */();
+	struct StringBuilder buffer = /* new StringBuilder */();
+	struct int depth = /*  0 */;
+	/* for *//* (int */ i = /*  0 */;
+	/* i < input */.length();/*  i++) {
+            char c = input.charAt(i);
+            buffer.append(c);
+            if (c == ';' && depth == 0) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else if (c == '} *//* ' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
+            } *//*  else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+            } */
+}
+int main(){
 	__main__();
 	return 0;
 }

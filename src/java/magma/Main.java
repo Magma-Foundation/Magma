@@ -31,6 +31,10 @@ public class Main {
         }
     }
 
+    private static final List<String> imports = new ArrayList<>();
+    private static final List<String> structs = new ArrayList<>();
+    private static final List<String> functions = new ArrayList<>();
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -63,8 +67,16 @@ public class Main {
     }
 
     private static String compile(String input) {
-        Optional<String> s = compileStatements(input, Main::compileRootSegment);
-        return s.orElse("");
+        List<String> segments = divideStatements(input);
+        return parseAll(segments, Main::compileRootSegment)
+                .map(compiled -> {
+                    compiled.addAll(imports);
+                    compiled.addAll(structs);
+                    compiled.addAll(functions);
+                    return compiled;
+                })
+                .map(compiled -> mergeAll(compiled, Main::mergeStatements))
+                .orElse("");
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
@@ -76,14 +88,30 @@ public class Main {
             Function<String, Optional<String>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
-        for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
-                return compiler.apply(segment).map(str -> merger.apply(output, str));
-            });
+        return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
+    }
+
+    private static String mergeAll(List<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        StringBuilder output = new StringBuilder();
+
+        for (String segment : compiled) {
+            output = merger.apply(output, segment);
         }
 
-        return maybeOutput.map(StringBuilder::toString);
+        return output.toString();
+    }
+
+    private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
+        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
+        for (String segment : segments) {
+            maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
+                return compiler.apply(segment).map(compiled -> {
+                    allCompiled.add(compiled);
+                    return allCompiled;
+                });
+            });
+        }
+        return maybeCompiled;
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String str) {
@@ -115,7 +143,13 @@ public class Main {
 
     private static Optional<String> compileRootSegment(String input) {
         if (input.startsWith("package ")) return Optional.of("");
-        if (input.strip().startsWith("import ")) return Optional.of("#include <temp.h>\n");
+
+        if (input.strip().startsWith("import ")) {
+            String value = "#include <temp.h>\n";
+            imports.add(value);
+            return Optional.of("");
+        }
+
         int keywordIndex = input.indexOf("class ");
         if (keywordIndex >= 0) {
             String modifiers = input.substring(0, keywordIndex);
@@ -127,13 +161,19 @@ public class Main {
                 if (body.endsWith("}")) {
                     String inputContent = body.substring(0, body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileClassSegment).map(outputContent -> {
-                        return generatePlaceholder(modifiers) + "struct " + name + " {\n};\n" + outputContent;
+                        return generateStruct(modifiers, name) + outputContent;
                     });
                 }
             }
         }
 
         return Optional.of(invalidate("root segment", input));
+    }
+
+    private static String generateStruct(String modifiers, String name) {
+        String generated = generatePlaceholder(modifiers) + "struct " + name + " {\n};\n";
+        structs.add(generated);
+        return "";
     }
 
     private static String invalidate(String type, String input) {
@@ -155,29 +195,26 @@ public class Main {
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
         int paramEnd = withParams.indexOf(")");
-        if (paramEnd >= 0) {
-            String paramString = withParams.substring(0, paramEnd);
-            String withBody = withParams.substring(paramEnd + ")".length()).strip();
+        if (paramEnd < 0) return Optional.empty();
 
-            if (withBody.startsWith("{") && withBody.endsWith("}")) {
-                return compileValues(paramString, Main::compileDefinition)
-                        .flatMap(outputParams -> {
-                            return compileDefinition(header).flatMap(definition -> {
-                                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                                    return definition + "(" +
-                                            outputParams +
-                                            "){" +
-                                            statement +
-                                            "\n}\n";
-                                });
-                            });
-                        });
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
+        String paramString = withParams.substring(0, paramEnd);
+        String withBody = withParams.substring(paramEnd + ")".length()).strip();
+
+        if (!withBody.startsWith("{") || !withBody.endsWith("}")) return Optional.empty();
+
+        return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
+            return compileDefinition(header).flatMap(definition -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
+                    return generateFunction(definition, outputParams, statement);
+                });
+            });
+        });
+    }
+
+    private static String generateFunction(String definition, String params, String content) {
+        String function = definition + "(" + params + "){" + content + "\n}\n";
+        functions.add(function);
+        return "";
     }
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
