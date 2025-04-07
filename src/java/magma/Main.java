@@ -832,6 +832,9 @@ public class Main {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
 
+        if (stripped.startsWith("if ")) return new Some<>("if (1) {\n}\n");
+        if (stripped.startsWith("for ")) return new Some<>("for (;;) {\n}\n");
+
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
@@ -1093,7 +1096,7 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        if(input.equals("static")) return false;
+        if (input.equals("static")) return false;
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
