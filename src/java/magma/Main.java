@@ -1,10 +1,13 @@
 package magma;
 
+import java.util.LinkedList;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     sealed public interface Result<T, X> permits Ok, Err {
@@ -1345,21 +1348,47 @@ public class Main {
     private static int findArgStart(String withoutEnd) {
         int argsStart = -1;
         int depth = 0;
-        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
-            char c = withoutEnd.charAt(i);
+
+        LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, withoutEnd.length())
+                .map(index -> withoutEnd.length() - index - 1)
+                .mapToObj(index -> new Tuple<>(index, withoutEnd.charAt(index)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            Tuple<Integer, Character> tuple = queue.pop();
+            Integer i = tuple.left;
+            Character c = tuple.right;
+
+            if (c == '"') {
+                while (!queue.isEmpty()) {
+                    Tuple<Integer, Character> popped = queue.pop();
+
+                    if (popped.right == '"') {
+                        if (!queue.isEmpty() && queue.peekFirst().right == '\\') {
+                            continue;
+                        }
+
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
             if (c == '(' && depth == 0) {
                 argsStart = i;
                 break;
-            } else {
-                if (c == ')') depth++;
-                if (c == '(') depth--;
             }
+
+            if (c == ')') depth++;
+            if (c == '(') depth--;
         }
         return argsStart;
     }
 
     private static Result<String, CompileError> compileAllValues(ParseState state, String arguments) {
-        return compileValues(arguments, input -> compileValue(input, state));
+        return compileValues(arguments, input -> compileValue(input, state).mapErr(err -> new CompileError("Invalid argument", input, Lists.of(err))))
+                .mapErr(err -> new CompileError("Invalid arguments", arguments, Lists.of(err)));
     }
 
     private static String generateInvocation(String caller, String arguments) {
