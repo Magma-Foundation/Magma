@@ -658,6 +658,18 @@ public class Main {
         }
     }
 
+    private record SuffixRule(Rule rule, String suffix) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            if (input.endsWith(suffix())) {
+                String slice = input.substring(0, input.length() - suffix().length());
+                return rule().compile(slice);
+            } else {
+                return new Err<>(new CompileError("Suffix '" + suffix() + "' not present", input));
+            }
+        }
+    }
+
     public static final List_<String> MODIFIERS = Lists.of(
             "private",
             "static",
@@ -825,7 +837,7 @@ public class Main {
     private static Result<String, CompileError> compileImport(String input) {
         String stripped = input.strip();
         return compilePrefix(stripped, "import ", right -> {
-            return compileSuffix(right, ";", left -> {
+            return new SuffixRule(left -> {
                 List_<String> slices = divideByChar(left, '.');
                 if (isFunctionalImport(slices)) return new Ok<>("");
 
@@ -833,7 +845,7 @@ public class Main {
                 String value = "#include \"./%s.h\"\n".formatted(joined);
                 imports = imports.add(value);
                 return new Ok<>("");
-            });
+            }, ";").compile(right);
         });
     }
 
@@ -918,21 +930,12 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileToStruct(ParseState defined, String modifiers, String name, String body) {
-        return compileSuffix(body, "}", inputContent -> Main.getStringCompileErrorResult(inputContent, defined, modifiers, name));
+        return new SuffixRule(inputContent -> Main.getStringCompileErrorResult(inputContent, defined, modifiers, name), "}").compile(body);
     }
 
     private static Result<String, CompileError> getStringCompileErrorResult(String inputContent, ParseState defined, String modifiers, String name) {
         return compileStatements(inputContent, input1 -> compileClassSegment(defined, input1))
                 .mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
-    }
-
-    private static Result<String, CompileError> compileSuffix(String input, String suffix, Rule rule) {
-        if (input.endsWith(suffix)) {
-            String slice = input.substring(0, input.length() - suffix.length());
-            return rule.compile(slice);
-        } else {
-            return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
-        }
     }
 
     private static String generateStruct(String modifiers, String name, String content) {
@@ -950,20 +953,20 @@ public class Main {
                 input -> compileTypedBlock(state, "record ", input),
                 createMethodRule(state),
                 input -> compileGlobal(state, input),
-                input -> compileDefinitionStatement(state, input)
+                createDefinitionStatementRule(state)
         ));
+    }
+
+    private static TypeRule createDefinitionStatementRule(ParseState state) {
+        return new TypeRule("definition", input -> new SuffixRule(sliced -> compileDefinition(sliced, state).mapValue(Main::generateStatement), ";").compile(input));
     }
 
     private static TypeRule createMethodRule(ParseState state) {
         return new TypeRule("method", input -> compileMethod(state, input));
     }
 
-    private static Result<String, CompileError> compileDefinitionStatement(ParseState state, String input) {
-        return compileSuffix(input, ";", sliced -> compileDefinition(sliced, state).mapValue(Main::generateStatement));
-    }
-
     private static Result<String, CompileError> compileGlobal(ParseState state, String input) {
-        return compileSuffix(input, ";", substring -> {
+        return new SuffixRule(substring -> {
             return compileInitialization(state, substring)
                     .mapValue(value -> value + ";\n")
                     .mapValue(globals::add)
@@ -971,7 +974,7 @@ public class Main {
                         globals = result;
                         return "";
                     });
-        });
+        }, ";").compile(input);
     }
 
     private static Result<String, CompileError> compileMethod(ParseState state, String input) {
@@ -1055,7 +1058,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compilePostFix(String input) {
-        return compileSuffix(input, "++;", rule -> new Ok<>("\n\ttemp++;"));
+        return new SuffixRule(rule -> new Ok<>("\n\ttemp++;"), "++;").compile(input);
     }
 
     private static Result<String, CompileError> compileElse(String input) {
@@ -1075,14 +1078,14 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileStatement(ParseState state, String input) {
-        return compileSuffix(input, ";", slice -> {
+        return new SuffixRule(slice -> {
             return compileOr(slice, Lists.of(
                     withoutEnd -> compileReturn(state, withoutEnd),
                     withoutEnd -> compileInitialization(state, withoutEnd),
                     withoutEnd -> compileAssignment(state, withoutEnd),
                     withoutEnd -> compileInvocationStatement(state, withoutEnd)
             ));
-        });
+        }, ";").compile(input);
     }
 
     private static Result<String, CompileError> compileReturn(ParseState state, String withoutEnd) {
@@ -1204,7 +1207,7 @@ public class Main {
         String stripped = input.strip();
 
         return compilePrefix(stripped, "new ", withoutNew -> {
-            return compileSuffix(withoutNew, ")", slice -> {
+            return new SuffixRule(slice -> {
                 int paramStart = slice.indexOf("(");
 
                 String rawCaller = slice.substring(0, paramStart).strip();
@@ -1214,7 +1217,7 @@ public class Main {
 
                 String inputArguments = slice.substring(paramStart + "(".length());
                 return compileAllValues(state, inputArguments).flatMapValue(arguments -> compileType(state, caller).mapValue(type -> type + "(" + arguments + ")"));
-            });
+            }, ")").compile(withoutNew);
         });
     }
 
@@ -1231,11 +1234,11 @@ public class Main {
 
     private static Result<String, CompileError> compileString(String input) {
         return compilePrefix(input.strip(), "\"", right -> {
-            return compileSuffix(right, "\"", inner -> {
+            return new SuffixRule(inner -> {
                 return new Ok<String, CompileError>(inner)
                         .mapValue(value -> "\"" + value)
                         .mapValue(value -> value + "\"");
-            });
+            }, "\"").compile(right);
         });
     }
 
@@ -1333,7 +1336,7 @@ public class Main {
     private static Result<String, CompileError> compileInvocation(ParseState state, String input) {
         String stripped = input.strip();
 
-        return compileSuffix(stripped, ")", withoutEnd -> {
+        return new SuffixRule(withoutEnd -> {
             int argsStart = findArgStart(withoutEnd);
             if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
 
@@ -1342,7 +1345,7 @@ public class Main {
             return compileAllValues(state, inputArguments).flatMapValue(
                     outputValues -> compileValue(inputCaller, state).mapValue(
                             outputCaller -> generateInvocation(outputCaller, outputValues)));
-        });
+        }, ")").compile(stripped);
     }
 
     private static int findArgStart(String withoutEnd) {
@@ -1534,9 +1537,9 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileArray(ParseState parseState, String type) {
-        return compileSuffix(type.strip(), "[]", slice -> {
+        return new SuffixRule(slice -> {
             return compileType(parseState, slice).mapValue(value -> value + "*");
-        });
+        }, "[]").compile(type.strip());
     }
 
     private static Result<String, CompileError> compileOr(String input, List_<Rule> rules) {
