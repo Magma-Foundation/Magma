@@ -541,7 +541,7 @@ public class Main {
             expanded.add(tuple);
             if (generators.containsKey(tuple.left)) {
                 Function<List_<String>, Option<String>> generator = generators.get(tuple.left);
-                structs = structs.add(generator.apply(tuple.right).orElse(""));
+                generator.apply(tuple.right);
             } else {
                 System.err.println(tuple.left + " is not a generic type");
             }
@@ -667,8 +667,10 @@ public class Main {
                 : beforeContent;
 
         String body = right.substring(contentStart + "{".length()).strip();
-        String name = compileGenericTypedBlock(withoutPermits, modifiers, body, typeParams).orElse(withoutPermits);
-        return compileToStruct(modifiers, name, body, typeParams, Lists.empty(), Lists.empty());
+
+        return compileGenericTypedBlock(withoutPermits, modifiers, body, typeParams).or(() -> {
+            return compileToStruct(modifiers, withoutPermits, body, typeParams, Lists.empty(), Lists.empty());
+        });
     }
 
     private static Option<String> compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List_<List_<String>> typeParams) {

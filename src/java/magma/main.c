@@ -53,6 +53,17 @@ struct Temp {
 	/* private *//* static List_<Tuple<String, List_<String>>> toExpand = */ Lists.empty(/*  */);
 	/* private *//* static List_<String> globals = */ Lists.empty(/*  */);
 };
+/* private sealed */ struct Option {
+	void ifPresent(void (*)(T) ifPresent);
+	/* <R> */Option__struct R__ flatMap(Option__struct R__ (*)(T) mapper);
+	/* <R> */Option__struct R__ map(struct R (*)(T) mapper);
+	T orElse(T other);
+	int isPresent(/*  */);
+	Tuple__int_T__ toTuple(T other);
+	T orElseGet(T (*)() other);
+	Option__T__ or(Option__T__ (*)() other);
+	int isEmpty(/*  */);
+};
 
 	/* private *//* static int */ lambdaCounter = /*  0; */;;
 /* private *//* static final class RangeHead implements Head<Integer> {
@@ -330,7 +341,7 @@ auto __lambda12__(auto main){
             expanded.add(tuple);
             if (generators.containsKey(tuple.left)) {
                 Function<List_<String>, Option<String>> generator = generators.get(tuple.left);
-                structs = structs.add(generator.apply(tuple.right).orElse(""));
+                generator.apply(tuple.right);
             } else {
                 System.err.println(tuple.left + " is not a generic type");
             }
@@ -439,44 +450,38 @@ auto __lambda18__(auto compiled){
 	struct int permitsIndex = beforeContent.indexOf("permits");
 	struct String withoutPermits = /* permitsIndex >= 0
                 ? beforeContent */.substring(/* 0 */, permitsIndex).strip()
-                : beforeContent;/* 
+                : beforeContent;
+	struct String body = right.substring(/* contentStart + "{" */.length()).strip();/* 
 
-        String name; */
-	/* List_<String> */ classTypeParams = Lists.empty();/* 
-        if (withoutPermits.endsWith(">")) {
-            String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
-            int genStart = withoutEnd.indexOf("<");
-            if (genStart >= 0) {
-                name = withoutEnd.substring(0, genStart);
-                String substring = withoutEnd.substring(genStart + "<".length());
-                classTypeParams = Lists.of(substring.split(Pattern.quote(",")))
-                        .stream()
-                        .map(String::strip)
-                        .collect(new ListCollector<>());
-
-                List_<String> finalClassTypeParams = classTypeParams;
-                generators.put(name, typeArguments -> {
-                    return getStringOption(typeParams, finalClassTypeParams, right, contentStart, modifiers, name, typeArguments);
-                });
-
-                return new Some<>("");
-            } else {
-                name = withoutPermits;
-            }
-        } *//*  else {
-            name = withoutPermits;
-        } */
-	/* return getStringOption */(typeParams, classTypeParams, right, contentStart, modifiers, name, Lists.empty());
+        return compileGenericTypedBlock(withoutPermits, modifiers, body, typeParams).or(() -> {
+            return compileToStruct(modifiers, withoutPermits, body, typeParams, Lists.empty(), Lists.empty());
+        } *//* ); */
 }
-auto __lambda19__(auto outputContent){
+auto __lambda19__(auto string){
+	return String.strip(string);
+}
+/* private *//* static Option<String> */ compileGenericTypedBlock(struct String withoutPermits, struct String modifiers, struct String body, /* List_<List_<String>> */ typeParams){
+	/* if (!withoutPermits */.endsWith(">")) return new None<>();
+	struct String withoutEnd = withoutPermits.substring(/* 0 */, withoutPermits.length() - ">".length());
+	struct int genStart = withoutEnd.indexOf("<");
+	/* if (genStart < 0) return new None<> */();
+	struct String name = withoutEnd.substring(/* 0 */, genStart);
+	struct String substring = withoutEnd.substring(/* genStart + "<" */.length());
+	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda19__).collect(/* new ListCollector<> */());/* 
+
+        generators.put(name, typeArguments -> {
+            return compileToStruct(modifiers, name, body, typeParams, finalClassTypeParams, typeArguments);
+        } *//* ); */
+	/* return new Some<> */("");
+}
+auto __lambda20__(auto outputContent){
 	return /*  generateStruct(modifiers */;
 }
-/* private *//* static Option<String> */ getStringOption(/* List_<List_<String>> */ typeParams, /* List_<String> */ classTypeParams, struct String right, struct int contentStart, struct String modifiers, struct String name, /* List_<String> */ typeArguments){
-	/* List_<List_<String>> */ merged = typeParams.add(classTypeParams);
-	struct String body = right.substring(/* contentStart + "{" */.length()).strip();
+/* private *//* static Option<String> */ compileToStruct(struct String modifiers, struct String name, struct String body, /* List_<List_<String>> */ outerTypeParams, /* List_<String> */ innerTypeParams, /* List_<String> */ typeArguments){
+	/* List_<List_<String>> */ merged = outerTypeParams.add(innerTypeParams);
 	/* if (!body */.endsWith("}")) return new None<>();
 	struct String inputContent = body.substring(/* 0 */, body.length() - "}".length());
-	/* return compileStatements */(inputContent, /*  input1 -> compileClassSegment(input1 */, /*  merged) */).map(__lambda19__, name, /*  outputContent) */);
+	/* return compileStatements */(inputContent, /*  input1 -> compileClassSegment(input1 */, /*  merged) */).map(__lambda20__, name, /*  outputContent) */);
 }
 /* private *//* static String */ generateStruct(struct String modifiers, struct String name, struct String content){
 	struct String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
@@ -521,14 +526,14 @@ auto __lambda19__(auto outputContent){
 /* private *//* static String */ generateInvokable(struct String definition, struct String params){/* 
         return definition + "(" + params + ")"; */
 }
-auto __lambda20__(auto main){
+auto __lambda21__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda21__(auto main){
+auto __lambda22__(auto main){
 	return Main.mergeValues(main);
 }
 /* private *//* static Option<String> */ compileValues(struct String input, Option__struct String__ (*)(struct String) compiler){
-	/* return compileAll */(divideAll(input, __lambda20__), compiler, __lambda21__);
+	/* return compileAll */(divideAll(input, __lambda21__), compiler, __lambda22__);
 }
 /* private *//* static State */ divideValueChar(struct State state, struct Character c){
 	struct if (c = /* = ',' && state */.isLevel()) return state.advance();
@@ -686,7 +691,7 @@ auto __lambda21__(auto main){
 /* private *//* static String */ generateDefinition(struct String modifiers, struct String type, struct String name){/* 
         return modifiers + type + " " + name; */
 }
-auto __lambda22__(auto value){
+auto __lambda23__(auto value){
 	return /*  value + "*" */;
 }
 /* private *//* static Option<String> */ compileType(struct String type, /* List_<List_<String>> */ frames){
@@ -698,7 +703,7 @@ auto __lambda22__(auto value){
 	/* if (stripped */.equals("void")) return new Some<>("void");
 	/* if (stripped */.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 	/* if (stripped */.endsWith("[]"))
-            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames).map(__lambda22__);
+            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames).map(__lambda23__);
 	/* if (isSymbol(stripped)) return new Some<> */(/* "struct " + stripped */);/* 
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
@@ -749,11 +754,11 @@ auto __lambda22__(auto value){
         } */
 	/* return new Some<> */(invalidate("type", stripped));
 }
-auto __lambda23__(auto /* list_ */){
+auto __lambda24__(auto /* list_ */){
 	return /* List_ */.stream(/* list_ */);
 }
 /* private *//* static boolean */ hasNoTypeParams(/* List_<List_<String>> */ frames){
-	Option__struct String__ next = frames.stream().flatMap(__lambda23__).next();
+	Option__struct String__ next = frames.stream().flatMap(__lambda24__).next();
 	/* return next */.isEmpty();
 }
 /* private *//* static boolean */ isTypeParam(/* List_<List_<String>> */ frames, struct String stripped){/* 
