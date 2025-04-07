@@ -107,6 +107,7 @@ public class Main {
     private interface Rule {
         Result<Node, CompileError> parse(String input);
 
+        @Deprecated
         Result<Node, CompileError> modify(ParseState state, Node input);
 
         Result<String, CompileError> generate(Node input);
@@ -1004,24 +1005,15 @@ public class Main {
         }
     }
 
-    private record EqualsRule(String value) implements Rule {
-        private Result<String, CompileError> compile(ParseState state, String input) {
-            return input.equals(value) ? new Ok<>(input) : new Err<>(new CompileError("Not equal to '" + value + "'", input));
+    private record EqualsFilter(String value) implements Filter {
+        @Override
+        public boolean qualifies(String input) {
+            return value.equals(input);
         }
 
         @Override
-        public Result<Node, CompileError> parse(String input) {
-            return new Ok<>(new Node().withString("value", input));
-        }
-
-        @Override
-        public Result<Node, CompileError> modify(ParseState state, Node input) {
-            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
-        }
-
-        @Override
-        public Result<String, CompileError> generate(Node input) {
-            return new Ok<>(input.findString("value").orElse(""));
+        public String createErrorMessage() {
+            return "Not equal to '" + value + "'";
         }
     }
 
@@ -1378,8 +1370,8 @@ public class Main {
 
         private Result<String, CompileError> compile(ParseState state, String input) {
             Rule rule = new OrRule(Lists.of(
-                    new EqualsRule("boolean"),
-                    new EqualsRule("Bool")
+                    new FilterRule(new EqualsFilter("boolean"), new StringRule()),
+                    new FilterRule(new EqualsFilter("Bool"), new StringRule())
             ));
             return rule.parse(input)
                     .flatMapValue(node -> rule.modify(state, node))
@@ -2555,7 +2547,7 @@ public class Main {
 
     private static Rule createPrimitiveRule() {
         return new StripRule(new OrRule(Lists.of(
-                new EqualsRule("void"),
+                new FilterRule(new EqualsFilter("void"), new StringRule()),
                 new MyRule2()
         )));
     }
