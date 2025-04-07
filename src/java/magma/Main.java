@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -424,6 +426,10 @@ public class Main {
         public static <T> Stream_<T> empty() {
             return new HeadedStream<>(new EmptyHead<>());
         }
+
+        public static <T> Stream_<T> fromOption(Option<T> option) {
+            return new HeadedStream<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
     }
 
     private static class ListCollector<T> implements Collector<T, List_<T>> {
@@ -461,13 +467,29 @@ public class Main {
         }
     }
 
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (retrieved) return new None<>();
+
+            retrieved = true;
+            return new Some<>(value);
+        }
+    }
+
+    private static final Map<String, Function<List_<String>, Option<String>>> generators = new HashMap<>();
+    private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
     private static List_<String> structs = Lists.empty();
     private static List_<String> functions = Lists.empty();
-
-    private static List_<Tuple<String, List_<String>>> expansions = Lists.empty();
-    private static List_<Tuple<String, Function<List_<String>, Option<String>>>> generators = Lists.empty();
-
+    private static List_<Tuple<String, List_<String>>> toExpand = Lists.empty();
     private static List_<String> globals = Lists.empty();
 
     private static int lambdaCounter = 0;
@@ -506,19 +528,35 @@ public class Main {
     private static String compile(String input) {
         List_<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
-                .map(compiled -> {
-                    List_<String> generated = expansions.stream()
-                            .map(tuple -> "// " + generateGeneric(tuple.left, tuple.right) + "\n")
-                            .collect(new ListCollector<>());
-
-                    return compiled.addAll(imports)
-                            .addAll(generated)
-                            .addAll(structs)
-                            .addAll(globals)
-                            .addAll(functions);
-                })
+                .map(Main::generate)
                 .map(compiled -> mergeAll(compiled, Main::mergeStatements))
                 .orElse("");
+    }
+
+    private static List_<String> generate(List_<String> compiled) {
+        while (!toExpand.isEmpty()) {
+            Tuple<String, List_<String>> tuple = toExpand.popFirst();
+            if (hasAlreadyBeenSeen(tuple)) continue;
+
+            expanded.add(tuple);
+            if (generators.containsKey(tuple.left)) {
+                Function<List_<String>, Option<String>> generator = generators.get(tuple.left);
+                structs = structs.add(generator.apply(tuple.right).orElse(""));
+            } else {
+                System.err.println(tuple.left + " is not a generic type");
+            }
+        }
+
+        return compiled.addAll(imports)
+                .addAll(structs)
+                .addAll(globals)
+                .addAll(functions);
+    }
+
+    private static boolean hasAlreadyBeenSeen(Tuple<String, List_<String>> tuple) {
+        return Lists.contains(expanded, tuple,
+                (entry, entry0) -> Tuples.equalsTo(entry, entry0, String::equals,
+                        (list, list0) -> Lists.equalsTo(list, list0, String::equals)));
     }
 
     private static Option<String> compileStatements(String input, Function<String, Option<String>> compiler) {
@@ -628,39 +666,35 @@ public class Main {
                 ? beforeContent.substring(0, permitsIndex).strip()
                 : beforeContent;
 
-        String name;
-        List_<String> classTypeParams = Lists.empty();
-        if (withoutPermits.endsWith(">")) {
-            String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
-            int genStart = withoutEnd.indexOf("<");
-            if (genStart >= 0) {
-                name = withoutEnd.substring(0, genStart);
-                String substring = withoutEnd.substring(genStart + "<".length());
-                classTypeParams = Lists.of(substring.split(Pattern.quote(",")))
-                        .stream()
-                        .map(String::strip)
-                        .collect(new ListCollector<>());
-
-                List_<String> finalClassTypeParams = classTypeParams;
-                generators = generators.add(new Tuple<>(name, typeArguments -> {
-                    return getStringOption(typeParams, finalClassTypeParams, right, contentStart, modifiers, name, typeArguments);
-                }));
-
-                return new Some<>("");
-            } else {
-                name = withoutPermits;
-            }
-        } else {
-            name = withoutPermits;
-        }
-
-        return getStringOption(typeParams, classTypeParams, right, contentStart, modifiers, name, Lists.empty());
+        String body = right.substring(contentStart + "{".length()).strip();
+        String name = compileGenericTypedBlock(withoutPermits, modifiers, body, typeParams).orElse(withoutPermits);
+        return compileToStruct(modifiers, name, body, typeParams, Lists.empty(), Lists.empty());
     }
 
-    private static Option<String> getStringOption(List_<List_<String>> typeParams, List_<String> classTypeParams, String right, int contentStart, String modifiers, String name, List_<String> typeArguments) {
-        List_<List_<String>> merged = typeParams.add(classTypeParams);
+    private static Option<String> compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List_<List_<String>> typeParams) {
+        if (!withoutPermits.endsWith(">")) return new None<>();
 
-        String body = right.substring(contentStart + "{".length()).strip();
+        String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
+        int genStart = withoutEnd.indexOf("<");
+        if (genStart < 0) return new None<>();
+
+        String name = withoutEnd.substring(0, genStart);
+        String substring = withoutEnd.substring(genStart + "<".length());
+        List_<String> finalClassTypeParams = Lists.of(substring.split(Pattern.quote(",")))
+                .stream()
+                .map(String::strip)
+                .collect(new ListCollector<>());
+
+        generators.put(name, typeArguments -> {
+            return compileToStruct(modifiers, name, body, typeParams, finalClassTypeParams, typeArguments);
+        });
+
+        return new Some<>("");
+    }
+
+    private static Option<String> compileToStruct(String modifiers, String name, String body, List_<List_<String>> outerTypeParams, List_<String> innerTypeParams, List_<String> typeArguments) {
+        List_<List_<String>> merged = outerTypeParams.add(innerTypeParams);
+
         if (!body.endsWith("}")) return new None<>();
 
         String inputContent = body.substring(0, body.length() - "}".length());
@@ -967,7 +1001,7 @@ public class Main {
 
                         if (hasNoTypeParams(frames)) {
                             Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                            if (!Lists.contains(expansions, tuple, new BiFunction<Tuple<String, List_<String>>, Tuple<String, List_<String>>, Boolean>() {
+                            if (!Lists.contains(toExpand, tuple, new BiFunction<Tuple<String, List_<String>>, Tuple<String, List_<String>>, Boolean>() {
                                 @Override
                                 public Boolean apply(Tuple<String, List_<String>> stringListTuple, Tuple<String, List_<String>> stringListTuple2) {
                                     return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals, new BiFunction<List_<String>, List_<String>, Boolean>() {
@@ -978,7 +1012,7 @@ public class Main {
                                     });
                                 }
                             })) {
-                                expansions = expansions.add(tuple);
+                                toExpand = toExpand.add(tuple);
                             }
                         }
 
