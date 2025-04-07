@@ -1011,7 +1011,8 @@ public class Main {
         if (stripped.endsWith("[]"))
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), frames, typeArguments).map(value -> value + "*");
 
-        if (isSymbol(stripped)) return new Some<>("struct " + stripped);
+        if (isSymbol(stripped)) return new Some<>(stripped);
+
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             int genStart = withoutEnd.indexOf("<");
