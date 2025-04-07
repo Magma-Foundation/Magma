@@ -786,6 +786,11 @@ public class Main {
             return new Some<>("");
         }
 
+        if (input.endsWith(";")) {
+            String sliced = input.substring(0, input.length() - ";".length());
+            return compileDefinition(sliced, typeParams, typeArguments).map(Main::generateStatement);
+        }
+
         return new Some<>(invalidate("class segment", input));
     }
 
@@ -863,6 +868,7 @@ public class Main {
         if (stripped.isEmpty()) return new Some<>("");
 
         if (stripped.startsWith("if ")) return new Some<>("\n\tif (1) {\n\t}");
+        if (stripped.startsWith("while ")) return new Some<>("\n\twhile (1) {\n\t}");
         if (stripped.startsWith("for ")) return new Some<>("\n\tfor (;;) {\n\t}");
         if (stripped.startsWith("else ")) return new Some<>("\n\telse {}");
         if (stripped.endsWith("++;")) return new Some<>("\n\ttemp++;");
