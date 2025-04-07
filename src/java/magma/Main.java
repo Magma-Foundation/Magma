@@ -118,19 +118,28 @@ public class Main {
 
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
-        int i = withParams.indexOf(")");
-        if (i >= 0) {
-            String paramString = withParams.substring(0, i);
+        int paramEnd = withParams.indexOf(")");
+        if (paramEnd >= 0) {
+            String paramString = withParams.substring(0, paramEnd);
+            String withBody = withParams.substring(paramEnd + ")".length()).strip();
             List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
 
-            return compileAll(inputParams, Main::compileDefinition, Main::mergeValues)
-                    .flatMap(outputParams -> {
-                        return compileDefinition(header).map(definition -> {
-                            return definition + "(" +
-                                    outputParams +
-                                    "){\n}\n";
+            if (withBody.startsWith("{") && withBody.endsWith("}")) {
+                return compileAll(inputParams, Main::compileDefinition, Main::mergeValues)
+                        .flatMap(outputParams -> {
+                            return compileDefinition(header).flatMap(definition -> {
+                                return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
+                                    return definition + "(" +
+                                            outputParams +
+                                            "){" +
+                                            statement +
+                                            "\n}\n";
+                                });
+                            });
                         });
-                    });
+            } else {
+                return Optional.empty();
+            }
         } else {
             return Optional.empty();
         }
@@ -141,8 +150,8 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static String compileStatement(String input) {
-        return invalidate("statement", input);
+    private static Optional<String> compileStatement(String input) {
+        return Optional.of(invalidate("statement", input));
     }
 
     private static Optional<String> compileDefinition(String header) {
