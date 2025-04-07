@@ -23,12 +23,16 @@ public class Main {
     private static String getString(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
+        int depth = 0;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             buffer.append(c);
-            if (c == ';') {
+            if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
             }
         }
         segments.add(buffer.toString());
@@ -43,7 +47,8 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
-
+        if (input.strip().startsWith("import ")) return "#include <temp.h>\n";
+        if (input.contains("class ")) return "struct Temp {\n};\n";
 
         System.err.println("Invalid root segment: " + input);
         return "/* " + input + " */\n";
