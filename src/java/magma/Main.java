@@ -158,10 +158,9 @@ public class Main {
         if (paramEnd >= 0) {
             String paramString = withParams.substring(0, paramEnd);
             String withBody = withParams.substring(paramEnd + ")".length()).strip();
-            List<String> inputParams = Arrays.asList(paramString.split(Pattern.quote(",")));
 
             if (withBody.startsWith("{") && withBody.endsWith("}")) {
-                return compileAll(inputParams, Main::compileDefinition, Main::mergeValues)
+                return compileValues(paramString, Main::compileDefinition)
                         .flatMap(outputParams -> {
                             return compileDefinition(header).flatMap(definition -> {
                                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
@@ -179,6 +178,10 @@ public class Main {
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(Arrays.asList(input.split(Pattern.quote(","))), compiler, Main::mergeValues);
     }
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {
@@ -206,6 +209,23 @@ public class Main {
     }
 
     private static Optional<String> compileValue(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
+
+        if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int argsStart = withoutEnd.indexOf("(");
+            if (argsStart >= 0) {
+                String inputCaller = withoutEnd.substring(0, argsStart);
+                String inputArguments = withoutEnd.substring(argsStart + 1);
+                return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
+                    return compileValue(inputCaller).map(outputCaller -> {
+                        return outputCaller + "(" + outputValues + ")";
+                    });
+                });
+            }
+        }
+
         return Optional.of(generatePlaceholder(input));
     }
 
