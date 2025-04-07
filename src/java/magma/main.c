@@ -357,8 +357,8 @@ auto __lambda19__(auto compiled){
 	State appended = state.append(c);
 	if (c = /* = ';' && appended */.isLevel()) return appended.advance();
 	if (c = /* = '}' && appended */.isShallow()) return appended.advance().exit();
-	if (c = /* = '{') return appended */.enter();
-	if (c = /* = '}') return appended */.exit();
+	if (c = /* = '{' || c == '(') return appended */.enter();
+	if (c = /* = '}' || c == ')') return appended */.exit();
 	return appended;
 }
 /* private static */Option__String__ compileRootSegment(String input){
@@ -391,11 +391,10 @@ auto __lambda19__(auto compiled){
 	String withoutPermits1 = /* paramStart >= 0
                 ? withoutPermits */.substring(0, paramStart)
                 : withoutPermits;
-	String body = afterKeyword.substring(/* contentStart + "{" */.length()).strip();/* 
-
-        return compileGenericTypedBlock(withoutPermits1, modifiers, body, typeParams).or(() -> {
-            return compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists.empty(), Lists.empty());
-        } *//* ); */
+	String body = afterKeyword.substring(/* contentStart + "{" */.length()).strip();
+	/* return compileGenericTypedBlock */(/* withoutPermits1 */, modifiers, body, typeParams).or(/* () -> {
+            return compileToStruct(modifiers */, /*  withoutPermits1 */, body, typeParams, Lists.empty(), Lists.empty());
+        });
 }
 auto __lambda20__(auto string){
 	return String.strip(string);
@@ -407,12 +406,11 @@ auto __lambda20__(auto string){
 	/* if (genStart < 0) return new None<> */();
 	String name = withoutEnd.substring(/* 0 */, genStart);
 	String substring = withoutEnd.substring(/* genStart + "<" */.length());
-	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda20__).collect(/* new ListCollector<> */());/* 
-
-        generators.put(name, typeArguments -> {
-            String joined = generateGenericName(name, typeArguments);
+	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda20__).collect(/* new ListCollector<> */());
+	/* generators.put(name, typeArguments -> {
+            */String joined = /*  generateGenericName(name, typeArguments);
             return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);
-        } *//* ); */
+        }) */;
 	/* return new Some<> */("");
 }
 auto __lambda21__(auto outputContent){
@@ -444,20 +442,19 @@ auto __lambda21__(auto outputContent){
 	int paramEnd = withParams.indexOf(")");
 	/* if (paramEnd < 0) return new None<> */();
 	String paramString = withParams.substring(/* 0 */, paramEnd);
-	String withBody = withParams.substring(paramEnd + ")".length()).strip();/* 
-
-        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
+	String withBody = withParams.substring(paramEnd + ")".length()).strip();
+	/* return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
             return compileDefinition(header, typeParams, typeArguments).flatMap(definition -> {
-                String string = generateInvokable(definition, outputParams);
+                */String string = /* generateInvokable(definition, outputParams);
 
-                if (!withBody.startsWith("{") || !withBody.endsWith("}"))
+                if (!withBody */.startsWith("{") || !withBody.endsWith("}"))
                     return new Some<>(generateStatement(string));
 
-                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> {
+                return compileStatements(withBody.substring(/* 1 */, withBody.length() - 1), /*  input1 -> compileStatement(input1 */, typeParams, /*  typeArguments) */).map(statement -> {
                     return addFunction(statement, string);
                 });
             });
-        } *//* ); */
+        });
 }
 /* private static */String addFunction(String content, String string){
 	String function = /*  string + "{" + content + "\n}\n" */;
@@ -513,12 +510,12 @@ auto __lambda23__(auto main){
 	int separator = input.indexOf("=");
 	/* if (separator < 0) return new None<> */();
 	String inputDefinition = input.substring(/* 0 */, separator);
-	String inputValue = input.substring(/* separator + "=" */.length());/* 
-        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
+	String inputValue = input.substring(/* separator + "=" */.length());
+	/* return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
             return compileValue(inputValue).map(outputValue -> {
-                return generateStatement(outputDefinition + " = " + outputValue);
+                return generateStatement(outputDefinition *//* + */ " = /*  " + outputValue);
             });
-        } *//* ); */
+        }) */;
 }
 /* private static */String generateStatement(String value){
 	return "\n\t" + value + ";";
@@ -570,13 +567,20 @@ auto __lambda23__(auto main){
 	addFunction("\n\treturn " + lambdaValue + ";", generateInvokable(definition, param));
 	return lambda;
 }
+auto __lambda24__(auto outputValues){
+	return /* {
+            return compileValue */(inputCaller).map(outputCaller -> {
+                return generateInvocation(outputCaller;
+}
+auto __lambda25__(auto main){
+	return Main.compileValue(main);
+}
 /* private static */Option__String__ compileInvocation(String stripped){
 	/* if (!stripped */.endsWith(")")) return new None<>();
 	String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 	int argsStart = /*  -1 */;
-	int depth = /*  0 */;
-	/* for *//* (int */ i = withoutEnd.length() - 1;
-	i > = /*  0 */;/*  i--) {
+	int depth = /*  0 */;/* 
+        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
             char c = withoutEnd.charAt(i);
             if (c == '(' && depth == 0) {
                 argsStart = i;
@@ -588,12 +592,10 @@ auto __lambda23__(auto main){
         } */
 	/* if (argsStart < 0) return new None<> */();
 	String inputCaller = withoutEnd.substring(/* 0 */, argsStart);
-	String inputArguments = withoutEnd.substring(/* argsStart + 1 */);/* 
-        return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
-            return compileValue(inputCaller).map(outputCaller -> {
-                return generateInvocation(outputCaller, outputValues);
+	String inputArguments = withoutEnd.substring(/* argsStart + 1 */);
+	/* return compileValues */(inputArguments, __lambda25__).flatMap(__lambda24__, /*  outputValues);
             });
-        } *//* ); */
+        } */);
 }
 /* private static */String generateInvocation(String caller, String arguments){
 	return /* caller + "(" + arguments + ")" */;
@@ -639,7 +641,7 @@ auto __lambda23__(auto main){
 /* private static */String generateDefinition(String modifiers, String type, String name){
 	return /* modifiers + type + " " + name */;
 }
-auto __lambda24__(auto value){
+auto __lambda26__(auto value){
 	return /*  value + "*" */;
 }
 /* private static */Option__String__ compileType(String type, /* List_<List_<String>> */ frames, /* List_<String> */ typeArguments){
@@ -657,7 +659,7 @@ auto __lambda24__(auto value){
 	/* if (stripped */.equals("void")) return new Some<>("void");
 	/* if (stripped */.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 	/* if (stripped */.endsWith("[]"))
-            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames, typeArguments).map(__lambda24__);
+            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames, typeArguments).map(__lambda26__);
 	/* if (isSymbol(stripped)) return new Some<> */(stripped);/* 
 
         if (stripped.endsWith(">")) {
@@ -698,39 +700,45 @@ auto __lambda24__(auto value){
         } */
 	/* return new Some<> */(invalidate("type", stripped));
 }
-auto __lambda25__(auto string){
+auto __lambda27__(auto string){
 	return String.equals(string);
 }
-auto __lambda26__(auto string){
+auto __lambda28__(auto string){
 	return String.equals))(string);
 }
 /* private static */int isDefined(/* List_<Tuple<String, List_<String>>> */ toExpand, Tuple__String_/* List_<String> */__ tuple){
-	/* return Lists */.contains(toExpand, tuple, /* (stringListTuple, stringListTuple2) -> Tuples */.equalsTo(stringListTuple, /*  stringListTuple2 */, __lambda25__, /* (typeParams, typeParams2) -> Lists */.equalsTo(typeParams, /*  typeParams2 */, __lambda26__);
+	/* return Lists */.contains(toExpand, tuple, /* (stringListTuple, stringListTuple2) -> Tuples */.equalsTo(stringListTuple, /*  stringListTuple2 */, __lambda27__, /* (typeParams, typeParams2) -> Lists */.equalsTo(typeParams, /*  typeParams2 */, __lambda28__);
 }
 /* private static */String generateGenericName(String base, /* List_<String> */ newArguments){
 	String joined = newArguments.stream().collect(/* new Joiner */("_")).orElse("");
 	return /* base + "__" + String */.join("_", joined) + "__";
 }
-auto __lambda27__(auto /* list_ */){
+auto __lambda29__(auto /* list_ */){
 	return /* List_ */.stream(/* list_ */);
 }
 /* private static */int hasNoTypeParams(/* List_<List_<String>> */ frames){
-	Option__String__ next = frames.stream().flatMap(__lambda27__).next();
+	Option__String__ next = frames.stream().flatMap(__lambda29__).next();
 	/* return next */.isEmpty();
 }
-/* private static */int isTypeParam(/* List_<List_<String>> */ frames, String stripped){/* 
-        return frames.stream().anyMatch(frame -> {
-            return Lists.contains(frame, stripped, String::equals);
-        } *//* ); */
+auto __lambda30__(auto frame){
+	return /* {
+            return Lists */.contains(frame;
+}
+auto __lambda31__(auto string){
+	return String.equals);
+        }(string);
+}
+/* private static */int isTypeParam(/* List_<List_<String>> */ frames, String stripped){
+	/* return frames */.stream().anyMatch(__lambda30__, stripped, __lambda31__);
 }
 /* private static */String generateFunctionalType(String returns, /* List_<String> */ newArguments){
 	String joined = newArguments.stream().collect(/* new Joiner */(", ")).orElse("");
 	return /* returns + " (*)(" + joined + ")" */;
 }
 /* private static */int isSymbol(String input){/* 
-        if(input.equals("static")) return false; */
-	/* for *//* (int */ i = /*  0 */;
-	/* i < input */.length();/*  i++) {
+        if(input.equals("static")) return false; *//* 
+
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (!Character.isLetter(c)) {
                 return false;
