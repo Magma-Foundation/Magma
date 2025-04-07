@@ -684,20 +684,26 @@ public class Main {
         if (classIndex < 0) return new None<>();
 
         String modifiers = input.substring(0, classIndex).strip();
-        String right = input.substring(classIndex + keyword.length());
-        int contentStart = right.indexOf("{");
+        String afterKeyword = input.substring(classIndex + keyword.length());
+
+        int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) return new None<>();
 
-        String beforeContent = right.substring(0, contentStart).strip();
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
         int permitsIndex = beforeContent.indexOf("permits");
         String withoutPermits = permitsIndex >= 0
                 ? beforeContent.substring(0, permitsIndex).strip()
                 : beforeContent;
 
-        String body = right.substring(contentStart + "{".length()).strip();
+        int paramStart = withoutPermits.indexOf("(");
+        String withoutPermits1 = paramStart >= 0
+                ? withoutPermits.substring(0, paramStart)
+                : withoutPermits;
 
-        return compileGenericTypedBlock(withoutPermits, modifiers, body, typeParams).or(() -> {
-            return compileToStruct(modifiers, withoutPermits, body, typeParams, Lists.empty(), Lists.empty());
+        String body = afterKeyword.substring(contentStart + "{".length()).strip();
+
+        return compileGenericTypedBlock(withoutPermits1, modifiers, body, typeParams).or(() -> {
+            return compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists.empty(), Lists.empty());
         });
     }
 
@@ -753,10 +759,8 @@ public class Main {
         Option<String> maybeInterface = compileTypedBlock(input, "interface ", typeParams);
         if (maybeInterface.isPresent()) return maybeInterface;
 
-        int recordIndex = input.indexOf("record ");
-        if (recordIndex >= 0) {
-            return new Some<>(generateStruct("", "Temp", ""));
-        }
+        Option<String> maybeRecord = compileTypedBlock(input, "record ", typeParams);
+        if (maybeRecord.isPresent()) return maybeRecord;
 
         Option<String> maybeMethod = compileMethod(input, typeParams, typeArguments);
         if (maybeMethod.isPresent()) return maybeMethod;
