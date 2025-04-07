@@ -564,7 +564,7 @@ public class Main {
     private static List_<String> generate(List_<String> compiled) {
         while (!toExpand.isEmpty()) {
             Tuple<String, List_<String>> tuple = toExpand.popFirst();
-            if (hasAlreadyBeenSeen(tuple)) continue;
+            if (isDefined(expanded, tuple)) continue;
 
             expanded.add(tuple);
             if (generators.containsKey(tuple.left)) {
@@ -579,12 +579,6 @@ public class Main {
                 .addAll(structs)
                 .addAll(globals)
                 .addAll(functions);
-    }
-
-    private static boolean hasAlreadyBeenSeen(Tuple<String, List_<String>> tuple) {
-        return Lists.contains(expanded, tuple,
-                (entry, entry0) -> Tuples.equalsTo(entry, entry0, String::equals,
-                        (list, list0) -> Lists.equalsTo(list, list0, String::equals)));
     }
 
     private static Option<String> compileStatements(String input, Function<String, Option<String>> compiler) {
@@ -847,7 +841,7 @@ public class Main {
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
 
-            if(withoutEnd.startsWith("return ")) {
+            if (withoutEnd.startsWith("return ")) {
                 String value = withoutEnd.substring("return ".length());
                 return compileValue(value)
                         .map(inner -> "return " + inner)
@@ -1055,17 +1049,7 @@ public class Main {
 
                         if (hasNoTypeParams(frames)) {
                             Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                            if (!Lists.contains(toExpand, tuple, new BiFunction<>() {
-                                @Override
-                                public Boolean apply(Tuple<String, List_<String>> stringListTuple, Tuple<String, List_<String>> stringListTuple2) {
-                                    return Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals, new BiFunction<List_<String>, List_<String>, Boolean>() {
-                                        @Override
-                                        public Boolean apply(List_<String> typeParams, List_<String> typeParams2) {
-                                            return Lists.equalsTo(typeParams, typeParams2, String::equals);
-                                        }
-                                    });
-                                }
-                            })) {
+                            if (!isDefined(toExpand, tuple)) {
                                 toExpand = toExpand.add(tuple);
                             }
                         }
@@ -1077,6 +1061,12 @@ public class Main {
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {
+        return Lists.contains(toExpand, tuple,
+                (stringListTuple, stringListTuple2) -> Tuples.equalsTo(stringListTuple, stringListTuple2, String::equals,
+                        (typeParams, typeParams2) -> Lists.equalsTo(typeParams, typeParams2, String::equals)));
     }
 
     private static String generateGenericName(String base, List_<String> newArguments) {
@@ -1097,16 +1087,14 @@ public class Main {
         });
     }
 
-    private static String generateGeneric(String base, List_<String> newArguments) {
-        return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">";
-    }
-
     private static String generateFunctionalType(String returns, List_<String> newArguments) {
         String joined = newArguments.stream().collect(new Joiner(", ")).orElse("");
         return returns + " (*)(" + joined + ")";
     }
 
     private static boolean isSymbol(String input) {
+        if(input.equals("static")) return false;
+
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (!Character.isLetter(c)) {
