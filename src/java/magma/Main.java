@@ -893,24 +893,20 @@ public class Main {
     }
 
     private static class EmptyRule implements Rule {
-        private Result<String, CompileError> compile(ParseState state, String input) {
-            if (input.isEmpty()) return new Ok<>("");
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            if (input.isEmpty()) return new Ok<>(new Main.Node());
             else return new Err<>(new CompileError("Not empty", input));
         }
 
         @Override
-        public Result<Node, CompileError> parse(String input) {
-            return new Ok<>(new Node().withString("value", input));
-        }
-
-        @Override
         public Result<Node, CompileError> modify(ParseState state, Node input) {
-            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+            return new Ok<>(input);
         }
 
         @Override
         public Result<String, CompileError> generate(Node input) {
-            return new Ok<>(input.findString("value").orElse(""));
+            return new Ok<>("");
         }
     }
 
