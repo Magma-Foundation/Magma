@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
 
@@ -29,6 +30,10 @@ public class Main {
         boolean isPresent();
 
         Tuple<Boolean, T> toTuple(T other);
+
+        T orElseGet(Supplier<T> other);
+
+        Option<T> or(Supplier<Option<T>> other);
     }
 
     private interface List_<T> {
@@ -197,8 +202,12 @@ public class Main {
             this.depth = depth;
         }
 
-        private boolean isEmpty() {
-            return queue.isEmpty();
+        private State popAndAppend() {
+            return append(pop());
+        }
+
+        private boolean hasNext() {
+            return !queue.isEmpty();
         }
 
         private State enter() {
@@ -226,7 +235,7 @@ public class Main {
             return depth == 0;
         }
 
-        private char getPop() {
+        private char pop() {
             return queue.popFirst();
         }
 
@@ -269,6 +278,16 @@ public class Main {
         public Tuple<Boolean, T> toTuple(T other) {
             return new Tuple<>(true, value);
         }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -299,6 +318,16 @@ public class Main {
         @Override
         public Tuple<Boolean, T> toTuple(T other) {
             return new Tuple<>(false, other);
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
         }
     }
 
@@ -397,12 +426,42 @@ public class Main {
         List_<Character> queue = Streams.from(input).collect(new ListCollector<>());
 
         State current = new State(queue);
-        while (!current.isEmpty()) {
-            char c = current.getPop();
-            current = divider.apply(current, c);
+        while (current.hasNext()) {
+            char c = current.pop();
+
+            State finalCurrent = current;
+            current = divideSingleQuotes(finalCurrent, c)
+                    .or(() -> divideDoubleQuotes(finalCurrent, c))
+                    .orElseGet(() -> divider.apply(finalCurrent, c));
         }
 
         return current.advance().segments();
+    }
+
+    private static Option<State> divideDoubleQuotes(State state, char c) {
+        if (c != '"') return new None<>();
+
+        State current = state.append(c);
+        while (current.hasNext()) {
+            char popped = current.pop();
+            current = current.append(popped);
+
+            if (popped == '\\') current = current.popAndAppend();
+            if (popped == '"') break;
+        }
+
+        return new Some<>(current);
+    }
+
+    private static Option<State> divideSingleQuotes(State current, char c) {
+        if (c != '\'') return new None<>();
+
+        State appended = current.append(c);
+        char maybeEscape = current.pop();
+        State withNext = appended.append(maybeEscape);
+        State appended1 = maybeEscape == '\\' ? withNext.popAndAppend() : withNext;
+
+        return new Some<>(appended1.popAndAppend());
     }
 
     private static State divideStatementChar(State state, char c) {
