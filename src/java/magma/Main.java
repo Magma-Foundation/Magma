@@ -873,7 +873,7 @@ public class Main {
 
             if (withoutEnd.startsWith("return ")) {
                 String value = withoutEnd.substring("return ".length());
-                return compileValue(value)
+                return compileValue(value, typeParams, typeArguments)
                         .map(inner -> "return " + inner)
                         .map(Main::generateStatement);
             }
@@ -886,13 +886,13 @@ public class Main {
                 String destination = withoutEnd.substring(0, valueSeparator).strip();
                 String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
 
-                return compileValue(destination)
-                        .and(() -> compileValue(value))
+                return compileValue(destination, typeParams, typeArguments)
+                        .and(() -> compileValue(value, typeParams, typeArguments))
                         .map(tuple -> tuple.left + " = " + tuple.right)
                         .map(Main::generateStatement);
             }
 
-            Option<String> maybeInvocation = compileInvocation(withoutEnd);
+            Option<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, typeArguments);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
@@ -905,34 +905,32 @@ public class Main {
 
         String inputDefinition = withoutEnd.substring(0, separator);
         String inputValue = withoutEnd.substring(separator + "=".length());
-        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
-            return compileValue(inputValue).map(outputValue -> {
-                return generateStatement(outputDefinition + " = " + outputValue);
-            });
-        });
+        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(
+                outputDefinition -> compileValue(inputValue, typeParams, typeArguments).map(
+                        outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
     }
 
     private static String generateStatement(String value) {
         return "\n\t" + value + ";";
     }
 
-    private static Option<String> compileValue(String input) {
+    private static Option<String> compileValue(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
         if (stripped.startsWith("'") && stripped.endsWith("'")) return new Some<>(stripped);
 
         if (stripped.startsWith("!")) {
-            return compileValue(stripped.substring(1)).map(result -> "!" + result);
+            return compileValue(stripped.substring(1), typeParams, typeArguments).map(result -> "!" + result);
         }
 
         if (input.startsWith("new ")) {
             return new Some<>("Temp()");
         }
 
-        Option<String> maybeLambda = compileLambda(input);
+        Option<String> maybeLambda = compileLambda(input, typeParams, typeArguments);
         if (maybeLambda.isPresent()) return maybeLambda;
 
-        Option<String> maybeInvocation = compileInvocation(stripped);
+        Option<String> maybeInvocation = compileInvocation(stripped, typeParams, typeArguments);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
         int ternaryIndex = stripped.indexOf("?");
@@ -943,9 +941,9 @@ public class Main {
             if (caseIndex >= 0) {
                 String ifTrue = cases.substring(0, caseIndex).strip();
                 String ifFalse = cases.substring(caseIndex + ":".length()).strip();
-                return compileValue(condition)
-                        .and(() -> compileValue(ifTrue))
-                        .and(() -> compileValue(ifFalse))
+                return compileValue(condition, typeParams, typeArguments)
+                        .and(() -> compileValue(ifTrue, typeParams, typeArguments))
+                        .and(() -> compileValue(ifFalse, typeParams, typeArguments))
                         .map(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
             }
         }
@@ -955,7 +953,7 @@ public class Main {
             String object = stripped.substring(0, dataSeparator);
             String property = stripped.substring(dataSeparator + ".".length());
 
-            return compileValue(object).map(newObject -> newObject + "." + property);
+            return compileValue(object, typeParams, typeArguments).map(newObject -> newObject + "." + property);
         }
 
         int methodSeparator = stripped.lastIndexOf("::");
@@ -963,23 +961,23 @@ public class Main {
             String object = stripped.substring(0, methodSeparator);
             String property = stripped.substring(methodSeparator + "::".length());
 
-            return compileValue(object).map(newObject -> {
+            return compileValue(object, typeParams, typeArguments).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
                 return generateLambda(Lists.of(paramName), generateInvocation(caller, paramName));
             });
         }
 
-        return compileOperator(input, "+")
-                .or(() -> compileOperator(input, "-"))
-                .or(() -> compileOperator(input, "=="))
-                .or(() -> compileOperator(input, ">="))
+        return compileOperator(input, "+", typeParams, typeArguments)
+                .or(() -> compileOperator(input, "-", typeParams, typeArguments))
+                .or(() -> compileOperator(input, "==", typeParams, typeArguments))
+                .or(() -> compileOperator(input, ">=", typeParams, typeArguments))
                 .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> new Some<>(invalidate("value", input)));
     }
 
-    private static Option<String> compileLambda(String input) {
+    private static Option<String> compileLambda(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int arrowIndex = input.indexOf("->");
         if (arrowIndex < 0) return new None<>();
 
@@ -998,18 +996,26 @@ public class Main {
             return new None<>();
         }
 
-        String inputValue = input.substring(arrowIndex + "->".length());
-        return compileValue(inputValue).map(outputValue -> generateLambda(paramNames, outputValue));
+        String inputValue = input.substring(arrowIndex + "->".length()).strip();
+        Option<String> compiledValue;
+        if(inputValue.startsWith("{") && inputValue.endsWith("}")) {
+            String substring = inputValue.substring(1, inputValue.length() - 1);
+            compiledValue = compileStatements(substring, statement -> compileStatement(statement, typeParams, typeArguments));
+        } else {
+            compiledValue = compileValue(inputValue, typeParams, typeArguments);
+        }
+
+        return compiledValue.map(outputValue -> generateLambda(paramNames, outputValue));
     }
 
-    private static Option<String> compileOperator(String input, String operator) {
+    private static Option<String> compileOperator(String input, String operator, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int operatorIndex = input.indexOf(operator);
         if (operatorIndex < 0) return new None<>();
 
         String left = input.substring(0, operatorIndex);
         String right = input.substring(operatorIndex + operator.length());
-        return compileValue(left)
-                .and(() -> compileValue(right))
+        return compileValue(left, typeParams, typeArguments)
+                .and(() -> compileValue(right, typeParams, typeArguments))
                 .map(tuple -> tuple.left + " " + operator + " " + tuple.right);
     }
 
@@ -1039,7 +1045,7 @@ public class Main {
         return lambda;
     }
 
-    private static Option<String> compileInvocation(String stripped) {
+    private static Option<String> compileInvocation(String stripped, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (!stripped.endsWith(")")) return new None<>();
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -1060,8 +1066,8 @@ public class Main {
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + 1);
-        return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
-            return compileValue(inputCaller).map(outputCaller -> {
+        return compileValues(inputArguments, input -> compileValue(input, typeParams, typeArguments)).flatMap(outputValues -> {
+            return compileValue(inputCaller, typeParams, typeArguments).map(outputCaller -> {
                 return generateInvocation(outputCaller, outputValues);
             });
         });
