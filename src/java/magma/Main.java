@@ -1,6 +1,5 @@
 package magma;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -666,10 +665,10 @@ public class Main {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         Files.readString(source)
                 .match(input -> runWithInput(source, input), Some::new)
-                .ifPresent(Throwable::printStackTrace);
+                .ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Option<IOException> runWithInput(Path source, String input) {
+    private static Option<IOError> runWithInput(Path source, String input) {
         String output = compile(input).mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n").match(value -> value, err -> {
             System.err.println(err.display());
             return "";
