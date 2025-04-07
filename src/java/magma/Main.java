@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 public class Main {
     sealed public interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        Option<T> findValue();
     }
 
     sealed public interface Option<T> permits Some, None {
@@ -39,6 +41,8 @@ public class Main {
         boolean isEmpty();
 
         <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
+
+        <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty);
     }
 
     public interface List_<T> {
@@ -103,12 +107,22 @@ public class Main {
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(value);
         }
+
+        @Override
+        public Option<T> findValue() {
+            return new Some<>(value);
+        }
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
+        }
+
+        @Override
+        public Option<T> findValue() {
+            return new None<>();
         }
     }
 
@@ -308,6 +322,11 @@ public class Main {
         public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return other.get().map(otherValue -> new Tuple<>(value, otherValue));
         }
+
+        @Override
+        public <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty) {
+            return whenPresent.apply(value);
+        }
     }
 
     public static final class None<T> implements Option<T> {
@@ -358,6 +377,11 @@ public class Main {
         @Override
         public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenPresent, Supplier<R> whenEmpty) {
+            return whenEmpty.get();
         }
     }
 
@@ -564,25 +588,39 @@ public class Main {
     }
 
     private static Option<String> compileRootSegment(String input) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) return new Some<>("");
-        if (input.startsWith("package ")) return new Some<>("");
+        return compileRootStatement(input).findValue();
+    }
 
-        if (stripped.startsWith("import ")) {
+    private static Result<String, CompileError> compileRootStatement(String input) {
+        return compileWhitespace(input)
+                .or(() -> compilePackage(input.startsWith("package ")))
+                .or(() -> compileImport(input))
+                .or(() -> compileClass(input))
+                .match((Function<String, Result<String, CompileError>>) Ok::new, () -> new Err<>(new CompileError("Invalid " + "root segment", input)));
+    }
+
+    private static Option<String> compileClass(String input) {
+        List_<List_<String>> frame = Lists.<List_<String>>empty().add(Lists.empty());
+        return compileTypedBlock(input, "class ", frame);
+    }
+
+    private static Option<String> compileImport(String input) {
+        if (input.strip().startsWith("import ")) {
             String value = "#include <temp.h>\n";
             imports = imports.add(value);
             return new Some<>("");
         }
+        return new None<>();
+    }
 
-        List_<List_<String>> frame = Lists.<List_<String>>empty().add(Lists.empty());
-        Option<String> maybeClass = compileTypedBlock(input, "class ", frame);
-        if (maybeClass.isPresent()) return maybeClass;
+    private static Option<String> compilePackage(boolean input) {
+        if (input) return new Some<>("");
+        return new None<>();
+    }
 
-        System.err.println(new Err<>(new CompileError("Invalid " + "root segment", input))
-                .error
-                .display());
-
-        return new Some<>(generatePlaceholder(input));
+    private static Option<String> compileWhitespace(String input) {
+        if (input.isBlank()) return new Some<>("");
+        return new None<>();
     }
 
     private static Option<String> compileTypedBlock(String input, String keyword, List_<List_<String>> typeParams) {
