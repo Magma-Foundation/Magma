@@ -52,10 +52,9 @@
 /* public */ struct List__Character {
 	List__Character add(Character element);
 	List__Character addAll(List__Character elements);
-	void forEach(void (*)(Character) consumer);
 	Stream__Character stream();
 	Character popFirst();
-	int isEmpty();
+	int hasElements();
 	Option_Character apply(int index);
 	int size();
 	Character last();
@@ -65,10 +64,9 @@
 /* public */ struct List__String {
 	List__String add(String element);
 	List__String addAll(List__String elements);
-	void forEach(void (*)(String) consumer);
 	Stream__String stream();
 	String popFirst();
-	int isEmpty();
+	int hasElements();
 	Option_String apply(int index);
 	int size();
 	String last();
@@ -152,10 +150,9 @@
 /* public */ struct List__List__String {
 	List__List__String add(List__String element);
 	List__List__String addAll(List__List__String elements);
-	void forEach(void (*)(List__String) consumer);
 	Stream__List__String stream();
 	List__String popFirst();
-	int isEmpty();
+	int hasElements();
 	Option_List__String apply(int index);
 	int size();
 	List__String last();
@@ -167,10 +164,9 @@
 /* public */ struct List__Tuple_String_List__String {
 	List__Tuple_String_List__String add(Tuple_String_List__String element);
 	List__Tuple_String_List__String addAll(List__Tuple_String_List__String elements);
-	void forEach(void (*)(Tuple_String_List__String) consumer);
 	Stream__Tuple_String_List__String stream();
 	Tuple_String_List__String popFirst();
-	int isEmpty();
+	int hasElements();
 	Option_Tuple_String_List__String apply(int index);
 	int size();
 	Tuple_String_List__String last();
@@ -192,7 +188,7 @@ private State(List__Character queue, List__String segments, StringBuilder buffer
 	return append(pop());
 }
 /* private */int hasNext(){
-	return !queue.isEmpty();
+	return queue.hasElements();
 }
 /* private */State enter(){
 	return State(queue, segments, buffer, depth + 1);

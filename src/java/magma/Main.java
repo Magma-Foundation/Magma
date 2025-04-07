@@ -85,7 +85,7 @@ public class Main {
         Stream_<T> filter(Predicate<T> predicate);
     }
 
-    private interface Collector<T, C> {
+    public interface Collector<T, C> {
         C createInitial();
 
         C fold(C current, T element);
