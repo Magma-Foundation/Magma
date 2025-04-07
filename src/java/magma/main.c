@@ -30,17 +30,13 @@ public  */struct Main {
             return whenErr.apply(error);
         }
     } *//* public static */void main(struct String* args){
-	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");/* 
-        readString(source)
-                .match(input -> runWithInput(source, input), Optional::of)
-                .ifPresent(Throwable::printStackTrace); *//* 
-     */
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+	readString(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
-	struct Path target = source.resolveSibling("main.c");/* 
-        return writeString(target, output); *//* 
-     */
+	struct Path target = source.resolveSibling("main.c");
+	/* return writeString */(target, output);
 }
 /* private static *//* Optional<IOException> */ writeString(struct Path target, struct String output){/* 
         try {
@@ -48,25 +44,21 @@ public  */struct Main {
             return Optional.empty();
         } *//*  catch (IOException e) {
             return Optional.of(e);
-        } *//* 
-     */
+        } */
 }
 /* private static Result<String, *//* IOException> */ readString(struct Path source){/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
             return new Err<>(e);
-        } *//* 
-     */
+        } */
 }
 /* private static */struct String compile(struct String input){
-	/* Optional<String> */ s = compileStatements(input, /*  Main::compileRootSegment */);/* 
-        return s.orElse(""); *//* 
-     */
+	/* Optional<String> */ s = compileStatements(input, /*  Main::compileRootSegment */);
+	/* return s */.orElse("");
 }
-/* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){/* 
-        return compileAll(divideStatements(input), compiler, Main::mergeStatements); *//* 
-     */
+/* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
+	/* return compileAll */(divideStatements(input), compiler, /*  Main::mergeStatements */);
 }
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
 	/* Optional<StringBuilder> */ maybeOutput = Optional.of(/* new StringBuilder */());/* 
@@ -74,20 +66,18 @@ public  */struct Main {
             maybeOutput = maybeOutput.flatMap(output -> {
                 return compiler.apply(segment).map(str -> merger.apply(output, str));
             });
-        } *//* 
-
-        return maybeOutput.map(StringBuilder::toString); *//* 
-     */
+        } */
+	/* return maybeOutput */.map(/* StringBuilder::toString */);
 }
-/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){/* 
-        return output.append(str); *//* 
-     */
+/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
+	/* return output */.append(str);
 }
 /* private static *//* ArrayList<String> */ divideStatements(struct String input){
 	/* ArrayList<String> */ segments = /* new ArrayList<> */();
 	struct StringBuilder buffer = /* new StringBuilder */();
 	struct int depth = /*  0 */;
-	/* for *//* (int */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
+	/* for *//* (int */ i = /*  0 */;
+	/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             buffer.append(c);
             if (c == ';' && depth == 0) {
@@ -100,8 +90,7 @@ public  */struct Main {
             } *//*  else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
-            } *//* 
-         */
+            } */
 }
 /* 
         segments.add(buffer.toString()); *//* 
@@ -187,40 +176,39 @@ public  */struct Main {
 
     private static Optional<String> compileStatement(String input) {
         String stripped = input.strip();
+        if (stripped.isEmpty()) return Optional.of("");
+
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+
             int separator = withoutEnd.indexOf("=");
             if (separator >= 0) {
                 String inputDefinition = withoutEnd.substring(0, separator);
                 String inputValue = withoutEnd.substring(separator + "=".length());
                 return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
                     return compileValue(inputValue).map(outputValue -> {
-                        return "\n\t" + outputDefinition + " = " + outputValue + ";";
+                        return generateStatement(outputDefinition + " = " + outputValue);
                     });
                 });
             }
+
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd);
+            if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
         return Optional.of(invalidate("statement", input));
+    } *//* 
+
+    private static String generateStatement(String value) {
+        return "\n\t" + value + ";";
     } *//* 
 
     private static Optional<String> compileValue(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
 
-        if (stripped.endsWith(")")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                String inputCaller = withoutEnd.substring(0, argsStart);
-                String inputArguments = withoutEnd.substring(argsStart + 1);
-                return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
-                    return compileValue(inputCaller).map(outputCaller -> {
-                        return outputCaller + "(" + outputValues + ")";
-                    });
-                });
-            }
-        }
+        Optional<String> maybeInvocation = compileInvocation(stripped);
+        if (maybeInvocation.isPresent()) return maybeInvocation;
 
         int separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
@@ -236,7 +224,35 @@ public  */struct Main {
             return Optional.of(stripped);
         }
 
-        return Optional.of(generatePlaceholder(input));
+        return Optional.of(invalidate("value", input));
+    } *//* 
+
+    private static Optional<String> compileInvocation(String stripped) {
+        if (!stripped.endsWith(")")) return Optional.empty();
+        String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+
+        int argsStart = -1;
+        int depth = 0;
+        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+            char c = withoutEnd.charAt(i);
+            if (c == '(' && depth == 0) {
+                argsStart = i;
+                break;
+            } else {
+                if (c == ')') depth++;
+                if (c == '(') depth--;
+            }
+        }
+
+        if (argsStart < 0) return Optional.empty();
+
+        String inputCaller = withoutEnd.substring(0, argsStart);
+        String inputArguments = withoutEnd.substring(argsStart + 1);
+        return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
+            return compileValue(inputCaller).map(outputCaller -> {
+                return outputCaller + "(" + outputValues + ")";
+            });
+        });
     } *//* 
 
     private static Optional<String> compileDefinition(String input) {
@@ -260,7 +276,8 @@ public  */struct Main {
             String name = stripped.substring(nameSeparator + " ".length());
             return Optional.of(modifiers + compileType(type) + " " + name);
         }
-        return Optional.of(generatePlaceholder(stripped));
+
+        return Optional.of(invalidate("definition", stripped));
     } *//* 
 
     private static String compileType(String type) {
@@ -272,7 +289,7 @@ public  */struct Main {
             return "struct " + stripped;
         }
 
-        return generatePlaceholder(stripped);
+        return invalidate("type", stripped);
     } *//* 
 
     private static boolean isSymbol(String input) {

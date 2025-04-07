@@ -191,40 +191,39 @@ public class Main {
 
     private static Optional<String> compileStatement(String input) {
         String stripped = input.strip();
+        if (stripped.isEmpty()) return Optional.of("");
+
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+
             int separator = withoutEnd.indexOf("=");
             if (separator >= 0) {
                 String inputDefinition = withoutEnd.substring(0, separator);
                 String inputValue = withoutEnd.substring(separator + "=".length());
                 return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
                     return compileValue(inputValue).map(outputValue -> {
-                        return "\n\t" + outputDefinition + " = " + outputValue + ";";
+                        return generateStatement(outputDefinition + " = " + outputValue);
                     });
                 });
             }
+
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd);
+            if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
         return Optional.of(invalidate("statement", input));
+    }
+
+    private static String generateStatement(String value) {
+        return "\n\t" + value + ";";
     }
 
     private static Optional<String> compileValue(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
 
-        if (stripped.endsWith(")")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                String inputCaller = withoutEnd.substring(0, argsStart);
-                String inputArguments = withoutEnd.substring(argsStart + 1);
-                return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
-                    return compileValue(inputCaller).map(outputCaller -> {
-                        return outputCaller + "(" + outputValues + ")";
-                    });
-                });
-            }
-        }
+        Optional<String> maybeInvocation = compileInvocation(stripped);
+        if (maybeInvocation.isPresent()) return maybeInvocation;
 
         int separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
@@ -240,7 +239,35 @@ public class Main {
             return Optional.of(stripped);
         }
 
-        return Optional.of(generatePlaceholder(input));
+        return Optional.of(invalidate("value", input));
+    }
+
+    private static Optional<String> compileInvocation(String stripped) {
+        if (!stripped.endsWith(")")) return Optional.empty();
+        String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+
+        int argsStart = -1;
+        int depth = 0;
+        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+            char c = withoutEnd.charAt(i);
+            if (c == '(' && depth == 0) {
+                argsStart = i;
+                break;
+            } else {
+                if (c == ')') depth++;
+                if (c == '(') depth--;
+            }
+        }
+
+        if (argsStart < 0) return Optional.empty();
+
+        String inputCaller = withoutEnd.substring(0, argsStart);
+        String inputArguments = withoutEnd.substring(argsStart + 1);
+        return compileValues(inputArguments, Main::compileValue).flatMap(outputValues -> {
+            return compileValue(inputCaller).map(outputCaller -> {
+                return outputCaller + "(" + outputValues + ")";
+            });
+        });
     }
 
     private static Optional<String> compileDefinition(String input) {
@@ -264,7 +291,8 @@ public class Main {
             String name = stripped.substring(nameSeparator + " ".length());
             return Optional.of(modifiers + compileType(type) + " " + name);
         }
-        return Optional.of(generatePlaceholder(stripped));
+
+        return Optional.of(invalidate("definition", stripped));
     }
 
     private static String compileType(String type) {
@@ -276,7 +304,7 @@ public class Main {
             return "struct " + stripped;
         }
 
-        return generatePlaceholder(stripped);
+        return invalidate("type", stripped);
     }
 
     private static boolean isSymbol(String input) {
