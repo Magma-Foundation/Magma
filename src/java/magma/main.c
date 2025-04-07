@@ -30,7 +30,7 @@ public  */struct Main {
             return whenErr.apply(error);
         }
     } *//* public static */void main(struct String* args){
-	struct Path source = /* Paths.get */(".", "src", "java", "magma", "Main.java");/* 
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");/* 
         readString(source)
                 .match(input -> runWithInput(source, input), Optional::of)
                 .ifPresent(Throwable::printStackTrace); *//* 
@@ -38,7 +38,7 @@ public  */struct Main {
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
-	struct Path target = /* source.resolveSibling */("main.c");/* 
+	struct Path target = source.resolveSibling("main.c");/* 
         return writeString(target, output); *//* 
      */
 }
@@ -60,7 +60,7 @@ public  */struct Main {
      */
 }
 /* private static */struct String compile(struct String input){
-	/* Optional<String> */ s = /* compileStatements */(/* input */, /*  Main::compileRootSegment */);/* 
+	/* Optional<String> */ s = compileStatements(input, /*  Main::compileRootSegment */);/* 
         return s.orElse(""); *//* 
      */
 }
@@ -69,7 +69,7 @@ public  */struct Main {
      */
 }
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* Optional<StringBuilder> */ maybeOutput = /* Optional.of */(/* new StringBuilder */(/*  */));/* 
+	/* Optional<StringBuilder> */ maybeOutput = Optional.of(/* new StringBuilder */());/* 
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> {
                 return compiler.apply(segment).map(str -> merger.apply(output, str));
@@ -84,8 +84,8 @@ public  */struct Main {
      */
 }
 /* private static *//* ArrayList<String> */ divideStatements(struct String input){
-	/* ArrayList<String> */ segments = /* new ArrayList<> */(/*  */);
-	struct StringBuilder buffer = /* new StringBuilder */(/*  */);
+	/* ArrayList<String> */ segments = /* new ArrayList<> */();
+	struct StringBuilder buffer = /* new StringBuilder */();
 	struct int depth = /*  0 */;
 	/* for *//* (int */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
@@ -220,6 +220,20 @@ public  */struct Main {
                     });
                 });
             }
+        }
+
+        int separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            String object = stripped.substring(0, separator);
+            String property = stripped.substring(separator + ".".length());
+
+            return compileValue(object).map(newObject -> {
+                return newObject + "." + property;
+            });
+        }
+
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
         }
 
         return Optional.of(generatePlaceholder(input));

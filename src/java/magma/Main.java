@@ -226,6 +226,20 @@ public class Main {
             }
         }
 
+        int separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            String object = stripped.substring(0, separator);
+            String property = stripped.substring(separator + ".".length());
+
+            return compileValue(object).map(newObject -> {
+                return newObject + "." + property;
+            });
+        }
+
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
+        }
+
         return Optional.of(generatePlaceholder(input));
     }
 
