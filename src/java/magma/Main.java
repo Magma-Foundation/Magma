@@ -351,6 +351,7 @@ public class Main {
 
     private static final List_<String> imports = Lists.empty();
     private static final List_<String> structs = Lists.empty();
+    private static List_<String> globals = Lists.empty();
     private static final List_<String> functions = Lists.empty();
     private static int lambdaCounter = 0;
 
@@ -391,6 +392,7 @@ public class Main {
                 .map(compiled -> {
                     compiled.addAll(imports);
                     compiled.addAll(structs);
+                    compiled.addAll(globals);
                     compiled.addAll(functions);
                     return compiled;
                 })
@@ -526,7 +528,13 @@ public class Main {
         }
 
         Option<String> maybeAssignment = compileAssignment(input);
-        if (maybeAssignment.isPresent()) return maybeAssignment.map(value -> value + ";\n");
+        if (maybeAssignment.isPresent()) {
+             globals = maybeAssignment.map(value -> value + ";\n")
+                     .map(globals::add)
+                     .orElse(globals);
+
+             return new Some<>("");
+        }
 
         return new Some<>(invalidate("class segment", input));
     }

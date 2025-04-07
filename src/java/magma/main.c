@@ -1,11 +1,3 @@
-
-	/* private static final *//* List_<String> */ imports = Lists.empty();;;
-
-	/* private static final *//* List_<String> */ structs = Lists.empty();;;
-
-	/* private static final *//* List_<String> */ functions = Lists.empty();;;
-
-	/* private static */struct int lambdaCounter = /*  0; */;;
 /* 
  *//*  */#include <temp.h>
 #include <temp.h>
@@ -43,6 +35,16 @@
 
 public  */struct Main {
 };
+
+	/* private static final *//* List_<String> */ imports = Lists.empty();;;
+
+	/* private static final *//* List_<String> */ structs = Lists.empty();;;
+
+	/* private static *//* List_<String> */ globals = Lists.empty();;;
+
+	/* private static final *//* List_<String> */ functions = Lists.empty();;;
+
+	/* private static */struct int lambdaCounter = /*  0; */;;
 /* private record *//* Tuple<A, */ B>(struct A left, struct B right){
 }
 /* private static final class RangeHead implements Head<Integer> {
@@ -244,6 +246,7 @@ auto __lambda6__(auto compiled){
                 .map(compiled -> {
                     compiled.addAll(imports);
                     compiled.addAll(structs);
+                    compiled.addAll(globals);
                     compiled.addAll(functions);
                     return compiled;
                 } */
@@ -351,9 +354,6 @@ auto __lambda10__(auto compiled){
 	System.err.println(/* "Invalid " + type + ": " + input */);
 	/* return generatePlaceholder */(input);
 }
-auto __lambda11__(auto value){
-	return /*  value + ";\n" */;
-}
 /* private static *//* Option<String> */ compileClassSegment(struct String input){
 	/* Option<String> */ maybeMethod = compileMethod(input);/* 
         if (maybeMethod.isPresent()) return maybeMethod; */
@@ -365,8 +365,14 @@ auto __lambda11__(auto value){
         if (recordIndex >= 0) {
             return new Some<>(generateStruct("", "Temp"));
         } */
-	/* Option<String> */ maybeAssignment = compileAssignment(input);
-	/* if (maybeAssignment */.isPresent()) return maybeAssignment.map(__lambda11__);
+	/* Option<String> */ maybeAssignment = compileAssignment(input);/* 
+        if (maybeAssignment.isPresent()) {
+             globals = maybeAssignment.map(value -> value + ";\n")
+                     .map(globals::add)
+                     .orElse(globals);
+
+             return new Some<>("");
+        } */
 	/* return new Some<> */(invalidate("class segment", input));
 }
 /* private static *//* Option<String> */ compileMethod(struct String input){
@@ -393,14 +399,14 @@ auto __lambda11__(auto value){
 	functions.add(function);/* 
         return ""; */
 }
-auto __lambda12__(auto main){
+auto __lambda11__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda13__(auto main){
+auto __lambda12__(auto main){
 	return Main.mergeValues(main);
 }
 /* private static *//* Option<String> */ compileValues(struct String input, /* Function<String */, /* Option<String>> */ compiler){
-	/* return compileAll */(divideAll(input, __lambda12__), compiler, __lambda13__);
+	/* return compileAll */(divideAll(input, __lambda11__), compiler, __lambda12__);
 }
 /* private static */struct State divideValueChar(struct State state, struct Character c){
 	struct if (c = /* = ',' && state */.isLevel()) return state.advance();
