@@ -3,7 +3,6 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,7 +42,7 @@ public class Main {
         <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
-    private interface List_<T> {
+    public interface List_<T> {
         List_<T> add(T element);
 
         List_<T> addAll(List_<T> elements);
@@ -67,7 +66,7 @@ public class Main {
         T first();
     }
 
-    private interface Stream_<T> {
+    public interface Stream_<T> {
         <R> Stream_<R> map(Function<T, R> mapper);
 
         <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
@@ -116,11 +115,11 @@ public class Main {
         }
     }
 
-    private static final class RangeHead implements Head<Integer> {
+    public static final class RangeHead implements Head<Integer> {
         private final int size;
         private int counter = 0;
 
-        private RangeHead(int size) {
+        public RangeHead(int size) {
             this.size = size;
         }
 
@@ -136,7 +135,7 @@ public class Main {
         }
     }
 
-    private record HeadedStream<T>(Head<T> head) implements Stream_<T> {
+    public record HeadedStream<T>(Head<T> head) implements Stream_<T> {
         @Override
         public <R> Stream_<R> map(Function<T, R> mapper) {
             return new HeadedStream<>(() -> head.next().map(mapper));
@@ -197,97 +196,6 @@ public class Main {
         @Override
         public Stream_<T> filter(Predicate<T> predicate) {
             return flatMap(value -> new HeadedStream<>(predicate.test(value) ? new SingleHead<>(value) : new EmptyHead<>()));
-        }
-    }
-
-    private record JavaList<T>(List<T> inner) implements List_<T> {
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        @Override
-        public List_<T> add(T element) {
-            List<T> copy = new ArrayList<>(inner);
-            copy.add(element);
-            return new JavaList<>(copy);
-        }
-
-        @Override
-        public List_<T> addAll(List_<T> elements) {
-            return elements.stream().<List_<T>>foldWithInitial(this, List_::add);
-        }
-
-        @Override
-        public void forEach(Consumer<T> consumer) {
-            inner.forEach(consumer);
-        }
-
-        @Override
-        public Stream_<T> stream() {
-            return streamWithIndices().map(Tuple::right);
-        }
-
-        @Override
-        public T popFirst() {
-            return inner.removeFirst();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return inner.isEmpty();
-        }
-
-        @Override
-        public int size() {
-            return inner.size();
-        }
-
-        @Override
-        public T last() {
-            return inner.getLast();
-        }
-
-        @Override
-        public Stream_<Tuple<Integer, T>> streamWithIndices() {
-            return new HeadedStream<>(new RangeHead(inner.size())).map(index -> new Tuple<>(index, inner.get(index)));
-        }
-
-        @Override
-        public T first() {
-            return inner.getFirst();
-        }
-
-        @Override
-        public Option<T> apply(int index) {
-            if (index < 0 || index >= size()) return new None<>();
-            return new Some<>(inner.get(index));
-        }
-    }
-
-    private static class Lists {
-        public static <T> List_<T> empty() {
-            return new JavaList<>();
-        }
-
-        public static <T> boolean contains(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
-            return list.stream().anyMatch(child -> equator.apply(element, child));
-        }
-
-        public static <T> boolean equalsTo(List_<T> elements, List_<T> other, BiFunction<T, T, Boolean> equator) {
-            if (elements.size() != other.size()) return false;
-
-            return new HeadedStream<>(new RangeHead(elements.size())).allMatch(index -> {
-                T left = elements.apply(index).orElse(null);
-                T right = other.apply(index).orElse(null);
-                return equator.apply(left, right);
-            });
-        }
-
-        public static <T> Option<Integer> indexOf(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
-            return list.streamWithIndices()
-                    .filter(tuple -> equator.apply(tuple.right, element))
-                    .next()
-                    .map(Tuple::left);
         }
     }
 
