@@ -100,7 +100,7 @@ public class Main {
     }
 
     private interface Rule {
-        Option<String> apply(String input);
+        Option<String> compile(String input);
     }
 
     public record Tuple<A, B>(A left, B right) {
@@ -532,7 +532,7 @@ public class Main {
     }
 
     private static Option<List_<String>> parseAll(List_<String> segments, Rule compiler) {
-        return segments.stream().foldToOption(Lists.empty(), (compiled, segment) -> compiler.apply(segment).map(compiled::add));
+        return segments.stream().foldToOption(Lists.empty(), (compiled, segment) -> compiler.compile(segment).map(compiled::add));
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String str) {
