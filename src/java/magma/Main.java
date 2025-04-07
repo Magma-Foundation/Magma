@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -625,8 +624,7 @@ public class Main {
 
         String name = withoutEnd.substring(0, genStart);
         String substring = withoutEnd.substring(genStart + "<".length());
-        List<String> list = Arrays.asList(substring.split(Pattern.quote(",")));
-        List_<String> finalClassTypeParams = Lists.fromNative(list)
+        List_<String> finalClassTypeParams = Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(","))))
                 .stream()
                 .map(String::strip)
                 .collect(new ListCollector<>());
@@ -893,7 +891,7 @@ public class Main {
             return compileValue(object, typeParams, typeArguments).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
-                return generateLambda(Lists.fromNative(List.of(paramName)), generateInvocation(caller, paramName));
+                return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
             });
         }
 
@@ -927,15 +925,14 @@ public class Main {
 
     private static Option<List_<String>> findLambdaParams(String beforeArrow) {
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-            List<String> list = Arrays.asList(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")));
-            return new Some<>(Lists.fromNative(list)
+            return new Some<>(Lists.fromNative(Arrays.asList(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(","))))
                     .stream()
                     .map(String::strip)
                     .collect(new ListCollector<>()));
         }
 
         if (isSymbol(beforeArrow)) {
-            return new Some<>(Lists.fromNative(List.of(beforeArrow)));
+            return new Some<>(Lists.<String>empty().add(beforeArrow));
         }
 
         return new None<>();
