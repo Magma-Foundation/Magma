@@ -679,7 +679,8 @@ public class Main {
         if (!body.endsWith("}")) return new None<>();
 
         String inputContent = body.substring(0, body.length() - "}".length());
-        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged, typeArguments))
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged, typeArguments)
+                .findValue())
                 .map(outputContent -> generateStruct(modifiers, name, outputContent));
     }
 
@@ -692,49 +693,34 @@ public class Main {
         return "";
     }
 
-    private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (input.isBlank()) return new Some<>("");
-
-        Option<String> maybeClass = compileTypedBlock(input, "class ", typeParams);
-        if (maybeClass.isPresent()) return maybeClass;
-
-        Option<String> maybeInterface = compileTypedBlock(input, "interface ", typeParams);
-        if (maybeInterface.isPresent()) return maybeInterface;
-
-        Option<String> maybeRecord = compileTypedBlock(input, "record ", typeParams);
-        if (maybeRecord.isPresent()) return maybeRecord;
-
-        Option<String> maybeMethod = compileMethod(input, typeParams, typeArguments);
-        if (maybeMethod.isPresent()) return maybeMethod;
-
-        Option<String> maybeInitialization = compileInitializationStatement(input, typeParams, typeArguments);
-        if (maybeInitialization.isPresent()) {
-            globals = maybeInitialization.map(value -> value + ";\n")
-                    .map(globals::add)
-                    .orElse(globals);
-
-            return new Some<>("");
-        }
-
-        if (input.endsWith(";")) {
-            String sliced = input.substring(0, input.length() - ";".length());
-            return compileDefinition(sliced, typeParams, typeArguments).map(Main::generateStatement);
-        }
-
-        System.err.println(new Err<>(new CompileError("Invalid " + "class segment", input))
-                .error
-                .display());
-
-        return new Some<>(generatePlaceholder(input));
+    private static Result<String, CompileError> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileWhitespace(input)
+                .or(() -> compileTypedBlock(input, "class", typeParams))
+                .or(() -> compileTypedBlock(input, "interface ", typeParams))
+                .or(() -> compileTypedBlock(input, "record ", typeParams))
+                .or(() -> compileMethod(input, typeParams, typeArguments))
+                .or(() -> compileGlobal(input, typeParams, typeArguments))
+                .or(() -> compileDefinitionStatement(input, typeParams, typeArguments))
+                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid class segment", input)));
     }
 
-    private static Option<String> compileInitializationStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (input.endsWith(";")) {
-            String substring = input.substring(0, input.length() - ";".length());
-            return compileInitialization(substring, typeParams, typeArguments);
-        } else {
-            return new None<>();
-        }
+    private static Option<String> compileDefinitionStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (!input.endsWith(";")) return new None<>();
+
+        String sliced = input.substring(0, input.length() - ";".length());
+        return compileDefinition(sliced, typeParams, typeArguments).map(Main::generateStatement);
+    }
+
+    private static Option<String> compileGlobal(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (!input.endsWith(";")) return new None<>();
+
+        String substring = input.substring(0, input.length() - ";".length());
+        Option<String> maybeInitialization = compileInitialization(substring, typeParams, typeArguments);
+
+        globals = maybeInitialization.map(value -> value + ";\n")
+                .map(globals::add)
+                .orElse(globals);
+        return new Some<>("");
     }
 
     private static Option<String> compileMethod(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
