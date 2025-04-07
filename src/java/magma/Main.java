@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -526,6 +527,12 @@ public class Main {
         }
     }
 
+    private record CompileError(String message, String context) {
+        public String display() {
+            return message + ": " + context;
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Option<String>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -533,7 +540,6 @@ public class Main {
     private static List_<String> functions = Lists.empty();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.empty();
     private static List_<String> globals = Lists.empty();
-
     private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
@@ -668,7 +674,11 @@ public class Main {
         Option<String> maybeClass = compileTypedBlock(input, "class ", frame);
         if (maybeClass.isPresent()) return maybeClass;
 
-        return new Some<>(invalidate("root segment", input));
+        System.err.println(new Err<>(new CompileError("Invalid " + "root segment", input))
+                .error
+                .display());
+
+        return new Some<>(generatePlaceholder(input));
     }
 
     private static Option<String> compileTypedBlock(String input, String keyword, List_<List_<String>> typeParams) {
@@ -740,11 +750,6 @@ public class Main {
         return "";
     }
 
-    private static String invalidate(String type, String input) {
-        System.err.println("Invalid " + type + ": " + input);
-        return generatePlaceholder(input);
-    }
-
     private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (input.isBlank()) return new Some<>("");
 
@@ -774,7 +779,11 @@ public class Main {
             return compileDefinition(sliced, typeParams, typeArguments).map(Main::generateStatement);
         }
 
-        return new Some<>(invalidate("class segment", input));
+        System.err.println(new Err<>(new CompileError("Invalid " + "class segment", input))
+                .error
+                .display());
+
+        return new Some<>(generatePlaceholder(input));
     }
 
     private static Option<String> compileInitializationStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -884,7 +893,11 @@ public class Main {
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
-        return new Some<>(invalidate("statement", input));
+        System.err.println(new Err<>(new CompileError("Invalid " + "statement", input))
+                .error
+                .display());
+
+        return new Some<>(generatePlaceholder(input));
     }
 
     private static Option<String> compileInitialization(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -952,7 +965,7 @@ public class Main {
             return compileValue(object, typeParams, typeArguments).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
-                return generateLambda(new JavaList<String>(Arrays.asList(paramName)), generateInvocation(caller, paramName));
+                return generateLambda(new JavaList<String>(List.of(paramName)), generateInvocation(caller, paramName));
             });
         }
 
@@ -962,7 +975,13 @@ public class Main {
                 .or(() -> compileOperator(input, ">=", typeParams, typeArguments))
                 .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
-                .or(() -> new Some<>(invalidate("value", input)));
+                .or(() -> {
+                    System.err.println(new Err<>(new CompileError("Invalid " + "value", input))
+                            .error
+                            .display());
+
+                    return new Some<>(generatePlaceholder(input));
+                });
     }
 
     private static Option<String> compileLambda(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -988,7 +1007,7 @@ public class Main {
         }
 
         if (isSymbol(beforeArrow)) {
-            return new Some<>(new JavaList<String>(Arrays.asList(beforeArrow)));
+            return new Some<>(new JavaList<String>(List.of(beforeArrow)));
         }
 
         return new None<>();
@@ -1073,7 +1092,13 @@ public class Main {
     }
 
     private static Option<String> compileOrInvalidateDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileDefinition(input, typeParams, typeArguments).or(() -> new Some<>(invalidate("definition", input)));
+        return compileDefinition(input, typeParams, typeArguments).or(() -> {
+            System.err.println(new Err<>(new CompileError("Invalid " + "definition", input))
+                    .error
+                    .display());
+
+            return new Some<>(generatePlaceholder(input));
+        });
     }
 
     private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -1148,14 +1173,14 @@ public class Main {
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
                     return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
                         if (base.equals("Function")) {
-                            return generateFunctionalType(newArguments.get(1), new JavaList<String>(Arrays.asList(newArguments.get(0))));
+                            return generateFunctionalType(newArguments.get(1), new JavaList<String>(Collections.singletonList(newArguments.get(0))));
                         }
                         if (base.equals("BiFunction")) {
                             return generateFunctionalType(newArguments.get(2), new JavaList<String>(Arrays.asList(newArguments.get(0), newArguments.get(1))));
                         }
 
                         if (base.equals("Consumer")) {
-                            return generateFunctionalType("void", new JavaList<String>(Arrays.asList(newArguments.get(0))));
+                            return generateFunctionalType("void", new JavaList<String>(Collections.singletonList(newArguments.get(0))));
                         }
 
                         if (base.equals("Supplier")) {
@@ -1175,7 +1200,11 @@ public class Main {
             }
         }
 
-        return new Some<>(invalidate("type", stripped));
+        System.err.println(new Err<>(new CompileError("Invalid " + "type", stripped))
+                .error
+                .display());
+
+        return new Some<>(generatePlaceholder(stripped));
     }
 
     private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {
