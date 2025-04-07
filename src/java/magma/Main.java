@@ -655,6 +655,13 @@ public class Main {
         }
     }
 
+    public static final List_<String> MODIFIERS = Lists.of(
+            "private",
+            "static",
+            "final",
+            "public"
+    );
+
     private static List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static Map_<String, Function<List_<String>, Result<String, CompileError>>> generators = Maps.empty();
     private static List_<String> imports = Lists.empty();
@@ -927,10 +934,14 @@ public class Main {
                 input -> compileTypedBlock(state, "class", input),
                 input -> compileTypedBlock(state, "interface ", input),
                 input -> compileTypedBlock(state, "record ", input),
-                new TypeRule("method", input -> compileMethod(state, input)),
+                createMethodRule(state),
                 input -> compileGlobal(state, input),
                 input -> compileDefinitionStatement(state, input)
         ));
+    }
+
+    private static TypeRule createMethodRule(ParseState state) {
+        return new TypeRule("method", input -> compileMethod(state, input));
     }
 
     private static Result<String, CompileError> compileDefinitionStatement(ParseState state, String input) {
@@ -1378,19 +1389,24 @@ public class Main {
             return compileType(state, beforeName).mapValue(outputType -> new Node().withString("type", outputType));
         }
 
-        String placeholder = beforeName.substring(0, typeSeparator);
+        String modifierString = beforeName.substring(0, typeSeparator);
         String inputType = beforeName.substring(typeSeparator + 1);
 
-        return divideByChar(placeholder, ' ')
+        return parseDivide(modifierString).flatMapValue(modifiers -> compileType(state, inputType).mapValue(outputType -> modifiers.withString("type", outputType)));
+    }
+
+    private static Result<Node, CompileError> parseDivide(String input) {
+        return divideByChar(input, ' ')
                 .stream()
                 .map(String::strip)
-                .map(Main::compileSymbol)
+                .map(Main::compileModifier)
                 .map(node -> node.mapValue(value -> new Node().withString("value", value)))
                 .collect(new Exceptional<>(new ListCollector<>()))
-                .flatMapValue(modifiers -> {
-                    Node modifiers1 = new Node().withNodeList("modifiers", modifiers);
-                    return compileType(state, inputType).mapValue(outputType -> modifiers1.withString("type", outputType));
-                });
+                .mapValue(modifiers -> new Node().withNodeList("modifiers", modifiers));
+    }
+
+    private static Result<String, CompileError> compileModifier(String modifier) {
+        return Lists.contains(MODIFIERS, modifier, String::equals) ? new Ok<>(modifier) : new Err<>(new CompileError("Not a modifier", modifier));
     }
 
     private static Result<String, CompileError> createNotASymbol(String value) {
