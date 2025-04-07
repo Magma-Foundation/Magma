@@ -268,10 +268,6 @@ public class Main {
             return new JavaList<>();
         }
 
-        public static <T> List_<T> of(T... elements) {
-            return new JavaList<>(Arrays.asList(elements));
-        }
-
         public static <T> boolean contains(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
             return list.stream().anyMatch(child -> equator.apply(element, child));
         }
@@ -686,7 +682,8 @@ public class Main {
             return new Some<>("");
         }
 
-        Option<String> maybeClass = compileTypedBlock(input, "class ", Lists.of(Lists.empty()));
+        List_<List_<String>> frame = new JavaList<List_<String>>().add(Lists.empty());
+        Option<String> maybeClass = compileTypedBlock(input, "class ", frame);
         if (maybeClass.isPresent()) return maybeClass;
 
         return new Some<>(invalidate("root segment", input));
@@ -728,7 +725,7 @@ public class Main {
 
         String name = withoutEnd.substring(0, genStart);
         String substring = withoutEnd.substring(genStart + "<".length());
-        List_<String> finalClassTypeParams = Lists.of(substring.split(Pattern.quote(",")))
+        List_<String> finalClassTypeParams = new JavaList<>(Arrays.asList(substring.split(Pattern.quote(","))))
                 .stream()
                 .map(String::strip)
                 .collect(new ListCollector<>());
@@ -966,7 +963,7 @@ public class Main {
             return compileValue(object, typeParams, typeArguments).map(newObject -> {
                 String caller = newObject + "." + property;
                 String paramName = newObject.toLowerCase();
-                return generateLambda(Lists.of(paramName), generateInvocation(caller, paramName));
+                return generateLambda(new JavaList<String>(Arrays.asList(paramName)), generateInvocation(caller, paramName));
             });
         }
 
@@ -1002,7 +999,7 @@ public class Main {
         }
 
         if (isSymbol(beforeArrow)) {
-            return new Some<>(Lists.of(beforeArrow));
+            return new Some<>(new JavaList<String>(Arrays.asList(beforeArrow)));
         }
 
         return new None<>();
@@ -1162,14 +1159,14 @@ public class Main {
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
                     return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
                         if (base.equals("Function")) {
-                            return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                            return generateFunctionalType(newArguments.get(1), new JavaList<String>(Arrays.asList(newArguments.get(0))));
                         }
                         if (base.equals("BiFunction")) {
-                            return generateFunctionalType(newArguments.get(2), Lists.of(newArguments.get(0), newArguments.get(1)));
+                            return generateFunctionalType(newArguments.get(2), new JavaList<String>(Arrays.asList(newArguments.get(0), newArguments.get(1))));
                         }
 
                         if (base.equals("Consumer")) {
-                            return generateFunctionalType("void", Lists.of(newArguments.get(0)));
+                            return generateFunctionalType("void", new JavaList<String>(Arrays.asList(newArguments.get(0))));
                         }
 
                         if (base.equals("Supplier")) {
