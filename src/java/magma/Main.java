@@ -1,6 +1,5 @@
 package magma;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -882,7 +881,7 @@ public class Main {
 
         String name = withoutEnd.substring(0, genStart);
         String substring = withoutEnd.substring(genStart + "<".length());
-        List_<String> finalClassTypeParams = Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(","))))
+        List_<String> finalClassTypeParams = Lists.of(substring.split(Pattern.quote(",")))
                 .stream()
                 .map(String::strip)
                 .collect(new ListCollector<>());
@@ -1246,7 +1245,7 @@ public class Main {
 
     private static Option<List_<String>> findLambdaParams(String beforeArrow) {
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-            return new Some<>(Lists.fromNative(Arrays.asList(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(","))))
+            return new Some<>(Lists.of(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
                     .stream()
                     .map(String::strip)
                     .collect(new ListCollector<>()));
@@ -1419,10 +1418,10 @@ public class Main {
         return parseAll(segments, type1 -> compileType(parseState, type1)).mapValue(newArguments -> {
             switch (base) {
                 case "Function" -> {
-                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
+                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.of(newArguments.apply(0).orElse(null)));
                 }
                 case "BiFunction" -> {
-                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.fromNative(Arrays.asList(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null))));
+                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.of(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null)));
                 }
                 case "Consumer" -> {
                     return generateFunctionalType("void", Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));

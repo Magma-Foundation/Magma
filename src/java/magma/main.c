@@ -1,4 +1,3 @@
-#include "./java/util/Arrays.h"
 #include "./java/util/Collections.h"
 #include "./java/util/Comparator.h"
 #include "./java/util/HashMap.h"
@@ -5402,20 +5401,20 @@ auto __lambda1543__(auto string){
 	return String.strip(string);
 }
 auto __lambda1544__(auto param){
-	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)(param);
+	return Lists.of(substring.split(Pattern.quote(","))).stream().map(String.strip)(param);
 }
 auto __lambda1545__(auto param){
-	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)
+	return Lists.of(substring.split(Pattern.quote(","))).stream().map(String.strip)
                 .collect(param);
 }
 auto __lambda1546__(auto string){
 	return String.strip(string);
 }
 auto __lambda1547__(auto param){
-	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)(param);
+	return Lists.of(substring.split(Pattern.quote(","))).stream().map(String.strip)(param);
 }
 auto __lambda1548__(auto param){
-	return Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(String.strip)
+	return Lists.of(substring.split(Pattern.quote(","))).stream().map(String.strip)
                 .collect(new ListCollector<>())(param);
 }
 auto __lambda1549__(auto string){
@@ -5442,7 +5441,7 @@ auto __lambda1551__(auto typeArguments){
 	}
 	String name = withoutEnd.substring(0, genStart);
 	String substring = withoutEnd.substring(genStart + "<".length());
-	List__String finalClassTypeParams = Lists.fromNative(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(__lambda1543__).collect(ListCollector());
+	List__String finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda1543__).collect(ListCollector());
 	generators = generators.with(name, __lambda1550__);
 	return Some(Ok(""));
 }
@@ -11208,10 +11207,10 @@ auto __lambda3102__(auto type1){
 	return parseAll(segments, __lambda2591__).mapValue(newArguments -> {
             switch (base) {
                 case "Function" -> {
-                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
+                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.of(newArguments.apply(0).orElse(null)));
                 }
                 case "BiFunction" -> {
-                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.fromNative(Arrays.asList(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null))));
+                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.of(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null)));
                 }
                 case "Consumer" -> {
                     return generateFunctionalType("void", Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
