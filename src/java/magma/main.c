@@ -362,7 +362,7 @@ auto __lambda13__(auto compiled, auto segment){
 	}
 	if (1) {
 	}
-	List__List__String frame = JavaList_List__String().add(Lists.empty());
+	List__List__String frame = Lists.<List_<String>>empty().add(Lists.empty());
 	Option_String maybeClass = compileTypedBlock(input, "class ", frame);
 	if (1) {
 	}
@@ -402,7 +402,8 @@ auto __lambda15__(auto string){
 	}
 	String name = withoutEnd.substring(0, genStart);
 	String substring = withoutEnd.substring(genStart + "<".length());
-	List__String finalClassTypeParams = /* new JavaList<> */(Arrays.asList(substring.split(Pattern.quote(",")))).stream().map(__lambda15__).collect(ListCollector());
+	List_String list = Arrays.asList(substring.split(Pattern.quote(",")));
+	List__String finalClassTypeParams = Lists.fromNative(list).stream().map(__lambda15__).collect(ListCollector());
 	/* generators.put(name, typeArguments -> {
             */String joined = /*  generateGenericName(name, typeArguments);
             return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);

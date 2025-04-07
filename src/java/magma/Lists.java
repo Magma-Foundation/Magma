@@ -1,5 +1,6 @@
 package magma;
 
+import java.util.List;
 import java.util.function.BiFunction;
 
 class Lists {
@@ -26,5 +27,9 @@ class Lists {
                 .filter(tuple -> equator.apply(tuple.right(), element))
                 .next()
                 .map(Main.Tuple::left);
+    }
+
+    public static <T> Main.List_<T> fromNative(List<T> list) {
+        return new JavaList<>(list);
     }
 }
