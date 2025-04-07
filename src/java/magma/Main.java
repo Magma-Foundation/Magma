@@ -750,7 +750,8 @@ public class Main {
         if (!withBody.startsWith("{") || !withBody.endsWith("}"))
             return new Some<>(generateStatement(string));
 
-        return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> addFunction(statement, string));
+        return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatementOrBlock(input1, typeParams, typeArguments)
+                .findValue()).map(statement -> addFunction(statement, string));
     }
 
     private static String addFunction(String content, String string) {
@@ -787,49 +788,77 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
+    private static Result<String, CompileError> compileStatementOrBlock(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileWhitespace(input)
+                .or(() -> compileIf(input))
+                .or(() -> compileeWhile(input)).or(() -> compileFor(input))
+                .or(() -> compileElse(input))
+                .or(() -> compilePostFix(input))
+                .or(() -> compileStatement(input, typeParams, typeArguments))
+                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid statement or block", input)));
+    }
+
+    private static Option<String> compilePostFix(String input) {
+        if (input.strip().endsWith("++;")) return new Some<>("\n\ttemp++;");
+        return new None<>();
+    }
+
+    private static Option<String> compileElse(String input) {
+        if (input.strip().startsWith("else ")) return new Some<>("\n\telse {}");
+        return new None<>();
+    }
+
+    private static Option<String> compileFor(String input) {
+        if (input.strip().startsWith("for ")) return new Some<>("\n\tfor (;;) {\n\t}");
+        return new None<>();
+    }
+
+    private static Option<String> compileeWhile(String input) {
+        if (input.strip().startsWith("while ")) return new Some<>("\n\twhile (1) {\n\t}");
+        return new None<>();
+    }
+
+    private static Option<String> compileIf(String input) {
+        if (input.strip().startsWith("if ")) return new Some<>("\n\tif (1) {\n\t}");
+        return new None<>();
+    }
+
     private static Option<String> compileStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) return new Some<>("");
+        if (!input.strip().endsWith(";")) return new None<>();
 
-        if (stripped.startsWith("if ")) return new Some<>("\n\tif (1) {\n\t}");
-        if (stripped.startsWith("while ")) return new Some<>("\n\twhile (1) {\n\t}");
-        if (stripped.startsWith("for ")) return new Some<>("\n\tfor (;;) {\n\t}");
-        if (stripped.startsWith("else ")) return new Some<>("\n\telse {}");
-        if (stripped.endsWith("++;")) return new Some<>("\n\ttemp++;");
+        String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
+        return compileReturn(withoutEnd, typeParams, typeArguments)
+                .or(() -> compileInitialization(withoutEnd, typeParams, typeArguments))
+                .or(() -> compileAssignment(withoutEnd, typeParams, typeArguments))
+                .or(() -> compileInvocationStatement(withoutEnd, typeParams, typeArguments));
+    }
 
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-
-            if (withoutEnd.startsWith("return ")) {
-                String value = withoutEnd.substring("return ".length());
-                return compileValue(value, typeParams, typeArguments)
-                        .map(inner -> "return " + inner)
-                        .map(Main::generateStatement);
-            }
-
-            Option<String> maybeInitialization = compileInitialization(withoutEnd, typeParams, typeArguments);
-            if (maybeInitialization.isPresent()) return maybeInitialization;
-
-            int valueSeparator = withoutEnd.indexOf("=");
-            if (valueSeparator >= 0) {
-                String destination = withoutEnd.substring(0, valueSeparator).strip();
-                String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
-
-                return compileValue(destination, typeParams, typeArguments)
-                        .and(() -> compileValue(value, typeParams, typeArguments))
-                        .map(tuple -> tuple.left + " = " + tuple.right)
-                        .map(Main::generateStatement);
-            }
-
-            Option<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, typeArguments);
-            if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
+    private static Option<String> compileReturn(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (withoutEnd.startsWith("return ")) {
+            String value = withoutEnd.substring("return ".length());
+            return compileValue(value, typeParams, typeArguments)
+                    .map(inner -> "return " + inner)
+                    .map(Main::generateStatement);
         }
+        return new None<>();
+    }
 
-        System.err.println(new Err<>(new CompileError("Invalid " + "statement", input))
-                .error
-                .display());
+    private static Option<String> compileInvocationStatement(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileInvocation(withoutEnd, typeParams, typeArguments).map(Main::generateStatement);
+    }
 
-        return new Some<>(generatePlaceholder(input));
+    private static Option<String> compileAssignment(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        int valueSeparator = withoutEnd.indexOf("=");
+        if (valueSeparator >= 0) {
+            String destination = withoutEnd.substring(0, valueSeparator).strip();
+            String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
+
+            return compileValue(destination, typeParams, typeArguments)
+                    .and(() -> compileValue(value, typeParams, typeArguments))
+                    .map(tuple -> tuple.left + " = " + tuple.right)
+                    .map(Main::generateStatement);
+        }
+        return new None<>();
     }
 
     private static Option<String> compileInitialization(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
@@ -963,7 +992,8 @@ public class Main {
     private static Option<String> compileLambdaBody(String inputValue, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            return compileStatements(substring, statement -> compileStatement(statement, typeParams, typeArguments));
+            return compileStatements(substring, statement -> compileStatementOrBlock(statement, typeParams, typeArguments)
+                    .findValue());
         } else {
             return compileValue(inputValue, typeParams, typeArguments);
         }
@@ -1184,6 +1214,7 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.isEmpty()) return false;
         if (input.equals("static")) return false;
 
         for (int i = 0; i < input.length(); i++) {
