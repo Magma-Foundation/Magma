@@ -19,7 +19,7 @@
     private static final List<String> imports = new ArrayList<>(); *//* 
     private static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> functions = new ArrayList<>(); *//* 
-    private static final int lambdaCounter = 0; *//* ' && appended.isShallow()) return appended.advance().exit(); *//* 
+    private static int lambdaCounter = 0; *//* ' && appended.isShallow()) return appended.advance().exit(); *//* 
         if (c == '{') return appended.enter();
         if (c == '} *//* ') return appended.exit(); *//* 
         return appended; *//* 
@@ -186,6 +186,7 @@
 
     private static String generateLambda(String paramName, String lambdaValue) {
         String lambda = "__lambda" + lambdaCounter + "__";
+        lambdaCounter++;
 
         String definition = generateDefinition("", "auto", lambda);
         String param = generateDefinition("", "auto", paramName);
@@ -369,15 +370,15 @@ public  */struct Main {
 auto __lambda0__(auto throwable){
 	return Throwable.printStackTrace(throwable);
 }
-auto __lambda0__(auto input){
+auto __lambda1__(auto input){
 	return runWithInput(source, input);
 }
-auto __lambda0__(auto optional){
+auto __lambda2__(auto optional){
 	return Optional.of(optional);
 }
 /* public static */void main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda0__, __lambda0__).ifPresent(__lambda0__);
+	readString(source).match(__lambda1__, __lambda2__).ifPresent(__lambda0__);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
@@ -399,17 +400,17 @@ auto __lambda0__(auto optional){
             return new Err<>(e);
         } */
 }
-auto __lambda0__(auto main){
+auto __lambda3__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda0__(auto main){
+auto __lambda4__(auto main){
 	return Main.mergeStatements(main);
 }
-auto __lambda0__(auto compiled){
-	return mergeAll(compiled, __lambda0__);
+auto __lambda5__(auto compiled){
+	return mergeAll(compiled, __lambda4__);
 }
 /* private static */struct String compile(struct String input){
-	/* List<String> */ segments = divideAll(input, __lambda0__);/* 
+	/* List<String> */ segments = divideAll(input, __lambda3__);/* 
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
                     compiled.addAll(imports);
@@ -418,22 +419,22 @@ auto __lambda0__(auto compiled){
                     return compiled;
                 } */
 	/* )
-                 */.map(__lambda0__).orElse("");
+                 */.map(__lambda5__).orElse("");
 }
-auto __lambda0__(auto main){
+auto __lambda6__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda0__(auto main){
+auto __lambda7__(auto main){
 	return Main.mergeStatements(main);
 }
 /* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
-	/* return compileAll */(divideAll(input, __lambda0__), compiler, __lambda0__);
+	/* return compileAll */(divideAll(input, __lambda6__), compiler, __lambda7__);
 }
-auto __lambda0__(auto compiled){
+auto __lambda8__(auto compiled){
 	return mergeAll(compiled, merger);
 }
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* return parseAll */(segments, compiler).map(__lambda0__);
+	/* return parseAll */(segments, compiler).map(__lambda8__);
 }
 /* private static */struct String mergeAll(/* List<String> */ compiled, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
 	struct StringBuilder output = /* new StringBuilder */();/* 
@@ -458,14 +459,14 @@ auto __lambda0__(auto compiled){
 /* private static */struct StringBuilder mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
 }
-auto __lambda0__(auto linkedlist){
+auto __lambda9__(auto linkedlist){
 	return LinkedList.new(linkedlist);
 }
-auto __lambda0__(auto input){
+auto __lambda10__(auto input){
 	return input.charAt(input);
 }
 /* private static *//* List<String> */ divideAll(struct String input, /* BiFunction<State */, /* Character */, /* State> */ divider){
-	/* LinkedList<Character> */ queue = IntStream.range(/* 0 */, input.length()).mapToObj(__lambda0__).collect(Collectors.toCollection(__lambda0__));
+	/* LinkedList<Character> */ queue = IntStream.range(/* 0 */, input.length()).mapToObj(__lambda10__).collect(Collectors.toCollection(__lambda9__));
 	struct State state = /* new State */(queue);
 	struct State current = state;/* 
         while (!isEmpty(current)) {

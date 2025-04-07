@@ -91,7 +91,7 @@ public class Main {
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> functions = new ArrayList<>();
-    private static final int lambdaCounter = 0;
+    private static int lambdaCounter = 0;
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -374,6 +374,7 @@ public class Main {
 
     private static String generateLambda(String paramName, String lambdaValue) {
         String lambda = "__lambda" + lambdaCounter + "__";
+        lambdaCounter++;
 
         String definition = generateDefinition("", "auto", lambda);
         String param = generateDefinition("", "auto", paramName);
