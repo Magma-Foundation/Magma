@@ -18,7 +18,15 @@ public class Main {
     sealed public interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
 
-        Option<T> findValue();
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        Option<X> findError();
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper);
     }
 
     sealed public interface Option<T> permits Some, None {
@@ -87,6 +95,8 @@ public class Main {
         boolean allMatch(Predicate<T> predicate);
 
         Stream_<T> filter(Predicate<T> predicate);
+
+        <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder);
     }
 
     public interface Collector<T, C> {
@@ -100,7 +110,7 @@ public class Main {
     }
 
     private interface Rule {
-        Option<String> compile(String input);
+        Result<String, CompileError> compile(String input);
     }
 
     public record Tuple<A, B>(A left, B right) {
@@ -113,8 +123,28 @@ public class Main {
         }
 
         @Override
-        public Option<T> findValue() {
-            return new Some<>(value);
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(value);
+        }
+
+        @Override
+        public Option<X> findError() {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(value);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper) {
+            return mapper.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
         }
     }
 
@@ -125,8 +155,28 @@ public class Main {
         }
 
         @Override
-        public Option<T> findValue() {
-            return new None<>();
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(error);
+        }
+
+        @Override
+        public Option<X> findError() {
+            return new Some<>(error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(error));
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper) {
+            return new Err<>(error);
         }
     }
 
@@ -211,6 +261,16 @@ public class Main {
         @Override
         public Stream_<T> filter(Predicate<T> predicate) {
             return flatMap(value -> new HeadedStream<>(predicate.test(value) ? new SingleHead<>(value) : new EmptyHead<>()));
+        }
+
+        @Override
+        public <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+            return this.foldWithInitial(new Ok<>(initial), new BiFunction<Result<R, X>, T, Result<R, X>>() {
+                @Override
+                public Result<R, X> apply(Result<R, X> result, T t) {
+                    return result.flatMapValue(current -> folder.apply(current, t));
+                }
+            });
         }
     }
 
@@ -419,6 +479,10 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        public Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -458,13 +522,42 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, String context) {
+    private record CompileError(String message, String context, List_<CompileError> children) {
+        public CompileError(String message, String context) {
+            this(message, context, Lists.empty());
+        }
+
         public String display() {
-            return message + ": " + context;
+            String joined = children.stream()
+                    .map(CompileError::display)
+                    .collect(new Joiner())
+                    .orElse("");
+
+            return message + ": " + context + joined;
         }
     }
 
-    private static final Map<String, Function<List_<String>, Option<String>>> generators = new HashMap<>();
+    private record OrState(Option<String> maybeValue, List_<CompileError> errors) {
+        public OrState() {
+            this(new None<>(), Lists.empty());
+        }
+
+        public OrState withValue(String value) {
+            if (maybeValue.isPresent()) return this;
+            return new OrState(new Some<>(value), errors);
+        }
+
+        public OrState withError(CompileError error) {
+            if (maybeValue.isPresent()) return this;
+            return new OrState(maybeValue, errors.add(error));
+        }
+
+        public Result<String, List_<CompileError>> toResult() {
+            return maybeValue.<Result<String, List_<CompileError>>>match(Ok::new, () -> new Err<>(errors));
+        }
+    }
+
+    private static final Map<String, Function<List_<String>, Result<String, CompileError>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
     private static List_<String> structs = Lists.empty();
@@ -481,18 +574,22 @@ public class Main {
     }
 
     private static Option<IOException> runWithInput(Path source, String input) {
-        String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+        String output = compile(input).mapValue(value -> value + "int main(){\n\t__main__();\n\treturn 0;\n}\n").match(value -> {
+            return value;
+        }, err -> {
+            System.err.println(err.display());
+            return "";
+        });
 
         Path target = source.resolveSibling("main.c");
         return magma.Files.writeString(target, output);
     }
 
-    private static String compile(String input) {
+    private static Result<String, CompileError> compile(String input) {
         List_<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
-                .map(Main::generate)
-                .map(compiled -> mergeAll(compiled, Main::mergeStatements))
-                .orElse("");
+                .mapValue(Main::generate)
+                .mapValue(compiled -> mergeAll(compiled, Main::mergeStatements));
     }
 
     private static List_<String> generate(List_<String> compiled) {
@@ -502,8 +599,8 @@ public class Main {
 
             expanded.add(tuple);
             if (generators.containsKey(tuple.left)) {
-                Function<List_<String>, Option<String>> generator = generators.get(tuple.left);
-                generator.apply(tuple.right);
+                Function<List_<String>, Result<String, CompileError>> generator = generators.get(tuple.left);
+                generator.apply(tuple.right).findError();
             } else {
                 System.err.println(tuple.left + " is not a generic type");
             }
@@ -515,24 +612,24 @@ public class Main {
                 .addAll(functions);
     }
 
-    private static Option<String> compileStatements(String input, Rule compiler) {
+    private static Result<String, CompileError> compileStatements(String input, Rule compiler) {
         return compileAll(divideAll(input, Main::divideStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Option<String> compileAll(
+    private static Result<String, CompileError> compileAll(
             List_<String> segments,
             Rule compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
+        return parseAll(segments, compiler).mapValue(compiled -> mergeAll(compiled, merger));
     }
 
     private static String mergeAll(List_<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
         return compiled.stream().foldWithInitial(new StringBuilder(), merger).toString();
     }
 
-    private static Option<List_<String>> parseAll(List_<String> segments, Rule compiler) {
-        return segments.stream().foldToOption(Lists.empty(), (compiled, segment) -> compiler.compile(segment).map(compiled::add));
+    private static Result<List_<String>, CompileError> parseAll(List_<String> segments, Rule compiler) {
+        return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.compile(segment).mapValue(compiled::add));
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String str) {
@@ -590,51 +687,48 @@ public class Main {
         return appended;
     }
 
-    private static Option<String> compileRootSegment(String input) {
-        return compileRootStatement(input).findValue();
+    private static Result<String, CompileError> compileRootSegment(String value) {
+        return compileOr(value, Lists.of(
+                Main::compileWhitespace,
+                Main::compilePackage,
+                input -> compileImport(input),
+                Main::compileClass
+        ));
     }
 
-    private static Result<String, CompileError> compileRootStatement(String input) {
-        return compileWhitespace(input)
-                .or(() -> compilePackage(input.startsWith("package ")))
-                .or(() -> compileImport(input))
-                .or(() -> compileClass(input))
-                .match((Function<String, Result<String, CompileError>>) Ok::new, () -> new Err<>(new CompileError("Invalid " + "root segment", input)));
+    private static Result<String, CompileError> compilePackage(String input) {
+        if (input.startsWith("package ")) return new Ok<>("");
+        return createPrefixErr(input, "package ");
     }
 
-    private static Option<String> compileClass(String input) {
+    private static Result<String, CompileError> compileClass(String input) {
         List_<List_<String>> frame = Lists.<List_<String>>empty().add(Lists.empty());
         return compileTypedBlock(input, "class ", frame);
     }
 
-    private static Option<String> compileImport(String input) {
-        if (input.strip().startsWith("import ")) {
-            String value = "#include <temp.h>\n";
-            imports = imports.add(value);
-            return new Some<>("");
-        }
-        return new None<>();
+    private static Result<String, CompileError> compileImport(String input) {
+        String stripped = input.strip();
+        if (!stripped.startsWith("import ")) return createPrefixErr(stripped, "import ");
+
+        String value = "#include <temp.h>\n";
+        imports = imports.add(value);
+        return new Ok<>("");
     }
 
-    private static Option<String> compilePackage(boolean input) {
-        if (input) return new Some<>("");
-        return new None<>();
+    private static Result<String, CompileError> compileWhitespace(String input) {
+        if (input.isBlank()) return new Ok<>("");
+        return new Err<>(new CompileError("Not whitespace", input));
     }
 
-    private static Option<String> compileWhitespace(String input) {
-        if (input.isBlank()) return new Some<>("");
-        return new None<>();
-    }
-
-    private static Option<String> compileTypedBlock(String input, String keyword, List_<List_<String>> typeParams) {
+    private static Result<String, CompileError> compileTypedBlock(String input, String keyword, List_<List_<String>> typeParams) {
         int classIndex = input.indexOf(keyword);
-        if (classIndex < 0) return new None<>();
+        if (classIndex < 0) return createInfixRule(input, keyword);
 
         String modifiers = input.substring(0, classIndex).strip();
         String afterKeyword = input.substring(classIndex + keyword.length());
 
         int contentStart = afterKeyword.indexOf("{");
-        if (contentStart < 0) return new None<>();
+        if (contentStart < 0) return createInfixRule(afterKeyword, "{");
 
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
         String body = afterKeyword.substring(contentStart + "{".length()).strip();
@@ -650,16 +744,16 @@ public class Main {
                 ? withoutPermits.substring(0, paramStart)
                 : withoutPermits;
 
-        return compileGenericTypedBlock(withoutParams, modifiers, body, typeParams).or(
-                () -> compileToStruct(modifiers, withoutParams, body, typeParams, Lists.empty(), Lists.empty()));
+        return compileGenericTypedBlock(modifiers, withoutParams, body, typeParams)
+                .orElseGet(() -> compileToStruct(modifiers, withoutParams, body, typeParams, Lists.empty(), Lists.empty()));
     }
 
-    private static Option<String> compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List_<List_<String>> typeParams) {
+    private static Option<Result<String, CompileError>> compileGenericTypedBlock(String modifiers, String withoutPermits, String body, List_<List_<String>> typeParams) {
         if (!withoutPermits.endsWith(">")) return new None<>();
 
         String withoutEnd = withoutPermits.substring(0, withoutPermits.length() - ">".length());
         int genStart = withoutEnd.indexOf("<");
-        if (genStart < 0) return new None<>();
+        if (genStart < 0) return new Some<>(createInfixRule(withoutEnd, "<"));
 
         String name = withoutEnd.substring(0, genStart);
         String substring = withoutEnd.substring(genStart + "<".length());
@@ -673,18 +767,21 @@ public class Main {
             return compileToStruct(modifiers, joined, body, typeParams, finalClassTypeParams, typeArguments);
         });
 
-        return new Some<>("");
+        return new Some<>(new Ok<>(""));
     }
 
-    private static Option<String> compileToStruct(String modifiers, String name, String body, List_<List_<String>> outerTypeParams, List_<String> innerTypeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileToStruct(String modifiers, String name, String body, List_<List_<String>> outerTypeParams, List_<String> innerTypeParams, List_<String> typeArguments) {
         List_<List_<String>> merged = outerTypeParams.add(innerTypeParams);
 
-        if (!body.endsWith("}")) return new None<>();
-
+        if (!body.endsWith("}")) return createSuffixErr(body, "}");
         String inputContent = body.substring(0, body.length() - "}".length());
-        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged, typeArguments)
-                .findValue())
-                .map(outputContent -> generateStruct(modifiers, name, outputContent));
+
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged, typeArguments))
+                .mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
+    }
+
+    private static Result<String, CompileError> createSuffixErr(String input, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
     private static String generateStruct(String modifiers, String name, String content) {
@@ -696,65 +793,67 @@ public class Main {
         return "";
     }
 
-    private static Result<String, CompileError> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileWhitespace(input)
-                .or(() -> compileTypedBlock(input, "class", typeParams))
-                .or(() -> compileTypedBlock(input, "interface ", typeParams))
-                .or(() -> compileTypedBlock(input, "record ", typeParams))
-                .or(() -> compileMethod(input, typeParams, typeArguments))
-                .or(() -> compileGlobal(input, typeParams, typeArguments))
-                .or(() -> compileDefinitionStatement(input, typeParams, typeArguments))
-                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid class segment", input)));
+    private static Result<String, CompileError> compileClassSegment(String value, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileOr(value, Lists.of(
+                Main::compileWhitespace,
+                input -> compileTypedBlock(input, "class", typeParams),
+                input -> compileTypedBlock(input, "interface ", typeParams),
+                input -> compileTypedBlock(input, "record ", typeParams),
+                input -> compileMethod(input, typeParams, typeArguments),
+                input -> compileGlobal(input, typeParams, typeArguments),
+                input -> compileDefinitionStatement(input, typeParams, typeArguments)
+        ));
     }
 
-    private static Option<String> compileDefinitionStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (!input.endsWith(";")) return new None<>();
+    private static Result<String, CompileError> compileDefinitionStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (!input.endsWith(";")) return createSuffixErr(input, ";");
 
         String sliced = input.substring(0, input.length() - ";".length());
-        return compileDefinition(sliced, typeParams, typeArguments).map(Main::generateStatement);
+        return compileDefinition(sliced, typeParams, typeArguments).mapValue(Main::generateStatement);
     }
 
-    private static Option<String> compileGlobal(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (!input.endsWith(";")) return new None<>();
+    private static Result<String, CompileError> compileGlobal(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (!input.endsWith(";")) return createSuffixErr(input, ";");
 
         String substring = input.substring(0, input.length() - ";".length());
-        Option<String> maybeInitialization = compileInitialization(substring, typeParams, typeArguments);
+        Result<String, CompileError> maybeInitialization = compileInitialization(substring, typeParams, typeArguments);
 
-        globals = maybeInitialization.map(value -> value + ";\n")
-                .map(globals::add)
-                .orElse(globals);
-        return new Some<>("");
+        return maybeInitialization.mapValue(value -> value + ";\n")
+                .mapValue(globals::add)
+                .mapValue(result -> {
+                    globals = result;
+                    return "";
+                });
     }
 
-    private static Option<String> compileMethod(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileMethod(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int paramStart = input.indexOf("(");
-        if (paramStart < 0) return new None<>();
+        if (paramStart < 0) return createInfixRule(input, "(");
 
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
         int paramEnd = withParams.indexOf(")");
-        if (paramEnd < 0) return new None<>();
+        if (paramEnd < 0) return createInfixRule(withParams, ")");
 
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
         return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments))
-                .flatMap(outputParams -> getStringOption(typeParams, typeArguments, outputParams, header, withBody));
+                .flatMapValue(outputParams -> getStringOption(typeParams, typeArguments, outputParams, header, withBody));
     }
 
-    private static Option<String> getStringOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String header, String withBody) {
-        return compileDefinition(header, typeParams, typeArguments)
-                .flatMap(definition -> getOption(typeParams, typeArguments, outputParams, withBody, definition));
+    private static Result<String, CompileError> getStringOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String header, String withBody) {
+        return compileDefinition(header, typeParams, typeArguments).flatMapValue(definition -> getOption(typeParams, typeArguments, outputParams, withBody, definition));
     }
 
-    private static Option<String> getOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String withBody, String definition) {
+    private static Result<String, CompileError> getOption(List_<List_<String>> typeParams, List_<String> typeArguments, String outputParams, String withBody, String definition) {
         String string = generateInvokable(definition, outputParams);
 
         if (!withBody.startsWith("{") || !withBody.endsWith("}"))
-            return new Some<>(generateStatement(string));
+            return new Ok<>(generateStatement(string));
 
-        return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatementOrBlock(input1, typeParams, typeArguments)
-                .findValue()).map(statement -> addFunction(statement, string));
+        return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatementOrBlock(input1, typeParams, typeArguments))
+                .mapValue(statement -> addFunction(statement, string));
     }
 
     private static String addFunction(String content, String string) {
@@ -767,7 +866,7 @@ public class Main {
         return definition + "(" + params + ")";
     }
 
-    private static Option<String> compileValues(String input, Rule compiler) {
+    private static Result<String, CompileError> compileValues(String input, Rule compiler) {
         return compileAll(divideAll(input, Main::divideValueChar), compiler, Main::mergeValues);
     }
 
@@ -791,87 +890,93 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static Result<String, CompileError> compileStatementOrBlock(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileWhitespace(input)
-                .or(() -> compileIf(input))
-                .or(() -> compileeWhile(input)).or(() -> compileFor(input))
-                .or(() -> compileElse(input))
-                .or(() -> compilePostFix(input))
-                .or(() -> compileStatement(input, typeParams, typeArguments))
-                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid statement or block", input)));
+    private static Result<String, CompileError> compileStatementOrBlock(String value, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileOr(value, Lists.of(
+                Main::compileWhitespace,
+                Main::compileIf,
+                Main::compileWhile,
+                Main::compileFor,
+                Main::compileElse,
+                Main::compilePostFix,
+                input -> compileStatement(input, typeParams, typeArguments)
+        ));
     }
 
-    private static Option<String> compilePostFix(String input) {
-        if (input.strip().endsWith("++;")) return new Some<>("\n\ttemp++;");
-        return new None<>();
+    private static Result<String, CompileError> compilePostFix(String input) {
+        if (input.strip().endsWith("++;")) return new Ok<>("\n\ttemp++;");
+        return createSuffixErr(input.strip(), "++;");
     }
 
-    private static Option<String> compileElse(String input) {
-        if (input.strip().startsWith("else ")) return new Some<>("\n\telse {}");
-        return new None<>();
+    private static Result<String, CompileError> compileElse(String input) {
+        if (input.strip().startsWith("else ")) return new Ok<>("\n\telse {}");
+        return createPrefixErr(input.strip(), "else ");
     }
 
-    private static Option<String> compileFor(String input) {
-        if (input.strip().startsWith("for ")) return new Some<>("\n\tfor (;;) {\n\t}");
-        return new None<>();
+    private static Result<String, CompileError> compileFor(String input) {
+        if (input.strip().startsWith("for ")) return new Ok<>("\n\tfor (;;) {\n\t}");
+        return createPrefixErr(input.strip(), "for ");
     }
 
-    private static Option<String> compileeWhile(String input) {
-        if (input.strip().startsWith("while ")) return new Some<>("\n\twhile (1) {\n\t}");
-        return new None<>();
+    private static Result<String, CompileError> compileWhile(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("while ")) return new Ok<>("\n\twhile (1) {\n\t}");
+        return createPrefixErr(stripped, "while ");
     }
 
-    private static Option<String> compileIf(String input) {
-        if (input.strip().startsWith("if ")) return new Some<>("\n\tif (1) {\n\t}");
-        return new None<>();
+    private static Result<String, CompileError> compileIf(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("if ")) return new Ok<>("\n\tif (1) {\n\t}");
+        return createPrefixErr(stripped, "if ");
     }
 
-    private static Option<String> compileStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (!input.strip().endsWith(";")) return new None<>();
+    private static Result<String, CompileError> compileStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(";")) return createSuffixErr(stripped, ";");
 
-        String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
-        return compileReturn(withoutEnd, typeParams, typeArguments)
-                .or(() -> compileInitialization(withoutEnd, typeParams, typeArguments))
-                .or(() -> compileAssignment(withoutEnd, typeParams, typeArguments))
-                .or(() -> compileInvocationStatement(withoutEnd, typeParams, typeArguments));
+        String slice = stripped.substring(0, stripped.length() - ";".length());
+        return compileOr(slice, Lists.of(
+                withoutEnd -> compileReturn(withoutEnd, typeParams, typeArguments),
+                withoutEnd -> compileInitialization(withoutEnd, typeParams, typeArguments),
+                withoutEnd -> compileAssignment(withoutEnd, typeParams, typeArguments),
+                withoutEnd -> compileInvocationStatement(withoutEnd, typeParams, typeArguments)
+        ));
     }
 
-    private static Option<String> compileReturn(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileReturn(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (withoutEnd.startsWith("return ")) {
             String value = withoutEnd.substring("return ".length());
-            return compileValue(value, typeParams, typeArguments).findValue()
-                    .map(inner -> "return " + inner)
-                    .map(Main::generateStatement);
+            return compileValue(value, typeParams, typeArguments)
+                    .mapValue(inner -> "return " + inner)
+                    .mapValue(Main::generateStatement);
         }
-        return new None<>();
+        return createPrefixErr(withoutEnd, "return ");
     }
 
-    private static Option<String> compileInvocationStatement(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileInvocation(withoutEnd, typeParams, typeArguments).map(Main::generateStatement);
+    private static Result<String, CompileError> compileInvocationStatement(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileInvocation(withoutEnd, typeParams, typeArguments).mapValue(Main::generateStatement);
     }
 
-    private static Option<String> compileAssignment(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileAssignment(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int valueSeparator = withoutEnd.indexOf("=");
-        if (valueSeparator >= 0) {
-            String destination = withoutEnd.substring(0, valueSeparator).strip();
-            String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
+        if (valueSeparator < 0) return createInfixRule(withoutEnd, "=");
 
-            return compileValue(destination, typeParams, typeArguments).findValue()
-                    .and(() -> compileValue(value, typeParams, typeArguments).findValue())
-                    .map(tuple -> tuple.left + " = " + tuple.right)
-                    .map(Main::generateStatement);
-        }
-        return new None<>();
+        String destination = withoutEnd.substring(0, valueSeparator).strip();
+        String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
+
+        return compileValue(destination, typeParams, typeArguments)
+                .and(() -> compileValue(value, typeParams, typeArguments))
+                .mapValue(tuple -> tuple.left + " = " + tuple.right)
+                .mapValue(Main::generateStatement);
     }
 
-    private static Option<String> compileInitialization(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileInitialization(String withoutEnd, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int separator = withoutEnd.indexOf("=");
-        if (separator < 0) return new None<>();
+        if (separator < 0) return createInfixRule(withoutEnd, "=");
 
         String inputDefinition = withoutEnd.substring(0, separator);
         String inputValue = withoutEnd.substring(separator + "=".length());
-        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(
-                outputDefinition -> compileValue(inputValue, typeParams, typeArguments).findValue().map(
+        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMapValue(
+                outputDefinition -> compileValue(inputValue, typeParams, typeArguments).mapValue(
                         outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
     }
 
@@ -879,83 +984,85 @@ public class Main {
         return "\n\t" + value + ";";
     }
 
-    private static Result<String, CompileError> compileValue(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileString(input)
-                .or(() -> compileChar(input))
-                .or(() -> compileNot(input, typeParams, typeArguments))
-                .or(() -> compileConstruction(input, typeParams, typeArguments))
-                .or(() -> compileLambda(input, typeParams, typeArguments))
-                .or(() -> compileInvocation(input, typeParams, typeArguments))
-                .or(() -> compileTernary(input, typeParams, typeArguments))
-                .or(() -> compileDataAccess(input, typeParams, typeArguments))
-                .or(() -> compileMethodAccess(input, typeParams, typeArguments))
-                .or(() -> compileOperator(input, "+", typeParams, typeArguments))
-                .or(() -> compileOperator(input, "-", typeParams, typeArguments))
-                .or(() -> compileOperator(input, "==", typeParams, typeArguments))
-                .or(() -> compileOperator(input, ">=", typeParams, typeArguments))
-                .or(() -> compileSymbol(input))
-                .or(() -> compileNumber(input))
-                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid value", input)));
+    private static Result<String, CompileError> compileValue(String wrapped, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileOr(wrapped, Lists.of(
+                input -> compileString(input),
+                input -> compileChar(input),
+                input -> compileNot(input, typeParams, typeArguments),
+                input -> compileConstruction(input, typeParams, typeArguments),
+                input -> compileLambda(input, typeParams, typeArguments),
+                input -> compileInvocation(input, typeParams, typeArguments),
+                input -> compileTernary(input, typeParams, typeArguments),
+                input -> compileDataAccess(input, typeParams, typeArguments),
+                input -> compileMethodAccess(input, typeParams, typeArguments),
+                input -> compileOperator(input, "+", typeParams, typeArguments),
+                input -> compileOperator(input, "-", typeParams, typeArguments),
+                input -> compileOperator(input, "==", typeParams, typeArguments),
+                input -> compileOperator(input, ">=", typeParams, typeArguments),
+                input -> compileSymbol(input),
+                input -> compileNumber(input)
+        ));
     }
 
-    private static Option<String> compileNumber(String input) {
-        return isNumber(input.strip()) ? new Some<>(input.strip()) : new None<>();
+    private static Result<String, CompileError> compileNumber(String input) {
+        String stripped = input.strip();
+        return isNumber(stripped) ? new Ok<>(stripped) : new Err<>(new CompileError("Not a number", input));
     }
 
-    private static Option<String> compileSymbol(String input) {
-        return isSymbol(input.strip()) ? new Some<>(input.strip()) : new None<>();
+    private static Result<String, CompileError> compileSymbol(String input) {
+        String stripped = input.strip();
+        return isSymbol(stripped) ? new Ok<>(stripped) : new Err<>(new CompileError("Not a symbol", input));
     }
 
-    private static Option<String> compileMethodAccess(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        int methodSeparator = input.strip().lastIndexOf("::");
-        if (methodSeparator >= 0) {
-            String object = input.strip().substring(0, methodSeparator);
-            String property = input.strip().substring(methodSeparator + "::".length());
+    private static Result<String, CompileError> compileMethodAccess(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        String stripped = input.strip();
+        int methodSeparator = stripped.lastIndexOf("::");
+        if (methodSeparator < 0) return createInfixRule(stripped, "::");
 
-            return compileValue(object, typeParams, typeArguments).findValue().map(newObject -> {
-                String caller = newObject + "." + property;
-                String paramName = newObject.toLowerCase();
-                return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
-            });
-        }
-        return new None<>();
+        String object = stripped.substring(0, methodSeparator);
+        String property = stripped.substring(methodSeparator + "::".length());
+
+        return compileValue(object, typeParams, typeArguments).mapValue(newObject -> {
+            String caller = newObject + "." + property;
+            String paramName = newObject.toLowerCase();
+            return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
+        });
     }
 
-    private static Option<String> compileDataAccess(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        int dataSeparator = input.strip().lastIndexOf(".");
-        if (dataSeparator >= 0) {
-            String object = input.strip().substring(0, dataSeparator);
-            String property = input.strip().substring(dataSeparator + ".".length());
+    private static Result<String, CompileError> compileDataAccess(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        String stripped = input.strip();
+        int dataSeparator = stripped.lastIndexOf(".");
+        if (dataSeparator < 0) return createInfixRule(stripped, ".");
 
-            return compileValue(object, typeParams, typeArguments).findValue().map(newObject -> newObject + "." + property);
-        }
+        String object = stripped.substring(0, dataSeparator);
+        String property = stripped.substring(dataSeparator + ".".length());
 
-        return new None<>();
+        return compileValue(object, typeParams, typeArguments).mapValue(newObject -> newObject + "." + property);
     }
 
-    private static Option<String> compileTernary(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        int ternaryIndex = input.strip().indexOf("?");
-        if (ternaryIndex >= 0) {
-            String condition = input.strip().substring(0, ternaryIndex).strip();
-            String cases = input.strip().substring(ternaryIndex + "?".length());
-            int caseIndex = cases.indexOf(":");
-            if (caseIndex >= 0) {
-                String ifTrue = cases.substring(0, caseIndex).strip();
-                String ifFalse = cases.substring(caseIndex + ":".length()).strip();
-                return compileValue(condition, typeParams, typeArguments).findValue()
-                        .and(() -> compileValue(ifTrue, typeParams, typeArguments).findValue())
-                        .and(() -> compileValue(ifFalse, typeParams, typeArguments).findValue())
-                        .map(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
-            }
-        }
-        return new None<>();
+    private static Result<String, CompileError> compileTernary(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        String stripped = input.strip();
+        int ternaryIndex = stripped.indexOf("?");
+        if (ternaryIndex < 0) return createInfixRule(stripped, "?");
+
+        String condition = stripped.substring(0, ternaryIndex).strip();
+        String cases = stripped.substring(ternaryIndex + "?".length());
+        int caseIndex = cases.indexOf(":");
+        if (caseIndex < 0) return createInfixRule(stripped, "?");
+
+        String ifTrue = cases.substring(0, caseIndex).strip();
+        String ifFalse = cases.substring(caseIndex + ":".length()).strip();
+        return compileValue(condition, typeParams, typeArguments)
+                .and(() -> compileValue(ifTrue, typeParams, typeArguments))
+                .and(() -> compileValue(ifFalse, typeParams, typeArguments))
+                .mapValue(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
     }
 
-    private static Option<String> compileConstruction(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (!input.startsWith("new ")) return new None<>();
+    private static Result<String, CompileError> compileConstruction(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        if (!input.startsWith("new ")) return createPrefixErr(input, "new ");
 
         String withoutNew = input.substring("new ".length());
-        if (!withoutNew.endsWith(")")) return new None<>();
+        if (!withoutNew.endsWith(")")) return createSuffixErr(withoutNew, ")");
 
         String slice = withoutNew.substring(0, withoutNew.length() - ")".length());
         int paramStart = slice.indexOf("(");
@@ -966,43 +1073,49 @@ public class Main {
                 : rawCaller;
 
         String inputArguments = slice.substring(paramStart + "(".length());
-        return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(arguments -> {
-            return compileType(caller, typeParams, typeArguments).findValue().map(type -> {
-                return type + "(" + arguments + ")";
-            });
-        });
+        return compileAllValues(inputArguments, typeParams, typeArguments).flatMapValue(arguments -> compileType(caller, typeParams, typeArguments).mapValue(type -> type + "(" + arguments + ")"));
     }
 
-    private static Option<String> compileNot(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        if (input.strip().startsWith("!")) {
-            return compileValue(input.strip().substring(1), typeParams, typeArguments).findValue().map(result -> "!" + result);
-        } else {
-            return new None<>();
-        }
+    private static Result<String, CompileError> createPrefixErr(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
-    private static Option<String> compileChar(String input) {
-        if (input.strip().startsWith("'") && input.strip().endsWith("'")) return new Some<>(input.strip());
-        return new None<>();
+    private static Result<String, CompileError> compileNot(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        String stripped = input.strip();
+        if (!stripped.startsWith("!")) return createPrefixErr(stripped, "!");
+
+        return compileValue(stripped.substring(1), typeParams, typeArguments)
+                .mapValue(result -> "!" + result);
     }
 
-    private static Option<String> compileString(String input) {
+    private static Result<String, CompileError> compileChar(String input) {
+        if (input.strip().startsWith("'") && input.strip().endsWith("'")) return new Ok<>(input.strip());
+        return new Err<>(new CompileError("Not a character", input));
+    }
+
+    private static Result<String, CompileError> compileString(String input) {
         return input.strip().startsWith("\"") && input.strip().endsWith("\"")
-                ? new Some<>(input.strip())
-                : new None<>();
+                ? new Ok<>(input.strip())
+                : new Err<>(new CompileError("Not a string", input));
     }
 
-    private static Option<String> compileLambda(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileLambda(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int arrowIndex = input.indexOf("->");
-        if (arrowIndex < 0) return new None<>();
+        if (arrowIndex < 0) return createInfixRule(input, "->");
 
         String beforeArrow = input.substring(0, arrowIndex).strip();
 
-        return findLambdaParams(beforeArrow).flatMap(paramNames -> {
+        return findLambdaParams(beforeArrow).map(paramNames -> {
             String inputValue = input.substring(arrowIndex + "->".length()).strip();
             return compileLambdaBody(inputValue, typeParams, typeArguments)
-                    .map(outputValue -> generateLambda(paramNames, outputValue));
+                    .mapValue(outputValue -> generateLambda(paramNames, outputValue));
+        }).orElseGet(() -> {
+            return new Err<>(new CompileError("Not a lambda statement", input));
         });
+    }
+
+    private static Err<String, CompileError> createInfixRule(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
     private static Option<List_<String>> findLambdaParams(String beforeArrow) {
@@ -1020,25 +1133,24 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<String> compileLambdaBody(String inputValue, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileLambdaBody(String inputValue, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            return compileStatements(substring, statement -> compileStatementOrBlock(statement, typeParams, typeArguments)
-                    .findValue());
+            return compileStatements(substring, statement -> compileStatementOrBlock(statement, typeParams, typeArguments));
         } else {
-            return compileValue(inputValue, typeParams, typeArguments).findValue();
+            return compileValue(inputValue, typeParams, typeArguments);
         }
     }
 
-    private static Option<String> compileOperator(String input, String operator, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileOperator(String input, String operator, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int operatorIndex = input.indexOf(operator);
-        if (operatorIndex < 0) return new None<>();
+        if (operatorIndex < 0) return createInfixRule(input, operator);
 
         String left = input.substring(0, operatorIndex);
         String right = input.substring(operatorIndex + operator.length());
-        return compileValue(left, typeParams, typeArguments).findValue()
-                .and(() -> compileValue(right, typeParams, typeArguments).findValue())
-                .map(tuple -> tuple.left + " " + operator + " " + tuple.right);
+        return compileValue(left, typeParams, typeArguments)
+                .and(() -> compileValue(right, typeParams, typeArguments))
+                .mapValue(tuple -> tuple.left + " " + operator + " " + tuple.right);
     }
 
     private static boolean isNumber(String stripped) {
@@ -1067,9 +1179,9 @@ public class Main {
         return lambda;
     }
 
-    private static Option<String> compileInvocation(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileInvocation(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
-        if (!stripped.endsWith(")")) return new None<>();
+        if (!stripped.endsWith(")")) return createSuffixErr(stripped, ")");
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
         int argsStart = -1;
@@ -1085,105 +1197,115 @@ public class Main {
             }
         }
 
-        if (argsStart < 0) return new None<>();
+        if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + 1);
-        return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(
-                outputValues -> compileValue(inputCaller, typeParams, typeArguments).findValue().map(
+        return compileAllValues(inputArguments, typeParams, typeArguments).flatMapValue(
+                outputValues -> compileValue(inputCaller, typeParams, typeArguments).mapValue(
                         outputCaller -> generateInvocation(outputCaller, outputValues)));
     }
 
-    private static Option<String> compileAllValues(String arguments, List_<List_<String>> typeParams, List_<String> typeArguments) {
-        return compileValues(arguments, input -> compileValue(input, typeParams, typeArguments).findValue());
+    private static Result<String, CompileError> compileAllValues(String arguments, List_<List_<String>> typeParams, List_<String> typeArguments) {
+        return compileValues(arguments, input -> compileValue(input, typeParams, typeArguments));
     }
 
     private static String generateInvocation(String caller, String arguments) {
         return caller + "(" + arguments + ")";
     }
 
-    private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
+    private static Result<String, CompileError> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
-        if (stripped.isEmpty()) return new Some<>("");
+        if (stripped.isEmpty()) return new Ok<>("");
 
         int nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            String beforeName = stripped.substring(0, nameSeparator);
+        if (nameSeparator < 0) return new Err<>(new CompileError("No name present", stripped));
 
-            int typeSeparator = -1;
-            int depth = 0;
-            for (int i = beforeName.length() - 1; i >= 0; i--) {
-                char c = beforeName.charAt(i);
-                if (c == ' ' && depth == 0) {
-                    typeSeparator = i;
-                    break;
-                } else {
-                    if (c == '>') depth++;
-                    if (c == '<') depth--;
-                }
-            }
+        String beforeName = stripped.substring(0, nameSeparator);
 
-            String modifiers;
-            String inputType;
-            if (typeSeparator >= 0) {
-                modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
-                inputType = beforeName.substring(typeSeparator + 1);
+        int typeSeparator = -1;
+        int depth = 0;
+        for (int i = beforeName.length() - 1; i >= 0; i--) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
             } else {
-                modifiers = "";
-                inputType = beforeName;
+                if (c == '>') depth++;
+                if (c == '<') depth--;
             }
-
-            String name = stripped.substring(nameSeparator + " ".length());
-
-            return compileType(inputType, typeParams, typeArguments).findValue().map(
-                    outputType -> generateDefinition(modifiers, outputType, name));
         }
-        return new None<>();
+
+        String modifiers;
+        String inputType;
+        if (typeSeparator >= 0) {
+            modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
+            inputType = beforeName.substring(typeSeparator + 1);
+        } else {
+            modifiers = "";
+            inputType = beforeName;
+        }
+
+        String name = stripped.substring(nameSeparator + " ".length());
+        return compileType(inputType, typeParams, typeArguments).mapValue(outputType -> generateDefinition(modifiers, outputType, name));
     }
 
     private static String generateDefinition(String modifiers, String type, String name) {
         return modifiers + type + " " + name;
     }
 
-    private static Result<String, CompileError> compileType(String type, List_<List_<String>> frames, List_<String> typeArguments) {
-        return compileTypeParam(type, frames, typeArguments)
-                .or(() -> compilePrimitive(type))
-                .or(() -> compileArray(type, frames, typeArguments))
-                .or(() -> compileSymbolType(type))
-                .or(() -> compileGeneric(type, frames, typeArguments))
-                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid " + "type", type.strip())));
+    private static Result<String, CompileError> compileType(String input, List_<List_<String>> frames, List_<String> typeArguments) {
+        return compileOr(input, Lists.of(
+                type -> compileTypeParam(type, frames, typeArguments),
+                type -> compilePrimitive(type),
+                type -> compileArray(type, frames, typeArguments),
+                type -> compileSymbolType(type),
+                type -> compileGeneric(type, frames, typeArguments)
+        ));
     }
 
-    private static Option<String> compilePrimitive(String type) {
-        if (type.strip().equals("void")) return new Some<>("void");
-        if (type.strip().equals("boolean") || type.strip().equals("Boolean")) return new Some<>("int");
-        return new None<>();
+    private static Result<String, CompileError> compileOr(String input, List_<Rule> rules) {
+        return rules.stream()
+                .foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState::withError))
+                .toResult()
+                .mapErr(errors -> new CompileError("No valid combination present", input, errors));
     }
 
-    private static Option<String> compileArray(String type, List_<List_<String>> frames, List_<String> typeArguments) {
-        if (type.strip().endsWith("[]"))
-            return compileType(type.strip().substring(0, type.strip().length() - "[]".length()), frames, typeArguments).findValue().map(value -> value + "*");
-        return new None<>();
+    private static Result<String, CompileError> compilePrimitive(String type) {
+        if (type.strip().equals("void")) return new Ok<>("void");
+        if (type.strip().equals("boolean") || type.strip().equals("Boolean")) return new Ok<>("int");
+        return new Err<>(new CompileError("Not a primitive", type));
     }
 
-    private static Option<String> compileSymbolType(String type) {
-        if (isSymbol(type.strip())) return new Some<>(type.strip());
-        return new None<>();
+    private static Result<String, CompileError> compileArray(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        String stripped = type.strip();
+        if (stripped.endsWith("[]")) {
+            String slice = stripped.substring(0, stripped.length() - "[]".length());
+            return compileType(slice, frames, typeArguments).mapValue(value -> value + "*");
+        }
+
+        return createSuffixErr(stripped, "[]");
     }
 
-    private static Option<String> compileGeneric(String type, List_<List_<String>> frames, List_<String> typeArguments) {
-        if (!type.strip().endsWith(">")) return new None<>();
+    private static Result<String, CompileError> compileSymbolType(String type) {
+        if (isSymbol(type.strip())) return new Ok<>(type.strip());
+        return new Err<>(new CompileError("Not a symbol", type));
+    }
 
-        String withoutEnd = type.strip().substring(0, type.strip().length() - ">".length());
+    private static Result<String, CompileError> compileGeneric(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        String stripped = type.strip();
+        if (!stripped.endsWith(">")) return new Err<>(new CompileError("Suffix '>' not present", stripped));
+        String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+
         int genStart = withoutEnd.indexOf("<");
-        if (genStart < 0) return new None<>();
-
+        if (genStart < 0) return new Err<>(new CompileError("Infix '<' not present", withoutEnd));
         String base = withoutEnd.substring(0, genStart).strip();
-        if (!isSymbol(base)) return new None<>();
 
+        if (!isSymbol(base)) return new Err<>(new CompileError("Not a symbol", base));
         String oldArguments = withoutEnd.substring(genStart + "<".length());
+
         List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-        return parseAll(segments, type1 -> compileType(type1, frames, typeArguments).findValue()).map(newArguments -> {
+        return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).mapValue(newArguments -> {
             switch (base) {
                 case "Function" -> {
                     return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.fromNative(Collections.singletonList(newArguments.apply(0).orElse(null))));
@@ -1210,14 +1332,14 @@ public class Main {
         });
     }
 
-    private static Option<String> compileTypeParam(String type, List_<List_<String>> frames, List_<String> typeArguments) {
-        if (!isTypeParam(frames, type.strip())) return new None<>();
+    private static Result<String, CompileError> compileTypeParam(String type, List_<List_<String>> frames, List_<String> typeArguments) {
+        String stripped = type.strip();
+        if (!isTypeParam(frames, stripped)) return new Err<>(new CompileError("Not a type param", stripped));
 
         List_<String> last = frames.last();
-        return Lists.indexOf(last, type.strip(), String::equals).map(index -> {
-            String argument = typeArguments.apply(index).orElse(null);
-            return new Some<>(argument);
-        }).orElseGet(() -> new Some<>(type.strip()));
+        return new Ok<>(Lists.indexOf(last, stripped, String::equals)
+                .map(index -> typeArguments.apply(index).orElse(null))
+                .orElse(stripped));
     }
 
     private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {

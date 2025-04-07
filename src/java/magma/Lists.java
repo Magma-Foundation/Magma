@@ -1,5 +1,6 @@
 package magma;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -31,5 +32,9 @@ class Lists {
 
     public static <T> Main.List_<T> fromNative(List<T> list) {
         return new JavaList<>(list);
+    }
+
+    public static <T> Main.List_<T> of(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
     }
 }
