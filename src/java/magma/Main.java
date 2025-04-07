@@ -1121,9 +1121,10 @@ public class Main {
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (!Character.isLetter(c)) {
-                return false;
+            if (Character.isLetter(c) || c == '_') {
+                continue;
             }
+            return false;
         }
         return true;
     }
