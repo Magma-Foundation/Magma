@@ -918,6 +918,61 @@ public class Main {
         }
     }
 
+    private static class GenericRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            String stripped = input.strip();
+            if (!stripped.endsWith(">")) return new Err<>(new CompileError("Suffix '>' not present", stripped));
+            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+
+            int genStart = withoutEnd.indexOf("<");
+            if (genStart < 0) return new Err<>(new CompileError("Infix '<' not present", withoutEnd));
+            String base = withoutEnd.substring(0, genStart).strip();
+
+            if (!new SymbolFilter().qualifies(base)) return createNotASymbol(base);
+            String oldArguments = withoutEnd.substring(genStart + "<".length());
+
+            List_<String> segments = createValueDivider().divide(oldArguments);
+            return DivideRule.parseAll(state, segments, createTypeRule()).mapValue(newArguments -> {
+                switch (base) {
+                    case "Function" -> {
+                        return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.of(newArguments.apply(0).orElse(null)));
+                    }
+                    case "BiFunction" -> {
+                        return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.of(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null)));
+                    }
+                    case "Consumer" -> {
+                        return generateFunctionalType("void", Lists.of(newArguments.apply(0).orElse(null)));
+                    }
+                    case "Supplier" -> {
+                        return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
+                    }
+                }
+
+                if (state.isNothingDefined()) {
+                    Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
+                    if (!isDefined(toExpand, tuple)) {
+                        toExpand = toExpand.add(tuple);
+                    }
+                }
+
+                return generateGenericName(base, newArguments);
+            });
+        }
+    }
+
+    private static class TypeParamRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+
+            String stripped = input.strip();
+            if (!state.isTypeParam(stripped))
+                return new Err<>(new CompileError("Not a type param", stripped));
+
+            return new Ok<>(state.findArgumentValue(stripped).orElse(stripped));
+        }
+    }
+
     public static final List_<String> MODIFIERS = Lists.of(
             "private",
             "static",
@@ -1596,50 +1651,10 @@ public class Main {
         return new OrRule(Lists.of(
                 createPrimitiveRule(),
                 createSymbolTypeRule(),
-                (state, type) -> compileTypeParam(state, type),
-                 createArrayRule(),
-                (state, type) -> compileGeneric(state, type)
+                new TypeParamRule(),
+                createArrayRule(),
+                new GenericRule()
         ));
-    }
-
-    private static Result<String, CompileError> compileGeneric(ParseState state, String type) {
-        String stripped = type.strip();
-        if (!stripped.endsWith(">")) return new Err<>(new CompileError("Suffix '>' not present", stripped));
-        String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-
-        int genStart = withoutEnd.indexOf("<");
-        if (genStart < 0) return new Err<>(new CompileError("Infix '<' not present", withoutEnd));
-        String base = withoutEnd.substring(0, genStart).strip();
-
-        if (!new SymbolFilter().qualifies(base)) return createNotASymbol(base);
-        String oldArguments = withoutEnd.substring(genStart + "<".length());
-
-        List_<String> segments = createValueDivider().divide(oldArguments);
-        return DivideRule.parseAll(state, segments, createTypeRule()).mapValue(newArguments -> {
-            switch (base) {
-                case "Function" -> {
-                    return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.of(newArguments.apply(0).orElse(null)));
-                }
-                case "BiFunction" -> {
-                    return generateFunctionalType(newArguments.apply(2).orElse(null), Lists.of(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null)));
-                }
-                case "Consumer" -> {
-                    return generateFunctionalType("void", Lists.of(newArguments.apply(0).orElse(null)));
-                }
-                case "Supplier" -> {
-                    return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
-                }
-            }
-
-            if (state.isNothingDefined()) {
-                Tuple<String, List_<String>> tuple = new Tuple<>(base, newArguments);
-                if (!isDefined(toExpand, tuple)) {
-                    toExpand = toExpand.add(tuple);
-                }
-            }
-
-            return generateGenericName(base, newArguments);
-        });
     }
 
     private static Rule createArrayRule() {
@@ -1663,11 +1678,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileTypeParam(ParseState state, String type) {
-        String stripped = type.strip();
-        if (!state.isTypeParam(stripped))
-            return new Err<>(new CompileError("Not a type param", stripped));
-
-        return new Ok<>(state.findArgumentValue(stripped).orElse(stripped));
+        return (new TypeParamRule()).compile(state, type);
     }
 
     private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {
