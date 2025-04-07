@@ -82,6 +82,16 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String header = input.substring(0, paramStart).strip();
+            int nameSeparator = header.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String name = header.substring(nameSeparator + " ".length());
+                return "void " + name + "(){\n}\n";
+            }
+        }
+
         return invalidate("class segment", input);
     }
 
