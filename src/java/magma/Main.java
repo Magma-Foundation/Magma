@@ -796,6 +796,8 @@ public class Main {
     private static Option<String> compileType(String type) {
         String stripped = type.strip();
         if (stripped.equals("void")) return new Some<>("void");
+        if (stripped.equals("boolean")) return new Some<>("int");
+
         if (stripped.endsWith("[]"))
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
 

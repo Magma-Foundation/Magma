@@ -17,7 +17,7 @@
 	/* <R> */Option<struct R> flatMap(Option<struct R> (*)(struct T) mapper);
 	/* <R> */Option<struct R> map(struct R (*)(struct T) mapper);
 	struct T orElse(struct T other);
-	struct boolean isPresent(/*  */);
+	int isPresent(/*  */);
 	Tuple<struct Boolean, struct T> toTuple(struct T other);
 	struct T orElseGet(struct T (*)() other);
 	Option<struct T> or(Option<struct T> (*)() other);
@@ -28,7 +28,7 @@
 	void forEach(void (*)(struct T) consumer);
 	Stream_<struct T> stream(/*  */);
 	struct T popFirst(/*  */);
-	struct boolean isEmpty(/*  */);
+	int isEmpty(/*  */);
 	struct T get(struct int index);
 };
 /* private */ struct Stream_<T> {
@@ -605,6 +605,7 @@ auto __lambda15__(auto value){
 /* private */static Option<struct String> compileType(struct String type){
 	struct String stripped = type.strip();
 	/* if (stripped */.equals("void")) return new Some<>("void");
+	/* if (stripped */.equals("boolean")) return new Some<>("int");
 	/* if (stripped */.endsWith("[]"))
             return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length())).map(__lambda15__);
 	/* if (isSymbol(stripped)) return new Some<> */(/* "struct " + stripped */);/* 
