@@ -594,8 +594,8 @@ public class Main {
         if (c == ',' && state.isLevel()) return state.advance();
 
         State appended = state.append(c);
-        if (c == '(') return appended.enter();
-        if (c == ')') return appended.exit();
+        if (c == '(' || c == '<') return appended.enter();
+        if (c == ')' || c == '>') return appended.exit();
         return appended;
     }
 
@@ -732,13 +732,24 @@ public class Main {
         if (nameSeparator >= 0) {
             String beforeName = stripped.substring(0, nameSeparator);
 
-            int space = beforeName.lastIndexOf(" ");
+            int typeSeparator = -1;
+            int depth = 0;
+            for (int i = 0; i < beforeName.length(); i++) {
+                char c = beforeName.charAt(i);
+                if(c == ' ' && depth == 0) {
+                    typeSeparator = i;
+                    break;
+                } else {
+                    if(c == '>') depth++;
+                    if(c == '<') depth--;
+                }
+            }
 
             String modifiers;
             String type;
-            if (space >= 0) {
-                modifiers = generatePlaceholder(beforeName.substring(0, space));
-                type = beforeName.substring(space + 1);
+            if (typeSeparator >= 0) {
+                modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
+                type = beforeName.substring(typeSeparator + 1);
             } else {
                 modifiers = "";
                 type = beforeName;
@@ -760,8 +771,9 @@ public class Main {
         if (stripped.equals("void")) return "void";
         if (stripped.endsWith("[]")) return compileType(stripped.substring(0, stripped.length() - "[]".length())) + "*";
 
-        if (isSymbol(stripped)) {
-            return "struct " + stripped;
+        if (isSymbol(stripped)) return "struct " + stripped;
+        if (stripped.endsWith(">")) {
+            return "Generic";
         }
 
         return invalidate("type", stripped);
