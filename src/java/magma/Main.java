@@ -920,7 +920,7 @@ public class Main {
     private static Option<String> compileValue(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
-
+        if (stripped.startsWith("'") && stripped.endsWith("'")) return new Some<>(stripped);
 
         if (stripped.startsWith("!")) {
             return compileValue(stripped.substring(1)).map(result -> "!" + result);
@@ -976,6 +976,7 @@ public class Main {
         return compileOperator(input, "+")
                 .or(() -> compileOperator(input, "-"))
                 .or(() -> compileOperator(input, "=="))
+                .or(() -> compileOperator(input, ">="))
                 .or(() -> isSymbol(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> isNumber(stripped) ? new Some<>(stripped) : new None<>())
                 .or(() -> new Some<>(invalidate("value", input)));
