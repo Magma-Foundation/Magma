@@ -453,9 +453,7 @@ if (1) {
 	return Temp();
 }
 auto __lambda16__(auto ){
-	return /* {
-            return compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists */.empty(), Lists.empty());
-        };
+	return compileToStruct(modifiers, /*  withoutPermits1 */, body, typeParams, Lists.empty(), Lists.empty());
 }
 /* private static */Option__String__ compileTypedBlock(String input, String keyword, List___List___String____ typeParams){
 	int classIndex = input.indexOf(keyword);if (1) {

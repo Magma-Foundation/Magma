@@ -715,9 +715,8 @@ public class Main {
 
         String body = afterKeyword.substring(contentStart + "{".length()).strip();
 
-        return compileGenericTypedBlock(withoutPermits1, modifiers, body, typeParams).or(() -> {
-            return compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists.empty(), Lists.empty());
-        });
+        return compileGenericTypedBlock(withoutPermits1, modifiers, body, typeParams).or(
+                () -> compileToStruct(modifiers, withoutPermits1, body, typeParams, Lists.empty(), Lists.empty()));
     }
 
     private static Option<String> compileGenericTypedBlock(String withoutPermits, String modifiers, String body, List_<List_<String>> typeParams) {
@@ -956,9 +955,7 @@ public class Main {
             String object = stripped.substring(0, dataSeparator);
             String property = stripped.substring(dataSeparator + ".".length());
 
-            return compileValue(object).map(newObject -> {
-                return newObject + "." + property;
-            });
+            return compileValue(object).map(newObject -> newObject + "." + property);
         }
 
         int methodSeparator = stripped.lastIndexOf("::");
@@ -1214,7 +1211,7 @@ public class Main {
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (Character.isLetter(c) || c == '_') {
+            if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;
