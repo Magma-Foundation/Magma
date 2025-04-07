@@ -1203,7 +1203,7 @@ public class Main {
 
     private static String generateGenericName(String base, List_<String> newArguments) {
         String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
-        return base + "__" + String.join("_", joined) + "__";
+        return base + "_" + String.join("_", joined);
     }
 
     private static boolean hasNoTypeParams(List_<List_<String>> frames) {
