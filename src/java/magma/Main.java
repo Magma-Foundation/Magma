@@ -105,6 +105,8 @@ public class Main {
     }
 
     private interface Rule {
+        void temp();
+
         Result<String, CompileError> compile(ParseState state, String input);
     }
 
@@ -678,6 +680,11 @@ public class Main {
         public Result<String, CompileError> compile(ParseState state, String input) {
             return childRule.compile(state, input).mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private record SuffixRule(Rule rule, String suffix) implements Rule {
@@ -690,6 +697,11 @@ public class Main {
                 return new Err<>(new CompileError("Suffix '" + suffix() + "' not present", input));
             }
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private record OrRule(List_<Rule> rules) implements Rule {
@@ -699,6 +711,11 @@ public class Main {
                     .foldWithInitial(new OrState(), (orState, rule) -> rule.compile(state, input).match(orState::withValue, orState::withError))
                     .toResult()
                     .mapErr(errors -> new CompileError("No valid combination present", input, errors));
+        }
+
+        @Override
+        public void temp() {
+
         }
     }
 
@@ -793,6 +810,11 @@ public class Main {
             String message = format.formatted(prefix());
             return new Err<>(new CompileError(message, input));
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private record StripRule(Rule childRule) implements Rule {
@@ -801,6 +823,11 @@ public class Main {
             String stripped = input.strip();
             return childRule().compile(state0, stripped);
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private static class EmptyRule implements Rule {
@@ -808,6 +835,11 @@ public class Main {
         public Result<String, CompileError> compile(ParseState state, String input) {
             if (input.isEmpty()) return new Ok<>("");
             else return new Err<>(new CompileError("Not empty", input));
+        }
+
+        @Override
+        public void temp() {
+
         }
     }
 
@@ -844,6 +876,11 @@ public class Main {
                         return createStructRule(modifiers, withoutParams).compile(defined, body);
                     });
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private record DivideRule(
@@ -863,6 +900,11 @@ public class Main {
         public Result<String, CompileError> compile(ParseState state, String input) {
             return parseAll(state, divider.divide(input), compiler).mapValue(compiled -> mergeAll(compiled, merger()));
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     public static class StatementMerger implements Merger {
@@ -876,6 +918,11 @@ public class Main {
         @Override
         public Result<String, CompileError> compile(ParseState state, String input) {
             return input.equals(value) ? new Ok<>(input) : new Err<>(new CompileError("Not equal to '" + value + "'", input));
+        }
+
+        @Override
+        public void temp() {
+
         }
     }
 
@@ -908,6 +955,11 @@ public class Main {
         public Result<String, CompileError> compile(ParseState state, String input) {
             return new Ok<String, CompileError>(input);
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private record FilterRule(Filter filter, Rule childRule) implements Rule {
@@ -915,6 +967,11 @@ public class Main {
         public Result<String, CompileError> compile(ParseState state, String input) {
             if (filter().qualifies(input)) return childRule().compile(state, input);
             return new Err<>(new CompileError(filter().createErrorMessage(), input));
+        }
+
+        @Override
+        public void temp() {
+
         }
     }
 
@@ -959,6 +1016,11 @@ public class Main {
                 return generateGenericName(base, newArguments);
             });
         }
+
+        @Override
+        public void temp() {
+
+        }
     }
 
     private static class TypeParamRule implements Rule {
@@ -970,6 +1032,452 @@ public class Main {
                 return new Err<>(new CompileError("Not a type param", stripped));
 
             return new Ok<>(state.findArgumentValue(stripped).orElse(stripped));
+        }
+
+        @Override
+        public void temp() {
+
+        }
+    }
+
+    private static class PackageRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("");
+        }
+    }
+
+    private static class ImportSegmentRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            List_<String> slices = divideByChar(input, '.');
+            if (isFunctionalImport(slices)) return new Ok<>("");
+
+            String joined = slices.stream().collect(new Joiner("/")).orElse("");
+            String value = "#include \"./%s.h\"\n".formatted(joined);
+            imports = imports.add(value);
+            return new Ok<>("");
+        }
+    }
+
+    private static class StructRule implements Rule {
+        private final String modifiers;
+        private final String name;
+
+        public StructRule(String modifiers, String name) {
+            this.modifiers = modifiers;
+            this.name = name;
+        }
+
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state0, String inputContent) {
+            return createStatementsRule(createClassSegmentRule()).compile(state0, inputContent).mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
+        }
+    }
+
+    private static class MyRule implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new DefinitionRule().compile(state, input).mapValue(Main::generateStatement);
+        }
+    }
+
+    private static class MyRule0 implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new MyRule7().compile(state, input)
+                    .mapValue(value -> value + ";\n")
+                    .mapValue(globals::add)
+                    .mapValue(result -> {
+                        globals = result;
+                        return "";
+                    });
+        }
+    }
+
+    public static class DefinitionRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            String stripped = input.strip();
+            if (stripped.isEmpty()) return new Ok<String, CompileError>("");
+
+            int nameSeparator = stripped.lastIndexOf(" ");
+            if (nameSeparator < 0) return new Err<String, CompileError>(new CompileError("No name present", stripped));
+
+            String beforeName = stripped.substring(0, nameSeparator);
+            String name = stripped.substring(nameSeparator + " ".length());
+            return Main.compileBeforeName(state, beforeName)
+                    .flatMapValue(node -> Main.generateDefinition(node.withString("name", name)));
+        }
+    }
+
+    private static class ArrayRule implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return createTypeRule().compile(state, input).mapValue(value -> value + "*");
+        }
+    }
+
+    private static class MyRule2 implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new OrRule(Lists.of(
+                    new EqualsRule("boolean"),
+                    new EqualsRule("Bool")
+            )).compile(state, input).mapValue(_ -> "int");
+        }
+    }
+
+    private static class PostFixRule implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\ttemp++;");
+        }
+    }
+
+    private static class ElseRule implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\telse {\n\t}\n");
+        }
+    }
+
+    private static class ForRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\tfor (;;) {\n\t}\n");
+        }
+    }
+
+    private static class WhileRule implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\twhile (1) {\n\t}\n");
+        }
+    }
+
+    private static class IfRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\tif (1) {\n\t}\n");
+        }
+    }
+
+    private static class MyRule3 implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return createValueRule().compile(state, input)
+                    .mapValue(inner -> "return " + inner)
+                    .mapValue(Main::generateStatement);
+        }
+    }
+
+    private static class MyRule4 implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<String, CompileError>(input)
+                    .mapValue(value -> "\"" + value)
+                    .mapValue(value -> value + "\"");
+        }
+    }
+
+    private static class MyRule5 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String withoutEnd) {
+            int argsStart = findArgStart(withoutEnd);
+            if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
+
+            String inputCaller = withoutEnd.substring(0, argsStart);
+            String inputArguments = withoutEnd.substring(argsStart + 1);
+            return compileAllValues(state, inputArguments).flatMapValue(
+                    outputValues -> createValueRule().compile(state, inputCaller).mapValue(
+                            outputCaller -> generateInvocation(outputCaller, outputValues)));
+        }
+    }
+
+    private static class MyRule6 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("'" + input + "'");
+        }
+    }
+
+    private static class MyRule7 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            int separator = input.indexOf("=");
+            if (separator < 0) return createInfixRule(input, "=");
+
+            String inputDefinition = input.substring(0, separator);
+            String inputValue = input.substring(separator + "=".length());
+            return new DefinitionRule().compile(state, inputDefinition).flatMapValue(
+                    outputDefinition -> createValueRule().compile(state, inputValue).mapValue(
+                            outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
+        }
+    }
+
+    private static class MyRule8 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String slice) {
+            int paramStart = slice.indexOf("(");
+
+            String rawCaller = slice.substring(0, paramStart).strip();
+            String caller = rawCaller.endsWith("<>")
+                    ? rawCaller.substring(0, rawCaller.length() - "<>".length())
+                    : rawCaller;
+
+            String inputArguments = slice.substring(paramStart + "(".length());
+            return compileAllValues(state, inputArguments).flatMapValue(arguments -> createTypeRule().compile(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+        }
+    }
+
+    private static class MyRule9 implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return createValueRule().compile(state, input).mapValue(result -> "!" + result);
+        }
+    }
+
+    private static class MyRule10 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            int valueSeparator = input.indexOf("=");
+            if (valueSeparator < 0) return createInfixRule(input, "=");
+
+            String destination = input.substring(0, valueSeparator).strip();
+            String value = input.substring(valueSeparator + "=".length()).strip();
+
+            return createValueRule().compile(state, destination)
+                    .and(() -> createValueRule().compile(state, value))
+                    .mapValue(tuple -> tuple.left + " = " + tuple.right)
+                    .mapValue(Main::generateStatement);
+        }
+    }
+
+    private static class NumberFilter implements Filter {
+        @Override
+        public boolean qualifies(String input) {
+            return isNumber(input);
+        }
+
+        @Override
+        public String createErrorMessage() {
+            return "Not a number";
+        }
+    }
+
+    private static class MyRule11 implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            int arrowIndex = input.indexOf("->");
+            if (arrowIndex < 0) return createInfixRule(input, "->");
+
+            String beforeArrow = input.substring(0, arrowIndex).strip();
+
+            return findLambdaParams(beforeArrow).map(paramNames -> {
+                String inputValue = input.substring(arrowIndex + "->".length()).strip();
+                return compileLambdaBody(state, inputValue)
+                        .flatMapValue(outputValue -> generateLambda(paramNames, outputValue));
+            }).orElseGet(() -> new Err<>(new CompileError("Not a lambda statement", input)));
+        }
+
+        @Override
+        public void temp() {
+        }
+    }
+
+    private static class TernaryRule implements Rule {
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+
+            String stripped = input.strip();
+            int ternaryIndex = stripped.indexOf("?");
+            if (ternaryIndex < 0) return createInfixRule(stripped, "?");
+
+            String condition = stripped.substring(0, ternaryIndex).strip();
+            String cases = stripped.substring(ternaryIndex + "?".length());
+            int caseIndex = cases.indexOf(":");
+            if (caseIndex < 0) return createInfixRule(stripped, "?");
+
+            String ifTrue = cases.substring(0, caseIndex).strip();
+            String ifFalse = cases.substring(caseIndex + ":".length()).strip();
+            return createValueRule().compile(state, condition)
+                    .and(() -> createValueRule().compile(state, ifTrue))
+                    .and(() -> createValueRule().compile(state, ifFalse))
+                    .mapValue(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
+        }
+
+        @Override
+        public void temp() {
+
+        }
+    }
+
+    private static class DataAccessRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+
+            String stripped = input.strip();
+            int dataSeparator = stripped.lastIndexOf(".");
+            if (dataSeparator < 0) return createInfixRule(stripped, ".");
+
+            String object = stripped.substring(0, dataSeparator);
+            String property = stripped.substring(dataSeparator + ".".length());
+
+            return createValueRule().compile(state, object).mapValue(newObject -> newObject + "." + property);
+        }
+    }
+
+    private static class MyRule12 implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return createInvocationRule().compile(state, input).mapValue(Main::generateStatement);
+        }
+    }
+
+    private static class MethodAccessRule implements Rule {
+        @Override
+        public void temp() {
+
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            String stripped = input.strip();
+            int methodSeparator = stripped.lastIndexOf("::");
+            if (methodSeparator < 0) return createInfixRule(stripped, "::");
+
+            String object = stripped.substring(0, methodSeparator);
+            String property = stripped.substring(methodSeparator + "::".length());
+
+            return createValueRule().compile(state, object).flatMapValue(newObject -> {
+                String caller = newObject + "." + property;
+                String lower = newObject.toLowerCase();
+                String paramName = new SymbolFilter().qualifies(lower) ? lower : "param";
+                return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
+            });
+        }
+    }
+
+    private record OperatorRule(String operator) implements Rule {
+        @Override
+        public void temp() {
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            int operatorIndex = input.indexOf(operator);
+            if (operatorIndex < 0) return createInfixRule(input, operator);
+
+            String left = input.substring(0, operatorIndex);
+            String right = input.substring(operatorIndex + operator.length());
+            return createValueRule().compile(state, left)
+                    .and(() -> createValueRule().compile(state, right))
+                    .mapValue(tuple -> tuple.left + " " + operator + " " + tuple.right);
         }
     }
 
@@ -1003,7 +1511,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        return DivideRule.parseAll(new ParseState(), new FoldingDivider(new DecoratedFolder(new StatementFolder())).divide(input), (state0, value) -> createRootSegmentRule().compile(state0, value))
+        return DivideRule.parseAll(new ParseState(), new FoldingDivider(new DecoratedFolder(new StatementFolder())).divide(input), createRootSegmentRule())
                 .flatMapValue(Main::generate)
                 .mapValue(compiled -> DivideRule.mergeAll(compiled, new StatementMerger()));
     }
@@ -1045,23 +1553,15 @@ public class Main {
     }
 
     private static Rule createClassRule() {
-        return new TypeRule("class", (state, input) -> new TypedBlockRule("class ").compile(state, input));
+        return new TypeRule("class", new TypedBlockRule("class "));
     }
 
     private static Rule createPackageRule() {
-        return new PrefixRule("package ", (_, __) -> new Ok<>(""));
+        return new PrefixRule("package ", new PackageRule());
     }
 
     private static Rule createImportRule() {
-        return new StripRule(new PrefixRule("import ", new SuffixRule((_, left) -> {
-            List_<String> slices = divideByChar(left, '.');
-            if (isFunctionalImport(slices)) return new Ok<>("");
-
-            String joined = slices.stream().collect(new Joiner("/")).orElse("");
-            String value = "#include \"./%s.h\"\n".formatted(joined);
-            imports = imports.add(value);
-            return new Ok<>("");
-        }, ";")));
+        return new StripRule(new PrefixRule("import ", new SuffixRule(new ImportSegmentRule(), ";")));
     }
 
     private static boolean isFunctionalImport(List_<String> slices) {
@@ -1117,8 +1617,7 @@ public class Main {
     }
 
     private static SuffixRule createStructRule(String modifiers, String name) {
-        return new SuffixRule((state0, inputContent) ->
-                createStatementsRule(createClassSegmentRule()).compile(state0, inputContent).mapValue(outputContent -> generateStruct(modifiers, name, outputContent)), "}");
+        return new SuffixRule(new StructRule(modifiers, name), "}");
     }
 
     private static String generateStruct(String modifiers, String name, String content) {
@@ -1141,21 +1640,24 @@ public class Main {
     }
 
     private static Rule createDefinitionStatementRule() {
-        return new TypeRule("definition", new SuffixRule((state0, sliced) -> compileDefinition(state0, sliced).mapValue(Main::generateStatement), ";"));
+        return new TypeRule("definition", new SuffixRule(new MyRule(), ";"));
     }
 
     private static Rule createMethodRule() {
-        return new TypeRule("method", Main::compileMethod);
+        return new TypeRule("method", new Rule() {
+            @Override
+            public void temp() {
+            }
+
+            @Override
+            public Result<String, CompileError> compile(ParseState state, String input) {
+                return compileMethod(state, input);
+            }
+        });
     }
 
     private static Rule createGlobalRule() {
-        return new TypeRule("initialization", new SuffixRule((state0, substring) -> compileInitialization(state0, substring)
-                .mapValue(value -> value + ";\n")
-                .mapValue(globals::add)
-                .mapValue(result -> {
-                    globals = result;
-                    return "";
-                }), ";"));
+        return new TypeRule("initialization", new SuffixRule(new MyRule0(), ";"));
     }
 
     private static Result<String, CompileError> compileMethod(ParseState state, String input) {
@@ -1171,12 +1673,12 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(state, paramString, Main::compileDefinition)
+        return compileValues(state, paramString, new DefinitionRule())
                 .flatMapValue(outputParams -> compileMethodWithDefinition(state, outputParams, header, withBody));
     }
 
     private static Result<String, CompileError> compileMethodWithDefinition(ParseState state, String outputParams, String header, String withBody) {
-        return compileDefinition(state.withTypeArguments(state.typeArguments), header)
+        return new DefinitionRule().compile(state.withTypeArguments(state.typeArguments), header)
                 .flatMapValue(definition -> compileMethodBody(state, definition, outputParams, withBody));
     }
 
@@ -1221,73 +1723,41 @@ public class Main {
                 createForRule(),
                 createElseRule(),
                 createPostFixRule(),
-                (state0, input) -> createStatementRule().compile(state0, input)
+                createStatementRule()
         ));
     }
 
     private static Rule createPostFixRule() {
-        return new TypeRule("post-fix", new SuffixRule((_, __) -> new Ok<>("\n\ttemp++;"), "++;"));
+        return new TypeRule("post-fix", new SuffixRule(new PostFixRule(), "++;"));
     }
 
     private static Rule createElseRule() {
-        return new TypeRule("else", new StripRule(new PrefixRule("else ", (state, _) -> new Ok<>("\n\telse {\n\t}\n"))));
+        return new TypeRule("else", new StripRule(new PrefixRule("else ", new ElseRule())));
     }
 
     private static Rule createForRule() {
-        return new TypeRule("for", new StripRule(new PrefixRule("for ", (state, _) -> new Ok<>("\n\tfor (;;) {\n\t}\n"))));
+        return new TypeRule("for", new StripRule(new PrefixRule("for ", new ForRule())));
     }
 
     private static Rule createWhileRule() {
-        return new TypeRule("while", new StripRule(new PrefixRule("while ", (state, _) -> new Ok<>("\n\twhile (1) {\n\t}\n"))));
+        return new TypeRule("while", new StripRule(new PrefixRule("while ", new WhileRule())));
     }
 
     private static Rule createIfRule() {
-        return new TypeRule("if", new StripRule(new PrefixRule("if ", (state, _) -> new Ok<>("\n\tif (1) {\n\t}\n"))));
+        return new TypeRule("if", new StripRule(new PrefixRule("if ", new IfRule())));
     }
 
     private static Rule createStatementRule() {
         return new SuffixRule(new OrRule(Lists.of(
-                (state, withoutEnd) -> createReturnRule().compile(state, withoutEnd.strip()),
-                (state, withoutEnd) -> compileInitialization(state, withoutEnd),
-                (state, withoutEnd) -> compileAssignment(state, withoutEnd),
-                (state, withoutEnd) -> compileInvocationStatement(state, withoutEnd)
+                createReturnRule(),
+                new MyRule7(),
+                new MyRule10(),
+                new MyRule12()
         )), ";");
     }
 
-    private static PrefixRule createReturnRule() {
-        return new PrefixRule("return ", (state, value) -> {
-            return createValueRule().compile(state, value)
-                    .mapValue(inner -> "return " + inner)
-                    .mapValue(Main::generateStatement);
-        });
-    }
-
-    private static Result<String, CompileError> compileInvocationStatement(ParseState state, String withoutEnd) {
-        return createInvocationRule().compile(state, withoutEnd).mapValue(Main::generateStatement);
-    }
-
-    private static Result<String, CompileError> compileAssignment(ParseState state, String withoutEnd) {
-        int valueSeparator = withoutEnd.indexOf("=");
-        if (valueSeparator < 0) return createInfixRule(withoutEnd, "=");
-
-        String destination = withoutEnd.substring(0, valueSeparator).strip();
-        String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
-
-        return createValueRule().compile(state, destination)
-                .and(() -> createValueRule().compile(state, value))
-                .mapValue(tuple -> tuple.left + " = " + tuple.right)
-                .mapValue(Main::generateStatement);
-    }
-
-    private static Result<String, CompileError> compileInitialization(ParseState state, String withoutEnd) {
-        int separator = withoutEnd.indexOf("=");
-        if (separator < 0) return createInfixRule(withoutEnd, "=");
-
-        String inputDefinition = withoutEnd.substring(0, separator);
-        String inputValue = withoutEnd.substring(separator + "=".length());
-        return compileDefinition(state, inputDefinition).flatMapValue(
-                outputDefinition -> createValueRule().compile(state, inputValue).mapValue(
-                        outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
+    private static Rule createReturnRule() {
+        return new StripRule(new PrefixRule("return ", new MyRule3()));
     }
 
     private static String generateStatement(String value) {
@@ -1296,127 +1766,47 @@ public class Main {
 
     private static OrRule createValueRule() {
         return new OrRule(Lists.of(
-                (state, input3) -> createStringRule().compile(state, input3.strip()),
-                (state, input1) -> compileChar(input1),
-                (state, input4) -> compileSymbol(input4),
-                (state, input2) -> compileNumber(input2),
-                (state, input) -> compileNot(state, input),
-                (state, input) -> compileConstruction(state, input),
-                (state, input) -> compileLambda(state, input),
+                createStringRule(),
+                createCharRule(),
+                createSymbolRule(),
+                createNumberRule(),
+                createNotRule(),
+                createConstructionRule(),
+                new MyRule11(),
                 createInvocationRule(),
-                (state, input) -> compileTernary(state, input),
-                (state, input) -> compileDataAccess(input, state),
-                (state, input) -> compileMethodAccess(state, input),
-                new TypeRule("add", (state, input) -> compileOperator(state, input, "+")),
-                new TypeRule("subtract", (state, input) -> compileOperator(state, input, "-")),
-                new TypeRule("equals", (state, input) -> compileOperator(state, input, "==")),
-                new TypeRule("greater-than-or-equals", (state, input) -> compileOperator(state, input, ">="))
+                new TernaryRule(),
+                new DataAccessRule(),
+                new MethodAccessRule(),
+                new TypeRule("add", new OperatorRule("+")),
+                new TypeRule("subtract", new OperatorRule("-")),
+                new TypeRule("equals", new OperatorRule("==")),
+                new TypeRule("greater-than-or-equals", new OperatorRule(">="))
         ));
     }
 
-    private static Result<String, CompileError> compileNumber(String input) {
-        String stripped = input.strip();
-        return isNumber(stripped) ? new Ok<>(stripped) : new Err<>(new CompileError("Not a number", input));
+    private static StripRule createNotRule() {
+        return new StripRule(new PrefixRule("!", new MyRule9()));
     }
 
-    private static Result<String, CompileError> compileSymbol(String input) {
-        String stripped = input.strip();
-        return new SymbolFilter().qualifies(stripped) ? new Ok<>(stripped) : createNotASymbol(input);
+    private static StripRule createNumberRule() {
+        return new StripRule(new FilterRule(new NumberFilter(), new StringRule()));
     }
 
-    private static Result<String, CompileError> compileMethodAccess(ParseState state, String input) {
-        String stripped = input.strip();
-        int methodSeparator = stripped.lastIndexOf("::");
-        if (methodSeparator < 0) return createInfixRule(stripped, "::");
-
-        String object = stripped.substring(0, methodSeparator);
-        String property = stripped.substring(methodSeparator + "::".length());
-
-        return createValueRule().compile(state, object).flatMapValue(newObject -> {
-            String caller = newObject + "." + property;
-            String lower = newObject.toLowerCase();
-            String paramName = new SymbolFilter().qualifies(lower) ? lower : "param";
-            return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
-        });
-    }
-
-    private static Result<String, CompileError> compileDataAccess(String input, ParseState state) {
-        String stripped = input.strip();
-        int dataSeparator = stripped.lastIndexOf(".");
-        if (dataSeparator < 0) return createInfixRule(stripped, ".");
-
-        String object = stripped.substring(0, dataSeparator);
-        String property = stripped.substring(dataSeparator + ".".length());
-
-        return createValueRule().compile(state, object).mapValue(newObject -> newObject + "." + property);
-    }
-
-    private static Result<String, CompileError> compileTernary(ParseState state, String input) {
-        String stripped = input.strip();
-        int ternaryIndex = stripped.indexOf("?");
-        if (ternaryIndex < 0) return createInfixRule(stripped, "?");
-
-        String condition = stripped.substring(0, ternaryIndex).strip();
-        String cases = stripped.substring(ternaryIndex + "?".length());
-        int caseIndex = cases.indexOf(":");
-        if (caseIndex < 0) return createInfixRule(stripped, "?");
-
-        String ifTrue = cases.substring(0, caseIndex).strip();
-        String ifFalse = cases.substring(caseIndex + ":".length()).strip();
-        return createValueRule().compile(state, condition)
-                .and(() -> createValueRule().compile(state, ifTrue))
-                .and(() -> createValueRule().compile(state, ifFalse))
-                .mapValue(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
-    }
-
-    private static Result<String, CompileError> compileConstruction(ParseState state, String input) {
-        return createConstructionRule().compile(state, input.strip());
+    private static StripRule createSymbolRule() {
+        return new StripRule(new FilterRule(new SymbolFilter(), new StringRule()));
     }
 
     private static TypeRule createConstructionRule() {
-        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule((state, slice) -> {
-            int paramStart = slice.indexOf("(");
-
-            String rawCaller = slice.substring(0, paramStart).strip();
-            String caller = rawCaller.endsWith("<>")
-                    ? rawCaller.substring(0, rawCaller.length() - "<>".length())
-                    : rawCaller;
-
-            String inputArguments = slice.substring(paramStart + "(".length());
-            return compileAllValues(state, inputArguments).flatMapValue(arguments -> createTypeRule().compile(state, caller).mapValue(type -> type + "(" + arguments + ")"));
-        }, ")"))));
+        return new TypeRule("construction", new StripRule(new PrefixRule("new ", new SuffixRule(new MyRule8(), ")"))));
     }
 
-    private static Result<String, CompileError> compileNot(ParseState state, String input) {
-        return new PrefixRule("!", (state0, slice) -> {
-            return createValueRule().compile(state0, slice).mapValue(result -> "!" + result);
-        }).compile(state, input.strip());
-    }
-
-    private static Result<String, CompileError> compileChar(String input) {
-        if (input.strip().startsWith("'") && input.strip().endsWith("'")) return new Ok<>(input.strip());
-        return new Err<>(new CompileError("Not a character", input));
+    private static Rule createCharRule() {
+        return new TypeRule("char", new PrefixRule("'", new SuffixRule(new MyRule6(), "'")));
     }
 
     private static Rule createStringRule() {
-        return new TypeRule("string", new PrefixRule("\"", new SuffixRule((state0, inner) -> {
-            return new Ok<String, CompileError>(inner)
-                    .mapValue(value -> "\"" + value)
-                    .mapValue(value -> value + "\"");
-        }, "\"")));
-    }
-
-    private static Result<String, CompileError> compileLambda(ParseState parseState, String input) {
-        int arrowIndex = input.indexOf("->");
-        if (arrowIndex < 0) return createInfixRule(input, "->");
-
-        String beforeArrow = input.substring(0, arrowIndex).strip();
-
-        return findLambdaParams(beforeArrow).map(paramNames -> {
-            String inputValue = input.substring(arrowIndex + "->".length()).strip();
-            return compileLambdaBody(parseState, inputValue)
-                    .flatMapValue(outputValue -> generateLambda(paramNames, outputValue));
-        }).orElseGet(() -> new Err<>(new CompileError("Not a lambda statement", input)));
+        PrefixRule childRule = new PrefixRule("\"", new SuffixRule(new MyRule4(), "\""));
+        return new TypeRule("string", new StripRule(childRule));
     }
 
     private static Err<String, CompileError> createInfixRule(String input, String infix) {
@@ -1447,21 +1837,10 @@ public class Main {
     private static Result<String, CompileError> compileLambdaBody(ParseState state, String inputValue) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            return createStatementsRule((state0, value) -> createStatementOrBlockRule().compile(state0, value)).compile(state, substring);
+            return createStatementsRule(createStatementOrBlockRule()).compile(state, substring);
         } else {
             return createValueRule().compile(state, inputValue);
         }
-    }
-
-    private static Result<String, CompileError> compileOperator(ParseState state, String input, String operator) {
-        int operatorIndex = input.indexOf(operator);
-        if (operatorIndex < 0) return createInfixRule(input, operator);
-
-        String left = input.substring(0, operatorIndex);
-        String right = input.substring(operatorIndex + operator.length());
-        return createValueRule().compile(state, left)
-                .and(() -> createValueRule().compile(state, right))
-                .mapValue(tuple -> tuple.left + " " + operator + " " + tuple.right);
     }
 
     private static boolean isNumber(String stripped) {
@@ -1498,16 +1877,7 @@ public class Main {
     }
 
     private static Rule createInvocationRule() {
-        return new StripRule(new SuffixRule((state, withoutEnd) -> {
-            int argsStart = findArgStart(withoutEnd);
-            if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
-
-            String inputCaller = withoutEnd.substring(0, argsStart);
-            String inputArguments = withoutEnd.substring(argsStart + 1);
-            return compileAllValues(state, inputArguments).flatMapValue(
-                    outputValues -> createValueRule().compile(state, inputCaller).mapValue(
-                            outputCaller -> generateInvocation(outputCaller, outputValues)));
-        }, ")"));
+        return new StripRule(new SuffixRule(new MyRule5(), ")"));
     }
 
     private static int findArgStart(String withoutEnd) {
@@ -1557,19 +1927,6 @@ public class Main {
 
     private static String generateInvocation(String caller, String arguments) {
         return caller + "(" + arguments + ")";
-    }
-
-    private static Result<String, CompileError> compileDefinition(ParseState state, String input) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) return new Ok<>("");
-
-        int nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator < 0) return new Err<>(new CompileError("No name present", stripped));
-
-        String beforeName = stripped.substring(0, nameSeparator);
-        String name = stripped.substring(nameSeparator + " ".length());
-        return compileBeforeName(state, beforeName)
-                .flatMapValue(node -> generateDefinition(node.withString("name", name)));
     }
 
     private static Result<Node, CompileError> compileBeforeName(ParseState state, String beforeName) {
@@ -1650,7 +2007,7 @@ public class Main {
     private static Rule createTypeRule() {
         return new OrRule(Lists.of(
                 createPrimitiveRule(),
-                createSymbolTypeRule(),
+                createSymbolRule(),
                 new TypeParamRule(),
                 createArrayRule(),
                 new GenericRule()
@@ -1658,27 +2015,14 @@ public class Main {
     }
 
     private static Rule createArrayRule() {
-        return new StripRule(new SuffixRule((state, slice) -> {
-            return createTypeRule().compile(state, slice).mapValue(value -> value + "*");
-        }, "[]"));
+        return new StripRule(new SuffixRule(new ArrayRule(), "[]"));
     }
 
-    private static StripRule createPrimitiveRule() {
+    private static Rule createPrimitiveRule() {
         return new StripRule(new OrRule(Lists.of(
                 new EqualsRule("void"),
-                (state, input) -> new OrRule(Lists.of(
-                        new EqualsRule("boolean"),
-                        new EqualsRule("Bool")
-                )).compile(state, input).mapValue(_ -> "int")
+                new MyRule2()
         )));
-    }
-
-    private static StripRule createSymbolTypeRule() {
-        return new StripRule(new FilterRule(new SymbolFilter(), new StringRule()));
-    }
-
-    private static Result<String, CompileError> compileTypeParam(ParseState state, String type) {
-        return (new TypeParamRule()).compile(state, type);
     }
 
     private static boolean isDefined(List_<Tuple<String, List_<String>>> toExpand, Tuple<String, List_<String>> tuple) {
