@@ -134,6 +134,10 @@ public class Main {
         List_<String> divide(String input);
     }
 
+    private interface Merger {
+        StringBuilder apply(StringBuilder cache, String element);
+    }
+
     public record Tuple<A, B>(A left, B right) {
     }
 
@@ -836,6 +840,32 @@ public class Main {
         }
     }
 
+    private record DivideRule(
+            Divider divider,
+            Rule compiler,
+            Merger merger
+    ) implements Rule {
+        private static Result<List_<String>, CompileError> parseAll(ParseState state, List_<String> segments, Rule compiler) {
+            return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.compile(state, segment).mapValue(compiled::add));
+        }
+
+        private static String mergeAll(List_<String> compiled, Merger merger) {
+            return compiled.stream().foldWithInitial(new StringBuilder(), merger::apply).toString();
+        }
+
+        @Override
+        public Result<String, CompileError> compile(ParseState state, String input) {
+            return parseAll(state, divider.divide(input), compiler).mapValue(compiled -> mergeAll(compiled, merger()));
+        }
+    }
+
+    public static class StatementMerger implements Merger {
+        @Override
+        public StringBuilder apply(StringBuilder output, String str) {
+            return output.append(str);
+        }
+    }
+
     public static final List_<String> MODIFIERS = Lists.of(
             "private",
             "static",
@@ -866,9 +896,9 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        return parseAll(new ParseState(), new FoldingDivider(new DecoratedFolder(new StatementFolder())).divide(input), (state0, value) -> createRootSegmentRule().compile(state0, value))
+        return DivideRule.parseAll(new ParseState(), new FoldingDivider(new DecoratedFolder(new StatementFolder())).divide(input), (state0, value) -> createRootSegmentRule().compile(state0, value))
                 .flatMapValue(Main::generate)
-                .mapValue(compiled -> mergeAll(compiled, Main::mergeStatements));
+                .mapValue(compiled -> DivideRule.mergeAll(compiled, new StatementMerger()));
     }
 
     private static Result<List_<String>, CompileError> generate(List_<String> compiled) {
@@ -894,28 +924,11 @@ public class Main {
         return new None<>();
     }
 
-    private static Result<String, CompileError> compileStatements(ParseState state, String input, Rule compiler) {
-        FoldingDivider divider = new FoldingDivider(new DecoratedFolder(new StatementFolder()));
-        return getStringCompileErrorResult(state, input, compiler, divider, Main::mergeStatements);
+    private static Rule createStatementsRule(Rule compiler) {
+        return new DivideRule(new FoldingDivider(new DecoratedFolder(new StatementFolder())), compiler, new StatementMerger());
     }
 
-    private static Result<String, CompileError> getStringCompileErrorResult(ParseState state, String input, Rule compiler, FoldingDivider divider, BiFunction<StringBuilder, String, StringBuilder> mergeStatements) {
-        return parseAll(state, divider.divide(input), compiler).mapValue(compiled -> mergeAll(compiled, mergeStatements));
-    }
-
-    private static String mergeAll(List_<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return compiled.stream().foldWithInitial(new StringBuilder(), merger).toString();
-    }
-
-    private static Result<List_<String>, CompileError> parseAll(ParseState state, List_<String> segments, Rule compiler) {
-        return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.compile(state, segment).mapValue(compiled::add));
-    }
-
-    private static StringBuilder mergeStatements(StringBuilder output, String str) {
-        return output.append(str);
-    }
-
-    private static OrRule createRootSegmentRule() {
+    private static Rule createRootSegmentRule() {
         return new OrRule(Lists.of(
                 createWhitespaceRule(),
                 createPackageRule(),
@@ -924,15 +937,15 @@ public class Main {
         ));
     }
 
-    private static TypeRule createClassRule() {
+    private static Rule createClassRule() {
         return new TypeRule("class", (state, input) -> new TypedBlockRule("class ").compile(state, input));
     }
 
-    private static PrefixRule createPackageRule() {
+    private static Rule createPackageRule() {
         return new PrefixRule("package ", (_, __) -> new Ok<>(""));
     }
 
-    private static StripRule createImportRule() {
+    private static Rule createImportRule() {
         return new StripRule(new PrefixRule("import ", new SuffixRule((_, left) -> {
             List_<String> slices = divideByChar(left, '.');
             if (isFunctionalImport(slices)) return new Ok<>("");
@@ -998,8 +1011,7 @@ public class Main {
 
     private static SuffixRule createStructRule(String modifiers, String name) {
         return new SuffixRule((state0, inputContent) ->
-                compileStatements(state0, inputContent,
-                        createClassSegmentRule()).mapValue(outputContent -> generateStruct(modifiers, name, outputContent)), "}");
+                createStatementsRule(createClassSegmentRule()).compile(state0, inputContent).mapValue(outputContent -> generateStruct(modifiers, name, outputContent)), "}");
     }
 
     private static String generateStruct(String modifiers, String name, String content) {
@@ -1045,6 +1057,7 @@ public class Main {
 
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
+
         int paramEnd = withParams.indexOf(")");
         if (paramEnd < 0) return createInfixRule(withParams, ")");
 
@@ -1056,11 +1069,8 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileMethodWithDefinition(ParseState state, String outputParams, String header, String withBody) {
-        return getStringCompileErrorResult(state, header).flatMapValue(definition -> compileMethodBody(state, definition, outputParams, withBody));
-    }
-
-    private static Result<String, CompileError> getStringCompileErrorResult(ParseState state, String header) {
-        return compileDefinition(state.withTypeArguments(state.typeArguments), header);
+        return compileDefinition(state.withTypeArguments(state.typeArguments), header)
+                .flatMapValue(definition -> compileMethodBody(state, definition, outputParams, withBody));
     }
 
     private static Result<String, CompileError> compileMethodBody(ParseState state, String definition, String outputParams, String withBody) {
@@ -1069,7 +1079,7 @@ public class Main {
         if (!withBody.startsWith("{") || !withBody.endsWith("}"))
             return new Ok<>(generateStatement(string));
 
-        return compileStatements(state, withBody.substring(1, withBody.length() - 1), createStatementOrBlockRule())
+        return createStatementsRule(createStatementOrBlockRule()).compile(state, withBody.substring(1, withBody.length() - 1))
                 .mapValue(statement -> addFunction(statement, string));
     }
 
@@ -1084,10 +1094,10 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileValues(ParseState state, String input, Rule compiler) {
-        return getStringCompileErrorResult(state, input, compiler, createValueDivider(), Main::mergeValues);
+        return new DivideRule(createValueDivider(), compiler, Main::mergeValues).compile(state, input);
     }
 
-    private static FoldingDivider createValueDivider() {
+    private static Divider createValueDivider() {
         return new FoldingDivider(new DecoratedFolder(new ValueFolder()));
     }
 
@@ -1330,7 +1340,7 @@ public class Main {
     private static Result<String, CompileError> compileLambdaBody(ParseState state, String inputValue) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            return compileStatements(state, substring, (state0, value) -> createStatementOrBlockRule().compile(state0, value));
+            return createStatementsRule((state0, value) -> createStatementOrBlockRule().compile(state0, value)).compile(state, substring);
         } else {
             return createValueRule().compile(state, inputValue);
         }
@@ -1553,7 +1563,7 @@ public class Main {
         String oldArguments = withoutEnd.substring(genStart + "<".length());
 
         List_<String> segments = createValueDivider().divide(oldArguments);
-        return parseAll(state, segments, createTypeRule()).mapValue(newArguments -> {
+        return DivideRule.parseAll(state, segments, createTypeRule()).mapValue(newArguments -> {
             switch (base) {
                 case "Function" -> {
                     return generateFunctionalType(newArguments.apply(1).orElse(null), Lists.of(newArguments.apply(0).orElse(null)));
