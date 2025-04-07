@@ -331,6 +331,23 @@ public class Main {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
 
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String paramName = stripped.substring(0, arrowIndex).strip();
+            if (isSymbol(paramName)) {
+                String inputValue = stripped.substring(arrowIndex + "->".length());
+                String lambda = "__lambda" + lambdaCounter + "__";
+
+                return compileValue(inputValue).map(outputValue -> {
+                    String definition = generateDefinition("", "auto", lambda);
+                    String param = generateDefinition("", "auto", paramName);
+                    addFunction(definition, param, "\n\treturn " + outputValue + ";");
+
+                    return lambda;
+                });
+            }
+        }
+
         Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
@@ -346,18 +363,6 @@ public class Main {
 
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
-        }
-
-        int arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            String paramName = stripped.substring(0, arrowIndex).strip();
-            String value = stripped.substring(arrowIndex + "->".length());
-            String lambda = "__lambda" + lambdaCounter + "__";
-            addFunction(generateDefinition("", "auto", lambda), generateDefinition("", "auto", paramName), "{\n\treturn " +
-                    value + ";\n" +
-                    "}");
-
-            return Optional.of(lambda);
         }
 
         return Optional.of(invalidate("value", input));

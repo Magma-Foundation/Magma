@@ -143,6 +143,23 @@
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
 
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String paramName = stripped.substring(0, arrowIndex).strip();
+            if (isSymbol(paramName)) {
+                String inputValue = stripped.substring(arrowIndex + "->".length());
+                String lambda = "__lambda" + lambdaCounter + "__";
+
+                return compileValue(inputValue).map(outputValue -> {
+                    String definition = generateDefinition("", "auto", lambda);
+                    String param = generateDefinition("", "auto", paramName);
+                    addFunction(definition, param, "\n\treturn " + outputValue + ";");
+
+                    return lambda;
+                });
+            }
+        }
+
         Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
@@ -158,18 +175,6 @@
 
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
-        }
-
-        int arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            String paramName = stripped.substring(0, arrowIndex).strip();
-            String value = stripped.substring(arrowIndex + "->".length());
-            String lambda = "__lambda" + lambdaCounter + "__";
-            addFunction(generateDefinition("", "auto", lambda), generateDefinition("", "auto", paramName), "{\n\treturn " +
-                    value + ";\n" +
-                    "}");
-
-            return Optional.of(lambda);
         }
 
         return Optional.of(invalidate("value", input));
@@ -343,13 +348,12 @@ public  */struct Main {
         }
      */
 }
-auto __lambda0__(auto input){{
-	return  runWithInput;
-}
+auto __lambda0__(auto input){
+	return runWithInput(source, input);
 }
 /* public static */void main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda0__(source, input), /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
+	readString(source).match(__lambda0__, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
@@ -371,9 +375,8 @@ auto __lambda0__(auto input){{
             return new Err<>(e);
         } */
 }
-auto __lambda0__(auto compiled){{
-	return  mergeAll;
-}
+auto __lambda0__(auto compiled){
+	return mergeAll(compiled, /*  Main::mergeStatements */);
 }
 /* private static */struct String compile(struct String input){
 	/* List<String> */ segments = divideAll(input, /*  Main::divideStatementChar */);/* 
@@ -385,17 +388,16 @@ auto __lambda0__(auto compiled){{
                     return compiled;
                 } */
 	/* )
-                 */.map(__lambda0__(compiled, /*  Main::mergeStatements */)).orElse("");
+                 */.map(__lambda0__).orElse("");
 }
 /* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
 	/* return compileAll */(divideAll(input, /*  Main::divideStatementChar */), compiler, /*  Main::mergeStatements */);
 }
-auto __lambda0__(auto compiled){{
-	return  mergeAll;
-}
+auto __lambda0__(auto compiled){
+	return mergeAll(compiled, merger);
 }
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* return parseAll */(segments, compiler).map(__lambda0__(compiled, merger));
+	/* return parseAll */(segments, compiler).map(__lambda0__);
 }
 /* private static */struct String mergeAll(/* List<String> */ compiled, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
 	struct StringBuilder output = /* new StringBuilder */();/* 
