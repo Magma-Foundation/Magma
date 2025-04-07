@@ -620,6 +620,10 @@ public class Main {
     }
 
     private record ParseState(List_<List_<String>> frames, List_<String> typeArguments) {
+        public ParseState() {
+            this(Lists.<List_<String>>empty().add(Lists.empty()), Lists.empty());
+        }
+
         private boolean isNothingDefined() {
             return frames.stream()
                     .flatMap(List_::stream)
@@ -670,6 +674,16 @@ public class Main {
         }
     }
 
+    private record OrRule(List_<Rule> rules) implements Rule {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return rules().stream()
+                    .foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState::withError))
+                    .toResult()
+                    .mapErr(errors -> new CompileError("No valid combination present", input, errors));
+        }
+    }
+
     public static final List_<String> MODIFIERS = Lists.of(
             "private",
             "static",
@@ -705,7 +719,7 @@ public class Main {
 
     private static Result<String, CompileError> compile(String input) {
         List_<String> segments = divideAll(input, Main::divideStatementChar);
-        return parseAll(segments, Main::compileRootSegment)
+        return parseAll(segments, value -> compileRootSegment(new ParseState(), value))
                 .flatMapValue(Main::generate)
                 .mapValue(compiled -> mergeAll(compiled, Main::mergeStatements));
     }
@@ -808,13 +822,13 @@ public class Main {
         return appended;
     }
 
-    private static Result<String, CompileError> compileRootSegment(String value) {
-        return compileOr(value, Lists.of(
+    private static Result<String, CompileError> compileRootSegment(ParseState state, String value) {
+        return new OrRule(Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
                 Main::compileImport,
-                Main::compileClass
-        ));
+                new TypeRule("class", input -> compileTypedBlock(state, "class ", input))
+        )).compile(value);
     }
 
     private static Result<String, CompileError> compilePackage(String input) {
@@ -827,11 +841,6 @@ public class Main {
         String format = "Prefix '%s' not present";
         String message = format.formatted(prefix);
         return new Err<>(new CompileError(message, input));
-    }
-
-    private static Result<String, CompileError> compileClass(String input) {
-        List_<List_<String>> frame = Lists.<List_<String>>empty().add(Lists.empty());
-        return compileTypedBlock(new ParseState(frame, Lists.empty()), "class ", input);
     }
 
     private static Result<String, CompileError> compileImport(String input) {
@@ -946,7 +955,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileClassSegment(ParseState state, String value) {
-        return compileOr(value, Lists.of(
+        return new OrRule(Lists.of(
                 Main::compileWhitespace,
                 input -> compileTypedBlock(state, "class", input),
                 input -> compileTypedBlock(state, "interface ", input),
@@ -954,7 +963,7 @@ public class Main {
                 createMethodRule(state),
                 input -> compileGlobal(state, input),
                 createDefinitionStatementRule(state)
-        ));
+        )).compile(value);
     }
 
     private static TypeRule createDefinitionStatementRule(ParseState state) {
@@ -1046,7 +1055,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileStatementOrBlock(ParseState state, String value) {
-        return compileOr(value, Lists.of(
+        return new OrRule(Lists.of(
                 Main::compileWhitespace,
                 Main::compileIf,
                 Main::compileWhile,
@@ -1054,7 +1063,7 @@ public class Main {
                 Main::compileElse,
                 Main::compilePostFix,
                 input -> compileStatement(state, input)
-        ));
+        )).compile(value);
     }
 
     private static Result<String, CompileError> compilePostFix(String input) {
@@ -1079,12 +1088,12 @@ public class Main {
 
     private static Result<String, CompileError> compileStatement(ParseState state, String input) {
         return new SuffixRule(slice -> {
-            return compileOr(slice, Lists.of(
+            return new OrRule(Lists.of(
                     withoutEnd -> compileReturn(state, withoutEnd),
                     withoutEnd -> compileInitialization(state, withoutEnd),
                     withoutEnd -> compileAssignment(state, withoutEnd),
                     withoutEnd -> compileInvocationStatement(state, withoutEnd)
-            ));
+            )).compile(slice);
         }, ";").compile(input);
     }
 
@@ -1129,7 +1138,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileValue(String wrapped, ParseState state) {
-        return compileOr(wrapped, Lists.of(
+        return new OrRule(Lists.of(
                 Main::compileString,
                 Main::compileChar,
                 Main::compileSymbol,
@@ -1145,7 +1154,7 @@ public class Main {
                 new TypeRule("subtract", input -> compileOperator(state, input, "-")),
                 new TypeRule("equals", input -> compileOperator(state, input, "==")),
                 new TypeRule("greater-than-or-equals", input -> compileOperator(state, input, ">="))
-        ));
+        )).compile(wrapped);
     }
 
     private static Result<String, CompileError> compileNumber(String input) {
@@ -1487,13 +1496,13 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileType(ParseState state, String input) {
-        return compileOr(input, Lists.of(
+        return new OrRule(Lists.of(
                 Main::compilePrimitive,
                 Main::compileSymbolType,
                 type -> compileTypeParam(state, type),
                 type -> compileArray(state, type),
                 type -> compileGeneric(state, type)
-        ));
+        )).compile(input);
     }
 
     private static Result<String, CompileError> compileGeneric(ParseState parseState, String type) {
@@ -1540,13 +1549,6 @@ public class Main {
         return new SuffixRule(slice -> {
             return compileType(parseState, slice).mapValue(value -> value + "*");
         }, "[]").compile(type.strip());
-    }
-
-    private static Result<String, CompileError> compileOr(String input, List_<Rule> rules) {
-        return rules.stream()
-                .foldWithInitial(new OrState(), (orState, rule) -> rule.compile(input).match(orState::withValue, orState::withError))
-                .toResult()
-                .mapErr(errors -> new CompileError("No valid combination present", input, errors));
     }
 
     private static Result<String, CompileError> compilePrimitive(String type) {
