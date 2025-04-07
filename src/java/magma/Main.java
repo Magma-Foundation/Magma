@@ -865,8 +865,10 @@ public class Main {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
 
-        if (stripped.startsWith("if ")) return new Some<>("if (1) {\n}\n");
-        if (stripped.startsWith("for ")) return new Some<>("for (;;) {\n}\n");
+        if (stripped.startsWith("if ")) return new Some<>("\n\tif (1) {\n\t}");
+        if (stripped.startsWith("for ")) return new Some<>("\n\tfor (;;) {\n\t}");
+        if (stripped.startsWith("else ")) return new Some<>("\n\telse {}");
+        if (stripped.endsWith("++;")) return new Some<>("\n\ttemp++;");
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -983,29 +985,36 @@ public class Main {
 
         String beforeArrow = input.substring(0, arrowIndex).strip();
 
-        List_<String> paramNames;
+        return findLambdaParams(beforeArrow).flatMap(paramNames -> {
+            String inputValue = input.substring(arrowIndex + "->".length()).strip();
+            return compileLambdaBody(inputValue, typeParams, typeArguments)
+                    .map(outputValue -> generateLambda(paramNames, outputValue));
+        });
+    }
+
+    private static Option<List_<String>> findLambdaParams(String beforeArrow) {
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
             List<String> list = Arrays.asList(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")));
-            paramNames = new JavaList<>(list)
+            return new Some<>(new JavaList<>(list)
                     .stream()
                     .map(String::strip)
-                    .collect(new ListCollector<>());
-        } else if (isSymbol(beforeArrow)) {
-            paramNames = Lists.of(beforeArrow);
-        } else {
-            return new None<>();
+                    .collect(new ListCollector<>()));
         }
 
-        String inputValue = input.substring(arrowIndex + "->".length()).strip();
-        Option<String> compiledValue;
+        if (isSymbol(beforeArrow)) {
+            return new Some<>(Lists.of(beforeArrow));
+        }
+
+        return new None<>();
+    }
+
+    private static Option<String> compileLambdaBody(String inputValue, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            compiledValue = compileStatements(substring, statement -> compileStatement(statement, typeParams, typeArguments));
+            return compileStatements(substring, statement -> compileStatement(statement, typeParams, typeArguments));
         } else {
-            compiledValue = compileValue(inputValue, typeParams, typeArguments);
+            return compileValue(inputValue, typeParams, typeArguments);
         }
-
-        return compiledValue.map(outputValue -> generateLambda(paramNames, outputValue));
     }
 
     private static Option<String> compileOperator(String input, String operator, List_<List_<String>> typeParams, List_<String> typeArguments) {
