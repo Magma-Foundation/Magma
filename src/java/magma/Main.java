@@ -13,16 +13,52 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class Main {
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+    private sealed interface Result<T, X> permits Ok, Err {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
 
-            Path target = source.resolveSibling("main.c");
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(error);
+        }
+    }
+
+    public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> runWithInput(Path source, String input) {
+        String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+
+        Path target = source.resolveSibling("main.c");
+        return writeString(target, output);
+    }
+
+    private static Optional<IOException> writeString(Path target, String output) {
+        try {
             Files.writeString(target, output);
+            return Optional.empty();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
