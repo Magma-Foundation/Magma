@@ -1136,7 +1136,7 @@ public class Main {
 
     private static Result<String, CompileError> compileSymbol(String input) {
         String stripped = input.strip();
-        return isSymbol(stripped) ? new Ok<>(stripped) : new Err<>(new CompileError("Not a symbol", input));
+        return isSymbol(stripped) ? new Ok<>(stripped) : createNotASymbol(input);
     }
 
     private static Result<String, CompileError> compileMethodAccess(ParseState state, String input) {
@@ -1374,14 +1374,20 @@ public class Main {
         String placeholder = beforeName.substring(0, typeSeparator);
         String inputType = beforeName.substring(typeSeparator + 1);
 
-        List_<Node> modifiers = divideByChar(placeholder, ' ')
+        return divideByChar(placeholder, ' ')
                 .stream()
                 .map(String::strip)
-                .map(value -> new Node().withString("value", value))
-                .collect(new ListCollector<>());
+                .map(Main::compileSymbol)
+                .map(node -> node.mapValue(value -> new Node().withString("value", value)))
+                .collect(new Exceptional<>(new ListCollector<>()))
+                .flatMapValue(modifiers -> {
+                    Node modifiers1 = new Node().withNodeList("modifiers", modifiers);
+                    return compileType(state, inputType).mapValue(outputType -> modifiers1.withString("type", outputType));
+                });
+    }
 
-        Node modifiers1 = new Node().withNodeList("modifiers", modifiers);
-        return compileType(state, inputType).mapValue(outputType -> modifiers1.withString("type", outputType));
+    private static Result<String, CompileError> createNotASymbol(String value) {
+        return new Err<>(new CompileError("Not a symbol", value));
     }
 
     private static int findTypeSeparator(String beforeName) {
@@ -1433,7 +1439,7 @@ public class Main {
         if (genStart < 0) return new Err<>(new CompileError("Infix '<' not present", withoutEnd));
         String base = withoutEnd.substring(0, genStart).strip();
 
-        if (!isSymbol(base)) return new Err<>(new CompileError("Not a symbol", base));
+        if (!isSymbol(base)) return createNotASymbol(base);
         String oldArguments = withoutEnd.substring(genStart + "<".length());
 
         List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
@@ -1489,7 +1495,7 @@ public class Main {
 
     private static Result<String, CompileError> compileSymbolType(String type) {
         if (isSymbol(type.strip())) return new Ok<>(type.strip());
-        return new Err<>(new CompileError("Not a symbol", type));
+        return createNotASymbol(type);
     }
 
     private static Result<String, CompileError> compileTypeParam(ParseState state, String type) {
