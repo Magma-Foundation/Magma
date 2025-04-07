@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
@@ -85,28 +86,34 @@ public class Main {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String header = input.substring(0, paramStart).strip();
-            int nameSeparator = header.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = header.substring(0, nameSeparator);
-
-                int space = beforeName.lastIndexOf(" ");
-
-                String modifiers;
-                String type;
-                if (space >= 0) {
-                    modifiers = generatePlaceholder(beforeName.substring(0, space));
-                    type = beforeName.substring(space + 1);
-                } else {
-                    modifiers = "";
-                    type = beforeName;
-                }
-
-                String name = header.substring(nameSeparator + " ".length());
-                return modifiers + type + " " + name + "(){\n}\n";
-            }
+            Optional<String> maybeDefinition = compileDefinition(header);
+            if (maybeDefinition.isPresent()) return maybeDefinition.get() + "(){\n}\n";
         }
 
         return invalidate("class segment", input);
+    }
+
+    private static Optional<String> compileDefinition(String header) {
+        int nameSeparator = header.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            String beforeName = header.substring(0, nameSeparator);
+
+            int space = beforeName.lastIndexOf(" ");
+
+            String modifiers;
+            String type;
+            if (space >= 0) {
+                modifiers = generatePlaceholder(beforeName.substring(0, space));
+                type = beforeName.substring(space + 1);
+            } else {
+                modifiers = "";
+                type = beforeName;
+            }
+
+            String name = header.substring(nameSeparator + " ".length());
+            return Optional.of(modifiers + type + " " + name);
+        }
+        return Optional.empty();
     }
 
     private static String generatePlaceholder(String input) {
