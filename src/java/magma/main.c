@@ -8,29 +8,31 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
 /* private sealed */ struct Result<T, X> permits Ok, Err {
-	/* <R> */struct R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr);
+	/* <R> */struct R match(struct R (*)(struct T) whenOk, struct R (*)(struct X) whenErr);
 };
 /* private sealed */ struct Option<T> permits Some, None {
-	void ifPresent(Consumer<struct T> ifPresent);
-	/* <R> */Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper);
-	/* <R> */Option<struct R> map(Function<struct T, struct R> mapper);
+	void ifPresent(void (*)(struct T) ifPresent);
+	/* <R> */Option<struct R> flatMap(Option<struct R> (*)(struct T) mapper);
+	/* <R> */Option<struct R> map(struct R (*)(struct T) mapper);
 	struct T orElse(struct T other);
 	struct boolean isPresent(/*  */);
 	Tuple<struct Boolean, struct T> toTuple(struct T other);
-	struct T orElseGet(Supplier<struct T> other);
-	Option<struct T> or(Supplier<Option<struct T>> other);
+	struct T orElseGet(struct T (*)() other);
+	Option<struct T> or(Option<struct T> (*)() other);
 };
 /* private */ struct List_<T> {
 	List_<struct T> add(struct T element);
 	List_<struct T> addAll(List_<struct T> elements);
-	void forEach(Consumer<struct T> consumer);
+	void forEach(void (*)(struct T) consumer);
 	Stream_<struct T> stream(/*  */);
 	struct T popFirst(/*  */);
 	struct boolean isEmpty(/*  */);
+	struct T get(struct int index);
 };
 /* private */ struct Stream_<T> {
-	/* <R> */Stream_<struct R> map(Function<struct T, struct R> mapper);
+	/* <R> */Stream_<struct R> map(struct R (*)(struct T) mapper);
 	/* <R> */struct R foldWithInitial(struct R initial, BiFunction<struct R, struct T, struct R> folder);
 	/* <C> */struct C collect(Collector<struct T, struct C> collector);
 	/* <R> */Option<struct R> foldToOption(struct R initial, BiFunction<struct R, struct T, Option<struct R>> folder);
@@ -41,6 +43,8 @@
 };
 /* private */ struct Head<T> {
 	Option<struct T> next(/*  */);
+};
+struct Temp {
 };
 struct Temp {
 };
@@ -101,7 +105,11 @@ struct Temp {
 }
 /* private */static class Lists {
         public static</* T> List_<T */> empty(/*  */){
-	/* return new JavaList<> */();/* 
+	/* return new JavaList<> */();
+	/* }
+
+        public static <T> List_<T> of(T */... elements) {
+            return new JavaList<>(Arrays.asList(elements));/* 
         }
      */
 }
@@ -167,7 +175,7 @@ struct Temp {
 }
 /* private *//* static final class None<T> implements Option<T> {
         @Override
-        public void */ ifPresent(Consumer<struct T> ifPresent){
+        public void */ ifPresent(void (*)(struct T) ifPresent){
 	/* }
 
         @Override
@@ -288,13 +296,13 @@ auto __lambda7__(auto main){
 auto __lambda8__(auto main){
 	return Main.mergeStatements(main);
 }
-/* private */static Option<struct String> compileStatements(struct String input, Function<struct String, Option<struct String>> compiler){
+/* private */static Option<struct String> compileStatements(struct String input, Option<struct String> (*)(struct String) compiler){
 	/* return compileAll */(divideAll(input, __lambda7__), compiler, __lambda8__);
 }
 auto __lambda9__(auto compiled){
 	return /*  mergeAll(compiled */;
 }
-/* private */static Option<struct String> compileAll(List_<struct String> segments, Function<struct String, Option<struct String>> compiler, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger){
+/* private */static Option<struct String> compileAll(List_<struct String> segments, Option<struct String> (*)(struct String) compiler, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger){
 	/* return parseAll */(segments, compiler).map(__lambda9__, /*  merger) */);
 }
 /* private *//* static String */ mergeAll(List_<struct String> compiled, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger){
@@ -303,7 +311,7 @@ auto __lambda9__(auto compiled){
 auto __lambda10__(auto compiled){
 	return compiled.add(compiled);
 }
-/* private */static Option<List_<struct String>> parseAll(List_<struct String> segments, Function<struct String, Option<struct String>> compiler){
+/* private */static Option<List_<struct String>> parseAll(List_<struct String> segments, Option<struct String> (*)(struct String) compiler){
 	/* return segments */.stream().foldToOption(Lists.empty(), /* (compiled, segment) -> compiler */.apply(segment).map(__lambda10__));
 }
 /* private *//* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String str){
@@ -432,7 +440,7 @@ auto __lambda13__(auto main){
 auto __lambda14__(auto main){
 	return Main.mergeValues(main);
 }
-/* private */static Option<struct String> compileValues(struct String input, Function<struct String, Option<struct String>> compiler){
+/* private */static Option<struct String> compileValues(struct String input, Option<struct String> (*)(struct String) compiler){
 	/* return compileAll */(divideAll(input, __lambda13__), compiler, __lambda14__);
 }
 /* private *//* static State */ divideValueChar(struct State state, struct Character c){
@@ -606,10 +614,29 @@ auto __lambda15__(auto value){
             if (genStart >= 0) {
                 String base = withoutEnd.substring(0, genStart).strip();
                 String oldArguments = withoutEnd.substring(genStart + "<".length());
-                return compileValues(oldArguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
+                List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
+                return parseAll(segments, Main::compileType).map(newArguments -> {
+                    if (base.equals("Function")) {
+                        return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                    }
+
+                    if (base.equals("Consumer")) {
+                        return generateFunctionalType("void", Lists.of(newArguments.get(0)));
+                    }
+
+                    if (base.equals("Supplier")) {
+                        return generateFunctionalType(newArguments.get(0), Lists.empty());
+                    }
+
+                    return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">";
+                });
             }
         } */
 	/* return new Some<> */(invalidate("type", stripped));
+}
+/* private *//* static String */ generateFunctionalType(struct String returns, List_<struct String> newArguments){
+	struct String joined = newArguments.stream().collect(/* new Joiner */(", ")).orElse("");/* 
+        return returns + " (*)(" + joined + ")"; */
 }
 /* private *//* static boolean */ isSymbol(struct String input){
 	/* for *//* (int */ i = /*  0 */;

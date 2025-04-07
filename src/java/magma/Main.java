@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -48,6 +49,8 @@ public class Main {
         T popFirst();
 
         boolean isEmpty();
+
+        T get(int index);
     }
 
     private interface Stream_<T> {
@@ -177,11 +180,20 @@ public class Main {
         public boolean isEmpty() {
             return inner.isEmpty();
         }
+
+        @Override
+        public T get(int index) {
+            return inner.get(index);
+        }
     }
 
     private static class Lists {
         public static <T> List_<T> empty() {
             return new JavaList<>();
+        }
+
+        public static <T> List_<T> of(T... elements) {
+            return new JavaList<>(Arrays.asList(elements));
         }
     }
 
@@ -346,6 +358,18 @@ public class Main {
         @Override
         public List_<T> fold(List_<T> current, T element) {
             return current.add(element);
+        }
+    }
+
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + delimiter + element).orElse(element));
         }
     }
 
@@ -782,11 +806,31 @@ public class Main {
             if (genStart >= 0) {
                 String base = withoutEnd.substring(0, genStart).strip();
                 String oldArguments = withoutEnd.substring(genStart + "<".length());
-                return compileValues(oldArguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
+                List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
+                return parseAll(segments, Main::compileType).map(newArguments -> {
+                    if (base.equals("Function")) {
+                        return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                    }
+
+                    if (base.equals("Consumer")) {
+                        return generateFunctionalType("void", Lists.of(newArguments.get(0)));
+                    }
+
+                    if (base.equals("Supplier")) {
+                        return generateFunctionalType(newArguments.get(0), Lists.empty());
+                    }
+
+                    return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">";
+                });
             }
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static String generateFunctionalType(String returns, List_<String> newArguments) {
+        String joined = newArguments.stream().collect(new Joiner(", ")).orElse("");
+        return returns + " (*)(" + joined + ")";
     }
 
     private static boolean isSymbol(String input) {
