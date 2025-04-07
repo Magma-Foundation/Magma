@@ -376,6 +376,7 @@ public class Main {
     private static final List_<String> imports = Lists.empty();
     private static final List_<String> structs = Lists.empty();
     private static final List_<String> functions = Lists.empty();
+    private static final List_<Tuple<String, List_<String>>> expansions = Lists.empty();
     private static List_<String> globals = Lists.empty();
     private static int lambdaCounter = 0;
 
@@ -414,11 +415,15 @@ public class Main {
         List_<String> segments = divideAll(input, Main::divideStatementChar);
         return parseAll(segments, Main::compileRootSegment)
                 .map(compiled -> {
-                    compiled.addAll(imports);
-                    compiled.addAll(structs);
-                    compiled.addAll(globals);
-                    compiled.addAll(functions);
-                    return compiled;
+                    List_<String> generated = expansions.stream()
+                            .map(tuple -> "// " + generateGeneric(tuple.left, tuple.right) + "\n")
+                            .collect(new ListCollector<>());
+
+                    return compiled.addAll(imports)
+                            .addAll(structs)
+                            .addAll(globals)
+                            .addAll(generated)
+                            .addAll(functions);
                 })
                 .map(compiled -> mergeAll(compiled, Main::mergeStatements))
                 .orElse("");
@@ -796,7 +801,7 @@ public class Main {
     private static Option<String> compileType(String type) {
         String stripped = type.strip();
         if (stripped.equals("void")) return new Some<>("void");
-        if (stripped.equals("boolean")) return new Some<>("int");
+        if (stripped.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 
         if (stripped.endsWith("[]"))
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
@@ -822,12 +827,19 @@ public class Main {
                         return generateFunctionalType(newArguments.get(0), Lists.empty());
                     }
 
-                    return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">";
+                    expansions.add(new Tuple<>(base, newArguments));
+
+                    String joined = newArguments.stream().collect(new Joiner("_")).orElse("");
+                    return base + "__" + String.join("_", joined) + "__";
                 });
             }
         }
 
         return new Some<>(invalidate("type", stripped));
+    }
+
+    private static String generateGeneric(String base, List_<String> newArguments) {
+        return base + "<" + mergeAll(newArguments, Main::mergeValues) + ">";
     }
 
     private static String generateFunctionalType(String returns, List_<String> newArguments) {
