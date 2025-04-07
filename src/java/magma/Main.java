@@ -57,6 +57,10 @@ public class Main {
         T get(int index);
 
         int size();
+
+        T last();
+
+        Stream_<Tuple<Integer, T>> streamWithIndices();
     }
 
     private interface Stream_<T> {
@@ -77,6 +81,8 @@ public class Main {
         Option<T> next();
 
         boolean allMatch(Predicate<T> predicate);
+
+        Stream_<T> filter(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -183,6 +189,11 @@ public class Main {
         public boolean allMatch(Predicate<T> predicate) {
             return this.foldWithInitial(true, (aBoolean, t) -> aBoolean && predicate.test(t));
         }
+
+        @Override
+        public Stream_<T> filter(Predicate<T> predicate) {
+            return flatMap(value -> new HeadedStream<>(predicate.test(value) ? new SingleHead<>(value) : new EmptyHead<>()));
+        }
     }
 
     private record JavaList<T>(List<T> inner) implements List_<T> {
@@ -209,7 +220,7 @@ public class Main {
 
         @Override
         public Stream_<T> stream() {
-            return new HeadedStream<>(new RangeHead(inner.size())).map(inner::get);
+            return streamWithIndices().map(Tuple::right);
         }
 
         @Override
@@ -231,6 +242,16 @@ public class Main {
         public int size() {
             return inner.size();
         }
+
+        @Override
+        public T last() {
+            return inner.getLast();
+        }
+
+        @Override
+        public Stream_<Tuple<Integer, T>> streamWithIndices() {
+            return new HeadedStream<>(new RangeHead(inner.size())).map(index -> new Tuple<>(index, inner.get(index)));
+        }
     }
 
     private static class Lists {
@@ -251,6 +272,13 @@ public class Main {
 
             return new HeadedStream<>(new RangeHead(elements.size()))
                     .allMatch(index -> equator.apply(elements.get(index), other.get(index)));
+        }
+
+        public static <T> Option<Integer> indexOf(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
+            return list.streamWithIndices()
+                    .filter(tuple -> equator.apply(tuple.right, element))
+                    .next()
+                    .map(Tuple::left);
         }
     }
 
@@ -701,7 +729,7 @@ public class Main {
         if (!body.endsWith("}")) return new None<>();
 
         String inputContent = body.substring(0, body.length() - "}".length());
-        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged))
+        return compileStatements(inputContent, input1 -> compileClassSegment(input1, merged, typeArguments))
                 .map(outputContent -> generateStruct(modifiers, name, outputContent));
     }
 
@@ -719,7 +747,7 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams) {
+    private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (input.isBlank()) return new Some<>("");
 
         Option<String> maybeInterface = compileTypedBlock(input, "interface ", typeParams);
@@ -730,10 +758,10 @@ public class Main {
             return new Some<>(generateStruct("", "Temp", ""));
         }
 
-        Option<String> maybeMethod = compileMethod(input, typeParams);
+        Option<String> maybeMethod = compileMethod(input, typeParams, typeArguments);
         if (maybeMethod.isPresent()) return maybeMethod;
 
-        Option<String> maybeAssignment = compileAssignment(input, typeParams);
+        Option<String> maybeAssignment = compileAssignment(input, typeParams, typeArguments);
         if (maybeAssignment.isPresent()) {
             globals = maybeAssignment.map(value -> value + ";\n")
                     .map(globals::add)
@@ -745,7 +773,7 @@ public class Main {
         return new Some<>(invalidate("class segment", input));
     }
 
-    private static Option<String> compileMethod(String input, List_<List_<String>> typeParams) {
+    private static Option<String> compileMethod(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return new None<>();
 
@@ -757,14 +785,14 @@ public class Main {
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams)).flatMap(outputParams -> {
-            return compileDefinition(header, typeParams).flatMap(definition -> {
+        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
+            return compileDefinition(header, typeParams, typeArguments).flatMap(definition -> {
                 String string = generateInvokable(definition, outputParams);
 
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
                     return new Some<>(generateStatement(string));
 
-                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams)).map(statement -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> {
                     return addFunction(statement, string);
                 });
             });
@@ -799,14 +827,14 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static Option<String> compileStatement(String input, List_<List_<String>> typeParams) {
+    private static Option<String> compileStatement(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         if (stripped.isEmpty()) return new Some<>("");
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams);
+            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams, typeArguments);
             if (maybeAssignment.isPresent()) return maybeAssignment;
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
@@ -816,13 +844,13 @@ public class Main {
         return new Some<>(invalidate("statement", input));
     }
 
-    private static Option<String> compileAssignment(String input, List_<List_<String>> typeParams) {
+    private static Option<String> compileAssignment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         int separator = input.indexOf("=");
         if (separator < 0) return new None<>();
 
         String inputDefinition = input.substring(0, separator);
         String inputValue = input.substring(separator + "=".length());
-        return compileDefinition(inputDefinition, typeParams).flatMap(outputDefinition -> {
+        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
             return compileValue(inputValue).map(outputValue -> {
                 return generateStatement(outputDefinition + " = " + outputValue);
             });
@@ -921,7 +949,7 @@ public class Main {
         return caller + "(" + arguments + ")";
     }
 
-    private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams) {
+    private static Option<String> compileDefinition(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -952,7 +980,7 @@ public class Main {
 
             String name = stripped.substring(nameSeparator + " ".length());
 
-            return compileType(inputType, typeParams).map(outputType -> {
+            return compileType(inputType, typeParams, typeArguments).map(outputType -> {
                 return generateDefinition(modifiers, outputType, name);
             });
         }
@@ -964,18 +992,24 @@ public class Main {
         return modifiers + type + " " + name;
     }
 
-    private static Option<String> compileType(String type, List_<List_<String>> frames) {
+    private static Option<String> compileType(String type, List_<List_<String>> frames, List_<String> typeArguments) {
         String stripped = type.strip();
 
         if (isTypeParam(frames, stripped)) {
-            return new Some<>(stripped);
+            List_<String> last = frames.last();
+            return Lists.indexOf(last, stripped, String::equals).map(index -> {
+                String argument = typeArguments.get(index);
+                return new Some<>(argument);
+            }).orElseGet(() -> {
+                return new Some<>(stripped);
+            });
         }
 
         if (stripped.equals("void")) return new Some<>("void");
         if (stripped.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 
         if (stripped.endsWith("[]"))
-            return compileType(stripped.substring(0, stripped.length() - "[]".length()), frames).map(value -> value + "*");
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()), frames, typeArguments).map(value -> value + "*");
 
         if (isSymbol(stripped)) return new Some<>("struct " + stripped);
         if (stripped.endsWith(">")) {
@@ -986,7 +1020,7 @@ public class Main {
                 if (isSymbol(base)) {
                     String oldArguments = withoutEnd.substring(genStart + "<".length());
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                    return parseAll(segments, type1 -> compileType(type1, frames)).map(newArguments -> {
+                    return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
                         if (base.equals("Function")) {
                             return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
                         }

@@ -27,7 +27,7 @@ struct Temp {
 };
 struct Temp {
 };
-/* private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams) {
+/* private static Option<String> compileClassSegment(String input, List_<List_<String>> typeParams, List_<String> typeArguments) {
         if (input.isBlank()) return new Some<>("");
 
         Option<String> maybeInterface = compileTypedBlock(input, " */ struct ", typeParams);
@@ -38,7 +38,7 @@ struct Temp {
 	/* return */struct new Some<>(/* generateStruct("", *//* "Temp", */ "");
 	/* }
 
- *//* Option<String> maybeMethod = */ compileMethod(/* input */, /* typeParams */);
+ *//* Option<String> maybeMethod = */ compileMethod(/* input */, /* typeParams */, /* typeArguments */);
 	/* return */struct new Some<>(/* "" */);
 	/* }
 
@@ -54,14 +54,14 @@ struct Temp {
 	/* private *//* static List_<String> globals = */ Lists.empty(/*  */);
 };
 /* private sealed */ struct Option__struct String__ {
-	void ifPresent(void (*)(T) ifPresent);
-	/* <R> */Option__struct R__ flatMap(Option__struct R__ (*)(T) mapper);
-	/* <R> */Option__struct R__ map(struct R (*)(T) mapper);
-	T orElse(T other);
+	void ifPresent(void (*)(struct String) ifPresent);
+	/* <R> */Option__struct R__ flatMap(Option__struct R__ (*)(struct String) mapper);
+	/* <R> */Option__struct R__ map(struct R (*)(struct String) mapper);
+	struct String orElse(struct String other);
 	int isPresent(/*  */);
-	Tuple__int_T__ toTuple(T other);
-	T orElseGet(T (*)() other);
-	Option__T__ or(Option__T__ (*)() other);
+	Tuple__int_struct String__ toTuple(struct String other);
+	struct String orElseGet(struct String (*)() other);
+	Option__struct String__ or(Option__struct String__ (*)() other);
 	int isEmpty(/*  */);
 };
 
@@ -92,6 +92,12 @@ auto __lambda0__(auto child){
 auto __lambda1__(auto index){
 	return equator.apply(elements.get(index);
 }
+auto __lambda2__(auto tuple){
+	return Tuple.left(tuple);
+}
+auto __lambda3__(auto tuple){
+	return equator.apply(tuple.right;
+}
 /* private *//* static class Lists {
         public static <T> List_<T> */ empty(/*  */){
 	/* return new JavaList<> */();
@@ -107,7 +113,11 @@ auto __lambda1__(auto index){
 
  *//* public static <T> boolean equalsTo(List_<T> elements, List_<T> other, BiFunction<T, T, Boolean> equator) {
             if (elements.size() */ ! = other.size()) return false;
-	/* return new HeadedStream<> */(/* new RangeHead */(elements.size())).allMatch(__lambda1__, other.get(index)));/* 
+	/* return new HeadedStream<> */(/* new RangeHead */(elements.size())).allMatch(__lambda1__, other.get(index)));
+	/* }
+
+        public static <T> Option<Integer> indexOf(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
+            return list */.streamWithIndices().filter(__lambda3__, /*  element) */).next().map(__lambda2__);/* 
         }
      */
 }
@@ -223,18 +233,18 @@ auto __lambda1__(auto index){
         }
      */
 }
-auto __lambda2__(auto value){
+auto __lambda4__(auto value){
 	return value.charAt(value);
 }
-auto __lambda3__(auto emptyhead){
+auto __lambda5__(auto emptyhead){
 	return EmptyHead.new(emptyhead);
 }
-auto __lambda4__(auto singlehead){
+auto __lambda6__(auto singlehead){
 	return SingleHead.new(singlehead);
 }
 /* private *//* static class Streams {
         public static Stream_<Character> */ from(struct String value){
-	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda2__);
+	/* return new HeadedStream<> */(/* new RangeHead */(value.length())).map(__lambda4__);
 	/* }
 
         public static <T> Stream_<T> empty() {
@@ -242,7 +252,7 @@ auto __lambda4__(auto singlehead){
 	/* }
 
         public static <T> Stream_<T> fromOption(Option<T> option) {
-            return new HeadedStream<> */(option.<Head<T>>map(__lambda4__).orElseGet(__lambda3__));/* 
+            return new HeadedStream<> */(option.<Head<T>>map(__lambda6__).orElseGet(__lambda5__));/* 
         }
      */
 }
@@ -281,18 +291,18 @@ auto __lambda4__(auto singlehead){
         }
      */
 }
-auto __lambda5__(auto throwable){
+auto __lambda7__(auto throwable){
 	return Throwable.printStackTrace(throwable);
 }
-auto __lambda6__(auto input){
+auto __lambda8__(auto input){
 	return /*  runWithInput(source */;
 }
-auto __lambda7__(auto /* input), some */){
+auto __lambda9__(auto /* input), some */){
 	return /* input), Some */.new(/* input), some */);
 }
 /* public *//* static void */ main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(__lambda6__, __lambda7__).ifPresent(__lambda5__);
+	readString(source).match(__lambda8__, __lambda9__).ifPresent(__lambda7__);
 }
 /* private *//* static Option<IOException> */ runWithInput(struct Path source, struct String input){
 	struct String output = /*  compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n" */;
@@ -314,24 +324,24 @@ auto __lambda7__(auto /* input), some */){
             return new Err<>(e);
         } */
 }
-auto __lambda8__(auto main){
+auto __lambda10__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda9__(auto compiled){
+auto __lambda11__(auto compiled){
 	return /*  mergeAll(compiled */;
 }
-auto __lambda10__(auto main){
+auto __lambda12__(auto main){
 	return Main.mergeStatements)(main);
 }
-auto __lambda11__(auto main){
+auto __lambda13__(auto main){
 	return Main.generate(main);
 }
-auto __lambda12__(auto main){
+auto __lambda14__(auto main){
 	return Main.compileRootSegment(main);
 }
 /* private *//* static String */ compile(struct String input){
-	/* List_<String> */ segments = divideAll(input, __lambda8__);
-	/* return parseAll */(segments, __lambda12__).map(__lambda11__).map(__lambda9__, __lambda10__).orElse("");
+	/* List_<String> */ segments = divideAll(input, __lambda10__);
+	/* return parseAll */(segments, __lambda14__).map(__lambda13__).map(__lambda11__, __lambda12__).orElse("");
 }
 /* private *//* static List_<String> */ generate(/* List_<String> */ compiled){/* 
         while (!toExpand.isEmpty()) {
@@ -348,38 +358,38 @@ auto __lambda12__(auto main){
         } */
 	/* return compiled */.addAll(imports).addAll(structs).addAll(globals).addAll(functions);
 }
-auto __lambda13__(auto string){
+auto __lambda15__(auto string){
 	return String.equals(string);
 }
-auto __lambda14__(auto string){
+auto __lambda16__(auto string){
 	return String.equals))(string);
 }
 /* private *//* static boolean */ hasAlreadyBeenSeen(Tuple__struct String_/* List_<String> */__ tuple){
-	/* return Lists */.contains(expanded, tuple, /* (entry, entry0) -> Tuples */.equalsTo(entry, /*  entry0 */, __lambda13__, /* (list, list0) -> Lists */.equalsTo(list, /*  list0 */, __lambda14__);
+	/* return Lists */.contains(expanded, tuple, /* (entry, entry0) -> Tuples */.equalsTo(entry, /*  entry0 */, __lambda15__, /* (list, list0) -> Lists */.equalsTo(list, /*  list0 */, __lambda16__);
 }
-auto __lambda15__(auto main){
+auto __lambda17__(auto main){
 	return Main.divideStatementChar(main);
 }
-auto __lambda16__(auto main){
+auto __lambda18__(auto main){
 	return Main.mergeStatements(main);
 }
 /* private *//* static Option<String> */ compileStatements(struct String input, Option__struct String__ (*)(struct String) compiler){
-	/* return compileAll */(divideAll(input, __lambda15__), compiler, __lambda16__);
+	/* return compileAll */(divideAll(input, __lambda17__), compiler, __lambda18__);
 }
-auto __lambda17__(auto compiled){
+auto __lambda19__(auto compiled){
 	return /*  mergeAll(compiled */;
 }
 /* private *//* static Option<String> */ compileAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler, struct StringBuilder (*)(struct StringBuilder, struct String) merger){
-	/* return parseAll */(segments, compiler).map(__lambda17__, /*  merger) */);
+	/* return parseAll */(segments, compiler).map(__lambda19__, /*  merger) */);
 }
 /* private *//* static String */ mergeAll(/* List_<String> */ compiled, struct StringBuilder (*)(struct StringBuilder, struct String) merger){
 	/* return compiled */.stream().foldWithInitial(/* new StringBuilder */(), merger).toString();
 }
-auto __lambda18__(auto compiled){
+auto __lambda20__(auto compiled){
 	return compiled.add(compiled);
 }
 /* private *//* static Option<List_<String>> */ parseAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler){
-	/* return segments */.stream().foldToOption(Lists.empty(), /* (compiled, segment) -> compiler */.apply(segment).map(__lambda18__));
+	/* return segments */.stream().foldToOption(Lists.empty(), /* (compiled, segment) -> compiler */.apply(segment).map(__lambda20__));
 }
 /* private *//* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
@@ -457,7 +467,7 @@ auto __lambda18__(auto compiled){
             return compileToStruct(modifiers, withoutPermits, body, typeParams, Lists.empty(), Lists.empty());
         } *//* ); */
 }
-auto __lambda19__(auto string){
+auto __lambda21__(auto string){
 	return String.strip(string);
 }
 /* private *//* static Option<String> */ compileGenericTypedBlock(struct String withoutPermits, struct String modifiers, struct String body, /* List_<List_<String>> */ typeParams){
@@ -467,7 +477,7 @@ auto __lambda19__(auto string){
 	/* if (genStart < 0) return new None<> */();
 	struct String name = withoutEnd.substring(/* 0 */, genStart);
 	struct String substring = withoutEnd.substring(/* genStart + "<" */.length());
-	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda19__).collect(/* new ListCollector<> */());/* 
+	/* List_<String> */ finalClassTypeParams = Lists.of(substring.split(Pattern.quote(","))).stream().map(__lambda21__).collect(/* new ListCollector<> */());/* 
 
         generators.put(name, typeArguments -> {
             String joined = generateGenericName(name, typeArguments);
@@ -475,14 +485,14 @@ auto __lambda19__(auto string){
         } *//* ); */
 	/* return new Some<> */("");
 }
-auto __lambda20__(auto outputContent){
+auto __lambda22__(auto outputContent){
 	return /*  generateStruct(modifiers */;
 }
 /* private *//* static Option<String> */ compileToStruct(struct String modifiers, struct String name, struct String body, /* List_<List_<String>> */ outerTypeParams, /* List_<String> */ innerTypeParams, /* List_<String> */ typeArguments){
 	/* List_<List_<String>> */ merged = outerTypeParams.add(innerTypeParams);
 	/* if (!body */.endsWith("}")) return new None<>();
 	struct String inputContent = body.substring(/* 0 */, body.length() - "}".length());
-	/* return compileStatements */(inputContent, /*  input1 -> compileClassSegment(input1 */, /*  merged) */).map(__lambda20__, name, /*  outputContent) */);
+	/* return compileStatements */(inputContent, /*  input1 -> compileClassSegment(input1 */, merged, /*  typeArguments) */).map(__lambda22__, name, /*  outputContent) */);
 }
 /* private *//* static String */ generateStruct(struct String modifiers, struct String name, struct String content){
 	struct String modifiersString = modifiers.isEmpty() ? "" : generatePlaceholder(modifiers) + " ";
@@ -496,7 +506,7 @@ auto __lambda20__(auto outputContent){
 	System.err.println(/* "Invalid " + type + ": " + input */);
 	/* return generatePlaceholder */(input);
 }
-/* private *//* static Option<String> */ compileMethod(struct String input, /* List_<List_<String>> */ typeParams){
+/* private *//* static Option<String> */ compileMethod(struct String input, /* List_<List_<String>> */ typeParams, /* List_<String> */ typeArguments){
 	struct int paramStart = input.indexOf("(");
 	/* if (paramStart < 0) return new None<> */();
 	struct String header = input.substring(/* 0 */, paramStart).strip();
@@ -506,14 +516,14 @@ auto __lambda20__(auto outputContent){
 	struct String paramString = withParams.substring(/* 0 */, paramEnd);
 	struct String withBody = withParams.substring(paramEnd + ")".length()).strip();/* 
 
-        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams)).flatMap(outputParams -> {
-            return compileDefinition(header, typeParams).flatMap(definition -> {
+        return compileValues(paramString, input1 -> compileDefinition(input1, typeParams, typeArguments)).flatMap(outputParams -> {
+            return compileDefinition(header, typeParams, typeArguments).flatMap(definition -> {
                 String string = generateInvokable(definition, outputParams);
 
                 if (!withBody.startsWith("{") || !withBody.endsWith("}"))
                     return new Some<>(generateStatement(string));
 
-                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams)).map(statement -> {
+                return compileStatements(withBody.substring(1, withBody.length() - 1), input1 -> compileStatement(input1, typeParams, typeArguments)).map(statement -> {
                     return addFunction(statement, string);
                 });
             });
@@ -527,14 +537,14 @@ auto __lambda20__(auto outputContent){
 /* private *//* static String */ generateInvokable(struct String definition, struct String params){/* 
         return definition + "(" + params + ")"; */
 }
-auto __lambda21__(auto main){
+auto __lambda23__(auto main){
 	return Main.divideValueChar(main);
 }
-auto __lambda22__(auto main){
+auto __lambda24__(auto main){
 	return Main.mergeValues(main);
 }
 /* private *//* static Option<String> */ compileValues(struct String input, Option__struct String__ (*)(struct String) compiler){
-	/* return compileAll */(divideAll(input, __lambda21__), compiler, __lambda22__);
+	/* return compileAll */(divideAll(input, __lambda23__), compiler, __lambda24__);
 }
 /* private *//* static State */ divideValueChar(struct State state, struct Character c){
 	struct if (c = /* = ',' && state */.isLevel()) return state.advance();
@@ -547,14 +557,14 @@ auto __lambda22__(auto main){
 	/* if (buffer */.isEmpty()) return buffer.append(element);
 	/* return buffer */.append(", ").append(element);
 }
-/* private *//* static Option<String> */ compileStatement(struct String input, /* List_<List_<String>> */ typeParams){
+/* private *//* static Option<String> */ compileStatement(struct String input, /* List_<List_<String>> */ typeParams, /* List_<String> */ typeArguments){
 	struct String stripped = input.strip();
 	/* if (stripped */.isEmpty()) return new Some<>("");/* 
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 
-            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams);
+            Option<String> maybeAssignment = compileAssignment(withoutEnd, typeParams, typeArguments);
             if (maybeAssignment.isPresent()) return maybeAssignment;
 
             Option<String> maybeInvocation = compileInvocation(withoutEnd);
@@ -562,12 +572,12 @@ auto __lambda22__(auto main){
         } */
 	/* return new Some<> */(invalidate("statement", input));
 }
-/* private *//* static Option<String> */ compileAssignment(struct String input, /* List_<List_<String>> */ typeParams){
+/* private *//* static Option<String> */ compileAssignment(struct String input, /* List_<List_<String>> */ typeParams, /* List_<String> */ typeArguments){
 	struct int separator = input.indexOf("=");
 	/* if (separator < 0) return new None<> */();
 	struct String inputDefinition = input.substring(/* 0 */, separator);
 	struct String inputValue = input.substring(/* separator + "=" */.length());/* 
-        return compileDefinition(inputDefinition, typeParams).flatMap(outputDefinition -> {
+        return compileDefinition(inputDefinition, typeParams, typeArguments).flatMap(outputDefinition -> {
             return compileValue(inputValue).map(outputValue -> {
                 return generateStatement(outputDefinition + " = " + outputValue);
             });
@@ -652,7 +662,7 @@ auto __lambda22__(auto main){
 /* private *//* static String */ generateInvocation(struct String caller, struct String arguments){/* 
         return caller + "(" + arguments + ")"; */
 }
-/* private *//* static Option<String> */ compileDefinition(struct String input, /* List_<List_<String>> */ typeParams){
+/* private *//* static Option<String> */ compileDefinition(struct String input, /* List_<List_<String>> */ typeParams, /* List_<String> */ typeArguments){
 	struct String stripped = input.strip();
 	struct int nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
@@ -683,7 +693,7 @@ auto __lambda22__(auto main){
 
             String name = stripped.substring(nameSeparator + " ".length());
 
-            return compileType(inputType, typeParams).map(outputType -> {
+            return compileType(inputType, typeParams, typeArguments).map(outputType -> {
                 return generateDefinition(modifiers, outputType, name);
             });
         } */
@@ -692,19 +702,25 @@ auto __lambda22__(auto main){
 /* private *//* static String */ generateDefinition(struct String modifiers, struct String type, struct String name){/* 
         return modifiers + type + " " + name; */
 }
-auto __lambda23__(auto value){
+auto __lambda25__(auto value){
 	return /*  value + "*" */;
 }
-/* private *//* static Option<String> */ compileType(struct String type, /* List_<List_<String>> */ frames){
+/* private *//* static Option<String> */ compileType(struct String type, /* List_<List_<String>> */ frames, /* List_<String> */ typeArguments){
 	struct String stripped = type.strip();/* 
 
         if (isTypeParam(frames, stripped)) {
-            return new Some<>(stripped);
+            List_<String> last = frames.last();
+            return Lists.indexOf(last, stripped, String::equals).map(index -> {
+                String argument = typeArguments.get(index);
+                return new Some<>(argument);
+            }).orElseGet(() -> {
+                return new Some<>(stripped);
+            });
         } */
 	/* if (stripped */.equals("void")) return new Some<>("void");
 	/* if (stripped */.equals("boolean") || stripped.equals("Boolean")) return new Some<>("int");
 	/* if (stripped */.endsWith("[]"))
-            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames).map(__lambda23__);
+            return compileType(stripped.substring(/* 0 */, stripped.length() - "[]".length()), frames, typeArguments).map(__lambda25__);
 	/* if (isSymbol(stripped)) return new Some<> */(/* "struct " + stripped */);/* 
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
@@ -714,7 +730,7 @@ auto __lambda23__(auto value){
                 if (isSymbol(base)) {
                     String oldArguments = withoutEnd.substring(genStart + "<".length());
                     List_<String> segments = divideAll(oldArguments, Main::divideValueChar);
-                    return parseAll(segments, type1 -> compileType(type1, frames)).map(newArguments -> {
+                    return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
                         if (base.equals("Function")) {
                             return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
                         }
@@ -758,11 +774,11 @@ auto __lambda23__(auto value){
 	struct String joined = newArguments.stream().collect(/* new Joiner */("_")).orElse("");/* 
         return base + "__" + String.join("_", joined) + "__"; */
 }
-auto __lambda24__(auto /* list_ */){
+auto __lambda26__(auto /* list_ */){
 	return /* List_ */.stream(/* list_ */);
 }
 /* private *//* static boolean */ hasNoTypeParams(/* List_<List_<String>> */ frames){
-	Option__struct String__ next = frames.stream().flatMap(__lambda24__).next();
+	Option__struct String__ next = frames.stream().flatMap(__lambda26__).next();
 	/* return next */.isEmpty();
 }
 /* private *//* static boolean */ isTypeParam(/* List_<List_<String>> */ frames, struct String stripped){/* 
