@@ -19,6 +19,7 @@
     private static final List<String> imports = new ArrayList<>(); *//* 
     private static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> functions = new ArrayList<>(); *//* 
+    private static final int lambdaCounter = 0; *//* 
         segments.add(buffer.toString()); *//* 
         return segments; *//* 
      *//* String modifiers = input.substring(0, keywordIndex); *//* 
@@ -74,13 +75,13 @@
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                    return generateFunction(definition, outputParams, statement);
+                    return addFunction(definition, outputParams, statement);
                 });
             });
         });
     } *//* 
 
-    private static String generateFunction(String definition, String params, String content) {
+    private static String addFunction(String definition, String params, String content) {
         String function = definition + "(" + params + "){" + content + "\n}\n";
         functions.add(function);
         return "";
@@ -145,6 +146,18 @@
             return Optional.of(stripped);
         }
 
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String paramName = stripped.substring(0, arrowIndex).strip();
+            String value = stripped.substring(arrowIndex + "->".length());
+            String lambda = "__lambda" + lambdaCounter + "__";
+            addFunction(generateDefinition("", "auto", lambda), generateDefinition("", "auto", paramName), "{\n\treturn " +
+                    value + ";\n" +
+                    "}");
+            
+            return Optional.of(lambda);
+        }
+
         return Optional.of(invalidate("value", input));
     } *//* 
 
@@ -195,10 +208,14 @@
             }
 
             String name = stripped.substring(nameSeparator + " ".length());
-            return Optional.of(modifiers + compileType(type) + " " + name);
+            return Optional.of(generateDefinition(modifiers, compileType(type), name));
         }
 
         return Optional.of(invalidate("definition", stripped));
+    } *//* 
+
+    private static String generateDefinition(String modifiers, String type, String name) {
+        return modifiers + type + " " + name;
     } *//* 
 
     private static String compileType(String type) {
@@ -255,9 +272,13 @@ public  */struct Main {
         int keywordIndex = input.indexOf(" */struct ");
         if (keywordIndex >= 0) {
 };
+auto __lambda0__(auto input){{
+	return  runWithInput(source;
+}
+}
 /* public static */void main(struct String* args){
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	readString(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
+	readString(source).match(__lambda0__, /*  input) */, /*  Optional::of */).ifPresent(/* Throwable::printStackTrace */);
 }
 /* private static *//* Optional<IOException> */ runWithInput(struct Path source, struct String input){/* 
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n} *//* \n"; */
@@ -279,6 +300,10 @@ public  */struct Main {
             return new Err<>(e);
         } */
 }
+auto __lambda0__(auto compiled){{
+	return  mergeAll(compiled;
+}
+}
 /* private static */struct String compile(struct String input){
 	/* List<String> */ segments = divideStatements(input);/* 
         return parseAll(segments, Main::compileRootSegment)
@@ -289,13 +314,17 @@ public  */struct Main {
                     return compiled;
                 } */
 	/* )
-                 */.map(/* compiled -> mergeAll(compiled */, /*  Main::mergeStatements) */).orElse("");
+                 */.map(__lambda0__, /*  Main::mergeStatements) */).orElse("");
 }
 /* private static *//* Optional<String> */ compileStatements(struct String input, /* Function<String */, /* Optional<String>> */ compiler){
 	/* return compileAll */(divideStatements(input), compiler, /*  Main::mergeStatements */);
 }
+auto __lambda0__(auto compiled){{
+	return  mergeAll(compiled;
+}
+}
 /* private static *//* Optional<String> */ compileAll(/* List<String> */ segments, /* Function<String */, /* Optional<String>> */ compiler, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
-	/* return parseAll */(segments, compiler).map(/* compiled -> mergeAll(compiled */, /*  merger) */);
+	/* return parseAll */(segments, compiler).map(__lambda0__, /*  merger) */);
 }
 /* private static */struct String mergeAll(/* List<String> */ compiled, /* BiFunction<StringBuilder */, /* String */, /* StringBuilder> */ merger){
 	struct StringBuilder output = /* new StringBuilder */();/* 

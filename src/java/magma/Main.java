@@ -34,6 +34,7 @@ public class Main {
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> functions = new ArrayList<>();
+    private static final int lambdaCounter = 0;
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -205,13 +206,13 @@ public class Main {
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
                 return compileStatements(withBody.substring(1, withBody.length() - 1), Main::compileStatement).map(statement -> {
-                    return generateFunction(definition, outputParams, statement);
+                    return addFunction(definition, outputParams, statement);
                 });
             });
         });
     }
 
-    private static String generateFunction(String definition, String params, String content) {
+    private static String addFunction(String definition, String params, String content) {
         String function = definition + "(" + params + "){" + content + "\n}\n";
         functions.add(function);
         return "";
@@ -276,6 +277,18 @@ public class Main {
             return Optional.of(stripped);
         }
 
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String paramName = stripped.substring(0, arrowIndex).strip();
+            String value = stripped.substring(arrowIndex + "->".length());
+            String lambda = "__lambda" + lambdaCounter + "__";
+            addFunction(generateDefinition("", "auto", lambda), generateDefinition("", "auto", paramName), "{\n\treturn " +
+                    value + ";\n" +
+                    "}");
+
+            return Optional.of(lambda);
+        }
+
         return Optional.of(invalidate("value", input));
     }
 
@@ -326,10 +339,14 @@ public class Main {
             }
 
             String name = stripped.substring(nameSeparator + " ".length());
-            return Optional.of(modifiers + compileType(type) + " " + name);
+            return Optional.of(generateDefinition(modifiers, compileType(type), name));
         }
 
         return Optional.of(invalidate("definition", stripped));
+    }
+
+    private static String generateDefinition(String modifiers, String type, String name) {
+        return modifiers + type + " " + name;
     }
 
     private static String compileType(String type) {
