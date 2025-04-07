@@ -105,9 +105,11 @@ public class Main {
     }
 
     private interface Rule {
-        void temp();
+        Result<Node, CompileError> parse(String input);
 
-        Result<String, CompileError> compile(ParseState state, String input);
+        Result<Node, CompileError> modify(ParseState state, Node input);
+
+        Result<String, CompileError> generate(Node input);
     }
 
     public interface Map_<K, V> {
@@ -676,46 +678,80 @@ public class Main {
     }
 
     private record TypeRule(String type, Rule childRule) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return childRule.compile(state, input).mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return childRule.parse(input)
+                    .flatMapValue(node -> childRule.modify(state, node))
+                    .flatMapValue(childRule::generate).mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record SuffixRule(Rule rule, String suffix) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             if (input.endsWith(suffix())) {
                 String slice = input.substring(0, input.length() - suffix().length());
-                return rule().compile(state, slice);
+                Rule rule1 = rule();
+                return rule1.parse(slice)
+                        .flatMapValue(node -> rule1.modify(state, node))
+                        .flatMapValue(rule1::generate);
             } else {
                 return new Err<>(new CompileError("Suffix '" + suffix() + "' not present", input));
             }
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record OrRule(List_<Rule> rules) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             return rules().stream()
-                    .foldWithInitial(new OrState(), (orState, rule) -> rule.compile(state, input).match(orState::withValue, orState::withError))
+                    .foldWithInitial(new OrState(), (orState, rule) -> rule.parse(input)
+                            .flatMapValue(node -> rule.modify(state, node))
+                            .flatMapValue(rule::generate).match(orState::withValue, orState::withError))
                     .toResult()
                     .mapErr(errors -> new CompileError("No valid combination present", input, errors));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -802,9 +838,13 @@ public class Main {
     }
 
     private record PrefixRule(String prefix, Rule childRule) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            if (input.startsWith(prefix())) return childRule().compile(state, input.substring(prefix().length()));
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            if (input.startsWith(prefix())) {
+                Rule rule = childRule();
+                return rule.parse(input.substring(this.prefix().length()))
+                        .flatMapValue(node -> rule.modify(state, node))
+                        .flatMapValue(rule::generate);
+            }
 
             String format = "Prefix '%s' not present";
             String message = format.formatted(prefix());
@@ -812,40 +852,70 @@ public class Main {
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record StripRule(Rule childRule) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state0, String input) {
+        private Result<String, CompileError> compile(ParseState state0, String input) {
             String stripped = input.strip();
-            return childRule().compile(state0, stripped);
+            Rule rule = childRule();
+            return rule.parse(stripped)
+                    .flatMapValue(node -> rule.modify(state0, node))
+                    .flatMapValue(rule::generate);
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class EmptyRule implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             if (input.isEmpty()) return new Ok<>("");
             else return new Err<>(new CompileError("Not empty", input));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record TypedBlockRule(String keyword) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
 
             int classIndex = input.indexOf(keyword);
             if (classIndex < 0) return createInfixRule(input, keyword);
@@ -873,13 +943,26 @@ public class Main {
             return compileTypedBlockBody(state, modifiers, withoutParams, body)
                     .orElseGet(() -> {
                         ParseState defined = state.define(Lists.empty());
-                        return createStructRule(modifiers, withoutParams).compile(defined, body);
+                        Rule rule = createStructRule(modifiers, withoutParams);
+                        return rule.parse(body)
+                                .flatMapValue(node -> rule.modify(defined, node))
+                                .flatMapValue(rule::generate);
                     });
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -889,21 +972,32 @@ public class Main {
             Merger merger
     ) implements Rule {
         private static Result<List_<String>, CompileError> parseAll(ParseState state, List_<String> segments, Rule compiler) {
-            return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.compile(state, segment).mapValue(compiled::add));
+            return segments.stream().foldToResult(Lists.empty(), (compiled, segment) -> compiler.parse(segment)
+                    .flatMapValue(node -> compiler.modify(state, node))
+                    .flatMapValue(compiler::generate).mapValue(compiled::add));
         }
 
         private static String mergeAll(List_<String> compiled, Merger merger) {
             return compiled.stream().foldWithInitial(new StringBuilder(), merger::apply).toString();
         }
 
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             return parseAll(state, divider.divide(input), compiler).mapValue(compiled -> mergeAll(compiled, merger()));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -915,14 +1009,23 @@ public class Main {
     }
 
     private record EqualsRule(String value) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             return input.equals(value) ? new Ok<>(input) : new Err<>(new CompileError("Not equal to '" + value + "'", input));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -951,33 +1054,55 @@ public class Main {
     }
 
     public static class StringRule implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             return new Ok<String, CompileError>(input);
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record FilterRule(Filter filter, Rule childRule) implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            if (filter().qualifies(input)) return childRule().compile(state, input);
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            if (filter().qualifies(input)) {
+                Rule rule = childRule();
+                return rule.parse(input)
+                        .flatMapValue(node -> rule.modify(state, node))
+                        .flatMapValue(rule::generate);
+            }
             return new Err<>(new CompileError(filter().createErrorMessage(), input));
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class GenericRule implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             String stripped = input.strip();
             if (!stripped.endsWith(">")) return new Err<>(new CompileError("Suffix '>' not present", stripped));
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
@@ -1018,14 +1143,23 @@ public class Main {
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class TypeParamRule implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
 
             String stripped = input.strip();
             if (!state.isTypeParam(stripped))
@@ -1035,31 +1169,46 @@ public class Main {
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class PackageRule implements Rule {
-        @Override
-        public void temp() {
 
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class ImportSegmentRule implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             List_<String> slices = divideByChar(input, '.');
             if (isFunctionalImport(slices)) return new Ok<>("");
 
@@ -1067,6 +1216,21 @@ public class Main {
             String value = "#include \"./%s.h\"\n".formatted(joined);
             imports = imports.add(value);
             return new Ok<>("");
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -1079,35 +1243,61 @@ public class Main {
             this.name = name;
         }
 
-        @Override
-        public void temp() {
+        private Result<String, CompileError> compile(ParseState state0, String inputContent) {
+            Rule rule = createStatementsRule(createClassSegmentRule());
+            return rule.parse(inputContent)
+                    .flatMapValue(node -> rule.modify(state0, node))
+                    .flatMapValue(rule::generate).mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state0, String inputContent) {
-            return createStatementsRule(createClassSegmentRule()).compile(state0, inputContent).mapValue(outputContent -> generateStruct(modifiers, name, outputContent));
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = new DefinitionRule();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(Main::generateStatement);
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new DefinitionRule().compile(state, input).mapValue(Main::generateStatement);
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule0 implements Rule {
-        @Override
-        public void temp() {
-        }
 
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new MyRule7().compile(state, input)
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = new MyRule7();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate)
                     .mapValue(value -> value + ";\n")
                     .mapValue(globals::add)
                     .mapValue(result -> {
@@ -1115,16 +1305,26 @@ public class Main {
                         return "";
                     });
         }
-    }
 
-    public static class DefinitionRule implements Rule {
         @Override
-        public void temp() {
-
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
+        }
+    }
+
+    public static class DefinitionRule implements Rule {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
             String stripped = input.strip();
             if (stripped.isEmpty()) return new Ok<String, CompileError>("");
 
@@ -1136,174 +1336,333 @@ public class Main {
             return Main.compileBeforeName(state, beforeName)
                     .flatMapValue(node -> Main.generateDefinition(node.withString("name", name)));
         }
-    }
 
-    private static class ArrayRule implements Rule {
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return createTypeRule().compile(state, input).mapValue(value -> value + "*");
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
+        }
+    }
+
+    private static class ArrayRule implements Rule {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = createTypeRule();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(value -> value + "*");
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule2 implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = new OrRule(Lists.of(
+                    new EqualsRule("boolean"),
+                    new EqualsRule("Bool")
+            ));
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(_ -> "int");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new OrRule(Lists.of(
-                    new EqualsRule("boolean"),
-                    new EqualsRule("Bool")
-            )).compile(state, input).mapValue(_ -> "int");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class PostFixRule implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\ttemp++;");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("\n\ttemp++;");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class ElseRule implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\telse {\n\t}\n");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("\n\telse {\n\t}\n");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class ForRule implements Rule {
-        @Override
-        public void temp() {
 
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\tfor (;;) {\n\t}\n");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("\n\tfor (;;) {\n\t}\n");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class WhileRule implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\twhile (1) {\n\t}\n");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("\n\twhile (1) {\n\t}\n");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class IfRule implements Rule {
-        @Override
-        public void temp() {
 
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("\n\tif (1) {\n\t}\n");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("\n\tif (1) {\n\t}\n");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule3 implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = createValueRule();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate)
+                    .mapValue(inner -> "return " + inner)
+                    .mapValue(Main::generateStatement);
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return createValueRule().compile(state, input)
-                    .mapValue(inner -> "return " + inner)
-                    .mapValue(Main::generateStatement);
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule4 implements Rule {
-        @Override
-        public void temp() {
-        }
 
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             return new Ok<String, CompileError>(input)
                     .mapValue(value -> "\"" + value)
                     .mapValue(value -> value + "\"");
         }
-    }
 
-    private static class MyRule5 implements Rule {
         @Override
-        public void temp() {
-
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String withoutEnd) {
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
+        }
+    }
+
+    private static class MyRule5 implements Rule {
+
+        private Result<String, CompileError> compile(ParseState state, String withoutEnd) {
             int argsStart = findArgStart(withoutEnd);
             if (argsStart < 0) return new Err<>(new CompileError("Argument start not found", withoutEnd));
 
             String inputCaller = withoutEnd.substring(0, argsStart);
             String inputArguments = withoutEnd.substring(argsStart + 1);
             return compileAllValues(state, inputArguments).flatMapValue(
-                    outputValues -> createValueRule().compile(state, inputCaller).mapValue(
-                            outputCaller -> generateInvocation(outputCaller, outputValues)));
+                    outputValues -> {
+                        Rule rule = createValueRule();
+                        return rule.parse(inputCaller)
+                                .flatMapValue(node -> rule.modify(state, node))
+                                .flatMapValue(rule::generate).mapValue(
+                                        outputCaller -> generateInvocation(outputCaller, outputValues));
+                    });
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule6 implements Rule {
-        @Override
-        public void temp() {
 
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            return new Ok<>("'" + input + "'");
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return new Ok<>("'" + input + "'");
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule7 implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             int separator = input.indexOf("=");
             if (separator < 0) return createInfixRule(input, "=");
 
             String inputDefinition = input.substring(0, separator);
             String inputValue = input.substring(separator + "=".length());
-            return new DefinitionRule().compile(state, inputDefinition).flatMapValue(
-                    outputDefinition -> createValueRule().compile(state, inputValue).mapValue(
-                            outputValue -> generateStatement(outputDefinition + " = " + outputValue)));
+            Rule rule1 = new DefinitionRule();
+            return rule1.parse(inputDefinition)
+                    .flatMapValue(node1 -> rule1.modify(state, node1))
+                    .flatMapValue(rule1::generate).flatMapValue(
+                            outputDefinition -> {
+                                Rule rule = createValueRule();
+                                return rule.parse(inputValue)
+                                        .flatMapValue(node -> rule.modify(state, node))
+                                        .flatMapValue(rule::generate).mapValue(
+                                                outputValue -> generateStatement(outputDefinition + " = " + outputValue));
+                            });
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule8 implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String slice) {
+        private Result<String, CompileError> compile(ParseState state, String slice) {
             int paramStart = slice.indexOf("(");
 
             String rawCaller = slice.substring(0, paramStart).strip();
@@ -1312,39 +1671,91 @@ public class Main {
                     : rawCaller;
 
             String inputArguments = slice.substring(paramStart + "(".length());
-            return compileAllValues(state, inputArguments).flatMapValue(arguments -> createTypeRule().compile(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+            return compileAllValues(state, inputArguments).flatMapValue(arguments -> {
+                Rule rule = createTypeRule();
+                return rule.parse(caller)
+                        .flatMapValue(node -> rule.modify(state, node))
+                        .flatMapValue(rule::generate).mapValue(type -> type + "(" + arguments + ")");
+            });
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule9 implements Rule {
-        @Override
-        public void temp() {
+
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = createValueRule();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(result -> "!" + result);
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return createValueRule().compile(state, input).mapValue(result -> "!" + result);
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule10 implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             int valueSeparator = input.indexOf("=");
             if (valueSeparator < 0) return createInfixRule(input, "=");
 
             String destination = input.substring(0, valueSeparator).strip();
             String value = input.substring(valueSeparator + "=".length()).strip();
 
-            return createValueRule().compile(state, destination)
-                    .and(() -> createValueRule().compile(state, value))
+            Rule rule1 = createValueRule();
+            return rule1.parse(destination)
+                    .flatMapValue(node1 -> rule1.modify(state, node1))
+                    .flatMapValue(rule1::generate)
+                    .and(() -> {
+                        Rule rule = createValueRule();
+                        return rule.parse(value)
+                                .flatMapValue(node -> rule.modify(state, node))
+                                .flatMapValue(rule::generate);
+                    })
                     .mapValue(tuple -> tuple.left + " = " + tuple.right)
                     .mapValue(Main::generateStatement);
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -1361,8 +1772,7 @@ public class Main {
     }
 
     private static class MyRule11 implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             int arrowIndex = input.indexOf("->");
             if (arrowIndex < 0) return createInfixRule(input, "->");
 
@@ -1376,13 +1786,23 @@ public class Main {
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class TernaryRule implements Rule {
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
 
             String stripped = input.strip();
             int ternaryIndex = stripped.indexOf("?");
@@ -1395,26 +1815,44 @@ public class Main {
 
             String ifTrue = cases.substring(0, caseIndex).strip();
             String ifFalse = cases.substring(caseIndex + ":".length()).strip();
-            return createValueRule().compile(state, condition)
-                    .and(() -> createValueRule().compile(state, ifTrue))
-                    .and(() -> createValueRule().compile(state, ifFalse))
+            Rule rule1 = createValueRule();
+            return rule1.parse(condition)
+                    .flatMapValue(node1 -> rule1.modify(state, node1))
+                    .flatMapValue(rule1::generate)
+                    .and(() -> {
+                        Rule rule = createValueRule();
+                        return rule.parse(ifTrue)
+                                .flatMapValue(node -> rule.modify(state, node))
+                                .flatMapValue(rule::generate);
+                    })
+                    .and(() -> {
+                        Rule rule = createValueRule();
+                        return rule.parse(ifFalse)
+                                .flatMapValue(node -> rule.modify(state, node))
+                                .flatMapValue(rule::generate);
+                    })
                     .mapValue(tuple -> tuple.left.left + " ? " + tuple.left.right + " : " + tuple.right);
         }
 
         @Override
-        public void temp() {
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
 
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class DataAccessRule implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
 
             String stripped = input.strip();
             int dataSeparator = stripped.lastIndexOf(".");
@@ -1423,30 +1861,56 @@ public class Main {
             String object = stripped.substring(0, dataSeparator);
             String property = stripped.substring(dataSeparator + ".".length());
 
-            return createValueRule().compile(state, object).mapValue(newObject -> newObject + "." + property);
+            Rule rule = createValueRule();
+            return rule.parse(object)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(newObject -> newObject + "." + property);
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MyRule12 implements Rule {
-        @Override
-        public void temp() {
 
+        private Result<String, CompileError> compile(ParseState state, String input) {
+            Rule rule = createInvocationRule();
+            return rule.parse(input)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(Main::generateStatement);
         }
 
         @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
-            return createInvocationRule().compile(state, input).mapValue(Main::generateStatement);
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private static class MethodAccessRule implements Rule {
-        @Override
-        public void temp() {
 
-        }
-
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             String stripped = input.strip();
             int methodSeparator = stripped.lastIndexOf("::");
             if (methodSeparator < 0) return createInfixRule(stripped, "::");
@@ -1454,30 +1918,67 @@ public class Main {
             String object = stripped.substring(0, methodSeparator);
             String property = stripped.substring(methodSeparator + "::".length());
 
-            return createValueRule().compile(state, object).flatMapValue(newObject -> {
-                String caller = newObject + "." + property;
-                String lower = newObject.toLowerCase();
-                String paramName = new SymbolFilter().qualifies(lower) ? lower : "param";
-                return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
-            });
+            Rule rule = createValueRule();
+            return rule.parse(object)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).flatMapValue(newObject -> {
+                        String caller = newObject + "." + property;
+                        String lower = newObject.toLowerCase();
+                        String paramName = new SymbolFilter().qualifies(lower) ? lower : "param";
+                        return generateLambda(Lists.<String>empty().add(paramName), generateInvocation(caller, paramName));
+                    });
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
     private record OperatorRule(String operator) implements Rule {
-        @Override
-        public void temp() {
-        }
 
-        @Override
-        public Result<String, CompileError> compile(ParseState state, String input) {
+        private Result<String, CompileError> compile(ParseState state, String input) {
             int operatorIndex = input.indexOf(operator);
             if (operatorIndex < 0) return createInfixRule(input, operator);
 
             String left = input.substring(0, operatorIndex);
             String right = input.substring(operatorIndex + operator.length());
-            return createValueRule().compile(state, left)
-                    .and(() -> createValueRule().compile(state, right))
+            Rule rule1 = createValueRule();
+            return rule1.parse(left)
+                    .flatMapValue(node1 -> rule1.modify(state, node1))
+                    .flatMapValue(rule1::generate)
+                    .and(() -> {
+                        Rule rule = createValueRule();
+                        return rule.parse(right)
+                                .flatMapValue(node -> rule.modify(state, node))
+                                .flatMapValue(rule::generate);
+                    })
                     .mapValue(tuple -> tuple.left + " " + operator + " " + tuple.right);
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString("value", input));
+        }
+
+        @Override
+        public Result<Node, CompileError> modify(ParseState state, Node input) {
+            return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node input) {
+            return new Ok<>(input.findString("value").orElse(""));
         }
     }
 
@@ -1610,7 +2111,10 @@ public class Main {
             String joined = generateGenericName(name, typeArguments);
             ParseState state1 = state.withTypeArguments(typeArguments);
             ParseState defined = state1.define(finalClassTypeParams);
-            return createStructRule(modifiers, joined).compile(defined, body);
+            Rule rule = createStructRule(modifiers, joined);
+            return rule.parse(body)
+                    .flatMapValue(node -> rule.modify(defined, node))
+                    .flatMapValue(rule::generate);
         });
 
         return new Some<>(new Ok<>(""));
@@ -1645,12 +2149,23 @@ public class Main {
 
     private static Rule createMethodRule() {
         return new TypeRule("method", new Rule() {
+
             @Override
-            public void temp() {
+            public Result<String, CompileError> generate(Node input) {
+                return new Ok<>(input.findString("value").orElse(""));
             }
 
             @Override
-            public Result<String, CompileError> compile(ParseState state, String input) {
+            public Result<Node, CompileError> modify(ParseState state, Node input) {
+                return compile(state, input.findString("value").orElse("")).mapValue(value -> new Node().withString("value", value));
+            }
+
+            @Override
+            public Result<Node, CompileError> parse(String input) {
+                return new Ok<>(new Node().withString("value", input));
+            }
+
+            private Result<String, CompileError> compile(ParseState state, String input) {
                 return compileMethod(state, input);
             }
         });
@@ -1678,7 +2193,11 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileMethodWithDefinition(ParseState state, String outputParams, String header, String withBody) {
-        return new DefinitionRule().compile(state.withTypeArguments(state.typeArguments), header)
+        Rule rule = new DefinitionRule();
+        ParseState state1 = state.withTypeArguments(state.typeArguments);
+        return rule.parse(header)
+                .flatMapValue(node -> rule.modify(state1, node))
+                .flatMapValue(rule::generate)
                 .flatMapValue(definition -> compileMethodBody(state, definition, outputParams, withBody));
     }
 
@@ -1688,7 +2207,10 @@ public class Main {
         if (!withBody.startsWith("{") || !withBody.endsWith("}"))
             return new Ok<>(generateStatement(string));
 
-        return createStatementsRule(createStatementOrBlockRule()).compile(state, withBody.substring(1, withBody.length() - 1))
+        Rule rule = createStatementsRule(createStatementOrBlockRule());
+        return rule.parse(withBody.substring(1, withBody.length() - 1))
+                .flatMapValue(node -> rule.modify(state, node))
+                .flatMapValue(rule::generate)
                 .mapValue(statement -> addFunction(statement, string));
     }
 
@@ -1703,7 +2225,10 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileValues(ParseState state, String input, Rule compiler) {
-        return new DivideRule(createValueDivider(), compiler, Main::mergeValues).compile(state, input);
+        Rule rule = new DivideRule(createValueDivider(), compiler, Main::mergeValues);
+        return rule.parse(input)
+                .flatMapValue(node -> rule.modify(state, node))
+                .flatMapValue(rule::generate);
     }
 
     private static Divider createValueDivider() {
@@ -1837,9 +2362,15 @@ public class Main {
     private static Result<String, CompileError> compileLambdaBody(ParseState state, String inputValue) {
         if (inputValue.startsWith("{") && inputValue.endsWith("}")) {
             String substring = inputValue.substring(1, inputValue.length() - 1);
-            return createStatementsRule(createStatementOrBlockRule()).compile(state, substring);
+            Rule rule = createStatementsRule(createStatementOrBlockRule());
+            return rule.parse(substring)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate);
         } else {
-            return createValueRule().compile(state, inputValue);
+            Rule rule = createValueRule();
+            return rule.parse(inputValue)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate);
         }
     }
 
@@ -1932,13 +2463,21 @@ public class Main {
     private static Result<Node, CompileError> compileBeforeName(ParseState state, String beforeName) {
         int typeSeparator = findTypeSeparator(beforeName);
         if (typeSeparator < 0) {
-            return createTypeRule().compile(state, beforeName).mapValue(outputType -> new Node().withString("type", outputType));
+            Rule rule = createTypeRule();
+            return rule.parse(beforeName)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(outputType -> new Node().withString("type", outputType));
         }
 
         String modifierString = beforeName.substring(0, typeSeparator);
         String inputType = beforeName.substring(typeSeparator + 1);
 
-        return parseDivide(modifierString).flatMapValue(modifiers -> createTypeRule().compile(state, inputType).mapValue(outputType -> modifiers.withString("type", outputType)));
+        return parseDivide(modifierString).flatMapValue(modifiers -> {
+            Rule rule = createTypeRule();
+            return rule.parse(inputType)
+                    .flatMapValue(node -> rule.modify(state, node))
+                    .flatMapValue(rule::generate).mapValue(outputType -> modifiers.withString("type", outputType));
+        });
     }
 
     private static Result<Node, CompileError> parseDivide(String input) {
