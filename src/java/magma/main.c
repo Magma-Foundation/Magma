@@ -12,11 +12,7 @@
 #include <temp.h>
 #include <temp.h>
 // Tuple<struct A, struct B>
-// BiFunction<struct A, struct A, int>
-// BiFunction<struct B, struct B, int>
 // Option<struct String>
-// BiFunction<struct StringBuilder, struct String, struct StringBuilder>
-// BiFunction<struct State, struct Character, struct State>
 /* private sealed */ struct Result {
 	/* <R> */struct R match(struct R (*)(T) whenOk, struct R (*)(X) whenErr);
 };
@@ -43,9 +39,9 @@
 };
 /* private */ struct Stream_ {
 	/* <R> *//* Stream_<R> */ map(struct R (*)(T) mapper);
-	/* <R> */struct R foldWithInitial(struct R initial, BiFunction__struct R_T_struct R__ folder);
+	/* <R> */struct R foldWithInitial(struct R initial, struct R (*)(struct R, T) folder);
 	/* <C> */struct C collect(Collector__T_struct C__ collector);
-	/* <R> */Option__struct R__ foldToOption(struct R initial, BiFunction__struct R_T_Option__struct R____ folder);
+	/* <R> */Option__struct R__ foldToOption(struct R initial, Option__struct R__ (*)(struct R, T) folder);
 	int anyMatch(Predicate__T__ predicate);
 	/* <R> *//* Stream_<R> */ flatMap(/* Stream_<R> */ (*)(T) mapper);
 	/* Stream_<T> */ concat(/* Stream_<T> */ other);
@@ -282,7 +278,7 @@ auto __lambda2__(auto value){
      */
 }
 /* private *//* static class Tuples {
-        public static <A, B> boolean */ equalsTo(Tuple__struct A_struct B__ left, Tuple__struct A_struct B__ right, BiFunction__struct A_struct A_int__ leftEquator, BiFunction__struct B_struct B_int__ rightEquator){
+        public static <A, B> boolean */ equalsTo(Tuple__struct A_struct B__ left, Tuple__struct A_struct B__ right, int (*)(struct A, struct A) leftEquator, int (*)(struct B, struct B) rightEquator){
 	/* return leftEquator */.apply(left.left, right.left) &&
                     rightEquator.apply(left.right, right.right);/* 
         }
@@ -359,10 +355,10 @@ auto __lambda10__(auto main){
 auto __lambda11__(auto compiled){
 	return /*  mergeAll(compiled */;
 }
-/* private *//* static Option<String> */ compileAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
+/* private *//* static Option<String> */ compileAll(/* List_<String> */ segments, Option__struct String__ (*)(struct String) compiler, struct StringBuilder (*)(struct StringBuilder, struct String) merger){
 	/* return parseAll */(segments, compiler).map(__lambda11__, /*  merger) */);
 }
-/* private *//* static String */ mergeAll(/* List_<String> */ compiled, BiFunction__struct StringBuilder_struct String_struct StringBuilder__ merger){
+/* private *//* static String */ mergeAll(/* List_<String> */ compiled, struct StringBuilder (*)(struct StringBuilder, struct String) merger){
 	/* return compiled */.stream().foldWithInitial(/* new StringBuilder */(), merger).toString();
 }
 auto __lambda12__(auto compiled){
@@ -374,7 +370,7 @@ auto __lambda12__(auto compiled){
 /* private *//* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String str){
 	/* return output */.append(str);
 }
-/* private *//* static List_<String> */ divideAll(struct String input, BiFunction__struct State_struct Character_struct State__ divider){
+/* private *//* static List_<String> */ divideAll(struct String input, struct State (*)(struct State, struct Character) divider){
 	/* List_<Character> */ queue = Streams.from(input).collect(/* new ListCollector<> */());
 	struct State current = /* new State */(queue);/* 
         while (current.hasNext()) {
@@ -702,6 +698,9 @@ auto __lambda16__(auto value){
                     return parseAll(segments, type1 -> compileType(type1, frames)).map(newArguments -> {
                         if (base.equals("Function")) {
                             return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
+                        }
+                        if (base.equals("BiFunction")) {
+                            return generateFunctionalType(newArguments.get(2), Lists.of(newArguments.get(0), newArguments.get(1)));
                         }
 
                         if (base.equals("Consumer")) {

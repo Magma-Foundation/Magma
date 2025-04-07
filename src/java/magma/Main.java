@@ -941,6 +941,9 @@ public class Main {
                         if (base.equals("Function")) {
                             return generateFunctionalType(newArguments.get(1), Lists.of(newArguments.get(0)));
                         }
+                        if (base.equals("BiFunction")) {
+                            return generateFunctionalType(newArguments.get(2), Lists.of(newArguments.get(0), newArguments.get(1)));
+                        }
 
                         if (base.equals("Consumer")) {
                             return generateFunctionalType("void", Lists.of(newArguments.get(0)));
