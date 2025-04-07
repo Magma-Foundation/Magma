@@ -87,8 +87,22 @@ public class Main {
             String header = input.substring(0, paramStart).strip();
             int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String beforeName = header.substring(0, nameSeparator);
+
+                int space = beforeName.lastIndexOf(" ");
+
+                String modifiers;
+                String type;
+                if (space >= 0) {
+                    modifiers = generatePlaceholder(beforeName.substring(0, space));
+                    type = beforeName.substring(space + 1);
+                } else {
+                    modifiers = "";
+                    type = beforeName;
+                }
+
                 String name = header.substring(nameSeparator + " ".length());
-                return "void " + name + "(){\n}\n";
+                return modifiers + type + " " + name + "(){\n}\n";
             }
         }
 

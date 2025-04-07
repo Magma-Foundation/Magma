@@ -8,19 +8,19 @@
 
 public  */struct Main {
 };
-void main(){
+/* public static */void main(){
 }
-void compile(){
+/* private static */String compile(){
 }
-void compile(){
+/* private static */String compile(){
 }
 /* 
-        segments.add(buffer.toString()); */void StringBuilder(){
+        segments.add(buffer.toString()); *//* StringBuilder output = */new StringBuilder(){
 }
 /* 
         for (String segment : segments) {
             output.append(compiler.apply(segment));
-        } */void output.toString(){
+        } */return output.toString(){
 }
 /* 
      *//* 
@@ -31,13 +31,15 @@ void compile(){
         int keywordIndex = input.indexOf(" */struct ");
         if (keywordIndex >= 0) {
 };
-void input.substring(){
+/* String modifiers */= input.substring(){
 }
-void input.substring(){
+/* String right */= input.substring(){
 }
-void right.indexOf(){
+/* int contentStart */= right.indexOf(){
 }
-void invalidate(){
+/* }
+
+        */return invalidate(){
 }
 /* 
 
@@ -52,8 +54,22 @@ void invalidate(){
             String header = input.substring(0, paramStart).strip();
             int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
+                String beforeName = header.substring(0, nameSeparator);
+
+                int space = beforeName.lastIndexOf(" ");
+
+                String modifiers;
+                String type;
+                if (space >= 0) {
+                    modifiers = generatePlaceholder(beforeName.substring(0, space));
+                    type = beforeName.substring(space + 1);
+                } else {
+                    modifiers = "";
+                    type = beforeName;
+                }
+
                 String name = header.substring(nameSeparator + " ".length());
-                return "void " + name + "(){\n}\n";
+                return modifiers + type + " " + name + "(){\n}\n";
             }
         }
 
