@@ -803,8 +803,12 @@ public class Main {
     }
 
     private static Result<String, CompileError> compilePackage(String input) {
-        if (input.startsWith("package ")) return new Ok<>("");
-        return createPrefixErr(input, "package ");
+        return compilePrefix(input, "package ", _ -> new Ok<>(""));
+    }
+
+    private static Result<String, CompileError> compilePrefix(String input, String prefix, Rule childRule) {
+        if (input.startsWith(prefix)) return childRule.compile(input.substring(prefix.length()));
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
     private static Result<String, CompileError> compileClass(String input) {
@@ -814,17 +818,16 @@ public class Main {
 
     private static Result<String, CompileError> compileImport(String input) {
         String stripped = input.strip();
-        if (!stripped.startsWith("import ")) return createPrefixErr(stripped, "import ");
-        String right = stripped.substring("import ".length());
+        return compilePrefix(stripped, "import ", right -> {
+            return compileSuffix(right, ";", left -> {
+                List_<String> slices = divideByChar(left, '.');
+                if (isFunctionalImport(slices)) return new Ok<>("");
 
-        return compileSuffix(right, ";", left -> {
-            List_<String> slices = divideByChar(left, '.');
-            if (isFunctionalImport(slices)) return new Ok<>("");
-
-            String joined = slices.stream().collect(new Joiner("/")).orElse("");
-            String value = "#include \"./%s.h\"\n".formatted(joined);
-            imports = imports.add(value);
-            return new Ok<>("");
+                String joined = slices.stream().collect(new Joiner("/")).orElse("");
+                String value = "#include \"./%s.h\"\n".formatted(joined);
+                imports = imports.add(value);
+                return new Ok<>("");
+            });
         });
     }
 
@@ -1050,25 +1053,19 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileElse(String input) {
-        if (input.strip().startsWith("else ")) return new Ok<>("\n\telse {}");
-        return createPrefixErr(input.strip(), "else ");
+        return compilePrefix(input.strip(), "else ", _ -> new Ok<>("\n\telse {\n\t}\n"));
     }
 
     private static Result<String, CompileError> compileFor(String input) {
-        if (input.strip().startsWith("for ")) return new Ok<>("\n\tfor (;;) {\n\t}");
-        return createPrefixErr(input.strip(), "for ");
+        return compilePrefix(input.strip(), "for ", _ -> new Ok<>("\n\tfor (;;) {\n\t}\n"));
     }
 
     private static Result<String, CompileError> compileWhile(String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("while ")) return new Ok<>("\n\twhile (1) {\n\t}");
-        return createPrefixErr(stripped, "while ");
+        return compilePrefix(input.strip(), "while ", _ -> new Ok<>("\n\twhile (1) {\n\t}\n"));
     }
 
     private static Result<String, CompileError> compileIf(String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("if ")) return new Ok<>("\n\tif (1) {\n\t}");
-        return createPrefixErr(stripped, "if ");
+        return compilePrefix(input.strip(), "if ", _ -> new Ok<>("\n\tif (1) {\n\t}\n"));
     }
 
     private static Result<String, CompileError> compileStatement(ParseState state, String input) {
@@ -1083,13 +1080,11 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileReturn(ParseState state, String withoutEnd) {
-        if (withoutEnd.startsWith("return ")) {
-            String value = withoutEnd.substring("return ".length());
+        return compilePrefix(withoutEnd.strip(), "return ", value -> {
             return compileValue(value, state)
                     .mapValue(inner -> "return " + inner)
                     .mapValue(Main::generateStatement);
-        }
-        return createPrefixErr(withoutEnd, "return ");
+        });
     }
 
     private static Result<String, CompileError> compileInvocationStatement(ParseState state, String withoutEnd) {
@@ -1201,33 +1196,26 @@ public class Main {
 
     private static Result<String, CompileError> compileConstruction(ParseState state, String input) {
         String stripped = input.strip();
-        if (!stripped.startsWith("new ")) return createPrefixErr(stripped, "new ");
 
-        String withoutNew = stripped.substring("new ".length());
+        return compilePrefix(stripped, "new ", withoutNew -> {
+            return compileSuffix(withoutNew, ")", slice -> {
+                int paramStart = slice.indexOf("(");
 
-        return compileSuffix(withoutNew, ")", slice -> {
-            int paramStart = slice.indexOf("(");
+                String rawCaller = slice.substring(0, paramStart).strip();
+                String caller = rawCaller.endsWith("<>")
+                        ? rawCaller.substring(0, rawCaller.length() - "<>".length())
+                        : rawCaller;
 
-            String rawCaller = slice.substring(0, paramStart).strip();
-            String caller = rawCaller.endsWith("<>")
-                    ? rawCaller.substring(0, rawCaller.length() - "<>".length())
-                    : rawCaller;
-
-            String inputArguments = slice.substring(paramStart + "(".length());
-            return compileAllValues(state, inputArguments).flatMapValue(arguments -> compileType(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+                String inputArguments = slice.substring(paramStart + "(".length());
+                return compileAllValues(state, inputArguments).flatMapValue(arguments -> compileType(state, caller).mapValue(type -> type + "(" + arguments + ")"));
+            });
         });
     }
 
-    private static Result<String, CompileError> createPrefixErr(String input, String prefix) {
-        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
-    }
-
     private static Result<String, CompileError> compileNot(ParseState state, String input) {
-        String stripped = input.strip();
-        if (!stripped.startsWith("!")) return createPrefixErr(stripped, "!");
-
-        return compileValue(stripped.substring(1), state)
-                .mapValue(result -> "!" + result);
+        return compilePrefix(input.strip(), "!", slice -> {
+            return compileValue(slice, state).mapValue(result -> "!" + result);
+        });
     }
 
     private static Result<String, CompileError> compileChar(String input) {
