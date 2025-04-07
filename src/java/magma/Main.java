@@ -586,6 +586,31 @@ public class Main {
         }
     }
 
+    private static final class Node {
+        private final Map<String, String> strings;
+
+        private Node() {
+            this(new HashMap<>());
+        }
+
+        private Node(Map<String, String> maps) {
+            this.strings = maps;
+        }
+
+        private Node withString(String propertyKey, String propertyValue) {
+            strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String> find(String propertyKey) {
+            if (strings.containsKey(propertyKey)) {
+                return new Some<>(strings.get(propertyKey));
+            } else {
+                return new None<>();
+            }
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Result<String, CompileError>>> generators = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> expanded = Lists.empty();
     private static List_<String> imports = Lists.empty();
@@ -597,7 +622,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        magma.Files.readString(source)
+        Files.readString(source)
                 .match(input -> runWithInput(source, input), Some::new)
                 .ifPresent(Throwable::printStackTrace);
     }
@@ -609,7 +634,7 @@ public class Main {
         });
 
         Path target = source.resolveSibling("main.c");
-        return magma.Files.writeString(target, output);
+        return Files.writeString(target, output);
     }
 
     private static Result<String, CompileError> compile(String input) {
@@ -723,7 +748,7 @@ public class Main {
         return compileOr(value, Lists.of(
                 Main::compileWhitespace,
                 Main::compilePackage,
-                input -> compileImport(input),
+                Main::compileImport,
                 Main::compileClass
         ));
     }
@@ -1199,9 +1224,15 @@ public class Main {
         String lambda = "__lambda" + lambdaCounter + "__";
         lambdaCounter++;
 
-        Result<String, CompileError> definition = generateDefinition("", "auto", lambda);
+        Result<String, CompileError> definition = generateDefinition(new Node()
+                .withString("modifiers", "")
+                .withString("type", "auto")
+                .withString("name", lambda));
         Result<String, CompileError> params = paramNames.stream()
-                .map(name -> generateDefinition("", "auto", name))
+                .map(name -> generateDefinition(new Node()
+                        .withString("modifiers", "")
+                        .withString("type", "auto")
+                        .withString("name", name)))
                 .collect(new Exceptional<>(new Joiner(", ")))
                 .mapValue(inner -> inner.orElse(""));
 
@@ -1254,7 +1285,26 @@ public class Main {
         if (nameSeparator < 0) return new Err<>(new CompileError("No name present", stripped));
 
         String beforeName = stripped.substring(0, nameSeparator);
+        String name = stripped.substring(nameSeparator + " ".length());
+        return compileBeforeName(typeParams, typeArguments, beforeName).flatMapValue(node -> {
+            return generateDefinition(node.withString("name", name));
+        });
+    }
 
+    private static Result<Node, CompileError> compileBeforeName(List_<List_<String>> typeParams, List_<String> typeArguments, String beforeName) {
+        int typeSeparator = findTypeSeparator(beforeName);
+        if (typeSeparator < 0) {
+            return compileType(beforeName, typeParams, typeArguments).mapValue(outputType -> new Node().withString("type", outputType));
+        }
+
+        String modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
+        String inputType = beforeName.substring(typeSeparator + 1);
+
+        Node modifiers1 = new Node().withString("modifiers", modifiers);
+        return compileType(inputType, typeParams, typeArguments).mapValue(outputType -> modifiers1.withString("type", outputType));
+    }
+
+    private static int findTypeSeparator(String beforeName) {
         int typeSeparator = -1;
         int depth = 0;
         for (int i = beforeName.length() - 1; i >= 0; i--) {
@@ -1267,23 +1317,11 @@ public class Main {
                 if (c == '<') depth--;
             }
         }
-
-        String modifiers;
-        String inputType;
-        if (typeSeparator >= 0) {
-            modifiers = generatePlaceholder(beforeName.substring(0, typeSeparator));
-            inputType = beforeName.substring(typeSeparator + 1);
-        } else {
-            modifiers = "";
-            inputType = beforeName;
-        }
-
-        String name = stripped.substring(nameSeparator + " ".length());
-        return compileType(inputType, typeParams, typeArguments).flatMapValue(outputType -> generateDefinition(modifiers, outputType, name));
+        return typeSeparator;
     }
 
-    private static Result<String, CompileError> generateDefinition(String modifiers, String type, String name) {
-        return new Ok<>(modifiers + type + " " + name);
+    private static Result<String, CompileError> generateDefinition(Node node) {
+        return new Ok<>(node.find("modifiers").orElse("") + node.find("type").orElse("") + " " + node.find("name").orElse(""));
     }
 
     private static Result<String, CompileError> compileType(String input, List_<List_<String>> frames, List_<String> typeArguments) {
