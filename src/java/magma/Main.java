@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,6 +17,18 @@ import java.util.stream.IntStream;
 public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private sealed interface Option<T> permits Some, None {
+        void ifPresent(Consumer<T> ifPresent);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        <R> Option<R> map(Function<T, R> mapper);
+
+        T orElse(T other);
+
+        boolean isPresent();
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -88,6 +100,59 @@ public class Main {
         }
     }
 
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public void ifPresent(Consumer<T> ifPresent) {
+            ifPresent.accept(value);
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(value);
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(value));
+        }
+
+        @Override
+        public T orElse(T other) {
+            return value;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+    }
+
+    private static final class None<T> implements Option<T> {
+        @Override
+        public void ifPresent(Consumer<T> ifPresent) {
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+    }
+
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> functions = new ArrayList<>();
@@ -96,23 +161,23 @@ public class Main {
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
-                .match(input -> runWithInput(source, input), Optional::of)
+                .match(input -> runWithInput(source, input), Some::new)
                 .ifPresent(Throwable::printStackTrace);
     }
 
-    private static Optional<IOException> runWithInput(Path source, String input) {
+    private static Option<IOException> runWithInput(Path source, String input) {
         String output = compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
 
         Path target = source.resolveSibling("main.c");
         return writeString(target, output);
     }
 
-    private static Optional<IOException> writeString(Path target, String output) {
+    private static Option<IOException> writeString(Path target, String output) {
         try {
             Files.writeString(target, output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
     }
 
@@ -137,13 +202,13 @@ public class Main {
                 .orElse("");
     }
 
-    private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
+    private static Option<String> compileStatements(String input, Function<String, Option<String>> compiler) {
         return compileAll(divideAll(input, Main::divideStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Optional<String> compileAll(
+    private static Option<String> compileAll(
             List<String> segments,
-            Function<String, Optional<String>> compiler,
+            Function<String, Option<String>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
         return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
@@ -159,8 +224,8 @@ public class Main {
         return output.toString();
     }
 
-    private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
-        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
+    private static Option<List<String>> parseAll(List<String> segments, Function<String, Option<String>> compiler) {
+        Option<List<String>> maybeCompiled = new Some<>(new ArrayList<>());
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
                 return compiler.apply(segment).map(compiled -> {
@@ -204,13 +269,13 @@ public class Main {
         return state.queue.isEmpty();
     }
 
-    private static Optional<String> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return Optional.of("");
+    private static Option<String> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return new Some<>("");
 
         if (input.strip().startsWith("import ")) {
             String value = "#include <temp.h>\n";
             imports.add(value);
-            return Optional.of("");
+            return new Some<>("");
         }
 
         int keywordIndex = input.indexOf("class ");
@@ -230,7 +295,7 @@ public class Main {
             }
         }
 
-        return Optional.of(invalidate("root segment", input));
+        return new Some<>(invalidate("root segment", input));
     }
 
     private static String generateStruct(String modifiers, String name) {
@@ -244,26 +309,26 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static Optional<String> compileClassSegment(String input) {
-        Optional<String> maybeMethod = compileMethod(input);
+    private static Option<String> compileClassSegment(String input) {
+        Option<String> maybeMethod = compileMethod(input);
         if (maybeMethod.isPresent()) return maybeMethod;
 
-        return Optional.of(invalidate("class segment", input));
+        return new Some<>(invalidate("class segment", input));
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Option<String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
-        if (paramStart < 0) return Optional.empty();
+        if (paramStart < 0) return new None<>();
 
         String header = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
         int paramEnd = withParams.indexOf(")");
-        if (paramEnd < 0) return Optional.empty();
+        if (paramEnd < 0) return new None<>();
 
         String paramString = withParams.substring(0, paramEnd);
         String withBody = withParams.substring(paramEnd + ")".length()).strip();
 
-        if (!withBody.startsWith("{") || !withBody.endsWith("}")) return Optional.empty();
+        if (!withBody.startsWith("{") || !withBody.endsWith("}")) return new None<>();
 
         return compileValues(paramString, Main::compileDefinition).flatMap(outputParams -> {
             return compileDefinition(header).flatMap(definition -> {
@@ -280,7 +345,7 @@ public class Main {
         return "";
     }
 
-    private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
+    private static Option<String> compileValues(String input, Function<String, Option<String>> compiler) {
         return compileAll(divideAll(input, Main::divideValueChar), compiler, Main::mergeValues);
     }
 
@@ -298,9 +363,9 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static Optional<String> compileStatement(String input) {
+    private static Option<String> compileStatement(String input) {
         String stripped = input.strip();
-        if (stripped.isEmpty()) return Optional.of("");
+        if (stripped.isEmpty()) return new Some<>("");
 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -316,20 +381,20 @@ public class Main {
                 });
             }
 
-            Optional<String> maybeInvocation = compileInvocation(withoutEnd);
+            Option<String> maybeInvocation = compileInvocation(withoutEnd);
             if (maybeInvocation.isPresent()) return maybeInvocation.map(Main::generateStatement);
         }
 
-        return Optional.of(invalidate("statement", input));
+        return new Some<>(invalidate("statement", input));
     }
 
     private static String generateStatement(String value) {
         return "\n\t" + value + ";";
     }
 
-    private static Optional<String> compileValue(String input) {
+    private static Option<String> compileValue(String input) {
         String stripped = input.strip();
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) return new Some<>(stripped);
 
         int arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
@@ -340,7 +405,7 @@ public class Main {
             }
         }
 
-        Optional<String> maybeInvocation = compileInvocation(stripped);
+        Option<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) return maybeInvocation;
 
         int dataSeparator = stripped.lastIndexOf(".");
@@ -366,10 +431,10 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return Optional.of(stripped);
+            return new Some<>(stripped);
         }
 
-        return Optional.of(invalidate("value", input));
+        return new Some<>(invalidate("value", input));
     }
 
     private static String generateLambda(String paramName, String lambdaValue) {
@@ -383,8 +448,8 @@ public class Main {
         return lambda;
     }
 
-    private static Optional<String> compileInvocation(String stripped) {
-        if (!stripped.endsWith(")")) return Optional.empty();
+    private static Option<String> compileInvocation(String stripped) {
+        if (!stripped.endsWith(")")) return new None<>();
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
         int argsStart = -1;
@@ -400,7 +465,7 @@ public class Main {
             }
         }
 
-        if (argsStart < 0) return Optional.empty();
+        if (argsStart < 0) return new None<>();
 
         String inputCaller = withoutEnd.substring(0, argsStart);
         String inputArguments = withoutEnd.substring(argsStart + 1);
@@ -415,7 +480,7 @@ public class Main {
         return caller + "(" + arguments + ")";
     }
 
-    private static Optional<String> compileDefinition(String input) {
+    private static Option<String> compileDefinition(String input) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -434,10 +499,10 @@ public class Main {
             }
 
             String name = stripped.substring(nameSeparator + " ".length());
-            return Optional.of(generateDefinition(modifiers, compileType(type), name));
+            return new Some<>(generateDefinition(modifiers, compileType(type), name));
         }
 
-        return Optional.of(invalidate("definition", stripped));
+        return new Some<>(invalidate("definition", stripped));
     }
 
     private static String generateDefinition(String modifiers, String type, String name) {
