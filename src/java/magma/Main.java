@@ -46,13 +46,11 @@ public class Main {
 
         List_<T> addAll(List_<T> elements);
 
-        void forEach(Consumer<T> consumer);
-
         Stream_<T> stream();
 
         T popFirst();
 
-        boolean isEmpty();
+        boolean hasElements();
 
         Option<T> apply(int index);
 
@@ -220,7 +218,7 @@ public class Main {
         }
 
         private boolean hasNext() {
-            return !queue.isEmpty();
+            return queue.hasElements();
         }
 
         private State enter() {
@@ -471,7 +469,7 @@ public class Main {
     }
 
     private static List_<String> generate(List_<String> compiled) {
-        while (!toExpand.isEmpty()) {
+        while (toExpand.hasElements()) {
             Tuple<String, List_<String>> tuple = toExpand.popFirst();
             if (isDefined(expanded, tuple)) continue;
 

@@ -2,7 +2,6 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 record JavaList<T>(List<T> inner) implements Main.List_<T> {
     public JavaList() {
@@ -22,11 +21,6 @@ record JavaList<T>(List<T> inner) implements Main.List_<T> {
     }
 
     @Override
-    public void forEach(Consumer<T> consumer) {
-        inner.forEach(consumer);
-    }
-
-    @Override
     public Main.Stream_<T> stream() {
         return streamWithIndices().map(Main.Tuple::right);
     }
@@ -37,8 +31,8 @@ record JavaList<T>(List<T> inner) implements Main.List_<T> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return inner.isEmpty();
+    public boolean hasElements() {
+        return !inner.isEmpty();
     }
 
     @Override
