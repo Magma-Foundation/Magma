@@ -56,7 +56,7 @@ public class Main {
 
         boolean isEmpty();
 
-        T get(int index);
+        Option<T> apply(int index);
 
         int size();
 
@@ -238,11 +238,6 @@ public class Main {
         }
 
         @Override
-        public T get(int index) {
-            return inner.get(index);
-        }
-
-        @Override
         public int size() {
             return inner.size();
         }
@@ -261,6 +256,12 @@ public class Main {
         public T first() {
             return inner.getFirst();
         }
+
+        @Override
+        public Option<T> apply(int index) {
+            if (index < 0 || index >= size()) return new None<>();
+            return new Some<>(inner.get(index));
+        }
     }
 
     private static class Lists {
@@ -275,8 +276,11 @@ public class Main {
         public static <T> boolean equalsTo(List_<T> elements, List_<T> other, BiFunction<T, T, Boolean> equator) {
             if (elements.size() != other.size()) return false;
 
-            return new HeadedStream<>(new RangeHead(elements.size()))
-                    .allMatch(index -> equator.apply(elements.get(index), other.get(index)));
+            return new HeadedStream<>(new RangeHead(elements.size())).allMatch(index -> {
+                T left = elements.apply(index).orElse(null);
+                T right = other.apply(index).orElse(null);
+                return equator.apply(left, right);
+            });
         }
 
         public static <T> Option<Integer> indexOf(List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
@@ -928,7 +932,12 @@ public class Main {
             if (withoutNew.endsWith(")")) {
                 String slice = withoutNew.substring(0, withoutNew.length() - ")".length());
                 int paramStart = slice.indexOf("(");
-                String caller = slice.substring(0, paramStart).strip();
+
+                String rawCaller = slice.substring(0, paramStart).strip();
+                String caller = rawCaller.endsWith("<>")
+                        ? rawCaller.substring(0, rawCaller.length() - "<>".length())
+                        : rawCaller;
+
                 String inputArguments = slice.substring(paramStart + "(".length());
                 return compileAllValues(inputArguments, typeParams, typeArguments).flatMap(arguments -> {
                     return compileType(caller, typeParams, typeArguments).map(type -> {
@@ -1162,7 +1171,7 @@ public class Main {
         if (isTypeParam(frames, stripped)) {
             List_<String> last = frames.last();
             return Lists.indexOf(last, stripped, String::equals).map(index -> {
-                String argument = typeArguments.get(index);
+                String argument = typeArguments.apply(index).orElse(null);
                 return new Some<>(argument);
             }).orElseGet(() -> new Some<>(stripped));
         }
@@ -1186,16 +1195,16 @@ public class Main {
                     return parseAll(segments, type1 -> compileType(type1, frames, typeArguments)).map(newArguments -> {
                         switch (base) {
                             case "Function" -> {
-                                return generateFunctionalType(newArguments.get(1), new JavaList<>(Collections.singletonList(newArguments.get(0))));
+                                return generateFunctionalType(newArguments.apply(1).orElse(null), new JavaList<>(Collections.singletonList(newArguments.apply(0).orElse(null))));
                             }
                             case "BiFunction" -> {
-                                return generateFunctionalType(newArguments.get(2), new JavaList<>(Arrays.asList(newArguments.get(0), newArguments.get(1))));
+                                return generateFunctionalType(newArguments.apply(2).orElse(null), new JavaList<>(Arrays.asList(newArguments.apply(0).orElse(null), newArguments.apply(1).orElse(null))));
                             }
                             case "Consumer" -> {
-                                return generateFunctionalType("void", new JavaList<>(Collections.singletonList(newArguments.get(0))));
+                                return generateFunctionalType("void", new JavaList<>(Collections.singletonList(newArguments.apply(0).orElse(null))));
                             }
                             case "Supplier" -> {
-                                return generateFunctionalType(newArguments.get(0), Lists.empty());
+                                return generateFunctionalType(newArguments.apply(0).orElse(null), Lists.empty());
                             }
                         }
 
