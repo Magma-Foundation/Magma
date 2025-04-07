@@ -892,7 +892,7 @@ public class Main {
                 .or(() -> compileOperator(input, ">=", typeParams, typeArguments))
                 .or(() -> compileSymbol(input))
                 .or(() -> compileNumber(input))
-                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid value", input));
+                .<Result<String, CompileError>>match(Ok::new, () -> new Err<>(new CompileError("Invalid value", input)));
     }
 
     private static Option<String> compileNumber(String input) {
