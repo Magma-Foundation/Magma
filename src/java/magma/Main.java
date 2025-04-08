@@ -5,11 +5,37 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class Main {
     private static class CompileException extends Exception {
         public CompileException(String message, String context) {
             super(message + ": " + context);
+        }
+    }
+
+    private static final class Node {
+        private final Map<String, String> strings;
+
+        private Node() {
+            this(Collections.emptyMap());
+        }
+
+        private Node(Map<String, String> strings) {
+            this.strings = strings;
+        }
+
+        private Node withString(String propertyKey, String propertyValue) {
+            HashMap<String, String> copy = new HashMap<>(strings);
+            copy.put(propertyKey, propertyValue);
+            return new Node(copy);
+        }
+
+        private Optional<String> findString(String propertyKey) {
+            return Optional.ofNullable(strings.get(propertyKey));
         }
     }
 
@@ -63,10 +89,14 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                return generateStruct(new Node().withString("name", name));
             }
         }
 
         throw new CompileException("Invalid root", input);
+    }
+
+    private static String generateStruct(Node node) {
+        return "struct " + node.findString("name").orElse("") + " {\n};\n";
     }
 }
