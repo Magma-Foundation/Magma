@@ -85,14 +85,16 @@ public class Main {
     }
 
     private static final class Node {
+        private final Optional<String> maybeType;
         private final Map<String, String> strings;
         private final Map<String, List<Node>> nodeLists;
 
         private Node() {
-            this(Collections.emptyMap(), Collections.emptyMap());
+            this(Optional.empty(), Collections.emptyMap(), Collections.emptyMap());
         }
 
-        private Node(Map<String, String> strings, Map<String, List<Node>> nodeLists) {
+        private Node(Optional<String> maybeType, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
+            this.maybeType = maybeType;
             this.strings = strings;
             this.nodeLists = nodeLists;
         }
@@ -100,7 +102,7 @@ public class Main {
         private Node withString(String propertyKey, String propertyValue) {
             HashMap<String, String> copy = new HashMap<>(strings);
             copy.put(propertyKey, propertyValue);
-            return new Node(copy, nodeLists);
+            return new Node(maybeType, copy, nodeLists);
         }
 
         private Optional<String> findString(String propertyKey) {
@@ -108,7 +110,8 @@ public class Main {
         }
 
         public String display() {
-            return strings.toString() + nodeLists.toString();
+            String typeString = maybeType.map(type -> type + " ").orElse("");
+            return typeString + strings.toString() + nodeLists.toString();
         }
 
         @Override
@@ -123,17 +126,25 @@ public class Main {
             HashMap<String, List<Node>> nodeListsCopy = new HashMap<>(other.nodeLists);
             nodeListsCopy.putAll(other.nodeLists);
 
-            return new Node(stringsCopy, nodeListsCopy);
+            return new Node(maybeType, stringsCopy, nodeListsCopy);
         }
 
         public Node withNodeList(String propertyKey, List<Node> propertyValues) {
             HashMap<String, List<Node>> copy = new HashMap<>(nodeLists);
             copy.put(propertyKey, propertyValues);
-            return new Node(strings, copy);
+            return new Node(maybeType, strings, copy);
         }
 
         public Optional<List<Node>> findNodeList(String propertyKey) {
             return Optional.ofNullable(nodeLists.get(propertyKey));
+        }
+
+        public Node retype(String type) {
+            return new Node(Optional.of(type), strings, nodeLists);
+        }
+
+        public boolean is(String type) {
+            return this.maybeType.isPresent() && this.maybeType.get().equals(type);
         }
     }
 
@@ -371,7 +382,25 @@ public class Main {
         }
     }
 
-    private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
+    private record NodeListRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
+        private static <T> Result<T, CompileError> usingNodeList(
+                String propertyKey,
+                Node node,
+                Function<List<Node>, Result<T, CompileError>> mapper
+        ) {
+            return node.findNodeList(propertyKey)
+                    .map(mapper)
+                    .orElseGet(() -> createNotPresentError(propertyKey, node));
+        }
+
+        private static <T> Result<T, CompileError> createNotPresentError(String propertyKey, Node node) {
+            String format = "Node list '%s' not present";
+            String message = format.formatted(propertyKey);
+            NodeContext context = new NodeContext(node);
+            CompileError error = new CompileError(message, context);
+            return new Err<>(error);
+        }
+
         @Override
         public Result<Node, CompileError> parse(String input) {
             List<String> segments = divider.divide(input);
@@ -388,17 +417,7 @@ public class Main {
 
         @Override
         public Result<String, CompileError> generate(Node node) {
-            return node.findNodeList(propertyKey())
-                    .map(this::generateNodeList)
-                    .orElseGet(() -> createGenerateError(node));
-        }
-
-        private Err<String, CompileError> createGenerateError(Node node) {
-            String format = "Node list '%s' not present";
-            String message = format.formatted(propertyKey);
-            NodeContext context = new NodeContext(node);
-            CompileError error = new CompileError(message, context);
-            return new Err<>(error);
+            return usingNodeList(propertyKey, node, this::generateNodeList);
         }
 
         private Result<String, CompileError> generateNodeList(List<Node> children) {
@@ -421,6 +440,22 @@ public class Main {
         public StringBuilder merge(StringBuilder cache, String element) {
             if (cache.isEmpty()) return cache.append(element);
             return cache.append(delimiter).append(element);
+        }
+    }
+
+    private record TypeRule(String type, Rule childRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return childRule.parse(input).mapValue(node -> node.retype(type));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            if (node.is(type)) {
+                return childRule.generate(node);
+            } else {
+                return new Err<>(new CompileError("Type '" + type + "' not present", new NodeContext(node)));
+            }
         }
     }
 
@@ -465,50 +500,73 @@ public class Main {
 
     private static Result<String, CompileError> compile(String input) {
         return createJavaRootRule().parse(input)
+                .flatMapValue(Main::modify)
                 .flatMapValue(parsed -> createCRootRule().generate(parsed));
     }
 
+    private static Result<Node, CompileError> modify(Node node) {
+        return NodeListRule.usingNodeList("children", node, children -> {
+            List<Node> newChildren = children.stream()
+                    .filter(child -> !child.is("package"))
+                    .map(Main::modifyRootChild)
+                    .toList();
+
+            return new Ok<>(new Node().withNodeList("children", newChildren));
+        });
+    }
+
+    private static Node modifyRootChild(Node child) {
+        if (child.is("import")) {
+            return child.retype("include");
+        } else if (child.is("class")) {
+            return child.retype("struct");
+        } else {
+            return child;
+        }
+    }
+
     private static Rule createCRootRule() {
-        return new DivideRule("children", new StatementDivider(), createCRootSegmentRule());
+        return new NodeListRule("children", new StatementDivider(), createCRootSegmentRule());
     }
 
     private static Rule createJavaRootRule() {
-        return new DivideRule("children", new StatementDivider(), createJavaRootSegmentRule());
+        return new NodeListRule("children", new StatementDivider(), createJavaRootSegmentRule());
     }
 
-    private static OrRule createCRootSegmentRule() {
+    private static Rule createCRootSegmentRule() {
         return new OrRule(List.of(
                 createIncludeRule(),
                 createStructRule()
         ));
     }
 
-    private static PrefixRule createIncludeRule() {
-        DivideRule namespace = new DivideRule("namespace", new DelimitedRule("/"), new StringRule("value"));
-        return new PrefixRule("#include \"", new SuffixRule(namespace, "\"\n"));
+    private static TypeRule createStructRule() {
+        StringRule name = new StringRule("name");
+        return new TypeRule("struct", new PrefixRule("struct ", new SuffixRule(name, " {\n};\n")));
     }
 
-    private static OrRule createJavaRootSegmentRule() {
+    private static TypeRule createIncludeRule() {
+        NodeListRule namespace = new NodeListRule("namespace", new DelimitedRule("/"), new StringRule("value"));
+        return new TypeRule("include", new PrefixRule("#include \"", new SuffixRule(namespace, "\"\n")));
+    }
+
+    private static Rule createJavaRootSegmentRule() {
         return new OrRule(List.of(
-                createNamespacedRule("package "),
-                createNamespacedRule("import "),
+                createPrefixedRule("package", "package "),
+                createPrefixedRule("import", "import "),
                 createClassRule()
         ));
     }
 
-    private static StripRule createNamespacedRule(String prefix) {
-        DivideRule namespace = new DivideRule("namespace", new DelimitedRule("."), new StringRule("value"));
-        return new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ";")));
-    }
-
-    private static InfixRule createClassRule() {
+    private static TypeRule createClassRule() {
         Rule modifiers = new StringRule("modifiers");
         Rule name = new StripRule(new StringRule("name"));
         Rule withEnd = new StringRule("with-end");
-        return new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd));
+        return new TypeRule("class", new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd)));
     }
 
-    private static PrefixRule createStructRule() {
-        return new PrefixRule("struct ", new SuffixRule(new StringRule("name"), " {\n};\n"));
+    private static TypeRule createPrefixedRule(String type, String prefix) {
+        NodeListRule namespace = new NodeListRule("namespace", new DelimitedRule("."), new StringRule("value"));
+        return new TypeRule(type, new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ";"))));
     }
 }

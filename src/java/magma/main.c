@@ -1,4 +1,3 @@
-#include "magma"
 #include "java/io/IOException"
 #include "java/io/PrintWriter"
 #include "java/io/StringWriter"
