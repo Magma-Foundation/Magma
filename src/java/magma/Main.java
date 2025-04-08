@@ -77,19 +77,21 @@ public class Main {
 
     private static final class Node {
         private final Map<String, String> strings;
+        private final Map<String, List<Node>> nodeLists;
 
         private Node() {
-            this(Collections.emptyMap());
+            this(Collections.emptyMap(), Collections.emptyMap());
         }
 
-        private Node(Map<String, String> strings) {
+        private Node(Map<String, String> strings, Map<String, List<Node>> nodeLists) {
             this.strings = strings;
+            this.nodeLists = nodeLists;
         }
 
         private Node withString(String propertyKey, String propertyValue) {
             HashMap<String, String> copy = new HashMap<>(strings);
             copy.put(propertyKey, propertyValue);
-            return new Node(copy);
+            return new Node(copy, nodeLists);
         }
 
         private Optional<String> findString(String propertyKey) {
@@ -101,9 +103,23 @@ public class Main {
         }
 
         public Node merge(Node other) {
-            HashMap<String, String> copy = new HashMap<>(strings);
-            copy.putAll(other.strings);
-            return new Node(copy);
+            HashMap<String, String> stringsCopy = new HashMap<>(strings);
+            stringsCopy.putAll(other.strings);
+
+            HashMap<String, List<Node>> nodeListsCopy = new HashMap<>(other.nodeLists);
+            nodeListsCopy.putAll(other.nodeLists);
+
+            return new Node(stringsCopy, nodeListsCopy);
+        }
+
+        public Node withNodeList(String propertyKey, List<Node> propertyValues) {
+            HashMap<String, List<Node>> copy = new HashMap<>(nodeLists);
+            copy.put(propertyKey, propertyValues);
+            return new Node(strings, copy);
+        }
+
+        public Optional<List<Node>> findNodeList(String propertyKey) {
+            return Optional.ofNullable(nodeLists.get(propertyKey));
         }
     }
 
@@ -314,6 +330,67 @@ public class Main {
         }
     }
 
+    private record DivideRule(Rule childRule, String propertyKey) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            List<String> segments = divide(input);
+            Result<List<Node>, CompileError> maybeParsed = new Ok<>(new ArrayList<Node>());
+            for (String segment : segments) {
+                maybeParsed = maybeParsed.and(() -> childRule().parse(segment)).mapValue(tuple -> {
+                    tuple.left.add(tuple.right);
+                    return tuple.left;
+                });
+            }
+
+            return maybeParsed.mapValue(list -> new Node().withNodeList(propertyKey(), list));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return node.findNodeList(propertyKey())
+                    .map(this::generateNodeList)
+                    .orElseGet(() -> createGenerateError(node));
+        }
+
+        private Err<String, CompileError> createGenerateError(Node node) {
+            String format = "Node list '%s' not present";
+            String message = format.formatted(propertyKey);
+            NodeContext context = new NodeContext(node);
+            CompileError error = new CompileError(message, context);
+            return new Err<>(error);
+        }
+
+        private Result<String, CompileError> generateNodeList(List<Node> children) {
+            Result<StringBuilder, CompileError> maybeOutput = new Ok<>(new StringBuilder());
+            for (Node child : children) {
+                maybeOutput = maybeOutput.and(() -> childRule().generate(child)).mapValue(tuple -> {
+                    return tuple.left.append(tuple.right);
+                });
+            }
+
+            return maybeOutput.mapValue(StringBuilder::toString);
+        }
+    }
+
+    private static List<String> divide(String input) {
+        List<String> segments = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
+        int depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            buffer.append(c);
+            if (c == ';' && depth == 0) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+            }
+        }
+        segments.add(buffer.toString());
+        return segments;
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -354,49 +431,16 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        Result<List<Node>, CompileError> maybeParsed = parse(input);
-        return maybeParsed.flatMapValue(parsed -> {
-            return generate(parsed, createCRootSegmentRule());
-        });
+        return createJavaRootRule().parse(input)
+                .flatMapValue(parsed -> createCRootRule().generate(parsed));
     }
 
-    private static Result<String, CompileError> generate(List<Node> parsed, OrRule childRule) {
-        Result<StringBuilder, CompileError> maybeOutput = new Ok<>(new StringBuilder());
-        for (Node node : parsed) {
-            maybeOutput = maybeOutput.and(() -> childRule.generate(node)).mapValue(tuple -> {
-                return tuple.left.append(tuple.right);
-            });
-        }
-
-        return maybeOutput.mapValue(StringBuilder::toString);
+    private static Rule createCRootRule() {
+        return new DivideRule(createCRootSegmentRule(), "children");
     }
 
-    private static Result<List<Node>, CompileError> parse(String input) {
-        List<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
-        }
-        segments.add(buffer.toString());
-
-        Result<List<Node>, CompileError> maybeParsed = new Ok<>(new ArrayList<Node>());
-        for (String segment : segments) {
-            maybeParsed = maybeParsed.and(() -> createJavaRootSegmentRule().parse(segment))
-                    .mapValue(tuple -> {
-                        tuple.left.add(tuple.right);
-                        return tuple.left;
-                    });
-        }
-        return maybeParsed;
+    private static Rule createJavaRootRule() {
+        return new DivideRule(createJavaRootSegmentRule(), "children");
     }
 
     private static OrRule createCRootSegmentRule() {
