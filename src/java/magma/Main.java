@@ -23,19 +23,39 @@ public class Main {
         <R> Result<T, R> mapErr(Function<X, R> mapper);
 
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
     }
 
     private interface Error {
         String display();
     }
 
+    private interface Context {
+        String display();
+    }
+
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileException(String message, String context) implements Error {
+    private record StringContext(String value) implements Context {
         @Override
         public String display() {
-            return message + ": " + context;
+            return value;
+        }
+    }
+
+    private record NodeContext(Node node) implements Context {
+        @Override
+        public String display() {
+            return node.display();
+        }
+    }
+
+    private record CompileError(String message, Context context) implements Error {
+        @Override
+        public String display() {
+            return message + ": " + context.display();
         }
     }
 
@@ -59,6 +79,10 @@ public class Main {
         private Optional<String> findString(String propertyKey) {
             return Optional.ofNullable(strings.get(propertyKey));
         }
+
+        public String display() {
+            return strings.toString();
+        }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -80,6 +104,11 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(value);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(value);
         }
     }
 
@@ -103,6 +132,11 @@ public class Main {
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(error);
         }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(error);
+        }
     }
 
     private record ThrowableError(Throwable throwable) implements Error {
@@ -118,6 +152,33 @@ public class Main {
         @Override
         public String display() {
             return error.display();
+        }
+    }
+
+    private interface Rule {
+        Result<Node, CompileError> parse(String name);
+
+        Result<String, CompileError> generate(Node node);
+    }
+
+    private record StringRule(String propertyKey) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String name) {
+            return new Ok<>(new Node().withString(propertyKey, name));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return node.findString(propertyKey)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> createError(node));
+        }
+
+        private Err<String, CompileError> createError(Node node) {
+            String format = "String '%s' not present";
+            String message = format.formatted(propertyKey());
+            CompileError error = new CompileError(message, new NodeContext(node));
+            return new Err<>(error);
         }
     }
 
@@ -160,7 +221,7 @@ public class Main {
         }
     }
 
-    private static Result<String, CompileException> compile(String input) {
+    private static Result<String, CompileError> compile(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -177,7 +238,7 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        Result<StringBuilder, CompileException> output = new Ok<>(new StringBuilder());
+        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
         for (String segment : segments) {
             output = output.and(() -> compileRootSegment(segment)).mapValue(tuple -> {
                 tuple.left.append(tuple.right);
@@ -188,7 +249,7 @@ public class Main {
         return output.mapValue(StringBuilder::toString);
     }
 
-    private static Result<String, CompileException> compileRootSegment(String input) {
+    private static Result<String, CompileError> compileRootSegment(String input) {
         if (input.startsWith("package ")) return new Ok<>("");
         if (input.strip().startsWith("import ")) return new Ok<>("#include \"temp.h\"\n");
 
@@ -198,14 +259,16 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return new Ok<>(generateStruct(new Node().withString("name", name)));
+                return new StringRule("name").parse(name).flatMapValue(Main::getName);
             }
         }
 
-        return new Err<>(new CompileException("Invalid root", input));
+        return new Err<>(new CompileError("Invalid root", new StringContext(input)));
     }
 
-    private static String generateStruct(Node node) {
-        return "struct " + node.findString("name").orElse("") + " {\n};\n";
+    private static Result<String, CompileError> getName(Node node) {
+        return new StringRule("name").generate(node)
+                .mapValue(value -> value + " {\n};\n")
+                .mapValue(value -> "struct " + value);
     }
 }
