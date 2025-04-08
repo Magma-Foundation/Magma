@@ -576,6 +576,32 @@ public class Main {
         }
     }
 
+    private record SymbolRule(Rule childRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            if (isSymbol(input)) {
+                return childRule.parse(input);
+            } else {
+                return new Err<>(new CompileError("Not a symbol", new StringContext(input)));
+            }
+        }
+
+        private boolean isSymbol(String input) {
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (Character.isLetter(c)) continue;
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return childRule.generate(node);
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         magma.Files.readString(source)
@@ -661,15 +687,14 @@ public class Main {
                 createWhitespaceRule(),
                 createPrefixedRule("package", "package "),
                 createPrefixedRule("import", "import "),
-                createClassRule()
+                createClassRule(new LazyRule())
         ));
     }
 
-    private static Rule createClassRule() {
+    private static Rule createClassRule(LazyRule classRule) {
         Rule modifiers = createModifiersRule();
         Rule name = new StripRule(new StringRule("name"));
 
-        LazyRule classRule = new LazyRule();
         InfixRule rightRule = createContentRule(name, createClassMemberRule(classRule));
         classRule.set(new TypeRule("class", new InfixRule(modifiers, "class ", rightRule)));
         return classRule;
@@ -684,15 +709,34 @@ public class Main {
         return new NodeListRule("modifiers", new Delimiter(" "), new StringRule("modifier"));
     }
 
-    private static Rule createClassMemberRule(LazyRule classRule) {
-        return new OrRule(List.of(
+    private static Rule createClassMemberRule(Rule classRule) {
+        LazyRule lazyRule = new LazyRule();
+        lazyRule.set(new OrRule(List.of(
                 createWhitespaceRule(),
-                new TypeRule("interface", new InfixRule(createModifiersRule(), "interface ", new StringRule("after-keyword"))),
+                createInterfaceRule(lazyRule),
                 createRecordRule(),
                 classRule,
                 new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";")),
                 createMethodRule()
+        )));
+        return lazyRule;
+    }
+
+    private static Rule createInterfaceRule(Rule classMember) {
+        Rule name = new StripRule(new SymbolRule(new StringRule("name")));
+
+        Rule childRule = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name, "<", new StringRule("type-params")), ">")),
+                nameK
         ));
+
+        Rule beforeContent = new StripRule(new OrRule(List.of(
+                new InfixRule(childRule, "permits ", new NodeListRule("variants", new Delimiter(","), new StripRule(new StringRule("value")))),
+                childRule
+        )));
+
+        Rule afterKeyword = createContentRule(beforeContent, classMember);
+        return new TypeRule("interface", new InfixRule(createModifiersRule(), "interface ", afterKeyword));
     }
 
     private static TypeRule createMethodRule() {
