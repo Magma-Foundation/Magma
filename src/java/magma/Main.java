@@ -82,12 +82,16 @@ public class Main {
 
         @Override
         public String display() {
+            return format(0);
+        }
+
+        private String format(int depth) {
             ArrayList<CompileError> copy = new ArrayList<>(errors);
             copy.sort(Comparator.comparingInt(CompileError::computeMaxDepth));
 
             String joined = copy.stream()
-                    .map(CompileError::display)
-                    .map(display -> "\n" + display)
+                    .map(compileError -> compileError.format(depth + 1))
+                    .map(display -> "\n" + "\t".repeat(depth) + display)
                     .collect(Collectors.joining());
 
             return message + ": " + context.display() + joined;
@@ -522,7 +526,9 @@ public class Main {
     private record TypeRule(String type, Rule childRule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
-            return childRule.parse(input).mapValue(node -> node.retype(type));
+            return childRule.parse(input)
+                    .mapValue(node -> node.retype(type))
+                    .mapErr(err -> new CompileError("Failed to attach type '" + type + "'", new StringContext(input), List.of(err)));
         }
 
         @Override
