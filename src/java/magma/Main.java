@@ -89,6 +89,12 @@ public class Main {
         public String display() {
             return strings.toString();
         }
+
+        public Node merge(Node other) {
+            HashMap<String, String> copy = new HashMap<>(strings);
+            copy.putAll(other.strings);
+            return new Node(copy);
+        }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -215,6 +221,33 @@ public class Main {
         }
     }
 
+    private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            int index = input.indexOf(infix);
+            if (index < 0) {
+                String format = "Infix '%s' not present";
+                String message = format.formatted(infix);
+                StringContext context = new StringContext(input);
+                CompileError error = new CompileError(message, context);
+                return new Err<>(error);
+            }
+
+            String left = input.substring(0, index);
+            String right = input.substring(index + infix.length());
+            return leftRule.parse(left)
+                    .and(() -> rightRule.parse(right))
+                    .mapValue(tuple -> tuple.left.merge(tuple.right));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return leftRule.generate(node)
+                    .and(() -> rightRule.generate(node))
+                    .mapValue(tuple -> tuple.left + infix + tuple.right);
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -286,17 +319,18 @@ public class Main {
         if (input.startsWith("package ")) return new Ok<>("");
         if (input.strip().startsWith("import ")) return new Ok<>("#include \"temp.h\"\n");
 
-        int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String afterKeyword = input.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                return new StringRule("name").parse(name).flatMapValue(node -> createStructRule().generate(node));
-            }
-        }
+        return getStringCompileErrorResult(input);
+    }
 
-        return new Err<>(new CompileError("Invalid root", new StringContext(input)));
+    private static Result<String, CompileError> getStringCompileErrorResult(String input) {
+        return createClassRule().parse(input).flatMapValue(node -> createStructRule().generate(node));
+    }
+
+    private static InfixRule createClassRule() {
+        StringRule modifiers = new StringRule("modifiers");
+        StringRule name = new StringRule("name");
+        StringRule withEnd = new StringRule("with-end");
+        return new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd));
     }
 
     private static PrefixRule createStructRule() {
