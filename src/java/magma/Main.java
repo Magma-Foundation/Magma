@@ -53,6 +53,10 @@ public class Main {
         StringBuilder merge(StringBuilder cache, String element);
     }
 
+    private interface Locator {
+        Optional<Integer> locate(String infix, String input);
+    }
+
     private record Tuple<A, B>(A left, B right) {
     }
 
@@ -274,11 +278,31 @@ public class Main {
         }
     }
 
-    private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
+    public static class FirstLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String infix, String input) {
+            int index = input.indexOf(infix);
+            return index == -1 ? Optional.empty() : Optional.of(index);
+        }
+    }
+
+    public static class LastLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String infix, String input) {
+            int index = input.lastIndexOf(infix);
+            return index == -1 ? Optional.empty() : Optional.of(index);
+        }
+    }
+
+    private record InfixRule(Rule leftRule, String infix, Rule rightRule, Locator locator) implements Rule {
+        private InfixRule(Rule leftRule, String infix, Rule rightRule) {
+            this(leftRule, infix, rightRule, new FirstLocator());
+        }
+
         @Override
         public Result<Node, CompileError> parse(String input) {
-            int index = input.indexOf(infix);
-            if (index < 0) {
+            Optional<Integer> maybeIndex = locator.locate(infix, input);
+            if (maybeIndex.isEmpty()) {
                 String format = "Infix '%s' not present";
                 String message = format.formatted(infix);
                 StringContext context = new StringContext(input);
@@ -286,6 +310,7 @@ public class Main {
                 return new Err<>(error);
             }
 
+            int index = maybeIndex.get();
             String left = input.substring(0, index);
             String right = input.substring(index + infix.length());
             return leftRule.parse(left)
@@ -651,9 +676,17 @@ public class Main {
                 new TypeRule("interface", new InfixRule(createModifiersRule(), "interface ", new StringRule("after-keyword"))),
                 createRecordRule(),
                 classRule,
-                new TypeRule("definition", new SuffixRule(new StringRule("definition"), ";")),
-                new TypeRule("method", new InfixRule(new StringRule("definition"), "(", new StringRule("with-params")))
+                new TypeRule("definition", new SuffixRule(createDefinitionRule(), ";")),
+                createMethodRule()
         ));
+    }
+
+    private static TypeRule createMethodRule() {
+        return new TypeRule("method", new InfixRule(createDefinitionRule(), "(", new StringRule("with-params")));
+    }
+
+    private static Rule createDefinitionRule() {
+        return new StripRule(new InfixRule(new StringRule("before-name"), " ", new StringRule("name"), new LastLocator()));
     }
 
     private static TypeRule createWhitespaceRule() {
