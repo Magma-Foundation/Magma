@@ -367,6 +367,10 @@ public class Main {
                 if (c == ';' && depth == 0) {
                     segments.add(buffer.toString());
                     buffer = new StringBuilder();
+                } else if (c == '}' && depth == 1) {
+                    segments.add(buffer.toString());
+                    buffer = new StringBuilder();
+                    depth--;
                 } else {
                     if (c == '{') depth++;
                     if (c == '}') depth--;
@@ -456,6 +460,29 @@ public class Main {
             } else {
                 return new Err<>(new CompileError("Type '" + type + "' not present", new NodeContext(node)));
             }
+        }
+    }
+
+    private static class LazyRule implements Rule {
+        private Optional<Rule> childRule = Optional.empty();
+
+        public void set(Rule rule) {
+            childRule = Optional.of(rule);
+        }
+
+        private Result<Rule, CompileError> findRule(Context context) {
+            return childRule.<Result<Rule, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("No rule set.", context)));
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return findRule(new StringContext(input)).flatMapValue(rule -> rule.parse(input));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return findRule(new NodeContext(node)).flatMapValue(rule -> rule.generate(node));
         }
     }
 
@@ -558,11 +585,26 @@ public class Main {
         ));
     }
 
-    private static TypeRule createClassRule() {
-        Rule modifiers = new StringRule("modifiers");
+    private static Rule createClassRule() {
+        Rule modifiers = createModifiersRule();
         Rule name = new StripRule(new StringRule("name"));
-        Rule withEnd = new StringRule("with-end");
-        return new TypeRule("class", new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd)));
+
+        LazyRule classRule = new LazyRule();
+        Rule withEnd = new StripRule(new SuffixRule(new NodeListRule("children", new StatementDivider(), createClassMemberRule(classRule)), "}"));
+        classRule.set(new TypeRule("class", new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd))));
+        return classRule;
+    }
+
+    private static StringRule createModifiersRule() {
+        return new StringRule("modifiers");
+    }
+
+    private static Rule createClassMemberRule(LazyRule classRule) {
+        return new OrRule(List.of(
+                new TypeRule("interface", new InfixRule(createModifiersRule(), "interface ", new StringRule("after-keyword"))),
+                new TypeRule("record", new InfixRule(createModifiersRule(), "record ", new StringRule("after-keyword"))),
+                classRule
+        ));
     }
 
     private static TypeRule createPrefixedRule(String type, String prefix) {
