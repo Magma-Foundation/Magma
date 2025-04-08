@@ -727,7 +727,7 @@ public class Main {
 
         Rule childRule = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(name, "<", new StringRule("type-params")), ">")),
-                nameK
+                name
         ));
 
         Rule beforeContent = new StripRule(new OrRule(List.of(
