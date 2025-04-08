@@ -510,7 +510,7 @@ public class Main {
         }
     }
 
-    private record DelimitedRule(String delimiter) implements Divider {
+    private record Delimiter(String delimiter) implements Divider {
         @Override
         public List<String> divide(String input) {
             return Arrays.asList(input.split(Pattern.quote(delimiter)));
@@ -661,7 +661,7 @@ public class Main {
     }
 
     private static TypeRule createStructRule() {
-        StringRule name = new StringRule("name");
+        Rule name = new StringRule("name");
         InfixRule contentRule = createContentRule(name, createStructMemberRule());
         return new TypeRule("struct", new PrefixRule("struct ", contentRule));
     }
@@ -671,7 +671,7 @@ public class Main {
     }
 
     private static TypeRule createIncludeRule() {
-        NodeListRule namespace = new NodeListRule("namespace", new DelimitedRule("/"), new StringRule("value"));
+        NodeListRule namespace = new NodeListRule("namespace", new Delimiter("/"), new StringRule("value"));
         return new TypeRule("include", new PrefixRule("#include \"", new SuffixRule(namespace, "\"\n")));
     }
 
@@ -699,8 +699,8 @@ public class Main {
         return new InfixRule(beforeContent, "{", withEnd);
     }
 
-    private static StringRule createModifiersRule() {
-        return new StringRule("modifiers");
+    private static Rule createModifiersRule() {
+        return new NodeListRule("modifiers", new Delimiter(" "), new StringRule("modifier"));
     }
 
     private static Rule createClassMemberRule(LazyRule classRule) {
@@ -719,12 +719,24 @@ public class Main {
     }
 
     private static Rule createDefinitionRule() {
-        Rule beforeName = createTypeRule();
-        return new StripRule(new InfixRule(beforeName, " ", new StringRule("name"), new LastLocator()));
+        Rule beforeType = createModifiersRule();
+
+        Rule beforeName = new OrRule(List.of(
+                new StripRule(new InfixRule(beforeType, " ", createTypeRule(), new LastLocator())),
+                createTypeRule()
+        ));
+
+        List<Rule> beforeName1 = List.of(
+                beforeName,
+                beforeType
+        );
+
+        return new StripRule(new InfixRule(new OrRule(beforeName1), " ", new StringRule("name"), new LastLocator()));
     }
 
     private static Rule createTypeRule() {
         return new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(new StringRule("base"), "<", new StringRule("arguments")), ">"))
         ));
     }
 
@@ -737,7 +749,7 @@ public class Main {
     }
 
     private static TypeRule createPrefixedRule(String type, String prefix) {
-        NodeListRule namespace = new NodeListRule("namespace", new DelimitedRule("."), new StringRule("value"));
+        NodeListRule namespace = new NodeListRule("namespace", new Delimiter("."), new StringRule("value"));
         return new TypeRule(type, new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ";"))));
     }
 }
