@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -43,6 +45,12 @@ public class Main {
         Result<String, CompileError> generate(Node node);
     }
 
+    private interface Divider {
+        List<String> divide(String input);
+
+        StringBuilder merge(StringBuilder cache, String element);
+    }
+
     private record Tuple<A, B>(A left, B right) {
     }
 
@@ -69,6 +77,7 @@ public class Main {
         public String display() {
             String joined = errors.stream()
                     .map(CompileError::display)
+                    .map(display -> "\n" + display)
                     .collect(Collectors.joining());
 
             return message + ": " + context.display() + joined;
@@ -99,7 +108,12 @@ public class Main {
         }
 
         public String display() {
-            return strings.toString();
+            return strings.toString() + nodeLists.toString();
+        }
+
+        @Override
+        public String toString() {
+            return display();
         }
 
         public Node merge(Node other) {
@@ -330,19 +344,46 @@ public class Main {
         }
     }
 
-    private record DivideRule(Rule childRule, String propertyKey) implements Rule {
+    public static class StatementDivider implements Divider {
+        @Override
+        public List<String> divide(String input) {
+            List<String> segments = new ArrayList<String>();
+            StringBuilder buffer = new StringBuilder();
+            int depth = 0;
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                buffer.append(c);
+                if (c == ';' && depth == 0) {
+                    segments.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else {
+                    if (c == '{') depth++;
+                    if (c == '}') depth--;
+                }
+            }
+            segments.add(buffer.toString());
+            return segments;
+        }
+
+        @Override
+        public StringBuilder merge(StringBuilder cache, String element) {
+            return cache.append(element);
+        }
+    }
+
+    private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
-            List<String> segments = divide(input);
+            List<String> segments = divider.divide(input);
             Result<List<Node>, CompileError> maybeParsed = new Ok<>(new ArrayList<Node>());
             for (String segment : segments) {
-                maybeParsed = maybeParsed.and(() -> childRule().parse(segment)).mapValue(tuple -> {
+                maybeParsed = maybeParsed.and(() -> childRule.parse(segment)).mapValue(tuple -> {
                     tuple.left.add(tuple.right);
                     return tuple.left;
                 });
             }
 
-            return maybeParsed.mapValue(list -> new Node().withNodeList(propertyKey(), list));
+            return maybeParsed.mapValue(list -> new Node().withNodeList(propertyKey, list));
         }
 
         @Override
@@ -363,32 +404,24 @@ public class Main {
         private Result<String, CompileError> generateNodeList(List<Node> children) {
             Result<StringBuilder, CompileError> maybeOutput = new Ok<>(new StringBuilder());
             for (Node child : children) {
-                maybeOutput = maybeOutput.and(() -> childRule().generate(child)).mapValue(tuple -> {
-                    return tuple.left.append(tuple.right);
-                });
+                maybeOutput = maybeOutput.and(() -> childRule().generate(child)).mapValue(tuple -> divider.merge(tuple.left, tuple.right));
             }
 
             return maybeOutput.mapValue(StringBuilder::toString);
         }
     }
 
-    private static List<String> divide(String input) {
-        List<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            }
+    private record DelimitedRule(String delimiter) implements Divider {
+        @Override
+        public List<String> divide(String input) {
+            return Arrays.asList(input.split(Pattern.quote(delimiter)));
         }
-        segments.add(buffer.toString());
-        return segments;
+
+        @Override
+        public StringBuilder merge(StringBuilder cache, String element) {
+            if (cache.isEmpty()) return cache.append(element);
+            return cache.append(delimiter).append(element);
+        }
     }
 
     public static void main(String[] args) {
@@ -436,23 +469,36 @@ public class Main {
     }
 
     private static Rule createCRootRule() {
-        return new DivideRule(createCRootSegmentRule(), "children");
+        return new DivideRule("children", new StatementDivider(), createCRootSegmentRule());
     }
 
     private static Rule createJavaRootRule() {
-        return new DivideRule(createJavaRootSegmentRule(), "children");
+        return new DivideRule("children", new StatementDivider(), createJavaRootSegmentRule());
     }
 
     private static OrRule createCRootSegmentRule() {
         return new OrRule(List.of(
+                createIncludeRule(),
                 createStructRule()
         ));
     }
 
+    private static PrefixRule createIncludeRule() {
+        DivideRule namespace = new DivideRule("namespace", new DelimitedRule("/"), new StringRule("value"));
+        return new PrefixRule("#include \"", new SuffixRule(namespace, "\"\n"));
+    }
+
     private static OrRule createJavaRootSegmentRule() {
         return new OrRule(List.of(
+                createNamespacedRule("package "),
+                createNamespacedRule("import "),
                 createClassRule()
         ));
+    }
+
+    private static StripRule createNamespacedRule(String prefix) {
+        DivideRule namespace = new DivideRule("namespace", new DelimitedRule("."), new StringRule("value"));
+        return new StripRule(new PrefixRule(prefix, new SuffixRule(namespace, ";")));
     }
 
     private static InfixRule createClassRule() {
