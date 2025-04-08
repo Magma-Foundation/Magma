@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
@@ -361,9 +363,27 @@ public class Main {
             List<String> segments = new ArrayList<String>();
             StringBuilder buffer = new StringBuilder();
             int depth = 0;
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
+
+            LinkedList<Character> queue = IntStream.range(0, input.length())
+                    .mapToObj(input::charAt)
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            while (!queue.isEmpty()) {
+                char c = queue.pop();
                 buffer.append(c);
+
+                if (c == '\'') {
+                    char popped = queue.pop();
+                    buffer.append(popped);
+
+                    if (popped == '\\') {
+                        buffer.append(queue.pop());
+                    }
+
+                    buffer.append(queue.pop());
+                    continue;
+                }
+
                 if (c == ';' && depth == 0) {
                     segments.add(buffer.toString());
                     buffer = new StringBuilder();
@@ -486,6 +506,20 @@ public class Main {
         }
     }
 
+    private static class EmptyRule implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return input.isEmpty()
+                    ? new Ok<>(new Node())
+                    : new Err<>(new CompileError("Not empty", new StringContext(input)));
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return new Ok<>("");
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -562,6 +596,7 @@ public class Main {
 
     private static Rule createCRootSegmentRule() {
         return new OrRule(List.of(
+                createWhitespaceRule(),
                 createIncludeRule(),
                 createStructRule()
         ));
@@ -579,6 +614,7 @@ public class Main {
 
     private static Rule createJavaRootSegmentRule() {
         return new OrRule(List.of(
+                createWhitespaceRule(),
                 createPrefixedRule("package", "package "),
                 createPrefixedRule("import", "import "),
                 createClassRule()
@@ -601,10 +637,21 @@ public class Main {
 
     private static Rule createClassMemberRule(LazyRule classRule) {
         return new OrRule(List.of(
+                createWhitespaceRule(),
                 new TypeRule("interface", new InfixRule(createModifiersRule(), "interface ", new StringRule("after-keyword"))),
-                new TypeRule("record", new InfixRule(createModifiersRule(), "record ", new StringRule("after-keyword"))),
-                classRule
+                createRecordRule(),
+                classRule,
+                new TypeRule("definition", new SuffixRule(new StringRule("definition"), ";")),
+                new TypeRule("method", new InfixRule(new StringRule("definition"), "(", new StringRule("with-params")))
         ));
+    }
+
+    private static TypeRule createWhitespaceRule() {
+        return new TypeRule("whitespace", new StripRule(new EmptyRule()));
+    }
+
+    private static TypeRule createRecordRule() {
+        return new TypeRule("record", new InfixRule(createModifiersRule(), "record ", new StringRule("after-keyword")));
     }
 
     private static TypeRule createPrefixedRule(String type, String prefix) {

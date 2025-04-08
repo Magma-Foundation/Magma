@@ -8,6 +8,7 @@
 #include "java/util/Arrays"
 #include "java/util/Collections"
 #include "java/util/HashMap"
+#include "java/util/LinkedList"
 #include "java/util/List"
 #include "java/util/Map"
 #include "java/util/Optional"
@@ -15,6 +16,7 @@
 #include "java/util/function/Supplier"
 #include "java/util/regex/Pattern"
 #include "java/util/stream/Collectors"
+#include "java/util/stream/IntStream"
 struct Main {
 };
 int main(){
