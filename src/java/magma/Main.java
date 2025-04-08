@@ -409,6 +409,22 @@ public class Main {
                     continue;
                 }
 
+                if (c == '"') {
+                    while (!queue.isEmpty()) {
+                        char next = queue.pop();
+                        buffer.append(next);
+
+                        if (next == '\\') {
+                            buffer.append(queue.pop());
+                        }
+
+                        if (next == '"') {
+                            break;
+                        }
+                    }
+                    continue;
+                }
+
                 if (c == ';' && depth == 0) {
                     segments.add(buffer.toString());
                     buffer = new StringBuilder();
