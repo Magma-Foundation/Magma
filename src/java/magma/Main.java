@@ -1,9 +1,7 @@
 package magma;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-    private sealed interface Result<T, X> permits Ok, Err {
+    sealed public interface Result<T, X> permits Ok, Err {
         <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper);
 
         <R> Result<R, X> mapValue(Function<T, R> mapper);
@@ -169,7 +167,7 @@ public class Main {
         }
     }
 
-    private record Ok<T, X>(T value) implements Result<T, X> {
+    public record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper) {
             return mapper.get().mapValue(otherValue -> new Tuple<>(value, otherValue));
@@ -196,7 +194,7 @@ public class Main {
         }
     }
 
-    private record Err<T, X>(X error) implements Result<T, X> {
+    public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> mapper) {
             return new Err<>(error);
@@ -580,7 +578,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readString(source)
+        magma.Files.readString(source)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .match(input -> compileAndWrite(input, source), Optional::of)
@@ -595,26 +593,9 @@ public class Main {
 
     private static Optional<ApplicationError> writeOutput(String output, Path source) {
         Path target = source.resolveSibling("main.c");
-        return writeString(target, output + "int main(){\n\treturn 0;\n}")
+        return magma.Files.writeString(target, output + "int main(){\n\treturn 0;\n}")
                 .map(ThrowableError::new)
                 .map(ApplicationError::new);
-    }
-
-    private static Optional<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
     }
 
     private static Result<String, CompileError> compile(String input) {
@@ -715,7 +696,20 @@ public class Main {
     }
 
     private static TypeRule createMethodRule() {
-        return new TypeRule("method", new InfixRule(createDefinitionRule(), "(", new StringRule("with-params")));
+        StringRule params = new StringRule("params");
+        InfixRule withParams = createContentRule(new StripRule(new SuffixRule(params, ")")), createStatementRule());
+        return new TypeRule("method", new InfixRule(createDefinitionRule(), "(", withParams));
+    }
+
+    private static Rule createStatementRule() {
+        return new OrRule(List.of(
+                createWhitespaceRule(),
+                new TypeRule("invocation-statement", new StripRule(new SuffixRule(new StringRule("invocation"), ";"))),
+                new TypeRule("while", new StripRule(new PrefixRule("while ", new StringRule("discard")))),
+                new TypeRule("if", new StripRule(new PrefixRule("if ", new StringRule("discard")))),
+                new TypeRule("return", new StripRule(new PrefixRule("return ", new StringRule("value")))),
+                new TypeRule("else", new StripRule(new PrefixRule("else ", new StringRule("discard"))))
+        ));
     }
 
     private static Rule createDefinitionRule() {
