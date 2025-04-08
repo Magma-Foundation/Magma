@@ -9,10 +9,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
@@ -58,10 +60,18 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, Context context) implements Error {
+    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
+        private CompileError(String message, Context context) {
+            this(message, context, Collections.emptyList());
+        }
+
         @Override
         public String display() {
-            return message + ": " + context.display();
+            String joined = errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
+
+            return message + ": " + context.display() + joined;
         }
     }
 
@@ -248,6 +258,62 @@ public class Main {
         }
     }
 
+    private record StripRule(Rule childRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return childRule.parse(input.strip());
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return childRule.generate(node);
+        }
+    }
+
+    private record OrRule(List<Rule> rules) implements Rule {
+        private record State<T>(Optional<T> maybeValue, List<CompileError> errors) {
+            public State() {
+                this(Optional.empty(), Collections.emptyList());
+            }
+
+            public State<T> withValue(T value) {
+                return new State<>(Optional.of(value), errors);
+            }
+
+            public State<T> withError(CompileError error) {
+                ArrayList<CompileError> errors = new ArrayList<>(this.errors);
+                errors.add(error);
+                return new State<>(maybeValue, errors);
+            }
+
+            public Result<T, List<CompileError>> toResult() {
+                return maybeValue.<Result<T, List<CompileError>>>map(Ok::new).orElse(new Err<>(errors));
+            }
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return foldAll(new StringContext(input), rule -> rule.parse(input));
+        }
+
+        private <R> Result<R, CompileError> foldAll(Context context, Function<Rule, Result<R, CompileError>> mapper) {
+            return foldRules(mapper)
+                    .toResult()
+                    .mapErr(errors -> new CompileError("No valid combination", context, errors));
+        }
+
+        private <R> State<R> foldRules(Function<Rule, Result<R, CompileError>> mapper) {
+            return rules.stream().reduce(new State<R>(),
+                    (orState, rule) -> mapper.apply(rule).match(orState::withValue, orState::withError),
+                    (_, next) -> next);
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return foldAll(new NodeContext(node), rule -> rule.generate(node));
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -288,7 +354,25 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        ArrayList<String> segments = new ArrayList<>();
+        Result<List<Node>, CompileError> maybeParsed = parse(input);
+        return maybeParsed.flatMapValue(parsed -> {
+            return generate(parsed, createCRootSegmentRule());
+        });
+    }
+
+    private static Result<String, CompileError> generate(List<Node> parsed, OrRule childRule) {
+        Result<StringBuilder, CompileError> maybeOutput = new Ok<>(new StringBuilder());
+        for (Node node : parsed) {
+            maybeOutput = maybeOutput.and(() -> childRule.generate(node)).mapValue(tuple -> {
+                return tuple.left.append(tuple.right);
+            });
+        }
+
+        return maybeOutput.mapValue(StringBuilder::toString);
+    }
+
+    private static Result<List<Node>, CompileError> parse(String input) {
+        List<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
         for (int i = 0; i < input.length(); i++) {
@@ -304,32 +388,33 @@ public class Main {
         }
         segments.add(buffer.toString());
 
-        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
+        Result<List<Node>, CompileError> maybeParsed = new Ok<>(new ArrayList<Node>());
         for (String segment : segments) {
-            output = output.and(() -> compileRootSegment(segment)).mapValue(tuple -> {
-                tuple.left.append(tuple.right);
-                return tuple.left;
-            });
+            maybeParsed = maybeParsed.and(() -> createJavaRootSegmentRule().parse(segment))
+                    .mapValue(tuple -> {
+                        tuple.left.add(tuple.right);
+                        return tuple.left;
+                    });
         }
-
-        return output.mapValue(StringBuilder::toString);
+        return maybeParsed;
     }
 
-    private static Result<String, CompileError> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return new Ok<>("");
-        if (input.strip().startsWith("import ")) return new Ok<>("#include \"temp.h\"\n");
-
-        return getStringCompileErrorResult(input);
+    private static OrRule createCRootSegmentRule() {
+        return new OrRule(List.of(
+                createStructRule()
+        ));
     }
 
-    private static Result<String, CompileError> getStringCompileErrorResult(String input) {
-        return createClassRule().parse(input).flatMapValue(node -> createStructRule().generate(node));
+    private static OrRule createJavaRootSegmentRule() {
+        return new OrRule(List.of(
+                createClassRule()
+        ));
     }
 
     private static InfixRule createClassRule() {
-        StringRule modifiers = new StringRule("modifiers");
-        StringRule name = new StringRule("name");
-        StringRule withEnd = new StringRule("with-end");
+        Rule modifiers = new StringRule("modifiers");
+        Rule name = new StripRule(new StringRule("name"));
+        Rule withEnd = new StringRule("with-end");
         return new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd));
     }
 
