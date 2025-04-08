@@ -35,6 +35,12 @@ public class Main {
         String display();
     }
 
+    private interface Rule {
+        Result<Node, CompileError> parse(String input);
+
+        Result<String, CompileError> generate(Node node);
+    }
+
     private record Tuple<A, B>(A left, B right) {
     }
 
@@ -155,16 +161,10 @@ public class Main {
         }
     }
 
-    private interface Rule {
-        Result<Node, CompileError> parse(String name);
-
-        Result<String, CompileError> generate(Node node);
-    }
-
     private record StringRule(String propertyKey) implements Rule {
         @Override
-        public Result<Node, CompileError> parse(String name) {
-            return new Ok<>(new Node().withString(propertyKey, name));
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString(propertyKey, input));
         }
 
         @Override
@@ -179,6 +179,39 @@ public class Main {
             String message = format.formatted(propertyKey());
             CompileError error = new CompileError(message, new NodeContext(node));
             return new Err<>(error);
+        }
+    }
+
+    private record SuffixRule(Rule childRule, String suffix) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            if (input.endsWith(suffix)) {
+                String slice = input.substring(0, input.length() - suffix.length());
+                return childRule.parse(slice);
+            } else {
+                return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
+            }
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return childRule.generate(node).mapValue(value -> value + suffix);
+        }
+    }
+
+    private record PrefixRule(String prefix, SuffixRule childRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            if (input.startsWith(prefix)) {
+                return childRule.parse(input.substring(prefix.length()));
+            } else {
+                return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(input)));
+            }
+        }
+
+        @Override
+        public Result<String, CompileError> generate(Node node) {
+            return childRule.generate(node).mapValue(value -> prefix + value);
         }
     }
 
@@ -259,16 +292,14 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return new StringRule("name").parse(name).flatMapValue(Main::getName);
+                return new StringRule("name").parse(name).flatMapValue(node -> createStructRule().generate(node));
             }
         }
 
         return new Err<>(new CompileError("Invalid root", new StringContext(input)));
     }
 
-    private static Result<String, CompileError> getName(Node node) {
-        return new StringRule("name").generate(node)
-                .mapValue(value -> value + " {\n};\n")
-                .mapValue(value -> "struct " + value);
+    private static PrefixRule createStructRule() {
+        return new PrefixRule("struct ", new SuffixRule(new StringRule("name"), " {\n};\n"));
     }
 }
