@@ -258,7 +258,7 @@ public class Main {
         }
     }
 
-    private record PrefixRule(String prefix, SuffixRule childRule) implements Rule {
+    private record PrefixRule(String prefix, Rule childRule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
             if (input.startsWith(prefix)) {
@@ -604,7 +604,12 @@ public class Main {
 
     private static TypeRule createStructRule() {
         StringRule name = new StringRule("name");
-        return new TypeRule("struct", new PrefixRule("struct ", new SuffixRule(name, " {\n};\n")));
+        InfixRule contentRule = createContentRule(name, createStructMemberRule());
+        return new TypeRule("struct", new PrefixRule("struct ", contentRule));
+    }
+
+    private static OrRule createStructMemberRule() {
+        return new OrRule(List.of());
     }
 
     private static TypeRule createIncludeRule() {
@@ -626,9 +631,14 @@ public class Main {
         Rule name = new StripRule(new StringRule("name"));
 
         LazyRule classRule = new LazyRule();
-        Rule withEnd = new StripRule(new SuffixRule(new NodeListRule("children", new StatementDivider(), createClassMemberRule(classRule)), "}"));
-        classRule.set(new TypeRule("class", new InfixRule(modifiers, "class ", new InfixRule(name, "{", withEnd))));
+        InfixRule rightRule = createContentRule(name, createClassMemberRule(classRule));
+        classRule.set(new TypeRule("class", new InfixRule(modifiers, "class ", rightRule)));
         return classRule;
+    }
+
+    private static InfixRule createContentRule(Rule beforeContent, Rule contentRule) {
+        Rule withEnd = new StripRule(new SuffixRule(new NodeListRule("children", new StatementDivider(), contentRule), "}"));
+        return new InfixRule(beforeContent, "{", withEnd);
     }
 
     private static StringRule createModifiersRule() {
