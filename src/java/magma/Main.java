@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,12 +82,22 @@ public class Main {
 
         @Override
         public String display() {
-            String joined = errors.stream()
+            ArrayList<CompileError> copy = new ArrayList<>(errors);
+            copy.sort(Comparator.comparingInt(CompileError::computeMaxDepth));
+
+            String joined = copy.stream()
                     .map(CompileError::display)
                     .map(display -> "\n" + display)
                     .collect(Collectors.joining());
 
             return message + ": " + context.display() + joined;
+        }
+
+        private int computeMaxDepth() {
+            return 1 + errors.stream()
+                    .mapToInt(CompileError::computeMaxDepth)
+                    .max()
+                    .orElse(0);
         }
     }
 
@@ -702,7 +713,13 @@ public class Main {
     }
 
     private static Rule createDefinitionRule() {
-        return new StripRule(new InfixRule(new StringRule("before-name"), " ", new StringRule("name"), new LastLocator()));
+        Rule beforeName = createTypeRule();
+        return new StripRule(new InfixRule(beforeName, " ", new StringRule("name"), new LastLocator()));
+    }
+
+    private static Rule createTypeRule() {
+        return new OrRule(List.of(
+        ));
     }
 
     private static TypeRule createWhitespaceRule() {
