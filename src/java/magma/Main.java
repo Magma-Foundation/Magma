@@ -336,7 +336,7 @@ public class Main {
 
     private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input, typeParams))
+                .or(() -> compileStatement(input, typeParams).map(result -> "\n\t" + result + ";"))
                 .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
                 .or(() -> generatePlaceholder(input));
     }
@@ -344,11 +344,23 @@ public class Main {
     private static Optional<String> compileStatement(String input, List<String> typeParams) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
-            String value = stripped.substring(0, stripped.length() - ";".length());
-            if (value.startsWith("return ")) {
-                return compileValue(value.substring("return ".length()), typeParams).map(result -> "\n\treturn " + result + ";");
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            if (withoutEnd.startsWith("return ")) {
+                return compileValue(withoutEnd.substring("return ".length()), typeParams).map(result -> "return " + result);
+            }
+
+            int valueSeparator = withoutEnd.indexOf("=");
+            if (valueSeparator >= 0) {
+                String destination = withoutEnd.substring(0, valueSeparator).strip();
+                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+                return compileValue(destination, typeParams).flatMap(newDest -> {
+                    return compileValue(source, typeParams).map(newSource -> {
+                        return newDest + " = " + newSource;
+                    });
+                });
             }
         }
+
         return Optional.empty();
     }
 
