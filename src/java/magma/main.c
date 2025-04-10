@@ -18,19 +18,24 @@
 	<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
 };
 /* private */ struct Err<T, X>(X error) implements Result<T, X> {
+
+};
+/* private */ struct Ok<T, X>(T value) implements Result<T, X> {
+
+};
+/* public */ struct Main {
+	/* private */ /* static final List<String> imports = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> structs = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> methods = new */ ArrayList<>(/*  */);	/* ' */ /* && */ isShallow(/* appended */);/* 
+        if (c == '{') return appended.enter();
+        if (c == '} */	/* ') */ struct return appended.exit(/*  */);/* 
+        return appended; */
+};
 	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenErr.apply(error); *//* 
          */
-}
-};
-/* private */ struct Ok<T, X>(T value) implements Result<T, X> {
-	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
+	}	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenOk.apply(value); *//* 
          */
-}
-};
-/* public */ struct Main {
-	/* private */ /* static class State {
+	}	/* private */ /* static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
         private StringBuilder buffer;
@@ -84,18 +89,18 @@
             return segments; *//* 
         }
      */
-}	/* private */ /* static final List<String> imports = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> structs = new */ ArrayList<>(/*  */);	/* public */ /* static void */ main(struct String* args) {/* 
+	}	/* public */ /* static void */ main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); *//* 
      */
-}	/* private */ /* static Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
+	}	/* private */ /* static Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
         Path target = source.resolveSibling("main.c"); *//* 
         String output = compile(input); *//* 
         return writeString(target, output); *//* 
      */
-}	/* private */ /* static Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
+	}	/* private */ /* static Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -103,33 +108,34 @@
             return Optional.of(e);
         } *//* 
      */
-}	/* private */ /* static Result<String, IOException> */ readString(struct Path source) {/* 
+	}	/* private */ /* static Result<String, IOException> */ readString(struct Path source) {/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
             return new Err<>(e);
         } *//* 
      */
-}	/* private */ /* static String */ compile(struct String input) {/* 
+	}	/* private */ /* static String */ compile(struct String input) {/* 
         List<String> segments = divide(input, Main::divideStatementChar); *//* 
         return parseAll(segments, Main::compileRootSegment)
                 .map(list -> {
                     List<String> copy = new ArrayList<String>();
                     copy.addAll(imports);
                     copy.addAll(structs);
+                    copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
                 } *//* )
                 .map(compiled -> mergeAll(Main::mergeStatements, compiled))
                 .or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
-}	/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
+	}	/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
         return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements); *//* 
      */
-}	/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
+	}	/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
         return parseAll(segments, compiler).map(compiled -> mergeAll(merger, compiled)); *//* 
      */
-}	/* private */ /* static String */ mergeAll(/* BiFunction<StringBuilder, String, StringBuilder> */ merger, /* List<String> */ compiled) {/* 
+	}	/* private */ /* static String */ mergeAll(/* BiFunction<StringBuilder, String, StringBuilder> */ merger, /* List<String> */ compiled) {/* 
         StringBuilder output = new StringBuilder(); *//* 
         for (String segment : compiled) {
             output = merger.apply(output, segment);
@@ -137,7 +143,7 @@
 
         return output.toString(); *//* 
      */
-}	/* private */ /* static Optional<List<String>> */ parseAll(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler) {/* 
+	}	/* private */ /* static Optional<List<String>> */ parseAll(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler) {/* 
         Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>()); *//* 
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
@@ -149,10 +155,10 @@
         } *//* 
         return maybeCompiled; *//* 
      */
-}	/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
+	}	/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
         return output.append(compiled); *//* 
      */
-}	/* private */ /* static List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
+	}	/* private */ /* static List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)); *//* 
@@ -165,16 +171,11 @@
 
         return state.advance().segments(); *//* 
      */
-}	/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
+	}	/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
         State appended = state.append(c); *//* 
         if (c == '; *//* ' && appended.isLevel()) return appended.advance(); *//* 
         if (c == ' */
-}	/* ' */ /* && */ isShallow(/* appended */);/* 
-        if (c == '{') return appended.enter();
-        if (c == '} */	/* ') */ struct return appended.exit(/*  */);/* 
-        return appended; */
-};
-/* 
+	}/* 
 
     private static boolean isShallow(State state) {
         return state.depth == 1;
@@ -271,7 +272,8 @@
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
-                        return Optional.of(header + " {" + outputContent + "\n}");
+                        methods.add(header + " {" + outputContent + "\n\t}");
+                        return Optional.of("");
                     });
                 }
 

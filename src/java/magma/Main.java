@@ -93,6 +93,7 @@ public class Main {
 
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
+    private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -131,6 +132,7 @@ public class Main {
                     List<String> copy = new ArrayList<String>();
                     copy.addAll(imports);
                     copy.addAll(structs);
+                    copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
                 })
@@ -290,7 +292,8 @@ public class Main {
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
-                        return Optional.of(header + " {" + outputContent + "\n}");
+                        methods.add(header + " {" + outputContent + "\n\t}");
+                        return Optional.of("");
                     });
                 }
 
