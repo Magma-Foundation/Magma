@@ -1,4 +1,3 @@
-#include "./org/jetbrains/annotations/NotNull"
 #include "./java/io/IOException"
 #include "./java/nio/file/Files"
 #include "./java/nio/file/Path"
@@ -7,5 +6,5 @@
 #include "./java/util/Arrays"
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/Collectors"
-/* public */ struct Temp {
+/* public */ struct Main {
 };

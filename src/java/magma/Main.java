@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,7 +59,7 @@ public class Main {
             }
         }
 
-        int classIndex = input.indexOf("class ".toString());
+        int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
             String[] oldModifiers = input.substring(0, classIndex).strip().split(" ");
             String newModifiers = Arrays.stream(oldModifiers)
@@ -69,7 +67,12 @@ public class Main {
                     .map(Main::generatePlaceholder)
                     .collect(Collectors.joining(" "));
 
-            return newModifiers + " struct Temp {\n};\n";
+            String afterKeyword = input.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                return newModifiers + " struct " + name + " {\n};\n";
+            }
         }
 
         return generatePlaceholder(input);
