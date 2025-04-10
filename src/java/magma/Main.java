@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,6 +98,7 @@ public class Main {
 
     private record Tuple<A, B>(A left, B right) {
     }
+
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> globals = new ArrayList<>();
@@ -366,11 +369,29 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileConditional(input, typeParams, "if ", depth))
                 .or(() -> compileConditional(input, typeParams, "while ", depth))
+                .or(() -> compileElse(input, typeParams, depth))
                 .or(() -> compileInitialization(input, typeParams, depth).map(result -> formatStatement(depth, result)))
                 .or(() -> compileStatement(input, typeParams, depth).map(result -> formatStatement(depth, result)))
                 .or(() -> compileKeywordStatement(input, depth, "continue"))
                 .or(() -> compileKeywordStatement(input, depth, "break"))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static @NotNull Optional<String> compileElse(String input, List<String> typeParams, int depth) {
+        String stripped = input.strip();
+        if (stripped.startsWith("else ")) {
+            String withoutKeyword = stripped.substring("else ".length()).strip();
+            if (withoutKeyword.startsWith("{") && withoutKeyword.endsWith("}")) {
+                String indent = createIndent(depth);
+                return compileStatements(withoutKeyword.substring(1, withoutKeyword.length() - 1),
+                        statement -> compileStatementOrBlock(statement, typeParams, depth + 1))
+                        .map(result -> indent + "else {" + result + indent + "}");
+            } else {
+                return compileStatement(withoutKeyword, typeParams, depth).map(result -> "else " + result);
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileKeywordStatement(String input, int depth, String keyword) {
