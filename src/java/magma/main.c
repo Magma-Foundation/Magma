@@ -15,8 +15,7 @@
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
 struct Result<T, X> {
-	Function<struct X, struct R> whenErr);
-};
+<R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr);};
 struct Err<T, X>(X error) implements Result<T, X> {
 };
 struct Ok<T, X>(T value) implements Result<T, X> {
@@ -90,34 +89,31 @@ auto __lambda1__() {
 	return Throwable.printStackTrace()
 }
 void main(struct String* args) {
-	/* Path source */ = Paths.get(".", "src", "java", "magma", "Main.java");
+	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
 	Optional[__lambda0__];(Optional[__lambda1__];);
 }
 Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
-	/* Path target */ = source.resolveSibling("main.c");
-	/* String output */ = compile(input);
+	struct Path target = source.resolveSibling("main.c");
+	struct String output = compile(input);
 	return magma.Files.writeString(target, output);
 }
 auto __lambda2__() {
 	return Main.divideStatementChar()
 }
 auto __lambda3__() {
-	return parseAll(segments, Main::compileRootSegment)
-                .map(list -> {
-                    List<String> copy = new ArrayList<String>();
-                    copy.addAll(imports);
+	return Main.mergeStatements))
+                .or(() -> generatePlaceholder(input)).orElse(""()
+}
+struct String compile(struct String input) {
+	List<struct String> segments = divide(input, Optional[__lambda2__];);
+	List<struct String> copy = ArrayList<struct String>(/* );
+                    copy */.addAll(imports);
                     copy.addAll(structs);
                     copy.addAll(globals);
                     copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
-                })
-                .map(compiled -> mergeAll(compiled, Main.mergeStatements))
-                .or(() -> generatePlaceholder(input)).orElse()
-}
-struct String compile(struct String input) {
-	/* List<String> segments */ = divide(input, Optional[__lambda2__];);
-	return Optional[__lambda3__];("");
+                }).map(compiled -> mergeAll(compiled, Optional[__lambda3__];);
 }
 auto __lambda4__() {
 	return Main.divideStatementChar()
@@ -168,8 +164,8 @@ auto __lambda13__() {
 	return LinkedList.new()
 }
 List<struct String> divide(struct String input, BiFunction<struct State, struct Character, struct State> divider) {
-	/* LinkedList<Character> queue */ = Optional[__lambda12__];(Collectors.toCollection(Optional[__lambda13__];));
-	/* State state */ = struct State(queue);/* 
+	LinkedList<char> queue = Optional[__lambda12__];(Collectors.toCollection(Optional[__lambda13__];));
+	struct State state = struct State(queue);/* 
         while (state.hasElements()) {
             char c = state.pop();
 
@@ -204,7 +200,7 @@ List<struct String> divide(struct String input, BiFunction<struct State, struct 
 	return state.advance().segments();
 }
 struct State divideStatementChar(struct State state, char c) {
-	/* State appended */ = state.append(c);
+	struct State appended = state.append(c);
 	if (/* c == ';' && appended */.isLevel()) /* return appended */.advance();
 	if (/* c == '}' && isShallow */(appended)) /* return appended */.advance().exit();
 	/* if (c */ = /* = '{' || c == '(') return appended */.enter();
@@ -216,7 +212,7 @@ int isShallow(struct State state) {
 }
 Optional<struct String> compileRootSegment(struct String input) {
 	if (input.startsWith("package ")) /* return Optional */.of("");
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
@@ -226,15 +222,15 @@ Optional<struct String> compileRootSegment(struct String input) {
                 return Optional.of("");
             }
         } */
-	/* Optional<String> maybeClass */ = compileToStruct(input, "class ", ArrayList<>());
+	Optional<struct String> maybeClass = compileToStruct(input, "class ", ArrayList<>());
 	if (maybeClass.isPresent()) /* return maybeClass; */
 	return generatePlaceholder(input);
 }
 Optional<struct String> compileToStruct(struct String input, struct String infix, List<struct String> typeParams) {
-	/* int classIndex */ = input.indexOf(infix);
+	int classIndex = input.indexOf(infix);
 	if (/* classIndex < 0 */) /* return Optional */.empty();
-	/* String afterKeyword */ = input.substring(/* classIndex + infix */.length());
-	/* int contentStart */ = afterKeyword.indexOf("{");/* 
+	struct String afterKeyword = input.substring(/* classIndex + infix */.length());
+	int contentStart = afterKeyword.indexOf("{");/* 
         if (contentStart >= 0) {
             String name = afterKeyword.substring(0, contentStart).strip();
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
@@ -276,7 +272,7 @@ auto __lambda21__(auto result) {
 	return "\t" + result + ";\n";
 }
 Optional<struct String> compileDefinitionStatement(struct String input) {
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (stripped.endsWith(";")) {
             String content = stripped.substring(0, stripped.length() - ";".length());
             return compileDefinition(content).map(result -> "\t" + result + ";\n");
@@ -298,11 +294,11 @@ auto __lambda24__(auto outputDefinition) {
 }
 Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {
 	if (!input.endsWith(";")) /* return Optional */.empty();
-	/* String withoutEnd */ = input.substring(0, input.length() - ";".length());
-	/* int valueSeparator */ = withoutEnd.indexOf("=");
+	struct String withoutEnd = input.substring(0, input.length() - ";".length());
+	int valueSeparator = withoutEnd.indexOf("=");
 	if (/* valueSeparator < 0 */) /* return Optional */.empty();
-	/* String definition */ = withoutEnd.substring(0, valueSeparator).strip();
-	/* String value */ = withoutEnd.substring(/* valueSeparator + "=" */.length()).strip();
+	struct String definition = withoutEnd.substring(0, valueSeparator).strip();
+	struct String value = withoutEnd.substring(/* valueSeparator + "=" */.length()).strip();
 	return compileDefinition(definition).flatMap(__lambda24__);
 }
 Optional<struct String> compileWhitespace(struct String input) {
@@ -324,12 +320,11 @@ auto __lambda28__(auto outputParams) {
                 String body = withParams.substring(paramEnd + ")".length();
 }
 Optional<struct String> compileMethod(struct String input, List<struct String> typeParams) {
-	/* int paramStart */ = input.indexOf("(");
+	int paramStart = input.indexOf("(");
 	if (/* paramStart < 0 */) /* return Optional */.empty();
-	/* String inputDefinition */ = input.substring(0, paramStart).strip();
-	/* String withParams */ = input.substring(paramStart + "(".length());
-	return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-            int paramEnd = withParams.indexOf(")");
+	struct String inputDefinition = input.substring(0, paramStart).strip();
+	struct String withParams = input.substring(paramStart + "(".length());
+	int paramEnd = withParams.indexOf(")");
             if (paramEnd < 0) return Optional.empty();
 
             String params = withParams.substring(0, paramEnd);
@@ -350,7 +345,7 @@ auto __lambda29__() {
 	return Main.divideValueChar()
 }
 Optional<struct String> compileValues(struct String input, Function<struct String, Optional<struct String>> compiler) {
-	/* List<String> divided */ = divide(input, Optional[__lambda29__];);
+	List<struct String> divided = divide(input, Optional[__lambda29__];);
 	return compileValues(divided, compiler);
 }
 struct State divideValueChar(struct State state, char c) {/* 
@@ -361,7 +356,7 @@ struct State divideValueChar(struct State state, char c) {/*
             }
         } */
 	if (/* c == ',' && state */.isLevel()) /* return state */.advance();
-	/* State appended */ = state.append(c);
+	struct State appended = state.append(c);
 	/* if (c */ = /* = '<' || c == '(') return appended */.enter();
 	if (/* c == '>' || c == ' */) /* ') return appended */.exit();
 	return appended;
@@ -378,17 +373,17 @@ auto __lambda31__(auto ) {
 auto __lambda32__(auto ) {
 	return compileConditional(input, typeParams, "while ");
 }
-auto __lambda33__(auto result) {
-	return "\n\t" + result + ";";
-}
-auto __lambda34__(auto ) {
-	return compileStatement(input, typeParams).map(__lambda33__);
-}
-auto __lambda35__(auto value) {
+auto __lambda33__(auto value) {
 	return "\n\t" + value + ";";
 }
+auto __lambda34__(auto ) {
+	return compileInitialization(input, typeParams).map(__lambda33__);
+}
+auto __lambda35__(auto result) {
+	return "\n\t" + result + ";";
+}
 auto __lambda36__(auto ) {
-	return compileInitialization(input, typeParams).map(__lambda35__);
+	return compileStatement(input, typeParams).map(__lambda35__);
 }
 auto __lambda37__(auto ) {
 	return generatePlaceholder(input);
@@ -397,7 +392,7 @@ Optional<struct String> compileStatementOrBlock(struct String input, List<struct
 	return compileWhitespace(input).or(__lambda31__).or(__lambda32__).or(__lambda34__).or(__lambda36__).or(__lambda37__);
 }
 Optional<struct String> compileConditional(struct String input, List<struct String> typeParams, struct String prefix) {
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (stripped.startsWith(prefix)) {
             String afterKeyword = stripped.substring(prefix.length()).strip();
             if (afterKeyword.startsWith("(")) {
@@ -435,7 +430,7 @@ Optional<struct String> compileConditional(struct String input, List<struct Stri
 	return Optional.empty();
 }
 Optional<struct String> compileStatement(struct String input, List<struct String> typeParams) {
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             if (withoutEnd.startsWith("return ")) {
@@ -468,7 +463,7 @@ auto __lambda40__(auto compiled) {
 	return /* compiled + " */." + property;
 }
 Optional<struct String> compileValue(struct String input, List<struct String> typeParams) {
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return Optional.of(stripped);
         } *//* 
@@ -489,18 +484,18 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
         if (stripped.startsWith("!")) {
             return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
         } */
-	/* Optional<String> value */ = compileLambda(stripped, typeParams);
+	Optional<struct String> value = compileLambda(stripped, typeParams);
 	if (value.isPresent()) /* return value; */
-	/* Optional<String> invocation */ = compileInvocation(input, typeParams);
+	Optional<struct String> invocation = compileInvocation(input, typeParams);
 	if (invocation.isPresent()) /* return invocation; */
-	/* int methodIndex */ = stripped.lastIndexOf("::");/* 
+	int methodIndex = stripped.lastIndexOf("::");/* 
         if (methodIndex >= 0) {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
             return Optional.of(generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + type + "." + property + "()") + ";");
         } */
-	/* int separator */ = input.lastIndexOf(".");/* 
+	int separator = input.lastIndexOf(".");/* 
         if (separator >= 0) {
             String object = input.substring(0, separator).strip();
             String property = input.substring(separator + ".".length()).strip();
@@ -522,9 +517,9 @@ auto __lambda43__(auto newValue) {
 	return generateLambdaWithReturn(paramNames, "\n\treturn " + newValue + ";");
 }
 Optional<struct String> compileLambda(struct String input, List<struct String> typeParams) {
-	/* int arrowIndex */ = input.indexOf("->");
+	int arrowIndex = input.indexOf("->");
 	if (/* arrowIndex < 0 */) /* return Optional */.empty();
-	/* String beforeArrow */ = input.substring(0, arrowIndex).strip();/* 
+	struct String beforeArrow = input.substring(0, arrowIndex).strip();/* 
         List<String> paramNames; *//* 
         if (isSymbol(beforeArrow)) {
             paramNames = Collections.singletonList(beforeArrow);
@@ -536,7 +531,7 @@ Optional<struct String> compileLambda(struct String input, List<struct String> t
         } *//*  else {
             return Optional.empty();
         } */
-	/* String value */ = input.substring(/* arrowIndex + "->" */.length()).strip();/* 
+	struct String value = input.substring(/* arrowIndex + "->" */.length()).strip();/* 
         if (value.startsWith("{") && value.endsWith("}")) {
             String slice = value.substring(1, value.length() - 1);
             return compileStatements(slice, statement -> compileStatementOrBlock(statement, typeParams)).flatMap(result -> {
@@ -549,10 +544,10 @@ auto __lambda44__(auto name) {
 	return /* "auto " + name */;
 }
 Optional<struct String> generateLambdaWithReturn(List<struct String> paramNames, struct String returnValue) {
-	/* int current */ = counter;/* 
+	int current = counter;/* 
         counter++; */
-	/* String lambdaName */ = "__lambda" + current + "__";
-	/* String joined */ = paramNames.stream().map(__lambda44__).collect(Collectors.joining(", ", "(", ")"));
+	struct String lambdaName = "__lambda" + current + "__";
+	struct String joined = paramNames.stream().map(__lambda44__).collect(Collectors.joining(", ", "(", ")"));
 	methods.add("auto " + lambdaName + joined + " {" + returnValue + "\n}\n");
 	return Optional.of(lambdaName);
 }
@@ -568,7 +563,7 @@ int isNumber(struct String input) {
 	return Optional[__lambda45__];(Optional[__lambda46__];);
 }
 Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {
-	/* String stripped */ = input.strip();
+	struct String stripped = input.strip();
 	if (stripped.endsWith(")") /* ) {
             String sliced = stripped */.substring(0, stripped.length() - ")".length());
 
@@ -614,50 +609,48 @@ struct StringBuilder mergeValues(struct StringBuilder cache, struct String eleme
 	return cache.append(", ").append(element);
 }
 Optional<struct String> compileDefinition(struct String definition) {
-	/* int nameSeparator */ = definition.lastIndexOf(" ");/* 
-        if (nameSeparator >= 0) {
-            String beforeName = definition.substring(0, nameSeparator).strip();
-            String name = definition.substring(nameSeparator + " ".length()).strip();
-
-            int typeSeparator = -1;
-            int depth = 0;
-            int i = beforeName.length() - 1;
-            while (i >= 0) {
-                char c = beforeName.charAt(i);
-                if (c == ' ' && depth == 0) {
-                    typeSeparator = i;
-                    break;
-                } else {
-                    if (c == '>') depth++;
-                    if (c == '<') depth--;
-                }
-                i--;
+	int nameSeparator = definition.lastIndexOf(" ");
+	if (/* nameSeparator < 0 */) /* return Optional */.empty();
+	struct String beforeName = definition.substring(0, nameSeparator).strip();
+	struct String name = definition.substring(/* nameSeparator + " " */.length()).strip();
+	if (!isSymbol(name)) /* return Optional */.empty();
+	int typeSeparator = /* -1 */;
+	int depth = 0;
+	int i = beforeName.length() - 1;/* 
+        while (i >= 0) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
+            } else {
+                if (c == '>') depth++;
+                if (c == '<') depth--;
             }
+            i--;
+        } *//* 
 
-            if (typeSeparator >= 0) {
-                String beforeType = beforeName.substring(0, typeSeparator).strip();
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
 
-                List<String> typeParams;
-                if (beforeType.endsWith(">")) {
-                    String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
-                    int typeParamStart = withoutEnd.indexOf("<");
-                    if (typeParamStart >= 0) {
-                        String substring = withoutEnd.substring(typeParamStart + 1);
-                        typeParams = splitValues(substring);
-                    } else {
-                        typeParams = Collections.emptyList();
-                    }
+            List<String> typeParams;
+            if (beforeType.endsWith(">")) {
+                String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
+                int typeParamStart = withoutEnd.indexOf("<");
+                if (typeParamStart >= 0) {
+                    String substring = withoutEnd.substring(typeParamStart + 1);
+                    typeParams = splitValues(substring);
                 } else {
                     typeParams = Collections.emptyList();
                 }
-
-                String inputType = beforeName.substring(typeSeparator + " ".length());
-                return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
             } else {
-                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
+                typeParams = Collections.emptyList();
             }
+
+            String inputType = beforeName.substring(typeSeparator + " ".length());
+            return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
+        } *//*  else {
+            return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
         } */
-	return Optional.empty();
 }
 auto __lambda50__() {
 	return Arrays.stream(paramsArrays)
@@ -666,7 +659,7 @@ auto __lambda50__() {
                 .toList()
 }
 List<struct String> splitValues(struct String substring) {
-	/* String[] paramsArrays */ = substring.strip().split(Pattern.quote(","));
+	struct String* paramsArrays = substring.strip().split(Pattern.quote(","));
 	return Optional[__lambda50__];();
 }
 struct String generateDefinition(List<struct String> maybeTypeParams, struct String type, struct String name) {/* 
@@ -696,7 +689,7 @@ Optional<struct String> compileType(struct String input, List<struct String> typ
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
                     .map(value -> value + "*");
         } */
-	/* String stripped */ = input.strip();/* 
+	struct String stripped = input.strip();/* 
         if (isSymbol(stripped)) {
             if (typeParams.contains(stripped)) {
                 return Optional.of(stripped);

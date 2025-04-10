@@ -357,8 +357,8 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileConditional(input, typeParams, "if "))
                 .or(() -> compileConditional(input, typeParams, "while "))
-                .or(() -> compileStatement(input, typeParams).map(result -> "\n\t" + result + ";"))
                 .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
+                .or(() -> compileStatement(input, typeParams).map(result -> "\n\t" + result + ";"))
                 .or(() -> generatePlaceholder(input));
     }
 
@@ -573,49 +573,49 @@ public class Main {
 
     private static Optional<String> compileDefinition(String definition) {
         int nameSeparator = definition.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            String beforeName = definition.substring(0, nameSeparator).strip();
-            String name = definition.substring(nameSeparator + " ".length()).strip();
+        if (nameSeparator < 0) return Optional.empty();
 
-            int typeSeparator = -1;
-            int depth = 0;
-            int i = beforeName.length() - 1;
-            while (i >= 0) {
-                char c = beforeName.charAt(i);
-                if (c == ' ' && depth == 0) {
-                    typeSeparator = i;
-                    break;
-                } else {
-                    if (c == '>') depth++;
-                    if (c == '<') depth--;
-                }
-                i--;
+        String beforeName = definition.substring(0, nameSeparator).strip();
+        String name = definition.substring(nameSeparator + " ".length()).strip();
+        if (!isSymbol(name)) return Optional.empty();
+
+        int typeSeparator = -1;
+        int depth = 0;
+        int i = beforeName.length() - 1;
+        while (i >= 0) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
+            } else {
+                if (c == '>') depth++;
+                if (c == '<') depth--;
             }
+            i--;
+        }
 
-            if (typeSeparator >= 0) {
-                String beforeType = beforeName.substring(0, typeSeparator).strip();
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
 
-                List<String> typeParams;
-                if (beforeType.endsWith(">")) {
-                    String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
-                    int typeParamStart = withoutEnd.indexOf("<");
-                    if (typeParamStart >= 0) {
-                        String substring = withoutEnd.substring(typeParamStart + 1);
-                        typeParams = splitValues(substring);
-                    } else {
-                        typeParams = Collections.emptyList();
-                    }
+            List<String> typeParams;
+            if (beforeType.endsWith(">")) {
+                String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
+                int typeParamStart = withoutEnd.indexOf("<");
+                if (typeParamStart >= 0) {
+                    String substring = withoutEnd.substring(typeParamStart + 1);
+                    typeParams = splitValues(substring);
                 } else {
                     typeParams = Collections.emptyList();
                 }
-
-                String inputType = beforeName.substring(typeSeparator + " ".length());
-                return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
             } else {
-                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
+                typeParams = Collections.emptyList();
             }
+
+            String inputType = beforeName.substring(typeSeparator + " ".length());
+            return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
+        } else {
+            return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
         }
-        return Optional.empty();
     }
 
     private static List<String> splitValues(String substring) {
