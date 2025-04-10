@@ -27,14 +27,14 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(error);
+            return whenErr.apply(this.error);
         }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(value);
+            return whenOk.apply(this.value);
         }
     }
 
@@ -56,40 +56,40 @@ public class Main {
         }
 
         private State advance() {
-            segments.add(buffer.toString());
-            buffer = new StringBuilder();
+            this.segments.add(this.buffer.toString());
+            this.buffer = new StringBuilder();
             return this;
         }
 
         private State append(char c) {
-            buffer.append(c);
+            this.buffer.append(c);
             return this;
         }
 
         private boolean isLevel() {
-            return depth == 0;
+            return this.depth == 0;
         }
 
         private char pop() {
-            return queue.pop();
+            return this.queue.pop();
         }
 
         private boolean hasElements() {
-            return !queue.isEmpty();
+            return !this.queue.isEmpty();
         }
 
         private State exit() {
-            this.depth = depth - 1;
+            this.depth = this.depth - 1;
             return this;
         }
 
         private State enter() {
-            this.depth = depth + 1;
+            this.depth = this.depth + 1;
             return this;
         }
 
         public List<String> segments() {
-            return segments;
+            return this.segments;
         }
     }
 
