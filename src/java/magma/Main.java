@@ -373,6 +373,22 @@ public class Main {
             }
         }
 
+        int argsStart = input.indexOf("(");
+        if (argsStart >= 0) {
+            String type = input.substring(0, argsStart);
+            String withEnd = input.substring(argsStart + "(".length()).strip();
+            if (withEnd.endsWith(")")) {
+                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+                return compileValue(type, typeParams).flatMap(outputType -> {
+                    return compileValues(argsString, arg -> {
+                        return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
+                    }).map(args -> {
+                        return outputType + "(" + args + ")";
+                    });
+                });
+            }
+        }
+
         return generatePlaceholder(input);
     }
 
