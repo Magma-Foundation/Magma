@@ -267,13 +267,13 @@ public class Main {
     }
 
     private static Optional<String> compileGlobalInitialization(String input, List<String> typeParams) {
-        return compileInitialization(input, typeParams).map(generated -> {
+        return compileInitialization(input, typeParams, 0).map(generated -> {
             globals.add(generated + ";\n");
             return "";
         });
     }
 
-    private static Optional<String> compileInitialization(String input, List<String> typeParams) {
+    private static Optional<String> compileInitialization(String input, List<String> typeParams, int depth) {
         if (!input.endsWith(";")) return Optional.empty();
 
         String withoutEnd = input.substring(0, input.length() - ";".length());
@@ -283,7 +283,7 @@ public class Main {
         String definition = withoutEnd.substring(0, valueSeparator).strip();
         String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
         return compileDefinition(definition).flatMap(outputDefinition -> {
-            return compileValue(value, typeParams).map(outputValue -> {
+            return compileValue(value, typeParams, depth).map(outputValue -> {
                 return outputDefinition + " = " + outputValue;
             });
         });
@@ -315,7 +315,7 @@ public class Main {
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
-                    return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams)).flatMap(outputContent -> {
+                    return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams, 1)).flatMap(outputContent -> {
                         methods.add(header + " {" + outputContent + "\n}\n");
                         return Optional.of("");
                     });
@@ -351,82 +351,99 @@ public class Main {
         return compileAndMerge(params, compiler, Main::mergeValues);
     }
 
-    private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams) {
+    private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileConditional(input, typeParams, "if "))
-                .or(() -> compileConditional(input, typeParams, "while "))
-                .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
-                .or(() -> compileStatement(input, typeParams).map(result -> "\n\t" + result + ";"))
+                .or(() -> compileConditional(input, typeParams, "if ", depth))
+                .or(() -> compileConditional(input, typeParams, "while ", depth))
+                .or(() -> compileInitialization(input, typeParams, depth).map(result -> formatStatement(depth, result)))
+                .or(() -> compileStatement(input, typeParams, depth).map(result -> formatStatement(depth, result)))
                 .or(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileConditional(String input, List<String> typeParams, String prefix) {
-        String stripped = input.strip();
-        if (stripped.startsWith(prefix)) {
-            String afterKeyword = stripped.substring(prefix.length()).strip();
-            if (afterKeyword.startsWith("(")) {
-                String withoutConditionStart = afterKeyword.substring(1);
-                int conditionEnd = -1;
-                int depth = 0;
-                for (int i = 0; i < withoutConditionStart.length(); i++) {
-                    char c = withoutConditionStart.charAt(i);
-                    if (c == ')' && depth == 0) {
-                        conditionEnd = i;
-                        break;
-                    }
-                    if (c == '(') depth++;
-                    if (c == ')') depth--;
-                }
-
-                if (conditionEnd >= 0) {
-                    String oldCondition = withoutConditionStart.substring(0, conditionEnd).strip();
-                    String withBraces = withoutConditionStart.substring(conditionEnd + ")".length()).strip();
-                    return compileValue(oldCondition, typeParams).flatMap(newCondition -> {
-                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                            String content = withBraces.substring(1, withBraces.length() - 1);
-                            return compileStatements(content, statement -> compileStatement(statement, typeParams)).map(statements -> {
-                                return "\n\t" + prefix + "(" + newCondition + ") " + statements;
-                            });
-                        } else {
-                            return compileValue(withBraces, typeParams).map(result -> {
-                                return "\n\t" + prefix + "(" + newCondition + ") " + result;
-                            });
-                        }
-                    });
-                }
-            }
-        }
-
-        return Optional.empty();
+    private static String formatStatement(int depth, String value) {
+        return createIndent(depth) + value + ";";
     }
 
-    private static Optional<String> compileStatement(String input, List<String> typeParams) {
+    private static String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
+    }
+
+    private static Optional<String> compileConditional(String input, List<String> typeParams, String prefix, int depth) {
+        String stripped = input.strip();
+        if (!stripped.startsWith(prefix)) return Optional.empty();
+
+        String afterKeyword = stripped.substring(prefix.length()).strip();
+        if (!afterKeyword.startsWith("(")) return Optional.empty();
+
+        String withoutConditionStart = afterKeyword.substring(1);
+        int conditionEnd = findConditionEnd(withoutConditionStart);
+
+        if (conditionEnd < 0) return Optional.empty();
+        String oldCondition = withoutConditionStart.substring(0, conditionEnd).strip();
+        String withBraces = withoutConditionStart.substring(conditionEnd + ")".length()).strip();
+
+        return compileValue(oldCondition, typeParams, depth).flatMap(newCondition -> {
+            String withCondition = createIndent(depth) + prefix + "(" + newCondition + ")";
+
+            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                String content = withBraces.substring(1, withBraces.length() - 1);
+                return compileStatements(content, statement -> compileStatementOrBlock(statement, typeParams, depth + 1)).map(statements -> {
+                    return withCondition +
+                            " {" + statements + "\n" +
+                            "\t".repeat(depth) +
+                            "}";
+                });
+            } else {
+                return compileValue(withBraces, typeParams, depth).map(result -> {
+                    return withCondition + " " + result;
+                });
+            }
+        });
+
+    }
+
+    private static int findConditionEnd(String withoutConditionStart) {
+        int conditionEnd = -1;
+        int depth0 = 0;
+        for (int i = 0; i < withoutConditionStart.length(); i++) {
+            char c = withoutConditionStart.charAt(i);
+            if (c == ')' && depth0 == 0) {
+                conditionEnd = i;
+                break;
+            }
+            if (c == '(') depth0++;
+            if (c == ')') depth0--;
+        }
+        return conditionEnd;
+    }
+
+    private static Optional<String> compileStatement(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             if (withoutEnd.startsWith("return ")) {
-                return compileValue(withoutEnd.substring("return ".length()), typeParams).map(result -> "return " + result);
+                return compileValue(withoutEnd.substring("return ".length()), typeParams, depth).map(result -> "return " + result);
             }
 
             int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
                 String destination = withoutEnd.substring(0, valueSeparator).strip();
                 String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
-                return compileValue(destination, typeParams).flatMap(newDest -> {
-                    return compileValue(source, typeParams).map(newSource -> {
+                return compileValue(destination, typeParams, depth).flatMap(newDest -> {
+                    return compileValue(source, typeParams, depth).map(newSource -> {
                         return newDest + " = " + newSource;
                     });
                 });
             }
 
-            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams);
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, depth);
             if (maybeInvocation.isPresent()) return maybeInvocation;
         }
 
         return Optional.empty();
     }
 
-    private static Optional<String> compileValue(String input, List<String> typeParams) {
+    private static Optional<String> compileValue(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return Optional.of(stripped);
@@ -440,19 +457,19 @@ public class Main {
                 String withEnd = slice.substring(argsStart + "(".length()).strip();
                 if (withEnd.endsWith(")")) {
                     String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                    return compileType(type, typeParams).flatMap(outputType -> compileArgs(argsString, typeParams).map(value -> outputType + value));
+                    return compileType(type, typeParams).flatMap(outputType -> compileArgs(argsString, typeParams, depth).map(value -> outputType + value));
                 }
             }
         }
 
         if (stripped.startsWith("!")) {
-            return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
+            return compileValue(stripped.substring(1), typeParams, depth).map(result -> "!" + result);
         }
 
-        Optional<String> value = compileLambda(stripped, typeParams);
+        Optional<String> value = compileLambda(stripped, typeParams, depth);
         if (value.isPresent()) return value;
 
-        Optional<String> invocation = compileInvocation(input, typeParams);
+        Optional<String> invocation = compileInvocation(input, typeParams, depth);
         if (invocation.isPresent()) return invocation;
 
         int methodIndex = stripped.lastIndexOf("::");
@@ -471,7 +488,7 @@ public class Main {
         if (separator >= 0) {
             String object = input.substring(0, separator).strip();
             String property = input.substring(separator + ".".length()).strip();
-            return compileValue(object, typeParams).map(compiled -> compiled + "." + property);
+            return compileValue(object, typeParams, depth).map(compiled -> compiled + "." + property);
         }
 
         if (isSymbol(stripped) || isNumber(stripped)) {
@@ -481,7 +498,7 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static Optional<String> compileLambda(String input, List<String> typeParams) {
+    private static Optional<String> compileLambda(String input, List<String> typeParams, int depth) {
         int arrowIndex = input.indexOf("->");
         if (arrowIndex < 0) return Optional.empty();
 
@@ -501,12 +518,12 @@ public class Main {
         String value = input.substring(arrowIndex + "->".length()).strip();
         if (value.startsWith("{") && value.endsWith("}")) {
             String slice = value.substring(1, value.length() - 1);
-            return compileStatements(slice, statement -> compileStatementOrBlock(statement, typeParams)).flatMap(result -> {
+            return compileStatements(slice, statement -> compileStatementOrBlock(statement, typeParams, depth)).flatMap(result -> {
                 return generateLambdaWithReturn(paramNames, result);
             });
         }
 
-        return compileValue(value, typeParams).flatMap(newValue -> {
+        return compileValue(value, typeParams, depth).flatMap(newValue -> {
             return generateLambdaWithReturn(paramNames, "\n\treturn " + newValue + ";");
         });
     }
@@ -529,40 +546,45 @@ public class Main {
                 .allMatch(Character::isDigit);
     }
 
-    private static Optional<String> compileInvocation(String input, List<String> typeParams) {
+    private static Optional<String> compileInvocation(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
         if (stripped.endsWith(")")) {
             String sliced = stripped.substring(0, stripped.length() - ")".length());
 
-            int argsStart = -1;
-            int depth = 0;
-            int i = sliced.length() - 1;
-            while (i >= 0) {
-                char c = sliced.charAt(i);
-                if (c == '(' && depth == 0) {
-                    argsStart = i;
-                    break;
-                }
-
-                if (c == ')') depth++;
-                if (c == '(') depth--;
-                i--;
-            }
+            int argsStart = findInvocationStart(sliced);
 
             if (argsStart >= 0) {
                 String type = sliced.substring(0, argsStart);
                 String withEnd = sliced.substring(argsStart + "(".length()).strip();
-                return compileValue(type, typeParams).flatMap(caller -> {
-                    return compileArgs(withEnd, typeParams).map(value -> caller + value);
+                return compileValue(type, typeParams, depth).flatMap(caller -> {
+                    return compileArgs(withEnd, typeParams, depth).map(value -> caller + value);
                 });
             }
         }
         return Optional.empty();
     }
 
-    private static Optional<String> compileArgs(String argsString, List<String> typeParams) {
+    private static int findInvocationStart(String sliced) {
+        int argsStart = -1;
+        int depth0 = 0;
+        int i = sliced.length() - 1;
+        while (i >= 0) {
+            char c = sliced.charAt(i);
+            if (c == '(' && depth0 == 0) {
+                argsStart = i;
+                break;
+            }
+
+            if (c == ')') depth0++;
+            if (c == '(') depth0--;
+            i--;
+        }
+        return argsStart;
+    }
+
+    private static Optional<String> compileArgs(String argsString, List<String> typeParams, int depth) {
         return compileValues(argsString, arg -> {
-            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
+            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams, depth));
         }).map(args -> {
             return "(" + args + ")";
         });
