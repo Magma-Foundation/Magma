@@ -173,7 +173,25 @@ public class Main {
     private static Optional<String> compileType(String input) {
         if (input.equals("void")) return Optional.of("void");
 
+        if (input.endsWith("[]")) {
+            return compileType(input.substring(0, input.length() - "[]".length()))
+                    .map(value -> value + "*");
+        }
+
+        if (isSymbol(input)) {
+            return Optional.of("struct " + input);
+        }
+
         return generatePlaceholder(input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) continue;
+            return false;
+        }
+        return true;
     }
 
     private static Optional<String> generatePlaceholder(String input) {

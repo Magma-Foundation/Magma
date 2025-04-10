@@ -12,7 +12,7 @@
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
 };
-/* public */ /* static */ void main(/* String[] */ args)/*  {
+/* public */ /* static */ void main(struct String* args)/*  {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -21,7 +21,7 @@
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    } *//* private */ /* static */ /* String */ compile(/* String */ input)/*  {
+    } *//* private */ /* static */ struct String compile(struct String input)/*  {
         return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse("");
     } *//* 
 
@@ -36,9 +36,9 @@
         }
 
         return maybeOutput.map(StringBuilder::toString);
-    } *//* private */ /* static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ output/* String */ compiled)/*  {
+    } *//* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled)/*  {
         return output.append(compiled);
-    } *//* private */ /* static */ /* ArrayList<String> */ divide(/* String */ input)/*  {
+    } *//* private */ /* static */ /* ArrayList<String> */ divide(struct String input)/*  {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -149,7 +149,25 @@
     private static Optional<String> compileType(String input) {
         if (input.equals("void")) return Optional.of("void");
 
+        if (input.endsWith("[]")) {
+            return compileType(input.substring(0, input.length() - "[]".length()))
+                    .map(value -> value + "*");
+        }
+
+        if (isSymbol(input)) {
+            return Optional.of("struct " + input);
+        }
+
         return generatePlaceholder(input);
+    } *//* 
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) continue;
+            return false;
+        }
+        return true;
     } *//* 
 
     private static Optional<String> generatePlaceholder(String input) {
