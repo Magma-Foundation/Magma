@@ -11,25 +11,11 @@
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
-};
 /* private */ struct Result<T, X> {
+/* <R> */ struct R match(/* Function<T *//* R> */ whenOk/* Function<X *//* R> */ whenErr);/* 
+     */
 };
-/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
-     *//* 
-
-    private record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(error);
-        }
-    } *//* 
-
-    private record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(value);
-        }
-    } *//* public */ /* static */ void main(struct String* args) {/* 
+/* private */ /* record */ /* Err<T, */ X>(struct X error);/* private */ /* record */ /* Ok<T, */ X>(struct T value);/* public */ /* static */ void main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
@@ -58,20 +44,18 @@
 }/* private */ /* static */ struct String compile(struct String input) {/* 
         return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
-}/* 
-
-    private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compileAndMerge(compiler, divide(input), Main::mergeStatements);
-    } *//* 
-
-    private static Optional<String> compileAndMerge(Function<String, Optional<String>> compiler, List<String> segments, BiFunction<StringBuilder, String, StringBuilder> mergeStatements) {
-        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
+}/* private */ /* static */ /* Optional<String> */ compileStatements(struct String input/* Function<String *//* Optional<String>> */ compiler) {/* 
+        return compileAndMerge(divide(input), compiler, Main::mergeStatements); *//* 
+     */
+}/* private */ /* static */ /* Optional<String> */ compileAndMerge(/* List<String> */ segments/* Function<String *//* Optional<String>> */ compiler/* BiFunction<StringBuilder *//* String *//* StringBuilder> */ mergeStatements) {/* 
+        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder()); *//* 
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
-        }
+        } *//* 
 
-        return maybeOutput.map(StringBuilder::toString);
-    } *//* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled) {/* 
+        return maybeOutput.map(StringBuilder::toString); *//* 
+     */
+}/* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled) {/* 
         return output.append(compiled); *//* 
      */
 }/* private */ /* static */ /* ArrayList<String> */ divide(struct String input) {/* 
@@ -96,7 +80,9 @@
 }/* 
         segments.add(buffer.toString()); *//* 
         return segments; *//* 
-     *//* 
+     */
+};
+/* 
 
     private static Optional<String> compileRootSegment(String input) {
         if (input.startsWith("package ")) return Optional.of("");
@@ -132,7 +118,9 @@
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                    return newModifiers + " struct " + name + " {\n};\n" + outputContent;
+                    return newModifiers + " struct " + name + " {\n" +
+                            outputContent +
+                            "\n};\n";
                 });
             }
         }
@@ -149,8 +137,8 @@
     } *//* 
 
     private static Optional<String> compileClassMember(String input) {
-        return compileMethod(input)
-                .or(() -> compileToStruct(input, "interface "))
+        return compileToStruct(input, "interface ")
+                .or(() ->compileMethod(input))
                 .or(() -> generatePlaceholder(input));
     } *//* 
 
@@ -169,15 +157,16 @@
             List<String> params = Arrays.stream(paramsArrays).map(String::strip).toList();
             String body = withParams.substring(paramEnd + ")".length()).strip();
 
-            return compileAndMerge(Main::compileDefinition, params, Main::mergeValues).flatMap(outputParams -> {
+            return compileAndMerge(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition)), Main::mergeValues).flatMap(outputParams -> {
+                String header = outputDefinition + "(" + outputParams + ")";
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
-                        return Optional.of(outputDefinition + "(" + outputParams + ") {" + outputContent + "\n}");
+                        return Optional.of(header + " {" + outputContent + "\n}");
                     });
                 }
 
-                return Optional.empty();
+                return Optional.of(header + ";");
             });
         });
     } *//* 

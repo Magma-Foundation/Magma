@@ -67,10 +67,10 @@ public class Main {
     }
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
-        return compileAndMerge(compiler, divide(input), Main::mergeStatements);
+        return compileAndMerge(divide(input), compiler, Main::mergeStatements);
     }
 
-    private static Optional<String> compileAndMerge(Function<String, Optional<String>> compiler, List<String> segments, BiFunction<StringBuilder, String, StringBuilder> mergeStatements) {
+    private static Optional<String> compileAndMerge(List<String> segments, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> mergeStatements) {
         Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder());
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
@@ -140,7 +140,9 @@ public class Main {
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                    return newModifiers + " struct " + name + " {\n};\n" + outputContent;
+                    return newModifiers + " struct " + name + " {\n" +
+                            outputContent +
+                            "\n};\n";
                 });
             }
         }
@@ -157,8 +159,8 @@ public class Main {
     }
 
     private static Optional<String> compileClassMember(String input) {
-        return compileMethod(input)
-                .or(() -> compileToStruct(input, "interface "))
+        return compileToStruct(input, "interface ")
+                .or(() ->compileMethod(input))
                 .or(() -> generatePlaceholder(input));
     }
 
@@ -177,15 +179,16 @@ public class Main {
             List<String> params = Arrays.stream(paramsArrays).map(String::strip).toList();
             String body = withParams.substring(paramEnd + ")".length()).strip();
 
-            return compileAndMerge(Main::compileDefinition, params, Main::mergeValues).flatMap(outputParams -> {
+            return compileAndMerge(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition)), Main::mergeValues).flatMap(outputParams -> {
+                String header = outputDefinition + "(" + outputParams + ")";
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
-                        return Optional.of(outputDefinition + "(" + outputParams + ") {" + outputContent + "\n}");
+                        return Optional.of(header + " {" + outputContent + "\n}");
                     });
                 }
 
-                return Optional.empty();
+                return Optional.of(header + ";");
             });
         });
     }
