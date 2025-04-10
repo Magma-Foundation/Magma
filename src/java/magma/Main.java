@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) {
@@ -41,6 +42,14 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) return "";
+        if (input.strip().startsWith("import ")) {
+            String right = input.strip().substring("import ".length());
+            if (right.endsWith(";")) {
+                String content = right.substring(0, right.length() - ";".length());
+                String joined = String.join("/", content.split(Pattern.quote(".")));
+                return "#include \"./" + joined + "\"\n";
+            }
+        }
         return "/* " + input + " */";
     }
 }
