@@ -100,6 +100,7 @@ public class Main {
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> globals = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
+    private static int counter = 0;
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -415,6 +416,23 @@ public class Main {
 
         if (stripped.startsWith("!")) {
             return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
+        }
+
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String paramName = stripped.substring(0, arrowIndex).strip();
+            if (isSymbol(paramName)) {
+                String value = stripped.substring(arrowIndex + "->".length());
+
+                int current = counter;
+                counter++;
+                String name = "__lambda" + current + "__";
+
+                return compileValue(value, typeParams).flatMap(newValue -> {
+                    methods.add("auto " + name + " (auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
+                    return Optional.of(name);
+                });
+            }
         }
 
         Optional<String> invocation = compileInvocation(input, typeParams);
