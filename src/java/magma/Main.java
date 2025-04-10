@@ -508,6 +508,7 @@ public class Main {
                 .or(() -> compileOperator(input, typeParams, depth, "<"))
                 .or(() -> compileOperator(input, typeParams, depth, "+"))
                 .or(() -> compileOperator(input, typeParams, depth, ">="))
+                .or(() -> compileOperator(input, typeParams, depth, "&&"))
                 .or(() -> generatePlaceholder(input));
     }
 
