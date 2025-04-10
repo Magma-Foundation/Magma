@@ -90,6 +90,10 @@ public class Main {
         public List<String> segments() {
             return this.segments;
         }
+
+        public char peek() {
+            return this.queue.peek();
+        }
     }
 
     private static final List<String> imports = new ArrayList<>();
@@ -174,6 +178,22 @@ public class Main {
 
                 if (maybeSlash == '\\') state.append(state.pop());
                 state.append(state.pop());
+                continue;
+            }
+
+            if (c == '\"') {
+                state.append(c);
+
+                while (state.hasElements()) {
+                    char next = state.pop();
+                    state.append(next);
+
+                    if (next == '\\') state.append(state.pop());
+                    if (next == '"') {
+                        break;
+                    }
+                }
+
                 continue;
             }
 
@@ -322,16 +342,23 @@ public class Main {
     }
 
     private static State divideValueChar(State state, char c) {
+        if (c == '-') {
+            if (state.peek() == '>') {
+                state.pop();
+                return state.append('-').append('>');
+            }
+        }
+
         if (c == ',' && state.isLevel()) return state.advance();
 
         State appended = state.append(c);
-        if (c == '<') return appended.enter();
-        if (c == '>') return appended.exit();
+        if (c == '<' || c == '(') return appended.enter();
+        if (c == '>' || c == ')') return appended.exit();
         return appended;
     }
 
-    private static Optional<String> compileValues(List<String> params, Function<String, Optional<String>> compoiler) {
-        return compileAndMerge(params, compoiler, Main::mergeValues);
+    private static Optional<String> compileValues(List<String> params, Function<String, Optional<String>> compiler) {
+        return compileAndMerge(params, compiler, Main::mergeValues);
     }
 
     private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams) {

@@ -77,9 +77,12 @@ struct State enter() {
 List<struct String> segments() {
 	return this.segments;
 }
+char peek() {
+	return this.queue.peek();
+}
 void main(struct String* args) {
 	/* Path source */ = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
-	magma.Files.readString(/* source) */.match(/* input -> compileAndWrite(input, source), Optional::of */).ifPresent(Throwable::printStackTrace);
+	magma.Files.readString(/* source) */.match(/* input -> compileAndWrite(input, source */), /* Optional::of) */.ifPresent(Throwable::printStackTrace);
 }
 Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
 	/* Path target */ = source.resolveSibling(/* "main */.c");
@@ -91,15 +94,15 @@ struct String compile(struct String input) {
 	return parseAll(segments, /* Main::compileRootSegment) */.map(/* list -> {
                     List<String> copy = new ArrayList<String> */(/* );
                     copy */.addAll(/* imports);
-                    copy */.addAll(/* structs);
-                    copy */.addAll(/* globals);
-                    copy */.addAll(methods);
+                    copy */.addAll(structs);
+                    copy.addAll(globals);
+                    copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
-                }).map(compiled -> mergeAll(Main::mergeStatements, compiled)).or(() -> generatePlaceholder(input)).orElse("");
+                }).map(compiled -> mergeAll(Main::mergeStatements, /* compiled)) */.or(() -> generatePlaceholder(input)).orElse("");
 }
 Optional<struct String> compileStatements(struct String input, Function<struct String, Optional<struct String>> compiler) {
-	return compileAndMerge(/* divide(input */, /*  Main::divideStatementChar) */, compiler, /*  Main::mergeStatements */);
+	return compileAndMerge(divide(input, /*  Main::divideStatementChar */), compiler, /*  Main::mergeStatements */);
 }
 Optional<struct String> compileAndMerge(List<struct String> segments, Function<struct String, Optional<struct String>> compiler, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger) {
 	return parseAll(segments, /* compiler) */.map(/* compiled -> mergeAll(merger, compiled */));
@@ -140,6 +143,22 @@ List<struct String> divide(struct String input, BiFunction<struct State, struct 
                 continue;
             }
 
+            if (c == '\"') {
+                state.append(c);
+
+                while (state.hasElements()) {
+                    char next = state.pop();
+                    state.append(next);
+
+                    if (next == '\\') state.append(state.pop());
+                    if (next == '"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
             state = divider.apply(state, c);
         } */
 	return state.advance(/* ) */.segments();
@@ -174,8 +193,8 @@ Optional<struct String> compileRootSegment(struct String input) {
 Optional<struct String> compileToStruct(struct String input, struct String infix, List<struct String> typeParams) {
 	/* int classIndex */ = input.indexOf(infix);
 	if(/* classIndex < 0) return Optional */.empty();
-	/* String afterKeyword */ = input.substring(/* classIndex + infix */.length());/* 
-        int contentStart = afterKeyword.indexOf("{");
+	/* String afterKeyword */ = input.substring(/* classIndex + infix */.length());
+	/* int contentStart */ = afterKeyword.indexOf(/* "{" */);/* 
         if (contentStart >= 0) {
             String name = afterKeyword.substring(0, contentStart).strip();
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
@@ -190,7 +209,7 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
 	return Optional.empty();
 }
 Optional<struct String> compileClassMember(struct String input, List<struct String> typeParams) {
-	return compileWhitespace(/* input) */.or((/* ) -> compileToStruct */(input, /*  "interface " */, /* typeParams)) */.or((/* ) -> compileToStruct */(input, /*  "record " */, /* typeParams)) */.or((/* ) -> compileToStruct */(input, /*  "class " */, typeParams)).or(() -> compileGlobalInitialization(input, typeParams)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, typeParams)).or(() -> generatePlaceholder(input));
+	return compileWhitespace(/* input) */.or((/* ) -> compileToStruct(input */, /*  "interface " */, /* typeParams)) */.or(() -> compileToStruct(input, /*  "record " */, /* typeParams)) */.or(() -> compileToStruct(input, /*  "class " */, /* typeParams)) */.or(() -> compileGlobalInitialization(input, /* typeParams)) */.or((/* ) -> compileDefinitionStatement(input */)).or(() -> compileMethod(input, /*  typeParams) */).or(() -> generatePlaceholder(input));
 }
 Optional<struct String> compileDefinitionStatement(struct String input) {
 	/* String stripped */ = input.strip();/* 
@@ -224,19 +243,17 @@ Optional<struct String> compileWhitespace(struct String input) {
 	return Optional.empty();
 }
 Optional<struct String> compileMethod(struct String input, List<struct String> typeParams) {
-	/* int paramStart */ = input.indexOf(/* " */(/* ");
-        if  */(/* paramStart < 0) return Optional */.empty(/* );
+	/* int paramStart */ = input.indexOf(/* "(" */);
+	if(/* paramStart < 0) return Optional */.empty();
+	/* String inputDefinition */ = input.substring(0, /* paramStart) */.strip();
+	/* String withParams */ = input.substring(/* paramStart + " */(/* " */.length());
+	return compileDefinition(/* inputDefinition) */.flatMap(/* outputDefinition -> {
+            int paramEnd = withParams */.indexOf(/* ")");
+            if  */(/* paramEnd < 0) return Optional */.empty(/* );
 
-        String inputDefinition = input */.substring(0, /* paramStart) */.strip(/* );
-        String withParams = input */.substring(paramStart + "(".length());
-
-        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-            int paramEnd = withParams.indexOf(")");
-            if (paramEnd < 0) return Optional.empty();
-
-            String params = withParams.substring(0, /*  paramEnd);
-            return compileValues(params */, /*  definition -> {
-                return compileWhitespace */(/* definition) */.or((/* ) -> compileDefinition */(definition)).or(() -> generatePlaceholder(definition));
+            String params = withParams */.substring(0, /*  paramEnd);
+            return compileValues(params */, /* definition -> {
+                return compileWhitespace */(/* definition) */.or((/* ) -> compileDefinition(definition */)).or(() -> generatePlaceholder(definition));
             }).flatMap(outputParams -> {
                 String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
@@ -256,18 +273,24 @@ Optional<struct String> compileValues(struct String input, Function<struct Strin
 	/* List<String> divided */ = divide(input, /*  Main::divideValueChar */);
 	return compileValues(divided, compiler);
 }
-struct State divideValueChar(struct State state, char c) {
+struct State divideValueChar(struct State state, char c) {/* 
+        if (c == '-') {
+            if (state.peek() == '>') {
+                state.pop();
+                return state.append('-').append('>');
+            }
+        } */
 	/* if (c */ = /* = ',' && state */.isLevel(/* )) return state */.advance();
 	/* State appended */ = state.append(c);
-	/* if (c */ = /* = '<') return appended */.enter();
-	/* if (c */ = /* = '>') return appended */.exit();
+	/* if (c */ = /* = '<' || c == ' */(/* ') return appended */.enter();
+	/* if (c */ = /* = '>' || c == ')') return appended */.exit();
 	return appended;
 }
-Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compoiler) {
-	return compileAndMerge(params, compoiler, /*  Main::mergeValues */);
+Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compiler) {
+	return compileAndMerge(params, compiler, /*  Main::mergeValues */);
 }
 Optional<struct String> compileStatementOrBlock(struct String input, List<struct String> typeParams) {
-	return compileWhitespace(/* input) */.or((/* ) -> compileStatement */(input, /* typeParams) */.map(/* result -> "\n\t" + result + ";")) */.or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";")).or(() -> generatePlaceholder(input));
+	return compileWhitespace(/* input) */.or((/* ) -> compileStatement(input */, /* typeParams) */.map(/* result -> "\n\t" + result + ";") */).or(() -> compileInitialization(input, /* typeParams) */.map(/* value -> "\n\t" + value + ";" */)).or(() -> generatePlaceholder(input));
 }
 Optional<struct String> compileStatement(struct String input, List<struct String> typeParams) {
 	/* String stripped */ = input.strip();/* 
@@ -335,8 +358,8 @@ int isNumber(struct String input) {/*
         } */
 	return true;
 }
-Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {/* 
-        int argsStart = input.indexOf("(");
+Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {
+	/* int argsStart */ = input.indexOf(/* "(" */);/* 
         if (argsStart >= 0) {
             String type = input.substring(0, argsStart);
             String withEnd = input.substring(argsStart + "(".length()).strip();
@@ -358,7 +381,7 @@ Optional<struct String> compileArgs(struct String argsString, List<struct String
 }
 struct StringBuilder mergeValues(struct StringBuilder cache, struct String element) {
 	if(cache.isEmpty()) return cache.append(element);
-	return cache.append(/* " */, /* ") */.append(element);
+	return cache.append(/* ", ") */.append(element);
 }
 Optional<struct String> compileDefinition(struct String definition) {
 	/* int nameSeparator */ = definition.lastIndexOf(/* " " */);/* 
@@ -405,7 +428,7 @@ Optional<struct String> compileDefinition(struct String definition) {
 	return Optional.empty();
 }
 List<struct String> splitValues(struct String substring) {
-	/* String[] paramsArrays */ = substring.strip(/* ) */.split(Pattern.quote(", /* ") */);
+	/* String[] paramsArrays */ = substring.strip(/* ) */.split(Pattern.quote(","));
 	return Arrays.stream(/* paramsArrays) */.map(/* String::strip) */.filter(/* param -> !param */.isEmpty()).toList();
 }
 struct String generateDefinition(List<struct String> maybeTypeParams, struct String type, struct String name) {/* 
