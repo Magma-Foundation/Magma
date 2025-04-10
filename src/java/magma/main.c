@@ -15,11 +15,11 @@
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
 /* public */ struct Main {
-/* private */ struct Result<T, X> {
-<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);/* 
+	/* private */ struct Result<T, X> {
+		<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);/* 
      */
 };
-/* private */ /* record Err<T, */ X>(struct X error);/* private */ /* record Ok<T, */ X>(struct T value);/* private */ /* static class State {
+	/* private */ /* record Err<T, */ X>(struct X error);	/* private */ /* record Ok<T, */ X>(struct T value);	/* private */ /* static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
         private StringBuilder buffer;
@@ -73,18 +73,18 @@
             return segments; *//* 
         }
      */
-}/* public */ /* static void */ main(struct String* args) {/* 
+}	/* public */ /* static void */ main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); *//* 
      */
-}/* private */ /* static Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
+}	/* private */ /* static Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
         Path target = source.resolveSibling("main.c"); *//* 
         String output = compile(input); *//* 
         return writeString(target, output); *//* 
      */
-}/* private */ /* static Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
+}	/* private */ /* static Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -92,20 +92,20 @@
             return Optional.of(e);
         } *//* 
      */
-}/* private */ /* static Result<String, IOException> */ readString(struct Path source) {/* 
+}	/* private */ /* static Result<String, IOException> */ readString(struct Path source) {/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
             return new Err<>(e);
         } *//* 
      */
-}/* private */ /* static String */ compile(struct String input) {/* 
+}	/* private */ /* static String */ compile(struct String input) {/* 
         return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
-}/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
+}	/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
         return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements); *//* 
      */
-}/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
+}	/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
         Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder()); *//* 
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(compiled -> merger.apply(output, compiled)));
@@ -113,10 +113,10 @@
 
         return maybeOutput.map(StringBuilder::toString); *//* 
      */
-}/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
+}	/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
         return output.append(compiled); *//* 
      */
-}/* private */ /* static List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
+}	/* private */ /* static List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)); *//* 
@@ -129,13 +129,13 @@
 
         return state.advance().segments(); *//* 
      */
-}/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
+}	/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
         State appended = state.append(c); *//* 
         if (c == '; *//* ' && appended.isLevel()) return appended.advance(); *//* 
         if (c == ' */
-}/* ' */ /* && */ isShallow(/* appended */);/* 
+}	/* ' */ /* && */ isShallow(/* appended */);/* 
         if (c == '{') return appended.enter();
-        if (c == '} *//* ') */ struct return appended.exit(/*  */);/* 
+        if (c == '} */	/* ') */ struct return appended.exit(/*  */);/* 
         return appended; *//* 
      */
 };
@@ -158,13 +158,13 @@
             }
         }
 
-        Optional<String> maybeClass = compileToStruct(input, "class ");
+        Optional<String> maybeClass = compileToStruct(input, "class ", 0);
         if (maybeClass.isPresent()) return maybeClass;
 
         return generatePlaceholder(input);
     } *//* 
 
-    private static Optional<String> compileToStruct(String input, String infix) {
+    private static Optional<String> compileToStruct(String input, String infix, int depth) {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) return Optional.empty();
 
@@ -177,9 +177,9 @@
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                return compileModifiers(substring).flatMap(newModifiers0 -> {
-                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                        return newModifiers0 + " struct " + name + " {\n" +
+                return compileModifiers(substring).flatMap(newModifiers -> {
+                    return compileStatements(inputContent, input1 -> compileClassMember(input1, depth + 1)).map(outputContent -> {
+                        return "\t".repeat(depth) + newModifiers + " struct " + name + " {\n" +
                                 outputContent +
                                 "\n};\n";
                     });
@@ -203,13 +203,13 @@
                 .collect(Collectors.joining(" ")));
     } *//* 
 
-    private static Optional<String> compileClassMember(String input) {
-        return compileToStruct(input, "interface ")
-                .or(() -> compileMethod(input))
+    private static Optional<String> compileClassMember(String input, int depth) {
+        return compileToStruct(input, "interface ", depth)
+                .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
     } *//* 
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<String> compileMethod(String input, int depth) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return Optional.empty();
 
@@ -222,7 +222,7 @@
 
             String params = withParams.substring(0, paramEnd);
             return compileValues(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
-                String header = outputDefinition + "(" + outputParams + ")";
+                String header = "\t".repeat(depth) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
@@ -323,11 +323,6 @@
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
                 .toList();
-    } *//* 
-
-    private static Optional<String> compileTypeParam(String input) {
-        if (isSymbol(input.strip())) return Optional.of(input);
-        return generatePlaceholder(input);
     } *//* 
 
     private static String generateDefinition(Optional<String> maybeModifiers, List<String> maybeTypeParams, String type, String name) {
