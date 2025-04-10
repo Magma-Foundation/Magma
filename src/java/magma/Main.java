@@ -248,7 +248,7 @@ public class Main {
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileModifiers(substring).flatMap(newModifiers -> {
-                    return compileStatements(inputContent, input1 -> compileClassMember(input1, 1)).map(outputContent -> {
+                    return compileStatements(inputContent, input1 -> compileClassMember(input1)).map(outputContent -> {
                         structs.add(newModifiers + " struct " + name + " {\n" +
                                 outputContent +
                                 "\n" + "};\n");
@@ -274,16 +274,16 @@ public class Main {
                 .collect(Collectors.joining(" ")));
     }
 
-    private static Optional<String> compileClassMember(String input, int depth) {
+    private static Optional<String> compileClassMember(String input) {
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
-                .or(() -> compileInitialization(input, depth))
-                .or(() -> compileMethod(input, depth))
+                .or(() -> compileInitialization(input))
+                .or(() -> compileMethod(input, 0))
                 .or(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileInitialization(String input, int depth) {
+    private static Optional<String> compileInitialization(String input) {
         if (!input.endsWith(";")) return Optional.empty();
 
         String withoutEnd = input.substring(0, input.length() - ";".length());
@@ -322,7 +322,7 @@ public class Main {
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
-                        methods.add(header + " {" + outputContent + "\n\t}");
+                        methods.add(header + " {" + outputContent + "\n}");
                         return Optional.of("");
                     });
                 }
