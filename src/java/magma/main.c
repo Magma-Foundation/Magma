@@ -64,7 +64,7 @@ char pop() {
 	return this.queue.pop();
 }
 int hasElements() {
-	return /* !this */.queue.isEmpty();
+	return !this.queue.isEmpty();
 }
 struct State exit() {
 	this.depth = this.depth - 1;
@@ -207,7 +207,7 @@ Optional<struct String> compileGlobalInitialization(struct String input, List<st
         });
 }
 Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {
-	if(/* !input */.endsWith(";")) return Optional.empty();
+	if(!input.endsWith(";")) return Optional.empty();
 	/* String withoutEnd */ = input.substring(0, input.length(/* ) - ";" */.length());
 	/* int valueSeparator */ = withoutEnd.indexOf(/* "=" */);
 	if(/* valueSeparator < 0) return Optional */.empty();
@@ -308,6 +308,10 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
                     });
                 }
             }
+        } *//* 
+
+        if (stripped.startsWith("!")) {
+            return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
         } */
 	/* Optional<String> invocation */ = compileInvocation(input, typeParams);/* 
         if (invocation.isPresent()) return invocation; */

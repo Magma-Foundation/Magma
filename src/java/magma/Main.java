@@ -384,6 +384,10 @@ public class Main {
             }
         }
 
+        if (stripped.startsWith("!")) {
+            return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
+        }
+
         Optional<String> invocation = compileInvocation(input, typeParams);
         if (invocation.isPresent()) return invocation;
 
