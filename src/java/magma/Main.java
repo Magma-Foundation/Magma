@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,10 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileAll(input, Main::compileRootSegment);
+    }
+
+    private static String compileAll(String input, Function<String, String> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -31,6 +36,10 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -40,7 +49,7 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -71,11 +80,20 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return newModifiers + " struct " + name + " {\n};\n";
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileAll(inputContent, Main::compileClassMember);
+                    return newModifiers + " struct " + name + " {\n};\n" + outputContent;
+                }
             }
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static String compileClassMember(String classMember) {
+        return generatePlaceholder(classMember);
     }
 
     private static String generatePlaceholder(String input) {
