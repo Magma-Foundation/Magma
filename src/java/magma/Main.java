@@ -14,14 +14,51 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
+    private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(error);
+        }
+    }
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(value);
+        }
+    }
+
     public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .match(input -> compileAndWrite(input, source), Optional::of)
+                .ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> compileAndWrite(String input, Path source) {
+        Path target = source.resolveSibling("main.c");
+        String output = compile(input);
+        return writeString(target, output);
+    }
+
+    private static Optional<IOException> writeString(Path target, String output) {
         try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
+            Files.writeString(target, output);
+            return Optional.empty();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
@@ -149,12 +186,9 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static StringBuilder mergeValues(StringBuilder stringBuilder, String s) {
-        if (stringBuilder.isEmpty()) {
-            return stringBuilder.append(s);
-        }
-
-        return stringBuilder.append(", ").append(s);
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) return cache.append(element);
+        return cache.append(", ").append(element);
     }
 
     private static Optional<String> compileDefinition(String definition) {
