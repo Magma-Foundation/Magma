@@ -363,11 +363,7 @@ public class Main {
                 if (withEnd.endsWith(")")) {
                     String argsString = withEnd.substring(0, withEnd.length() - ")".length());
                     return compileType(type, typeParams).flatMap(outputType -> {
-                        return compileValues(argsString, arg -> {
-                            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
-                        }).map(args -> {
-                            return outputType + "(" + args + ")";
-                        });
+                        return compileArgs(argsString, typeParams).map(value -> outputType + value);
                     });
                 }
             }
@@ -379,17 +375,28 @@ public class Main {
             String withEnd = input.substring(argsStart + "(".length()).strip();
             if (withEnd.endsWith(")")) {
                 String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                return compileValue(type, typeParams).flatMap(outputType -> {
-                    return compileValues(argsString, arg -> {
-                        return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
-                    }).map(args -> {
-                        return outputType + "(" + args + ")";
-                    });
+                return compileValue(type, typeParams).flatMap(caller -> {
+                    return compileArgs(argsString, typeParams).map(value -> caller + value);
                 });
             }
         }
 
+        int separator = input.lastIndexOf(".");
+        if (separator >= 0) {
+            String object = input.substring(0, separator).strip();
+            String property = input.substring(separator + ".".length()).strip();
+            return compileValue(object, typeParams).map(compiled -> compiled + "." + property);
+        }
+
         return generatePlaceholder(input);
+    }
+
+    private static Optional<String> compileArgs(String argsString, List<String> typeParams) {
+        return compileValues(argsString, arg -> {
+            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
+        }).map(args -> {
+            return "(" + args + ")";
+        });
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
