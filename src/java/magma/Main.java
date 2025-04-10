@@ -164,12 +164,10 @@ public class Main {
     private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
         Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
         for (String segment : segments) {
-            maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
-                return compiler.apply(segment).map(compiledSegment -> {
-                    allCompiled.add(compiledSegment);
-                    return allCompiled;
-                });
-            });
+            maybeCompiled = maybeCompiled.flatMap(allCompiled -> compiler.apply(segment).map(compiledSegment -> {
+                allCompiled.add(compiledSegment);
+                return allCompiled;
+            }));
         }
         return maybeCompiled;
     }
@@ -448,6 +446,8 @@ public class Main {
 
     private static Optional<String> compileType(String input, List<String> typeParams) {
         if (input.equals("void")) return Optional.of("void");
+        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean"))
+            return Optional.of("int");
 
         if (input.endsWith("[]")) {
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)

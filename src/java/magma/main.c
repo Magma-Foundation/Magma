@@ -26,7 +26,7 @@
 	/* private */ /* final */ /* Deque<Character> */ queue;
 	/* private */ /* final */ /* List<String> */ segments;
 	/* private */ struct StringBuilder buffer;
-	/* private */ struct int depth;
+	/* private */ int depth;
 };
 /* public */ struct Main {
 };
@@ -40,7 +40,7 @@
 }/* @Override */ /* public */ <R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenOk.apply(value); *//* 
          */
-}struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
+}struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, int depth) {/* 
             this.queue = queue; *//* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
@@ -58,13 +58,13 @@
             buffer.append(c); *//* 
             return this; *//* 
          */
-}/* private */ struct boolean isLevel(/*  */) {/* 
+}/* private */ int isLevel(/*  */) {/* 
             return depth == 0; *//* 
          */
 }/* private */ struct char pop(/*  */) {/* 
             return queue.pop(); *//* 
          */
-}/* private */ struct boolean hasElements(/*  */) {/* 
+}/* private */ int hasElements(/*  */) {/* 
             return !queue.isEmpty(); *//* 
          */
 }/* private */ struct State exit(/*  */) {/* 
@@ -180,7 +180,7 @@
         if (c == '}') return appended.exit(); *//* 
         return appended; *//* 
      */
-}/* private */ /* static */ struct boolean isShallow(struct State state) {/* 
+}/* private */ /* static */ int isShallow(struct State state) {/* 
         return state.depth == 1; *//* 
      */
 }/* private */ /* static */ /* Optional<String> */ compileRootSegment(struct String input) {/* 
@@ -253,9 +253,7 @@
         String stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             String content = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(content).map(result -> {
-                return "\t" + result + ";\n";
-            });
+            return compileDefinition(content).map(result -> "\t" + result + ";\n");
         } *//* 
         return Optional.empty(); *//* 
      */
@@ -278,7 +276,7 @@
         if (input.isBlank()) return Optional.of(""); *//* 
         return Optional.empty(); *//* 
      */
-}/* private */ /* static */ /* Optional<String> */ compileMethod(struct String input, struct int depth) {/* 
+}/* private */ /* static */ /* Optional<String> */ compileMethod(struct String input, int depth) {/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) return Optional.empty(); *//* 
 
@@ -401,6 +399,8 @@
      */
 }/* private */ /* static */ /* Optional<String> */ compileType(struct String input, /* List<String> */ typeParams) {/* 
         if (input.equals("void")) return Optional.of("void"); *//* 
+        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean"))
+            return Optional.of("int"); *//* 
 
         if (input.endsWith("[]")) {
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
@@ -417,7 +417,7 @@
 
         return generatePlaceholder(input); *//* 
      */
-}/* private */ /* static */ struct boolean isSymbol(struct String input) {/* 
+}/* private */ /* static */ int isSymbol(struct String input) {/* 
         for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) continue;
