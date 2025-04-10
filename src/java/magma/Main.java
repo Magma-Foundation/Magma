@@ -220,8 +220,6 @@ public class Main {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) return Optional.empty();
 
-        String substring = input.substring(0, classIndex);
-
         String afterKeyword = input.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart >= 0) {
@@ -229,28 +227,13 @@ public class Main {
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                return compileModifiers(substring).flatMap(newModifiers -> compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                    structs.add(newModifiers + " struct " + name + " {\n" +
-                            outputContent + "};\n");
+                return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                    structs.add("struct " + name + " {\n" + outputContent + "};\n");
                     return "";
-                }));
+                });
             }
         }
         return Optional.empty();
-    }
-
-    private static Optional<String> compileModifiers(String substring) {
-        String[] oldModifiers = substring.strip().split(" ");
-        List<String> list = Arrays.stream(oldModifiers)
-                .map(String::strip)
-                .filter(modifier -> !modifier.isEmpty())
-                .toList();
-
-        if (list.isEmpty()) return Optional.empty();
-        return Optional.of(list.stream()
-                .map(Main::generatePlaceholder)
-                .flatMap(Optional::stream)
-                .collect(Collectors.joining(" ")));
     }
 
     private static Optional<String> compileClassMember(String input) {
@@ -394,29 +377,24 @@ public class Main {
             if (typeSeparator >= 0) {
                 String beforeType = beforeName.substring(0, typeSeparator).strip();
 
-                String modifiers;
                 List<String> typeParams;
                 if (beforeType.endsWith(">")) {
                     String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
                     int typeParamStart = withoutEnd.indexOf("<");
                     if (typeParamStart >= 0) {
-                        modifiers = withoutEnd.substring(0, typeParamStart);
                         String substring = withoutEnd.substring(typeParamStart + 1);
                         typeParams = splitValues(substring);
                     } else {
-                        modifiers = beforeType;
                         typeParams = Collections.emptyList();
                     }
                 } else {
-                    modifiers = beforeType;
                     typeParams = Collections.emptyList();
                 }
 
                 String inputType = beforeName.substring(typeSeparator + " ".length());
-                Optional<String> compiledModifiers = compileModifiers(modifiers.strip());
-                return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(compiledModifiers, typeParams, outputType, name)));
+                return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
             } else {
-                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Optional.empty(), Collections.emptyList(), outputType, name)));
+                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
             }
         }
         return Optional.empty();
@@ -430,9 +408,7 @@ public class Main {
                 .toList();
     }
 
-    private static String generateDefinition(Optional<String> maybeModifiers, List<String> maybeTypeParams, String type, String name) {
-        String modifiersString = maybeModifiers.map(modifiers -> modifiers + " ").orElse("");
-
+    private static String generateDefinition(List<String> maybeTypeParams, String type, String name) {
         String typeParamsString;
         if (maybeTypeParams.isEmpty()) {
             typeParamsString = "";
@@ -440,7 +416,7 @@ public class Main {
             typeParamsString = "<" + String.join(", ", maybeTypeParams) + "> ";
         }
 
-        return modifiersString + typeParamsString + type + " " + name;
+        return typeParamsString + type + " " + name;
     }
 
     private static Optional<String> compileType(String input, List<String> typeParams) {
