@@ -444,14 +444,28 @@ public class Main {
     }
 
     private static Optional<String> compileInvocation(String input, List<String> typeParams) {
-        int argsStart = input.indexOf("(");
-        if (argsStart >= 0) {
-            String type = input.substring(0, argsStart);
-            String withEnd = input.substring(argsStart + "(".length()).strip();
-            if (withEnd.endsWith(")")) {
-                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+        String stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            String sliced = stripped.substring(0, stripped.length() - ")".length());
+
+            int argsStart = -1;
+            int depth = 0;
+            for (int i = sliced.length() - 1; i >= 0; i--) {
+                char c = sliced.charAt(i);
+                if (c == '(' && depth == 0) {
+                    argsStart = i;
+                    break;
+                }
+
+                if (c == ')') depth++;
+                if (c == '(') depth--;
+            }
+
+            if (argsStart >= 0) {
+                String type = sliced.substring(0, argsStart);
+                String withEnd = sliced.substring(argsStart + "(".length()).strip();
                 return compileValue(type, typeParams).flatMap(caller -> {
-                    return compileArgs(argsString, typeParams).map(value -> caller + value);
+                    return compileArgs(withEnd, typeParams).map(value -> caller + value);
                 });
             }
         }
