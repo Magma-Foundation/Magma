@@ -210,13 +210,13 @@ public class Main {
             }
         }
 
-        Optional<String> maybeClass = compileToStruct(input, "class ");
+        Optional<String> maybeClass = compileToStruct(input, "class ", new ArrayList<>());
         if (maybeClass.isPresent()) return maybeClass;
 
         return generatePlaceholder(input);
     }
 
-    private static Optional<String> compileToStruct(String input, String infix) {
+    private static Optional<String> compileToStruct(String input, String infix, List<String> typeParams) {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) return Optional.empty();
 
@@ -227,7 +227,7 @@ public class Main {
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                return compileStatements(inputContent, input1 -> compileClassMember(input1, typeParams)).map(outputContent -> {
                     structs.add("struct " + name + " {\n" + outputContent + "};\n");
                     return "";
                 });
@@ -236,14 +236,14 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileClassMember(String input) {
+    private static Optional<String> compileClassMember(String input, List<String> typeParams) {
         return compileWhitespace(input)
-                .or(() -> compileToStruct(input, "interface "))
-                .or(() -> compileToStruct(input, "record "))
-                .or(() -> compileToStruct(input, "class "))
-                .or(() -> compileGlobalInitialization(input))
+                .or(() -> compileToStruct(input, "interface ", typeParams))
+                .or(() -> compileToStruct(input, "record ", typeParams))
+                .or(() -> compileToStruct(input, "class ", typeParams))
+                .or(() -> compileGlobalInitialization(input, typeParams))
                 .or(() -> compileDefinitionStatement(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, typeParams))
                 .or(() -> generatePlaceholder(input));
     }
 
@@ -256,14 +256,14 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileGlobalInitialization(String input) {
-        return compileInitialization(input).map(generated -> {
+    private static Optional<String> compileGlobalInitialization(String input, List<String> typeParams) {
+        return compileInitialization(input, typeParams).map(generated -> {
             globals.add(generated + ";\n");
             return "";
         });
     }
 
-    private static Optional<String> compileInitialization(String input) {
+    private static Optional<String> compileInitialization(String input, List<String> typeParams) {
         if (!input.endsWith(";")) return Optional.empty();
 
         String withoutEnd = input.substring(0, input.length() - ";".length());
@@ -272,8 +272,10 @@ public class Main {
 
         String definition = withoutEnd.substring(0, valueSeparator).strip();
         String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
-        return compileDefinition(definition).map(outputDefinition -> {
-            return outputDefinition + " = " + generatePlaceholder(value).orElse("");
+        return compileDefinition(definition).flatMap(outputDefinition -> {
+            return compileValue(value, typeParams).map(outputValue -> {
+                return outputDefinition + " = " + outputValue;
+            });
         });
     }
 
@@ -282,7 +284,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<String> compileMethod(String input, List<String> typeParams) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return Optional.empty();
 
@@ -299,7 +301,7 @@ public class Main {
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileStatementOrBlock).flatMap(outputContent -> {
+                    return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams)).flatMap(outputContent -> {
                         methods.add(header + " {" + outputContent + "\n}\n");
                         return Optional.of("");
                     });
@@ -328,25 +330,45 @@ public class Main {
         return compileAndMerge(params, compoiler, Main::mergeValues);
     }
 
-    private static Optional<String> compileStatementOrBlock(String input) {
+    private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input))
-                .or(() -> compileInitialization(input).map(value -> "\n\t" + value + ";"))
+                .or(() -> compileStatement(input, typeParams))
+                .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
                 .or(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileStatement(String input) {
+    private static Optional<String> compileStatement(String input, List<String> typeParams) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String value = stripped.substring(0, stripped.length() - ";".length());
             if (value.startsWith("return ")) {
-                return compileValue(value.substring("return ".length())).map(result -> "\n\treturn " + result + ";");
+                return compileValue(value.substring("return ".length()), typeParams).map(result -> "\n\treturn " + result + ";");
             }
         }
         return Optional.empty();
     }
 
-    private static Optional<String> compileValue(String input) {
+    private static Optional<String> compileValue(String input, List<String> typeParams) {
+        String stripped = input.strip();
+        if (stripped.startsWith("new ")) {
+            String slice = stripped.substring("new ".length());
+            int argsStart = slice.indexOf("(");
+            if (argsStart >= 0) {
+                String type = slice.substring(0, argsStart);
+                String withEnd = slice.substring(argsStart + "(".length()).strip();
+                if (withEnd.endsWith(")")) {
+                    String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+                    return compileType(type, typeParams).flatMap(outputType -> {
+                        return compileValues(argsString, arg -> {
+                            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
+                        }).map(args -> {
+                            return outputType + "(" + args + ")";
+                        });
+                    });
+                }
+            }
+        }
+
         return generatePlaceholder(input);
     }
 
@@ -450,7 +472,9 @@ public class Main {
             if (argsStart >= 0) {
                 String base = slice.substring(0, argsStart).strip();
                 String params = slice.substring(argsStart + "<".length()).strip();
-                return compileValues(params, type -> compileType(type, typeParams)).map(compiled -> {
+                return compileValues(params, type -> {
+                    return compileWhitespace(type).or(() -> compileType(type, typeParams));
+                }).map(compiled -> {
                     return base + "<" + compiled + ">";
                 });
             }

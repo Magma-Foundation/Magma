@@ -29,10 +29,10 @@ struct State {
 };
 struct Main {
 };
-List<struct String> imports = /* new ArrayList<>() */;
-List<struct String> structs = /* new ArrayList<>() */;
-List<struct String> globals = /* new ArrayList<>() */;
-List<struct String> methods = /* new ArrayList<>() */;
+List<struct String> imports = ArrayList<>();
+List<struct String> structs = ArrayList<>();
+List<struct String> globals = ArrayList<>();
+List<struct String> methods = ArrayList<>();
 <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
 	return /* whenErr.apply(this.error) */;
 }
@@ -110,7 +110,7 @@ Optional<struct String> compileAndMerge(List<struct String> segments, Function<s
 	return /* parseAll(segments, compiler).map(compiled -> mergeAll(merger, compiled)) */;
 }
 struct String mergeAll(BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger, List<struct String> compiled) {
-	struct StringBuilder output = /* new StringBuilder() */;/* 
+	struct StringBuilder output = struct StringBuilder();/* 
         for (String segment : compiled) {
             output = merger.apply(output, segment);
         } */
@@ -133,7 +133,7 @@ List<struct String> divide(struct String input, BiFunction<struct State, struct 
 	LinkedList<char> queue = /* IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)) */;
-	struct State state = /* new State(queue) */;/* 
+	struct State state = struct State(/* queue */);/* 
         while (state.hasElements()) {
             char c = state.pop();
 
@@ -174,11 +174,11 @@ Optional<struct String> compileRootSegment(struct String input) {/*
                 return Optional.of("");
             }
         } */
-	Optional<struct String> maybeClass = /* compileToStruct(input, "class ") */;/* 
+	Optional<struct String> maybeClass = /* compileToStruct(input, "class ", new ArrayList<>()) */;/* 
         if (maybeClass.isPresent()) return maybeClass; */
 	return /* generatePlaceholder(input) */;
 }
-Optional<struct String> compileToStruct(struct String input, struct String infix) {
+Optional<struct String> compileToStruct(struct String input, struct String infix, List<struct String> typeParams) {
 	int classIndex = /* input.indexOf(infix) */;/* 
         if (classIndex < 0) return Optional.empty(); */
 	struct String afterKeyword = /* input.substring(classIndex + infix.length()) */;/* 
@@ -188,7 +188,7 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                return compileStatements(inputContent, input1 -> compileClassMember(input1, typeParams)).map(outputContent -> {
                     structs.add("struct " + name + " {\n" + outputContent + "};\n");
                     return "";
                 });
@@ -196,14 +196,14 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
         } */
 	return /* Optional.empty() */;
 }
-Optional<struct String> compileClassMember(struct String input) {
+Optional<struct String> compileClassMember(struct String input, List<struct String> typeParams) {
 	return /* compileWhitespace(input)
-                .or(() -> compileToStruct(input, "interface "))
-                .or(() -> compileToStruct(input, "record "))
-                .or(() -> compileToStruct(input, "class "))
-                .or(() -> compileGlobalInitialization(input))
+                .or(() -> compileToStruct(input, "interface ", typeParams))
+                .or(() -> compileToStruct(input, "record ", typeParams))
+                .or(() -> compileToStruct(input, "class ", typeParams))
+                .or(() -> compileGlobalInitialization(input, typeParams))
                 .or(() -> compileDefinitionStatement(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, typeParams))
                 .or(() -> generatePlaceholder(input)) */;
 }
 Optional<struct String> compileDefinitionStatement(struct String input) {
@@ -214,28 +214,30 @@ Optional<struct String> compileDefinitionStatement(struct String input) {
         } */
 	return /* Optional.empty() */;
 }
-Optional<struct String> compileGlobalInitialization(struct String input) {
-	return /* compileInitialization(input).map(generated -> {
+Optional<struct String> compileGlobalInitialization(struct String input, List<struct String> typeParams) {
+	return /* compileInitialization(input, typeParams).map(generated -> {
             globals.add(generated + ";\n");
             return "";
         }) */;
 }
-Optional<struct String> compileInitialization(struct String input) {/* 
+Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {/* 
         if (!input.endsWith(";")) return Optional.empty(); */
 	struct String withoutEnd = /* input.substring(0, input.length() - ";".length()) */;
 	int valueSeparator = /* withoutEnd.indexOf("=") */;/* 
         if (valueSeparator < 0) return Optional.empty(); */
 	struct String definition = /* withoutEnd.substring(0, valueSeparator).strip() */;
 	struct String value = /* withoutEnd.substring(valueSeparator + "=".length()).strip() */;
-	return /* compileDefinition(definition).map(outputDefinition -> {
-            return outputDefinition + " = " + generatePlaceholder(value).orElse("");
+	return /* compileDefinition(definition).flatMap(outputDefinition -> {
+            return compileValue(value, typeParams).map(outputValue -> {
+                return outputDefinition + " = " + outputValue;
+            });
         }) */;
 }
 Optional<struct String> compileWhitespace(struct String input) {/* 
         if (input.isBlank()) return Optional.of(""); */
 	return /* Optional.empty() */;
 }
-Optional<struct String> compileMethod(struct String input) {
+Optional<struct String> compileMethod(struct String input, List<struct String> typeParams) {
 	int paramStart = /* input.indexOf("(");
         if (paramStart < 0) return Optional.empty();
 
@@ -252,7 +254,7 @@ Optional<struct String> compileMethod(struct String input) {
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileStatementOrBlock).flatMap(outputContent -> {
+                    return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams)).flatMap(outputContent -> {
                         methods.add(header + " {" + outputContent + "\n}\n");
                         return Optional.of("");
                     });
@@ -276,23 +278,42 @@ struct State divideValueChar(struct State state, char c) {
 Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compoiler) {
 	return /* compileAndMerge(params, compoiler, Main::mergeValues) */;
 }
-Optional<struct String> compileStatementOrBlock(struct String input) {
+Optional<struct String> compileStatementOrBlock(struct String input, List<struct String> typeParams) {
 	return /* compileWhitespace(input)
-                .or(() -> compileStatement(input))
-                .or(() -> compileInitialization(input).map(value -> "\n\t" + value + ";"))
+                .or(() -> compileStatement(input, typeParams))
+                .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
                 .or(() -> generatePlaceholder(input)) */;
 }
-Optional<struct String> compileStatement(struct String input) {
+Optional<struct String> compileStatement(struct String input, List<struct String> typeParams) {
 	struct String stripped = /* input.strip() */;/* 
         if (stripped.endsWith(";")) {
             String value = stripped.substring(0, stripped.length() - ";".length());
             if (value.startsWith("return ")) {
-                return compileValue(value.substring("return ".length())).map(result -> "\n\treturn " + result + ";");
+                return compileValue(value.substring("return ".length()), typeParams).map(result -> "\n\treturn " + result + ";");
             }
         } */
 	return /* Optional.empty() */;
 }
-Optional<struct String> compileValue(struct String input) {
+Optional<struct String> compileValue(struct String input, List<struct String> typeParams) {
+	struct String stripped = /* input.strip() */;/* 
+        if (stripped.startsWith("new ")) {
+            String slice = stripped.substring("new ".length());
+            int argsStart = slice.indexOf("(");
+            if (argsStart >= 0) {
+                String type = slice.substring(0, argsStart);
+                String withEnd = slice.substring(argsStart + "(".length()).strip();
+                if (withEnd.endsWith(")")) {
+                    String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+                    return compileType(type, typeParams).flatMap(outputType -> {
+                        return compileValues(argsString, arg -> {
+                            return compileWhitespace(arg).or(() -> compileValue(arg, typeParams));
+                        }).map(args -> {
+                            return outputType + "(" + args + ")";
+                        });
+                    });
+                }
+            }
+        } */
 	return /* generatePlaceholder(input) */;
 }
 struct StringBuilder mergeValues(struct StringBuilder cache, struct String element) {/* 
@@ -389,7 +410,9 @@ Optional<struct String> compileType(struct String input, List<struct String> typ
             if (argsStart >= 0) {
                 String base = slice.substring(0, argsStart).strip();
                 String params = slice.substring(argsStart + "<".length()).strip();
-                return compileValues(params, type -> compileType(type, typeParams)).map(compiled -> {
+                return compileValues(params, type -> {
+                    return compileWhitespace(type).or(() -> compileType(type, typeParams));
+                }).map(compiled -> {
                     return base + "<" + compiled + ">";
                 });
             }
