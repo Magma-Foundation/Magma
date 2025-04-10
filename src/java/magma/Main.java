@@ -140,7 +140,7 @@ public class Main {
     }
 
     private static String mergeAll(List<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return compiled.stream().reduce(new StringBuilder(), merger::apply, (_, next) -> next).toString();
+        return compiled.stream().reduce(new StringBuilder(), merger, (_, next) -> next).toString();
     }
 
     private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
@@ -409,16 +409,8 @@ public class Main {
             return compileValue(stripped.substring(1), typeParams).map(result -> "!" + result);
         }
 
-        int arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            String paramName = stripped.substring(0, arrowIndex).strip();
-            if (isSymbol(paramName)) {
-                String value = stripped.substring(arrowIndex + "->".length());
-                return compileValue(value, typeParams).flatMap(newValue -> {
-                    return generateLambda(paramName, newValue);
-                });
-            }
-        }
+        Optional<String> value = compileLambda(stripped, typeParams);
+        if (value.isPresent()) return value;
 
         Optional<String> invocation = compileInvocation(input, typeParams);
         if (invocation.isPresent()) return invocation;
@@ -428,7 +420,7 @@ public class Main {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
-            return generateLambda("temp", type + "." + property + "(temp)");
+            return Optional.of(generateLambdaWithReturn("temp", "\n\treturn " + type + "." + property + "(temp") + ";");
         }
 
         int separator = input.lastIndexOf(".");
@@ -445,12 +437,32 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static Optional<String> generateLambda(String paramName, String newValue) {
+    private static Optional<String> compileLambda(String input, List<String> typeParams) {
+        int arrowIndex = input.indexOf("->");
+        if (arrowIndex < 0) return Optional.empty();
+
+        String paramName = input.substring(0, arrowIndex).strip();
+        if (!isSymbol(paramName)) return Optional.empty();
+
+        String value = input.substring(arrowIndex + "->".length()).strip();
+        if (value.startsWith("{") && value.endsWith("}")) {
+            String slice = value.substring(1, value.length() - 1);
+            return compileStatements(slice, statement -> compileStatementOrBlock(statement, typeParams)).flatMap(result -> {
+                return generateLambdaWithReturn(paramName, result);
+            });
+        }
+
+        return compileValue(value, typeParams).flatMap(newValue -> {
+            return generateLambdaWithReturn(paramName, "\n\treturn " + newValue + ";");
+        });
+    }
+
+    private static Optional<String> generateLambdaWithReturn(String paramName, String returnValue) {
         int current = counter;
         counter++;
         String name = "__lambda" + current + "__";
 
-        methods.add("auto " + name + "(auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
+        methods.add("auto " + name + "(auto " + paramName + ") {" + returnValue + "\n}\n");
         return Optional.of(name);
     }
 
