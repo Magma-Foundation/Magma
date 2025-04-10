@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -70,11 +71,8 @@ public class Main {
 
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
-            String[] oldModifiers = input.substring(0, classIndex).strip().split(" ");
-            String newModifiers = Arrays.stream(oldModifiers)
-                    .map(String::strip)
-                    .map(Main::generatePlaceholder)
-                    .collect(Collectors.joining(" "));
+            String substring = input.substring(0, classIndex);
+            String newModifiers = compileModifiers(substring);
 
             String afterKeyword = input.substring(classIndex + "class ".length());
             int contentStart = afterKeyword.indexOf("{");
@@ -92,8 +90,52 @@ public class Main {
         return generatePlaceholder(input);
     }
 
-    private static String compileClassMember(String classMember) {
-        return generatePlaceholder(classMember);
+    private static String compileModifiers(String substring) {
+        String[] oldModifiers = substring.strip().split(" ");
+        String newModifiers = Arrays.stream(oldModifiers)
+                .map(String::strip)
+                .map(Main::generatePlaceholder)
+                .collect(Collectors.joining(" "));
+        return newModifiers;
+    }
+
+    private static String compileClassMember(String input) {
+        return compileMethod(input).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String inputDefinition = input.substring(0, paramStart).strip();
+            String withParams = input.substring(paramStart + "(".length());
+
+            return compileDefinition(inputDefinition).map(outputDefinition -> {
+                return outputDefinition + "(" + generatePlaceholder(withParams);
+            });
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileDefinition(String definition) {
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            String beforeName = definition.substring(0, nameSeparator).strip();
+            String name = definition.substring(nameSeparator + " ".length()).strip();
+
+            int typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                String modifiers = beforeName.substring(0, typeSeparator);
+                String type = beforeName.substring(typeSeparator + " ".length());
+                return Optional.of(compileModifiers(modifiers) + " " + compileType(type) + " " + name);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static String compileType(String input) {
+        if (input.equals("void")) return "void";
+
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String input) {
