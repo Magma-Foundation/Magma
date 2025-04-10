@@ -377,7 +377,7 @@ public class Main {
                 .or(() -> generatePlaceholder(input));
     }
 
-    private static @NotNull Optional<String> compileElse(String input, List<String> typeParams, int depth) {
+    private static Optional<String> compileElse(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
         if (stripped.startsWith("else ")) {
             String withoutKeyword = stripped.substring("else ".length()).strip();
