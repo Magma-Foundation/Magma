@@ -81,11 +81,11 @@ char peek() {
 	return this.queue.peek();
 }
 void main(struct String* args) {
-	/* Path source */ = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
+	/* Path source */ = Paths.get(".", "src", "java", "magma", "Main.java");
 	magma.Files.readString(/* source) */.match(/* input -> compileAndWrite(input, source */), /* Optional::of) */.ifPresent(Throwable::printStackTrace);
 }
 Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
-	/* Path target */ = source.resolveSibling(/* "main */.c");
+	/* Path target */ = source.resolveSibling("main.c");
 	/* String output */ = compile(input);
 	return magma.Files.writeString(target, output);
 }
@@ -186,7 +186,7 @@ Optional<struct String> compileRootSegment(struct String input) {
                 return Optional.of("");
             }
         } */
-	/* Optional<String> maybeClass */ = compileToStruct(input, /*  "class " */, ArrayList<>());/* 
+	/* Optional<String> maybeClass */ = compileToStruct(input, "class ", ArrayList<>());/* 
         if (maybeClass.isPresent()) return maybeClass; */
 	return generatePlaceholder(input);
 }
@@ -194,7 +194,7 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
 	/* int classIndex */ = input.indexOf(infix);
 	if(/* classIndex < 0) return Optional */.empty();
 	/* String afterKeyword */ = input.substring(/* classIndex + infix */.length());
-	/* int contentStart */ = afterKeyword.indexOf(/* "{" */);/* 
+	/* int contentStart */ = afterKeyword.indexOf("{");/* 
         if (contentStart >= 0) {
             String name = afterKeyword.substring(0, contentStart).strip();
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
@@ -209,7 +209,7 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
 	return Optional.empty();
 }
 Optional<struct String> compileClassMember(struct String input, List<struct String> typeParams) {
-	return compileWhitespace(/* input) */.or((/* ) -> compileToStruct(input */, /*  "interface " */, /* typeParams)) */.or(() -> compileToStruct(input, /*  "record " */, /* typeParams)) */.or(() -> compileToStruct(input, /*  "class " */, /* typeParams)) */.or(() -> compileGlobalInitialization(input, /* typeParams)) */.or((/* ) -> compileDefinitionStatement(input */)).or(() -> compileMethod(input, /*  typeParams) */).or(() -> generatePlaceholder(input));
+	return compileWhitespace(/* input) */.or((/* ) -> compileToStruct(input */, "interface ", /* typeParams)) */.or(() -> compileToStruct(input, "record ", /* typeParams)) */.or(() -> compileToStruct(input, "class ", /* typeParams)) */.or(() -> compileGlobalInitialization(input, /* typeParams)) */.or((/* ) -> compileDefinitionStatement(input */)).or(() -> compileMethod(input, /*  typeParams) */).or(() -> generatePlaceholder(input));
 }
 Optional<struct String> compileDefinitionStatement(struct String input) {
 	/* String stripped */ = input.strip();/* 
@@ -228,7 +228,7 @@ Optional<struct String> compileGlobalInitialization(struct String input, List<st
 Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {
 	if(!input.endsWith(";")) return Optional.empty();
 	/* String withoutEnd */ = input.substring(0, input.length(/* ) - ";" */.length());
-	/* int valueSeparator */ = withoutEnd.indexOf(/* "=" */);
+	/* int valueSeparator */ = withoutEnd.indexOf("=");
 	if(/* valueSeparator < 0) return Optional */.empty();
 	/* String definition */ = withoutEnd.substring(0, /* valueSeparator) */.strip();
 	/* String value */ = withoutEnd.substring(/* valueSeparator + "=" */.length(/* ) */).strip();
@@ -243,17 +243,19 @@ Optional<struct String> compileWhitespace(struct String input) {
 	return Optional.empty();
 }
 Optional<struct String> compileMethod(struct String input, List<struct String> typeParams) {
-	/* int paramStart */ = input.indexOf(/* "(" */);
+	/* int paramStart */ = input.indexOf("(");
 	if(/* paramStart < 0) return Optional */.empty();
 	/* String inputDefinition */ = input.substring(0, /* paramStart) */.strip();
-	/* String withParams */ = input.substring(/* paramStart + " */(/* " */.length());
+	/* String withParams */ = input.substring(/* paramStart + " */(".length());
 	return compileDefinition(/* inputDefinition) */.flatMap(/* outputDefinition -> {
-            int paramEnd = withParams */.indexOf(/* ")");
-            if  */(/* paramEnd < 0) return Optional */.empty(/* );
+            int paramEnd = withParams */.indexOf(")");
+            if (paramEnd < 0) return Optional.empty();
 
-            String params = withParams */.substring(0, /*  paramEnd);
-            return compileValues(params */, /* definition -> {
-                return compileWhitespace */(/* definition) */.or((/* ) -> compileDefinition(definition */)).or(() -> generatePlaceholder(definition));
+            String params = withParams.substring(0, paramEnd);
+            return compileValues(params, definition -> {
+                return compileWhitespace(definition)
+                        .or(() -> compileDefinition(definition))
+                        .or(() -> generatePlaceholder(definition));
             }).flatMap(outputParams -> {
                 String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
@@ -318,6 +320,10 @@ Optional<struct String> compileStatement(struct String input, List<struct String
 }
 Optional<struct String> compileValue(struct String input, List<struct String> typeParams) {
 	/* String stripped */ = input.strip();/* 
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(stripped);
+        } *//* 
+
         if (stripped.startsWith("new ")) {
             String slice = stripped.substring("new ".length());
             int argsStart = slice.indexOf("(");
@@ -338,7 +344,7 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
         } */
 	/* Optional<String> invocation */ = compileInvocation(input, typeParams);/* 
         if (invocation.isPresent()) return invocation; */
-	/* int separator */ = input.lastIndexOf(/* " */.");/* 
+	/* int separator */ = input.lastIndexOf(".");/* 
         if (separator >= 0) {
             String object = input.substring(0, separator).strip();
             String property = input.substring(separator + ".".length()).strip();
@@ -359,7 +365,7 @@ int isNumber(struct String input) {/*
 	return true;
 }
 Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {
-	/* int argsStart */ = input.indexOf(/* "(" */);/* 
+	/* int argsStart */ = input.indexOf("(");/* 
         if (argsStart >= 0) {
             String type = input.substring(0, argsStart);
             String withEnd = input.substring(argsStart + "(".length()).strip();
@@ -384,7 +390,7 @@ struct StringBuilder mergeValues(struct StringBuilder cache, struct String eleme
 	return cache.append(/* ", ") */.append(element);
 }
 Optional<struct String> compileDefinition(struct String definition) {
-	/* int nameSeparator */ = definition.lastIndexOf(/* " " */);/* 
+	/* int nameSeparator */ = definition.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
             String beforeName = definition.substring(0, nameSeparator).strip();
             String name = definition.substring(nameSeparator + " ".length()).strip();
@@ -488,7 +494,7 @@ int isSymbol(struct String input) {/*
 	return true;
 }
 Optional<struct String> generatePlaceholder(struct String input) {
-	return Optional.of(/* "/* " + input + " */" */);
+	return Optional.of("/* " + input + " */");
 }
 /* 
  */

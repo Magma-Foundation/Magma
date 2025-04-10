@@ -396,6 +396,10 @@ public class Main {
 
     private static Optional<String> compileValue(String input, List<String> typeParams) {
         String stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(stripped);
+        }
+
         if (stripped.startsWith("new ")) {
             String slice = stripped.substring("new ".length());
             int argsStart = slice.indexOf("(");
@@ -404,9 +408,7 @@ public class Main {
                 String withEnd = slice.substring(argsStart + "(".length()).strip();
                 if (withEnd.endsWith(")")) {
                     String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                    return compileType(type, typeParams).flatMap(outputType -> {
-                        return compileArgs(argsString, typeParams).map(value -> outputType + value);
-                    });
+                    return compileType(type, typeParams).flatMap(outputType -> compileArgs(argsString, typeParams).map(value -> outputType + value));
                 }
             }
         }
