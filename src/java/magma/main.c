@@ -48,7 +48,7 @@ struct private State(Deque<char> queue, List<struct String> segments, struct Str
 struct public State(Deque<char> queue) {/* 
             this(queue, new ArrayList<>(), new StringBuilder(), 0); */
 }
-struct State advance(/*  */) {/* 
+struct State advance() {/* 
             this.segments.add(this.buffer.toString()); *//* 
             this.buffer = new StringBuilder(); */
 	return /* this */;
@@ -57,24 +57,24 @@ struct State append(char c) {/*
             this.buffer.append(c); */
 	return /* this */;
 }
-int isLevel(/*  */) {
+int isLevel() {
 	return /* this.depth == 0 */;
 }
-char pop(/*  */) {
+char pop() {
 	return /* this.queue.pop() */;
 }
-int hasElements(/*  */) {
+int hasElements() {
 	return /* !this.queue.isEmpty() */;
 }
-struct State exit(/*  */) {/* 
+struct State exit() {/* 
             this.depth = this.depth - 1; */
 	return /* this */;
 }
-struct State enter(/*  */) {/* 
+struct State enter() {/* 
             this.depth = this.depth + 1; */
 	return /* this */;
 }
-List<struct String> segments(/*  */) {
+List<struct String> segments() {
 	return /* this.segments */;
 }
 void main(struct String* args) {
@@ -249,7 +249,11 @@ Optional<struct String> compileMethod(struct String input, List<struct String> t
             if (paramEnd < 0) return Optional.empty();
 
             String params = withParams.substring(0, paramEnd);
-            return compileValues(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
+            return compileValues(params, definition -> {
+                return compileWhitespace(definition)
+                        .or(() -> compileDefinition(definition))
+                        .or(() -> generatePlaceholder(definition));
+            }).flatMap(outputParams -> {
                 String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {

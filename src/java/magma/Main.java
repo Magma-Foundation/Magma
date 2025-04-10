@@ -296,7 +296,11 @@ public class Main {
             if (paramEnd < 0) return Optional.empty();
 
             String params = withParams.substring(0, paramEnd);
-            return compileValues(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
+            return compileValues(params, definition -> {
+                return compileWhitespace(definition)
+                        .or(() -> compileDefinition(definition))
+                        .or(() -> generatePlaceholder(definition));
+            }).flatMap(outputParams -> {
                 String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
