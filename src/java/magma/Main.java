@@ -293,7 +293,19 @@ public class Main {
             String beforeName = definition.substring(0, nameSeparator).strip();
             String name = definition.substring(nameSeparator + " ".length()).strip();
 
-            int typeSeparator = beforeName.lastIndexOf(" ");
+            int typeSeparator = -1;
+            int depth = 0;
+            for (int i = 0; i < beforeName.length(); i++) {
+                char c = beforeName.charAt(i);
+                if (c == ' ' && depth == 0) {
+                    typeSeparator = i;
+                    break;
+                } else {
+                    if (c == '>') depth++;
+                    if (c == '<') depth--;
+                }
+            }
+
             if (typeSeparator >= 0) {
                 String beforeType = beforeName.substring(0, typeSeparator).strip();
 
@@ -335,11 +347,6 @@ public class Main {
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
                 .toList();
-    }
-
-    private static Optional<String> compileTypeParam(String input) {
-        if (isSymbol(input.strip())) return Optional.of(input);
-        return generatePlaceholder(input);
     }
 
     private static String generateDefinition(Optional<String> maybeModifiers, List<String> maybeTypeParams, String type, String name) {

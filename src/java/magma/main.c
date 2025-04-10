@@ -16,10 +16,16 @@
 #include "./java/util/stream/IntStream"
 /* public */ struct Main {
 /* private */ struct Result<T, X> {
-<R> R match(/* Function<T, */ /* R> */ whenOk, /* Function<X, */ /* R> */ whenErr);/* 
+<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);/* 
      */
 };
-/* private */ /* record */ /* Err<T, */ X>(struct X error);/* private */ /* record */ /* Ok<T, */ X>(struct T value);/* private */ /* static */ /* class */ /* State */ /* { */ /* private */ /* final */ /* Deque<Character> */ /* queue; */ /* private */ /* final */ /* List<String> */ /* segments; */ /* private */ /* StringBuilder */ /* buffer; */ /* private */ /* int */ /* depth; */ struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
+/* private */ /* record Err<T, */ X>(struct X error);/* private */ /* record Ok<T, */ X>(struct T value);/* private */ /* static class State {
+        private final Deque<Character> queue;
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private */ State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
             this.queue = queue; *//* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
@@ -67,18 +73,18 @@
             return segments; *//* 
         }
      */
-}/* public */ /* static */ void main(struct String* args) {/* 
+}/* public */ /* static void */ main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); *//* 
      */
-}/* private */ /* static */ /* Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
+}/* private */ /* static Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
         Path target = source.resolveSibling("main.c"); *//* 
         String output = compile(input); *//* 
         return writeString(target, output); *//* 
      */
-}/* private */ /* static */ /* Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
+}/* private */ /* static Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -86,20 +92,20 @@
             return Optional.of(e);
         } *//* 
      */
-}/* private */ /* static */ /* Result<String, */ /* IOException> */ readString(struct Path source) {/* 
+}/* private */ /* static Result<String, IOException> */ readString(struct Path source) {/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
             return new Err<>(e);
         } *//* 
      */
-}/* private */ /* static */ struct String compile(struct String input) {/* 
+}/* private */ /* static String */ compile(struct String input) {/* 
         return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
-}/* private */ /* static */ /* Optional<String> */ compileStatements(struct String input, /* Function<String, */ /* Optional<String>> */ compiler) {/* 
+}/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
         return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements); *//* 
      */
-}/* private */ /* static */ /* Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, */ /* Optional<String>> */ compiler, /* BiFunction<StringBuilder, */ /* String, */ /* StringBuilder> */ merger) {/* 
+}/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
         Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder()); *//* 
         for (String segment : segments) {
             maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(compiled -> merger.apply(output, compiled)));
@@ -107,10 +113,10 @@
 
         return maybeOutput.map(StringBuilder::toString); *//* 
      */
-}/* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder output, struct String compiled) {/* 
+}/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
         return output.append(compiled); *//* 
      */
-}/* private */ /* static */ /* List<String> */ divide(struct String input, /* BiFunction<State, */ /* Character, */ /* State> */ divider) {/* 
+}/* private */ /* static List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)); *//* 
@@ -123,7 +129,7 @@
 
         return state.advance().segments(); *//* 
      */
-}/* private */ /* static */ struct State divideStatementChar(struct State state, struct char c) {/* 
+}/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
         State appended = state.append(c); *//* 
         if (c == '; *//* ' && appended.isLevel()) return appended.advance(); *//* 
         if (c == ' */
@@ -263,7 +269,19 @@
             String beforeName = definition.substring(0, nameSeparator).strip();
             String name = definition.substring(nameSeparator + " ".length()).strip();
 
-            int typeSeparator = beforeName.lastIndexOf(" ");
+            int typeSeparator = -1;
+            int depth = 0;
+            for (int i = 0; i < beforeName.length(); i++) {
+                char c = beforeName.charAt(i);
+                if (c == ' ' && depth == 0) {
+                    typeSeparator = i;
+                    break;
+                } else {
+                    if (c == '>') depth++;
+                    if (c == '<') depth--;
+                }
+            }
+
             if (typeSeparator >= 0) {
                 String beforeType = beforeName.substring(0, typeSeparator).strip();
 
