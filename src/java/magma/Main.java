@@ -228,9 +228,15 @@ public class Main {
     }
 
     private static Optional<String> compileClassMember(String input, int depth) {
-        return compileToStruct(input, "interface ", depth)
+        return compileWhitespace(input)
+                .or(() -> compileToStruct(input, "interface ", depth))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) return Optional.of("");
+        return Optional.empty();
     }
 
     private static Optional<String> compileMethod(String input, int depth) {

@@ -16,8 +16,7 @@
 #include "./java/util/stream/IntStream"
 /* public */ struct Main {
 	/* private */ struct Result<T, X> {
-		<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);/* 
-     */
+		<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
 };
 	/* private */ /* record Err<T, */ X>(struct X error);	/* private */ /* record Ok<T, */ X>(struct T value);	/* private */ /* static class State {
         private final Deque<Character> queue;
@@ -136,8 +135,7 @@
 }	/* ' */ /* && */ isShallow(/* appended */);/* 
         if (c == '{') return appended.enter();
         if (c == '} */	/* ') */ struct return appended.exit(/*  */);/* 
-        return appended; *//* 
-     */
+        return appended; */
 };
 /* 
 
@@ -204,9 +202,15 @@
     } *//* 
 
     private static Optional<String> compileClassMember(String input, int depth) {
-        return compileToStruct(input, "interface ", depth)
+        return compileWhitespace(input)
+                .or(() -> compileToStruct(input, "interface ", depth))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
+    } *//* 
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) return Optional.of("");
+        return Optional.empty();
     } *//* 
 
     private static Optional<String> compileMethod(String input, int depth) {
