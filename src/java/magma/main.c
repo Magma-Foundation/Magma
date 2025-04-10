@@ -12,14 +12,46 @@
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
 };
-/* public */ /* static */ void main(struct String* args) {/* 
+/* private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    } *//* 
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(error);
+        }
+    } *//* 
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(value);
+        }
+    } *//* public */ /* static */ void main(struct String* args) {/* 
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
+        readString(source)
+                .match(input -> compileAndWrite(input, source), Optional::of)
+                .ifPresent(Throwable::printStackTrace); *//* 
+     */
+}/* private */ /* static */ /* Optional<IOException> */ compileAndWrite(struct String inputstruct Path source) {/* 
+        Path target = source.resolveSibling("main.c"); *//* 
+        String output = compile(input); *//* 
+        return writeString(target, output); *//* 
+     */
+}/* private */ /* static */ /* Optional<IOException> */ writeString(struct Path targetstruct String output) {/* 
         try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
+            Files.writeString(target, output);
+            return Optional.empty();
         } *//*  catch (IOException e) {
-            throw new RuntimeException(e);
+            return Optional.of(e);
+        } *//* 
+     */
+}/* private */ /* static */ /* Result<String, */ /* IOException> */ readString(struct Path source) {/* 
+        try {
+            return new Ok<>(Files.readString(source));
+        } *//*  catch (IOException e) {
+            return new Err<>(e);
         } *//* 
      */
 }/* private */ /* static */ struct String compile(struct String input) {/* 
@@ -131,12 +163,9 @@
         return generatePlaceholder(input);
     } *//* 
 
-    private static StringBuilder mergeValues(StringBuilder stringBuilder, String s) {
-        if (stringBuilder.isEmpty()) {
-            return stringBuilder.append(s);
-        }
-
-        return stringBuilder.append(", ").append(s);
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) return cache.append(element);
+        return cache.append(", ").append(element);
     } *//* 
 
     private static Optional<String> compileDefinition(String definition) {
