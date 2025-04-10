@@ -247,13 +247,11 @@ public class Main {
             String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                return compileModifiers(substring).flatMap(newModifiers -> {
-                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                        structs.add(newModifiers + " struct " + name + " {\n" +
-                                outputContent + "};\n");
-                        return "";
-                    });
-                });
+                return compileModifiers(substring).flatMap(newModifiers -> compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                    structs.add(newModifiers + " struct " + name + " {\n" +
+                            outputContent + "};\n");
+                    return "";
+                }));
             }
         }
         return Optional.empty();
@@ -280,7 +278,7 @@ public class Main {
                 .or(() -> compileToStruct(input, "class "))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
-                .or(() -> compileMethod(input, 0))
+                .or(() -> compileMethod(input))
                 .or(() -> generatePlaceholder(input));
     }
 
@@ -314,7 +312,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileMethod(String input, int depth) {
+    private static Optional<String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) return Optional.empty();
 
@@ -327,7 +325,7 @@ public class Main {
 
             String params = withParams.substring(0, paramEnd);
             return compileValues(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
-                String header = "\t".repeat(depth) + outputDefinition + "(" + outputParams + ")";
+                String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
@@ -411,13 +409,9 @@ public class Main {
 
                 String inputType = beforeName.substring(typeSeparator + " ".length());
                 Optional<String> compiledModifiers = compileModifiers(modifiers.strip());
-                return compileType(inputType, typeParams).flatMap(outputType -> {
-                    return Optional.of(generateDefinition(compiledModifiers, typeParams, outputType, name));
-                });
+                return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(compiledModifiers, typeParams, outputType, name)));
             } else {
-                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> {
-                    return Optional.of(generateDefinition(Optional.empty(), Collections.emptyList(), outputType, name));
-                });
+                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Optional.empty(), Collections.emptyList(), outputType, name)));
             }
         }
         return Optional.empty();
