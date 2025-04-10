@@ -127,7 +127,7 @@ public class Main {
                     copy.addAll(list);
                     return copy;
                 })
-                .map(compiled -> mergeAll(Main::mergeStatements, compiled))
+                .map(compiled -> mergeAll(compiled, Main::mergeStatements))
                 .or(() -> generatePlaceholder(input)).orElse("");
     }
 
@@ -136,27 +136,18 @@ public class Main {
     }
 
     private static Optional<String> compileAndMerge(List<String> segments, Function<String, Optional<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return parseAll(segments, compiler).map(compiled -> mergeAll(merger, compiled));
+        return parseAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
     }
 
-    private static String mergeAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> compiled) {
-        StringBuilder output = new StringBuilder();
-        for (String segment : compiled) {
-            output = merger.apply(output, segment);
-        }
-
-        return output.toString();
+    private static String mergeAll(List<String> compiled, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return compiled.stream().reduce(new StringBuilder(), merger::apply, (_, next) -> next).toString();
     }
 
     private static Optional<List<String>> parseAll(List<String> segments, Function<String, Optional<String>> compiler) {
-        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>());
-        for (String segment : segments) {
-            maybeCompiled = maybeCompiled.flatMap(allCompiled -> compiler.apply(segment).map(compiledSegment -> {
-                allCompiled.add(compiledSegment);
-                return allCompiled;
-            }));
-        }
-        return maybeCompiled;
+        return segments.stream().reduce(Optional.of(new ArrayList<String>()), (maybeCompiled, segment) -> maybeCompiled.flatMap(allCompiled -> compiler.apply(segment).map(compiledSegment -> {
+            allCompiled.add(compiledSegment);
+            return allCompiled;
+        })), (_, next) -> next);
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
@@ -464,12 +455,9 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isDigit(c)) continue;
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length())
+                .map(input::charAt)
+                .allMatch(Character::isDigit);
     }
 
     private static Optional<String> compileInvocation(String input, List<String> typeParams) {
@@ -479,7 +467,8 @@ public class Main {
 
             int argsStart = -1;
             int depth = 0;
-            for (int i = sliced.length() - 1; i >= 0; i--) {
+            int i = sliced.length() - 1;
+            while (i >= 0) {
                 char c = sliced.charAt(i);
                 if (c == '(' && depth == 0) {
                     argsStart = i;
@@ -488,6 +477,7 @@ public class Main {
 
                 if (c == ')') depth++;
                 if (c == '(') depth--;
+                i--;
             }
 
             if (argsStart >= 0) {
@@ -522,7 +512,8 @@ public class Main {
 
             int typeSeparator = -1;
             int depth = 0;
-            for (int i = beforeName.length() - 1; i >= 0; i--) {
+            int i = beforeName.length() - 1;
+            while (i >= 0) {
                 char c = beforeName.charAt(i);
                 if (c == ' ' && depth == 0) {
                     typeSeparator = i;
@@ -531,6 +522,7 @@ public class Main {
                     if (c == '>') depth++;
                     if (c == '<') depth--;
                 }
+                i--;
             }
 
             if (typeSeparator >= 0) {
@@ -621,12 +613,9 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isLetter(c)) continue;
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .allMatch(Character::isLetter);
     }
 
     private static Optional<String> generatePlaceholder(String input) {
