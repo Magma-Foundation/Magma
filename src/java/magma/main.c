@@ -1,3 +1,4 @@
+#include "./org/jetbrains/annotations/NotNull"
 #include "./java/io/IOException"
 #include "./java/nio/file/Files"
 #include "./java/nio/file/Path"
@@ -15,22 +16,19 @@
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
 /* private */ struct Result<T, X> {
-<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
+	/* <R> */ /* R */ /* match(Function<T, */ /* R> */ /* whenOk, */ /* Function<X, R> */ whenErr);
 };
 /* private */ struct Err<T, X>(X error) implements Result<T, X> {
-
 };
 /* private */ struct Ok<T, X>(T value) implements Result<T, X> {
-
 };
 /* private */ /* static */ struct State {
-/* private final Deque<Character> queue; *//* 
-        private final List<String> segments; *//* 
-        private StringBuilder buffer; *//* 
-        private int depth; */
+	/* private */ /* final */ /* Deque<Character> */ queue;
+	/* private */ /* final */ /* List<String> */ segments;
+	/* private */ struct StringBuilder buffer;
+	/* private */ struct int depth;
 };
 /* public */ struct Main {
-
 };
 /* private */ /* static */ /* final */ /* List<String> */ imports = /* new ArrayList<>() */;
 /* private */ /* static */ /* final */ /* List<String> */ structs = /* new ArrayList<>() */;
@@ -218,10 +216,9 @@
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileModifiers(substring).flatMap(newModifiers -> {
-                    return compileStatements(inputContent, input1 -> compileClassMember(input1)).map(outputContent -> {
+                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
                         structs.add(newModifiers + " struct " + name + " {\n" +
-                                outputContent +
-                                "\n" + "};\n");
+                                outputContent + "};\n");
                         return "";
                     });
                 });
@@ -248,8 +245,19 @@
                 .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileToStruct(input, "class "))
                 .or(() -> compileInitialization(input))
+                .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input, 0))
                 .or(() -> generatePlaceholder(input)); *//* 
+     */
+}/* private */ /* static */ /* @NotNull */ /* Optional<String> */ compileDefinitionStatement(struct String input) {/* 
+        String stripped = input.strip(); *//* 
+        if (stripped.endsWith("; *//* ")) {
+            String content = stripped.substring(0, stripped.length() - ";".length());
+            return compileDefinition(content).map(result -> {
+                return "\t" + result + ";\n";
+            });
+        } *//* 
+        return Optional.empty(); *//* 
      */
 }/* private */ /* static */ /* Optional<String> */ compileInitialization(struct String input) {/* 
         if (!input.endsWith("; *//* ")) return Optional.empty(); *//* 

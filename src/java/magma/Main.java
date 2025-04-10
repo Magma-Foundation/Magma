@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -248,10 +250,9 @@ public class Main {
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileModifiers(substring).flatMap(newModifiers -> {
-                    return compileStatements(inputContent, input1 -> compileClassMember(input1)).map(outputContent -> {
+                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
                         structs.add(newModifiers + " struct " + name + " {\n" +
-                                outputContent +
-                                "\n" + "};\n");
+                                outputContent + "};\n");
                         return "";
                     });
                 });
@@ -280,8 +281,18 @@ public class Main {
                 .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileToStruct(input, "class "))
                 .or(() -> compileInitialization(input))
+                .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input, 0))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static @NotNull Optional<String> compileDefinitionStatement(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String content = stripped.substring(0, stripped.length() - ";".length());
+            return compileDefinition(content).map(result -> "\t" + result + ";\n");
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> compileInitialization(String input) {
