@@ -331,7 +331,7 @@ public class Main {
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
                     return compileStatements(inputContent, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                        methods.add(header + " {" + outputContent + "\n}");
+                        methods.add(header + " {" + outputContent + "\n}\n");
                         return Optional.of("");
                     });
                 }
