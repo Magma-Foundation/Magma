@@ -17,8 +17,20 @@
 /* private */ struct Result<T, X> {
 	<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
 };
+/* private */ struct Err<T, X>(X error) implements Result<T, X> {
+	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
+            return whenErr.apply(error); *//* 
+         */
+}
+};
+/* private */ struct Ok<T, X>(T value) implements Result<T, X> {
+	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
+            return whenOk.apply(value); *//* 
+         */
+}
+};
 /* public */ struct Main {
-	/* private */ /* record Err<T, */ X>(struct X error);	/* private */ /* record Ok<T, */ X>(struct T value);	/* private */ /* static class State {
+	/* private */ /* static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
         private StringBuilder buffer;
@@ -182,13 +194,13 @@
             }
         }
 
-        Optional<String> maybeClass = compileToStruct(input, "class ", 0);
+        Optional<String> maybeClass = compileToStruct(input, "class ");
         if (maybeClass.isPresent()) return maybeClass;
 
         return generatePlaceholder(input);
     } *//* 
 
-    private static Optional<String> compileToStruct(String input, String infix, int depth) {
+    private static Optional<String> compileToStruct(String input, String infix) {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) return Optional.empty();
 
@@ -230,7 +242,8 @@
 
     private static Optional<String> compileClassMember(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileToStruct(input, "interface ", depth))
+                .or(() -> compileToStruct(input, "interface "))
+                .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
     } *//* 

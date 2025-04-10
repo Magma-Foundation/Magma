@@ -213,13 +213,13 @@ public class Main {
             }
         }
 
-        Optional<String> maybeClass = compileToStruct(input, "class ", 0);
+        Optional<String> maybeClass = compileToStruct(input, "class ");
         if (maybeClass.isPresent()) return maybeClass;
 
         return generatePlaceholder(input);
     }
 
-    private static Optional<String> compileToStruct(String input, String infix, int depth) {
+    private static Optional<String> compileToStruct(String input, String infix) {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) return Optional.empty();
 
@@ -261,7 +261,8 @@ public class Main {
 
     private static Optional<String> compileClassMember(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileToStruct(input, "interface ", depth))
+                .or(() -> compileToStruct(input, "interface "))
+                .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
     }
