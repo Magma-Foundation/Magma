@@ -276,7 +276,7 @@ public class Main {
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileToStruct(input, "class "))
-                .or(() -> compileInitialization(input))
+                .or(() -> compileGlobalInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .or(() -> generatePlaceholder(input));
@@ -291,6 +291,13 @@ public class Main {
         return Optional.empty();
     }
 
+    private static Optional<String> compileGlobalInitialization(String input) {
+        return compileInitialization(input).map(generated -> {
+            globals.add(generated + ";\n");
+            return "";
+        });
+    }
+
     private static Optional<String> compileInitialization(String input) {
         if (!input.endsWith(";")) return Optional.empty();
 
@@ -301,10 +308,7 @@ public class Main {
         String definition = withoutEnd.substring(0, valueSeparator).strip();
         String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
         return compileDefinition(definition).map(outputDefinition -> {
-            return outputDefinition + " = " + generatePlaceholder(value).orElse("") + ";\n";
-        }).map(generated -> {
-            globals.add(generated);
-            return "";
+            return outputDefinition + " = " + generatePlaceholder(value).orElse("");
         });
     }
 
@@ -362,6 +366,7 @@ public class Main {
     private static Optional<String> compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input))
+                .or(() -> compileInitialization(input).map(value -> "\n\t" + value + ";"))
                 .or(() -> generatePlaceholder(input));
     }
 
