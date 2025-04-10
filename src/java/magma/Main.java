@@ -182,6 +182,17 @@ public class Main {
         State state = new State(queue);
         while (state.hasElements()) {
             char c = state.pop();
+
+            if (c == '\'') {
+                state.append(c);
+                char maybeSlash = state.pop();
+                state.append(maybeSlash);
+
+                if (maybeSlash == '\\') state.append(state.pop());
+                state.append(state.pop());
+                continue;
+            }
+
             state = divider.apply(state, c);
         }
 

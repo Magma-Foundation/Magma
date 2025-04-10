@@ -24,10 +24,7 @@
 
 };
 /* public */ struct Main {
-	/* private */ /* static final List<String> imports = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> structs = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> methods = new */ ArrayList<>(/*  */);	/* ' */ /* && */ isShallow(/* appended */);/* 
-        if (c == '{') return appended.enter();
-        if (c == '} */	/* ') */ struct return appended.exit(/*  */);/* 
-        return appended; */
+	/* private */ /* static final List<String> imports = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> structs = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> methods = new */ ArrayList<>(/*  */);
 };
 	/* @Override */ /*        public <R> R */ match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenErr.apply(error); *//* 
@@ -166,6 +163,16 @@
         State state = new State(queue); *//* 
         while (state.hasElements()) {
             char c = state.pop();
+            if (c == '\'') {
+                state.append(c);
+                char maybeSlash = state.pop();
+                state.append(maybeSlash);
+
+                if (maybeSlash == '\\') state.append(state.pop());
+                state.append(state.pop());
+                continue;
+            }
+
             state = divider.apply(state, c);
         } *//* 
 
@@ -173,18 +180,19 @@
      */
 	}	/* private */ /* static State */ divideStatementChar(struct State state, struct char c) {/* 
         State appended = state.append(c); *//* 
-        if (c == '; *//* ' && appended.isLevel()) return appended.advance(); *//* 
-        if (c == ' */
-	}/* 
+        if (c == ';' && appended.isLevel()) return appended.advance(); *//* 
+        if (c == '}' && isShallow(appended)) return appended.advance().exit(); *//* 
+        if (c == '{') return appended.enter(); *//* 
+        if (c == '}') return appended.exit(); *//* 
+        return appended; *//* 
+     */
+	}	/* private */ /* static boolean */ isShallow(struct State state) {/* 
+        return state.depth == 1; *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileRootSegment(struct String input) {/* 
+        if (input.startsWith("package ")) return Optional.of(""); *//* 
 
-    private static boolean isShallow(State state) {
-        return state.depth == 1;
-    } *//* 
-
-    private static Optional<String> compileRootSegment(String input) {
-        if (input.startsWith("package ")) return Optional.of("");
-
-        String stripped = input.strip();
+        String stripped = input.strip(); *//* 
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
@@ -193,21 +201,20 @@
                 imports.add("#include \"./" + joined + "\"\n");
                 return Optional.of("");
             }
-        }
+        } *//* 
 
-        Optional<String> maybeClass = compileToStruct(input, "class ");
-        if (maybeClass.isPresent()) return maybeClass;
+        Optional<String> maybeClass = compileToStruct(input, "class "); *//* 
+        if (maybeClass.isPresent()) return maybeClass; *//* 
 
-        return generatePlaceholder(input);
-    } *//* 
+        return generatePlaceholder(input); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileToStruct(struct String input, struct String infix) {/* 
+        int classIndex = input.indexOf(infix); *//* 
+        if (classIndex < 0) return Optional.empty(); *//* 
 
-    private static Optional<String> compileToStruct(String input, String infix) {
-        int classIndex = input.indexOf(infix);
-        if (classIndex < 0) return Optional.empty();
+        String substring = input.substring(0, classIndex); *//* 
 
-        String substring = input.substring(0, classIndex);
-
-        String afterKeyword = input.substring(classIndex + infix.length());
+        String afterKeyword = input.substring(classIndex + infix.length()); *//* 
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart >= 0) {
             String name = afterKeyword.substring(0, contentStart).strip();
@@ -223,43 +230,39 @@
                     });
                 });
             }
-        }
-        return Optional.empty();
-    } *//* 
-
-    private static Optional<String> compileModifiers(String substring) {
-        String[] oldModifiers = substring.strip().split(" ");
+        } *//* 
+        return Optional.empty(); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileModifiers(struct String substring) {/* 
+        String[] oldModifiers = substring.strip().split(" "); *//* 
         List<String> list = Arrays.stream(oldModifiers)
                 .map(String::strip)
                 .filter(modifier -> !modifier.isEmpty())
-                .toList();
+                .toList(); *//* 
 
-        if (list.isEmpty()) return Optional.empty();
+        if (list.isEmpty()) return Optional.empty(); *//* 
         return Optional.of(list.stream()
                 .map(Main::generatePlaceholder)
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining(" ")));
-    } *//* 
-
-    private static Optional<String> compileClassMember(String input, int depth) {
+                .collect(Collectors.joining(" "))); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileClassMember(struct String input, struct int depth) {/* 
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileMethod(input, depth))
-                .or(() -> generatePlaceholder(input));
-    } *//* 
+                .or(() -> generatePlaceholder(input)); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileWhitespace(struct String input) {/* 
+        if (input.isBlank()) return Optional.of(""); *//* 
+        return Optional.empty(); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileMethod(struct String input, struct int depth) {/* 
+        int paramStart = input.indexOf("("); *//* 
+        if (paramStart < 0) return Optional.empty(); *//* 
 
-    private static Optional<String> compileWhitespace(String input) {
-        if (input.isBlank()) return Optional.of("");
-        return Optional.empty();
-    } *//* 
-
-    private static Optional<String> compileMethod(String input, int depth) {
-        int paramStart = input.indexOf("(");
-        if (paramStart < 0) return Optional.empty();
-
-        String inputDefinition = input.substring(0, paramStart).strip();
-        String withParams = input.substring(paramStart + "(".length());
+        String inputDefinition = input.substring(0, paramStart).strip(); *//* 
+        String withParams = input.substring(paramStart + "(".length()); *//* 
 
         return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
@@ -279,38 +282,32 @@
 
                 return Optional.of(header + ";");
             });
-        });
-    } *//* 
+        } *//* ); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileValues(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
+        List<String> divided = divide(input, Main::divideValueChar); *//* 
+        return compileValues(divided, compiler); *//* 
+     */
+	}	/* private */ /* static State */ divideValueChar(struct State state, struct char c) {/* 
+        if (c == ',' && state.isLevel()) return state.advance(); *//* 
 
-    private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
-        List<String> divided = divide(input, Main::divideValueChar);
-        return compileValues(divided, compiler);
-    } *//* 
-
-    private static State divideValueChar(State state, char c) {
-        if (c == ',' && state.isLevel()) return state.advance();
-
-        State appended = state.append(c);
-        if (c == '<') return appended.enter();
-        if (c == '>') return appended.exit();
-        return appended;
-    } *//* 
-
-    private static Optional<String> compileValues(List<String> params, Function<String, Optional<String>> compoiler) {
-        return compileAndMerge(params, compoiler, Main::mergeValues);
-    } *//* 
-
-    private static Optional<String> compileStatement(String input) {
-        return generatePlaceholder(input);
-    } *//* 
-
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
-        if (cache.isEmpty()) return cache.append(element);
-        return cache.append(", ").append(element);
-    } *//* 
-
-    private static Optional<String> compileDefinition(String definition) {
-        int nameSeparator = definition.lastIndexOf(" ");
+        State appended = state.append(c); *//* 
+        if (c == '<') return appended.enter(); *//* 
+        if (c == '>') return appended.exit(); *//* 
+        return appended; *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileValues(/* List<String> */ params, /* Function<String, Optional<String>> */ compoiler) {/* 
+        return compileAndMerge(params, compoiler, Main::mergeValues); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileStatement(struct String input) {/* 
+        return generatePlaceholder(input); *//* 
+     */
+	}	/* private */ /* static StringBuilder */ mergeValues(struct StringBuilder cache, struct String element) {/* 
+        if (cache.isEmpty()) return cache.append(element); *//* 
+        return cache.append(", ").append(element); *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileDefinition(struct String definition) {/* 
+        int nameSeparator = definition.lastIndexOf(" "); *//* 
         if (nameSeparator >= 0) {
             String beforeName = definition.substring(0, nameSeparator).strip();
             String name = definition.substring(nameSeparator + " ".length()).strip();
@@ -359,38 +356,35 @@
                     return Optional.of(generateDefinition(Optional.empty(), Collections.emptyList(), outputType, name));
                 });
             }
-        }
-        return Optional.empty();
-    } *//* 
-
-    private static List<String> splitValues(String substring) {
-        String[] paramsArrays = substring.strip().split(Pattern.quote(","));
+        } *//* 
+        return Optional.empty(); *//* 
+     */
+	}	/* private */ /* static List<String> */ splitValues(struct String substring) {/* 
+        String[] paramsArrays = substring.strip().split(Pattern.quote(",")); *//* 
         return Arrays.stream(paramsArrays)
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
-                .toList();
-    } *//* 
+                .toList(); *//* 
+     */
+	}	/* private */ /* static String */ generateDefinition(/* Optional<String> */ maybeModifiers, /* List<String> */ maybeTypeParams, struct String type, struct String name) {/* 
+        String modifiersString = maybeModifiers.map(modifiers -> modifiers + " ").orElse(""); *//* 
 
-    private static String generateDefinition(Optional<String> maybeModifiers, List<String> maybeTypeParams, String type, String name) {
-        String modifiersString = maybeModifiers.map(modifiers -> modifiers + " ").orElse("");
-
-        String typeParamsString;
+        String typeParamsString; *//* 
         if (maybeTypeParams.isEmpty()) {
             typeParamsString = "";
-        } else {
+        } *//*  else {
             typeParamsString = "<" + String.join(", ", maybeTypeParams) + "> ";
-        }
+        } *//* 
 
-        return modifiersString + typeParamsString + type + " " + name;
-    } *//* 
-
-    private static Optional<String> compileType(String input, List<String> typeParams) {
-        if (input.equals("void")) return Optional.of("void");
+        return modifiersString + typeParamsString + type + " " + name; *//* 
+     */
+	}	/* private */ /* static Optional<String> */ compileType(struct String input, /* List<String> */ typeParams) {/* 
+        if (input.equals("void")) return Optional.of("void"); *//* 
 
         if (input.endsWith("[]")) {
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
                     .map(value -> value + "*");
-        }
+        } *//* 
 
         if (isSymbol(input)) {
             if (typeParams.contains(input)) {
@@ -398,22 +392,20 @@
             } else {
                 return Optional.of("struct " + input);
             }
-        }
+        } *//* 
 
-        return generatePlaceholder(input);
-    } *//* 
-
-    private static boolean isSymbol(String input) {
-        for (int i = 0; i < input.length(); i++) {
+        return generatePlaceholder(input); *//* 
+     */
+	}	/* private */ /* static boolean */ isSymbol(struct String input) {/* 
+        for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) continue;
             return false;
-        }
-        return true;
-    } *//* 
-
-    private static Optional<String> generatePlaceholder(String input) {
-        return Optional.of("/* " + input + " */");
-    } *//* 
-}
+        } *//* 
+        return true; *//* 
+     */
+	}	/* private */ /* static Optional<String> */ generatePlaceholder(struct String input) {/* 
+        return Optional.of("/* " + input + " */"); *//* 
+     */
+	}/* 
  */
