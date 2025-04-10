@@ -462,7 +462,7 @@ public class Main {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
-            return Optional.of(generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + type + "." + property + "()") + ";");
+            return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + type + "." + property + "()").map(result -> result + ";");
         }
 
         int separator = input.lastIndexOf(".");
