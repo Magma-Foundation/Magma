@@ -278,6 +278,7 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
+                .or(() -> compileToStruct(input, "class "))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileMethod(input, 0))
                 .or(() -> generatePlaceholder(input));

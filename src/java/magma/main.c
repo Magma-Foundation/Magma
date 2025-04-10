@@ -23,6 +23,12 @@
 /* private */ struct Ok<T, X>(T value) implements Result<T, X> {
 
 };
+/* private */ /* static */ struct State {
+/* private final Deque<Character> queue; *//* 
+        private final List<String> segments; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; */
+};
 /* public */ struct Main {
 
 };
@@ -36,54 +42,44 @@
 }/* @Override */ /* public */ <R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenOk.apply(value); *//* 
          */
-}/* private */ /* static */ /* class */ /* State */ /* { */ /* private */ /* final */ /* Deque<Character> */ /* queue; */ /* private */ /* final */ /* List<String> */ /* segments; */ /* private */ /* StringBuilder */ /* buffer; */ /* private */ /* int */ /* depth; */ struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
+}struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
             this.queue = queue; *//* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; *//* 
-        }
-
-        public State(Deque<Character> queue) {
+         */
+}struct public State(/* Deque<Character> */ queue) {/* 
             this(queue, new ArrayList<>(), new StringBuilder(), 0); *//* 
-        }
-
-        private State advance() {
+         */
+}/* private */ struct State advance(/*  */) {/* 
             segments.add(buffer.toString()); *//* 
             buffer = new StringBuilder(); *//* 
             return this; *//* 
-        }
-
-        private State append(char c) {
+         */
+}/* private */ struct State append(struct char c) {/* 
             buffer.append(c); *//* 
             return this; *//* 
-        }
-
-        private boolean isLevel() {
+         */
+}/* private */ struct boolean isLevel(/*  */) {/* 
             return depth == 0; *//* 
-        }
-
-        private char pop() {
+         */
+}/* private */ struct char pop(/*  */) {/* 
             return queue.pop(); *//* 
-        }
-
-        private boolean hasElements() {
+         */
+}/* private */ struct boolean hasElements(/*  */) {/* 
             return !queue.isEmpty(); *//* 
-        }
-
-        private State exit() {
+         */
+}/* private */ struct State exit(/*  */) {/* 
             this.depth = depth - 1; *//* 
             return this; *//* 
-        }
-
-        private State enter() {
+         */
+}/* private */ struct State enter(/*  */) {/* 
             this.depth = depth + 1; *//* 
             return this; *//* 
-        }
-
-        public List<String> segments() {
+         */
+}/* public */ /* List<String> */ segments(/*  */) {/* 
             return segments; *//* 
-        }
-     */
+         */
 }/* public */ /* static */ void main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
@@ -250,6 +246,7 @@
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
+                .or(() -> compileToStruct(input, "class "))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileMethod(input, 0))
                 .or(() -> generatePlaceholder(input)); *//* 
