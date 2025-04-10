@@ -17,7 +17,7 @@
 /* public */ struct Main {
 	/* private */ struct Result<T, X> {
 		<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
-};
+	};
 	/* private */ /* record Err<T, */ X>(struct X error);	/* private */ /* record Ok<T, */ X>(struct T value);	/* private */ /* static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
@@ -177,9 +177,10 @@
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileModifiers(substring).flatMap(newModifiers -> {
                     return compileStatements(inputContent, input1 -> compileClassMember(input1, depth + 1)).map(outputContent -> {
-                        return "\t".repeat(depth) + newModifiers + " struct " + name + " {\n" +
+                        String indent = "\t".repeat(depth);
+                        return indent + newModifiers + " struct " + name + " {\n" +
                                 outputContent +
-                                "\n};\n";
+                                "\n" + indent + "};\n";
                     });
                 });
             }
