@@ -359,6 +359,9 @@ public class Main {
                     });
                 });
             }
+
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams);
+            if (maybeInvocation.isPresent()) return maybeInvocation;
         }
 
         return Optional.empty();
@@ -381,17 +384,8 @@ public class Main {
             }
         }
 
-        int argsStart = input.indexOf("(");
-        if (argsStart >= 0) {
-            String type = input.substring(0, argsStart);
-            String withEnd = input.substring(argsStart + "(".length()).strip();
-            if (withEnd.endsWith(")")) {
-                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                return compileValue(type, typeParams).flatMap(caller -> {
-                    return compileArgs(argsString, typeParams).map(value -> caller + value);
-                });
-            }
-        }
+        Optional<String> invocation = compileInvocation(input, typeParams);
+        if (invocation.isPresent()) return invocation;
 
         int separator = input.lastIndexOf(".");
         if (separator >= 0) {
@@ -405,6 +399,21 @@ public class Main {
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static Optional<String> compileInvocation(String input, List<String> typeParams) {
+        int argsStart = input.indexOf("(");
+        if (argsStart >= 0) {
+            String type = input.substring(0, argsStart);
+            String withEnd = input.substring(argsStart + "(".length()).strip();
+            if (withEnd.endsWith(")")) {
+                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+                return compileValue(type, typeParams).flatMap(caller -> {
+                    return compileArgs(argsString, typeParams).map(value -> caller + value);
+                });
+            }
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> compileArgs(String argsString, List<String> typeParams) {

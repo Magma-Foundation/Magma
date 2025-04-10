@@ -45,16 +45,16 @@ struct private State(Deque<char> queue, List<struct String> segments, struct Str
 	this.buffer = buffer;
 	this.depth = depth;
 }
-struct public State(Deque<char> queue) {/* 
-            this(queue, new ArrayList<>(), new StringBuilder(), 0); */
+struct public State(Deque<char> queue) {
+	this(queue, ArrayList<>(), struct StringBuilder(), /*  0 */);
 }
-struct State advance() {/* 
-            this.segments.add(this.buffer.toString()); */
+struct State advance() {
+	this.segments.add(this.buffer.toString());
 	this.buffer = struct StringBuilder();
 	return this;
 }
-struct State append(char c) {/* 
-            this.buffer.append(c); */
+struct State append(char c) {
+	this.buffer.append(c);
 	return this;
 }
 int isLevel() {
@@ -78,10 +78,8 @@ List<struct String> segments() {
 	return this.segments;
 }
 void main(struct String* args) {
-	/* Path source */ = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");/* 
-        magma.Files.readString(source)
-                .match(input -> compileAndWrite(input, source), Optional::of)
-                .ifPresent(Throwable::printStackTrace); */
+	/* Path source */ = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
+	magma.Files.readString(/* source) */.match(/* input -> compileAndWrite(input, source), Optional::of */).ifPresent(Throwable::printStackTrace);
 }
 Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
 	/* Path target */ = source.resolveSibling(/* "main */.c");
@@ -157,8 +155,8 @@ struct State divideStatementChar(struct State state, char c) {
 int isShallow(struct State state) {
 	return state.depth == 1;
 }
-Optional<struct String> compileRootSegment(struct String input) {/* 
-        if (input.startsWith("package ")) return Optional.of(""); */
+Optional<struct String> compileRootSegment(struct String input) {
+	if(input.startsWith("package ")) return Optional.of("");
 	/* String stripped */ = input.strip();/* 
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length());
@@ -174,8 +172,8 @@ Optional<struct String> compileRootSegment(struct String input) {/*
 	return generatePlaceholder(input);
 }
 Optional<struct String> compileToStruct(struct String input, struct String infix, List<struct String> typeParams) {
-	/* int classIndex */ = input.indexOf(infix);/* 
-        if (classIndex < 0) return Optional.empty(); */
+	/* int classIndex */ = input.indexOf(infix);
+	if(/* classIndex < 0) return Optional */.empty();
 	/* String afterKeyword */ = input.substring(/* classIndex + infix */.length());/* 
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart >= 0) {
@@ -208,11 +206,11 @@ Optional<struct String> compileGlobalInitialization(struct String input, List<st
             return "";
         });
 }
-Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {/* 
-        if (!input.endsWith(";")) return Optional.empty(); */
+Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {
+	if(/* !input */.endsWith(";")) return Optional.empty();
 	/* String withoutEnd */ = input.substring(/* 0 */, input.length(/* ) - ";" */.length());
-	/* int valueSeparator */ = withoutEnd.indexOf(/* "=" */);/* 
-        if (valueSeparator < 0) return Optional.empty(); */
+	/* int valueSeparator */ = withoutEnd.indexOf(/* "=" */);
+	if(/* valueSeparator < 0) return Optional */.empty();
 	/* String definition */ = withoutEnd.substring(/* 0 */, /* valueSeparator) */.strip();
 	/* String value */ = withoutEnd.substring(/* valueSeparator + "=" */.length(/* ) */).strip();
 	return compileDefinition(/* definition) */.flatMap(/* outputDefinition -> {
@@ -221,8 +219,8 @@ Optional<struct String> compileInitialization(struct String input, List<struct S
             });
         });
 }
-Optional<struct String> compileWhitespace(struct String input) {/* 
-        if (input.isBlank()) return Optional.of(""); */
+Optional<struct String> compileWhitespace(struct String input) {
+	if(input.isBlank()) return Optional.of("");
 	return Optional.empty();
 }
 Optional<struct String> compileMethod(struct String input, List<struct String> typeParams) {
@@ -274,21 +272,24 @@ Optional<struct String> compileStatementOrBlock(struct String input, List<struct
 Optional<struct String> compileStatement(struct String input, List<struct String> typeParams) {
 	/* String stripped */ = input.strip();/* 
         if (stripped.endsWith(";")) {
-            String value = stripped.substring(0, stripped.length() - ";".length());
-            if (value.startsWith("return ")) {
-                return compileValue(value.substring("return ".length()), typeParams).map(result -> "return " + result);
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            if (withoutEnd.startsWith("return ")) {
+                return compileValue(withoutEnd.substring("return ".length()), typeParams).map(result -> "return " + result);
             }
 
-            int valueSeparator = value.indexOf("=");
+            int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
-                String destination = value.substring(0, valueSeparator).strip();
-                String source = value.substring(valueSeparator + "=".length()).strip();
+                String destination = withoutEnd.substring(0, valueSeparator).strip();
+                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
                 return compileValue(destination, typeParams).flatMap(newDest -> {
                     return compileValue(source, typeParams).map(newSource -> {
                         return newDest + " = " + newSource;
                     });
                 });
             }
+
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams);
+            if (maybeInvocation.isPresent()) return maybeInvocation;
         } */
 	return Optional.empty();
 }
@@ -307,19 +308,9 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
                     });
                 }
             }
-        } *//* 
-
-        int argsStart = input.indexOf("(");
-        if (argsStart >= 0) {
-            String type = input.substring(0, argsStart);
-            String withEnd = input.substring(argsStart + "(".length()).strip();
-            if (withEnd.endsWith(")")) {
-                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                return compileValue(type, typeParams).flatMap(caller -> {
-                    return compileArgs(argsString, typeParams).map(value -> caller + value);
-                });
-            }
         } */
+	/* Optional<String> invocation */ = compileInvocation(input, typeParams);/* 
+        if (invocation.isPresent()) return invocation; */
 	/* int separator */ = input.lastIndexOf(/* " */.");/* 
         if (separator >= 0) {
             String object = input.substring(0, separator).strip();
@@ -332,6 +323,20 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
         } */
 	return generatePlaceholder(input);
 }
+Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {/* 
+        int argsStart = input.indexOf("(");
+        if (argsStart >= 0) {
+            String type = input.substring(0, argsStart);
+            String withEnd = input.substring(argsStart + "(".length()).strip();
+            if (withEnd.endsWith(")")) {
+                String argsString = withEnd.substring(0, withEnd.length() - ")".length());
+                return compileValue(type, typeParams).flatMap(caller -> {
+                    return compileArgs(argsString, typeParams).map(value -> caller + value);
+                });
+            }
+        } */
+	return Optional.empty();
+}
 Optional<struct String> compileArgs(struct String argsString, List<struct String> typeParams) {
 	return compileValues(argsString, /* arg -> {
             return compileWhitespace */(/* arg) */.or(() -> compileValue(arg, typeParams));
@@ -339,8 +344,8 @@ Optional<struct String> compileArgs(struct String argsString, List<struct String
             return "(" + args + ")";
         });
 }
-struct StringBuilder mergeValues(struct StringBuilder cache, struct String element) {/* 
-        if (cache.isEmpty()) return cache.append(element); */
+struct StringBuilder mergeValues(struct StringBuilder cache, struct String element) {
+	if(cache.isEmpty()) return cache.append(element);
 	return cache.append(/* " */, /* ") */.append(element);
 }
 Optional<struct String> compileDefinition(struct String definition) {
@@ -400,8 +405,8 @@ struct String generateDefinition(List<struct String> maybeTypeParams, struct Str
         } */
 	return /* typeParamsString + type + " " + name */;
 }
-Optional<struct String> compileType(struct String input, List<struct String> typeParams) {/* 
-        if (input.equals("void")) return Optional.of("void"); *//* 
+Optional<struct String> compileType(struct String input, List<struct String> typeParams) {
+	if(input.equals("void")) return Optional.of("void");/* 
 
         if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
             return Optional.of("int");
