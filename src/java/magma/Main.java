@@ -420,7 +420,7 @@ public class Main {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
-            return Optional.of(generateLambdaWithReturn("temp", "\n\treturn " + type + "." + property + "(temp") + ";");
+            return Optional.of(generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + type + "." + property + "()") + ";");
         }
 
         int separator = input.lastIndexOf(".");
@@ -441,29 +441,42 @@ public class Main {
         int arrowIndex = input.indexOf("->");
         if (arrowIndex < 0) return Optional.empty();
 
-        String paramName = input.substring(0, arrowIndex).strip();
-        if (!isSymbol(paramName)) return Optional.empty();
+        String beforeArrow = input.substring(0, arrowIndex).strip();
+        List<String> paramNames;
+        if (isSymbol(beforeArrow)) {
+            paramNames = Collections.singletonList(beforeArrow);
+        } else if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+            String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
+            paramNames = Arrays.stream(inner.split(Pattern.quote(",")))
+                    .map(String::strip)
+                    .toList();
+        } else {
+            return Optional.empty();
+        }
 
         String value = input.substring(arrowIndex + "->".length()).strip();
         if (value.startsWith("{") && value.endsWith("}")) {
             String slice = value.substring(1, value.length() - 1);
             return compileStatements(slice, statement -> compileStatementOrBlock(statement, typeParams)).flatMap(result -> {
-                return generateLambdaWithReturn(paramName, result);
+                return generateLambdaWithReturn(paramNames, result);
             });
         }
 
         return compileValue(value, typeParams).flatMap(newValue -> {
-            return generateLambdaWithReturn(paramName, "\n\treturn " + newValue + ";");
+            return generateLambdaWithReturn(paramNames, "\n\treturn " + newValue + ";");
         });
     }
 
-    private static Optional<String> generateLambdaWithReturn(String paramName, String returnValue) {
+    private static Optional<String> generateLambdaWithReturn(List<String> paramNames, String returnValue) {
         int current = counter;
         counter++;
-        String name = "__lambda" + current + "__";
+        String lambdaName = "__lambda" + current + "__";
 
-        methods.add("auto " + name + "(auto " + paramName + ") {" + returnValue + "\n}\n");
-        return Optional.of(name);
+        String joined = paramNames.stream()
+                .map(name -> "auto " + name)
+                .collect(Collectors.joining(", ", "(", ")"));
+        methods.add("auto " + lambdaName + joined + " {" + returnValue + "\n}\n");
+        return Optional.of(lambdaName);
     }
 
     private static boolean isNumber(String input) {
