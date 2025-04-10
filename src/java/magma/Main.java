@@ -459,7 +459,7 @@ public class Main {
         counter++;
         String name = "__lambda" + current + "__";
 
-        methods.add("auto " + name + " (auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
+        methods.add("auto " + name + "(auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
         return Optional.of(name);
     }
 

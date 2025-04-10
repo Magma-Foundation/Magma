@@ -81,12 +81,12 @@ List<struct String> segments() {
 char peek() {
 	return this.queue.peek();
 }
-auto __lambda0__ (auto temp) {
+auto __lambda0__(auto temp) {
 	return magma.Files.readString(source)
                 .match(input -> compileAndWrite(input, source), Optional.of)
                 .ifPresent(temp);
 }
-auto __lambda1__ (auto temp) {
+auto __lambda1__(auto temp) {
 	return Throwable.printStackTrace(temp);
 }
 void main(struct String* args) {
@@ -98,10 +98,10 @@ Optional<struct IOException> compileAndWrite(struct String input, struct Path so
 	/* String output */ = compile(input);
 	return magma.Files.writeString(target, output);
 }
-auto __lambda2__ (auto temp) {
+auto __lambda2__(auto temp) {
 	return divide(input, Main.divideStatementChar)(temp);
 }
-auto __lambda3__ (auto temp) {
+auto __lambda3__(auto temp) {
 	return parseAll(segments, Main::compileRootSegment)
                 .map(list -> {
                     List<String> copy = new ArrayList<String>();
@@ -119,13 +119,13 @@ struct String compile(struct String input) {
 	/* List<String> segments */ = __lambda2__;
 	return __lambda3__;
 }
-auto __lambda4__ (auto temp) {
+auto __lambda4__(auto temp) {
 	return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main.mergeStatements)(temp);
 }
 Optional<struct String> compileStatements(struct String input, Function<struct String, Optional<struct String>> compiler) {
 	return __lambda4__;
 }
-auto __lambda5__ (auto compiled) {
+auto __lambda5__(auto compiled) {
 	return mergeAll(merger, compiled);
 }
 Optional<struct String> compileAndMerge(List<struct String> segments, Function<struct String, Optional<struct String>> compiler, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger) {
@@ -151,7 +151,7 @@ Optional<List<struct String>> parseAll(List<struct String> segments, Function<st
 struct StringBuilder mergeStatements(struct StringBuilder output, struct String compiled) {
 	return output.append(compiled);
 }
-auto __lambda6__ (auto temp) {
+auto __lambda6__(auto temp) {
 	return IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList.new))(temp);
@@ -248,7 +248,7 @@ Optional<struct String> compileDefinitionStatement(struct String input) {
         } */
 	return Optional.empty();
 }
-auto __lambda7__ (auto generated) {
+auto __lambda7__(auto generated) {
 	return /* {
             globals */.add(generated + ";\n");
             return "";
@@ -257,7 +257,7 @@ auto __lambda7__ (auto generated) {
 Optional<struct String> compileGlobalInitialization(struct String input, List<struct String> typeParams) {
 	return compileInitialization(input, typeParams).map(__lambda7__);
 }
-auto __lambda8__ (auto outputDefinition) {
+auto __lambda8__(auto outputDefinition) {
 	return /* {
             return compileValue */(value, typeParams).map(outputValue -> {
                 return outputDefinition + " = " + outputValue;
@@ -277,12 +277,12 @@ Optional<struct String> compileWhitespace(struct String input) {
 	/* if (input */.isBlank()) return Optional.of("");
 	return Optional.empty();
 }
-auto __lambda9__ (auto definition) {
+auto __lambda9__(auto definition) {
 	return /* {
                 return compileWhitespace */(definition).or(/* () -> compileDefinition */(definition)).or(() -> generatePlaceholder(definition));
             };
 }
-auto __lambda10__ (auto outputParams) {
+auto __lambda10__(auto outputParams) {
 	return /* {
                 String header = "\t" */.repeat(0) + outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length();
@@ -310,7 +310,7 @@ Optional<struct String> compileMethod(struct String input, List<struct String> t
             });
         });
 }
-auto __lambda11__ (auto temp) {
+auto __lambda11__(auto temp) {
 	return divide(input, Main.divideValueChar)(temp);
 }
 Optional<struct String> compileValues(struct String input, Function<struct String, Optional<struct String>> compiler) {
@@ -330,16 +330,16 @@ struct State divideValueChar(struct State state, char c) {/*
 	/* if (c */ = /* = '>' || c == ')') return appended */.exit();
 	return appended;
 }
-auto __lambda12__ (auto temp) {
+auto __lambda12__(auto temp) {
 	return compileAndMerge(params, compiler, Main.mergeValues)(temp);
 }
 Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compiler) {
 	return __lambda12__;
 }
-auto __lambda13__ (auto result) {
+auto __lambda13__(auto result) {
 	return "\n\t" + result + ";";
 }
-auto __lambda14__ (auto value) {
+auto __lambda14__(auto value) {
 	return "\n\t" + value + ";";
 }
 Optional<struct String> compileStatementOrBlock(struct String input, List<struct String> typeParams) {
@@ -369,7 +369,7 @@ Optional<struct String> compileStatement(struct String input, List<struct String
         } */
 	return Optional.empty();
 }
-auto __lambda15__ (auto temp) {
+auto __lambda15__(auto temp) {
 	return stripped.lastIndexOf(".")(temp);
 }
 Optional<struct String> compileValue(struct String input, List<struct String> typeParams) {
@@ -429,7 +429,7 @@ Optional<struct String> generateLambda(struct String paramName, struct String ne
 	/* int current */ = counter;/* 
         counter++; */
 	/* String name */ = "__lambda" + current + "__";
-	methods.add("auto " + name + " (auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
+	methods.add("auto " + name + "(auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
 	return Optional.of(name);
 }
 int isNumber(struct String input) {/* 
@@ -468,12 +468,12 @@ Optional<struct String> compileInvocation(struct String input, List<struct Strin
         } */
 	return Optional.empty();
 }
-auto __lambda16__ (auto arg) {
+auto __lambda16__(auto arg) {
 	return /* {
             return compileWhitespace */(arg).or(() -> compileValue(arg, typeParams));
         };
 }
-auto __lambda17__ (auto args) {
+auto __lambda17__(auto args) {
 	return /*  {
             return "(" + args + ")";
         } */;
@@ -529,7 +529,7 @@ Optional<struct String> compileDefinition(struct String definition) {
         } */
 	return Optional.empty();
 }
-auto __lambda18__ (auto temp) {
+auto __lambda18__(auto temp) {
 	return Arrays.stream(paramsArrays)
                 .map(String.strip)
                 .filter(param -> !param.isEmpty())
