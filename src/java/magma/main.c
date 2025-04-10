@@ -5,29 +5,80 @@
 #include "./java/util/ArrayList"
 #include "./java/util/Arrays"
 #include "./java/util/Collections"
+#include "./java/util/Deque"
+#include "./java/util/LinkedList"
 #include "./java/util/List"
 #include "./java/util/Optional"
 #include "./java/util/function/BiFunction"
 #include "./java/util/function/Function"
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/Collectors"
+#include "./java/util/stream/IntStream"
 /* public */ struct Main {
 /* private */ struct Result<T, X> {
-<R> R match(/* Function<T *//* R> */ whenOk/* Function<X *//* R> */ whenErr);/* 
+<R> R match(/* Function<T, */ /* R> */ whenOk, /* Function<X, */ /* R> */ whenErr);/* 
      */
 };
-/* private */ /* record */ /* Err<T, */ X>(struct X error);/* private */ /* record */ /* Ok<T, */ X>(struct T value);/* public */ /* static */ void main(struct String* args) {/* 
+/* private */ /* record */ /* Err<T, */ X>(struct X error);/* private */ /* record */ /* Ok<T, */ X>(struct T value);/* private */ /* static */ /* class */ /* State */ /* { */ /* private */ /* final */ /* Deque<Character> */ /* queue; */ /* private */ /* final */ /* List<String> */ /* segments; */ /* private */ /* StringBuilder */ /* buffer; */ /* private */ /* int */ /* depth; */ struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, struct int depth) {/* 
+            this.queue = queue; *//* 
+            this.segments = segments; *//* 
+            this.buffer = buffer; *//* 
+            this.depth = depth; *//* 
+        }
+
+        public State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0); *//* 
+        }
+
+        private State advance() {
+            segments.add(buffer.toString()); *//* 
+            buffer = new StringBuilder(); *//* 
+            return this; *//* 
+        }
+
+        private State append(char c) {
+            buffer.append(c); *//* 
+            return this; *//* 
+        }
+
+        private boolean isLevel() {
+            return depth == 0; *//* 
+        }
+
+        private char pop() {
+            return queue.pop(); *//* 
+        }
+
+        private boolean hasElements() {
+            return !queue.isEmpty(); *//* 
+        }
+
+        private State exit() {
+            this.depth = depth - 1; *//* 
+            return this; *//* 
+        }
+
+        private State enter() {
+            this.depth = depth + 1; *//* 
+            return this; *//* 
+        }
+
+        public List<String> segments() {
+            return segments; *//* 
+        }
+     */
+}/* public */ /* static */ void main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); *//* 
      */
-}/* private */ /* static */ /* Optional<IOException> */ compileAndWrite(struct String inputstruct Path source) {/* 
+}/* private */ /* static */ /* Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
         Path target = source.resolveSibling("main.c"); *//* 
         String output = compile(input); *//* 
         return writeString(target, output); *//* 
      */
-}/* private */ /* static */ /* Optional<IOException> */ writeString(struct Path targetstruct String output) {/* 
+}/* private */ /* static */ /* Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -45,45 +96,48 @@
 }/* private */ /* static */ struct String compile(struct String input) {/* 
         return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
-}/* private */ /* static */ /* Optional<String> */ compileStatements(struct String input/* Function<String *//* Optional<String>> */ compiler) {/* 
-        return compileAndMerge(divide(input), compiler, Main::mergeStatements); *//* 
+}/* private */ /* static */ /* Optional<String> */ compileStatements(struct String input, /* Function<String, */ /* Optional<String>> */ compiler) {/* 
+        return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements); *//* 
      */
-}/* private */ /* static */ /* Optional<String> */ compileAndMerge(/* List<String> */ segments/* Function<String *//* Optional<String>> */ compiler/* BiFunction<StringBuilder *//* String *//* StringBuilder> */ mergeStatements) {/* 
+}/* private */ /* static */ /* Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, */ /* Optional<String>> */ compiler, /* BiFunction<StringBuilder, */ /* String, */ /* StringBuilder> */ merger) {/* 
         Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder()); *//* 
         for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(output::append));
+            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(compiled -> merger.apply(output, compiled)));
         } *//* 
 
         return maybeOutput.map(StringBuilder::toString); *//* 
      */
-}/* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled) {/* 
+}/* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder output, struct String compiled) {/* 
         return output.append(compiled); *//* 
      */
-}/* private */ /* static */ /* ArrayList<String> */ divide(struct String input) {/* 
-        ArrayList<String> segments = new ArrayList<>(); *//* 
-        StringBuilder buffer = new StringBuilder(); *//* 
-        int depth = 0; *//* 
-        for (int i = 0; *//*  i < input.length(); *//*  i++) {
-            char c = input.charAt(i);
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '} *//* ' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            } *//*  else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-            } *//* 
-         */
-}/* 
-        segments.add(buffer.toString()); *//* 
-        return segments; *//* 
+}/* private */ /* static */ /* List<String> */ divide(struct String input, /* BiFunction<State, */ /* Character, */ /* State> */ divider) {/* 
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new)); *//* 
+
+        State state = new State(queue); *//* 
+        while (state.hasElements()) {
+            char c = state.pop();
+            state = divider.apply(state, c);
+        } *//* 
+
+        return state.advance().segments(); *//* 
+     */
+}/* private */ /* static */ struct State divideStatementChar(struct State state, struct char c) {/* 
+        State appended = state.append(c); *//* 
+        if (c == '; *//* ' && appended.isLevel()) return appended.advance(); *//* 
+        if (c == ' */
+}/* ' */ /* && */ isShallow(/* appended */);/* 
+        if (c == '{') return appended.enter();
+        if (c == '} *//* ') */ struct return appended.exit(/*  */);/* 
+        return appended; *//* 
      */
 };
 /* 
+
+    private static boolean isShallow(State state) {
+        return state.depth == 1;
+    } *//* 
 
     private static Optional<String> compileRootSegment(String input) {
         if (input.startsWith("package ")) return Optional.of("");
@@ -160,8 +214,8 @@
             int paramEnd = withParams.indexOf(")");
             if (paramEnd < 0) return Optional.empty();
 
-            String substring = withParams.substring(0, paramEnd);
-            return compileValues(substring, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
+            String params = withParams.substring(0, paramEnd);
+            return compileValues(params, definition -> compileDefinition(definition).or(() -> generatePlaceholder(definition))).flatMap(outputParams -> {
                 String header = outputDefinition + "(" + outputParams + ")";
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
@@ -177,10 +231,17 @@
     } *//* 
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
-        String[] paramsArrays = input.strip().split(Pattern.quote(","));
-        List<String> params = Arrays.stream(paramsArrays).map(String::strip).toList();
+        List<String> divided = divide(input, Main::divideValueChar);
+        return compileValues(divided, compiler);
+    } *//* 
 
-        return compileValues(params, compiler);
+    private static State divideValueChar(State state, char c) {
+        if (c == ',' && state.isLevel()) return state.advance();
+
+        State appended = state.append(c);
+        if (c == '<') return appended.enter();
+        if (c == '>') return appended.exit();
+        return appended;
     } *//* 
 
     private static Optional<String> compileValues(List<String> params, Function<String, Optional<String>> compoiler) {
@@ -240,11 +301,10 @@
 
     private static List<String> splitValues(String substring) {
         String[] paramsArrays = substring.strip().split(Pattern.quote(","));
-        List<String> params = Arrays.stream(paramsArrays)
+        return Arrays.stream(paramsArrays)
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
                 .toList();
-        return params;
     } *//* 
 
     private static Optional<String> compileTypeParam(String input) {
