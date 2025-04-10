@@ -464,7 +464,7 @@ public class Main {
 
             if(isSymbol(property)) {
                 return compileType(type, typeParams).flatMap(compiled -> {
-                    return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()").map(result -> result + ";");
+                    return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()");
                 });
             }
         }

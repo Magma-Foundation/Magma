@@ -91,7 +91,7 @@ auto __lambda2__() {
 }
 void main(struct String* args) {
 	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-	magma.Files.readString(source).match(__lambda0__, __lambda1__;).ifPresent(__lambda2__;);
+	magma.Files.readString(source).match(__lambda0__, __lambda1__).ifPresent(__lambda2__);
 }
 Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
 	struct Path target = source.resolveSibling("main.c");
@@ -105,7 +105,7 @@ auto __lambda4__(auto ) {
 	return generatePlaceholder(input);
 }
 struct String compile(struct String input) {
-	List<struct String> segments = divide(input, __lambda3__;);
+	List<struct String> segments = divide(input, __lambda3__);
 	List<struct String> copy = ArrayList<struct String>(/* );
                     copy */.addAll(imports);
                     copy.addAll(structs);
@@ -122,7 +122,7 @@ auto __lambda6__() {
 	return struct Main.mergeStatements()
 }
 Optional<struct String> compileStatements(struct String input, Function<struct String, Optional<struct String>> compiler) {
-	return compileAndMerge(divide(input, __lambda5__;), compiler, __lambda6__;);
+	return compileAndMerge(divide(input, __lambda5__), compiler, __lambda6__);
 }
 auto __lambda7__(auto compiled) {
 	return mergeAll(compiled, merger);
@@ -162,7 +162,7 @@ auto __lambda14__() {
 	return struct LinkedList.new()
 }
 List<struct String> divide(struct String input, BiFunction<struct State, struct Character, struct State> divider) {
-	LinkedList<char> queue = IntStream.range(0, input.length()).mapToObj(__lambda13__;).collect(Collectors.toCollection(__lambda14__;));
+	LinkedList<char> queue = IntStream.range(0, input.length()).mapToObj(__lambda13__).collect(Collectors.toCollection(__lambda14__));
 	struct State state = struct State(queue);/* 
         while (state.hasElements()) {
             char c = state.pop();
@@ -343,7 +343,7 @@ auto __lambda30__() {
 	return struct Main.divideValueChar()
 }
 Optional<struct String> compileValues(struct String input, Function<struct String, Optional<struct String>> compiler) {
-	List<struct String> divided = divide(input, __lambda30__;);
+	List<struct String> divided = divide(input, __lambda30__);
 	return compileValues(divided, compiler);
 }
 struct State divideValueChar(struct State state, char c) {/* 
@@ -363,7 +363,7 @@ auto __lambda31__() {
 	return struct Main.mergeValues()
 }
 Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compiler) {
-	return compileAndMerge(params, compiler, __lambda31__;);
+	return compileAndMerge(params, compiler, __lambda31__);
 }
 auto __lambda32__(auto ) {
 	return compileConditional(input, typeParams, "if ");
@@ -490,7 +490,7 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
 
             if(isSymbol(property)) {
                 return compileType(type, typeParams).flatMap(compiled -> {
-                    return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()").map(result -> result + ";");
+                    return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()");
                 });
             }
         } */
@@ -557,7 +557,7 @@ auto __lambda46__() {
 	return char.isDigit()
 }
 int isNumber(struct String input) {
-	return IntStream.range(0, input.length()).map(__lambda45__;).allMatch(__lambda46__;);
+	return IntStream.range(0, input.length()).map(__lambda45__).allMatch(__lambda46__);
 }
 Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {
 	struct String stripped = input.strip();
@@ -657,7 +657,7 @@ auto __lambda51__(auto param) {
 }
 List<struct String> splitValues(struct String substring) {
 	struct String* paramsArrays = substring.strip().split(Pattern.quote(","));
-	return Arrays.stream(paramsArrays).map(__lambda50__;).filter(__lambda51__).toList();
+	return Arrays.stream(paramsArrays).map(__lambda50__).filter(__lambda51__).toList();
 }
 struct String generateDefinition(List<struct String> maybeTypeParams, struct String type, struct String name) {/* 
         String typeParamsString; *//* 
@@ -717,7 +717,7 @@ auto __lambda54__() {
 	return char.isLetter()
 }
 int isSymbol(struct String input) {
-	return IntStream.range(0, input.length()).mapToObj(__lambda53__;).allMatch(__lambda54__;);
+	return IntStream.range(0, input.length()).mapToObj(__lambda53__).allMatch(__lambda54__);
 }
 Optional<struct String> generatePlaceholder(struct String input) {
 	return Optional.of("/* " + input + " */");
