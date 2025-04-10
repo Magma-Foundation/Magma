@@ -130,18 +130,31 @@ public class Main {
 
             String[] paramsArrays = withParams.substring(0, paramEnd).strip().split(Pattern.quote(","));
             List<String> params = Arrays.stream(paramsArrays).map(String::strip).toList();
-            String body = withParams.substring(paramEnd + ")".length());
+            String body = withParams.substring(paramEnd + ")".length()).strip();
 
-            return compileAndMerge(Main::compileDefinition, params, (stringBuilder, s) -> {
-                if (stringBuilder.isEmpty()) {
-                    return stringBuilder.append(s);
+            return compileAndMerge(Main::compileDefinition, params, Main::mergeValues).flatMap(outputParams -> {
+                if (body.startsWith("{") && body.endsWith("}")) {
+                    String inputContent = body.substring("{".length(), body.length() - "}".length());
+                    return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
+                        return Optional.of(outputDefinition + "(" + outputParams + ") {" + outputContent + "\n}");
+                    });
                 }
 
-                return stringBuilder.append(", ").append(s);
-            }).flatMap(outputParams -> {
-                return Optional.of(outputDefinition + "(" + outputParams + ")" + generatePlaceholder(body).orElse(""));
+                return Optional.empty();
             });
         });
+    }
+
+    private static Optional<String> compileStatement(String input) {
+        return generatePlaceholder(input);
+    }
+
+    private static StringBuilder mergeValues(StringBuilder stringBuilder, String s) {
+        if (stringBuilder.isEmpty()) {
+            return stringBuilder.append(s);
+        }
+
+        return stringBuilder.append(", ").append(s);
     }
 
     private static Optional<String> compileDefinition(String definition) {

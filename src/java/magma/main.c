@@ -12,18 +12,20 @@
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
 };
-/* public */ /* static */ void main(struct String* args)/*  {
+/* public */ /* static */ void main(struct String* args) {/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
             Path target = source.resolveSibling("main.c");
             Files.writeString(target, compile(input));
-        } catch (IOException e) {
+        } *//*  catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    } *//* private */ /* static */ struct String compile(struct String input)/*  {
-        return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse("");
-    } *//* 
+        } *//* 
+     */
+}/* private */ /* static */ struct String compile(struct String input) {/* 
+        return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
+     */
+}/* 
 
     private static Optional<String> compileStatements(String input, Function<String, Optional<String>> compiler) {
         return compileAndMerge(compiler, divide(input), Main::mergeStatements);
@@ -36,34 +38,38 @@
         }
 
         return maybeOutput.map(StringBuilder::toString);
-    } *//* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled)/*  {
-        return output.append(compiled);
-    } *//* private */ /* static */ /* ArrayList<String> */ divide(struct String input)/*  {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
+    } *//* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder outputstruct String compiled) {/* 
+        return output.append(compiled); *//* 
+     */
+}/* private */ /* static */ /* ArrayList<String> */ divide(struct String input) {/* 
+        ArrayList<String> segments = new ArrayList<>(); *//* 
+        StringBuilder buffer = new StringBuilder(); *//* 
+        int depth = 0; *//* 
+        for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
             buffer.append(c);
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
+            } else if (c == '} *//* ' && depth == 1) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
                 depth--;
-            } else {
+            } *//*  else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
-            }
-        } *//* 
+            } *//* 
+         */
+}/* 
         segments.add(buffer.toString()); *//* 
         return segments; *//* 
      *//* private */ /* static */ /* Optional<String> */ /* compileRootSegment(String */ /* input) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (input.startsWith("package */ /* ")) */ /* return */ /* Optional.of(""); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* stripped */ /* = */ /* input.strip(); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (stripped.startsWith("import */ /* ")) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* right */ /* = */ /* stripped.substring("import */ /* ".length()); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (right.endsWith(";")) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* content */ /* = */ /* right.substring(0, */ /* right.length() */ /* - */ /* ";".length()); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* joined */ /* = */ /* String.join("/", */ /* content.split(Pattern.quote("."))); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* return */ /* Optional.of("#include */ /* \"./" */ /* + */ /* joined */ /* + */ /* "\"\n"); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* } */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* } */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* int */ /* classIndex */ /* = */ /* input.indexOf(" */ struct ");
         if (classIndex >= 0) {
 };
 /* String substring = input.substring(0, classIndex); *//* 
-            String newModifiers = compileModifiers(substring); *//* String */ /* afterKeyword */ /* = */ input.substring(/* classIndex */ /* + */ /* "class */ ".length()/* ); *//* 
+            String newModifiers = compileModifiers(substring); *//* 
+
+            String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
@@ -106,18 +112,31 @@
 
             String[] paramsArrays = withParams.substring(0, paramEnd).strip().split(Pattern.quote(","));
             List<String> params = Arrays.stream(paramsArrays).map(String::strip).toList();
-            String body = withParams.substring(paramEnd + ")".length());
+            String body = withParams.substring(paramEnd + ")".length()).strip();
 
-            return compileAndMerge(Main::compileDefinition, params, (stringBuilder, s) -> {
-                if (stringBuilder.isEmpty()) {
-                    return stringBuilder.append(s);
+            return compileAndMerge(Main::compileDefinition, params, Main::mergeValues).flatMap(outputParams -> {
+                if (body.startsWith("{") && body.endsWith("}")) {
+                    String inputContent = body.substring("{".length(), body.length() - "}".length());
+                    return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
+                        return Optional.of(outputDefinition + "(" + outputParams + ") {" + outputContent + "\n}");
+                    });
                 }
 
-                return stringBuilder.append(", ").append(s);
-            }).flatMap(outputParams -> {
-                return Optional.of(outputDefinition + "(" + outputParams + ")" + generatePlaceholder(body).orElse(""));
+                return Optional.empty();
             });
         });
+    } *//* 
+
+    private static Optional<String> compileStatement(String input) {
+        return generatePlaceholder(input);
+    } *//* 
+
+    private static StringBuilder mergeValues(StringBuilder stringBuilder, String s) {
+        if (stringBuilder.isEmpty()) {
+            return stringBuilder.append(s);
+        }
+
+        return stringBuilder.append(", ").append(s);
     } *//* 
 
     private static Optional<String> compileDefinition(String definition) {
