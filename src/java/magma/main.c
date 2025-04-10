@@ -16,37 +16,37 @@
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
 /* private */ struct Result<T, X> {
-	/* <R> */ /* R */ /* match(Function<T, */ /* R> */ /* whenOk, */ /* Function<X, R> */ whenErr);
+	/* <R> */ /* R */ /* match(Function<T, */ /* R> */ /* whenOk, */ Function<struct X, struct R> whenErr);
 };
 /* private */ struct Err<T, X>(X error) implements Result<T, X> {
 };
 /* private */ struct Ok<T, X>(T value) implements Result<T, X> {
 };
 /* private */ /* static */ struct State {
-	/* private */ /* final */ /* Deque<Character> */ queue;
-	/* private */ /* final */ /* List<String> */ segments;
+	/* private */ /* final */ Deque<char> queue;
+	/* private */ /* final */ List<struct String> segments;
 	/* private */ struct StringBuilder buffer;
 	/* private */ int depth;
 };
 /* public */ struct Main {
 };
-/* private */ /* static */ /* final */ /* List<String> */ imports = /* new ArrayList<>() */;
-/* private */ /* static */ /* final */ /* List<String> */ structs = /* new ArrayList<>() */;
-/* private */ /* static */ /* final */ /* List<String> */ globals = /* new ArrayList<>() */;
-/* private */ /* static */ /* final */ /* List<String> */ methods = /* new ArrayList<>() */;
-/* @Override */ /* public */ <R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {
+/* private */ /* static */ /* final */ List<struct String> imports = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ List<struct String> structs = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ List<struct String> globals = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ List<struct String> methods = /* new ArrayList<>() */;
+/* @Override */ /* public */ <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
 	return /* whenErr.apply(error) */;
 }
-/* @Override */ /* public */ <R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {
+/* @Override */ /* public */ <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
 	return /* whenOk.apply(value) */;
 }
-struct private State(/* Deque<Character> */ queue, /* List<String> */ segments, struct StringBuilder buffer, int depth) {/* 
+struct private State(Deque<char> queue, List<struct String> segments, struct StringBuilder buffer, int depth) {/* 
             this.queue = queue; *//* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; */
 }
-struct public State(/* Deque<Character> */ queue) {/* 
+struct public State(Deque<char> queue) {/* 
             this(queue, new ArrayList<>(), new StringBuilder(), 0); */
 }
 /* private */ struct State advance(/*  */) {/* 
@@ -54,14 +54,14 @@ struct public State(/* Deque<Character> */ queue) {/*
             buffer = new StringBuilder(); */
 	return /* this */;
 }
-/* private */ struct State append(struct char c) {/* 
+/* private */ struct State append(char c) {/* 
             buffer.append(c); */
 	return /* this */;
 }
 /* private */ int isLevel(/*  */) {
 	return /* depth == 0 */;
 }
-/* private */ struct char pop(/*  */) {
+/* private */ char pop(/*  */) {
 	return /* queue.pop() */;
 }
 /* private */ int hasElements(/*  */) {
@@ -75,7 +75,7 @@ struct public State(/* Deque<Character> */ queue) {/*
             this.depth = depth + 1; */
 	return /* this */;
 }
-/* public */ /* List<String> */ segments(/*  */) {
+/* public */ List<struct String> segments(/*  */) {
 	return /* segments */;
 }
 /* public */ /* static */ void main(struct String* args) {/* 
@@ -84,12 +84,12 @@ struct public State(/* Deque<Character> */ queue) {/*
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); */
 }
-/* private */ /* static */ /* Optional<IOException> */ compileAndWrite(struct String input, struct Path source) {/* 
+/* private */ /* static */ Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {/* 
         Path target = source.resolveSibling("main.c"); *//* 
         String output = compile(input); */
 	return /* writeString(target, output) */;
 }
-/* private */ /* static */ /* Optional<IOException> */ writeString(struct Path target, struct String output) {/* 
+/* private */ /* static */ Optional<struct IOException> writeString(struct Path target, struct String output) {/* 
         try {
             Files.writeString(target, output);
             return Optional.empty();
@@ -97,7 +97,7 @@ struct public State(/* Deque<Character> */ queue) {/*
             return Optional.of(e);
         } */
 }
-/* private */ /* static */ /* Result<String, IOException> */ readString(struct Path source) {/* 
+/* private */ /* static */ Result<struct String, struct IOException> readString(struct Path source) {/* 
         try {
             return new Ok<>(Files.readString(source));
         } *//*  catch (IOException e) {
@@ -119,20 +119,20 @@ struct public State(/* Deque<Character> */ queue) {/*
                 .map(compiled -> mergeAll(Main::mergeStatements, compiled))
                 .or(() -> generatePlaceholder(input)).orElse(""); */
 }
-/* private */ /* static */ /* Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {
+/* private */ /* static */ Optional<struct String> compileStatements(struct String input, Function<struct String, Optional<struct String>> compiler) {
 	return /* compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {
+/* private */ /* static */ Optional<struct String> compileAndMerge(List<struct String> segments, Function<struct String, Optional<struct String>> compiler, BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger) {
 	return /* parseAll(segments, compiler).map(compiled -> mergeAll(merger, compiled)) */;
 }
-/* private */ /* static */ struct String mergeAll(/* BiFunction<StringBuilder, String, StringBuilder> */ merger, /* List<String> */ compiled) {/* 
+/* private */ /* static */ struct String mergeAll(BiFunction<struct StringBuilder, struct String, struct StringBuilder> merger, List<struct String> compiled) {/* 
         StringBuilder output = new StringBuilder(); *//* 
         for (String segment : compiled) {
             output = merger.apply(output, segment);
         } */
 	return /* output.toString() */;
 }
-/* private */ /* static */ /* Optional<List<String>> */ parseAll(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler) {/* 
+/* private */ /* static */ Optional<List<struct String>> parseAll(List<struct String> segments, Function<struct String, Optional<struct String>> compiler) {/* 
         Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>()); *//* 
         for (String segment : segments) {
             maybeCompiled = maybeCompiled.flatMap(allCompiled -> compiler.apply(segment).map(compiledSegment -> {
@@ -145,7 +145,7 @@ struct public State(/* Deque<Character> */ queue) {/*
 /* private */ /* static */ struct StringBuilder mergeStatements(struct StringBuilder output, struct String compiled) {
 	return /* output.append(compiled) */;
 }
-/* private */ /* static */ /* List<String> */ divide(struct String input, /* BiFunction<State, Character, State> */ divider) {/* 
+/* private */ /* static */ List<struct String> divide(struct String input, BiFunction<struct State, struct Character, struct State> divider) {/* 
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new)); *//* 
@@ -168,7 +168,7 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* state.advance().segments() */;
 }
-/* private */ /* static */ struct State divideStatementChar(struct State state, struct char c) {/* 
+/* private */ /* static */ struct State divideStatementChar(struct State state, char c) {/* 
         State appended = state.append(c); *//* 
         if (c == ';' && appended.isLevel()) return appended.advance(); *//* 
         if (c == '}' && isShallow(appended)) return appended.advance().exit(); *//* 
@@ -179,7 +179,7 @@ struct public State(/* Deque<Character> */ queue) {/*
 /* private */ /* static */ int isShallow(struct State state) {
 	return /* state.depth == 1 */;
 }
-/* private */ /* static */ /* Optional<String> */ compileRootSegment(struct String input) {/* 
+/* private */ /* static */ Optional<struct String> compileRootSegment(struct String input) {/* 
         if (input.startsWith("package ")) return Optional.of(""); *//* 
 
         String stripped = input.strip(); *//* 
@@ -197,7 +197,7 @@ struct public State(/* Deque<Character> */ queue) {/*
         if (maybeClass.isPresent()) return maybeClass; */
 	return /* generatePlaceholder(input) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileToStruct(struct String input, struct String infix) {/* 
+/* private */ /* static */ Optional<struct String> compileToStruct(struct String input, struct String infix) {/* 
         int classIndex = input.indexOf(infix); *//* 
         if (classIndex < 0) return Optional.empty(); *//* 
 
@@ -219,7 +219,7 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ /* Optional<String> */ compileModifiers(struct String substring) {/* 
+/* private */ /* static */ Optional<struct String> compileModifiers(struct String substring) {/* 
         String[] oldModifiers = substring.strip().split(" "); *//* 
         List<String> list = Arrays.stream(oldModifiers)
                 .map(String::strip)
@@ -232,7 +232,7 @@ struct public State(/* Deque<Character> */ queue) {/*
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining(" "))) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileClassMember(struct String input) {
+/* private */ /* static */ Optional<struct String> compileClassMember(struct String input) {
 	return /* compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
@@ -242,7 +242,7 @@ struct public State(/* Deque<Character> */ queue) {/*
                 .or(() -> compileMethod(input))
                 .or(() -> generatePlaceholder(input)) */;
 }
-/* private */ /* static */ /* @NotNull */ /* Optional<String> */ compileDefinitionStatement(struct String input) {/* 
+/* private */ /* static */ /* @NotNull */ Optional<struct String> compileDefinitionStatement(struct String input) {/* 
         String stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             String content = stripped.substring(0, stripped.length() - ";".length());
@@ -250,7 +250,7 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ /* Optional<String> */ compileInitialization(struct String input) {/* 
+/* private */ /* static */ Optional<struct String> compileInitialization(struct String input) {/* 
         if (!input.endsWith("; *//* ")) return Optional.empty(); *//* 
 
         String withoutEnd = input.substring(0, input.length() - "; *//* ".length()); *//* 
@@ -266,11 +266,11 @@ struct public State(/* Deque<Character> */ queue) {/*
             return "";
         } *//* ); */
 }
-/* private */ /* static */ /* Optional<String> */ compileWhitespace(struct String input) {/* 
+/* private */ /* static */ Optional<struct String> compileWhitespace(struct String input) {/* 
         if (input.isBlank()) return Optional.of(""); */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ /* Optional<String> */ compileMethod(struct String input) {/* 
+/* private */ /* static */ Optional<struct String> compileMethod(struct String input) {/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) return Optional.empty(); *//* 
 
@@ -297,11 +297,11 @@ struct public State(/* Deque<Character> */ queue) {/*
             });
         } *//* ); */
 }
-/* private */ /* static */ /* Optional<String> */ compileValues(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
+/* private */ /* static */ Optional<struct String> compileValues(struct String input, Function<struct String, Optional<struct String>> compiler) {/* 
         List<String> divided = divide(input, Main::divideValueChar); */
 	return /* compileValues(divided, compiler) */;
 }
-/* private */ /* static */ struct State divideValueChar(struct State state, struct char c) {/* 
+/* private */ /* static */ struct State divideValueChar(struct State state, char c) {/* 
         if (c == ',' && state.isLevel()) return state.advance(); *//* 
 
         State appended = state.append(c); *//* 
@@ -309,15 +309,15 @@ struct public State(/* Deque<Character> */ queue) {/*
         if (c == '>') return appended.exit(); */
 	return /* appended */;
 }
-/* private */ /* static */ /* Optional<String> */ compileValues(/* List<String> */ params, /* Function<String, Optional<String>> */ compoiler) {
+/* private */ /* static */ Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compoiler) {
 	return /* compileAndMerge(params, compoiler, Main::mergeValues) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileStatementOrBlock(struct String input) {
+/* private */ /* static */ Optional<struct String> compileStatementOrBlock(struct String input) {
 	return /* compileWhitespace(input)
                 .or(() -> compileStatement(input))
                 .or(() -> generatePlaceholder(input)) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileStatement(struct String input) {/* 
+/* private */ /* static */ Optional<struct String> compileStatement(struct String input) {/* 
         String stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             String value = stripped.substring(0, stripped.length() - ";".length());
@@ -327,14 +327,14 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ /* Optional<String> */ compileValue(struct String input) {
+/* private */ /* static */ Optional<struct String> compileValue(struct String input) {
 	return /* generatePlaceholder(input) */;
 }
 /* private */ /* static */ struct StringBuilder mergeValues(struct StringBuilder cache, struct String element) {/* 
         if (cache.isEmpty()) return cache.append(element); */
 	return /* cache.append(", ").append(element) */;
 }
-/* private */ /* static */ /* Optional<String> */ compileDefinition(struct String definition) {/* 
+/* private */ /* static */ Optional<struct String> compileDefinition(struct String definition) {/* 
         int nameSeparator = definition.lastIndexOf(" "); *//* 
         if (nameSeparator >= 0) {
             String beforeName = definition.substring(0, nameSeparator).strip();
@@ -383,14 +383,14 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ /* List<String> */ splitValues(struct String substring) {/* 
+/* private */ /* static */ List<struct String> splitValues(struct String substring) {/* 
         String[] paramsArrays = substring.strip().split(Pattern.quote(",")); */
 	return /* Arrays.stream(paramsArrays)
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
                 .toList() */;
 }
-/* private */ /* static */ struct String generateDefinition(/* Optional<String> */ maybeModifiers, /* List<String> */ maybeTypeParams, struct String type, struct String name) {/* 
+/* private */ /* static */ struct String generateDefinition(Optional<struct String> maybeModifiers, List<struct String> maybeTypeParams, struct String type, struct String name) {/* 
         String modifiersString = maybeModifiers.map(modifiers -> modifiers + " ").orElse(""); *//* 
 
         String typeParamsString; *//* 
@@ -401,21 +401,39 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* modifiersString + typeParamsString + type + " " + name */;
 }
-/* private */ /* static */ /* Optional<String> */ compileType(struct String input, /* List<String> */ typeParams) {/* 
+/* private */ /* static */ Optional<struct String> compileType(struct String input, List<struct String> typeParams) {/* 
         if (input.equals("void")) return Optional.of("void"); *//* 
-        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean"))
-            return Optional.of("int"); *//* 
+        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
+            return Optional.of("int");
+        } *//* 
+
+        if (input.equals("char") || input.equals("Character")) {
+            return Optional.of("char");
+        } *//* 
 
         if (input.endsWith("[]")) {
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
                     .map(value -> value + "*");
         } *//* 
 
-        if (isSymbol(input)) {
-            if (typeParams.contains(input)) {
-                return Optional.of(input);
+        String stripped = input.strip(); *//* 
+        if (isSymbol(stripped)) {
+            if (typeParams.contains(stripped)) {
+                return Optional.of(stripped);
             } else {
-                return Optional.of("struct " + input);
+                return Optional.of("struct " + stripped);
+            }
+        } *//* 
+
+        if (stripped.endsWith(">")) {
+            String slice = stripped.substring(0, stripped.length() - ">".length());
+            int argsStart = slice.indexOf("<");
+            if (argsStart >= 0) {
+                String base = slice.substring(0, argsStart).strip();
+                String params = slice.substring(argsStart + "<".length()).strip();
+                return compileValues(params, type -> compileType(type, typeParams)).map(compiled -> {
+                    return base + "<" + compiled + ">";
+                });
             }
         } */
 	return /* generatePlaceholder(input) */;
@@ -428,7 +446,7 @@ struct public State(/* Deque<Character> */ queue) {/*
         } */
 	return /* true */;
 }
-/* private */ /* static */ /* Optional<String> */ generatePlaceholder(struct String input) {
+/* private */ /* static */ Optional<struct String> generatePlaceholder(struct String input) {
 	return /* Optional.of("/* " + input + " */") */;
 }
 /* 

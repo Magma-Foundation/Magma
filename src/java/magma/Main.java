@@ -458,19 +458,38 @@ public class Main {
 
     private static Optional<String> compileType(String input, List<String> typeParams) {
         if (input.equals("void")) return Optional.of("void");
-        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean"))
+
+        if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
             return Optional.of("int");
+        }
+
+        if (input.equals("char") || input.equals("Character")) {
+            return Optional.of("char");
+        }
 
         if (input.endsWith("[]")) {
             return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
                     .map(value -> value + "*");
         }
 
-        if (isSymbol(input)) {
-            if (typeParams.contains(input)) {
-                return Optional.of(input);
+        String stripped = input.strip();
+        if (isSymbol(stripped)) {
+            if (typeParams.contains(stripped)) {
+                return Optional.of(stripped);
             } else {
-                return Optional.of("struct " + input);
+                return Optional.of("struct " + stripped);
+            }
+        }
+
+        if (stripped.endsWith(">")) {
+            String slice = stripped.substring(0, stripped.length() - ">".length());
+            int argsStart = slice.indexOf("<");
+            if (argsStart >= 0) {
+                String base = slice.substring(0, argsStart).strip();
+                String params = slice.substring(argsStart + "<".length()).strip();
+                return compileValues(params, type -> compileType(type, typeParams)).map(compiled -> {
+                    return base + "<" + compiled + ">";
+                });
             }
         }
 
