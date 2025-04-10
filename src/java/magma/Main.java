@@ -388,6 +388,10 @@ public class Main {
             return compileValue(object, typeParams).map(compiled -> compiled + "." + property);
         }
 
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
+        }
+
         return generatePlaceholder(input);
     }
 
