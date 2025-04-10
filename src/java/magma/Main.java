@@ -93,6 +93,7 @@ public class Main {
 
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
+    private static final List<String> globals = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -132,6 +133,7 @@ public class Main {
                     List<String> copy = new ArrayList<String>();
                     copy.addAll(imports);
                     copy.addAll(structs);
+                    copy.addAll(globals);
                     copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
@@ -276,8 +278,25 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
+                .or(() -> compileInitialization(input, depth))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileInitialization(String input, int depth) {
+        if (!input.endsWith(";")) return Optional.empty();
+
+        String withoutEnd = input.substring(0, input.length() - ";".length());
+        int valueSeparator = withoutEnd.indexOf("=");
+        if (valueSeparator < 0) return Optional.empty();
+
+        String definition = withoutEnd.substring(0, valueSeparator).strip();
+        String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
+        return compileDefinition(definition).map(outputDefinition -> {
+            String generated = outputDefinition + " = " + generatePlaceholder(value).orElse("") + ";\n";
+            globals.add(generated);
+            return "";
+        });
     }
 
     private static Optional<String> compileWhitespace(String input) {

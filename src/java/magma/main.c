@@ -24,8 +24,12 @@
 
 };
 /* public */ struct Main {
-	/* private */ /* static */ /* final */ /* List<String> */ /* imports */ /* = */ struct new ArrayList<>(/*  */);	/* private */ /* static */ /* final */ /* List<String> */ /* structs */ /* = */ struct new ArrayList<>(/*  */);	/* private */ /* static */ /* final */ /* List<String> */ /* methods */ /* = */ struct new ArrayList<>(/*  */);
+
 };
+/* private */ /* static */ /* final */ /* List<String> */ imports = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ /* List<String> */ structs = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ /* List<String> */ globals = /* new ArrayList<>() */;
+/* private */ /* static */ /* final */ /* List<String> */ methods = /* new ArrayList<>() */;
 	/* @Override */ /* public */ <R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr) {/* 
             return whenErr.apply(error); *//* 
          */
@@ -113,6 +117,7 @@
                     List<String> copy = new ArrayList<String>();
                     copy.addAll(imports);
                     copy.addAll(structs);
+                    copy.addAll(globals);
                     copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
@@ -245,8 +250,24 @@
         return compileWhitespace(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
+                .or(() -> compileInitialization(input, depth))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> generatePlaceholder(input)); *//* 
+     */
+	}	/* private */ /* static */ /* Optional<String> */ compileInitialization(struct String input, struct int depth) {/* 
+        if (!input.endsWith("; *//* ")) return Optional.empty(); *//* 
+
+        String withoutEnd = input.substring(0, input.length() - "; *//* ".length()); *//* 
+        int valueSeparator = withoutEnd.indexOf("="); *//* 
+        if (valueSeparator < 0) return Optional.empty(); *//* 
+
+        String definition = withoutEnd.substring(0, valueSeparator).strip(); *//* 
+        String value = withoutEnd.substring(valueSeparator + "=".length()).strip(); *//* 
+        return compileDefinition(definition).map(outputDefinition -> {
+            String generated = outputDefinition + " = " + generatePlaceholder(value).orElse("") + ";\n";
+            globals.add(generated);
+            return "";
+        } *//* ); *//* 
      */
 	}	/* private */ /* static */ /* Optional<String> */ compileWhitespace(struct String input) {/* 
         if (input.isBlank()) return Optional.of(""); *//* 
