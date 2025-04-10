@@ -3,7 +3,6 @@ package magma;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,18 +19,18 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-    private interface Result<T, X> {
+    public interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
-    private record Err<T, X>(X error) implements Result<T, X> {
+    public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
         }
     }
 
-    private record Ok<T, X>(T value) implements Result<T, X> {
+    public record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(this.value);
@@ -100,7 +99,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readString(source)
+        magma.Files.readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace);
     }
@@ -108,24 +107,7 @@ public class Main {
     private static Optional<IOException> compileAndWrite(String input, Path source) {
         Path target = source.resolveSibling("main.c");
         String output = compile(input);
-        return writeString(target, output);
-    }
-
-    private static Optional<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+        return magma.Files.writeString(target, output);
     }
 
     private static String compile(String input) {

@@ -1,6 +1,5 @@
 #include "./org/jetbrains/annotations/NotNull"
 #include "./java/io/IOException"
-#include "./java/nio/file/Files"
 #include "./java/nio/file/Path"
 #include "./java/nio/file/Paths"
 #include "./java/util/ArrayList"
@@ -15,12 +14,12 @@
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
-/* private */ struct Result<T, X> {
+/* public */ struct Result<T, X> {
 	/* <R> */ /* R */ /* match(Function<T, */ /* R> */ /* whenOk, */ Function<struct X, struct R> whenErr);
 };
-/* private */ struct Err<T, X>(X error) implements Result<T, X> {
+/* public */ struct Err<T, X>(X error) implements Result<T, X> {
 };
-/* private */ struct Ok<T, X>(T value) implements Result<T, X> {
+/* public */ struct Ok<T, X>(T value) implements Result<T, X> {
 };
 /* private */ /* static */ struct State {
 	/* private */ /* final */ Deque<char> queue;
@@ -80,29 +79,14 @@ struct public State(Deque<char> queue) {/*
 }
 /* public */ /* static */ void main(struct String* args) {
 	struct Path source = /* Paths.get(".", "src", "java", "magma", "Main.java") */;/* 
-        readString(source)
+        magma.Files.readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
                 .ifPresent(Throwable::printStackTrace); */
 }
 /* private */ /* static */ Optional<struct IOException> compileAndWrite(struct String input, struct Path source) {
 	struct Path target = /* source.resolveSibling("main.c") */;
 	struct String output = /* compile(input) */;
-	return /* writeString(target, output) */;
-}
-/* private */ /* static */ Optional<struct IOException> writeString(struct Path target, struct String output) {/* 
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } *//*  catch (IOException e) {
-            return Optional.of(e);
-        } */
-}
-/* private */ /* static */ Result<struct String, struct IOException> readString(struct Path source) {/* 
-        try {
-            return new Ok<>(Files.readString(source));
-        } *//*  catch (IOException e) {
-            return new Err<>(e);
-        } */
+	return /* magma.Files.writeString(target, output) */;
 }
 /* private */ /* static */ struct String compile(struct String input) {
 	List<struct String> segments = /* divide(input, Main::divideStatementChar) */;/* 
