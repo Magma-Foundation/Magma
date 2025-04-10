@@ -24,7 +24,7 @@ public class Main {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             buffer.append(c);
-            if(c == ';') {
+            if (c == ';') {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
             }
@@ -40,6 +40,7 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) return "";
         return "/* " + input + " */";
     }
 }
