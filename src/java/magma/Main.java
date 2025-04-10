@@ -677,6 +677,7 @@ public class Main {
 
             boolean allSymbols = Arrays.stream(modifiersString.split(Pattern.quote(" ")))
                     .map(String::strip)
+                    .filter(value -> !value.isEmpty())
                     .allMatch(Main::isSymbol);
 
             if (!allSymbols) {
