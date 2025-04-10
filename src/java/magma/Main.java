@@ -533,11 +533,13 @@ public class Main {
             return compileValue(object, typeParams, depth).map(compiled -> compiled + "." + property);
         }
 
-        return compileOperator(input, typeParams, depth, "==")
+        return compileOperator(input, typeParams, depth, "||")
                 .or(() -> compileOperator(input, typeParams, depth, "<"))
                 .or(() -> compileOperator(input, typeParams, depth, "+"))
                 .or(() -> compileOperator(input, typeParams, depth, ">="))
                 .or(() -> compileOperator(input, typeParams, depth, "&&"))
+                .or(() -> compileOperator(input, typeParams, depth, "=="))
+                .or(() -> compileOperator(input, typeParams, depth, "!="))
                 .or(() -> generatePlaceholder(input));
     }
 
