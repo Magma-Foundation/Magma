@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -466,6 +464,17 @@ public class Main {
                 continue;
             }
 
+            if (c == '"') {
+                while (!queue.isEmpty()) {
+                    Tuple<Integer, Character> next = queue.pop();
+
+                    if (next.right == '\\') queue.pop();
+                    if (next.right == '"') break;
+                }
+
+                continue;
+            }
+
             if (c == ')' && depth0 == 0) {
                 conditionEnd = i;
                 break;
@@ -622,9 +631,10 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        return IntStream.range(0, input.length())
-                .map(input::charAt)
-                .allMatch(Character::isDigit);
+        return IntStream.range(0, input.length()).allMatch(index -> {
+            char c = input.charAt(index);
+            return (index == 0 && c == '-') || Character.isDigit(c);
+        });
     }
 
     private static Optional<String> compileInvocation(String input, List<String> typeParams, int depth) {
