@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -601,13 +599,13 @@ public class Main {
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
 
-            String modifiersString = beforeType;
+            String beforeTypeParams = beforeType;
             List<String> typeParams;
             if (beforeType.endsWith(">")) {
                 String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
                 int typeParamStart = withoutEnd.indexOf("<");
                 if (typeParamStart >= 0) {
-                    modifiersString = withoutEnd.substring(0, typeParamStart);
+                    beforeTypeParams = withoutEnd.substring(0, typeParamStart);
                     String substring = withoutEnd.substring(typeParamStart + 1);
                     typeParams = splitValues(substring);
                 } else {
@@ -617,7 +615,17 @@ public class Main {
                 typeParams = Collections.emptyList();
             }
 
-            boolean allSymbols = Arrays.stream(modifiersString.strip().split(Pattern.quote(" ")))
+            String strippedBeforeTypeParams = beforeTypeParams.strip();
+
+            String modifiersString;
+            int annotationSeparator = strippedBeforeTypeParams.lastIndexOf("\n");
+            if (annotationSeparator >= 0) {
+                modifiersString = strippedBeforeTypeParams.substring(annotationSeparator + "\n".length());
+            } else {
+                modifiersString = strippedBeforeTypeParams;
+            }
+
+            boolean allSymbols = Arrays.stream(modifiersString.split(Pattern.quote(" ")))
                     .map(String::strip)
                     .allMatch(Main::isSymbol);
 

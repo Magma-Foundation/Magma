@@ -1,4 +1,3 @@
-#include "./org/jetbrains/annotations/NotNull"
 #include "./java/io/IOException"
 #include "./java/nio/file/Path"
 #include "./java/nio/file/Paths"
@@ -17,15 +16,9 @@
 struct Result<T, X> {
 <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr);};
 struct Err<T, X>(X error) implements Result<T, X> {
-/* @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(this.error);
-        } */};
+};
 struct Ok<T, X>(T value) implements Result<T, X> {
-/* @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        } */};
+};
 struct State {
 	Deque<char> queue;
 	List<struct String> segments;
@@ -39,6 +32,12 @@ List<struct String> structs = ArrayList<>();
 List<struct String> globals = ArrayList<>();
 List<struct String> methods = ArrayList<>();
 int counter = 0;
+<R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
+	return whenErr.apply(this.error);
+}
+<R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
+	return whenOk.apply(this.value);
+}
 struct private State(Deque<char> queue, List<struct String> segments, struct StringBuilder buffer, int depth) {
 	this.queue = queue;
 	this.segments = segments;
@@ -641,13 +640,13 @@ Optional<struct String> compileDefinition(struct String definition) {
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
 
-            String modifiersString = beforeType;
+            String beforeTypeParams = beforeType;
             List<String> typeParams;
             if (beforeType.endsWith(">")) {
                 String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
                 int typeParamStart = withoutEnd.indexOf("<");
                 if (typeParamStart >= 0) {
-                    modifiersString = withoutEnd.substring(0, typeParamStart);
+                    beforeTypeParams = withoutEnd.substring(0, typeParamStart);
                     String substring = withoutEnd.substring(typeParamStart + 1);
                     typeParams = splitValues(substring);
                 } else {
@@ -657,7 +656,18 @@ Optional<struct String> compileDefinition(struct String definition) {
                 typeParams = Collections.emptyList();
             }
 
-            boolean allSymbols = Arrays.stream(modifiersString.strip().split(Pattern.quote(" ")))
+            String strippedBeforeTypeParams = beforeTypeParams.strip();
+
+            String modifiersString;
+            int annotationSeparator = strippedBeforeTypeParams.lastIndexOf("\n");
+            if (annotationSeparator >= 0) {
+                modifiersString = strippedBeforeTypeParams.substring(annotationSeparator + "\n".length());
+            } else {
+                modifiersString = strippedBeforeTypeParams;
+            }
+
+
+            boolean allSymbols = Arrays.stream(modifiersString.split(Pattern.quote(" ")))
                     .map(String::strip)
                     .allMatch(Main::isSymbol);
 
