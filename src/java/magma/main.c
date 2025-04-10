@@ -89,8 +89,8 @@ struct public State(Deque<char> queue) {/*
 	return /* magma.Files.writeString(target, output) */;
 }
 /* private */ /* static */ struct String compile(struct String input) {
-	List<struct String> segments = /* divide(input, Main::divideStatementChar) */;/* 
-        return parseAll(segments, Main::compileRootSegment)
+	List<struct String> segments = /* divide(input, Main::divideStatementChar) */;
+	return /* parseAll(segments, Main::compileRootSegment)
                 .map(list -> {
                     List<String> copy = new ArrayList<String>();
                     copy.addAll(imports);
@@ -99,9 +99,9 @@ struct public State(Deque<char> queue) {/*
                     copy.addAll(methods);
                     copy.addAll(list);
                     return copy;
-                } *//* )
+                })
                 .map(compiled -> mergeAll(Main::mergeStatements, compiled))
-                .or(() -> generatePlaceholder(input)).orElse(""); */
+                .or(() -> generatePlaceholder(input)).orElse("") */;
 }
 /* private */ /* static */ Optional<struct String> compileStatements(struct String input, Function<struct String, Optional<struct String>> compiler) {
 	return /* compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements) */;
@@ -155,8 +155,8 @@ struct public State(Deque<char> queue) {/*
 	struct State appended = /* state.append(c) */;
 	struct if (c = /* = ';' && appended.isLevel()) return appended.advance() */;
 	struct if (c = /* = '}' && isShallow(appended)) return appended.advance().exit() */;
-	struct if (c = /* = '{') return appended.enter() */;
-	struct if (c = /* = '}') return appended.exit() */;
+	struct if (c = /* = '{' || c == '(') return appended.enter() */;
+	struct if (c = /* = '}' || c == ')') return appended.exit() */;
 	return /* appended */;
 }
 /* private */ /* static */ int isShallow(struct State state) {
@@ -223,38 +223,39 @@ struct public State(Deque<char> queue) {/*
 }
 /* private */ /* static */ /* @NotNull */ Optional<struct String> compileDefinitionStatement(struct String input) {
 	struct String stripped = /* input.strip() */;/* 
-        if (stripped.endsWith("; *//* ")) {
+        if (stripped.endsWith(";")) {
             String content = stripped.substring(0, stripped.length() - ";".length());
             return compileDefinition(content).map(result -> "\t" + result + ";\n");
         } */
 	return /* Optional.empty() */;
 }
-/* private */ /* static */ Optional<struct String> compileGlobalInitialization(struct String input) {/* 
-        return compileInitialization(input).map(generated -> {
+/* private */ /* static */ Optional<struct String> compileGlobalInitialization(struct String input) {
+	return /* compileInitialization(input).map(generated -> {
             globals.add(generated + ";\n");
             return "";
-        } *//* ); */
+        }) */;
 }
 /* private */ /* static */ Optional<struct String> compileInitialization(struct String input) {/* 
-        if (!input.endsWith("; *//* ")) return Optional.empty(); */
-	struct String withoutEnd = /* input.substring(0, input.length() - " */;/* ".length()); */
+        if (!input.endsWith(";")) return Optional.empty(); */
+	struct String withoutEnd = /* input.substring(0, input.length() - ";".length()) */;
 	int valueSeparator = /* withoutEnd.indexOf("=") */;/* 
         if (valueSeparator < 0) return Optional.empty(); */
 	struct String definition = /* withoutEnd.substring(0, valueSeparator).strip() */;
-	struct String value = /* withoutEnd.substring(valueSeparator + "=".length()).strip() */;/* 
-        return compileDefinition(definition).map(outputDefinition -> {
+	struct String value = /* withoutEnd.substring(valueSeparator + "=".length()).strip() */;
+	return /* compileDefinition(definition).map(outputDefinition -> {
             return outputDefinition + " = " + generatePlaceholder(value).orElse("");
-        } *//* ); */
+        }) */;
 }
 /* private */ /* static */ Optional<struct String> compileWhitespace(struct String input) {/* 
         if (input.isBlank()) return Optional.of(""); */
 	return /* Optional.empty() */;
 }
 /* private */ /* static */ Optional<struct String> compileMethod(struct String input) {
-	int paramStart = /* input.indexOf("(") */;/* 
-        if (paramStart < 0) return Optional.empty(); */
-	struct String inputDefinition = /* input.substring(0, paramStart).strip() */;
-	struct String withParams = /* input.substring(paramStart + "(".length()) */;/* 
+	int paramStart = /* input.indexOf("(");
+        if (paramStart < 0) return Optional.empty();
+
+        String inputDefinition = input.substring(0, paramStart).strip();
+        String withParams = input.substring(paramStart + "(".length());
 
         return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
@@ -274,7 +275,7 @@ struct public State(Deque<char> queue) {/*
 
                 return Optional.of(header + ";");
             });
-        } *//* ); */
+        }) */;
 }
 /* private */ /* static */ Optional<struct String> compileValues(struct String input, Function<struct String, Optional<struct String>> compiler) {
 	List<struct String> divided = /* divide(input, Main::divideValueChar) */;
@@ -293,12 +294,12 @@ struct public State(Deque<char> queue) {/*
 /* private */ /* static */ Optional<struct String> compileStatementOrBlock(struct String input) {
 	return /* compileWhitespace(input)
                 .or(() -> compileStatement(input))
-                .or(() -> compileInitialization(input).map(value -> "\n\t" + value + " */;/* "))
-                .or(() -> generatePlaceholder(input)); */
+                .or(() -> compileInitialization(input).map(value -> "\n\t" + value + ";"))
+                .or(() -> generatePlaceholder(input)) */;
 }
 /* private */ /* static */ Optional<struct String> compileStatement(struct String input) {
 	struct String stripped = /* input.strip() */;/* 
-        if (stripped.endsWith("; *//* ")) {
+        if (stripped.endsWith(";")) {
             String value = stripped.substring(0, stripped.length() - ";".length());
             if (value.startsWith("return ")) {
                 return compileValue(value.substring("return ".length())).map(result -> "\n\treturn " + result + ";");
@@ -417,8 +418,8 @@ struct public State(Deque<char> queue) {/*
         } */
 	return /* generatePlaceholder(input) */;
 }
-/* private */ /* static */ int isSymbol(struct String input) {
-	/* for */ /* (int */ i = /* 0 */;/*  i < input.length(); *//*  i++) {
+/* private */ /* static */ int isSymbol(struct String input) {/* 
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) continue;
             return false;
