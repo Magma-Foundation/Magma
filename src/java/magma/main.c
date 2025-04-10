@@ -4,6 +4,7 @@
 #include "./java/nio/file/Paths"
 #include "./java/util/ArrayList"
 #include "./java/util/Arrays"
+#include "./java/util/Collections"
 #include "./java/util/List"
 #include "./java/util/Optional"
 #include "./java/util/function/BiFunction"
@@ -12,7 +13,7 @@
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
 /* private */ struct Result<T, X> {
-<R> struct R match(/* Function<T *//* R> */ whenOk/* Function<X *//* R> */ whenErr);/* 
+<R> R match(/* Function<T *//* R> */ whenOk/* Function<X *//* R> */ whenErr);/* 
      */
 };
 /* private */ /* record */ /* Err<T, */ X>(struct X error);/* private */ /* record */ /* Ok<T, */ X>(struct T value);/* public */ /* static */ void main(struct String* args) {/* 
@@ -206,35 +207,44 @@
                 String beforeType = beforeName.substring(0, typeSeparator).strip();
 
                 String modifiers;
-                Optional<String> typeParams;
+                List<String> typeParams;
                 if (beforeType.endsWith(">")) {
                     String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
                     int typeParamStart = withoutEnd.indexOf("<");
                     if (typeParamStart >= 0) {
                         modifiers = withoutEnd.substring(0, typeParamStart);
                         String substring = withoutEnd.substring(typeParamStart + 1);
-                        typeParams = compileValues(substring, Main::compileTypeParam);
+                        typeParams = splitValues(substring);
                     } else {
                         modifiers = beforeType;
-                        typeParams = Optional.empty();
+                        typeParams = Collections.emptyList();
                     }
                 } else {
                     modifiers = beforeType;
-                    typeParams = Optional.empty();
+                    typeParams = Collections.emptyList();
                 }
 
                 String inputType = beforeName.substring(typeSeparator + " ".length());
                 Optional<String> compiledModifiers = compileModifiers(modifiers.strip());
-                return compileType(inputType).flatMap(outputType -> {
+                return compileType(inputType, typeParams).flatMap(outputType -> {
                     return Optional.of(generateDefinition(compiledModifiers, typeParams, outputType, name));
                 });
             } else {
-                return compileType(beforeName).flatMap(outputType -> {
-                    return Optional.of(generateDefinition(Optional.empty(), Optional.empty(), outputType, name));
+                return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> {
+                    return Optional.of(generateDefinition(Optional.empty(), Collections.emptyList(), outputType, name));
                 });
             }
         }
         return Optional.empty();
+    } *//* 
+
+    private static List<String> splitValues(String substring) {
+        String[] paramsArrays = substring.strip().split(Pattern.quote(","));
+        List<String> params = Arrays.stream(paramsArrays)
+                .map(String::strip)
+                .filter(param -> !param.isEmpty())
+                .toList();
+        return params;
     } *//* 
 
     private static Optional<String> compileTypeParam(String input) {
@@ -242,22 +252,33 @@
         return generatePlaceholder(input);
     } *//* 
 
-    private static String generateDefinition(Optional<String> maybeModifiers, Optional<String> maybeTypeParams, String type, String name) {
+    private static String generateDefinition(Optional<String> maybeModifiers, List<String> maybeTypeParams, String type, String name) {
         String modifiersString = maybeModifiers.map(modifiers -> modifiers + " ").orElse("");
-        String typeParamsString = maybeTypeParams.map(inner -> "<" + inner + "> ").orElse("");
+
+        String typeParamsString;
+        if (maybeTypeParams.isEmpty()) {
+            typeParamsString = "";
+        } else {
+            typeParamsString = "<" + String.join(", ", maybeTypeParams) + "> ";
+        }
+
         return modifiersString + typeParamsString + type + " " + name;
     } *//* 
 
-    private static Optional<String> compileType(String input) {
+    private static Optional<String> compileType(String input, List<String> typeParams) {
         if (input.equals("void")) return Optional.of("void");
 
         if (input.endsWith("[]")) {
-            return compileType(input.substring(0, input.length() - "[]".length()))
+            return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
                     .map(value -> value + "*");
         }
 
         if (isSymbol(input)) {
-            return Optional.of("struct " + input);
+            if (typeParams.contains(input)) {
+                return Optional.of(input);
+            } else {
+                return Optional.of("struct " + input);
+            }
         }
 
         return generatePlaceholder(input);
