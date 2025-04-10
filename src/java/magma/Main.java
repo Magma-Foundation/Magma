@@ -423,16 +423,18 @@ public class Main {
             String paramName = stripped.substring(0, arrowIndex).strip();
             if (isSymbol(paramName)) {
                 String value = stripped.substring(arrowIndex + "->".length());
-
-                int current = counter;
-                counter++;
-                String name = "__lambda" + current + "__";
-
                 return compileValue(value, typeParams).flatMap(newValue -> {
-                    methods.add("auto " + name + " (auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
-                    return Optional.of(name);
+                    return generateLambda(paramName, newValue);
                 });
             }
+        }
+
+        int methodIndex = stripped.lastIndexOf("::");
+        if(methodIndex >= 0) {
+            String type = stripped.substring(0, methodIndex).strip();
+            String property = stripped.substring(methodIndex + "::".length()).strip();
+
+            return generateLambda("temp", type + "." + property + "(temp)");
         }
 
         Optional<String> invocation = compileInvocation(input, typeParams);
@@ -450,6 +452,15 @@ public class Main {
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static Optional<String> generateLambda(String paramName, String newValue) {
+        int current = counter;
+        counter++;
+        String name = "__lambda" + current + "__";
+
+        methods.add("auto " + name + " (auto " + paramName + ") {\n\treturn " + newValue + ";\n}\n");
+        return Optional.of(name);
     }
 
     private static boolean isNumber(String input) {
