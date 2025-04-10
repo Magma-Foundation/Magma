@@ -259,7 +259,7 @@ public class Main {
                 .or(() -> generatePlaceholder(input));
     }
 
-    private static @NotNull Optional<String> compileDefinitionStatement(String input) {
+    private static Optional<String> compileDefinitionStatement(String input) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String content = stripped.substring(0, stripped.length() - ";".length());
@@ -462,7 +462,7 @@ public class Main {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
-            if(isSymbol(property)) {
+            if (isSymbol(property)) {
                 return compileType(type, typeParams).flatMap(compiled -> {
                     return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()");
                 });
@@ -601,11 +601,13 @@ public class Main {
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
 
+            String modifiersString = beforeType;
             List<String> typeParams;
             if (beforeType.endsWith(">")) {
                 String withoutEnd = beforeType.substring(0, beforeType.length() - ">".length());
                 int typeParamStart = withoutEnd.indexOf("<");
                 if (typeParamStart >= 0) {
+                    modifiersString = withoutEnd.substring(0, typeParamStart);
                     String substring = withoutEnd.substring(typeParamStart + 1);
                     typeParams = splitValues(substring);
                 } else {
@@ -613,6 +615,14 @@ public class Main {
                 }
             } else {
                 typeParams = Collections.emptyList();
+            }
+
+            boolean allSymbols = Arrays.stream(modifiersString.strip().split(Pattern.quote(" ")))
+                    .map(String::strip)
+                    .allMatch(Main::isSymbol);
+
+            if (!allSymbols) {
+                return Optional.empty();
             }
 
             String inputType = beforeName.substring(typeSeparator + " ".length());
