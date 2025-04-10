@@ -355,9 +355,51 @@ public class Main {
 
     private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams) {
         return compileWhitespace(input)
+                .or(() -> compileConditional(input, typeParams, "if "))
+                .or(() -> compileConditional(input, typeParams, "while "))
                 .or(() -> compileStatement(input, typeParams).map(result -> "\n\t" + result + ";"))
                 .or(() -> compileInitialization(input, typeParams).map(value -> "\n\t" + value + ";"))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileConditional(String input, List<String> typeParams, String prefix) {
+        String stripped = input.strip();
+        if (stripped.startsWith(prefix)) {
+            String afterKeyword = stripped.substring(prefix.length()).strip();
+            if (afterKeyword.startsWith("(")) {
+                String withoutConditionStart = afterKeyword.substring(1);
+                int conditionEnd = -1;
+                int depth = 0;
+                for (int i = 0; i < withoutConditionStart.length(); i++) {
+                    char c = withoutConditionStart.charAt(i);
+                    if (c == ')' && depth == 0) {
+                        conditionEnd = i;
+                        break;
+                    }
+                    if (c == '(') depth++;
+                    if (c == ')') depth--;
+                }
+
+                if (conditionEnd >= 0) {
+                    String oldCondition = withoutConditionStart.substring(0, conditionEnd).strip();
+                    String withBraces = withoutConditionStart.substring(conditionEnd + ")".length()).strip();
+                    return compileValue(oldCondition, typeParams).flatMap(newCondition -> {
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            String content = withBraces.substring(1, withBraces.length() - 1);
+                            return compileStatements(content, statement -> compileStatement(statement, typeParams)).map(statements -> {
+                                return "\n\t" + prefix + "(" + newCondition + ") " + statements;
+                            });
+                        } else {
+                            return compileValue(withBraces, typeParams).map(result -> {
+                                return "\n\t" + prefix + "(" + newCondition + ") " + result;
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileStatement(String input, List<String> typeParams) {
