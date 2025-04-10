@@ -119,26 +119,32 @@ public class Main {
             }
         }
 
-        int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String substring = input.substring(0, classIndex);
-            String newModifiers = compileModifiers(substring);
-
-            String afterKeyword = input.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                        return newModifiers + " struct " + name + " {\n};\n" + outputContent;
-                    });
-                }
-            }
-        }
+        Optional<String> maybeClass = compileToStruct(input, "class ");
+        if (maybeClass.isPresent()) return maybeClass;
 
         return generatePlaceholder(input);
+    }
+
+    private static Optional<String> compileToStruct(String input, String infix) {
+        int classIndex = input.indexOf(infix);
+        if (classIndex < 0) return Optional.empty();
+
+        String substring = input.substring(0, classIndex);
+        String newModifiers = compileModifiers(substring);
+
+        String afterKeyword = input.substring(classIndex + infix.length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart >= 0) {
+            String name = afterKeyword.substring(0, contentStart).strip();
+            String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+            if (withEnd.endsWith("}")) {
+                String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                    return newModifiers + " struct " + name + " {\n};\n" + outputContent;
+                });
+            }
+        }
+        return Optional.empty();
     }
 
     private static String compileModifiers(String substring) {
@@ -151,7 +157,9 @@ public class Main {
     }
 
     private static Optional<String> compileClassMember(String input) {
-        return compileMethod(input).or(() -> generatePlaceholder(input));
+        return compileMethod(input)
+                .or(() -> compileToStruct(input, "interface "))
+                .or(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileMethod(String input) {

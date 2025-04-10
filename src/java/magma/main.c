@@ -12,9 +12,10 @@
 #include "./java/util/stream/Collectors"
 /* public */ struct Main {
 };
-/* private interface Result<T, X> {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-    } *//* 
+/* private */ struct Result<T, X> {
+};
+/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
+     *//* 
 
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
@@ -95,28 +96,48 @@
 }/* 
         segments.add(buffer.toString()); *//* 
         return segments; *//* 
-     *//* private */ /* static */ /* Optional<String> */ /* compileRootSegment(String */ /* input) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (input.startsWith("package */ /* ")) */ /* return */ /* Optional.of(""); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* stripped */ /* = */ /* input.strip(); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (stripped.startsWith("import */ /* ")) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* right */ /* = */ /* stripped.substring("import */ /* ".length()); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* if */ /* (right.endsWith(";")) */ /* { */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* content */ /* = */ /* right.substring(0, */ /* right.length() */ /* - */ /* ";".length()); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* String */ /* joined */ /* = */ /* String.join("/", */ /* content.split(Pattern.quote("."))); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* return */ /* Optional.of("#include */ /* \"./" */ /* + */ /* joined */ /* + */ /* "\"\n"); */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* } */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* } */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /*  */ /* int */ /* classIndex */ /* = */ /* input.indexOf(" */ struct ");
-        if (classIndex >= 0) {
-};
-/* String substring = input.substring(0, classIndex); *//* 
-            String newModifiers = compileModifiers(substring); *//* 
+     *//* 
 
-            String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
-                        return newModifiers + " struct " + name + " {\n};\n" + outputContent;
-                    });
-                }
-            } *//* 
+    private static Optional<String> compileRootSegment(String input) {
+        if (input.startsWith("package ")) return Optional.of("");
+
+        String stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            String right = stripped.substring("import ".length());
+            if (right.endsWith(";")) {
+                String content = right.substring(0, right.length() - ";".length());
+                String joined = String.join("/", content.split(Pattern.quote(".")));
+                return Optional.of("#include \"./" + joined + "\"\n");
+            }
         }
 
+        Optional<String> maybeClass = compileToStruct(input, "class ");
+        if (maybeClass.isPresent()) return maybeClass;
+
         return generatePlaceholder(input);
-     *//* 
+    } *//* 
+
+    private static Optional<String> compileToStruct(String input, String infix) {
+        int classIndex = input.indexOf(infix);
+        if (classIndex < 0) return Optional.empty();
+
+        String substring = input.substring(0, classIndex);
+        String newModifiers = compileModifiers(substring);
+
+        String afterKeyword = input.substring(classIndex + infix.length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart >= 0) {
+            String name = afterKeyword.substring(0, contentStart).strip();
+            String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+            if (withEnd.endsWith("}")) {
+                String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                return compileStatements(inputContent, Main::compileClassMember).map(outputContent -> {
+                    return newModifiers + " struct " + name + " {\n};\n" + outputContent;
+                });
+            }
+        }
+        return Optional.empty();
+    } *//* 
 
     private static String compileModifiers(String substring) {
         String[] oldModifiers = substring.strip().split(" ");
@@ -128,7 +149,9 @@
     } *//* 
 
     private static Optional<String> compileClassMember(String input) {
-        return compileMethod(input).or(() -> generatePlaceholder(input));
+        return compileMethod(input)
+                .or(() -> compileToStruct(input, "interface "))
+                .or(() -> generatePlaceholder(input));
     } *//* 
 
     private static Optional<String> compileMethod(String input) {
