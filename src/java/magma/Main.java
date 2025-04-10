@@ -348,7 +348,7 @@ public class Main {
 
             int typeSeparator = -1;
             int depth = 0;
-            for (int i = 0; i < beforeName.length(); i++) {
+            for (int i = beforeName.length() - 1; i >= 0; i--) {
                 char c = beforeName.charAt(i);
                 if (c == ' ' && depth == 0) {
                     typeSeparator = i;
