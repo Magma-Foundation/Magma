@@ -210,6 +210,9 @@ public class Main {
     }
 
     private static Optional<String> compileRootSegment(String input) {
+        Optional<String> whitespace = compileWhitespace(input);
+        if (whitespace.isPresent()) return whitespace;
+
         if (input.startsWith("package ")) return Optional.of("");
 
         String stripped = input.strip();
@@ -365,14 +368,29 @@ public class Main {
 
     private static Optional<String> compileStatementOrBlock(String input, List<String> typeParams, int depth) {
         return compileWhitespace(input)
+                .or(() -> compileKeywordStatement(input, depth, "continue"))
+                .or(() -> compileKeywordStatement(input, depth, "break"))
                 .or(() -> compileConditional(input, typeParams, "if ", depth))
                 .or(() -> compileConditional(input, typeParams, "while ", depth))
                 .or(() -> compileElse(input, typeParams, depth))
+                .or(() -> compilePostOperator(input, typeParams, depth, "++"))
+                .or(() -> compilePostOperator(input, typeParams, depth, "--"))
+                .or(() -> compileReturn(input, typeParams, depth).map(result -> formatStatement(depth, result)))
                 .or(() -> compileInitialization(input, typeParams, depth).map(result -> formatStatement(depth, result)))
-                .or(() -> compileStatement(input, typeParams, depth).map(result -> formatStatement(depth, result)))
-                .or(() -> compileKeywordStatement(input, depth, "continue"))
-                .or(() -> compileKeywordStatement(input, depth, "break"))
+                .or(() -> compileAssignment(input, typeParams, depth).map(result -> formatStatement(depth, result)))
+                .or(() -> compileInvocationStatement(input, typeParams, depth).map(result -> formatStatement(depth, result)))
+                .or(() -> compileDefinitionStatement(input))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compilePostOperator(String input, List<String> typeParams, int depth, String operator) {
+        String stripped = input.strip();
+        if (stripped.endsWith(operator + ";")) {
+            String slice = stripped.substring(0, stripped.length() - (operator + ";").length());
+            return compileValue(slice, typeParams, depth).map(value -> value + operator + ";");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileElse(String input, List<String> typeParams, int depth) {
@@ -486,14 +504,20 @@ public class Main {
         return conditionEnd;
     }
 
-    private static Optional<String> compileStatement(String input, List<String> typeParams, int depth) {
+    private static Optional<String> compileInvocationStatement(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            if (withoutEnd.startsWith("return ")) {
-                return compileValue(withoutEnd.substring("return ".length()), typeParams, depth).map(result -> "return " + result);
-            }
+            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, depth);
+            if (maybeInvocation.isPresent()) return maybeInvocation;
+        }
+        return Optional.empty();
+    }
 
+    private static Optional<String> compileAssignment(String input, List<String> typeParams, int depth) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
                 String destination = withoutEnd.substring(0, valueSeparator).strip();
@@ -504,9 +528,17 @@ public class Main {
                     });
                 });
             }
+        }
+        return Optional.empty();
+    }
 
-            Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, depth);
-            if (maybeInvocation.isPresent()) return maybeInvocation;
+    private static Optional<String> compileReturn(String input, List<String> typeParams, int depth) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            if (withoutEnd.startsWith("return ")) {
+                return compileValue(withoutEnd.substring("return ".length()), typeParams, depth).map(result -> "return " + result);
+            }
         }
 
         return Optional.empty();
