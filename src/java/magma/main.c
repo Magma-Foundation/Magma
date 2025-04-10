@@ -35,10 +35,10 @@
 /* private */ /* static */ /* final */ List<struct String> globals = /* new ArrayList<>() */;
 /* private */ /* static */ /* final */ List<struct String> methods = /* new ArrayList<>() */;
 /* @Override */ /* public */ <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
-	return /* whenErr.apply(error) */;
+	return /* whenErr.apply(this.error) */;
 }
 /* @Override */ /* public */ <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr) {
-	return /* whenOk.apply(value) */;
+	return /* whenOk.apply(this.value) */;
 }
 struct private State(Deque<char> queue, List<struct String> segments, struct StringBuilder buffer, int depth) {/* 
             this.queue = queue; *//* 
@@ -50,33 +50,33 @@ struct public State(Deque<char> queue) {/*
             this(queue, new ArrayList<>(), new StringBuilder(), 0); */
 }
 /* private */ struct State advance(/*  */) {/* 
-            segments.add(buffer.toString()); *//* 
-            buffer = new StringBuilder(); */
+            this.segments.add(this.buffer.toString()); *//* 
+            this.buffer = new StringBuilder(); */
 	return /* this */;
 }
 /* private */ struct State append(char c) {/* 
-            buffer.append(c); */
+            this.buffer.append(c); */
 	return /* this */;
 }
 /* private */ int isLevel(/*  */) {
-	return /* depth == 0 */;
+	return /* this.depth == 0 */;
 }
 /* private */ char pop(/*  */) {
-	return /* queue.pop() */;
+	return /* this.queue.pop() */;
 }
 /* private */ int hasElements(/*  */) {
-	return /* !queue.isEmpty() */;
+	return /* !this.queue.isEmpty() */;
 }
 /* private */ struct State exit(/*  */) {/* 
-            this.depth = depth - 1; */
+            this.depth = this.depth - 1; */
 	return /* this */;
 }
 /* private */ struct State enter(/*  */) {/* 
-            this.depth = depth + 1; */
+            this.depth = this.depth + 1; */
 	return /* this */;
 }
 /* public */ List<struct String> segments(/*  */) {
-	return /* segments */;
+	return /* this.segments */;
 }
 /* public */ /* static */ void main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
@@ -403,6 +403,7 @@ struct public State(Deque<char> queue) {/*
 }
 /* private */ /* static */ Optional<struct String> compileType(struct String input, List<struct String> typeParams) {/* 
         if (input.equals("void")) return Optional.of("void"); *//* 
+
         if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
             return Optional.of("int");
         } *//* 
