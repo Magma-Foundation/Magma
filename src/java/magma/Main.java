@@ -429,16 +429,16 @@ public class Main {
             }
         }
 
+        Optional<String> invocation = compileInvocation(input, typeParams);
+        if (invocation.isPresent()) return invocation;
+
         int methodIndex = stripped.lastIndexOf("::");
-        if(methodIndex >= 0) {
+        if (methodIndex >= 0) {
             String type = stripped.substring(0, methodIndex).strip();
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
             return generateLambda("temp", type + "." + property + "(temp)");
         }
-
-        Optional<String> invocation = compileInvocation(input, typeParams);
-        if (invocation.isPresent()) return invocation;
 
         int separator = input.lastIndexOf(".");
         if (separator >= 0) {
