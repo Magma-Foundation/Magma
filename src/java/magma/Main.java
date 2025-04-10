@@ -385,7 +385,7 @@ public class Main {
                         statement -> compileStatementOrBlock(statement, typeParams, depth + 1))
                         .map(result -> indent + "else {" + result + indent + "}");
             } else {
-                return compileStatement(withoutKeyword, typeParams, depth).map(result -> "else " + result);
+                return compileStatementOrBlock(withoutKeyword, typeParams, depth).map(result -> "else " + result);
             }
         }
 
@@ -434,7 +434,7 @@ public class Main {
                             "}";
                 });
             } else {
-                return compileStatement(withBraces, typeParams, depth).map(result -> {
+                return compileStatementOrBlock(withBraces, typeParams, depth).map(result -> {
                     return withCondition + " " + result;
                 });
             }
