@@ -301,7 +301,8 @@ public class Main {
         String definition = withoutEnd.substring(0, valueSeparator).strip();
         String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
         return compileDefinition(definition).map(outputDefinition -> {
-            String generated = outputDefinition + " = " + generatePlaceholder(value).orElse("") + ";\n";
+            return outputDefinition + " = " + generatePlaceholder(value).orElse("") + ";\n";
+        }).map(generated -> {
             globals.add(generated);
             return "";
         });
@@ -329,7 +330,7 @@ public class Main {
                 String body = withParams.substring(paramEnd + ")".length()).strip();
                 if (body.startsWith("{") && body.endsWith("}")) {
                     String inputContent = body.substring("{".length(), body.length() - "}".length());
-                    return compileStatements(inputContent, Main::compileStatement).flatMap(outputContent -> {
+                    return compileStatements(inputContent, Main::compileStatementOrBlock).flatMap(outputContent -> {
                         methods.add(header + " {" + outputContent + "\n}");
                         return Optional.of("");
                     });
@@ -358,7 +359,24 @@ public class Main {
         return compileAndMerge(params, compoiler, Main::mergeValues);
     }
 
+    private static Optional<String> compileStatementOrBlock(String input) {
+        return compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .or(() -> generatePlaceholder(input));
+    }
+
     private static Optional<String> compileStatement(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String value = stripped.substring(0, stripped.length() - ";".length());
+            if (value.startsWith("return ")) {
+                return compileValue(value.substring("return ".length())).map(result -> "\n\treturn " + result + ";");
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileValue(String input) {
         return generatePlaceholder(input);
     }
 
