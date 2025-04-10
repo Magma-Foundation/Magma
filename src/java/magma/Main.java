@@ -357,7 +357,17 @@ public class Main {
                 .or(() -> compileConditional(input, typeParams, "while ", depth))
                 .or(() -> compileInitialization(input, typeParams, depth).map(result -> formatStatement(depth, result)))
                 .or(() -> compileStatement(input, typeParams, depth).map(result -> formatStatement(depth, result)))
+                .or(() -> compileKeywordStatement(input, depth, "continue"))
+                .or(() -> compileKeywordStatement(input, depth, "break"))
                 .or(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileKeywordStatement(String input, int depth, String keyword) {
+        if(input.strip().equals(keyword + ";")) {
+            return Optional.of(formatStatement(depth, keyword));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static String formatStatement(int depth, String value) {
@@ -445,7 +455,10 @@ public class Main {
 
     private static Optional<String> compileValue(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
+        if (stripped.startsWith("'") && stripped.endsWith("'")) return Optional.of(stripped);
+
+        if (isSymbol(stripped) || isNumber(stripped)) {
             return Optional.of(stripped);
         }
 
@@ -457,7 +470,7 @@ public class Main {
                 String withEnd = slice.substring(argsStart + "(".length()).strip();
                 if (withEnd.endsWith(")")) {
                     String argsString = withEnd.substring(0, withEnd.length() - ")".length());
-                    return compileType(type, typeParams).flatMap(outputType -> compileArgs(argsString, typeParams, depth).map(value -> outputType + value));
+                    return compileType(type, typeParams, depth).flatMap(outputType -> compileArgs(argsString, typeParams, depth).map(value -> outputType + value));
                 }
             }
         }
@@ -478,7 +491,7 @@ public class Main {
             String property = stripped.substring(methodIndex + "::".length()).strip();
 
             if (isSymbol(property)) {
-                return compileType(type, typeParams).flatMap(compiled -> {
+                return compileType(type, typeParams, depth).flatMap(compiled -> {
                     return generateLambdaWithReturn(Collections.emptyList(), "\n\treturn " + compiled + "." + property + "()");
                 });
             }
@@ -491,8 +504,16 @@ public class Main {
             return compileValue(object, typeParams, depth).map(compiled -> compiled + "." + property);
         }
 
-        if (isSymbol(stripped) || isNumber(stripped)) {
-            return Optional.of(stripped);
+        int operatorIndex = input.indexOf("==");
+        if (operatorIndex >= 0) {
+            String left = input.substring(0, operatorIndex);
+            String right = input.substring(operatorIndex + "==".length());
+
+            return compileValue(left, typeParams, depth).flatMap(leftResult -> {
+                return compileValue(right, typeParams, depth).map(rightResult -> {
+                    return leftResult + " == " + rightResult;
+                });
+            });
         }
 
         return generatePlaceholder(input);
@@ -656,9 +677,9 @@ public class Main {
             }
 
             String inputType = beforeName.substring(typeSeparator + " ".length());
-            return compileType(inputType, typeParams).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
+            return compileType(inputType, typeParams, depth).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
         } else {
-            return compileType(beforeName, Collections.emptyList()).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
+            return compileType(beforeName, Collections.emptyList(), depth).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
         }
     }
 
@@ -681,7 +702,7 @@ public class Main {
         return typeParamsString + type + " " + name;
     }
 
-    private static Optional<String> compileType(String input, List<String> typeParams) {
+    private static Optional<String> compileType(String input, List<String> typeParams, int depth) {
         if (input.equals("void")) return Optional.of("void");
 
         if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
@@ -693,7 +714,7 @@ public class Main {
         }
 
         if (input.endsWith("[]")) {
-            return compileType(input.substring(0, input.length() - "[]".length()), typeParams)
+            return compileType(input.substring(0, input.length() - "[]".length()), typeParams, depth)
                     .map(value -> value + "*");
         }
 
@@ -713,7 +734,7 @@ public class Main {
                 String base = slice.substring(0, argsStart).strip();
                 String params = slice.substring(argsStart + "<".length()).strip();
                 return compileValues(params, type -> {
-                    return compileWhitespace(type).or(() -> compileType(type, typeParams));
+                    return compileWhitespace(type).or(() -> compileType(type, typeParams, depth));
                 }).map(compiled -> {
                     return base + "<" + compiled + ">";
                 });
