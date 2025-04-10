@@ -394,11 +394,20 @@ public class Main {
             return compileValue(object, typeParams).map(compiled -> compiled + "." + property);
         }
 
-        if (isSymbol(stripped)) {
+        if (isSymbol(stripped) || isNumber(stripped)) {
             return Optional.of(stripped);
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static boolean isNumber(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) continue;
+            return false;
+        }
+        return true;
     }
 
     private static Optional<String> compileInvocation(String input, List<String> typeParams) {

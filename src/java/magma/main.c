@@ -46,7 +46,7 @@ struct private State(Deque<char> queue, List<struct String> segments, struct Str
 	this.depth = depth;
 }
 struct public State(Deque<char> queue) {
-	this(queue, ArrayList<>(), struct StringBuilder(), /*  0 */);
+	this(queue, ArrayList<>(), struct StringBuilder(), 0);
 }
 struct State advance() {
 	this.segments.add(this.buffer.toString());
@@ -125,7 +125,7 @@ struct StringBuilder mergeStatements(struct StringBuilder output, struct String 
 	return output.append(compiled);
 }
 List<struct String> divide(struct String input, BiFunction<struct State, struct Character, struct State> divider) {
-	/* LinkedList<Character> queue */ = IntStream.range(/* 0 */, input.length(/* )) */.mapToObj(/* input::charAt */).collect(Collectors.toCollection(LinkedList::new));
+	/* LinkedList<Character> queue */ = IntStream.range(0, input.length(/* )) */.mapToObj(/* input::charAt */).collect(Collectors.toCollection(LinkedList::new));
 	/* State state */ = struct State(queue);/* 
         while (state.hasElements()) {
             char c = state.pop();
@@ -208,10 +208,10 @@ Optional<struct String> compileGlobalInitialization(struct String input, List<st
 }
 Optional<struct String> compileInitialization(struct String input, List<struct String> typeParams) {
 	if(/* !input */.endsWith(";")) return Optional.empty();
-	/* String withoutEnd */ = input.substring(/* 0 */, input.length(/* ) - ";" */.length());
+	/* String withoutEnd */ = input.substring(0, input.length(/* ) - ";" */.length());
 	/* int valueSeparator */ = withoutEnd.indexOf(/* "=" */);
 	if(/* valueSeparator < 0) return Optional */.empty();
-	/* String definition */ = withoutEnd.substring(/* 0 */, /* valueSeparator) */.strip();
+	/* String definition */ = withoutEnd.substring(0, /* valueSeparator) */.strip();
 	/* String value */ = withoutEnd.substring(/* valueSeparator + "=" */.length(/* ) */).strip();
 	return compileDefinition(/* definition) */.flatMap(/* outputDefinition -> {
             return compileValue(value, typeParams */).map(outputValue -> {
@@ -318,10 +318,18 @@ Optional<struct String> compileValue(struct String input, List<struct String> ty
             return compileValue(object, typeParams).map(compiled -> compiled + "." + property);
         } *//* 
 
-        if (isSymbol(stripped)) {
+        if (isSymbol(stripped) || isNumber(stripped)) {
             return Optional.of(stripped);
         } */
 	return generatePlaceholder(input);
+}
+int isNumber(struct String input) {/* 
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) continue;
+            return false;
+        } */
+	return true;
 }
 Optional<struct String> compileInvocation(struct String input, List<struct String> typeParams) {/* 
         int argsStart = input.indexOf("(");
