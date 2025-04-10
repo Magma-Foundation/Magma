@@ -363,7 +363,7 @@ public class Main {
     }
 
     private static Optional<String> compileKeywordStatement(String input, int depth, String keyword) {
-        if(input.strip().equals(keyword + ";")) {
+        if (input.strip().equals(keyword + ";")) {
             return Optional.of(formatStatement(depth, keyword));
         } else {
             return Optional.empty();
@@ -504,19 +504,25 @@ public class Main {
             return compileValue(object, typeParams, depth).map(compiled -> compiled + "." + property);
         }
 
-        int operatorIndex = input.indexOf("==");
-        if (operatorIndex >= 0) {
-            String left = input.substring(0, operatorIndex);
-            String right = input.substring(operatorIndex + "==".length());
+        return compileOperator(input, typeParams, depth, "==")
+                .or(() -> compileOperator(input, typeParams, depth, "<"))
+                .or(() -> compileOperator(input, typeParams, depth, "+"))
+                .or(() -> compileOperator(input, typeParams, depth, ">="))
+                .or(() -> generatePlaceholder(input));
+    }
 
-            return compileValue(left, typeParams, depth).flatMap(leftResult -> {
-                return compileValue(right, typeParams, depth).map(rightResult -> {
-                    return leftResult + " == " + rightResult;
-                });
+    private static Optional<String> compileOperator(String input, List<String> typeParams, int depth, String operator) {
+        int operatorIndex = input.indexOf(operator);
+        if (operatorIndex < 0) return Optional.empty();
+
+        String left = input.substring(0, operatorIndex);
+        String right = input.substring(operatorIndex + operator.length());
+
+        return compileValue(left, typeParams, depth).flatMap(leftResult -> {
+            return compileValue(right, typeParams, depth).map(rightResult -> {
+                return leftResult + " " + operator + " " + rightResult;
             });
-        }
-
-        return generatePlaceholder(input);
+        });
     }
 
     private static Optional<String> compileLambda(String input, List<String> typeParams, int depth) {
