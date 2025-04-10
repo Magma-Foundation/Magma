@@ -14,10 +14,10 @@
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/Collectors"
 #include "./java/util/stream/IntStream"
+/* private */ struct Result<T, X> {
+	<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
+};
 /* public */ struct Main {
-	/* private */ struct Result<T, X> {
-		<R> R match(/* Function<T, R> */ whenOk, /* Function<X, R> */ whenErr);
-	};
 	/* private */ /* record Err<T, */ X>(struct X error);	/* private */ /* record Ok<T, */ X>(struct T value);	/* private */ /* static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
@@ -72,7 +72,7 @@
             return segments; *//* 
         }
      */
-}	/* public */ /* static void */ main(struct String* args) {/* 
+}	/* private */ /* static final List<String> imports = new */ ArrayList<>(/*  */);	/* private */ /* static final List<String> structs = new */ ArrayList<>(/*  */);	/* public */ /* static void */ main(struct String* args) {/* 
         Path source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
         readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
@@ -99,18 +99,43 @@
         } *//* 
      */
 }	/* private */ /* static String */ compile(struct String input) {/* 
-        return compileStatements(input, Main::compileRootSegment).or(() -> generatePlaceholder(input)).orElse(""); *//* 
+        List<String> segments = divide(input, Main::divideStatementChar); *//* 
+        return parseAll(segments, Main::compileRootSegment)
+                .map(list -> {
+                    List<String> copy = new ArrayList<String>();
+                    copy.addAll(imports);
+                    copy.addAll(structs);
+                    copy.addAll(list);
+                    return copy;
+                } *//* )
+                .map(compiled -> mergeAll(Main::mergeStatements, compiled))
+                .or(() -> generatePlaceholder(input)).orElse(""); *//* 
      */
 }	/* private */ /* static Optional<String> */ compileStatements(struct String input, /* Function<String, Optional<String>> */ compiler) {/* 
         return compileAndMerge(divide(input, Main::divideStatementChar), compiler, Main::mergeStatements); *//* 
      */
 }	/* private */ /* static Optional<String> */ compileAndMerge(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger) {/* 
-        Optional<StringBuilder> maybeOutput = Optional.of(new StringBuilder()); *//* 
-        for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> compiler.apply(segment).map(compiled -> merger.apply(output, compiled)));
+        return parseAll(segments, compiler).map(compiled -> mergeAll(merger, compiled)); *//* 
+     */
+}	/* private */ /* static String */ mergeAll(/* BiFunction<StringBuilder, String, StringBuilder> */ merger, /* List<String> */ compiled) {/* 
+        StringBuilder output = new StringBuilder(); *//* 
+        for (String segment : compiled) {
+            output = merger.apply(output, segment);
         } *//* 
 
-        return maybeOutput.map(StringBuilder::toString); *//* 
+        return output.toString(); *//* 
+     */
+}	/* private */ /* static Optional<List<String>> */ parseAll(/* List<String> */ segments, /* Function<String, Optional<String>> */ compiler) {/* 
+        Optional<List<String>> maybeCompiled = Optional.of(new ArrayList<String>()); *//* 
+        for (String segment : segments) {
+            maybeCompiled = maybeCompiled.flatMap(allCompiled -> {
+                return compiler.apply(segment).map(compiledSegment -> {
+                    allCompiled.add(compiledSegment);
+                    return allCompiled;
+                });
+            });
+        } *//* 
+        return maybeCompiled; *//* 
      */
 }	/* private */ /* static StringBuilder */ mergeStatements(struct StringBuilder output, struct String compiled) {/* 
         return output.append(compiled); *//* 
@@ -152,7 +177,8 @@
             if (right.endsWith(";")) {
                 String content = right.substring(0, right.length() - ";".length());
                 String joined = String.join("/", content.split(Pattern.quote(".")));
-                return Optional.of("#include \"./" + joined + "\"\n");
+                imports.add("#include \"./" + joined + "\"\n");
+                return Optional.of("");
             }
         }
 
@@ -176,11 +202,11 @@
             if (withEnd.endsWith("}")) {
                 String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                 return compileModifiers(substring).flatMap(newModifiers -> {
-                    return compileStatements(inputContent, input1 -> compileClassMember(input1, depth + 1)).map(outputContent -> {
-                        String indent = "\t".repeat(depth);
-                        return indent + newModifiers + " struct " + name + " {\n" +
+                    return compileStatements(inputContent, input1 -> compileClassMember(input1, 1)).map(outputContent -> {
+                        structs.add(newModifiers + " struct " + name + " {\n" +
                                 outputContent +
-                                "\n" + indent + "};\n";
+                                "\n" + "};\n");
+                        return "";
                     });
                 });
             }
