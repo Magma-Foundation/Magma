@@ -169,7 +169,9 @@ public class Main {
                 char maybeSlash = state.pop();
                 state.append(maybeSlash);
 
-                if (maybeSlash == '\\') state.append(state.pop());
+                if (maybeSlash == '\\') {
+                    state.append(state.pop());
+                }
                 state.append(state.pop());
                 continue;
             }
@@ -181,7 +183,9 @@ public class Main {
                     char next = state.pop();
                     state.append(next);
 
-                    if (next == '\\') state.append(state.pop());
+                    if (next == '\\') {
+                        state.append(state.pop());
+                    }
                     if (next == '"') {
                         break;
                     }
@@ -198,10 +202,18 @@ public class Main {
 
     private static State divideStatementChar(State state, char c) {
         State appended = state.append(c);
-        if (c == ';' && appended.isLevel()) return appended.advance();
-        if (c == '}' && isShallow(appended)) return appended.advance().exit();
-        if (c == '{' || c == '(') return appended.enter();
-        if (c == '}' || c == ')') return appended.exit();
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
+        if (c == '}' && isShallow(appended)) {
+            return appended.advance().exit();
+        }
+        if (c == '{' || c == '(') {
+            return appended.enter();
+        }
+        if (c == '}' || c == ')') {
+            return appended.exit();
+        }
         return appended;
     }
 
@@ -211,9 +223,13 @@ public class Main {
 
     private static Optional<String> compileRootSegment(String input) {
         Optional<String> whitespace = compileWhitespace(input);
-        if (whitespace.isPresent()) return whitespace;
+        if (whitespace.isPresent()) {
+            return whitespace;
+        }
 
-        if (input.startsWith("package ")) return Optional.of("");
+        if (input.startsWith("package ")) {
+            return Optional.of("");
+        }
 
         String stripped = input.strip();
         if (stripped.startsWith("import ")) {
@@ -227,14 +243,18 @@ public class Main {
         }
 
         Optional<String> maybeClass = compileToStruct(input, "class ", new ArrayList<>());
-        if (maybeClass.isPresent()) return maybeClass;
+        if (maybeClass.isPresent()) {
+            return maybeClass;
+        }
 
         return generatePlaceholder(input);
     }
 
     private static Optional<String> compileToStruct(String input, String infix, List<String> typeParams) {
         int classIndex = input.indexOf(infix);
-        if (classIndex < 0) return Optional.empty();
+        if (classIndex < 0) {
+            return Optional.empty();
+        }
 
         String afterKeyword = input.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
@@ -280,11 +300,15 @@ public class Main {
     }
 
     private static Optional<String> compileInitialization(String input, List<String> typeParams, int depth) {
-        if (!input.endsWith(";")) return Optional.empty();
+        if (!input.endsWith(";")) {
+            return Optional.empty();
+        }
 
         String withoutEnd = input.substring(0, input.length() - ";".length());
         int valueSeparator = withoutEnd.indexOf("=");
-        if (valueSeparator < 0) return Optional.empty();
+        if (valueSeparator < 0) {
+            return Optional.empty();
+        }
 
         String definition = withoutEnd.substring(0, valueSeparator).strip();
         String value = withoutEnd.substring(valueSeparator + "=".length()).strip();
@@ -296,20 +320,26 @@ public class Main {
     }
 
     private static Optional<String> compileWhitespace(String input) {
-        if (input.isBlank()) return Optional.of("");
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
         return Optional.empty();
     }
 
     private static Optional<String> compileMethod(String input, List<String> typeParams) {
         int paramStart = input.indexOf("(");
-        if (paramStart < 0) return Optional.empty();
+        if (paramStart < 0) {
+            return Optional.empty();
+        }
 
         String inputDefinition = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + "(".length());
 
         return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
-            if (paramEnd < 0) return Optional.empty();
+            if (paramEnd < 0) {
+                return Optional.empty();
+            }
 
             String params = withParams.substring(0, paramEnd);
             return compileValues(params, Main::compileParameter)
@@ -354,11 +384,17 @@ public class Main {
             }
         }
 
-        if (c == ',' && state.isLevel()) return state.advance();
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
 
         State appended = state.append(c);
-        if (c == '<' || c == '(') return appended.enter();
-        if (c == '>' || c == ')') return appended.exit();
+        if (c == '<' || c == '(') {
+            return appended.enter();
+        }
+        if (c == '>' || c == ')') {
+            return appended.exit();
+        }
         return appended;
     }
 
@@ -388,7 +424,8 @@ public class Main {
         if (stripped.endsWith(operator + ";")) {
             String slice = stripped.substring(0, stripped.length() - (operator + ";").length());
             return compileValue(slice, typeParams, depth).map(value -> value + operator + ";");
-        } else {
+        }
+        else {
             return Optional.empty();
         }
     }
@@ -402,7 +439,8 @@ public class Main {
                 return compileStatements(withoutKeyword.substring(1, withoutKeyword.length() - 1),
                         statement -> compileStatementOrBlock(statement, typeParams, depth + 1))
                         .map(result -> indent + "else {" + result + indent + "}");
-            } else {
+            }
+            else {
                 return compileStatementOrBlock(withoutKeyword, typeParams, depth).map(result -> "else " + result);
             }
         }
@@ -413,7 +451,8 @@ public class Main {
     private static Optional<String> compileKeywordStatement(String input, int depth, String keyword) {
         if (input.strip().equals(keyword + ";")) {
             return Optional.of(formatStatement(depth, keyword));
-        } else {
+        }
+        else {
             return Optional.empty();
         }
     }
@@ -428,15 +467,21 @@ public class Main {
 
     private static Optional<String> compileConditional(String input, List<String> typeParams, String prefix, int depth) {
         String stripped = input.strip();
-        if (!stripped.startsWith(prefix)) return Optional.empty();
+        if (!stripped.startsWith(prefix)) {
+            return Optional.empty();
+        }
 
         String afterKeyword = stripped.substring(prefix.length()).strip();
-        if (!afterKeyword.startsWith("(")) return Optional.empty();
+        if (!afterKeyword.startsWith("(")) {
+            return Optional.empty();
+        }
 
         String withoutConditionStart = afterKeyword.substring(1);
         int conditionEnd = findConditionEnd(withoutConditionStart);
 
-        if (conditionEnd < 0) return Optional.empty();
+        if (conditionEnd < 0) {
+            return Optional.empty();
+        }
         String oldCondition = withoutConditionStart.substring(0, conditionEnd).strip();
         String withBraces = withoutConditionStart.substring(conditionEnd + ")".length()).strip();
 
@@ -451,7 +496,8 @@ public class Main {
                             "\t".repeat(depth) +
                             "}";
                 });
-            } else {
+            }
+            else {
                 return compileStatementOrBlock(withBraces, typeParams, depth).map(result -> {
                     return withCondition + " " + result;
                 });
@@ -486,8 +532,12 @@ public class Main {
                 while (!queue.isEmpty()) {
                     Tuple<Integer, Character> next = queue.pop();
 
-                    if (next.right == '\\') queue.pop();
-                    if (next.right == '"') break;
+                    if (next.right == '\\') {
+                        queue.pop();
+                    }
+                    if (next.right == '"') {
+                        break;
+                    }
                 }
 
                 continue;
@@ -498,8 +548,12 @@ public class Main {
                 break;
             }
 
-            if (c == '(') depth0++;
-            if (c == ')') depth0--;
+            if (c == '(') {
+                depth0++;
+            }
+            if (c == ')') {
+                depth0--;
+            }
         }
         return conditionEnd;
     }
@@ -509,7 +563,9 @@ public class Main {
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             Optional<String> maybeInvocation = compileInvocation(withoutEnd, typeParams, depth);
-            if (maybeInvocation.isPresent()) return maybeInvocation;
+            if (maybeInvocation.isPresent()) {
+                return maybeInvocation;
+            }
         }
         return Optional.empty();
     }
@@ -546,8 +602,12 @@ public class Main {
 
     private static Optional<String> compileValue(String input, List<String> typeParams, int depth) {
         String stripped = input.strip();
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) return Optional.of(stripped);
-        if (stripped.startsWith("'") && stripped.endsWith("'")) return Optional.of(stripped);
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(stripped);
+        }
+        if (stripped.startsWith("'") && stripped.endsWith("'")) {
+            return Optional.of(stripped);
+        }
 
         if (isSymbol(stripped) || isNumber(stripped)) {
             return Optional.of(stripped);
@@ -571,10 +631,14 @@ public class Main {
         }
 
         Optional<String> value = compileLambda(stripped, typeParams, depth);
-        if (value.isPresent()) return value;
+        if (value.isPresent()) {
+            return value;
+        }
 
         Optional<String> invocation = compileInvocation(input, typeParams, depth);
-        if (invocation.isPresent()) return invocation;
+        if (invocation.isPresent()) {
+            return invocation;
+        }
 
         int methodIndex = stripped.lastIndexOf("::");
         if (methodIndex >= 0) {
@@ -607,7 +671,9 @@ public class Main {
 
     private static Optional<String> compileOperator(String input, List<String> typeParams, int depth, String operator) {
         int operatorIndex = input.indexOf(operator);
-        if (operatorIndex < 0) return Optional.empty();
+        if (operatorIndex < 0) {
+            return Optional.empty();
+        }
 
         String left = input.substring(0, operatorIndex);
         String right = input.substring(operatorIndex + operator.length());
@@ -621,19 +687,23 @@ public class Main {
 
     private static Optional<String> compileLambda(String input, List<String> typeParams, int depth) {
         int arrowIndex = input.indexOf("->");
-        if (arrowIndex < 0) return Optional.empty();
+        if (arrowIndex < 0) {
+            return Optional.empty();
+        }
 
         String beforeArrow = input.substring(0, arrowIndex).strip();
         List<String> paramNames;
         if (isSymbol(beforeArrow)) {
             paramNames = Collections.singletonList(beforeArrow);
-        } else if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+        }
+        else if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
             String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
             paramNames = Arrays.stream(inner.split(Pattern.quote(",")))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .toList();
-        } else {
+        }
+        else {
             return Optional.empty();
         }
 
@@ -698,8 +768,12 @@ public class Main {
                 break;
             }
 
-            if (c == ')') depth0++;
-            if (c == '(') depth0--;
+            if (c == ')') {
+                depth0++;
+            }
+            if (c == '(') {
+                depth0--;
+            }
             i--;
         }
         return argsStart;
@@ -714,18 +788,24 @@ public class Main {
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
-        if (cache.isEmpty()) return cache.append(element);
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
         return cache.append(", ").append(element);
     }
 
     private static Optional<String> compileDefinition(String definition) {
         String stripped = definition.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator < 0) return Optional.empty();
+        if (nameSeparator < 0) {
+            return Optional.empty();
+        }
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
         String name = stripped.substring(nameSeparator + " ".length()).strip();
-        if (!isSymbol(name)) return Optional.empty();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
 
         int typeSeparator = -1;
         int depth = 0;
@@ -735,9 +815,14 @@ public class Main {
             if (c == ' ' && depth == 0) {
                 typeSeparator = i;
                 break;
-            } else {
-                if (c == '>') depth++;
-                if (c == '<') depth--;
+            }
+            else {
+                if (c == '>') {
+                    depth++;
+                }
+                if (c == '<') {
+                    depth--;
+                }
             }
             i--;
         }
@@ -754,10 +839,12 @@ public class Main {
                     beforeTypeParams = withoutEnd.substring(0, typeParamStart);
                     String substring = withoutEnd.substring(typeParamStart + 1);
                     typeParams = splitValues(substring);
-                } else {
+                }
+                else {
                     typeParams = Collections.emptyList();
                 }
-            } else {
+            }
+            else {
                 typeParams = Collections.emptyList();
             }
 
@@ -767,7 +854,8 @@ public class Main {
             int annotationSeparator = strippedBeforeTypeParams.lastIndexOf("\n");
             if (annotationSeparator >= 0) {
                 modifiersString = strippedBeforeTypeParams.substring(annotationSeparator + "\n".length());
-            } else {
+            }
+            else {
                 modifiersString = strippedBeforeTypeParams;
             }
 
@@ -782,7 +870,8 @@ public class Main {
 
             String inputType = beforeName.substring(typeSeparator + " ".length());
             return compileType(inputType, typeParams, depth).flatMap(outputType -> Optional.of(generateDefinition(typeParams, outputType, name)));
-        } else {
+        }
+        else {
             return compileType(beforeName, Collections.emptyList(), depth).flatMap(outputType -> Optional.of(generateDefinition(Collections.emptyList(), outputType, name)));
         }
     }
@@ -799,7 +888,8 @@ public class Main {
         String typeParamsString;
         if (maybeTypeParams.isEmpty()) {
             typeParamsString = "";
-        } else {
+        }
+        else {
             typeParamsString = "<" + String.join(", ", maybeTypeParams) + "> ";
         }
 
@@ -807,7 +897,9 @@ public class Main {
     }
 
     private static Optional<String> compileType(String input, List<String> typeParams, int depth) {
-        if (input.equals("void")) return Optional.of("void");
+        if (input.equals("void")) {
+            return Optional.of("void");
+        }
 
         if (input.equals("int") || input.equals("Integer") || input.equals("boolean") || input.equals("Boolean")) {
             return Optional.of("int");
@@ -826,7 +918,8 @@ public class Main {
         if (isSymbol(stripped)) {
             if (typeParams.contains(stripped)) {
                 return Optional.of(stripped);
-            } else {
+            }
+            else {
                 return Optional.of("struct " + stripped);
             }
         }
@@ -849,7 +942,9 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        if (input.isBlank()) return false;
+        if (input.isBlank()) {
+            return false;
+        }
 
         return IntStream.range(0, input.length()).allMatch(index -> {
             char c = input.charAt(index);
