@@ -118,7 +118,7 @@ auto __lambda6__() {
 auto __lambda7__(auto compiled) {
 	return mergeAll(compiled, __lambda6__);
 }
-auto __lambda8__(auto ) {
+auto __lambda8__() {
 	return generatePlaceholder(input);
 }
 struct String compile(struct String input) {
@@ -249,25 +249,25 @@ Optional<struct String> compileToStruct(struct String input, struct String infix
 	}
 	return Optional.empty();
 }
-auto __lambda21__(auto ) {
+auto __lambda21__() {
 	return compileToStruct(input, "interface ", typeParams);
 }
-auto __lambda22__(auto ) {
+auto __lambda22__() {
 	return compileToStruct(input, "record ", typeParams);
 }
-auto __lambda23__(auto ) {
+auto __lambda23__() {
 	return compileToStruct(input, "class ", typeParams);
 }
-auto __lambda24__(auto ) {
+auto __lambda24__() {
 	return compileGlobalInitialization(input, typeParams);
 }
-auto __lambda25__(auto ) {
+auto __lambda25__() {
 	return compileDefinitionStatement(input);
 }
-auto __lambda26__(auto ) {
+auto __lambda26__() {
 	return compileMethod(input, typeParams);
 }
-auto __lambda27__(auto ) {
+auto __lambda27__() {
 	return generatePlaceholder(input);
 }
 Optional<struct String> compileClassMember(struct String input, List<struct String> typeParams) {
@@ -310,10 +310,10 @@ Optional<struct String> compileWhitespace(struct String input) {
 	if (input.isBlank()) /* return Optional */.of("");
 	return Optional.empty();
 }
-auto __lambda32__(auto ) {
+auto __lambda32__() {
 	return compileDefinition(definition);
 }
-auto __lambda33__(auto ) {
+auto __lambda33__() {
 	return generatePlaceholder(definition);
 }
 auto __lambda34__(auto definition) {
@@ -376,31 +376,31 @@ auto __lambda38__() {
 Optional<struct String> compileValues(List<struct String> params, Function<struct String, Optional<struct String>> compiler) {
 	return compileAndMerge(params, compiler, __lambda38__);
 }
-auto __lambda39__(auto ) {
+auto __lambda39__() {
 	return compileConditional(input, typeParams, "if ", depth);
 }
-auto __lambda40__(auto ) {
+auto __lambda40__() {
 	return compileConditional(input, typeParams, "while ", depth);
 }
 auto __lambda41__(auto result) {
 	return formatStatement(depth, result);
 }
-auto __lambda42__(auto ) {
+auto __lambda42__() {
 	return compileInitialization(input, typeParams, depth).map(__lambda41__);
 }
 auto __lambda43__(auto result) {
 	return formatStatement(depth, result);
 }
-auto __lambda44__(auto ) {
+auto __lambda44__() {
 	return compileStatement(input, typeParams, depth).map(__lambda43__);
 }
-auto __lambda45__(auto ) {
+auto __lambda45__() {
 	return compileKeywordStatement(input, depth, "continue");
 }
-auto __lambda46__(auto ) {
+auto __lambda46__() {
 	return compileKeywordStatement(input, depth, "break");
 }
-auto __lambda47__(auto ) {
+auto __lambda47__() {
 	return generatePlaceholder(input);
 }
 Optional<struct String> compileStatementOrBlock(struct String input, List<struct String> typeParams, int depth) {
@@ -500,16 +500,16 @@ auto __lambda55__(auto compiled) {
 auto __lambda56__(auto compiled) {
 	return compiled + "." + property;
 }
-auto __lambda57__(auto ) {
+auto __lambda57__() {
 	return compileOperator(input, typeParams, depth, "<");
 }
-auto __lambda58__(auto ) {
+auto __lambda58__() {
 	return compileOperator(input, typeParams, depth, "+");
 }
-auto __lambda59__(auto ) {
+auto __lambda59__() {
 	return compileOperator(input, typeParams, depth, ">=");
 }
-auto __lambda60__(auto ) {
+auto __lambda60__() {
 	return generatePlaceholder(input);
 }
 Optional<struct String> compileValue(struct String input, List<struct String> typeParams, int depth) {
@@ -587,6 +587,7 @@ Optional<struct String> compileLambda(struct String input, List<struct String> t
             String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
             paramNames = Arrays.stream(inner.split(Pattern.quote(",")))
                     .map(String::strip)
+                    .filter(value -> !value.isEmpty())
                     .toList();
         } *//*  else {
             return Optional.empty();
@@ -651,7 +652,7 @@ int findInvocationStart(struct String sliced) {
 	}
 	return argsStart;
 }
-auto __lambda69__(auto ) {
+auto __lambda69__() {
 	return compileValue(arg, typeParams, depth);
 }
 auto __lambda70__(auto arg) {
@@ -754,7 +755,7 @@ struct String generateDefinition(List<struct String> maybeTypeParams, struct Str
 auto __lambda77__(auto value) {
 	return value + "*";
 }
-auto __lambda78__(auto ) {
+auto __lambda78__() {
 	return compileType(type, typeParams, depth);
 }
 auto __lambda79__(auto type) {

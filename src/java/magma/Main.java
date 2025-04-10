@@ -537,6 +537,7 @@ public class Main {
             String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
             paramNames = Arrays.stream(inner.split(Pattern.quote(",")))
                     .map(String::strip)
+                    .filter(value -> !value.isEmpty())
                     .toList();
         } else {
             return Optional.empty();
