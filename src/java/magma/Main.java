@@ -94,6 +94,8 @@ public class Main {
         }
     }
 
+    private record Tuple<A, B>(A left, B right) {
+    }
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> globals = new ArrayList<>();
@@ -306,24 +308,33 @@ public class Main {
             if (paramEnd < 0) return Optional.empty();
 
             String params = withParams.substring(0, paramEnd);
-            return compileValues(params, definition -> {
-                return compileWhitespace(definition)
-                        .or(() -> compileDefinition(definition))
-                        .or(() -> generatePlaceholder(definition));
-            }).flatMap(outputParams -> {
-                String header = "\t".repeat(0) + outputDefinition + "(" + outputParams + ")";
-                String body = withParams.substring(paramEnd + ")".length()).strip();
-                if (body.startsWith("{") && body.endsWith("}")) {
-                    String inputContent = body.substring("{".length(), body.length() - "}".length());
-                    return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams, 1)).flatMap(outputContent -> {
-                        methods.add(header + " {" + outputContent + "\n}\n");
-                        return Optional.of("");
-                    });
-                }
-
-                return Optional.of(header + ";");
-            });
+            return compileValues(params, Main::compileParameter)
+                    .flatMap(outputParams -> assembleMethodBody(typeParams, outputDefinition, outputParams, withParams.substring(paramEnd + ")".length()).strip()));
         });
+    }
+
+    private static Optional<String> assembleMethodBody(
+            List<String> typeParams,
+            String definition,
+            String params,
+            String body
+    ) {
+        String header = "\t".repeat(0) + definition + "(" + params + ")";
+        if (body.startsWith("{") && body.endsWith("}")) {
+            String inputContent = body.substring("{".length(), body.length() - "}".length());
+            return compileStatements(inputContent, input1 -> compileStatementOrBlock(input1, typeParams, 1)).flatMap(outputContent -> {
+                methods.add(header + " {" + outputContent + "\n}\n");
+                return Optional.of("");
+            });
+        }
+
+        return Optional.of(header + ";");
+    }
+
+    private static Optional<String> compileParameter(String definition) {
+        return compileWhitespace(definition)
+                .or(() -> compileDefinition(definition))
+                .or(() -> generatePlaceholder(definition));
     }
 
     private static Optional<String> compileValues(String input, Function<String, Optional<String>> compiler) {
@@ -404,7 +415,7 @@ public class Main {
                             "}";
                 });
             } else {
-                return compileValue(withBraces, typeParams, depth).map(result -> {
+                return compileStatement(withBraces, typeParams, depth).map(result -> {
                     return withCondition + " " + result;
                 });
             }
@@ -412,15 +423,33 @@ public class Main {
 
     }
 
-    private static int findConditionEnd(String withoutConditionStart) {
+    private static int findConditionEnd(String input) {
         int conditionEnd = -1;
         int depth0 = 0;
-        for (int i = 0; i < withoutConditionStart.length(); i++) {
-            char c = withoutConditionStart.charAt(i);
+
+        LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length())
+                .mapToObj(index -> new Tuple<>(index, input.charAt(index)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            Tuple<Integer, Character> pair = queue.pop();
+            Integer i = pair.left;
+            Character c = pair.right;
+
+            if (c == '\'') {
+                if (queue.pop().right == '\\') {
+                    queue.pop();
+                }
+
+                queue.pop();
+                continue;
+            }
+
             if (c == ')' && depth0 == 0) {
                 conditionEnd = i;
                 break;
             }
+
             if (c == '(') depth0++;
             if (c == ')') depth0--;
         }
@@ -625,11 +654,12 @@ public class Main {
     }
 
     private static Optional<String> compileDefinition(String definition) {
-        int nameSeparator = definition.lastIndexOf(" ");
+        String stripped = definition.strip();
+        int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) return Optional.empty();
 
-        String beforeName = definition.substring(0, nameSeparator).strip();
-        String name = definition.substring(nameSeparator + " ".length()).strip();
+        String beforeName = stripped.substring(0, nameSeparator).strip();
+        String name = stripped.substring(nameSeparator + " ".length()).strip();
         if (!isSymbol(name)) return Optional.empty();
 
         int typeSeparator = -1;
