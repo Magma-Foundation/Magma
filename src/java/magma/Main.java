@@ -751,9 +751,12 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        return IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .allMatch(Character::isLetter);
+        if (input.isBlank()) return false;
+
+        return IntStream.range(0, input.length()).allMatch(index -> {
+            char c = input.charAt(index);
+            return c == '_' || Character.isLetter(c) || (index != 0 && Character.isDigit(c));
+        });
     }
 
     private static Optional<String> generatePlaceholder(String input) {
