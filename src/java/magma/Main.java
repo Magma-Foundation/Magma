@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -535,7 +534,7 @@ public class Main {
             String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
                 String content = right.substring(0, right.length() - ";".length());
-                List_<String> split = Iterators.fromArray(content.split(Pattern.quote("."))).collect(new ListCollector<>());
+                List_<String> split = splitByDelimiter(content, '.');
                 if (split.size() >= 3 && Impl.equalsList(split.slice(0, 3), Impl.listOf("java", "util", "function"), String::equals)) {
                     return new Some<>("");
                 }
@@ -552,6 +551,23 @@ public class Main {
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static List_<String> splitByDelimiter(String content, char delimiter) {
+        List_<String> segments = Impl.emptyList();
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == delimiter) {
+                segments = segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else {
+                buffer.append(c);
+            }
+        }
+
+        return segments.add(buffer.toString());
     }
 
     private static Option<String> compileToStruct(String input, String infix, List_<String> typeParams) {
@@ -1000,7 +1016,8 @@ public class Main {
         }
         else if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
             String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
-            paramNames = Iterators.fromArray(inner.split(Pattern.quote(",")))
+            paramNames = splitByDelimiter(inner, ',')
+                    .iter()
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .collect(new ListCollector<>());
@@ -1163,7 +1180,8 @@ public class Main {
                 modifiersString = strippedBeforeTypeParams;
             }
 
-            boolean allSymbols = Iterators.fromArray(modifiersString.split(Pattern.quote(" ")))
+            boolean allSymbols = splitByDelimiter(modifiersString, ' ')
+                    .iter()
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .allMatch(Main::isSymbol);
@@ -1181,8 +1199,8 @@ public class Main {
     }
 
     private static List_<String> splitValues(String substring) {
-        String[] paramsArrays = substring.strip().split(Pattern.quote(","));
-        return Iterators.fromArray(paramsArrays)
+        return splitByDelimiter(substring.strip(), ',')
+                .iter()
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
                 .collect(new ListCollector<>());

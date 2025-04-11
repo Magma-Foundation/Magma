@@ -1,4 +1,3 @@
-#include "./java/util/regex/Pattern"
 #include "./java/util/stream/IntStream"
 struct Option<T> {
 <R> Option<R> map(Function<struct T, struct R> mapper);struct T orElse(struct T other);int isPresent();int isEmpty();void ifPresent(Consumer<struct T> consumer);Option<struct T> or(Supplier<Option<struct T>> supplier);<R> Option<R> flatMap(Function<struct T, Option<struct R>> mapper);};
@@ -412,6 +411,21 @@ struct State divideStatementChar(struct State state, char c) {
 }
 int isShallow(struct State state) {
 	return state.depth == 1;
+}
+List_<struct String> splitByDelimiter(struct String content, char delimiter) {
+	List_<struct String> segments = Impl.emptyList();
+	struct StringBuilder buffer = struct StringBuilder();/* 
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == delimiter) {
+                segments = segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else {
+                buffer.append(c);
+            }
+        } */
+	return segments.add(buffer.toString());
 }
 auto __lambda26__(auto input1) {
 	return compileClassMember(input1, typeParams);
@@ -932,7 +946,7 @@ Option<struct String> compileLambda(struct String input, List_<struct String> ty
 	}else 
 	if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
 		struct String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
-		paramNames = Iterators.fromArray(inner.split(Pattern.quote(","))).map(__lambda88__).filter(__lambda89__).collect(ListCollector<>());
+		paramNames = splitByDelimiter(inner, ',').iter().map(__lambda88__).filter(__lambda89__).collect(ListCollector<>());
 	}
 	else {
 		return None<>();
@@ -1085,7 +1099,7 @@ Option<struct String> compileDefinition(struct String definition) {
 		else {
 			modifiersString = strippedBeforeTypeParams;
 		}
-		int allSymbols = Iterators.fromArray(modifiersString.split(Pattern.quote(" "))).map(__lambda100__).filter(__lambda101__).allMatch(__lambda102__);
+		int allSymbols = splitByDelimiter(modifiersString, ' ').iter().map(__lambda100__).filter(__lambda101__).allMatch(__lambda102__);
 		if (!allSymbols) {
 			return None<>();
 		}
@@ -1103,8 +1117,7 @@ auto __lambda106__(auto param) {
 	return !param.isEmpty();
 }
 List_<struct String> splitValues(struct String substring) {
-	struct String* paramsArrays = substring.strip().split(Pattern.quote(","));
-	return Iterators.fromArray(paramsArrays).map(__lambda105__).filter(__lambda106__).collect(ListCollector<>());
+	return splitByDelimiter(substring.strip(), ',').iter().map(__lambda105__).filter(__lambda106__).collect(ListCollector<>());
 }
 auto __lambda107__(auto inner) {
 	return "<" + inner + "> ";
