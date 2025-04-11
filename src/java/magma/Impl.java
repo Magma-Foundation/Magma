@@ -6,8 +6,10 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class Impl {
     private record ExceptionalIOError(IOException exception) implements Main.IOError {
@@ -26,12 +28,44 @@ public class Impl {
         }
 
         @Override
-        public List<String> getNames() {
+        public Main.List_<String> listNames() {
             ArrayList<String> names = new ArrayList<>();
             for (Path path1 : this.path) {
                 names.add(path1.toString());
             }
-            return names;
+            return new JavaList<>(names);
+        }
+    }
+
+    private record JavaList<T>(List<T> elements) implements Main.List_<T> {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        @Override
+        public void add(T element) {
+            this.elements.add(element);
+        }
+
+        @Override
+        public void addAll(Main.List_<T> elements) {
+            elements.iter().forEach(this::add);
+        }
+
+        @Override
+        public Main.Iterator<T> iter() {
+            return new Main.HeadedIterator<>(new Main.RangeHead(this.elements.size())).map(this.elements::get);
+        }
+
+        @Override
+        public Optional<Main.Tuple<T, Main.List_<T>>> popFirst() {
+            if (this.elements.isEmpty()) {
+                return Optional.empty();
+            }
+
+            T first = this.elements.getFirst();
+            List<T> slice = this.elements.subList(1, this.elements.size());
+            return Optional.of(new Main.Tuple<>(first, new JavaList<>(slice)));
         }
     }
 
@@ -45,13 +79,10 @@ public class Impl {
     }
 
     private static Path unwrap(Main.Path_ path) {
-        List<String> names = path.getNames();
-        String first = names.getFirst();
-        Path current = Paths.get(first);
-        for (int i = 1; i < names.size(); i++) {
-            current = current.resolve(names.get(i));
-        }
-        return current;
+        return path.listNames()
+                .popFirst()
+                .map(list -> list.right().iter().fold(Paths.get(list.left()), Path::resolve))
+                .orElse(Paths.get("."));
     }
 
     static Main.Result<String, Main.IOError> readString(Main.Path_ source) {
@@ -64,5 +95,25 @@ public class Impl {
 
     public static Main.Path_ get(String first, String... elements) {
         return new PathImpl(Paths.get(first, elements));
+    }
+
+    public static <T> Main.List_<T> emptyList() {
+        return new JavaList<>();
+    }
+
+    public static <T> Main.List_<T> listOf(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
+    }
+
+    public static <T> Main.List_<T> listFromNative(List<T> list) {
+        return new JavaList<>(list);
+    }
+
+    public static <T> boolean contains(
+            Main.List_<T> list,
+            T element,
+            BiFunction<T, T, Boolean> equator
+    ) {
+        return list.iter().anyMatch(child -> equator.apply(child, element));
     }
 }
