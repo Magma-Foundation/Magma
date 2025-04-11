@@ -1,6 +1,5 @@
 package magma;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,6 +18,10 @@ import java.util.stream.IntStream;
 public class Main {
     public interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    public interface IOError {
+        String display();
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
@@ -105,15 +108,15 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        magma.Files.readString(source)
+        Impl.readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
-                .ifPresent(Throwable::printStackTrace);
+                .ifPresent(error -> error.display());
     }
 
-    private static Optional<IOException> compileAndWrite(String input, Path source) {
+    private static Optional<IOError> compileAndWrite(String input, Path source) {
         Path target = source.resolveSibling("main.c");
         String output = compile(input);
-        return magma.Files.writeString(target, output);
+        return Impl.writeString(target, output);
     }
 
     private static String compile(String input) {
