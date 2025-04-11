@@ -39,6 +39,12 @@ public class Main {
         boolean isEmpty();
 
         T peek();
+
+        int size();
+
+        List_<T> slice(int startInclusive, int endExclusive);
+
+        T get(int index);
     }
 
     public interface Iterator<T> {
@@ -529,7 +535,12 @@ public class Main {
             String right = stripped.substring("import ".length());
             if (right.endsWith(";")) {
                 String content = right.substring(0, right.length() - ";".length());
-                String joined = String.join("/", content.split(Pattern.quote(".")));
+                List_<String> split = Iterators.fromArray(content.split(Pattern.quote("."))).collect(new ListCollector<>());
+                if (split.size() >= 3 && Impl.equalsList(split.slice(0, 3), Impl.listOf("java", "util", "function"), String::equals)) {
+                    return new Some<>("");
+                }
+
+                String joined = split.iter().collect(new Joiner("/")).orElse("");
                 imports.add("#include \"./" + joined + "\"\n");
                 return new Some<>("");
             }

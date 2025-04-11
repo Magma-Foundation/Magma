@@ -82,6 +82,21 @@ public class Impl {
         public T peek() {
             return this.elements.getFirst();
         }
+
+        @Override
+        public int size() {
+            return this.elements.size();
+        }
+
+        @Override
+        public Main.List_<T> slice(int startInclusive, int endExclusive) {
+            return new JavaList<>(this.elements.subList(startInclusive, endExclusive));
+        }
+
+        @Override
+        public T get(int index) {
+            return this.elements.get(index);
+        }
     }
 
     static Main.Option<Main.IOError> writeString(Main.Path_ target, String output) {
@@ -130,5 +145,15 @@ public class Impl {
             BiFunction<T, T, Boolean> equator
     ) {
         return list.iter().anyMatch(child -> equator.apply(child, element));
+    }
+
+    public static <T> boolean equalsList(Main.List_<T> first, Main.List_<T> second, BiFunction<T, T, Boolean> equator) {
+        if (first.size() != second.size()) {
+            return false;
+        }
+
+        return new Main.HeadedIterator<>(new Main.RangeHead(first.size())).allMatch(index -> {
+            return equator.apply(first.get(index), second.get(index));
+        });
     }
 }

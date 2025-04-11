@@ -1,14 +1,9 @@
-#include "./java/util/function/BiFunction"
-#include "./java/util/function/Consumer"
-#include "./java/util/function/Function"
-#include "./java/util/function/Predicate"
-#include "./java/util/function/Supplier"
 #include "./java/util/regex/Pattern"
 #include "./java/util/stream/IntStream"
 struct Option<T> {
 <R> Option<R> map(Function<struct T, struct R> mapper);struct T orElse(struct T other);int isPresent();int isEmpty();void ifPresent(Consumer<struct T> consumer);Option<struct T> or(Supplier<Option<struct T>> supplier);<R> Option<R> flatMap(Function<struct T, Option<struct R>> mapper);};
 struct List_<T> {
-List_<struct T> add(struct T element);void addAll(List_<struct T> elements);Iterator<struct T> iter();Option<Tuple<struct T, List_<struct T>>> popFirst();struct T pop();int isEmpty();struct T peek();};
+List_<struct T> add(struct T element);void addAll(List_<struct T> elements);Iterator<struct T> iter();Option<Tuple<struct T, List_<struct T>>> popFirst();struct T pop();int isEmpty();struct T peek();int size();List_<struct T> slice(int startInclusive, int endExclusive);struct T get(int index);};
 struct Iterator<T> {
 <R> R fold(struct R initial, BiFunction<struct R, struct T, struct R> folder);<R> Iterator<R> map(Function<struct T, struct R> mapper);<C> C collect(Collector<struct T, struct C> collector);int anyMatch(Predicate<struct T> predicate);void forEach(Consumer<struct T> consumer);Iterator<struct T> filter(Predicate<struct T> predicate);int allMatch(Predicate<struct T> predicate);Iterator<struct T> concat(Iterator<struct T> other);Option<struct T> next();};
 struct Head<T> {
