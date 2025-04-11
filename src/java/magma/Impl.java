@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class Impl {
@@ -59,14 +58,14 @@ public class Impl {
         }
 
         @Override
-        public Optional<Main.Tuple<T, Main.List_<T>>> popFirst() {
+        public Main.Option<Main.Tuple<T, Main.List_<T>>> popFirst() {
             if (this.elements.isEmpty()) {
-                return Optional.empty();
+                return new Main.None<>();
             }
 
             T first = this.elements.getFirst();
             List<T> slice = this.elements.subList(1, this.elements.size());
-            return Optional.of(new Main.Tuple<>(first, new JavaList<>(slice)));
+            return new Main.Some<>(new Main.Tuple<>(first, new JavaList<>(slice)));
         }
 
         @Override
@@ -85,12 +84,12 @@ public class Impl {
         }
     }
 
-    static Optional<Main.IOError> writeString(Main.Path_ target, String output) {
+    static Main.Option<Main.IOError> writeString(Main.Path_ target, String output) {
         try {
             java.nio.file.Files.writeString(unwrap(target), output);
-            return Optional.empty();
+            return new Main.None<>();
         } catch (IOException e) {
-            return Optional.of(new ExceptionalIOError(e));
+            return new Main.Some<>(new ExceptionalIOError(e));
         }
     }
 
