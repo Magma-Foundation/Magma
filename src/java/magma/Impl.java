@@ -43,8 +43,9 @@ public class Impl {
         }
 
         @Override
-        public void add(T element) {
+        public Main.List_<T> add(T element) {
             this.elements.add(element);
+            return this;
         }
 
         @Override

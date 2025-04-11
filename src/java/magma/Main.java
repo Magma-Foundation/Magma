@@ -1,6 +1,5 @@
 package magma;
 
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -14,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class Main {
     public interface List_<T> {
-        void add(T element);
+        List_<T> add(T element);
 
         void addAll(List_<T> elements);
 
@@ -33,6 +32,14 @@ public class Main {
         boolean anyMatch(Predicate<T> predicate);
 
         void forEach(Consumer<T> consumer);
+
+        Iterator<T> filter(Predicate<T> predicate);
+
+        boolean allMatch(Predicate<T> predicate);
+
+        Iterator<T> concat(Iterator<T> other);
+
+        Optional<T> next();
     }
 
     public interface Head<T> {
@@ -207,6 +214,80 @@ public class Main {
                 }
                 next.ifPresent(consumer);
             }
+        }
+
+        @Override
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(value -> new HeadedIterator<>(predicate.test(value)
+                    ? new SingleHead<>(value)
+                    : new EmptyHead<>()));
+        }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+        }
+
+        @Override
+        public Iterator<T> concat(Iterator<T> other) {
+            return new HeadedIterator<>(() -> this.head.next().or(other::next));
+        }
+
+        @Override
+        public Optional<T> next() {
+            return this.head.next();
+        }
+
+        private <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(Iterators.empty(), Iterator::concat);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Optional<T> next() {
+            return Optional.empty();
+        }
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> fromArray(T[] array) {
+            return new HeadedIterator<>(new RangeHead(array.length)).map(index -> array[index]);
+        }
+
+        public static <T> Iterator<T> empty() {
+            return new HeadedIterator<>(new EmptyHead<>());
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List_<T>> {
+        @Override
+        public List_<T> createInitial() {
+            return Impl.emptyList();
+        }
+
+        @Override
+        public List_<T> fold(List_<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            }
+
+            this.retrieved = true;
+            return Optional.of(this.value);
         }
     }
 
@@ -811,10 +892,10 @@ public class Main {
         }
         else if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
             String inner = beforeArrow.substring(1, beforeArrow.length() - 1);
-            paramNames = Impl.listFromNative(Arrays.stream(inner.split(Pattern.quote(",")))
+            paramNames = Iterators.fromArray(inner.split(Pattern.quote(",")))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
-                    .toList());
+                    .collect(new ListCollector<>());
         }
         else {
             return Optional.empty();
@@ -974,7 +1055,7 @@ public class Main {
                 modifiersString = strippedBeforeTypeParams;
             }
 
-            boolean allSymbols = Arrays.stream(modifiersString.split(Pattern.quote(" ")))
+            boolean allSymbols = Iterators.fromArray(modifiersString.split(Pattern.quote(" ")))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .allMatch(Main::isSymbol);
@@ -993,10 +1074,10 @@ public class Main {
 
     private static List_<String> splitValues(String substring) {
         String[] paramsArrays = substring.strip().split(Pattern.quote(","));
-        return Impl.listFromNative(Arrays.stream(paramsArrays)
+        return Iterators.fromArray(paramsArrays)
                 .map(String::strip)
                 .filter(param -> !param.isEmpty())
-                .toList());
+                .collect(new ListCollector<>());
     }
 
     private static String generateDefinition(List_<String> maybeTypeParams, String type, String name) {
