@@ -68,6 +68,21 @@ public class Impl {
             List<T> slice = this.elements.subList(1, this.elements.size());
             return Optional.of(new Main.Tuple<>(first, new JavaList<>(slice)));
         }
+
+        @Override
+        public T pop() {
+            return this.elements.removeFirst();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.elements.isEmpty();
+        }
+
+        @Override
+        public T peek() {
+            return this.elements.getFirst();
+        }
     }
 
     static Optional<Main.IOError> writeString(Main.Path_ target, String output) {

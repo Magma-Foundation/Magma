@@ -1,14 +1,11 @@
 package magma;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -20,6 +17,12 @@ public class Main {
         Iterator<T> iter();
 
         Optional<Tuple<T, List_<T>>> popFirst();
+
+        T pop();
+
+        boolean isEmpty();
+
+        T peek();
     }
 
     public interface Iterator<T> {
@@ -81,19 +84,19 @@ public class Main {
     }
 
     private static class State {
-        private final Deque<Character> queue;
+        private final List_<Character> queue;
         private final List_<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(Deque<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
+        private State(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State(Deque<Character> queue) {
+        public State(List_<Character> queue) {
             this(queue, Impl.emptyList(), new StringBuilder(), 0);
         }
 
@@ -258,6 +261,15 @@ public class Main {
         public static <T> Iterator<T> empty() {
             return new HeadedIterator<>(new EmptyHead<>());
         }
+
+        public static Iterator<Character> fromString(String string) {
+            return fromStringWithIndices(string).map(Tuple::right);
+        }
+
+        public static Iterator<Tuple<Integer, Character>> fromStringWithIndices(String string) {
+            return new HeadedIterator<>(new RangeHead(string.length()))
+                    .map(index -> new Tuple<>(index, string.charAt(index)));
+        }
     }
 
     private static class ListCollector<T> implements Collector<T, List_<T>> {
@@ -350,9 +362,7 @@ public class Main {
     }
 
     private static List_<String> divide(String input, BiFunction<State, Character, State> divider) {
-        LinkedList<Character> queue = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+        List_<Character> queue = Iterators.fromString(input).collect(new ListCollector<>());
 
         State state = new State(queue);
         while (state.hasElements()) {
@@ -704,9 +714,7 @@ public class Main {
         int conditionEnd = -1;
         int depth0 = 0;
 
-        LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length())
-                .mapToObj(index -> new Tuple<>(index, input.charAt(index)))
-                .collect(Collectors.toCollection(LinkedList::new));
+        List_<Tuple<Integer, Character>> queue = Iterators.fromStringWithIndices(input).collect(new ListCollector<>());
 
         while (!queue.isEmpty()) {
             Tuple<Integer, Character> pair = queue.pop();
