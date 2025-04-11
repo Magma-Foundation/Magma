@@ -1,7 +1,5 @@
 package magma;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +20,12 @@ public class Main {
 
     public interface IOError {
         String display();
+    }
+
+    public interface Path_ {
+        Path_ resolveSibling(String sibling);
+
+        List<String> getNames();
     }
 
     public record Err<T, X>(X error) implements Result<T, X> {
@@ -99,7 +103,6 @@ public class Main {
 
     private record Tuple<A, B>(A left, B right) {
     }
-
     private static final List<String> imports = new ArrayList<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> globals = new ArrayList<>();
@@ -107,14 +110,14 @@ public class Main {
     private static int counter = 0;
 
     public static void main(String[] args) {
-        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        Path_ source = Impl.get(".", "src", "java", "magma", "Main.java");
         Impl.readString(source)
                 .match(input -> compileAndWrite(input, source), Optional::of)
-                .ifPresent(error -> error.display());
+                .ifPresent(IOError::display);
     }
 
-    private static Optional<IOError> compileAndWrite(String input, Path source) {
-        Path target = source.resolveSibling("main.c");
+    private static Optional<IOError> compileAndWrite(String input, Path_ source) {
+        Path_ target = source.resolveSibling("main.c");
         String output = compile(input);
         return Impl.writeString(target, output);
     }

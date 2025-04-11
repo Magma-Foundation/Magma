@@ -1,5 +1,3 @@
-#include "./java/nio/file/Path"
-#include "./java/nio/file/Paths"
 #include "./java/util/ArrayList"
 #include "./java/util/Arrays"
 #include "./java/util/Collections"
@@ -16,6 +14,8 @@ struct Result<T, X> {
 <R> R match(Function<struct T, struct R> whenOk, Function<struct X, struct R> whenErr);};
 struct IOError {
 struct String display();};
+struct Path_ {
+struct Path_ resolveSibling(struct String sibling);List<struct String> getNames();};
 struct Err<T, X>(X error) implements Result<T, X> {
 };
 struct Ok<T, X>(T value) implements Result<T, X> {
@@ -96,15 +96,15 @@ auto __lambda0__(auto input) {
 auto __lambda1__() {
 	return struct Optional.of()
 }
-auto __lambda2__(auto error) {
-	return error.display();
+auto __lambda2__() {
+	return struct IOError.display()
 }
 void main(struct String* args) {
-	struct Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+	struct Path_ source = Impl.get(".", "src", "java", "magma", "Main.java");
 	Impl.readString(source).match(__lambda0__, __lambda1__).ifPresent(__lambda2__);
 }
-Optional<struct IOError> compileAndWrite(struct String input, struct Path source) {
-	struct Path target = source.resolveSibling("main.c");
+Optional<struct IOError> compileAndWrite(struct String input, struct Path_ source) {
+	struct Path_ target = source.resolveSibling("main.c");
 	struct String output = compile(input);
 	return Impl.writeString(target, output);
 }
