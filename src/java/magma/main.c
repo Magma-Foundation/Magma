@@ -1,4 +1,3 @@
-#include "./java/util/stream/IntStream"
 struct Option<T> {
 <R> Option<R> map(Function<struct T, struct R> mapper);struct T orElse(struct T other);int isPresent();int isEmpty();void ifPresent(Consumer<struct T> consumer);Option<struct T> or(Supplier<Option<struct T>> supplier);<R> Option<R> flatMap(Function<struct T, Option<struct R>> mapper);};
 struct List_<T> {
@@ -968,12 +967,13 @@ Option<struct String> generateLambdaWithReturn(List_<struct String> paramNames, 
 	methods.add("auto " + lambdaName + "(" + joinedLambdaParams + ")" + " {" + returnValue + "\n}\n");
 	return Some<>(lambdaName);
 }
-auto __lambda94__(auto index) {
-	char c = input.charAt(index);
+auto __lambda94__(auto tuple) {
+	int index = tuple.left;
+	char c = tuple.right;
 	return (index == 0 && c == '-') || Character.isDigit(c);
 }
 int isNumber(struct String input) {
-	return IntStream.range(0, input.length()).allMatch(__lambda94__);
+	return Iterators.fromStringWithIndices(input).allMatch(__lambda94__);
 }
 auto __lambda95__(auto value) {
 	return caller + value;
@@ -1174,15 +1174,16 @@ Option<struct String> compileType(struct String input, List_<struct String> type
 	}
 	return generatePlaceholder(input);
 }
-auto __lambda113__(auto index) {
-	char c = input.charAt(index);
+auto __lambda113__(auto tuple) {
+	int index = tuple.left;
+	char c = tuple.right;
 	return c == '_' || Character.isLetter(c) ||(index != 0 && Character.isDigit(c));
 }
 int isSymbol(struct String input) {
 	if (input.isBlank()) {
 		return false;
 	}
-	return IntStream.range(0, input.length()).allMatch(__lambda113__);
+	return Iterators.fromStringWithIndices(input).allMatch(__lambda113__);
 }
 Option<struct String> generatePlaceholder(struct String input) {
 	return Some<>("/* " + input + " */");

@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 public class Main {
     public interface Option<T> {
@@ -1054,8 +1053,9 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        return IntStream.range(0, input.length()).allMatch(index -> {
-            char c = input.charAt(index);
+        return Iterators.fromStringWithIndices(input).allMatch(tuple -> {
+            int index = tuple.left;
+            char c = tuple.right;
             return (index == 0 && c == '-') || Character.isDigit(c);
         });
     }
@@ -1265,8 +1265,9 @@ public class Main {
             return false;
         }
 
-        return IntStream.range(0, input.length()).allMatch(index -> {
-            char c = input.charAt(index);
+        return Iterators.fromStringWithIndices(input).allMatch(tuple -> {
+            int index = tuple.left;
+            char c = tuple.right;
             return c == '_' || Character.isLetter(c) || (index != 0 && Character.isDigit(c));
         });
     }
