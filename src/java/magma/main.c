@@ -20,7 +20,9 @@ struct Main {
         DivideState enter();
 
         DivideState exit();
-    }
+
+        boolean isShallow();
+    }*//* 
 
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
@@ -71,7 +73,12 @@ struct Main {
             this.depth--;
             return this;
         }
-    }
+
+        @Override
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    }*//* 
 
     public static void main(String[] args) {
         try {
@@ -82,11 +89,11 @@ struct Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*//* 
 
     private static String compile(String input) {
         return compileStatements(input, Main::compileRootSegment);
-    }
+    }*//* 
 
     private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = divide(input);
@@ -95,7 +102,7 @@ struct Main {
             output.append(compiler.apply(segment));
         }
         return output.toString();
-    }
+    }*//* 
 
     private static String compileRootSegment(String input) {
         String stripped = input.strip();
@@ -109,7 +116,7 @@ struct Main {
 
         return compileClass(stripped)
                 .orElseGet(() -> generatePlaceholder(stripped));
-    }
+    }*//* 
 
     private static Optional<String> compileClass(String stripped) {
         int classIndex = stripped.indexOf("class ");
@@ -123,19 +130,19 @@ struct Main {
         }
         String name = right.substring(0, contentStart).strip();
         String withEnd = right.substring(contentStart + "{".length()).strip();
-        if (withEnd.endsWith("}")) {
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        else {
             String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
             String outputContent = compileStatements(inputContent, Main::compileClassMember);
             return Optional.of("struct " + name + " {\n};\n" + outputContent);
         }
-        else {
-            return Optional.empty();
-        }
-    }
+    }*//* 
 
     private static String compileClassMember(String classMember) {
         return generatePlaceholder(classMember);
-    }
+    }*//* 
 
     private static List<String> divide(String input) {
         DivideState current = new MutableDivideState();
@@ -146,25 +153,25 @@ struct Main {
         }
 
         return current.advance().segments();
-    }
+    }*//* 
 
     private static DivideState divideStatementChar(DivideState current, char c) {
         DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        else if (c == '}*//* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        }*//* 
         else if (c == '{') {
             return appended.enter();
         }
-        else if (c == '}') {
+        else if (c == '}*//* ') {
             return appended.exit();
-        }
+        }*//* 
         else {
             return appended;
-        }
-    }
-
-    private static String generatePlaceholder(String input) {
+        }*//* 
+    *//* private static String generatePlaceholder(String input) {
         return "/* " + input + "*/";
-    }
-*/
+    }*//* }*/
