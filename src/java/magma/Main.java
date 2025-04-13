@@ -110,6 +110,9 @@ public class Main {
         }
     }
 
+    private record Node(String beforeType, String type, String name) {
+    }
+
     private static final List<String> structs = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -153,17 +156,28 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("package ")) {
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) {
+            return maybeWhitespace.get();
+        }
+
+        if (input.strip().startsWith("package ")) {
             return "";
         }
 
-        if (stripped.startsWith("import ")) {
+        if (input.strip().startsWith("import ")) {
             return "#include <temp.h>\n";
         }
 
-        return compileClass(stripped)
-                .orElseGet(() -> generatePlaceholder(stripped));
+        return compileClass(input.strip())
+                .orElseGet(() -> generatePlaceholder(input.strip()));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> compileClass(String stripped) {
@@ -212,27 +226,44 @@ public class Main {
     }
 
     private static String compileClassMember(String classMember) {
-        String stripped = classMember.strip();
-        return compileToStruct(stripped, "interface")
-                .or(() -> compileToStruct(stripped, "class "))
-                .or(() -> compileMethod(stripped))
-                .orElseGet(() -> generatePlaceholder(stripped));
+        return compileWhitespace(classMember)
+                .or(() -> compileToStruct(classMember, "interface"))
+                .or(() -> compileToStruct(classMember, "class "))
+                .or(() -> compileMethod(classMember))
+                .or(() -> compileDefinitionStatement(classMember))
+                .orElseGet(() -> generatePlaceholder(classMember));
+    }
+
+    private static Optional<String> compileDefinitionStatement(String classMember) {
+        return compileSuffix(classMember, ";", inner -> {
+            return compileDefinition(inner, Main::generateDefinition);
+        });
+    }
+
+    private static Optional<String> generateDefinition(Node node) {
+        return generateStatement(node.beforeType() + node.type() + " " + node.name());
     }
 
     private static Optional<String> compileMethod(String input) {
-        return compileInfix(input, "(", (definition, _) -> {
-            return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
-                return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
-                    return generateFunctionalDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name);
-                }).or(() -> {
-                    return generateFunctionalDefinition("", compileType(beforeName.strip()), name);
-                });
+        return compileInfix(input, "(", (definition, _) -> compileDefinition(definition, Main::generateFunctionalDefinition));
+    }
+
+    private static Optional<String> compileDefinition(String definition, Function<Node, Optional<String>> generator) {
+        return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
+            return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
+                return generator.apply(new Node(generatePlaceholder(beforeType) + " ", compileType(type), name));
+            }).or(() -> {
+                return generator.apply(new Node("", compileType(beforeName.strip()), name));
             });
         });
     }
 
-    private static Optional<String> generateFunctionalDefinition(String beforeType, String type, String name) {
-        return Optional.of("\n\t" + beforeType + type + " (*" + name + ")();");
+    private static Optional<String> generateFunctionalDefinition(Node node) {
+        return generateStatement(node.beforeType() + node.type() + " (*" + node.name() + ")()");
+    }
+
+    private static Optional<String> generateStatement(String content) {
+        return Optional.of("\n\t" + content + ";");
     }
 
     private static String compileType(String input) {
@@ -241,7 +272,7 @@ public class Main {
             return "int";
         }
 
-        if(stripped.equals("char")) {
+        if (stripped.equals("char")) {
             return "char";
         }
 
