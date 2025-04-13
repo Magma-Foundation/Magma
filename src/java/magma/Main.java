@@ -8,32 +8,68 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static class State {
+    private interface DivideState {
+        DivideState advance();
+
+        DivideState append(char c);
+
+        List<String> segments();
+
+        boolean isLevel();
+
+        DivideState enter();
+
+        DivideState exit();
+    }
+
+    private static class MutableDivideState implements DivideState {
         private final List<String> segments;
+        private int depth;
         private StringBuilder buffer;
 
-        private State(List<String> segments, StringBuilder buffer) {
+        private MutableDivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
-        public State() {
-            this(new ArrayList<>(), new StringBuilder());
+        public MutableDivideState() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private State advance() {
+        @Override
+        public DivideState advance() {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
 
-        private State append(char c) {
+        @Override
+        public DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
 
+        @Override
         public List<String> segments() {
             return this.segments;
+        }
+
+        @Override
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        @Override
+        public DivideState enter() {
+            this.depth++;
+            return this;
+        }
+
+        @Override
+        public DivideState exit() {
+            this.depth--;
+            return this;
         }
     }
 
@@ -75,7 +111,7 @@ public class Main {
     }
 
     private static List<String> divide(String input) {
-        State current = new State();
+        DivideState current = new MutableDivideState();
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -85,10 +121,16 @@ public class Main {
         return current.advance().segments();
     }
 
-    private static State divideStatementChar(State current, char c) {
-        State appended = current.append(c);
-        if (c == ';') {
+    private static DivideState divideStatementChar(DivideState current, char c) {
+        DivideState appended = current.append(c);
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        else if (c == '{') {
+            return appended.enter();
+        }
+        else if (c == '}') {
+            return appended.exit();
         }
         else {
             return appended;
