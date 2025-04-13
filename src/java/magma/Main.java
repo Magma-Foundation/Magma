@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class Main {
     private interface DivideState {
@@ -85,10 +87,14 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = divide(input);
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
         return output.toString();
     }
@@ -103,17 +109,34 @@ public class Main {
             return "#include <temp.h>\n";
         }
 
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            String right = stripped.substring(classIndex + "class ".length());
-            int contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                String name = right.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
-            }
-        }
+        return compileClass(stripped)
+                .orElseGet(() -> generatePlaceholder(stripped));
+    }
 
-        return generatePlaceholder(stripped);
+    private static Optional<String> compileClass(String stripped) {
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex < 0) {
+            return Optional.empty();
+        }
+        String right = stripped.substring(classIndex + "class ".length());
+        int contentStart = right.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        String name = right.substring(0, contentStart).strip();
+        String withEnd = right.substring(contentStart + "{".length()).strip();
+        if (withEnd.endsWith("}")) {
+            String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+            String outputContent = compileStatements(inputContent, Main::compileClassMember);
+            return Optional.of("struct " + name + " {\n};\n" + outputContent);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static String compileClassMember(String classMember) {
+        return generatePlaceholder(classMember);
     }
 
     private static List<String> divide(String input) {
