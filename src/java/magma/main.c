@@ -7,24 +7,11 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/* public class Main {
-    private interface DivideState {
-        DivideState advance();
-
-        DivideState append(char c);
-
-        List<String> segments();
-
-        boolean isLevel();
-
-        DivideState enter();
-
-        DivideState exit();
-
-        boolean isShallow();
-    }
-
-    private static class MutableDivideState implements DivideState {
+struct Main {
+};
+struct DivideState {
+};
+/* DivideState advance();*//* DivideState append(char c);*//* List<String> segments();*//* boolean isLevel();*//* DivideState enter();*//* DivideState exit();*//* boolean isShallow();*//* *//* private static class MutableDivideState implements DivideState {
         private final List<String> segments;
         private int depth;
         private StringBuilder buffer;
@@ -78,9 +65,7 @@
         public boolean isShallow() {
             return this.depth == 1;
         }
-    }
-
-    public static void main(String[] args) {
+    }*//* public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -89,22 +74,16 @@
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String compile(String input) {
+    }*//* private static String compile(String input) {
         return compileStatements(input, Main::compileRootSegment);
-    }
-
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    }*//* private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = divide(input);
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
             output.append(compiler.apply(segment));
         }
         return output.toString();
-    }
-
-    private static String compileRootSegment(String input) {
+    }*//* private static String compileRootSegment(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
             return "";
@@ -116,21 +95,23 @@
 
         return compileClass(stripped)
                 .orElseGet(() -> generatePlaceholder(stripped));
-    }
-
-    private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, "class ", (_, right) -> {
-            return compileInfix(right, "{", (withEnd, name) -> {
-                if (!withEnd.endsWith("}")) {
-                    return Optional.empty();
-                }
-                else {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassMember);
+    }*//* private static Optional<String> compileClass(String stripped) {
+        return compileToStruct(stripped, "class ");
+    }*//* private static Optional<String> compileToStruct(String stripped, String infix) {
+        return compileInfix(stripped, infix, (_, right) -> {
+            return compileInfix(right, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd, "}", s -> {
+                    String outputContent = compileStatements(s, Main::compileClassMember);
                     return Optional.of("struct " + name + " {\n};\n" + outputContent);
-                }
+                });
             });
         });
+    }*//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> compiler) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(0, input.length() - suffix.length());
+        return compiler.apply(slice);
     }*//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
         int index = input.indexOf(infix);
         if (index < 0) {
@@ -138,9 +119,11 @@
         }
         String left = input.substring(0, index).strip();
         String right = input.substring(index + infix.length()).strip();
-        return compiler.apply(right, left);
+        return compiler.apply(left, right);
     }*//* private static String compileClassMember(String classMember) {
-        return generatePlaceholder(classMember);
+        String stripped = classMember.strip();
+        return compileToStruct(stripped, "interface")
+                .orElseGet(() -> generatePlaceholder(stripped));
     }*//* private static List<String> divide(String input) {
         DivideState current = new MutableDivideState();
 
@@ -164,8 +147,6 @@
             return appended.exit();
         }*//* else {
             return appended;
-        }*//* }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + "*/";*//* }
-}*/
+        }*//* *//* private static String generatePlaceholder(String input) {
+        return "/* " + input + "*/";
+    }*//* }*/

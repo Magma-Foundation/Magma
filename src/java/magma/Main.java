@@ -122,18 +122,26 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, "class ", (_, right) -> {
-            return compileInfix(right, "{", (withEnd, name) -> {
-                if (!withEnd.endsWith("}")) {
-                    return Optional.empty();
-                }
-                else {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassMember);
+        return compileToStruct(stripped, "class ");
+    }
+
+    private static Optional<String> compileToStruct(String stripped, String infix) {
+        return compileInfix(stripped, infix, (_, right) -> {
+            return compileInfix(right, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd, "}", s -> {
+                    String outputContent = compileStatements(s, Main::compileClassMember);
                     return Optional.of("struct " + name + " {\n};\n" + outputContent);
-                }
+                });
             });
         });
+    }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> compiler) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(0, input.length() - suffix.length());
+        return compiler.apply(slice);
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
@@ -143,11 +151,13 @@ public class Main {
         }
         String left = input.substring(0, index).strip();
         String right = input.substring(index + infix.length()).strip();
-        return compiler.apply(right, left);
+        return compiler.apply(left, right);
     }
 
     private static String compileClassMember(String classMember) {
-        return generatePlaceholder(classMember);
+        String stripped = classMember.strip();
+        return compileToStruct(stripped, "interface")
+                .orElseGet(() -> generatePlaceholder(stripped));
     }
 
     private static List<String> divide(String input) {
