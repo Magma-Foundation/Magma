@@ -58,13 +58,16 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) {
+        String stripped = input.strip();
+        if (stripped.startsWith("package ")) {
             return "";
         }
 
+        if (stripped.startsWith("import ")) {
+            return "#include <temp.h>\n";
+        }
 
-
-        return generatePlaceholder(input);
+        return generatePlaceholder(stripped);
     }
 
     private static List<String> divide(String input) {
