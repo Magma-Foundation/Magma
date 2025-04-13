@@ -13,6 +13,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
     private interface DivideState {
@@ -229,6 +230,7 @@ public class Main {
         return compileWhitespace(classMember)
                 .or(() -> compileToStruct(classMember, "interface"))
                 .or(() -> compileToStruct(classMember, "class "))
+                .or(() -> compileToStruct(classMember, "record "))
                 .or(() -> compileMethod(classMember))
                 .or(() -> compileConstructor(classMember))
                 .or(() -> compileDefinitionStatement(classMember))
@@ -261,7 +263,16 @@ public class Main {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
             return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
                 return compileType(type).flatMap(compiledType -> {
-                    return generator.apply(new Node(generatePlaceholder(beforeType) + " ", compiledType, name));
+                    List<String> modifiers = Stream.of(beforeType.strip().split(" "))
+                            .map(String::strip)
+                            .filter(value -> !value.isEmpty())
+                            .toList();
+
+                    if (modifiers.contains("static")) {
+                        return Optional.of("");
+                    }
+
+                    return generator.apply(new Node("", compiledType, name));
                 });
             }).or(() -> {
                 return compileType(beforeName.strip()).flatMap(compiledType -> {
