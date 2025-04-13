@@ -1,4 +1,4 @@
-/* package magma;*//* 
+/* 
 
 import java.io.IOException;*//* 
 import java.nio.file.Files;*//* 
@@ -52,9 +52,17 @@ public class Main {
         List<String> segments = divide(input);*//* 
         StringBuilder output = new StringBuilder();*//* 
         for (String segment : segments) {
-            output.append(generatePlaceholder(segment));*//* 
+            output.append(compileRootSegment(segment));*//* 
         }
         return output.toString();*//* 
+    }
+
+    private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return "";*//* 
+        }
+
+        return generatePlaceholder(input);*//* 
     }
 
     private static List<String> divide(String input) {
@@ -62,13 +70,13 @@ public class Main {
 
         for (int i = 0;*//*  i < input.length();*//*  i++) {
             char c = input.charAt(i);*//* 
-            current = extracted(current, c);*//* 
+            current = divideStatementChar(current, c);*//* 
         }
 
         return current.advance().segments();*//* 
     }
 
-    private static State extracted(State current, char c) {
+    private static State divideStatementChar(State current, char c) {
         State appended = current.append(c);*//* 
         if (c == ';*//* ') {
             return appended.advance();*//* 

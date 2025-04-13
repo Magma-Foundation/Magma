@@ -52,9 +52,19 @@ public class Main {
         List<String> segments = divide(input);
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(generatePlaceholder(segment));
+            output.append(compileRootSegment(segment));
         }
         return output.toString();
+    }
+
+    private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return "";
+        }
+
+
+
+        return generatePlaceholder(input);
     }
 
     private static List<String> divide(String input) {
