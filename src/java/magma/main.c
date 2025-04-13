@@ -12,60 +12,63 @@
 #include <temp.h>
 #include <temp.h>
 /* */struct DivideState {
-	/* DivideState*/ (*popAndAppend)();
-	/* DivideState*/ (*advance)();
-	/* DivideState*/ (*append)();
+	struct DivideState (*popAndAppend)();
+	struct DivideState (*advance)();
+	struct DivideState (*append)();
 	/* List<String>*/ (*segments)();
-	/* boolean*/ (*isLevel)();
-	/* DivideState*/ (*enter)();
-	/* DivideState*/ (*exit)();
-	/* boolean*/ (*isShallow)();
-	/* boolean*/ (*hasNext)();
-	/* char*/ (*pop)();/* */
+	int (*isLevel)();
+	struct DivideState (*enter)();
+	struct DivideState (*exit)();
+	int (*isShallow)();
+	int (*hasNext)();
+	char (*pop)();/* */
 };
 struct MutableDivideState implements DivideState {/* private final Deque<Character> queue;*//* private final List<String> segments;*//* private int depth;*//* private StringBuilder buffer;*/
-	/* private*/ (*MutableDivideState)();
-	/* public*/ (*MutableDivideState)();
+	struct private (*MutableDivideState)();
+	struct public (*MutableDivideState)();
 	/* @Override
-        public DivideState*/ (*advance)();
+        public*/ struct DivideState (*advance)();
 	/* @Override
-        public DivideState*/ (*append)();
+        public*/ struct DivideState (*append)();
 	/* @Override
-        public List<String>*/ (*segments)();
+        public*/ /* List<String>*/ (*segments)();
 	/* @Override
-        public boolean*/ (*isLevel)();
+        public*/ int (*isLevel)();
 	/* @Override
-        public DivideState*/ (*enter)();
+        public*/ struct DivideState (*enter)();
 	/* @Override
-        public DivideState*/ (*exit)();
+        public*/ struct DivideState (*exit)();
 	/* @Override
-        public boolean*/ (*isShallow)();
+        public*/ int (*isShallow)();
 	/* @Override
-        public boolean*/ (*hasNext)();
+        public*/ int (*hasNext)();
 	/* @Override
-        public char*/ (*pop)();
+        public*/ char (*pop)();
 	/* @Override
-        public DivideState*/ (*popAndAppend)();/* */
+        public*/ struct DivideState (*popAndAppend)();/* */
 };
 struct Main {
-	/* private static final List<String> structs = new*/ (*ArrayList<>)();
-	/* public static void*/ (*main)();
-	/* private static String*/ (*compile)();
-	/* private static String*/ (*compileStatements)();
-	/* private static String*/ (*mergeStatements)();
-	/* private static ArrayList<String>*/ (*compileStatementsToList)();
-	/* private static String*/ (*compileRootSegment)();
-	/* private static Optional<String>*/ (*compileClass)();
-	/* private static Optional<String>*/ (*compileToStruct)();
-	/* private static Optional<String>*/ (*compileSuffix)();
-	/* private static Optional<String>*/ (*compileInfix)();
-	/* private static Optional<String>*/ (*compileInfix)();
-	/* private static int*/ (*locateFirst)();
-	/* private static String*/ (*compileClassMember)();
-	/* private static Optional<String>*/ (*compileMethod)();
-	/* private static List<String>*/ (*divide)();
-	/* private static DivideState*/ (*divideDecorated)();
-	/* private static Optional<DivideState>*/ (*divideSingleQuotes)();
-	/* private static DivideState*/ (*divideStatementChar)();
-	/* private static String*/ (*generatePlaceholder)();/* */
+	/* private static final List<String> structs =*/ struct new (*ArrayList<>)();
+	/* public static*/ struct void (*main)();
+	/* private static*/ struct String (*compile)();
+	/* private static*/ struct String (*compileStatements)();
+	/* private static*/ struct String (*mergeStatements)();
+	/* private static*/ /* ArrayList<String>*/ (*compileStatementsToList)();
+	/* private static*/ struct String (*compileRootSegment)();
+	/* private static*/ /* Optional<String>*/ (*compileClass)();
+	/* private static*/ /* Optional<String>*/ (*compileToStruct)();
+	/* private static*/ /* Optional<String>*/ (*compileSuffix)();
+	/* private static*/ /* Optional<String>*/ (*compileInfix)();
+	/* private static*/ /* Optional<String>*/ (*compileInfix)();
+	/* private static*/ struct int (*locateFirst)();
+	/* private static*/ struct String (*compileClassMember)();
+	/* private static*/ /* Optional<String>*/ (*compileMethod)();
+	/* private static*/ /* Optional<String>*/ (*generateFunctionalDefinition)();
+	/* private static*/ struct String (*compileType)();
+	/* private static*/ int (*isSymbol)();
+	/* private static*/ /* List<String>*/ (*divide)();
+	/* private static*/ struct DivideState (*divideDecorated)();
+	/* private static*/ /* Optional<DivideState>*/ (*divideSingleQuotes)();
+	/* private static*/ struct DivideState (*divideStatementChar)();
+	/* private static*/ struct String (*generatePlaceholder)();/* */
 };

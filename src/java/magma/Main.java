@@ -194,10 +194,10 @@ public class Main {
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
-        return compileInfix(input, infix, compiler, Main::locateFirst);
+        return compileInfix(input, infix, Main::locateFirst, compiler);
     }
 
-    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler, BiFunction<String, String, Integer> locator) {
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Optional<String>> compiler) {
         int index = locator.apply(input, infix);
         if (index < 0) {
             return Optional.empty();
@@ -221,10 +221,46 @@ public class Main {
 
     private static Optional<String> compileMethod(String input) {
         return compileInfix(input, "(", (definition, _) -> {
-            return compileInfix(definition.strip(), " ", (beforeName, name) -> {
-                return Optional.of("\n\t" + generatePlaceholder(beforeName) + " (*" + name + ")();");
-            }, String::lastIndexOf);
+            return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
+                return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
+                    return generateFunctionalDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name);
+                }).or(() -> {
+                    return generateFunctionalDefinition("", compileType(beforeName.strip()), name);
+                });
+            });
         });
+    }
+
+    private static Optional<String> generateFunctionalDefinition(String beforeType, String type, String name) {
+        return Optional.of("\n\t" + beforeType + type + " (*" + name + ")();");
+    }
+
+    private static String compileType(String input) {
+        String stripped = input.strip();
+        if (stripped.equals("boolean")) {
+            return "int";
+        }
+
+        if(stripped.equals("char")) {
+            return "char";
+        }
+
+        if (isSymbol(stripped)) {
+            return "struct " + stripped;
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static List<String> divide(String input) {
