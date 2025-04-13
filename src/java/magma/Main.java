@@ -83,6 +83,8 @@ public class Main {
         }
     }
 
+    private static final List<String> structs = new ArrayList<>();
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -95,16 +97,32 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
+        compiled.addAll(structs);
+        return mergeStatements(compiled);
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
-        List<String> segments = divide(input);
+        List<String> compiled = compileStatementsToList(input, compiler);
+        return mergeStatements(compiled);
+    }
+
+    private static String mergeStatements(List<String> compiled) {
         StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            output.append(compiler.apply(segment));
+        for (String s : compiled) {
+            output.append(s);
         }
+
         return output.toString();
+    }
+
+    private static ArrayList<String> compileStatementsToList(String input, Function<String, String> compiler) {
+        List<String> segments = divide(input);
+        ArrayList<String> compiled = new ArrayList<String>();
+        for (String segment : segments) {
+            compiled.add(compiler.apply(segment));
+        }
+        return compiled;
     }
 
     private static String compileRootSegment(String input) {
@@ -130,7 +148,11 @@ public class Main {
             return compileInfix(right, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd, "}", s -> {
                     String outputContent = compileStatements(s, Main::compileClassMember);
-                    return Optional.of("struct " + name + " {\n};\n" + outputContent);
+                    String value = "struct " + name + " {" +
+                            outputContent +
+                            "\n};\n";
+                    structs.add(value);
+                    return Optional.of("");
                 });
             });
         });
@@ -145,7 +167,11 @@ public class Main {
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
-        int index = input.indexOf(infix);
+        return compileInfix(input, infix, compiler, Main::locateFirst);
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler, BiFunction<String, String, Integer> locator) {
+        int index = locator.apply(input, infix);
         if (index < 0) {
             return Optional.empty();
         }
@@ -154,10 +180,24 @@ public class Main {
         return compiler.apply(left, right);
     }
 
+    private static int locateFirst(String input, String infix) {
+        return input.indexOf(infix);
+    }
+
     private static String compileClassMember(String classMember) {
         String stripped = classMember.strip();
         return compileToStruct(stripped, "interface")
+                .or(() -> compileToStruct(stripped, "class "))
+                .or(() -> compileMethod(stripped))
                 .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        return compileInfix(input, "(", (definition, _) -> {
+            return compileInfix(definition.strip(), " ", (beforeName, name) -> {
+                return Optional.of("\n\t" + generatePlaceholder(beforeName) + " (*" + name + ")();");
+            }, String::lastIndexOf);
+        });
     }
 
     private static List<String> divide(String input) {
