@@ -7,18 +7,22 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/* private static String generatePlaceholder(String input) {
-        return "/* " + input + "*/";
-    }*//* }*/struct DivideState {
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+/* */struct DivideState {
 	/* DivideState*/ (*advance)();
 	/* DivideState*/ (*append)();
 	/* List<String>*/ (*segments)();
 	/* boolean*/ (*isLevel)();
 	/* DivideState*/ (*enter)();
 	/* DivideState*/ (*exit)();
-	/* boolean*/ (*isShallow)();/* */
+	/* boolean*/ (*isShallow)();
+	/* boolean*/ (*hasNext)();
+	/* char*/ (*pop)();/* */
 };
-struct MutableDivideState implements DivideState {/* private final List<String> segments;*//* private int depth;*//* private StringBuilder buffer;*/
+struct MutableDivideState implements DivideState {/* private final Deque<Character> queue;*//* private final List<String> segments;*//* private int depth;*//* private StringBuilder buffer;*/
 	/* private*/ (*MutableDivideState)();
 	/* public*/ (*MutableDivideState)();
 	/* @Override
@@ -34,7 +38,11 @@ struct MutableDivideState implements DivideState {/* private final List<String> 
 	/* @Override
         public DivideState*/ (*exit)();
 	/* @Override
-        public boolean*/ (*isShallow)();/* */
+        public boolean*/ (*isShallow)();
+	/* @Override
+        public boolean*/ (*hasNext)();
+	/* @Override
+        public char*/ (*pop)();/* */
 };
 struct Main {
 	/* private static final List<String> structs = new*/ (*ArrayList<>)();
@@ -54,10 +62,5 @@ struct Main {
 	/* private static Optional<String>*/ (*compileMethod)();
 	/* private static List<String>*/ (*divide)();
 	/* private static DivideState*/ (*divideStatementChar)();
-	/* ' &&*/ (*appended.isShallow)();
-	/* else*/ (*if)();
-	/* ') {
-            return*/ (*appended.exit)();/* else {
-            return appended;
-        }*//* */
+	/* private static String*/ (*generatePlaceholder)();/* */
 };

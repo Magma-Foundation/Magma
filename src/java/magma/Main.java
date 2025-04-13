@@ -5,13 +5,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private interface DivideState {
+        DivideState popAndAppend();
+
         DivideState advance();
 
         DivideState append(char c);
@@ -25,21 +31,27 @@ public class Main {
         DivideState exit();
 
         boolean isShallow();
+
+        boolean hasNext();
+
+        char pop();
     }
 
     private static class MutableDivideState implements DivideState {
+        private final Deque<Character> queue;
         private final List<String> segments;
         private int depth;
         private StringBuilder buffer;
 
-        private MutableDivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private MutableDivideState(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+            this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public MutableDivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public MutableDivideState(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
         @Override
@@ -80,6 +92,21 @@ public class Main {
         @Override
         public boolean isShallow() {
             return this.depth == 1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        @Override
+        public char pop() {
+            return this.queue.pop();
+        }
+
+        @Override
+        public DivideState popAndAppend() {
+            return this.append(this.pop());
         }
     }
 
@@ -201,10 +228,25 @@ public class Main {
     }
 
     private static List<String> divide(String input) {
-        DivideState current = new MutableDivideState();
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
 
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+        DivideState current = new MutableDivideState(queue);
+        while (current.hasNext()) {
+            char c = current.pop();
+            if (c == '\'') {
+                current.append('\'');
+
+                char maybeSlash = current.pop();
+                current.append(maybeSlash);
+                if (maybeSlash == '\\') {
+                    current.popAndAppend();
+                }
+
+                current.popAndAppend();
+                continue;
+            }
             current = divideStatementChar(current, c);
         }
 
