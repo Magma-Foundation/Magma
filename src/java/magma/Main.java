@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -121,25 +122,28 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped) {
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex < 0) {
+        return compileInfix(stripped, "class ", (_, right) -> {
+            return compileInfix(right, "{", (withEnd, name) -> {
+                if (!withEnd.endsWith("}")) {
+                    return Optional.empty();
+                }
+                else {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent, Main::compileClassMember);
+                    return Optional.of("struct " + name + " {\n};\n" + outputContent);
+                }
+            });
+        });
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
+        int index = input.indexOf(infix);
+        if (index < 0) {
             return Optional.empty();
         }
-        String right = stripped.substring(classIndex + "class ".length());
-        int contentStart = right.indexOf("{");
-        if (contentStart < 0) {
-            return Optional.empty();
-        }
-        String name = right.substring(0, contentStart).strip();
-        String withEnd = right.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return Optional.empty();
-        }
-        else {
-            String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-            String outputContent = compileStatements(inputContent, Main::compileClassMember);
-            return Optional.of("struct " + name + " {\n};\n" + outputContent);
-        }
+        String left = input.substring(0, index).strip();
+        String right = input.substring(index + infix.length()).strip();
+        return compiler.apply(right, left);
     }
 
     private static String compileClassMember(String classMember) {

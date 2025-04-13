@@ -6,9 +6,9 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-struct Main {
-};
-/* private interface DivideState {
+#include <temp.h>
+/* public class Main {
+    private interface DivideState {
         DivideState advance();
 
         DivideState append(char c);
@@ -22,7 +22,7 @@ struct Main {
         DivideState exit();
 
         boolean isShallow();
-    }*//* 
+    }
 
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
@@ -78,7 +78,7 @@ struct Main {
         public boolean isShallow() {
             return this.depth == 1;
         }
-    }*//* 
+    }
 
     public static void main(String[] args) {
         try {
@@ -89,11 +89,11 @@ struct Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }*//* 
+    }
 
     private static String compile(String input) {
         return compileStatements(input, Main::compileRootSegment);
-    }*//* 
+    }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = divide(input);
@@ -102,7 +102,7 @@ struct Main {
             output.append(compiler.apply(segment));
         }
         return output.toString();
-    }*//* 
+    }
 
     private static String compileRootSegment(String input) {
         String stripped = input.strip();
@@ -116,35 +116,32 @@ struct Main {
 
         return compileClass(stripped)
                 .orElseGet(() -> generatePlaceholder(stripped));
-    }*//* 
+    }
 
     private static Optional<String> compileClass(String stripped) {
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex < 0) {
+        return compileInfix(stripped, "class ", (_, right) -> {
+            return compileInfix(right, "{", (withEnd, name) -> {
+                if (!withEnd.endsWith("}")) {
+                    return Optional.empty();
+                }
+                else {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent, Main::compileClassMember);
+                    return Optional.of("struct " + name + " {\n};\n" + outputContent);
+                }
+            });
+        });
+    }*//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
+        int index = input.indexOf(infix);
+        if (index < 0) {
             return Optional.empty();
         }
-        String right = stripped.substring(classIndex + "class ".length());
-        int contentStart = right.indexOf("{");
-        if (contentStart < 0) {
-            return Optional.empty();
-        }
-        String name = right.substring(0, contentStart).strip();
-        String withEnd = right.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return Optional.empty();
-        }
-        else {
-            String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-            String outputContent = compileStatements(inputContent, Main::compileClassMember);
-            return Optional.of("struct " + name + " {\n};\n" + outputContent);
-        }
-    }*//* 
-
-    private static String compileClassMember(String classMember) {
+        String left = input.substring(0, index).strip();
+        String right = input.substring(index + infix.length()).strip();
+        return compiler.apply(right, left);
+    }*//* private static String compileClassMember(String classMember) {
         return generatePlaceholder(classMember);
-    }*//* 
-
-    private static List<String> divide(String input) {
+    }*//* private static List<String> divide(String input) {
         DivideState current = new MutableDivideState();
 
         for (int i = 0; i < input.length(); i++) {
@@ -153,25 +150,22 @@ struct Main {
         }
 
         return current.advance().segments();
-    }*//* 
-
-    private static DivideState divideStatementChar(DivideState current, char c) {
+    }*//* private static DivideState divideStatementChar(DivideState current, char c) {
         DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
         else if (c == '}*//* ' && appended.isShallow()) {
             return appended.advance().exit();
-        }*//* 
-        else if (c == '{') {
+        }*//* else if (c == '{') {
             return appended.enter();
         }
         else if (c == '}*//* ') {
             return appended.exit();
-        }*//* 
-        else {
+        }*//* else {
             return appended;
-        }*//* 
-    *//* private static String generatePlaceholder(String input) {
-        return "/* " + input + "*/";
-    }*//* }*/
+        }*//* }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + "*/";*//* }
+}*/
