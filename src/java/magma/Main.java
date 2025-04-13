@@ -103,8 +103,14 @@ public class Main {
             return "#include <temp.h>\n";
         }
 
-        if (stripped.contains("class ")) {
-            return "struct Temp {\n};\n";
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String right = stripped.substring(classIndex + "class ".length());
+            int contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                String name = right.substring(0, contentStart).strip();
+                return "struct " + name + " {\n};\n";
+            }
         }
 
         return generatePlaceholder(stripped);
