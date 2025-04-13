@@ -230,8 +230,17 @@ public class Main {
                 .or(() -> compileToStruct(classMember, "interface"))
                 .or(() -> compileToStruct(classMember, "class "))
                 .or(() -> compileMethod(classMember))
+                .or(() -> compileConstructor(classMember))
                 .or(() -> compileDefinitionStatement(classMember))
                 .orElseGet(() -> generatePlaceholder(classMember));
+    }
+
+    private static Optional<? extends String> compileConstructor(String input) {
+        return compileInfix(input, "(", (beforeParams, _) -> {
+            return compileInfix(beforeParams.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
+                return Optional.of("");
+            });
+        });
     }
 
     private static Optional<String> compileDefinitionStatement(String classMember) {
@@ -251,9 +260,13 @@ public class Main {
     private static Optional<String> compileDefinition(String definition, Function<Node, Optional<String>> generator) {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
             return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
-                return generator.apply(new Node(generatePlaceholder(beforeType) + " ", compileType(type), name));
+                return compileType(type).flatMap(compiledType -> {
+                    return generator.apply(new Node(generatePlaceholder(beforeType) + " ", compiledType, name));
+                });
             }).or(() -> {
-                return generator.apply(new Node("", compileType(beforeName.strip()), name));
+                return compileType(beforeName.strip()).flatMap(compiledType -> {
+                    return generator.apply(new Node("", compiledType, name));
+                });
             });
         });
     }
@@ -266,21 +279,25 @@ public class Main {
         return Optional.of("\n\t" + content + ";");
     }
 
-    private static String compileType(String input) {
+    private static Optional<String> compileType(String input) {
         String stripped = input.strip();
+        if (stripped.equals("private") || stripped.equals("public")) {
+            return Optional.empty();
+        }
+
         if (stripped.equals("boolean") || stripped.equals("int")) {
-            return "int";
+            return Optional.of("int");
         }
 
         if (stripped.equals("char")) {
-            return "char";
+            return Optional.of("char");
         }
 
         if (isSymbol(stripped)) {
-            return "struct " + stripped;
+            return Optional.of("struct " + stripped);
         }
 
-        return generatePlaceholder(stripped);
+        return Optional.of(generatePlaceholder(stripped));
     }
 
     private static boolean isSymbol(String input) {

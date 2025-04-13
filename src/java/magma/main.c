@@ -28,8 +28,6 @@ struct MutableDivideState implements DivideState {
 	/* private final*/ /* List<String>*/ segments;
 	/* private*/ int depth;
 	/* private*/ struct StringBuilder buffer;
-	struct private (*MutableDivideState)();
-	struct public (*MutableDivideState)();
 	/* @Override
         public*/ struct DivideState (*advance)();
 	/* @Override
@@ -68,13 +66,14 @@ struct Main {
 	/* private static*/ /* Optional<String>*/ (*compileInfix)();
 	/* private static*/ int (*locateFirst)();
 	/* private static*/ struct String (*compileClassMember)();
+	/* private static Optional<? extends*/ /* String>*/ (*compileConstructor)();
 	/* private static*/ /* Optional<String>*/ (*compileDefinitionStatement)();
 	/* private static*/ /* Optional<String>*/ (*generateDefinition)();
 	/* private static*/ /* Optional<String>*/ (*compileMethod)();
 	/* private static*/ /* Optional<String>*/ (*compileDefinition)();
 	/* private static*/ /* Optional<String>*/ (*generateFunctionalDefinition)();
 	/* private static*/ /* Optional<String>*/ (*generateStatement)();
-	/* private static*/ struct String (*compileType)();
+	/* private static*/ /* Optional<String>*/ (*compileType)();
 	/* private static*/ int (*isSymbol)();
 	/* private static*/ /* List<String>*/ (*divide)();
 	/* private static*/ struct DivideState (*divideDecorated)();
