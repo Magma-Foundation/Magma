@@ -67,6 +67,10 @@ public class Main {
             return "#include <temp.h>\n";
         }
 
+        if (stripped.contains("class ")) {
+            return "struct Temp {\n};\n";
+        }
+
         return generatePlaceholder(stripped);
     }
 

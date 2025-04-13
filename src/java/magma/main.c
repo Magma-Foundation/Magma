@@ -4,9 +4,9 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/* public class Main {
-    private static class State {
-        private final List<String> segments;*//* private StringBuilder buffer;*//* private State(List<String> segments, StringBuilder buffer) {
+struct Temp {
+};
+/* private StringBuilder buffer;*//* private State(List<String> segments, StringBuilder buffer) {
             this.segments = segments;*//* this.buffer = buffer;*//* }
 
         public State() {
@@ -38,7 +38,9 @@
             return "";*//* }
 
         if (stripped.startsWith("import ")) {
-            return "#include <temp.h>\n";*//* }
+            return "#include <temp.h>\n";*/struct Temp {
+};
+/* \n";*//* }
 
         return generatePlaceholder(stripped);*//* }
 
