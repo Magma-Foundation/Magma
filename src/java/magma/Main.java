@@ -235,22 +235,31 @@ public class Main {
         DivideState current = new MutableDivideState(queue);
         while (current.hasNext()) {
             char c = current.pop();
-            if (c == '\'') {
-                current.append('\'');
-
-                char maybeSlash = current.pop();
-                current.append(maybeSlash);
-                if (maybeSlash == '\\') {
-                    current.popAndAppend();
-                }
-
-                current.popAndAppend();
-                continue;
-            }
-            current = divideStatementChar(current, c);
+            current = divideDecorated(current, c);
         }
 
         return current.advance().segments();
+    }
+
+    private static DivideState divideDecorated(DivideState current, char c) {
+        return divideSingleQuotes(current, c)
+                .orElseGet(() -> divideStatementChar(current, c));
+    }
+
+    private static Optional<DivideState> divideSingleQuotes(DivideState current, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        current.append('\'');
+        char maybeSlash = current.pop();
+        current.append(maybeSlash);
+        if (maybeSlash == '\\') {
+            current.popAndAppend();
+        }
+
+        current.popAndAppend();
+        return Optional.of(current);
     }
 
     private static DivideState divideStatementChar(DivideState current, char c) {

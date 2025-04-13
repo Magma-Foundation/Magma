@@ -12,6 +12,7 @@
 #include <temp.h>
 #include <temp.h>
 /* */struct DivideState {
+	/* DivideState*/ (*popAndAppend)();
 	/* DivideState*/ (*advance)();
 	/* DivideState*/ (*append)();
 	/* List<String>*/ (*segments)();
@@ -42,7 +43,9 @@ struct MutableDivideState implements DivideState {/* private final Deque<Charact
 	/* @Override
         public boolean*/ (*hasNext)();
 	/* @Override
-        public char*/ (*pop)();/* */
+        public char*/ (*pop)();
+	/* @Override
+        public DivideState*/ (*popAndAppend)();/* */
 };
 struct Main {
 	/* private static final List<String> structs = new*/ (*ArrayList<>)();
@@ -61,6 +64,8 @@ struct Main {
 	/* private static String*/ (*compileClassMember)();
 	/* private static Optional<String>*/ (*compileMethod)();
 	/* private static List<String>*/ (*divide)();
+	/* private static DivideState*/ (*divideDecorated)();
+	/* private static Optional<DivideState>*/ (*divideSingleQuotes)();
 	/* private static DivideState*/ (*divideStatementChar)();
 	/* private static String*/ (*generatePlaceholder)();/* */
 };
