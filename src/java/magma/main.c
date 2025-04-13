@@ -26,7 +26,7 @@ struct DivideState {
 struct MutableDivideState implements DivideState {
 	/* private final*/ /* Deque<Character>*/ queue;
 	/* private final*/ /* List<String>*/ segments;
-	/* private*/ struct int depth;
+	/* private*/ int depth;
 	/* private*/ struct StringBuilder buffer;
 	struct private (*MutableDivideState)();
 	struct public (*MutableDivideState)();
@@ -66,7 +66,7 @@ struct Main {
 	/* private static*/ /* Optional<String>*/ (*compileSuffix)();
 	/* private static*/ /* Optional<String>*/ (*compileInfix)();
 	/* private static*/ /* Optional<String>*/ (*compileInfix)();
-	/* private static*/ struct int (*locateFirst)();
+	/* private static*/ int (*locateFirst)();
 	/* private static*/ struct String (*compileClassMember)();
 	/* private static*/ /* Optional<String>*/ (*compileDefinitionStatement)();
 	/* private static*/ /* Optional<String>*/ (*generateDefinition)();
