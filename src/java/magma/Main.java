@@ -417,7 +417,7 @@ public class Main {
             return Optional.of("int");
         }
 
-        if (stripped.equals("char")) {
+        if (stripped.equals("char") || stripped.equals("Character")) {
             return Optional.of("char");
         }
 

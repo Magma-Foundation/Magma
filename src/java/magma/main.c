@@ -30,7 +30,7 @@ typedef struct {
 	char (*pop)();
 } DivideState;
 typedef struct {
-	Deque_Character queue;
+	Deque_char queue;
 	List__String segments;
 	StringBuilder buffer;
 	int depth;
