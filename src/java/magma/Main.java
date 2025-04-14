@@ -508,29 +508,38 @@ public class Main {
         return compileInfix(stripped, infix, (_, right) -> {
             return compileInfix(right, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd, "}", content -> {
-                    String beforeContent1 = compileInfix(beforeContent, " permits ", (left, _) -> {
-                        return new Some<>(left);
-                    }).orElse(beforeContent);
+                    return compileInfix(beforeContent, " permits ", (left, permits) -> {
+                        List_<String> permitted = Lists.fromNativeList(Arrays.stream(permits.split(" "))
+                                .map(String::strip)
+                                .filter(value -> !value.isEmpty())
+                                .toList());
 
-                    String withoutImplements = compileInfix(beforeContent1, " implements ", (left, _) -> new Some<>(left))
-                            .orElse(beforeContent1).strip();
-
-                    return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
-                        return compileSuffix(withParamEnd.strip(), ")", paramString -> {
-                            List_<String> params = divide(paramString, Main::divideValueChar);
-                            String stripped1 = nameWithoutParams.strip();
-                            return getString(content, stripped1, params);
-                        });
+                        return getStringOption(content, left, permitted);
                     }).or(() -> {
-                        String stripped1 = withoutImplements.strip();
-                        return getString(content, stripped1, Lists.emptyList());
+                        return getStringOption(content, beforeContent, Lists.emptyList());
                     });
                 });
             });
         });
     }
 
-    private static Option<String> getString(String s, String withoutParams, List_<String> params) {
+    private static Option<String> getStringOption(String content, String beforeContent1, List_<String> permits) {
+        String withoutImplements = compileInfix(beforeContent1, " implements ", (left, _) -> new Some<>(left))
+                .orElse(beforeContent1).strip();
+
+        return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
+            return compileSuffix(withParamEnd.strip(), ")", paramString -> {
+                List_<String> params = divide(paramString, Main::divideValueChar);
+                String stripped1 = nameWithoutParams.strip();
+                return getString(content, stripped1, params, permits);
+            });
+        }).or(() -> {
+            String stripped1 = withoutImplements.strip();
+            return getString(content, stripped1, Lists.emptyList(), permits);
+        });
+    }
+
+    private static Option<String> getString(String s, String withoutParams, List_<String> params, List_<String> permits) {
         int typeParamStart = withoutParams.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParams.substring(0, typeParamStart).strip();
@@ -545,7 +554,7 @@ public class Main {
 
             expanding.put(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
-                String generated = generateStruct(newName, typeParams, argsInternal, params, s);
+                String generated = generateStruct(newName, typeParams, argsInternal, params, s, permits);
                 structs.put(newName, generated);
                 return new Some<>("");
             });
@@ -555,7 +564,7 @@ public class Main {
                 return new None<>();
             }
 
-            String generated = generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s);
+            String generated = generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s, permits);
             structs.put(withoutParams, generated);
         }
 
@@ -571,7 +580,7 @@ public class Main {
         return name + "_" + joined;
     }
 
-    private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List_<String> params, String body) {
+    private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List_<String> params, String body, List_<String> permits) {
         List_<String> compiled = compileAll(params, param -> {
             return compileDefinition(param, typeParams, typeArgs, Main::generateDefinition).orElse("");
         });
@@ -585,7 +594,22 @@ public class Main {
                 .collect(new Joiner())
                 .orElse("");
 
-        return "typedef struct {" +
+        String enums;
+        if (permits.isEmpty()) {
+            enums = "";
+        }
+        else {
+            String permitsString = permits.iter()
+                    .map(value -> "\n\t" + value)
+                    .collect(new Joiner(""))
+                    .orElse("");
+
+            enums = "enum " + name + "_type {" +
+                    permitsString +
+                    "\n};\n";
+        }
+
+        return enums + "typedef struct {" +
                 joined +
                 outputContent +
                 "\n} " +

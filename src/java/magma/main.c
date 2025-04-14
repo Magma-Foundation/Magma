@@ -49,6 +49,10 @@ typedef struct {
 } Tuple_char_ref_List__char_ref;
 typedef struct {
 } Iterators;
+enum Option_char_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	char (*orElse)();
@@ -57,6 +61,10 @@ typedef struct {
 	char (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_char;
+enum Option_R_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	R (*orElse)();
@@ -65,6 +73,10 @@ typedef struct {
 	R (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_R;
+enum Option_T_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	T (*orElse)();
@@ -73,6 +85,10 @@ typedef struct {
 	T (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_T;
+enum Option_DivideState_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	DivideState (*orElse)();
@@ -93,6 +109,10 @@ typedef struct {
 	int (*hasNext)();
 	Tuple_char_DivideState (*pop)();
 } DivideState;
+enum Option_int_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	int (*orElse)();
@@ -101,6 +121,10 @@ typedef struct {
 	int (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_int;
+enum Option_char_ref_type {
+	Some,
+	None
+};
 typedef struct {
 	Option_R (*map)();
 	char* (*orElse)();
