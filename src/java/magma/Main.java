@@ -132,12 +132,12 @@ public class Main {
         }
     }
 
-    private static final Map<String, Function<List_<String>, Optional<String>>> expandables = new HashMap<>();
+    private static final Map<String, Function<List_<String>, Optional<String>>> expanding = new HashMap<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
-    private static List_<Tuple<String, List_<String>>> expansions = Lists.emptyList();
-    private static List_<Tuple<String, List_<String>>> visited = Lists.emptyList();
+    private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
+    private static List_<Tuple<String, List_<String>>> hasExpand = Lists.emptyList();
 
     private static Tuple<String, List_<String>> stringListTuple;
 
@@ -156,15 +156,18 @@ public class Main {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
         compiled.addAll(structs);
 
-        while (!expansions.isEmpty()) {
-            Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = expansions.pop();
+        while (!toExpand.isEmpty()) {
+            Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = toExpand.pop();
             Tuple<String, List_<String>> entry = popped.left;
-            expansions = popped.right;
-            visited = visited.add(entry);
+            toExpand = popped.right;
+            hasExpand = hasExpand.add(entry);
 
-            if (expandables.containsKey(entry.left)) {
-                Optional<String> expanded = expandables.get(entry.left).apply(entry.right);
+            if (expanding.containsKey(entry.left)) {
+                Optional<String> expanded = expanding.get(entry.left).apply(entry.right);
                 compiled.add(expanded.orElse(""));
+            }
+            else {
+                compiled.add(generatePlaceholder(stringify(entry.left, entry.right)));
             }
         }
 
@@ -262,7 +265,7 @@ public class Main {
                 return Optional.empty();
             }
 
-            expandables.put(name, argsInternal -> {
+            expanding.put(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
                 String value = generateStruct(newName, typeParams, argsInternal, params, s);
                 return Optional.of(value);
@@ -447,8 +450,8 @@ public class Main {
                         .flatMap(Optional::stream)
                         .toList());
 
-                if (!isDefined(strippedBase, list, expansions) && !isDefined(strippedBase, list, visited)) {
-                    expansions = expansions.add(new Tuple<>(strippedBase, list));
+                if (!isDefined(strippedBase, list, toExpand) && !isDefined(strippedBase, list, hasExpand)) {
+                    toExpand = toExpand.add(new Tuple<>(strippedBase, list));
                 }
                 return Optional.of(stringify(strippedBase, list));
             });

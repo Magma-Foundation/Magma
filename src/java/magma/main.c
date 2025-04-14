@@ -71,7 +71,7 @@ typedef struct {
 	String left;
 	List__String right;
 } Tuple_String_List__String;
-typedef struct {
+/* List_String*//* ArrayList_String*//* Optional_String*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*/typedef struct {
 	char left;
 	List__char right;
 } Tuple_char_List__char;
