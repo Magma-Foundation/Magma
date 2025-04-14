@@ -16,6 +16,14 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
+    public interface List_<T> {
+        T get(int index);
+
+        int size();
+
+        List_<T> add(T element);
+    }
+
     private interface DivideState {
         DivideState popAndAppend();
 
@@ -23,7 +31,7 @@ public class Main {
 
         DivideState append(char c);
 
-        List<String> segments();
+        List_<String> segments();
 
         boolean isLevel();
 
@@ -40,11 +48,11 @@ public class Main {
 
     private static class MutableDivideState implements DivideState {
         private final Deque<Character> queue;
-        private final List<String> segments;
+        private final List_<String> segments;
         private int depth;
-        private StringBuilder buffer;
+        private final StringBuilder buffer;
 
-        private MutableDivideState(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+        private MutableDivideState(Deque<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
@@ -52,25 +60,18 @@ public class Main {
         }
 
         public MutableDivideState(Deque<Character> queue) {
-            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+            this(queue, Lists.emptyList(), new StringBuilder(), 0);
         }
 
         @Override
         public DivideState advance() {
-            this.segments().add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
+            return new MutableDivideState(this.queue, this.segments.add(this.buffer.toString()), new StringBuilder(), 0);
         }
 
         @Override
         public DivideState append(char c) {
             this.buffer.append(c);
             return this;
-        }
-
-        @Override
-        public List<String> segments() {
-            return this.segments;
         }
 
         @Override
@@ -108,6 +109,11 @@ public class Main {
         @Override
         public DivideState popAndAppend() {
             return this.append(this.pop());
+        }
+
+        @Override
+        public List_<String> segments() {
+            return this.segments;
         }
     }
 
@@ -324,7 +330,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (c == '_' || Character.isLetter(c)) {
                 continue;
             }
             return false;
@@ -343,7 +349,7 @@ public class Main {
             current = divideDecorated(current, c);
         }
 
-        return current.advance().segments();
+        return Lists.toNativeList(current.advance().segments());
     }
 
     private static DivideState divideDecorated(DivideState current, char c) {
