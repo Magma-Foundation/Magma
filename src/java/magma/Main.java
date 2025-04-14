@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -238,13 +239,18 @@ public class Main {
                     int typeParamStart = withoutParams.indexOf("<");
                     if (typeParamStart >= 0) {
                         String name = withoutParams.substring(0, typeParamStart).strip();
+                        List_<String> typeParams = Lists.fromNativeList(Arrays.stream(withoutParams.substring(typeParamStart + 1, withoutParams.length() - 1).strip().split(","))
+                                .map(String::strip)
+                                .filter(value -> !value.isEmpty())
+                                .toList());
+
                         if (!isSymbol(name)) {
                             return Optional.empty();
                         }
 
                         expandables.put(name, argsInternal -> {
                             String newName = stringify(name, argsInternal);
-                            String value = generateStruct(s, newName);
+                            String value = generateStruct(s, newName, argsInternal, typeParams);
                             return Optional.of(value);
                         });
                     }
@@ -253,7 +259,7 @@ public class Main {
                             return Optional.empty();
                         }
 
-                        structs.add(generateStruct(s, withoutParams));
+                        structs.add(generateStruct(s, withoutParams, Lists.emptyList(), Lists.emptyList()));
                     }
 
                     return Optional.of("");
@@ -267,8 +273,8 @@ public class Main {
         return name + "_" + joined;
     }
 
-    private static String generateStruct(String body, String name) {
-        String outputContent = compileStatements(body, Main::compileClassMember);
+    private static String generateStruct(String body, String name, List_<String> typeArgs, List_<String> typeParams) {
+        String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs));
         return "typedef struct {" +
                 outputContent +
                 "\n} " +
@@ -302,14 +308,14 @@ public class Main {
         return input.indexOf(infix);
     }
 
-    private static String compileClassMember(String classMember) {
+    private static String compileClassMember(String classMember, List_<String> typeParams, List_<String> typeArgs) {
         return compileWhitespace(classMember)
                 .or(() -> compileToStruct(classMember, "interface"))
                 .or(() -> compileToStruct(classMember, "class "))
                 .or(() -> compileToStruct(classMember, "record "))
-                .or(() -> compileMethod(classMember))
+                .or(() -> compileMethod(classMember, typeParams, typeArgs))
                 .or(() -> compileConstructor(classMember))
-                .or(() -> compileDefinitionStatement(classMember))
+                .or(() -> compileDefinitionStatement(classMember, typeParams, typeArgs))
                 .orElseGet(() -> generatePlaceholder(classMember));
     }
 
@@ -321,9 +327,9 @@ public class Main {
         });
     }
 
-    private static Optional<String> compileDefinitionStatement(String classMember) {
+    private static Optional<String> compileDefinitionStatement(String classMember, List_<String> typeParams, List_<String> typeArgs) {
         return compileSuffix(classMember, ";", inner -> {
-            return compileDefinition(inner, Main::generateDefinition);
+            return compileDefinition(inner, typeParams, typeArgs, Main::generateDefinition);
         });
     }
 
@@ -331,14 +337,14 @@ public class Main {
         return generateStatement(node.beforeType() + node.type() + " " + node.name());
     }
 
-    private static Optional<String> compileMethod(String input) {
-        return compileInfix(input, "(", (definition, _) -> compileDefinition(definition, Main::generateFunctionalDefinition));
+    private static Optional<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
+        return compileInfix(input, "(", (definition, _) -> compileDefinition(definition, typeParams, typeArgs, Main::generateFunctionalDefinition));
     }
 
-    private static Optional<String> compileDefinition(String definition, Function<Node, Optional<String>> generator) {
+    private static Optional<String> compileDefinition(String definition, List_<String> typeParams, List_<String> typeArgs, Function<Node, Optional<String>> generator) {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
             return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
-                return compileType(type).flatMap(compiledType -> {
+                return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
                     List<String> modifiers = Stream.of(beforeType.strip().split(" "))
                             .map(String::strip)
                             .filter(value -> !value.isEmpty())
@@ -351,7 +357,7 @@ public class Main {
                     return generator.apply(new Node("", compiledType, name));
                 });
             }).or(() -> {
-                return compileType(beforeName.strip()).flatMap(compiledType -> {
+                return compileType(beforeName.strip(), typeParams, typeArgs).flatMap(compiledType -> {
                     return generator.apply(new Node("", compiledType, name));
                 });
             });
@@ -384,7 +390,7 @@ public class Main {
         return Optional.of("\n\t" + content + ";");
     }
 
-    private static Optional<String> compileType(String input) {
+    private static Optional<String> compileType(String input, List_<String> typeParams, List_<String> typeArgs) {
         String stripped = input.strip();
         if (stripped.equals("private") || stripped.equals("public")) {
             return Optional.empty();
@@ -398,6 +404,11 @@ public class Main {
             return Optional.of("char");
         }
 
+        Optional<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
+        if (typeParamIndex.isPresent()) {
+            return Optional.of(typeArgs.get(typeParamIndex.get()));
+        }
+
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
         }
@@ -408,7 +419,7 @@ public class Main {
                 if (isSymbol(strippedBase)) {
                     List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar)
                             .stream()
-                            .map(Main::compileType)
+                            .map(input1 -> compileType(input1, typeParams, typeArgs))
                             .flatMap(Optional::stream)
                             .toList());
 
