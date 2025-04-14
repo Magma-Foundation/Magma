@@ -380,6 +380,7 @@ public class Main {
 
     private static final Map<String, Function<List_<String>, Option<String>>> expanding = new HashMap<>();
     private static final Map<String, String> structs = new HashMap<>();
+    private static List_<String> methods = Lists.emptyList();
     private static List_<String> dependencies = Lists.emptyList();
     private static Map<String, List_<String>> structDependencies = new HashMap<>();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
@@ -405,9 +406,7 @@ public class Main {
                 .map(struct -> structs.getOrDefault(struct, generatePlaceholder(struct)))
                 .collect(new ListCollector<>());
 
-        compiled.addAll(collected);
-
-        return mergeStatements(compiled);
+        return mergeStatements(compiled.addAll(collected).addAll(methods));
     }
 
     private static void expand(List_<String> compiled) {
@@ -711,6 +710,7 @@ public class Main {
                         .map(node -> node.findString("type").orElse(Strings.emptyString()))
                         .collect(new ListCollector<>());
 
+                methods = methods.add("void temp(){\n}\n");
                 return parseDefinition(definition, typeParams, typeArgs).flatMap(node -> generateFunctionalDefinition(node, paramTypes));
             });
         });
