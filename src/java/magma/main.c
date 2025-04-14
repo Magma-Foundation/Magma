@@ -15,7 +15,7 @@
 #include <temp.h>
 #include <temp.h>
 typedef struct {
-	String value;
+	/* char[]*/ (*asCharArray)();
 } String_;
 typedef struct {
 	int length;
@@ -34,6 +34,10 @@ typedef struct {
 	char left;
 	List__char right;
 } Tuple_char_List__char;
+typedef struct {
+	/* char[]*/ value;
+	/* char[]*/ (*asCharArray)();
+} JavaString;
 typedef struct {
 	String_ beforeType;
 	String_ type;

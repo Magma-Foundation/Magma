@@ -97,7 +97,21 @@ public class Main {
         Option<T> next();
     }
 
-    private record String_(String value) {
+    public interface String_ {
+        char[] asCharArray();
+    }
+
+    public static final class JavaString implements String_ {
+        private final char[] value;
+
+        public JavaString(String value) {
+            this.value = value.toCharArray();
+        }
+
+        @Override
+        public char[] asCharArray() {
+            return this.value;
+        }
     }
 
     private static class MutableDivideState implements DivideState {
@@ -651,7 +665,7 @@ public class Main {
     }
 
     private static Option<String> generateDefinition(Node node) {
-        return generateStatement(node.beforeType.value + node.type.value + " " + node.name.value);
+        return generateStatement(Strings.toSlice(node.beforeType) + Strings.toSlice(node.type) + " " + Strings.toSlice(node.name));
     }
 
     private static Option<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
@@ -672,11 +686,11 @@ public class Main {
                         return new Some<>("");
                     }
 
-                    return generator.apply(new Node(new String_(""), new String_(compiledType), new String_(name)));
+                    return generator.apply(new Node(Strings.fromSlice(""), Strings.fromSlice(compiledType), Strings.fromSlice(name)));
                 });
             }).or(() -> {
                 return compileType(beforeName.strip(), typeParams, typeArgs).flatMap(compiledType -> {
-                    return generator.apply(new Node(new String_(""), new String_(compiledType), new String_(name)));
+                    return generator.apply(new Node(Strings.fromSlice(""), Strings.fromSlice(compiledType), Strings.fromSlice(name)));
                 });
             });
         });
@@ -701,7 +715,7 @@ public class Main {
     }
 
     private static Option<String> generateFunctionalDefinition(Node node) {
-        return generateStatement(node.beforeType.value + node.type.value + " (*" + node.name.value + ")()");
+        return generateStatement(Strings.toSlice(node.beforeType) + Strings.toSlice(node.type) + " (*" + Strings.toSlice(node.name) + ")()");
     }
 
     private static Option<String> generateStatement(String content) {
