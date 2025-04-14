@@ -11,14 +11,28 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
+    public interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        T orElse(T other);
+
+        boolean isPresent();
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        T orElseGet(Supplier<T> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+    }
+
     public interface List_<T> {
         T get(int index);
 
@@ -48,7 +62,7 @@ public class Main {
 
         Iterator<T> concat(Iterator<T> other);
 
-        Optional<T> next();
+        Option<T> next();
     }
 
     private interface Collector<T, C> {
@@ -80,7 +94,7 @@ public class Main {
     }
 
     private interface Head<T> {
-        Optional<T> next();
+        Option<T> next();
     }
 
     private record String_(String value) {
@@ -186,15 +200,79 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Optional<String>> {
+    public static class None<T> implements Option<T> {
         @Override
-        public Optional<String> createInitial() {
-            return Optional.empty();
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
         }
 
         @Override
-        public Optional<String> fold(Optional<String> current, String element) {
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+    }
+
+    private static class Joiner implements Collector<String, Option<String>> {
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + element).orElse(element));
+        }
+    }
+
+    public record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
         }
     }
 
@@ -221,9 +299,9 @@ public class Main {
             R current = initial;
             while (true) {
                 R finalCurrent = current;
-                Optional<R> withNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                Option<R> withNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (withNext.isPresent()) {
-                    current = withNext.get();
+                    current = withNext.orElse(null);
                 }
                 else {
                     return current;
@@ -242,13 +320,13 @@ public class Main {
         }
 
         @Override
-        public Optional<T> next() {
+        public Option<T> next() {
             return this.head.next();
         }
     }
 
     private static class Iterators {
-        public static <T> Iterator<T> fromOption(Optional<T> optional) {
+        public static <T> Iterator<T> fromOption(Option<T> optional) {
             return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         }
 
@@ -266,19 +344,19 @@ public class Main {
         }
 
         @Override
-        public Optional<T> next() {
+        public Option<T> next() {
             if (this.retrieved) {
-                return Optional.empty();
+                return new None<>();
             }
             this.retrieved = true;
-            return Optional.of(this.value);
+            return new Some<>(this.value);
         }
     }
 
     private static class EmptyHead<T> implements Head<T> {
         @Override
-        public Optional<T> next() {
-            return Optional.empty();
+        public Option<T> next() {
+            return new None<>();
         }
     }
 
@@ -291,19 +369,19 @@ public class Main {
         }
 
         @Override
-        public Optional<Integer> next() {
+        public Option<Integer> next() {
             if (this.index >= this.length) {
-                return Optional.empty();
+                return new None<>();
             }
 
             int value = this.index;
             this.index++;
-            return Optional.of(value);
+            return new Some<>(value);
 
         }
     }
 
-    private static final Map<String, Function<List_<String>, Optional<String>>> expanding = new HashMap<>();
+    private static final Map<String, Function<List_<String>, Option<String>>> expanding = new HashMap<>();
     private static final Map<String, String> structs = new HashMap<>();
     private static List_<String> dependencies = Lists.emptyList();
     private static Map<String, List_<String>> structDependencies = new HashMap<>();
@@ -343,7 +421,7 @@ public class Main {
             hasExpand = hasExpand.add(entry);
 
             if (expanding.containsKey(entry.left)) {
-                Optional<String> expanded = expanding.get(entry.left).apply(entry.right);
+                Option<String> expanded = expanding.get(entry.left).apply(entry.right);
                 compiled.add(expanded.orElse(""));
             }
             else {
@@ -412,9 +490,9 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
+        Option<String> maybeWhitespace = compileWhitespace(input);
         if (maybeWhitespace.isPresent()) {
-            return maybeWhitespace.get();
+            return maybeWhitespace.orElse(null);
         }
 
         if (input.strip().startsWith("package ")) {
@@ -429,22 +507,22 @@ public class Main {
                 .orElseGet(() -> generatePlaceholder(input.strip()));
     }
 
-    private static Optional<String> compileWhitespace(String input) {
+    private static Option<String> compileWhitespace(String input) {
         if (input.isBlank()) {
-            return Optional.of("");
+            return new Some<>("");
         }
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Option<String> compileClass(String stripped) {
         return compileToStruct(stripped, "class ");
     }
 
-    private static Optional<String> compileToStruct(String stripped, String infix) {
+    private static Option<String> compileToStruct(String stripped, String infix) {
         return compileInfix(stripped, infix, (_, right) -> {
             return compileInfix(right, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd, "}", s -> {
-                    String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> Optional.of(left))
+                    String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> new Some<>(left))
                             .orElse(beforeContent).strip();
 
                     return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
@@ -462,7 +540,7 @@ public class Main {
         });
     }
 
-    private static Optional<String> getString(String s, String withoutParams, List_<String> params) {
+    private static Option<String> getString(String s, String withoutParams, List_<String> params) {
         int typeParamStart = withoutParams.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParams.substring(0, typeParamStart).strip();
@@ -472,26 +550,26 @@ public class Main {
                     .toList());
 
             if (!isSymbol(name)) {
-                return Optional.empty();
+                return new None<>();
             }
 
             expanding.put(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
                 String generated = generateStruct(newName, typeParams, argsInternal, params, s);
                 structs.put(withoutParams, generated);
-                return Optional.of("");
+                return new Some<>("");
             });
         }
         else {
             if (!isSymbol(withoutParams)) {
-                return Optional.empty();
+                return new None<>();
             }
 
             String generated = generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s);
             structs.put(withoutParams, generated);
         }
 
-        return Optional.of("");
+        return new Some<>("");
     }
 
     private static String stringify(String name, List_<String> args) {
@@ -521,22 +599,22 @@ public class Main {
                 ";\n";
     }
 
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> compiler) {
+    private static Option<String> compileSuffix(String input, String suffix, Function<String, Option<String>> compiler) {
         if (!input.endsWith(suffix)) {
-            return Optional.empty();
+            return new None<>();
         }
         String slice = input.substring(0, input.length() - suffix.length());
         return compiler.apply(slice);
     }
 
-    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> compiler) {
+    private static Option<String> compileInfix(String input, String infix, BiFunction<String, String, Option<String>> compiler) {
         return compileInfix(input, infix, Main::locateFirst, compiler);
     }
 
-    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Optional<String>> compiler) {
+    private static Option<String> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Option<String>> compiler) {
         int index = locator.apply(input, infix);
         if (index < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String left = input.substring(0, index).strip();
         String right = input.substring(index + infix.length()).strip();
@@ -558,29 +636,29 @@ public class Main {
                 .orElseGet(() -> generatePlaceholder(classMember));
     }
 
-    private static Optional<? extends String> compileConstructor(String input) {
+    private static Option<String> compileConstructor(String input) {
         return compileInfix(input, "(", (beforeParams, _) -> {
             return compileInfix(beforeParams.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
-                return Optional.of("");
+                return new Some<>("");
             });
         });
     }
 
-    private static Optional<String> compileDefinitionStatement(String classMember, List_<String> typeParams, List_<String> typeArgs) {
+    private static Option<String> compileDefinitionStatement(String classMember, List_<String> typeParams, List_<String> typeArgs) {
         return compileSuffix(classMember, ";", inner -> {
             return compileDefinition(inner, typeParams, typeArgs, Main::generateDefinition);
         });
     }
 
-    private static Optional<String> generateDefinition(Node node) {
+    private static Option<String> generateDefinition(Node node) {
         return generateStatement(node.beforeType.value + node.type.value + " " + node.name.value);
     }
 
-    private static Optional<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
+    private static Option<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
         return compileInfix(input, "(", (definition, _) -> compileDefinition(definition, typeParams, typeArgs, Main::generateFunctionalDefinition));
     }
 
-    private static Optional<String> compileDefinition(String definition, List_<String> typeParams, List_<String> typeArgs, Function<Node, Optional<String>> generator) {
+    private static Option<String> compileDefinition(String definition, List_<String> typeParams, List_<String> typeArgs, Function<Node, Option<String>> generator) {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
             return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
                 return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
@@ -591,7 +669,7 @@ public class Main {
                             .collect(new ListCollector<>());
 
                     if (Lists.contains(modifiers, "static", String::equals)) {
-                        return Optional.of("");
+                        return new Some<>("");
                     }
 
                     return generator.apply(new Node(new String_(""), new String_(compiledType), new String_(name)));
@@ -622,48 +700,48 @@ public class Main {
         return -1;
     }
 
-    private static Optional<String> generateFunctionalDefinition(Node node) {
+    private static Option<String> generateFunctionalDefinition(Node node) {
         return generateStatement(node.beforeType.value + node.type.value + " (*" + node.name.value + ")()");
     }
 
-    private static Optional<String> generateStatement(String content) {
-        return Optional.of("\n\t" + content + ";");
+    private static Option<String> generateStatement(String content) {
+        return new Some<>("\n\t" + content + ";");
     }
 
-    private static Optional<String> compileType(String input, List_<String> typeParams, List_<String> typeArgs) {
+    private static Option<String> compileType(String input, List_<String> typeParams, List_<String> typeArgs) {
         String stripped = input.strip();
         if (stripped.equals("private") || stripped.equals("public")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         if (stripped.equals("boolean") || stripped.equals("int")) {
-            return Optional.of("int");
+            return new Some<>("int");
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return Optional.of("char");
+            return new Some<>("char");
         }
 
         dependencies.add(stripped);
-        Optional<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
+        Option<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
         if (typeParamIndex.isPresent()) {
-            return Optional.of(typeArgs.get(typeParamIndex.get()));
+            return new Some<>(typeArgs.get(typeParamIndex.orElse(null)));
         }
 
         if (isSymbol(stripped)) {
-            return Optional.of(stripped);
+            return new Some<>(stripped);
         }
 
         return compileGenericType(typeParams, typeArgs, stripped)
-                .or(() -> Optional.of(generatePlaceholder(stripped)));
+                .or(() -> new Some<>(generatePlaceholder(stripped)));
     }
 
-    private static Optional<String> compileGenericType(List_<String> typeParams, List_<String> typeArgs, String stripped) {
+    private static Option<String> compileGenericType(List_<String> typeParams, List_<String> typeArgs, String stripped) {
         return compileSuffix(stripped, ">", withoutEnd -> {
             return compileInfix(withoutEnd, "<", (base, args) -> {
                 String strippedBase = base.strip();
                 if (!isSymbol(strippedBase)) {
-                    return Optional.empty();
+                    return new None<>();
                 }
 
                 List_<String> list = divide(args, Main::divideValueChar)
@@ -675,7 +753,7 @@ public class Main {
                 if (!isDefined(strippedBase, list, toExpand) && !isDefined(strippedBase, list, hasExpand)) {
                     toExpand = toExpand.add(new Tuple<>(strippedBase, list));
                 }
-                return Optional.of(stringify(strippedBase, list));
+                return new Some<>(stringify(strippedBase, list));
             });
         });
     }
@@ -736,9 +814,9 @@ public class Main {
                 .orElseGet(() -> divider.apply(current, c));
     }
 
-    private static @NotNull Optional<? extends DivideState> divideDoubleQuotes(DivideState state, char c) {
+    private static @NotNull Option<DivideState> divideDoubleQuotes(DivideState state, char c) {
         if (c != '\"') {
-            return Optional.empty();
+            return new None<>();
         }
 
         DivideState current = state.append(c);
@@ -755,12 +833,12 @@ public class Main {
             }
         }
 
-        return Optional.of(current);
+        return new Some<>(current);
     }
 
-    private static Optional<DivideState> divideSingleQuotes(DivideState current, char c) {
+    private static Option<DivideState> divideSingleQuotes(DivideState current, char c) {
         if (c != '\'') {
-            return Optional.empty();
+            return new None<>();
         }
 
         DivideState appended = current.append('\'');
@@ -776,7 +854,7 @@ public class Main {
             withEscape = withSlash;
         }
 
-        return Optional.of(withEscape.popAndAppend());
+        return new Some<>(withEscape.popAndAppend());
     }
 
     private static DivideState divideStatementChar(DivideState current, char c) {

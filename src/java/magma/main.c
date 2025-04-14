@@ -14,13 +14,13 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-/* Optional_String*//* Optional_Integer*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*//* Optional_T*//* Optional_char*//* Optional_R*/typedef struct {
+typedef struct {
 	String value;
 } String_;
 typedef struct {
 	int length;
 	int index;
-	Optional_Integer (*next)();
+	Option_Integer (*next)();
 } RangeHead;
 /* Tuple_char_DivideState*//* Tuple_String_List__String*//* Tuple_char_List__char*/typedef struct {
 	String_ beforeType;
@@ -28,12 +28,12 @@ typedef struct {
 	String_ name;
 } Node;
 typedef struct {
-	Optional_String (*createInitial)();
-	Optional_String (*fold)();
+	Option_String (*createInitial)();
+	Option_String (*fold)();
 } Joiner;
 typedef struct {
 } Iterators;
-typedef struct {
+/* Option_String*//* Option_char*//* Option_DivideState*//* Option_R*//* Option_T*//* Option_Integer*/typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
 	DivideState (*append)();
