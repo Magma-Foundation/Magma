@@ -3,6 +3,7 @@ package magma;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 
 class Lists {
     private record JavaList<T>(List<T> elements) implements Main.List_<T> {
@@ -45,5 +46,32 @@ class Lists {
 
     public static <T> Main.List_<T> of(T... elements) {
         return new JavaList<>(Arrays.asList(elements));
+    }
+
+    public static <T> boolean contains(Main.List_<T> list, T element, BiFunction<T, T, Boolean> equator) {
+        for (int i = 0; i < list.size(); i++) {
+            T found = list.get(i);
+            if (equator.apply(found, element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static <T> boolean equalsTo(Main.List_<T> first, Main.List_<T> second, BiFunction<T, T, Boolean> equator) {
+        if (first.size() != second.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < first.size(); i++) {
+            T firstElement = first.get(i);
+            T secondElement = second.get(i);
+
+            if (!equator.apply(firstElement, secondElement)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

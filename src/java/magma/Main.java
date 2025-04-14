@@ -8,8 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -120,11 +122,16 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
+        public static <A, B> boolean equalsTo(Tuple<A, B> first, Tuple<A, B> second, BiFunction<A, A, Boolean> firstComparator, BiFunction<B, B, Boolean> secondComparator) {
+            return firstComparator.apply(first.left, second.left) && secondComparator.apply(first.right, second.right);
+        }
     }
 
+    private static final Map<String, Function<List_<String>, Optional<String>>> expandables = new HashMap<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
     private static List_<Tuple<String, List_<String>>> expansions = Lists.emptyList();
+    private static Tuple<String, List_<String>> stringListTuple;
 
     public static void main(String[] args) {
         try {
@@ -140,6 +147,15 @@ public class Main {
     private static String compile(String input) {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
         compiled.addAll(structs);
+
+        List<Tuple<String, List_<String>>> nativeList = Lists.toNativeList(expansions);
+        for (Tuple<String, List_<String>> entry : nativeList) {
+            if (expandables.containsKey(entry.left)) {
+                Optional<String> expanded = expandables.get(entry.left).apply(entry.right);
+                compiled.add(expanded.orElse(""));
+            }
+        }
+
         return mergeStatements(compiled);
     }
 
@@ -209,23 +225,42 @@ public class Main {
                     }).orElse(withoutImplements).strip();
 
                     int typeParamStart = withoutParams.indexOf("<");
-                    String name = typeParamStart >= 0
-                            ? withoutParams.substring(0, typeParamStart).strip()
-                            : withoutParams;
+                    if (typeParamStart >= 0) {
+                        String name = withoutParams.substring(0, typeParamStart).strip();
+                        if (!isSymbol(name)) {
+                            return Optional.empty();
+                        }
 
-                    if (!isSymbol(name)) {
-                        return Optional.empty();
+                        expandables.put(name, argsInternal -> {
+                            String newName = stringify(name, argsInternal);
+                            String value = generateStruct(s, newName);
+                            return Optional.of(value);
+                        });
+                    }
+                    else {
+                        if (!isSymbol(withoutParams)) {
+                            return Optional.empty();
+                        }
+
+                        structs.add(generateStruct(s, withoutParams));
                     }
 
-                    String outputContent = compileStatements(s, Main::compileClassMember);
-                    String value = "struct " + name + " {" +
-                            outputContent +
-                            "\n};\n";
-                    structs.add(value);
                     return Optional.of("");
                 });
             });
         });
+    }
+
+    private static String stringify(String name, List_<String> args) {
+        String joined = String.join("_", Lists.toNativeList(args));
+        return name + "_" + joined;
+    }
+
+    private static String generateStruct(String body, String name) {
+        String outputContent = compileStatements(body, Main::compileClassMember);
+        return "struct " + name + " {" +
+                outputContent +
+                "\n};\n";
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> compiler) {
@@ -338,10 +373,25 @@ public class Main {
 
         return compileSuffix(stripped, ">", withoutEnd -> {
             return compileInfix(withoutEnd, "<", (base, args) -> {
-                expansions = expansions.add(new Tuple<>(base, Lists.of(args)));
-                return Optional.of(base);
+                String strippedBase = base.strip();
+                if (isSymbol(strippedBase)) {
+                    List_<String> list = Lists.of(args);
+                    if (!isContains(strippedBase, list)) {
+                        expansions = expansions.add(new Tuple<>(strippedBase, list));
+                    }
+                    return Optional.of(stringify(strippedBase, list));
+                }
+                else {
+                    return Optional.empty();
+                }
             });
         }).or(() -> Optional.of(generatePlaceholder(stripped)));
+    }
+
+    private static boolean isContains(String strippedBase, List_<String> list) {
+        return Lists.contains(expansions, new Tuple<>(strippedBase, list),
+                (tuple0, tuple1) -> Tuple.equalsTo(tuple0, tuple1, String::equals,
+                        (list1, list2) -> Lists.equalsTo(list1, list2, String::equals)));
     }
 
     private static boolean isSymbol(String input) {

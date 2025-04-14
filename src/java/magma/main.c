@@ -13,16 +13,13 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-struct List_ {
-	struct T (*get)();
-	int (*size)();
-	List_<T> (*add)();
-};
+#include <temp.h>
+#include <temp.h>
 struct DivideState {
 	struct DivideState (*popAndAppend)();
 	struct DivideState (*advance)();
 	struct DivideState (*append)();
-	List_<String> (*segments)();
+	List__String (*segments)();
 	int (*isLevel)();
 	struct DivideState (*enter)();
 	struct DivideState (*exit)();
@@ -31,8 +28,8 @@ struct DivideState {
 	char (*pop)();
 };
 struct MutableDivideState {
-	Deque<Character> queue;
-	List_<String> segments;
+	Deque_Character queue;
+	List__String segments;
 	struct StringBuilder buffer;
 	int depth;
 	struct DivideState (*advance)();
@@ -44,11 +41,19 @@ struct MutableDivideState {
 	int (*hasNext)();
 	char (*pop)();
 	struct DivideState (*popAndAppend)();
-	List_<String> (*segments)();
+	List__String (*segments)();
 };
 struct Node {
 };
-struct Tuple {
-};
 struct Main {
+};
+struct List__String {
+	struct T (*get)();
+	int (*size)();
+	List__T (*add)();
+};
+struct List__String> {
+	struct T (*get)();
+	int (*size)();
+	List__T (*add)();
 };
