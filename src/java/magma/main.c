@@ -1,26 +1,10 @@
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
 typedef struct {
 	char* (*asCharArray)();
 } String_;
 typedef struct {
 	int length;
 	int index;
-	Option_Integer (*next)();
+	Option_int (*next)();
 } RangeHead;
 typedef struct {
 	Option_char* (*createInitial)();
@@ -103,12 +87,12 @@ typedef struct {
 } Option_T;
 typedef struct {
 	Option_R (*map)();
-	Integer (*orElse)();
+	int (*orElse)();
 	int (*isPresent)();
-	Option_Integer (*or)();
-	Integer (*orElseGet)();
+	Option_int (*or)();
+	int (*orElseGet)();
 	Option_R (*flatMap)();
-} Option_Integer;
+} Option_int;
 typedef struct {
 	char (*get)();
 	int (*size)();

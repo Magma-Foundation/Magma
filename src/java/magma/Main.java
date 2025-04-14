@@ -728,7 +728,7 @@ public class Main {
             return new None<>();
         }
 
-        if (stripped.equals("boolean") || stripped.equals("int")) {
+        if (stripped.equals("boolean") || stripped.equals("int") || stripped.equals("Boolean") || stripped.equals("Integer")) {
             return new Some<>("int");
         }
 
