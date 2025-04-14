@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,8 +51,8 @@ public class Main {
     private static class MutableDivideState implements DivideState {
         private final Deque<Character> queue;
         private final List_<String> segments;
-        private int depth;
         private final StringBuilder buffer;
+        private final int depth;
 
         private MutableDivideState(Deque<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
             this.queue = queue;
@@ -65,13 +67,12 @@ public class Main {
 
         @Override
         public DivideState advance() {
-            return new MutableDivideState(this.queue, this.segments.add(this.buffer.toString()), new StringBuilder(), 0);
+            return new MutableDivideState(this.queue, this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
         }
 
         @Override
         public DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
+            return new MutableDivideState(this.queue, this.segments, this.buffer.append(c), this.depth);
         }
 
         @Override
@@ -81,14 +82,12 @@ public class Main {
 
         @Override
         public DivideState enter() {
-            this.depth++;
-            return this;
+            return new MutableDivideState(this.queue, this.segments, this.buffer, this.depth + 1);
         }
 
         @Override
         public DivideState exit() {
-            this.depth--;
-            return this;
+            return new MutableDivideState(this.queue, this.segments, this.buffer, this.depth - 1);
         }
 
         @Override
@@ -199,11 +198,20 @@ public class Main {
                     String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> Optional.of(left))
                             .orElse(beforeContent).strip();
 
-                    String name = compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
+                    String withoutParams = compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
                         return compileSuffix(withParamEnd.strip(), ")", params -> {
                             return Optional.of(nameWithoutParams);
                         });
-                    }).orElse(withoutImplements);
+                    }).orElse(withoutImplements).strip();
+
+                    int typeParamStart = withoutParams.indexOf("<");
+                    String name = typeParamStart >= 0
+                            ? withoutParams.substring(0, typeParamStart).strip()
+                            : withoutParams;
+
+                    if (!isSymbol(name)) {
+                        return Optional.empty();
+                    }
 
                     String outputContent = compileStatements(s, Main::compileClassMember);
                     String value = "struct " + name + " {" +
@@ -354,7 +362,29 @@ public class Main {
 
     private static DivideState divideDecorated(DivideState current, char c) {
         return divideSingleQuotes(current, c)
+                .or(() -> divideDoubleQuotes(current, c))
                 .orElseGet(() -> divideStatementChar(current, c));
+    }
+
+    private static @NotNull Optional<? extends DivideState> divideDoubleQuotes(DivideState state, char c) {
+        if (c != '\"') {
+            return Optional.empty();
+        }
+
+        DivideState current = state.append(c);
+        while (current.hasNext()) {
+            char popped = current.pop();
+            current = current.append(popped);
+
+            if (popped == '\"') {
+                break;
+            }
+            if (popped == '\\') {
+                current = current.append(current.pop());
+            }
+        }
+
+        return Optional.of(current);
     }
 
     private static Optional<DivideState> divideSingleQuotes(DivideState current, char c) {
@@ -362,15 +392,20 @@ public class Main {
             return Optional.empty();
         }
 
-        current.append('\'');
-        char maybeSlash = current.pop();
-        current.append(maybeSlash);
+        DivideState appended = current.append('\'');
+
+        char maybeSlash = appended.pop();
+        DivideState withSlash = appended.append(maybeSlash);
+
+        DivideState withEscape;
         if (maybeSlash == '\\') {
-            current.popAndAppend();
+            withEscape = withSlash.popAndAppend();
+        }
+        else {
+            withEscape = withSlash;
         }
 
-        current.popAndAppend();
-        return Optional.of(current);
+        return Optional.of(withEscape.popAndAppend());
     }
 
     private static DivideState divideStatementChar(DivideState current, char c) {
