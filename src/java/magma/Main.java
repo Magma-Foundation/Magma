@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -248,7 +247,11 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Option<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        public Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -256,7 +259,7 @@ public class Main {
 
         @Override
         public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + element).orElse(element));
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -592,7 +595,11 @@ public class Main {
     }
 
     private static String stringify(String name, List_<String> args) {
-        String joined = String.join("_", Lists.toNativeList(args));
+        String joined = args.iter()
+                .map(arg -> arg.replace("*", "_ref"))
+                .collect(new Joiner("_"))
+                .orElse("");
+
         return name + "_" + joined;
     }
 

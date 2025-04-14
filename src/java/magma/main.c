@@ -13,38 +13,30 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
 typedef struct {
 	int length;
 	int index;
 	Option_int (*next)();
 } RangeHead;
 typedef struct {
-	Option_char* (*createInitial)();
-	Option_char* (*fold)();
+	char* delimiter;
+	Option_char_ref (*createInitial)();
+	Option_char_ref (*fold)();
 } Joiner;
 typedef struct {
 	char left;
 	DivideState right;
 } Tuple_char_DivideState;
 typedef struct {
-	char* left;
-	List__char* right;
-} Tuple_char*_List__char*;
-typedef struct {
 	char left;
 	List__char right;
 } Tuple_char_List__char;
 typedef struct {
-} Iterators;
+	char* left;
+	List__char_ref right;
+} Tuple_char_ref_List__char_ref;
 typedef struct {
-	Option_R (*map)();
-	char* (*orElse)();
-	int (*isPresent)();
-	Option_char* (*or)();
-	char* (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_char*;
+} Iterators;
 typedef struct {
 	Option_R (*map)();
 	char (*orElse)();
@@ -73,7 +65,7 @@ typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
 	DivideState (*append)();
-	List__char* (*segments)();
+	List__char_ref (*segments)();
 	int (*isLevel)();
 	DivideState (*enter)();
 	DivideState (*exit)();
@@ -98,8 +90,16 @@ typedef struct {
 	Option_R (*flatMap)();
 } Option_int;
 typedef struct {
+	Option_R (*map)();
+	char* (*orElse)();
+	int (*isPresent)();
+	Option_char_ref (*or)();
+	char* (*orElseGet)();
+	Option_R (*flatMap)();
+} Option_char_ref;
+typedef struct {
 	List__char queue;
-	List__char* segments;
+	List__char_ref segments;
 	StringBuilder buffer;
 	int depth;
 	DivideState (*advance)();
@@ -111,8 +111,17 @@ typedef struct {
 	int (*hasNext)();
 	Tuple_char_DivideState (*pop)();
 	DivideState (*popAndAppend)();
-	List__char* (*segments)();
+	List__char_ref (*segments)();
 } MutableDivideState;
+typedef struct {
+	Iterator_R (*map)();
+	C (*collect)();
+	Iterator_char_ref (*filter)();
+	R (*fold)();
+	Iterator_R (*flatMap)();
+	Iterator_char_ref (*concat)();
+	Option_char_ref (*next)();
+} Iterator_char_ref;
 typedef struct {
 	Iterator_R (*map)();
 	C (*collect)();
@@ -122,15 +131,6 @@ typedef struct {
 	Iterator_char (*concat)();
 	Option_char (*next)();
 } Iterator_char;
-typedef struct {
-	Iterator_R (*map)();
-	C (*collect)();
-	Iterator_char* (*filter)();
-	R (*fold)();
-	Iterator_R (*flatMap)();
-	Iterator_char* (*concat)();
-	Option_char* (*next)();
-} Iterator_char*;
 typedef struct {
 	Iterator_R (*map)();
 	C (*collect)();
@@ -162,12 +162,12 @@ typedef struct {
 typedef struct {
 	char* (*get)();
 	int (*size)();
-	List__char* (*add)();
+	List__char_ref (*add)();
 	int (*isEmpty)();
-	Tuple_char*_List__char* (*pop)();
-	Iterator_char* (*iter)();
-	List__char* (*addAll)();
-	List__char* (*sort)();
-} List__char*;
+	Tuple_char_ref_List__char_ref (*pop)();
+	Iterator_char_ref (*iter)();
+	List__char_ref (*addAll)();
+	List__char_ref (*sort)();
+} List__char_ref;
 typedef struct {
 } Main;
