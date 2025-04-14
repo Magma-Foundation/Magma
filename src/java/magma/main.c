@@ -9,11 +9,6 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-/* Map_char_ref_String_*/
 /* Function_char_ref_char_ref*/
 /* Function_char_ref_T*/
 /* Function_char_ref_Option_char_ref*/
@@ -40,6 +35,10 @@
 /* Predicate_char*/
 /* BiFunction_R_char_R*/
 /* Function_char_Iterator_R*/
+/* Function_Tuple_char_ref_String__R*/
+/* Predicate_Tuple_char_ref_String_*/
+/* BiFunction_R_Tuple_char_ref_String__R*/
+/* Function_Tuple_char_ref_String__Iterator_R*/
 /* Function_R_R*/
 /* Predicate_R*/
 /* BiFunction_R_R_R*/
@@ -71,7 +70,10 @@ typedef struct {
 	Option_char (*next)();
 } Head_char;
 typedef struct {
-	Map_char_ref_String_ internalMap;
+	Option_Tuple_char_ref_String_ (*next)();
+} Head_Tuple_char_ref_String_;
+typedef struct {
+	Map__char_ref_String_ internalMap_;
 	Node (*withString)(char*, String_);
 	Option_String_ (*findString)(char*);
 } Node;
@@ -100,6 +102,10 @@ typedef struct {
 	C (*fold)(C, char*);
 } Collector_char_ref_C;
 typedef struct {
+	C (*createInitial)();
+	C (*fold)(C, Tuple_char_ref_String_);
+} Collector_Tuple_char_ref_String__C;
+typedef struct {
 	 (*)(Option_T);
 	 (*)();
 } Iterators;
@@ -126,10 +132,23 @@ typedef struct {
 	List__String_ (*sort)(BiFunction_String__String__int);
 } List__String_;
 typedef struct {
+	Map__char_ref_String_ (*with)(char*, String_);
+	int (*hasKey)(char*);
+	String_ (*get)(char*);
+	String_ (*getOrDefault)(char*, String_);
+	int (*isEmpty)();
+	Iterator_Tuple_char_ref_String_ (*iterEntries)();
+} Map__char_ref_String_;
+typedef struct {
 	String_ left;
 	List__String_ right;
 	 (*)(Tuple_String__List__String_, Tuple_String__List__String_, BiFunction_String__String__int, BiFunction_List__String__List__String__int);
 } Tuple_String__List__String_;
+typedef struct {
+	char* left;
+	String_ right;
+	 (*)(Tuple_char_ref_String_, Tuple_char_ref_String_, BiFunction_char_ref_char_ref_int, BiFunction_String__String__int);
+} Tuple_char_ref_String_;
 typedef struct {
 	Tuple_char_ref_List__char_ref left;
 	List__Tuple_char_ref_List__char_ref right;
@@ -217,7 +236,7 @@ typedef struct {
 	C (*collect)(Collector_String__C);
 	Iterator_String_ (*filter)(Predicate_String_);
 	R (*fold)(R, BiFunction_R_String__R);
-	Iterator_R (*flatMap)(Function_String__Iterator_R);
+	Iterator_R (*flatMap_)(Function_String__Iterator_R);
 	Iterator_String_ (*concat)(Iterator_String_);
 	Option_String_ (*next)();
 } Iterator_String_;
@@ -227,7 +246,7 @@ typedef struct {
 	C (*collect)(Collector_R_C);
 	Iterator_R (*filter)(Predicate_R);
 	R (*fold)(R, BiFunction_R_R_R);
-	Iterator_R (*flatMap)(Function_R_Iterator_R);
+	Iterator_R (*flatMap_)(Function_R_Iterator_R);
 	Iterator_R (*concat)(Iterator_R);
 	Option_R (*next)();
 } Iterator_R;
@@ -237,17 +256,27 @@ typedef struct {
 	C (*collect)(Collector_T_C);
 	Iterator_T (*filter)(Predicate_T);
 	R (*fold)(R, BiFunction_R_T_R);
-	Iterator_R (*flatMap)(Function_T_Iterator_R);
+	Iterator_R (*flatMap_)(Function_T_Iterator_R);
 	Iterator_T (*concat)(Iterator_T);
 	Option_T (*next)();
 } Iterator_T;
+typedef struct {
+	Head_Tuple_char_ref_String_ head;
+	Iterator_R (*map)(Function_Tuple_char_ref_String__R);
+	C (*collect)(Collector_Tuple_char_ref_String__C);
+	Iterator_Tuple_char_ref_String_ (*filter)(Predicate_Tuple_char_ref_String_);
+	R (*fold)(R, BiFunction_R_Tuple_char_ref_String__R);
+	Iterator_R (*flatMap_)(Function_Tuple_char_ref_String__Iterator_R);
+	Iterator_Tuple_char_ref_String_ (*concat)(Iterator_Tuple_char_ref_String_);
+	Option_Tuple_char_ref_String_ (*next)();
+} Iterator_Tuple_char_ref_String_;
 typedef struct {
 	Head_Tuple_char_ref_List__char_ref head;
 	Iterator_R (*map)(Function_Tuple_char_ref_List__char_ref_R);
 	C (*collect)(Collector_Tuple_char_ref_List__char_ref_C);
 	Iterator_Tuple_char_ref_List__char_ref (*filter)(Predicate_Tuple_char_ref_List__char_ref);
 	R (*fold)(R, BiFunction_R_Tuple_char_ref_List__char_ref_R);
-	Iterator_R (*flatMap)(Function_Tuple_char_ref_List__char_ref_Iterator_R);
+	Iterator_R (*flatMap_)(Function_Tuple_char_ref_List__char_ref_Iterator_R);
 	Iterator_Tuple_char_ref_List__char_ref (*concat)(Iterator_Tuple_char_ref_List__char_ref);
 	Option_Tuple_char_ref_List__char_ref (*next)();
 } Iterator_Tuple_char_ref_List__char_ref;
@@ -257,7 +286,7 @@ typedef struct {
 	C (*collect)(Collector_char_ref_C);
 	Iterator_char_ref (*filter)(Predicate_char_ref);
 	R (*fold)(R, BiFunction_R_char_ref_R);
-	Iterator_R (*flatMap)(Function_char_ref_Iterator_R);
+	Iterator_R (*flatMap_)(Function_char_ref_Iterator_R);
 	Iterator_char_ref (*concat)(Iterator_char_ref);
 	Option_char_ref (*next)();
 } Iterator_char_ref;
@@ -267,7 +296,7 @@ typedef struct {
 	C (*collect)(Collector_char_C);
 	Iterator_char (*filter)(Predicate_char);
 	R (*fold)(R, BiFunction_R_char_R);
-	Iterator_R (*flatMap)(Function_char_Iterator_R);
+	Iterator_R (*flatMap_)(Function_char_Iterator_R);
 	Iterator_char (*concat)(Iterator_char);
 	Option_char (*next)();
 } Iterator_char;
@@ -282,6 +311,7 @@ typedef struct {
 	 (*)(char**);
 	 (*)(char*);
 	 (*)(List__char_ref);
+	 (*)();
 	 (*)();
 	 (*)(Tuple_char_ref_List__char_ref, List__char_ref);
 	 (*)(char*, Function_char_ref_char_ref);
@@ -326,6 +356,42 @@ typedef struct {
 	 (*)(DivideState, char);
 	 (*)(char*);
 } Main;
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
+void temp(){
+}
 void temp(){
 }
 void temp(){

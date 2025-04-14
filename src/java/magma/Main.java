@@ -6,15 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -29,7 +25,7 @@ public class Main {
 
         T orElseGet(Supplier<T> other);
 
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+        <R> Option<R> flatMap_(Function<T, Option<R>> mapper);
     }
 
     public interface List_<T> {
@@ -50,7 +46,7 @@ public class Main {
         List_<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
-    private interface Collector<T, C> {
+    public interface Collector<T, C> {
         C createInitial();
 
         C fold(C current, T element);
@@ -84,6 +80,20 @@ public class Main {
 
     public interface String_ {
         char[] asCharArray();
+    }
+
+    public interface Map_<K, V> {
+        Map_<K, V> with(K key, V value);
+
+        boolean hasKey(K key);
+
+        V get(K key);
+
+        V getOrDefault(K key, V other);
+
+        boolean isEmpty();
+
+        Iterator<Tuple<K, V>> iterEntries();
     }
 
     private static class MutableDivideState implements DivideState {
@@ -157,24 +167,24 @@ public class Main {
     }
 
     private static final class Node {
-        private final Map<String, String_> internalMap;
+        private final Map_<String, String_> internalMap_;
 
         public Node() {
-            this(new HashMap<>());
+            this(Maps.empty());
         }
 
-        private Node(Map<String, String_> internalMap) {
-            this.internalMap = internalMap;
+        private Node(Map_<String, String_> internalMap_) {
+            this.internalMap_ = internalMap_;
         }
 
         private Node withString(String propertyKey, String_ propertyValue) {
-            this.internalMap.put(propertyKey, propertyValue);
+            this.internalMap_.with(propertyKey, propertyValue);
             return this;
         }
 
         public Option<String_> findString(String propertyKey) {
-            if (this.internalMap.containsKey(propertyKey)) {
-                return new Some<>(this.internalMap.get(propertyKey));
+            if (this.internalMap_.hasKey(propertyKey)) {
+                return new Some<>(this.internalMap_.get(propertyKey));
             }
             else {
                 return new None<>();
@@ -227,7 +237,7 @@ public class Main {
         }
 
         @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
             return new None<>();
         }
     }
@@ -275,7 +285,7 @@ public class Main {
         }
 
         @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
     }
@@ -290,7 +300,7 @@ public class Main {
         }
 
         public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap(element -> new Iterator<>(predicate.test(element)
+            return this.flatMap_(element -> new Iterator<>(predicate.test(element)
                     ? new SingleHead<>(element)
                     : new EmptyHead<T>()));
         }
@@ -309,8 +319,8 @@ public class Main {
             }
         }
 
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> flatMap) {
-            return this.map(flatMap).fold(Iterators.empty(), Iterator::concat);
+        public <R> Iterator<R> flatMap_(Function<T, Iterator<R>> flatMap_) {
+            return this.map(flatMap_).fold(Iterators.empty(), Iterator::concat);
         }
 
         public Iterator<T> concat(Iterator<T> other) {
@@ -378,11 +388,23 @@ public class Main {
         }
     }
 
-    private static final Map<String, Function<List_<String>, Option<String>>> expanding = new HashMap<>();
-    private static final Map<String, String> structs = new HashMap<>();
+    private static class MapCollector<K, V> implements Collector<Tuple<K, V>, Map_<K, V>> {
+        @Override
+        public Map_<K, V> createInitial() {
+            return Maps.empty();
+        }
+
+        @Override
+        public Map_<K, V> fold(Map_<K, V> current, Tuple<K, V> element) {
+            return current.with(element.left, element.right);
+        }
+    }
+
+    private static final Map_<String, Function<List_<String>, Option<String>>> expanding = Maps.empty();
+    private static final Map_<String, String> structs = Maps.empty();
     private static List_<String> methods = Lists.emptyList();
     private static List_<String> dependencies = Lists.emptyList();
-    private static Map<String, List_<String>> structDependencies = new HashMap<>();
+    private static Map_<String, List_<String>> structDependencies = Maps.empty();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
     private static List_<Tuple<String, List_<String>>> hasExpand = Lists.emptyList();
 
@@ -416,7 +438,7 @@ public class Main {
             toExpand = popped.right;
             hasExpand = hasExpand.add(entry);
 
-            if (expanding.containsKey(entry.left)) {
+            if (expanding.hasKey(entry.left)) {
                 Option<String> expanded = expanding.get(entry.left).apply(entry.right);
                 compiled.add(expanded.orElse(""));
             }
@@ -429,33 +451,33 @@ public class Main {
     private static List_<String> orderStructs() {
         List_<String> orderedStructs = Lists.emptyList();
         while (!structDependencies.isEmpty()) {
-            List_<String> toPrune = Lists.emptyList();
-            for (Map.Entry<String, List_<String>> entry : structDependencies.entrySet()) {
-                List_<String> dependencies = entry.getValue();
-                if (dependencies.isEmpty()) {
-                    toPrune.add(entry.getKey());
-                }
-            }
+            List_<String> toPrune = findLeaves();
 
             if (toPrune.isEmpty()) {
-                return Lists.fromNativeList(new ArrayList<>(structDependencies.entrySet()))
-                        .iter()
-                        .filter(entry -> !Lists.contains(orderedStructs, entry.getKey(), String::equals))
+                return structDependencies.iterEntries()
+                        .filter(entry -> !Lists.contains(orderedStructs, entry.left, String::equals))
                         .collect(new ListCollector<>())
-                        .sort((first, second) -> first.getValue().size() - second.getValue().size()).iter()
-                        .map(Map.Entry::getKey)
+                        .sort((first, second) -> first.right.size() - second.right.size()).iter()
+                        .map(Tuple::left)
                         .collect(new ListCollector<>());
             }
 
             orderedStructs.addAll(toPrune);
-            structDependencies = structDependencies.entrySet().stream()
-                    .filter(entry -> !Lists.contains(toPrune, entry.getKey(), String::equals))
-                    .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
+            structDependencies = structDependencies.iterEntries()
+                    .filter(entry -> !Lists.contains(toPrune, entry.left, String::equals))
+                    .map(entry -> new Tuple<>(entry.left, entry.right))
                     .map(entry -> removeDependencies(entry, toPrune))
-                    .collect(Collectors.toMap(Tuple::left, Tuple::right));
+                    .collect(new MapCollector<>());
         }
 
         return orderedStructs;
+    }
+
+    private static List_<String> findLeaves() {
+        return structDependencies.iterEntries()
+                .filter(entry -> entry.right.isEmpty())
+                .map(Tuple::left)
+                .collect(new ListCollector<>());
     }
 
     private static Tuple<String, List_<String>> removeDependencies(Tuple<String, List_<String>> entry, List_<String> toPrune) {
@@ -473,7 +495,7 @@ public class Main {
 
     private static String mergeStatements(List_<String> compiled) {
         return compiled.iter()
-                .fold(new StringBuilder(), (buffer, segment) -> buffer.append(segment))
+                .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
     }
 
@@ -569,10 +591,10 @@ public class Main {
                 return new None<>();
             }
 
-            expanding.put(name, argsInternal -> {
+            expanding.with(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
                 String generated = generateStruct(newName, typeParams, argsInternal, params, s, permits);
-                structs.put(newName, generated);
+                structs.with(newName, generated);
                 return new Some<>("");
             });
         }
@@ -582,7 +604,7 @@ public class Main {
             }
 
             String generated = generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s, permits);
-            structs.put(withoutParams, generated);
+            structs.with(withoutParams, generated);
         }
 
         return new Some<>("");
@@ -600,12 +622,12 @@ public class Main {
     private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List_<String> params, String body, List_<String> permits) {
         List_<String> compiled = compileAll(params, param -> {
             Function<Node, Option<String>> generator = Main::generateDefinition;
-            return parseDefinition(param, typeParams, typeArgs).flatMap(generator::apply).orElse("");
+            return parseDefinition(param, typeParams, typeArgs).flatMap_(generator::apply).orElse("");
         });
 
         String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs, permits));
 
-        structDependencies.put(name, dependencies);
+        structDependencies.with(name, dependencies);
         dependencies = Lists.emptyList();
 
         String joined = compiled.iter()
@@ -687,7 +709,7 @@ public class Main {
     private static Option<String> compileDefinitionStatement(String classMember, List_<String> typeParams, List_<String> typeArgs) {
         return compileSuffix(classMember, ";", inner -> {
             Function<Node, Option<String>> generator = Main::generateDefinition;
-            return parseDefinition(inner, typeParams, typeArgs).flatMap(generator::apply);
+            return parseDefinition(inner, typeParams, typeArgs).flatMap_(generator::apply);
         });
     }
 
@@ -711,7 +733,7 @@ public class Main {
                         .collect(new ListCollector<>());
 
                 methods = methods.add("void temp(){\n}\n");
-                return parseDefinition(definition, typeParams, typeArgs).flatMap(node -> generateFunctionalDefinition(node, paramTypes));
+                return parseDefinition(definition, typeParams, typeArgs).flatMap_(node -> generateFunctionalDefinition(node, paramTypes));
             });
         });
     }
@@ -722,7 +744,7 @@ public class Main {
             return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
                 return getStringOption(typeParams, typeArgs, withName, beforeType, type);
             }).or(() -> {
-                return compileType(beforeName.strip(), typeParams, typeArgs).flatMap(compiledType -> {
+                return compileType(beforeName.strip(), typeParams, typeArgs).flatMap_(compiledType -> {
                     return new Some<>(withName.withString("type", Strings.fromSlice(compiledType)));
                 });
             });
@@ -730,7 +752,7 @@ public class Main {
     }
 
     private static Option<Node> getStringOption(List_<String> typeParams, List_<String> typeArgs, Node withName, String beforeType, String type) {
-        return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
+        return compileType(type, typeParams, typeArgs).flatMap_(compiledType -> {
             List_<String> modifiers = Lists.of(beforeType.strip().split(" "))
                     .iter()
                     .map(String::strip)
@@ -831,7 +853,7 @@ public class Main {
                 List_<String> list = divideValues(args)
                         .iter()
                         .map(input1 -> compileType(input1, typeParams, typeArgs))
-                        .flatMap(Iterators::fromOption)
+                        .flatMap_(Iterators::fromOption)
                         .collect(new ListCollector<>());
 
                 if (!isDefined(strippedBase, list, toExpand) && !isDefined(strippedBase, list, hasExpand)) {
