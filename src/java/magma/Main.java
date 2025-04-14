@@ -50,22 +50,6 @@ public class Main {
         List_<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
-    public interface Iterator<T> {
-        <R> Iterator<R> map(Function<T, R> mapper);
-
-        <C> C collect(Collector<T, C> collector);
-
-        Iterator<T> filter(Predicate<T> predicate);
-
-        <R> R fold(R initial, BiFunction<R, T, R> folder);
-
-        <R> Iterator<R> flatMap(Function<T, Iterator<R>> flatMap);
-
-        Iterator<T> concat(Iterator<T> other);
-
-        Option<T> next();
-    }
-
     private interface Collector<T, C> {
         C createInitial();
 
@@ -295,25 +279,21 @@ public class Main {
         }
     }
 
-    public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-        @Override
+    public record Iterator<T>(Head<T> head) {
         public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+            return new Iterator<>(() -> this.head.next().map(mapper));
         }
 
-        @Override
         public <C> C collect(Collector<T, C> collector) {
             return this.fold(collector.createInitial(), collector::fold);
         }
 
-        @Override
         public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap(element -> new HeadedIterator<>(predicate.test(element)
+            return this.flatMap(element -> new Iterator<>(predicate.test(element)
                     ? new SingleHead<>(element)
                     : new EmptyHead<T>()));
         }
 
-        @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             R current = initial;
             while (true) {
@@ -328,17 +308,14 @@ public class Main {
             }
         }
 
-        @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> flatMap) {
             return this.map(flatMap).fold(Iterators.empty(), Iterator::concat);
         }
 
-        @Override
         public Iterator<T> concat(Iterator<T> other) {
-            return new HeadedIterator<>(() -> this.head.next().or(other::next));
+            return new Iterator<>(() -> this.head.next().or(other::next));
         }
 
-        @Override
         public Option<T> next() {
             return this.head.next();
         }
@@ -346,11 +323,11 @@ public class Main {
 
     private static class Iterators {
         public static <T> Iterator<T> fromOption(Option<T> optional) {
-            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+            return new Iterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         }
 
         public static <T> Iterator<T> empty() {
-            return new HeadedIterator<>(new EmptyHead<>());
+            return new Iterator<>(new EmptyHead<>());
         }
     }
 

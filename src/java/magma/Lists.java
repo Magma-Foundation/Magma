@@ -40,7 +40,7 @@ class Lists {
 
         @Override
         public Main.Iterator<T> iter() {
-            return new Main.HeadedIterator<>(new Main.RangeHead(this.elements.size())).map(this.elements::get);
+            return new Main.Iterator<>(new Main.RangeHead(this.elements.size())).map(this.elements::get);
         }
 
         @Override
