@@ -119,8 +119,12 @@ public class Main {
     private record Node(String beforeType, String type, String name) {
     }
 
+    private record Tuple<A, B>(A left, B right) {
+    }
+
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
+    private static List_<Tuple<String, List_<String>>> expansions = Lists.emptyList();
 
     public static void main(String[] args) {
         try {
@@ -332,7 +336,12 @@ public class Main {
             return Optional.of("struct " + stripped);
         }
 
-        return Optional.of(generatePlaceholder(stripped));
+        return compileSuffix(stripped, ">", withoutEnd -> {
+            return compileInfix(withoutEnd, "<", (base, args) -> {
+                expansions = expansions.add(new Tuple<>(base, Lists.of(args)));
+                return Optional.of(base);
+            });
+        }).or(() -> Optional.of(generatePlaceholder(stripped)));
     }
 
     private static boolean isSymbol(String input) {

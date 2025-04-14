@@ -1,6 +1,7 @@
 package magma;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class Lists {
@@ -40,5 +41,9 @@ class Lists {
 
     public static <T> Main.List_<T> emptyList() {
         return new JavaList<>();
+    }
+
+    public static <T> Main.List_<T> of(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
     }
 }

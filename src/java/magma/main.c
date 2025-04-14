@@ -16,13 +16,13 @@
 struct List_ {
 	struct T (*get)();
 	int (*size)();
-	/* List_<T>*/ (*add)();
+	List_<T> (*add)();
 };
 struct DivideState {
 	struct DivideState (*popAndAppend)();
 	struct DivideState (*advance)();
 	struct DivideState (*append)();
-	/* List_<String>*/ (*segments)();
+	List_<String> (*segments)();
 	int (*isLevel)();
 	struct DivideState (*enter)();
 	struct DivideState (*exit)();
@@ -31,8 +31,8 @@ struct DivideState {
 	char (*pop)();
 };
 struct MutableDivideState {
-	/* Deque<Character>*/ queue;
-	/* List_<String>*/ segments;
+	Deque<Character> queue;
+	List_<String> segments;
 	struct StringBuilder buffer;
 	int depth;
 	struct DivideState (*advance)();
@@ -44,9 +44,11 @@ struct MutableDivideState {
 	int (*hasNext)();
 	char (*pop)();
 	struct DivideState (*popAndAppend)();
-	/* List_<String>*/ (*segments)();
+	List_<String> (*segments)();
 };
 struct Node {
+};
+struct Tuple {
 };
 struct Main {
 };
