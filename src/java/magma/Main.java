@@ -195,15 +195,19 @@ public class Main {
 
     private static String compile(String input) {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
+        expand(compiled);
 
         List<String> orderedStructs = orderStructs();
-
         List<String> collected = orderedStructs.stream()
-                .map(structs::get)
+                .map(struct -> structs.getOrDefault(struct, generatePlaceholder(struct)))
                 .toList();
 
         compiled.addAll(collected);
 
+        return mergeStatements(compiled);
+    }
+
+    private static void expand(List<String> compiled) {
         while (!toExpand.isEmpty()) {
             Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = toExpand.pop();
             Tuple<String, List_<String>> entry = popped.left;
@@ -218,8 +222,6 @@ public class Main {
                 compiled.add(generatePlaceholder(stringify(entry.left, entry.right)));
             }
         }
-
-        return mergeStatements(compiled);
     }
 
     private static List<String> orderStructs() {

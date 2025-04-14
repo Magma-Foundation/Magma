@@ -17,10 +17,10 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-typedef struct {
+/* List_String*//* ArrayList_String*//* Optional_String*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*/typedef struct {
 	String value;
 } String_;
-typedef struct {
+/* Tuple_String_List_String*//* Tuple_char_List__char*//* Tuple_char_DivideState*//* Tuple_String_List__String*/typedef struct {
 	String_ beforeType;
 	String_ type;
 	String_ name;
@@ -28,7 +28,7 @@ typedef struct {
 	int (*hashCode)();
 	String (*toString)();
 } Node;
-typedef struct {
+/* List__char*//* List__String*/typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
 	DivideState (*append)();
@@ -58,4 +58,3 @@ typedef struct {
 } MutableDivideState;
 typedef struct {
 } Main;
-/* List_String*//* ArrayList_String*//* Optional_String*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*/
