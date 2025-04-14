@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -74,24 +75,28 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
-        List<String> segments = extracted(input, new State());
+        return compileAll(input, Main::divideStatementChar, compiler, Main::mergeStatements);
+    }
 
+    private static String compileAll(String input, BiFunction<State, Character, State> divider, Function<String, String> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        State current = new State();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            current = divider.apply(current, c);
+        }
+
+        List<String> segments = current.advance().segments;
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compiler.apply(segment));
+            String compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
         }
 
         return output.toString();
     }
 
-    private static List<String> extracted(String input, State state) {
-        State current = state;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = divideStatementChar(current, c);
-        }
-
-        return current.advance().segments;
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
     }
 
     private static State divideStatementChar(State current, char c) {
@@ -137,6 +142,59 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String header = input.substring(0, paramStart).strip();
+            String withParams = input.substring(paramStart + "(".length());
+
+            int nameSeparator = header.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String beforeName = header.substring(0, nameSeparator).strip();
+                String name = header.substring(nameSeparator + " ".length()).strip();
+
+                int paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    String params = withParams.substring(0, paramEnd).strip();
+                    String outputParams = compileAll(params, Main::divideValueChar, Main::compileDefinition, Main::mergeValues);
+                    return "\n\t" + beforeName + " (*" + name + ")(" +
+                            outputParams +
+                            ");";
+                }
+            }
+        }
+
         return generatePlaceholder(input);
+    }
+
+    private static StringBuilder mergeValues(StringBuilder builder, String element) {
+        if (builder.isEmpty()) {
+            return builder.append(element);
+        }
+        return builder.append(", ").append(element);
+    }
+
+    private static String compileDefinition(String input) {
+        String definition = input.strip();
+        int separator = definition.lastIndexOf(" ");
+        if (separator >= 0) {
+            return definition.substring(0, separator);
+        }
+        else {
+            return "";
+        }
+    }
+
+    private static State divideValueChar(State state, Character c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+        State appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 }
