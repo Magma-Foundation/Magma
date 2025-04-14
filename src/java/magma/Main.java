@@ -86,19 +86,6 @@ public class Main {
         char[] asCharArray();
     }
 
-    public static final class JavaString implements String_ {
-        private final char[] value;
-
-        public JavaString(String value) {
-            this.value = value.toCharArray();
-        }
-
-        @Override
-        public char[] asCharArray() {
-            return this.value;
-        }
-    }
-
     private static class MutableDivideState implements DivideState {
         private final List_<Character> queue;
         private final List_<String> segments;
