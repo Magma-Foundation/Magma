@@ -40,7 +40,7 @@ struct MutableDivideState {
 	char (*pop)();
 	struct DivideState (*popAndAppend)();
 };
-struct Node(String beforeType, String type, String name) {
+struct Node {
 };
 struct Main {
 };

@@ -188,13 +188,19 @@ public class Main {
 
     private static Optional<String> compileToStruct(String stripped, String infix) {
         return compileInfix(stripped, infix, (_, right) -> {
-            return compileInfix(right, "{", (name, withEnd) -> {
+            return compileInfix(right, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd, "}", s -> {
-                    String newName = compileInfix(name, " implements ", (left, _) -> Optional.of(left.strip()))
-                            .orElse(name);
+                    String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> Optional.of(left))
+                            .orElse(beforeContent).strip();
+
+                    String name = compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
+                        return compileSuffix(withParamEnd.strip(), ")", params -> {
+                            return Optional.of(nameWithoutParams);
+                        });
+                    }).orElse(withoutImplements);
 
                     String outputContent = compileStatements(s, Main::compileClassMember);
-                    String value = "struct " + newName + " {" +
+                    String value = "struct " + name + " {" +
                             outputContent +
                             "\n};\n";
                     structs.add(value);
