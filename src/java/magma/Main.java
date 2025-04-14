@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -133,13 +134,13 @@ public class Main {
     }
 
     private static final Map<String, Function<List_<String>, Optional<String>>> expanding = new HashMap<>();
-    private static final List<String> structs = new ArrayList<>();
+    private static final Map<String, String> structs = new HashMap<>();
     private static final List<String> methods = new ArrayList<>();
-
+    private static final List<String> stack = new ArrayList<>();
+    private static final List<String> dependencies = new ArrayList<>();
+    private static Map<String, List<String>> structDependencies = new HashMap<>();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
     private static List_<Tuple<String, List_<String>>> hasExpand = Lists.emptyList();
-
-    private static Tuple<String, List_<String>> stringListTuple;
 
     public static void main(String[] args) {
         try {
@@ -154,7 +155,33 @@ public class Main {
 
     private static String compile(String input) {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
-        compiled.addAll(structs);
+
+        List<String> orderedStructs = new ArrayList<>();
+        while (!structDependencies.isEmpty()) {
+            List<String> toPrune = new ArrayList<>();
+            for (Map.Entry<String, List<String>> entry : structDependencies.entrySet()) {
+                List<String> dependencies = entry.getValue();
+                if (dependencies.isEmpty()) {
+                    toPrune.add(entry.getKey());
+                }
+            }
+
+            if (toPrune.isEmpty()) {
+                break;
+            }
+
+            orderedStructs.addAll(toPrune);
+            structDependencies = structDependencies.entrySet().stream()
+                    .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
+                    .map(entry -> removeDependencies(entry, toPrune))
+                    .collect(Collectors.toMap(Tuple::left, Tuple::right));
+        }
+
+        List<String> collected = orderedStructs.stream()
+                .map(structs::get)
+                .toList();
+
+        compiled.addAll(collected);
 
         while (!toExpand.isEmpty()) {
             Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = toExpand.pop();
@@ -172,6 +199,14 @@ public class Main {
         }
 
         return mergeStatements(compiled);
+    }
+
+    private static Tuple<String, List<String>> removeDependencies(Tuple<String, List<String>> entry, List<String> toPrune) {
+        List<String> newDependencies = entry.right.stream()
+                .filter(dependency -> !toPrune.contains(dependency))
+                .toList();
+
+        return new Tuple<>(entry.left, newDependencies);
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -267,8 +302,9 @@ public class Main {
 
             expanding.put(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
-                String value = generateStruct(newName, typeParams, argsInternal, params, s);
-                return Optional.of(value);
+                String generated = generateStruct(newName, typeParams, argsInternal, params, s);
+                structs.put(withoutParams, generated);
+                return Optional.of("");
             });
         }
         else {
@@ -276,7 +312,8 @@ public class Main {
                 return Optional.empty();
             }
 
-            structs.add(generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s));
+            String generated = generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s);
+            structs.put(withoutParams, generated);
         }
 
         return Optional.of("");
@@ -293,6 +330,10 @@ public class Main {
         });
 
         String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs));
+
+        structDependencies.put(name, new ArrayList<>(dependencies));
+        dependencies.clear();
+
         return "typedef struct {" +
                 String.join("", compiled) +
                 outputContent +
@@ -423,6 +464,7 @@ public class Main {
             return Optional.of("char");
         }
 
+        dependencies.add(stripped);
         Optional<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
         if (typeParamIndex.isPresent()) {
             return Optional.of(typeArgs.get(typeParamIndex.get()));
