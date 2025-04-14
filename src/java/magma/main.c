@@ -16,6 +16,7 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
 typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
@@ -45,6 +46,9 @@ typedef struct {
 	List__String (*segments)();
 } MutableDivideState;
 typedef struct {
+	String beforeType;
+	String type;
+	String name;
 } Node;
 typedef struct {
 } Main;
@@ -56,4 +60,6 @@ typedef struct {
 	Tuple_String_List__String (*pop)();
 } List__String;
 typedef struct {
+	String left;
+	List__String right;
 } Tuple_String_List__String;

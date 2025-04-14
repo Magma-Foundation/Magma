@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -185,8 +186,12 @@ public class Main {
         return output.toString();
     }
 
-    private static ArrayList<String> compileStatementsToList(String input, Function<String, String> compiler) {
+    private static List<String> compileStatementsToList(String input, Function<String, String> compiler) {
         List<String> segments = divideStatements(input);
+        return compileAll(segments, compiler);
+    }
+
+    private static ArrayList<String> compileAll(List<String> segments, Function<String, String> compiler) {
         ArrayList<String> compiled = new ArrayList<String>();
         for (String segment : segments) {
             compiled.add(compiler.apply(segment));
@@ -230,42 +235,49 @@ public class Main {
                     String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> Optional.of(left))
                             .orElse(beforeContent).strip();
 
-                    String withoutParams = compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
-                        return compileSuffix(withParamEnd.strip(), ")", params -> {
-                            return Optional.of(nameWithoutParams);
+                    return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
+                        return compileSuffix(withParamEnd.strip(), ")", paramString -> {
+                            List<String> params = divide(paramString, Main::divideValueChar);
+                            String stripped1 = nameWithoutParams.strip();
+                            return getString(s, stripped1, params);
                         });
-                    }).orElse(withoutImplements).strip();
-
-                    int typeParamStart = withoutParams.indexOf("<");
-                    if (typeParamStart >= 0) {
-                        String name = withoutParams.substring(0, typeParamStart).strip();
-                        List_<String> typeParams = Lists.fromNativeList(Arrays.stream(withoutParams.substring(typeParamStart + 1, withoutParams.length() - 1).strip().split(","))
-                                .map(String::strip)
-                                .filter(value -> !value.isEmpty())
-                                .toList());
-
-                        if (!isSymbol(name)) {
-                            return Optional.empty();
-                        }
-
-                        expandables.put(name, argsInternal -> {
-                            String newName = stringify(name, argsInternal);
-                            String value = generateStruct(s, newName, argsInternal, typeParams);
-                            return Optional.of(value);
-                        });
-                    }
-                    else {
-                        if (!isSymbol(withoutParams)) {
-                            return Optional.empty();
-                        }
-
-                        structs.add(generateStruct(s, withoutParams, Lists.emptyList(), Lists.emptyList()));
-                    }
-
-                    return Optional.of("");
+                    }).or(() -> {
+                        String stripped1 = withoutImplements.strip();
+                        return getString(s, stripped1, Collections.emptyList());
+                    });
                 });
             });
         });
+    }
+
+    private static Optional<String> getString(String s, String withoutParams, List<String> params) {
+        int typeParamStart = withoutParams.indexOf("<");
+        if (typeParamStart >= 0) {
+            String name = withoutParams.substring(0, typeParamStart).strip();
+            List_<String> typeParams = Lists.fromNativeList(Arrays.stream(withoutParams.substring(typeParamStart + 1, withoutParams.length() - 1).strip().split(","))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList());
+
+            if (!isSymbol(name)) {
+                return Optional.empty();
+            }
+
+            expandables.put(name, argsInternal -> {
+                String newName = stringify(name, argsInternal);
+                String value = generateStruct(newName, typeParams, argsInternal, params, s);
+                return Optional.of(value);
+            });
+        }
+        else {
+            if (!isSymbol(withoutParams)) {
+                return Optional.empty();
+            }
+
+            structs.add(generateStruct(withoutParams, Lists.emptyList(), Lists.emptyList(), params, s));
+        }
+
+        return Optional.of("");
     }
 
     private static String stringify(String name, List_<String> args) {
@@ -273,9 +285,14 @@ public class Main {
         return name + "_" + joined;
     }
 
-    private static String generateStruct(String body, String name, List_<String> typeArgs, List_<String> typeParams) {
+    private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List<String> params, String body) {
+        ArrayList<String> compiled = compileAll(params, param -> {
+            return compileDefinition(param, typeParams, typeArgs, Main::generateDefinition).orElse("");
+        });
+
         String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs));
         return "typedef struct {" +
+                String.join("", compiled) +
                 outputContent +
                 "\n} " +
                 name +
@@ -413,26 +430,30 @@ public class Main {
             return Optional.of(stripped);
         }
 
+        return compileGenericType(typeParams, typeArgs, stripped)
+                .or(() -> Optional.of(generatePlaceholder(stripped)));
+    }
+
+    private static Optional<String> compileGenericType(List_<String> typeParams, List_<String> typeArgs, String stripped) {
         return compileSuffix(stripped, ">", withoutEnd -> {
             return compileInfix(withoutEnd, "<", (base, args) -> {
                 String strippedBase = base.strip();
-                if (isSymbol(strippedBase)) {
-                    List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar)
-                            .stream()
-                            .map(input1 -> compileType(input1, typeParams, typeArgs))
-                            .flatMap(Optional::stream)
-                            .toList());
-
-                    if (!isDefined(strippedBase, list, expansions) && !isDefined(strippedBase, list, visited)) {
-                        expansions = expansions.add(new Tuple<>(strippedBase, list));
-                    }
-                    return Optional.of(stringify(strippedBase, list));
-                }
-                else {
+                if (!isSymbol(strippedBase)) {
                     return Optional.empty();
                 }
+
+                List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar)
+                        .stream()
+                        .map(input1 -> compileType(input1, typeParams, typeArgs))
+                        .flatMap(Optional::stream)
+                        .toList());
+
+                if (!isDefined(strippedBase, list, expansions) && !isDefined(strippedBase, list, visited)) {
+                    expansions = expansions.add(new Tuple<>(strippedBase, list));
+                }
+                return Optional.of(stringify(strippedBase, list));
             });
-        }).or(() -> Optional.of(generatePlaceholder(stripped)));
+        });
     }
 
     private static DivideState divideValueChar(DivideState state, Character c) {
