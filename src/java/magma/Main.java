@@ -258,9 +258,11 @@ public class Main {
 
     private static String generateStruct(String body, String name) {
         String outputContent = compileStatements(body, Main::compileClassMember);
-        return "struct " + name + " {" +
+        return "typedef struct {" +
                 outputContent +
-                "\n};\n";
+                "\n} " +
+                name +
+                ";\n";
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> compiler) {
@@ -386,14 +388,19 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return Optional.of("struct " + stripped);
+            return Optional.of(stripped);
         }
 
         return compileSuffix(stripped, ">", withoutEnd -> {
             return compileInfix(withoutEnd, "<", (base, args) -> {
                 String strippedBase = base.strip();
                 if (isSymbol(strippedBase)) {
-                    List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar));
+                    List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar)
+                            .stream()
+                            .map(Main::compileType)
+                            .flatMap(Optional::stream)
+                            .toList());
+
                     if (!isDefined(strippedBase, list)) {
                         expansions = expansions.add(new Tuple<>(strippedBase, list));
                     }
@@ -408,7 +415,7 @@ public class Main {
 
     private static DivideState divideValueChar(DivideState state, Character c) {
         if (c == ',' && state.isLevel()) {
-            return state;
+            return state.advance();
         }
 
         DivideState appended = state.append(c);

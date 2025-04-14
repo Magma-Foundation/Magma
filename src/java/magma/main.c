@@ -15,42 +15,42 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-struct DivideState {
-	struct DivideState (*popAndAppend)();
-	struct DivideState (*advance)();
-	struct DivideState (*append)();
+typedef struct {
+	DivideState (*popAndAppend)();
+	DivideState (*advance)();
+	DivideState (*append)();
 	List__String (*segments)();
 	int (*isLevel)();
-	struct DivideState (*enter)();
-	struct DivideState (*exit)();
+	DivideState (*enter)();
+	DivideState (*exit)();
 	int (*isShallow)();
 	int (*hasNext)();
 	char (*pop)();
-};
-struct MutableDivideState {
+} DivideState;
+typedef struct {
 	Deque_Character queue;
 	List__String segments;
-	struct StringBuilder buffer;
+	StringBuilder buffer;
 	int depth;
-	struct DivideState (*advance)();
-	struct DivideState (*append)();
+	DivideState (*advance)();
+	DivideState (*append)();
 	int (*isLevel)();
-	struct DivideState (*enter)();
-	struct DivideState (*exit)();
+	DivideState (*enter)();
+	DivideState (*exit)();
 	int (*isShallow)();
 	int (*hasNext)();
 	char (*pop)();
-	struct DivideState (*popAndAppend)();
+	DivideState (*popAndAppend)();
 	List__String (*segments)();
-};
-struct Node {
-};
-struct Main {
-};
-struct List__String {
-	struct T (*get)();
+} MutableDivideState;
+typedef struct {
+} Node;
+typedef struct {
+} Main;
+typedef struct {
+	T (*get)();
 	int (*size)();
 	List__T (*add)();
-};
-struct Tuple_String List_<String> {
-};
+} List__String;
+typedef struct {
+} Tuple_String_List__String;
