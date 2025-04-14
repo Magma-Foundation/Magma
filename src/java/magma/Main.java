@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +136,6 @@ public class Main {
 
     private static final Map<String, Function<List_<String>, Optional<String>>> expanding = new HashMap<>();
     private static final Map<String, String> structs = new HashMap<>();
-    private static final List<String> methods = new ArrayList<>();
-    private static final List<String> stack = new ArrayList<>();
     private static final List<String> dependencies = new ArrayList<>();
     private static Map<String, List<String>> structDependencies = new HashMap<>();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
@@ -156,26 +155,7 @@ public class Main {
     private static String compile(String input) {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
 
-        List<String> orderedStructs = new ArrayList<>();
-        while (!structDependencies.isEmpty()) {
-            List<String> toPrune = new ArrayList<>();
-            for (Map.Entry<String, List<String>> entry : structDependencies.entrySet()) {
-                List<String> dependencies = entry.getValue();
-                if (dependencies.isEmpty()) {
-                    toPrune.add(entry.getKey());
-                }
-            }
-
-            if (toPrune.isEmpty()) {
-                break;
-            }
-
-            orderedStructs.addAll(toPrune);
-            structDependencies = structDependencies.entrySet().stream()
-                    .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
-                    .map(entry -> removeDependencies(entry, toPrune))
-                    .collect(Collectors.toMap(Tuple::left, Tuple::right));
-        }
+        List<String> orderedStructs = orderStructs();
 
         List<String> collected = orderedStructs.stream()
                 .map(structs::get)
@@ -199,6 +179,35 @@ public class Main {
         }
 
         return mergeStatements(compiled);
+    }
+
+    private static List<String> orderStructs() {
+        List<String> orderedStructs = new ArrayList<>();
+        while (!structDependencies.isEmpty()) {
+            List<String> toPrune = new ArrayList<>();
+            for (Map.Entry<String, List<String>> entry : structDependencies.entrySet()) {
+                List<String> dependencies = entry.getValue();
+                if (dependencies.isEmpty()) {
+                    toPrune.add(entry.getKey());
+                }
+            }
+
+            if (toPrune.isEmpty()) {
+                ArrayList<Map.Entry<String, List<String>>> list = new ArrayList<>(structDependencies.entrySet());
+                list.sort(Comparator.comparingInt(value -> value.getValue().size()));
+                return list.stream()
+                        .map(Map.Entry::getKey)
+                        .toList();
+            }
+
+            orderedStructs.addAll(toPrune);
+            structDependencies = structDependencies.entrySet().stream()
+                    .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
+                    .map(entry -> removeDependencies(entry, toPrune))
+                    .collect(Collectors.toMap(Tuple::left, Tuple::right));
+        }
+
+        return orderedStructs;
     }
 
     private static Tuple<String, List<String>> removeDependencies(Tuple<String, List<String>> entry, List<String> toPrune) {
