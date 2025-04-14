@@ -9,6 +9,11 @@ class Strings {
         }
 
         @Override
+        public String toString() {
+            return new String(this.value);
+        }
+
+        @Override
         public char[] asCharArray() {
             return this.value;
         }
@@ -20,5 +25,9 @@ class Strings {
 
     public static String toSlice(Main.String_ string) {
         return new String(string.asCharArray());
+    }
+
+    public static Main.String_ emptyString() {
+        return new JavaString("");
     }
 }

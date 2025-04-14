@@ -157,14 +157,28 @@ public class Main {
     }
 
     private static final class Node {
-        private final String_ beforeType;
-        private final String_ type;
-        private final String_ name;
+        private final Map<String, String_> internalMap;
 
-        private Node(String_ beforeType, String_ type, String_ name) {
-            this.beforeType = beforeType;
-            this.type = type;
-            this.name = name;
+        public Node() {
+            this(new HashMap<>());
+        }
+
+        private Node(Map<String, String_> internalMap) {
+            this.internalMap = internalMap;
+        }
+
+        private Node withString(String propertyKey, String_ propertyValue) {
+            this.internalMap.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String_> findString(String propertyKey) {
+            if (this.internalMap.containsKey(propertyKey)) {
+                return new Some<>(this.internalMap.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -469,7 +483,7 @@ public class Main {
         return compileAll(segments, compiler);
     }
 
-    private static List_<String> compileAll(List_<String> segments, Function<String, String> compiler) {
+    private static <T> List_<T> compileAll(List_<String> segments, Function<String, T> compiler) {
         return segments.iter()
                 .map(compiler)
                 .collect(new ListCollector<>());
@@ -586,7 +600,8 @@ public class Main {
 
     private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List_<String> params, String body, List_<String> permits) {
         List_<String> compiled = compileAll(params, param -> {
-            return compileDefinition(param, typeParams, typeArgs, Main::generateDefinition).orElse("");
+            Function<Node, Option<String>> generator = Main::generateDefinition;
+            return parseDefinition(param, typeParams, typeArgs).flatMap(generator::apply).orElse("");
         });
 
         String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs, permits));
@@ -632,7 +647,12 @@ public class Main {
         return compileInfix(input, infix, Main::locateFirst, compiler);
     }
 
-    private static Option<String> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Option<String>> compiler) {
+    private static <T> Option<T> compileInfix(
+            String input,
+            String infix,
+            BiFunction<String, String, Integer> locator,
+            BiFunction<String, String, Option<T>> compiler
+    ) {
         int index = locator.apply(input, infix);
         if (index < 0) {
             return new None<>();
@@ -667,52 +687,61 @@ public class Main {
 
     private static Option<String> compileDefinitionStatement(String classMember, List_<String> typeParams, List_<String> typeArgs) {
         return compileSuffix(classMember, ";", inner -> {
-            return compileDefinition(inner, typeParams, typeArgs, Main::generateDefinition);
+            Function<Node, Option<String>> generator = Main::generateDefinition;
+            return parseDefinition(inner, typeParams, typeArgs).flatMap(generator::apply);
         });
     }
 
     private static Option<String> generateDefinition(Node node) {
-        return generateStatement(Strings.toSlice(node.beforeType) + Strings.toSlice(node.type) + " " + Strings.toSlice(node.name));
+        return generateStatement(Strings.toSlice(node.findString("type").orElse(Strings.emptyString())) + " " + Strings.toSlice(node.findString("name").orElse(Strings.emptyString())));
     }
 
     private static Option<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs, List_<String> permits) {
         return compileInfix(input, "(", (definition, withParams) -> {
-            return compileInfix(withParams, ")", new BiFunction<String, String, Option<String>>() {
-                @Override
-                public Option<String> apply(String params, String s2) {
-                    if (!permits.isEmpty()) {
-                        return new Some<>("");
-                    }
-                    else {
-                        List_<String> newParams = compileAll(divideValues(params), definition -> compileDefinition(definition, typeParams, typeArgs, Main::generateDefinition).orElse(""));
-                        return compileDefinition(definition, typeParams, typeArgs, Main::generateFunctionalDefinition);
-                    }
+            return compileInfix(withParams, ")", (params, s2) -> {
+                if (!permits.isEmpty()) {
+                    return new Some<>("");
                 }
+
+                List_<Node> newParams = compileAll(divideValues(params), definition1 -> {
+                    return parseDefinition(definition1, typeParams, typeArgs).orElse(new Node());
+                });
+
+                List_<String_> paramTypes = newParams.iter()
+                        .map(node -> node.findString("type").orElse(Strings.emptyString()))
+                        .collect(new ListCollector<>());
+
+                return parseDefinition(definition, typeParams, typeArgs).flatMap(node -> generateFunctionalDefinition(node, paramTypes));
             });
         });
     }
 
-    private static Option<String> compileDefinition(String definition, List_<String> typeParams, List_<String> typeArgs, Function<Node, Option<String>> generator) {
+    private static Option<Node> parseDefinition(String definition, List_<String> typeParams, List_<String> typeArgs) {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
+            Node withName = new Node().withString("name", Strings.fromSlice(name));
             return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
-                return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
-                    List_<String> modifiers = Lists.of(beforeType.strip().split(" "))
-                            .iter()
-                            .map(String::strip)
-                            .filter(value -> !value.isEmpty())
-                            .collect(new ListCollector<>());
-
-                    if (Lists.contains(modifiers, "static", String::equals)) {
-                        return new Some<>("");
-                    }
-
-                    return generator.apply(new Node(Strings.fromSlice(""), Strings.fromSlice(compiledType), Strings.fromSlice(name)));
-                });
+                return getStringOption(typeParams, typeArgs, withName, beforeType, type);
             }).or(() -> {
                 return compileType(beforeName.strip(), typeParams, typeArgs).flatMap(compiledType -> {
-                    return generator.apply(new Node(Strings.fromSlice(""), Strings.fromSlice(compiledType), Strings.fromSlice(name)));
+                    return new Some<>(withName.withString("type", Strings.fromSlice(compiledType)));
                 });
             });
+        });
+    }
+
+    private static Option<Node> getStringOption(List_<String> typeParams, List_<String> typeArgs, Node withName, String beforeType, String type) {
+        return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
+            List_<String> modifiers = Lists.of(beforeType.strip().split(" "))
+                    .iter()
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .collect(new ListCollector<>());
+
+            if (Lists.contains(modifiers, "static", String::equals)) {
+                return new Some<>(new Node());
+            }
+
+            return new Some<>(withName.withString("type", Strings.fromSlice(compiledType)));
         });
     }
 
@@ -734,8 +763,15 @@ public class Main {
         return -1;
     }
 
-    private static Option<String> generateFunctionalDefinition(Node node) {
-        return generateStatement(Strings.toSlice(node.beforeType) + Strings.toSlice(node.type) + " (*" + Strings.toSlice(node.name) + ")()");
+    private static Option<String> generateFunctionalDefinition(Node node, List_<String_> paramTypes) {
+        String joined = paramTypes.iter()
+                .map(Strings::toSlice)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        String_ type = node.findString("type").orElse(Strings.emptyString());
+        String_ name = node.findString("name").orElse(Strings.emptyString());
+        return generateStatement("%s (*%s)(%s)".formatted(Strings.toSlice(type), Strings.toSlice(name), joined));
     }
 
     private static Option<String> generateStatement(String content) {
