@@ -100,6 +100,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        return "/* " + input + " */";
+        if (input.contains("class ")) {
+            return "struct Temp {\n};\n";
+        }
+
+        return "/* " + input.strip() + " */\n";
     }
 }
