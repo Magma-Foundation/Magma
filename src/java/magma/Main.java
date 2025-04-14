@@ -8,18 +8,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     public interface List_<T> {
@@ -32,6 +29,32 @@ public class Main {
         boolean isEmpty();
 
         Tuple<T, List_<T>> pop();
+
+        Iterator<T> iter();
+
+        List_<T> addAll(List_<T> elements);
+    }
+
+    public interface Iterator<T> {
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <C> C collect(Collector<T, C> collector);
+
+        Iterator<T> filter(Predicate<T> predicate);
+
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> flatMap);
+
+        Iterator<T> concat(Iterator<T> other);
+
+        Optional<T> next();
+    }
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
     }
 
     private interface DivideState {
@@ -54,6 +77,10 @@ public class Main {
         boolean hasNext();
 
         Tuple<Character, DivideState> pop();
+    }
+
+    private interface Head<T> {
+        Optional<T> next();
     }
 
     private record String_(String value) {
@@ -139,34 +166,6 @@ public class Main {
             this.type = type;
             this.name = name;
         }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (Node) obj;
-            return Objects.equals(this.beforeType, that.beforeType) &&
-                    Objects.equals(this.type, that.type) &&
-                    Objects.equals(this.name, that.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.beforeType, this.type, this.name);
-        }
-
-        @Override
-        public String toString() {
-            return "Node[" +
-                    "beforeType=" + this.beforeType + ", " +
-                    "type=" + this.type + ", " +
-                    "name=" + this.name + ']';
-        }
-
     }
 
     public record Tuple<A, B>(A left, B right) {
@@ -175,10 +174,139 @@ public class Main {
         }
     }
 
+    private static class ListCollector<T> implements Collector<T, List_<T>> {
+        @Override
+        public List_<T> createInitial() {
+            return Lists.emptyList();
+        }
+
+        @Override
+        public List_<T> fold(List_<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
+    private static class Joiner implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        }
+    }
+
+    public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> new HeadedIterator<>(predicate.test(element)
+                    ? new SingleHead<>(element)
+                    : new EmptyHead<T>()));
+        }
+
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Optional<R> withNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (withNext.isPresent()) {
+                    current = withNext.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> flatMap) {
+            return this.map(flatMap).fold(Iterators.empty(), Iterator::concat);
+        }
+
+        @Override
+        public Iterator<T> concat(Iterator<T> other) {
+            return new HeadedIterator<>(() -> this.head.next().or(other::next));
+        }
+
+        @Override
+        public Optional<T> next() {
+            return this.head.next();
+        }
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> fromOption(Optional<T> optional) {
+            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
+
+        public static <T> Iterator<T> empty() {
+            return new HeadedIterator<>(new EmptyHead<>());
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            }
+            this.retrieved = true;
+            return Optional.of(this.value);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Optional<T> next() {
+            return Optional.empty();
+        }
+    }
+
+    public static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int index;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.index >= this.length) {
+                return Optional.empty();
+            }
+
+            int value = this.index;
+            this.index++;
+            return Optional.of(value);
+
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Optional<String>>> expanding = new HashMap<>();
     private static final Map<String, String> structs = new HashMap<>();
-    private static final List<String> dependencies = new ArrayList<>();
-    private static Map<String, List<String>> structDependencies = new HashMap<>();
+    private static List_<String> dependencies = Lists.emptyList();
+    private static Map<String, List_<String>> structDependencies = new HashMap<>();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.emptyList();
     private static List_<Tuple<String, List_<String>>> hasExpand = Lists.emptyList();
 
@@ -194,20 +322,20 @@ public class Main {
     }
 
     private static String compile(String input) {
-        List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
+        List_<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
         expand(compiled);
 
-        List<String> orderedStructs = orderStructs();
-        List<String> collected = orderedStructs.stream()
+        List_<String> orderedStructs = orderStructs();
+        List_<String> collected = orderedStructs.iter()
                 .map(struct -> structs.getOrDefault(struct, generatePlaceholder(struct)))
-                .toList();
+                .collect(new ListCollector<>());
 
         compiled.addAll(collected);
 
         return mergeStatements(compiled);
     }
 
-    private static void expand(List<String> compiled) {
+    private static void expand(List_<String> compiled) {
         while (!toExpand.isEmpty()) {
             Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = toExpand.pop();
             Tuple<String, List_<String>> entry = popped.left;
@@ -224,23 +352,23 @@ public class Main {
         }
     }
 
-    private static List<String> orderStructs() {
-        List<String> orderedStructs = new ArrayList<>();
+    private static List_<String> orderStructs() {
+        List_<String> orderedStructs = Lists.emptyList();
         while (!structDependencies.isEmpty()) {
-            List<String> toPrune = new ArrayList<>();
-            for (Map.Entry<String, List<String>> entry : structDependencies.entrySet()) {
-                List<String> dependencies = entry.getValue();
+            List_<String> toPrune = Lists.emptyList();
+            for (Map.Entry<String, List_<String>> entry : structDependencies.entrySet()) {
+                List_<String> dependencies = entry.getValue();
                 if (dependencies.isEmpty()) {
                     toPrune.add(entry.getKey());
                 }
             }
 
             if (toPrune.isEmpty()) {
-                ArrayList<Map.Entry<String, List<String>>> list = new ArrayList<>(structDependencies.entrySet());
+                ArrayList<Map.Entry<String, List_<String>>> list = new ArrayList<>(structDependencies.entrySet());
                 list.sort(Comparator.comparingInt(value -> value.getValue().size()));
-                return list.stream()
+                return Lists.fromNativeList(list.stream()
                         .map(Map.Entry::getKey)
-                        .toList();
+                        .toList());
             }
 
             orderedStructs.addAll(toPrune);
@@ -253,39 +381,34 @@ public class Main {
         return orderedStructs;
     }
 
-    private static Tuple<String, List<String>> removeDependencies(Tuple<String, List<String>> entry, List<String> toPrune) {
-        List<String> newDependencies = entry.right.stream()
-                .filter(dependency -> !toPrune.contains(dependency))
-                .toList();
+    private static Tuple<String, List_<String>> removeDependencies(Tuple<String, List_<String>> entry, List_<String> toPrune) {
+        List_<String> newDependencies = entry.right.iter()
+                .filter(dependency -> !Lists.contains(toPrune, dependency, String::equals))
+                .collect(new ListCollector<>());
 
         return new Tuple<>(entry.left, newDependencies);
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
-        List<String> compiled = compileStatementsToList(input, compiler);
+        List_<String> compiled = compileStatementsToList(input, compiler);
         return mergeStatements(compiled);
     }
 
-    private static String mergeStatements(List<String> compiled) {
-        StringBuilder output = new StringBuilder();
-        for (String s : compiled) {
-            output.append(s);
-        }
-
-        return output.toString();
+    private static String mergeStatements(List_<String> compiled) {
+        return compiled.iter()
+                .fold(new StringBuilder(), (buffer, segment) -> buffer.append(segment))
+                .toString();
     }
 
-    private static List<String> compileStatementsToList(String input, Function<String, String> compiler) {
-        List<String> segments = divideStatements(input);
+    private static List_<String> compileStatementsToList(String input, Function<String, String> compiler) {
+        List_<String> segments = divideStatements(input);
         return compileAll(segments, compiler);
     }
 
-    private static ArrayList<String> compileAll(List<String> segments, Function<String, String> compiler) {
-        ArrayList<String> compiled = new ArrayList<String>();
-        for (String segment : segments) {
-            compiled.add(compiler.apply(segment));
-        }
-        return compiled;
+    private static List_<String> compileAll(List_<String> segments, Function<String, String> compiler) {
+        return segments.iter()
+                .map(compiler)
+                .collect(new ListCollector<>());
     }
 
     private static String compileRootSegment(String input) {
@@ -326,20 +449,20 @@ public class Main {
 
                     return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
                         return compileSuffix(withParamEnd.strip(), ")", paramString -> {
-                            List<String> params = divide(paramString, Main::divideValueChar);
+                            List_<String> params = divide(paramString, Main::divideValueChar);
                             String stripped1 = nameWithoutParams.strip();
                             return getString(s, stripped1, params);
                         });
                     }).or(() -> {
                         String stripped1 = withoutImplements.strip();
-                        return getString(s, stripped1, Collections.emptyList());
+                        return getString(s, stripped1, Lists.emptyList());
                     });
                 });
             });
         });
     }
 
-    private static Optional<String> getString(String s, String withoutParams, List<String> params) {
+    private static Optional<String> getString(String s, String withoutParams, List_<String> params) {
         int typeParamStart = withoutParams.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParams.substring(0, typeParamStart).strip();
@@ -376,18 +499,22 @@ public class Main {
         return name + "_" + joined;
     }
 
-    private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List<String> params, String body) {
-        ArrayList<String> compiled = compileAll(params, param -> {
+    private static String generateStruct(String name, List_<String> typeParams, List_<String> typeArgs, List_<String> params, String body) {
+        List_<String> compiled = compileAll(params, param -> {
             return compileDefinition(param, typeParams, typeArgs, Main::generateDefinition).orElse("");
         });
 
         String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs));
 
-        structDependencies.put(name, new ArrayList<>(dependencies));
-        dependencies.clear();
+        structDependencies.put(name, dependencies);
+        dependencies = Lists.emptyList();
+
+        String joined = compiled.iter()
+                .collect(new Joiner())
+                .orElse("");
 
         return "typedef struct {" +
-                String.join("", compiled) +
+                joined +
                 outputContent +
                 "\n} " +
                 name +
@@ -457,12 +584,13 @@ public class Main {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
             return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
                 return compileType(type, typeParams, typeArgs).flatMap(compiledType -> {
-                    List<String> modifiers = Stream.of(beforeType.strip().split(" "))
+                    List_<String> modifiers = Lists.of(beforeType.strip().split(" "))
+                            .iter()
                             .map(String::strip)
                             .filter(value -> !value.isEmpty())
-                            .toList();
+                            .collect(new ListCollector<>());
 
-                    if (modifiers.contains("static")) {
+                    if (Lists.contains(modifiers, "static", String::equals)) {
                         return Optional.of("");
                     }
 
@@ -538,11 +666,11 @@ public class Main {
                     return Optional.empty();
                 }
 
-                List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar)
-                        .stream()
+                List_<String> list = divide(args, Main::divideValueChar)
+                        .iter()
                         .map(input1 -> compileType(input1, typeParams, typeArgs))
-                        .flatMap(Optional::stream)
-                        .toList());
+                        .flatMap(Iterators::fromOption)
+                        .collect(new ListCollector<>());
 
                 if (!isDefined(strippedBase, list, toExpand) && !isDefined(strippedBase, list, hasExpand)) {
                     toExpand = toExpand.add(new Tuple<>(strippedBase, list));
@@ -584,11 +712,11 @@ public class Main {
         return true;
     }
 
-    private static List<String> divideStatements(String input) {
+    private static List_<String> divideStatements(String input) {
         return divide(input, Main::divideStatementChar);
     }
 
-    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> divideStatementChar) {
+    private static List_<String> divide(String input, BiFunction<DivideState, Character, DivideState> divideStatementChar) {
         List_<Character> queue = Lists.fromNativeList(IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .toList());
@@ -599,7 +727,7 @@ public class Main {
             current = divideDecorated(tuple.right, tuple.left, divideStatementChar);
         }
 
-        return Lists.toNativeList(current.advance().segments());
+        return current.advance().segments();
     }
 
     private static DivideState divideDecorated(DivideState current, char c, BiFunction<DivideState, Character, DivideState> divider) {

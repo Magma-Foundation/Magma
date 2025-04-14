@@ -38,6 +38,16 @@ class Lists {
             List<T> slice = this.elements.subList(1, this.elements.size());
             return new Main.Tuple<>(this.elements.getFirst(), new JavaList<>(slice));
         }
+
+        @Override
+        public Main.Iterator<T> iter() {
+            return new Main.HeadedIterator<>(new Main.RangeHead(this.elements.size())).map(this.elements::get);
+        }
+
+        @Override
+        public Main.List_<T> addAll(Main.List_<T> elements) {
+            return elements.iter().<Main.List_<T>>fold(this, Main.List_::add);
+        }
     }
 
     public static <T> Main.List_<T> fromNativeList(List<T> list) {

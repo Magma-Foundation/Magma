@@ -14,21 +14,26 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-#include <temp.h>
-#include <temp.h>
-#include <temp.h>
-/* List_String*//* ArrayList_String*//* Optional_String*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*/typedef struct {
+/* Optional_String*//* Optional_Integer*//* Optional_/* ? extends String*/*//* Optional_/* ? extends DivideState*/*//* Optional_DivideState*//* Optional_T*//* Optional_char*//* Optional_R*/typedef struct {
 	String value;
 } String_;
-/* Tuple_String_List_String*//* Tuple_char_List__char*//* Tuple_char_DivideState*//* Tuple_String_List__String*/typedef struct {
+typedef struct {
+	int length;
+	int index;
+	Optional_Integer (*next)();
+} RangeHead;
+/* Tuple_char_DivideState*//* Tuple_String_List__String*//* Tuple_char_List__char*/typedef struct {
 	String_ beforeType;
 	String_ type;
 	String_ name;
-	int (*equals)();
-	int (*hashCode)();
-	String (*toString)();
 } Node;
-/* List__char*//* List__String*/typedef struct {
+typedef struct {
+	Optional_String (*createInitial)();
+	Optional_String (*fold)();
+} Joiner;
+typedef struct {
+} Iterators;
+typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
 	DivideState (*append)();
@@ -40,7 +45,7 @@
 	int (*hasNext)();
 	Tuple_char_DivideState (*pop)();
 } DivideState;
-typedef struct {
+/* List__char*//* List__String*//* Iterator_char*//* Iterator_String*//* Iterator_R*//* Iterator_T*/typedef struct {
 	List__char queue;
 	List__String segments;
 	StringBuilder buffer;
