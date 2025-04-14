@@ -1,6 +1,19 @@
-typedef struct {
-	char* (*asCharArray)();
-} String_;
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
+#include <temp.h>
 typedef struct {
 	int length;
 	int index;
@@ -22,15 +35,6 @@ typedef struct {
 	char left;
 	List__char right;
 } Tuple_char_List__char;
-typedef struct {
-	char* value;
-	char* (*asCharArray)();
-} JavaString;
-typedef struct {
-	String_ beforeType;
-	String_ type;
-	String_ name;
-} Node;
 typedef struct {
 } Iterators;
 typedef struct {
@@ -94,15 +98,6 @@ typedef struct {
 	Option_R (*flatMap)();
 } Option_int;
 typedef struct {
-	char (*get)();
-	int (*size)();
-	List__char (*add)();
-	int (*isEmpty)();
-	Tuple_char_List__char (*pop)();
-	Iterator_char (*iter)();
-	List__char (*addAll)();
-} List__char;
-typedef struct {
 	List__char queue;
 	List__char* segments;
 	StringBuilder buffer;
@@ -118,15 +113,6 @@ typedef struct {
 	DivideState (*popAndAppend)();
 	List__char* (*segments)();
 } MutableDivideState;
-typedef struct {
-	char* (*get)();
-	int (*size)();
-	List__char* (*add)();
-	int (*isEmpty)();
-	Tuple_char*_List__char* (*pop)();
-	Iterator_char* (*iter)();
-	List__char* (*addAll)();
-} List__char*;
 typedef struct {
 	Iterator_R (*map)();
 	C (*collect)();
@@ -163,5 +149,25 @@ typedef struct {
 	Iterator_T (*concat)();
 	Option_T (*next)();
 } Iterator_T;
+typedef struct {
+	char (*get)();
+	int (*size)();
+	List__char (*add)();
+	int (*isEmpty)();
+	Tuple_char_List__char (*pop)();
+	Iterator_char (*iter)();
+	List__char (*addAll)();
+	List__char (*sort)();
+} List__char;
+typedef struct {
+	char* (*get)();
+	int (*size)();
+	List__char* (*add)();
+	int (*isEmpty)();
+	Tuple_char*_List__char* (*pop)();
+	Iterator_char* (*iter)();
+	List__char* (*addAll)();
+	List__char* (*sort)();
+} List__char*;
 typedef struct {
 } Main;

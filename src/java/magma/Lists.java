@@ -47,6 +47,13 @@ class Lists {
         public Main.List_<T> addAll(Main.List_<T> elements) {
             return elements.iter().<Main.List_<T>>fold(this, Main.List_::add);
         }
+
+        @Override
+        public Main.List_<T> sort(BiFunction<T, T, Integer> comparator) {
+            ArrayList<T> copy = new ArrayList<>(this.elements);
+            copy.sort(comparator::apply);
+            return new JavaList<>(copy);
+        }
     }
 
     public static <T> Main.List_<T> fromNativeList(List<T> list) {

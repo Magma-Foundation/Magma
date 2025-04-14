@@ -47,6 +47,8 @@ public class Main {
         Iterator<T> iter();
 
         List_<T> addAll(List_<T> elements);
+
+        List_<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
     public interface Iterator<T> {
@@ -456,15 +458,18 @@ public class Main {
             }
 
             if (toPrune.isEmpty()) {
-                ArrayList<Map.Entry<String, List_<String>>> list = new ArrayList<>(structDependencies.entrySet());
-                list.sort(Comparator.comparingInt(value -> value.getValue().size()));
-                return Lists.fromNativeList(list.stream()
+                return Lists.fromNativeList(new ArrayList<>(structDependencies.entrySet()))
+                        .iter()
+                        .filter(entry -> !Lists.contains(orderedStructs, entry.getKey(), String::equals))
+                        .collect(new ListCollector<>())
+                        .sort((first, second) -> first.getValue().size() - second.getValue().size()).iter()
                         .map(Map.Entry::getKey)
-                        .toList());
+                        .collect(new ListCollector<>());
             }
 
             orderedStructs.addAll(toPrune);
             structDependencies = structDependencies.entrySet().stream()
+                    .filter(entry -> !Lists.contains(toPrune, entry.getKey(), String::equals))
                     .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()))
                     .map(entry -> removeDependencies(entry, toPrune))
                     .collect(Collectors.toMap(Tuple::left, Tuple::right));
@@ -740,13 +745,17 @@ public class Main {
             return new Some<>("char*");
         }
 
-        return getStringOption(stripped, typeParams, typeArgs).map(inner -> {
+        if (stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()), typeParams, typeArgs).map(result -> result + "*");
+        }
+
+        return compileDependentType(stripped, typeParams, typeArgs).map(inner -> {
             dependencies.add(inner);
             return inner;
         });
     }
 
-    private static Option<String> getStringOption(String stripped, List_<String> typeParams, List_<String> typeArgs) {
+    private static Option<String> compileDependentType(String stripped, List_<String> typeParams, List_<String> typeArgs) {
         Option<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
         if (typeParamIndex.isPresent()) {
             return new Some<>(typeArgs.get(typeParamIndex.orElse(null)));
@@ -754,10 +763,6 @@ public class Main {
 
         if (isSymbol(stripped)) {
             return new Some<>(stripped);
-        }
-
-        if (stripped.endsWith("[]")) {
-            return compileType(stripped.substring(0, stripped.length() - "[]".length()), typeParams, typeArgs).map(result -> result + "*");
         }
 
         return compileGenericType(typeParams, typeArgs, stripped)
