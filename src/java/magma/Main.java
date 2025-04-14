@@ -736,6 +736,10 @@ public class Main {
             return new Some<>("char");
         }
 
+        if (stripped.equals("String")) {
+            return new Some<>("char*");
+        }
+
         return getStringOption(stripped, typeParams, typeArgs).map(inner -> {
             dependencies.add(inner);
             return inner;
@@ -752,7 +756,7 @@ public class Main {
             return new Some<>(stripped);
         }
 
-        if(stripped.endsWith("[]")) {
+        if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), typeParams, typeArgs).map(result -> result + "*");
         }
 
