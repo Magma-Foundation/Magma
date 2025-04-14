@@ -529,7 +529,7 @@ public class Main {
 
         return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
             return compileSuffix(withParamEnd.strip(), ")", paramString -> {
-                List_<String> params = divide(paramString, Main::divideValueChar);
+                List_<String> params = divideValues(paramString);
                 String stripped1 = nameWithoutParams.strip();
                 return getString(content, stripped1, params, permits);
             });
@@ -537,6 +537,10 @@ public class Main {
             String stripped1 = withoutImplements.strip();
             return getString(content, stripped1, Lists.emptyList(), permits);
         });
+    }
+
+    private static List_<String> divideValues(String paramString) {
+        return divide(paramString, Main::divideValueChar);
     }
 
     private static Option<String> getString(String s, String withoutParams, List_<String> params, List_<String> permits) {
@@ -585,7 +589,7 @@ public class Main {
             return compileDefinition(param, typeParams, typeArgs, Main::generateDefinition).orElse("");
         });
 
-        String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs));
+        String outputContent = compileStatements(body, classMember -> compileClassMember(classMember, typeParams, typeArgs, permits));
 
         structDependencies.put(name, dependencies);
         dependencies = Lists.emptyList();
@@ -642,12 +646,12 @@ public class Main {
         return input.indexOf(infix);
     }
 
-    private static String compileClassMember(String classMember, List_<String> typeParams, List_<String> typeArgs) {
+    private static String compileClassMember(String classMember, List_<String> typeParams, List_<String> typeArgs, List_<String> permits) {
         return compileWhitespace(classMember)
                 .or(() -> compileToStruct(classMember, "interface"))
                 .or(() -> compileToStruct(classMember, "class "))
                 .or(() -> compileToStruct(classMember, "record "))
-                .or(() -> compileMethod(classMember, typeParams, typeArgs))
+                .or(() -> compileMethod(classMember, typeParams, typeArgs, permits))
                 .or(() -> compileConstructor(classMember))
                 .or(() -> compileDefinitionStatement(classMember, typeParams, typeArgs))
                 .orElseGet(() -> generatePlaceholder(classMember));
@@ -671,8 +675,21 @@ public class Main {
         return generateStatement(Strings.toSlice(node.beforeType) + Strings.toSlice(node.type) + " " + Strings.toSlice(node.name));
     }
 
-    private static Option<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
-        return compileInfix(input, "(", (definition, _) -> compileDefinition(definition, typeParams, typeArgs, Main::generateFunctionalDefinition));
+    private static Option<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs, List_<String> permits) {
+        return compileInfix(input, "(", (definition, withParams) -> {
+            return compileInfix(withParams, ")", new BiFunction<String, String, Option<String>>() {
+                @Override
+                public Option<String> apply(String params, String s2) {
+                    if (!permits.isEmpty()) {
+                        return new Some<>("");
+                    }
+                    else {
+                        List_<String> newParams = compileAll(divideValues(params), definition -> compileDefinition(definition, typeParams, typeArgs, Main::generateDefinition).orElse(""));
+                        return compileDefinition(definition, typeParams, typeArgs, Main::generateFunctionalDefinition);
+                    }
+                }
+            });
+        });
     }
 
     private static Option<String> compileDefinition(String definition, List_<String> typeParams, List_<String> typeArgs, Function<Node, Option<String>> generator) {
@@ -775,7 +792,7 @@ public class Main {
                     return new None<>();
                 }
 
-                List_<String> list = divide(args, Main::divideValueChar)
+                List_<String> list = divideValues(args)
                         .iter()
                         .map(input1 -> compileType(input1, typeParams, typeArgs))
                         .flatMap(Iterators::fromOption)

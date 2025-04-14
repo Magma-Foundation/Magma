@@ -13,15 +13,9 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
-typedef struct {
-	int length;
-	int index;
-	Option_int (*next)();
-} RangeHead;
-typedef struct {
-	char left;
-	DivideState right;
-} Tuple_char_DivideState;
+/* Function_char_ref_char_ref*//* Function_char_ref_Option_char_ref*//* BiFunction_char_ref_char_ref_Option_char_ref*//* BiFunction_char_ref_char_ref_int*//* Function_Node_Option_char_ref*//* BiFunction_DivideState_char_DivideState*//* BiFunction_char_char_int*//* BiFunction_DivideState_DivideState_int*//* Function_T_R*//* Predicate_T*//* BiFunction_R_T_R*//* Function_T_Iterator_R*//* BiFunction_List__char_ref_List__char_ref_int*//* BiFunction_Tuple_char_ref_List__char_ref_Tuple_char_ref_List__char_ref_int*//* Function_char_ref_R*//* Predicate_char_ref*//* BiFunction_R_char_ref_R*//* Function_char_ref_Iterator_R*//* BiFunction_List__char_List__char_int*//* Function_char_R*//* Predicate_char*//* BiFunction_R_char_R*//* Function_char_Iterator_R*//* Function_R_R*//* Predicate_R*//* BiFunction_R_R_R*//* Function_R_Iterator_R*//* BiFunction_List__Tuple_char_ref_List__char_ref_List__Tuple_char_ref_List__char_ref_int*//* Function_Tuple_char_ref_List__char_ref_R*//* Predicate_Tuple_char_ref_List__char_ref*//* BiFunction_R_Tuple_char_ref_List__char_ref_R*//* Function_Tuple_char_ref_List__char_ref_Iterator_R*/typedef struct {
+	Option_Tuple_char_ref_List__char_ref (*next)();
+} Head_Tuple_char_ref_List__char_ref;
 typedef struct {
 	Option_char_ref (*next)();
 } Head_char_ref;
@@ -35,72 +29,27 @@ typedef struct {
 	Option_char (*next)();
 } Head_char;
 typedef struct {
-	char* delimiter;
-	Option_char_ref (*createInitial)();
-	Option_char_ref (*fold)();
-} Joiner;
+	C (*createInitial)();
+	C (*fold)();
+} Collector_char_C;
 typedef struct {
-	char left;
-	List__char right;
-} Tuple_char_List__char;
+	C (*createInitial)();
+	C (*fold)();
+} Collector_R_C;
 typedef struct {
-	char* left;
-	List__char_ref right;
-} Tuple_char_ref_List__char_ref;
+	C (*createInitial)();
+	C (*fold)();
+} Collector_T_C;
+typedef struct {
+	C (*createInitial)();
+	C (*fold)();
+} Collector_Tuple_char_ref_List__char_ref_C;
+typedef struct {
+	C (*createInitial)();
+	C (*fold)();
+} Collector_char_ref_C;
 typedef struct {
 } Iterators;
-enum Option_char_type {
-	Some,
-	None
-};
-typedef struct {
-	Option_char_type __type__;
-	Option_R (*map)();
-	char (*orElse)();
-	int (*isPresent)();
-	Option_char (*or)();
-	char (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_char;
-enum Option_R_type {
-	Some,
-	None
-};
-typedef struct {
-	Option_R_type __type__;
-	Option_R (*map)();
-	R (*orElse)();
-	int (*isPresent)();
-	Option_R (*or)();
-	R (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_R;
-enum Option_T_type {
-	Some,
-	None
-};
-typedef struct {
-	Option_T_type __type__;
-	Option_R (*map)();
-	T (*orElse)();
-	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_T;
-enum Option_DivideState_type {
-	Some,
-	None
-};
-typedef struct {
-	Option_DivideState_type __type__;
-	Option_R (*map)();
-	DivideState (*orElse)();
-	int (*isPresent)();
-	Option_DivideState (*or)();
-	DivideState (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_DivideState;
 typedef struct {
 	DivideState (*popAndAppend)();
 	DivideState (*advance)();
@@ -113,32 +62,22 @@ typedef struct {
 	int (*hasNext)();
 	Tuple_char_DivideState (*pop)();
 } DivideState;
-enum Option_int_type {
-	Some,
-	None
-};
 typedef struct {
-	Option_int_type __type__;
-	Option_R (*map)();
-	int (*orElse)();
-	int (*isPresent)();
-	Option_int (*or)();
-	int (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_int;
-enum Option_char_ref_type {
-	Some,
-	None
-};
+	Tuple_char_ref_List__char_ref left;
+	List__Tuple_char_ref_List__char_ref right;
+} Tuple_Tuple_char_ref_List__char_ref_List__Tuple_char_ref_List__char_ref;
 typedef struct {
-	Option_char_ref_type __type__;
-	Option_R (*map)();
-	char* (*orElse)();
-	int (*isPresent)();
-	Option_char_ref (*or)();
-	char* (*orElseGet)();
-	Option_R (*flatMap)();
-} Option_char_ref;
+	char left;
+	DivideState right;
+} Tuple_char_DivideState;
+typedef struct {
+	char left;
+	List__char right;
+} Tuple_char_List__char;
+typedef struct {
+	char* left;
+	List__char_ref right;
+} Tuple_char_ref_List__char_ref;
 typedef struct {
 	List__char queue;
 	List__char_ref segments;
@@ -155,6 +94,16 @@ typedef struct {
 	DivideState (*popAndAppend)();
 	List__char_ref (*segments)();
 } MutableDivideState;
+typedef struct {
+	Tuple_char_ref_List__char_ref (*get)();
+	int (*size)();
+	List__Tuple_char_ref_List__char_ref (*add)();
+	int (*isEmpty)();
+	Tuple_Tuple_char_ref_List__char_ref_List__Tuple_char_ref_List__char_ref (*pop)();
+	Iterator_Tuple_char_ref_List__char_ref (*iter)();
+	List__Tuple_char_ref_List__char_ref (*addAll)();
+	List__Tuple_char_ref_List__char_ref (*sort)();
+} List__Tuple_char_ref_List__char_ref;
 typedef struct {
 	char (*get)();
 	int (*size)();
@@ -195,6 +144,16 @@ typedef struct {
 	Iterator_T (*concat)();
 	Option_T (*next)();
 } Iterator_T;
+typedef struct {
+	Head_Tuple_char_ref_List__char_ref head;
+	Iterator_R (*map)();
+	C (*collect)();
+	Iterator_Tuple_char_ref_List__char_ref (*filter)();
+	R (*fold)();
+	Iterator_R (*flatMap)();
+	Iterator_Tuple_char_ref_List__char_ref (*concat)();
+	Option_Tuple_char_ref_List__char_ref (*next)();
+} Iterator_Tuple_char_ref_List__char_ref;
 typedef struct {
 	Head_char_ref head;
 	Iterator_R (*map)();
