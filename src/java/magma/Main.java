@@ -70,7 +70,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {

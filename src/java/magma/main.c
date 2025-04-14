@@ -63,7 +63,7 @@ struct Main {/* private static class State {
             throw new RuntimeException(e);
         }
     } *//* private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\t__main__();\n\treturn 0;\n}";
     } *//* private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = extracted(input, new State());
 
@@ -118,3 +118,7 @@ struct ");
         return generatePlaceholder(input);
     } */
 /* } */
+int main(){
+	__main__();
+	return 0;
+}
