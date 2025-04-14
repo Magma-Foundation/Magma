@@ -26,6 +26,10 @@ public class Main {
         int size();
 
         List_<T> add(T element);
+
+        boolean isEmpty();
+
+        Tuple<T, List_<T>> pop();
     }
 
     private interface DivideState {
@@ -121,7 +125,7 @@ public class Main {
     private record Node(String beforeType, String type, String name) {
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    public record Tuple<A, B>(A left, B right) {
         public static <A, B> boolean equalsTo(Tuple<A, B> first, Tuple<A, B> second, BiFunction<A, A, Boolean> firstComparator, BiFunction<B, B, Boolean> secondComparator) {
             return firstComparator.apply(first.left, second.left) && secondComparator.apply(first.right, second.right);
         }
@@ -130,7 +134,10 @@ public class Main {
     private static final Map<String, Function<List_<String>, Optional<String>>> expandables = new HashMap<>();
     private static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
+
     private static List_<Tuple<String, List_<String>>> expansions = Lists.emptyList();
+    private static List_<Tuple<String, List_<String>>> visited = Lists.emptyList();
+
     private static Tuple<String, List_<String>> stringListTuple;
 
     public static void main(String[] args) {
@@ -148,8 +155,12 @@ public class Main {
         List<String> compiled = compileStatementsToList(input, Main::compileRootSegment);
         compiled.addAll(structs);
 
-        List<Tuple<String, List_<String>>> nativeList = Lists.toNativeList(expansions);
-        for (Tuple<String, List_<String>> entry : nativeList) {
+        while (!expansions.isEmpty()) {
+            Tuple<Tuple<String, List_<String>>, List_<Tuple<String, List_<String>>>> popped = expansions.pop();
+            Tuple<String, List_<String>> entry = popped.left;
+            expansions = popped.right;
+            visited = visited.add(entry);
+
             if (expandables.containsKey(entry.left)) {
                 Optional<String> expanded = expandables.get(entry.left).apply(entry.right);
                 compiled.add(expanded.orElse(""));
@@ -401,7 +412,7 @@ public class Main {
                             .flatMap(Optional::stream)
                             .toList());
 
-                    if (!isDefined(strippedBase, list)) {
+                    if (!isDefined(strippedBase, list, expansions) && !isDefined(strippedBase, list, visited)) {
                         expansions = expansions.add(new Tuple<>(strippedBase, list));
                     }
                     return Optional.of(stringify(strippedBase, list));
@@ -428,8 +439,8 @@ public class Main {
         return appended;
     }
 
-    private static boolean isDefined(String base, List_<String> args) {
-        return Lists.contains(expansions, new Tuple<>(base, args),
+    private static boolean isDefined(String base, List_<String> args, List_<Tuple<String, List_<String>>> expansions1) {
+        return Lists.contains(expansions1, new Tuple<>(base, args),
                 (tuple0, tuple1) -> Tuple.equalsTo(tuple0, tuple1, String::equals,
                         (list1, list2) -> Lists.equalsTo(list1, list2, String::equals)));
     }

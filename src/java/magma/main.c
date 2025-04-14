@@ -51,6 +51,17 @@ typedef struct {
 	T (*get)();
 	int (*size)();
 	List__T (*add)();
+	int (*isEmpty)();
+	Tuple_T_List__T (*pop)();
 } List__String;
 typedef struct {
 } Tuple_String_List__String;
+typedef struct {
+	T (*get)();
+	int (*size)();
+	List__T (*add)();
+	int (*isEmpty)();
+	Tuple_T_List__T (*pop)();
+} List__T;
+typedef struct {
+} Tuple_T_List__T;

@@ -26,6 +26,17 @@ class Lists {
             this.elements.add(element);
             return this;
         }
+
+        @Override
+        public boolean isEmpty() {
+            return this.elements.isEmpty();
+        }
+
+        @Override
+        public Main.Tuple<T, Main.List_<T>> pop() {
+            List<T> slice = this.elements.subList(1, this.elements.size());
+            return new Main.Tuple<>(this.elements.getFirst(), new JavaList<>(slice));
+        }
     }
 
     public static <T> Main.List_<T> fromNativeList(List<T> list) {
