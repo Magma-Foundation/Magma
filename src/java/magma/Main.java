@@ -174,7 +174,7 @@ public class Main {
     }
 
     private static ArrayList<String> compileStatementsToList(String input, Function<String, String> compiler) {
-        List<String> segments = divide(input);
+        List<String> segments = divideStatements(input);
         ArrayList<String> compiled = new ArrayList<String>();
         for (String segment : segments) {
             compiled.add(compiler.apply(segment));
@@ -393,7 +393,7 @@ public class Main {
             return compileInfix(withoutEnd, "<", (base, args) -> {
                 String strippedBase = base.strip();
                 if (isSymbol(strippedBase)) {
-                    List_<String> list = Lists.of(args);
+                    List_<String> list = Lists.fromNativeList(divide(args, Main::divideValueChar));
                     if (!isDefined(strippedBase, list)) {
                         expansions = expansions.add(new Tuple<>(strippedBase, list));
                     }
@@ -404,6 +404,21 @@ public class Main {
                 }
             });
         }).or(() -> Optional.of(generatePlaceholder(stripped)));
+    }
+
+    private static DivideState divideValueChar(DivideState state, Character c) {
+        if (c == ',' && state.isLevel()) {
+            return state;
+        }
+
+        DivideState appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static boolean isDefined(String base, List_<String> args) {
@@ -423,7 +438,11 @@ public class Main {
         return true;
     }
 
-    private static List<String> divide(String input) {
+    private static List<String> divideStatements(String input) {
+        return divide(input, Main::divideStatementChar);
+    }
+
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> divideStatementChar) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -431,16 +450,16 @@ public class Main {
         DivideState current = new MutableDivideState(queue);
         while (current.hasNext()) {
             char c = current.pop();
-            current = divideDecorated(current, c);
+            current = divideDecorated(current, c, divideStatementChar);
         }
 
         return Lists.toNativeList(current.advance().segments());
     }
 
-    private static DivideState divideDecorated(DivideState current, char c) {
+    private static DivideState divideDecorated(DivideState current, char c, BiFunction<DivideState, Character, DivideState> divider) {
         return divideSingleQuotes(current, c)
                 .or(() -> divideDoubleQuotes(current, c))
-                .orElseGet(() -> divideStatementChar(current, c));
+                .orElseGet(() -> divider.apply(current, c));
     }
 
     private static @NotNull Optional<? extends DivideState> divideDoubleQuotes(DivideState state, char c) {

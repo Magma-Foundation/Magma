@@ -52,5 +52,5 @@ struct List__String {
 	int (*size)();
 	List__T (*add)();
 };
-struct Tuple_String, List_<String> {
+struct Tuple_String List_<String> {
 };
