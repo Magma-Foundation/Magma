@@ -421,7 +421,7 @@ public class Main {
                 compiled.add(expanded.orElse(""));
             }
             else {
-                compiled.add(generatePlaceholder(stringify(entry.left, entry.right)));
+                compiled.add(generatePlaceholder(stringify(entry.left, entry.right)) + "\n");
             }
         }
     }
