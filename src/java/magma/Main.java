@@ -556,7 +556,7 @@ public class Main {
             expanding.put(name, argsInternal -> {
                 String newName = stringify(name, argsInternal);
                 String generated = generateStruct(newName, typeParams, argsInternal, params, s);
-                structs.put(withoutParams, generated);
+                structs.put(newName, generated);
                 return new Some<>("");
             });
         }
@@ -722,7 +722,13 @@ public class Main {
             return new Some<>("char");
         }
 
-        dependencies.add(stripped);
+        return getStringOption(typeParams, typeArgs, stripped).map(inner -> {
+            dependencies.add(inner);
+            return inner;
+        });
+    }
+
+    private static Option<String> getStringOption(List_<String> typeParams, List_<String> typeArgs, String stripped) {
         Option<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
         if (typeParamIndex.isPresent()) {
             return new Some<>(typeArgs.get(typeParamIndex.orElse(null)));
