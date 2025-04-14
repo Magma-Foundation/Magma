@@ -16,10 +16,17 @@
 #include <temp.h>
 #include <temp.h>
 #include <temp.h>
+#include <temp.h>
 typedef struct {
-	String beforeType;
-	String type;
-	String name;
+	String value;
+} String_;
+typedef struct {
+	String_ beforeType;
+	String_ type;
+	String_ name;
+	int (*equals)();
+	int (*hashCode)();
+	String (*toString)();
 } Node;
 typedef struct {
 	DivideState (*popAndAppend)();

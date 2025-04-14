@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -53,6 +54,9 @@ public class Main {
         boolean hasNext();
 
         Tuple<Character, DivideState> pop();
+    }
+
+    private record String_(String value) {
     }
 
     private static class MutableDivideState implements DivideState {
@@ -125,7 +129,44 @@ public class Main {
         }
     }
 
-    private record Node(String beforeType, String type, String name) {
+    private static final class Node {
+        private final String_ beforeType;
+        private final String_ type;
+        private final String_ name;
+
+        private Node(String_ beforeType, String_ type, String_ name) {
+            this.beforeType = beforeType;
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj == null || obj.getClass() != this.getClass()) {
+                return false;
+            }
+            var that = (Node) obj;
+            return Objects.equals(this.beforeType, that.beforeType) &&
+                    Objects.equals(this.type, that.type) &&
+                    Objects.equals(this.name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.beforeType, this.type, this.name);
+        }
+
+        @Override
+        public String toString() {
+            return "Node[" +
+                    "beforeType=" + this.beforeType + ", " +
+                    "type=" + this.type + ", " +
+                    "name=" + this.name + ']';
+        }
+
     }
 
     public record Tuple<A, B>(A left, B right) {
@@ -403,7 +444,7 @@ public class Main {
     }
 
     private static Optional<String> generateDefinition(Node node) {
-        return generateStatement(node.beforeType() + node.type() + " " + node.name());
+        return generateStatement(node.beforeType.value + node.type.value + " " + node.name.value);
     }
 
     private static Optional<String> compileMethod(String input, List_<String> typeParams, List_<String> typeArgs) {
@@ -423,11 +464,11 @@ public class Main {
                         return Optional.of("");
                     }
 
-                    return generator.apply(new Node("", compiledType, name));
+                    return generator.apply(new Node(new String_(""), new String_(compiledType), new String_(name)));
                 });
             }).or(() -> {
                 return compileType(beforeName.strip(), typeParams, typeArgs).flatMap(compiledType -> {
-                    return generator.apply(new Node("", compiledType, name));
+                    return generator.apply(new Node(new String_(""), new String_(compiledType), new String_(name)));
                 });
             });
         });
@@ -452,7 +493,7 @@ public class Main {
     }
 
     private static Optional<String> generateFunctionalDefinition(Node node) {
-        return generateStatement(node.beforeType() + node.type() + " (*" + node.name() + ")()");
+        return generateStatement(node.beforeType.value + node.type.value + " (*" + node.name.value + ")()");
     }
 
     private static Optional<String> generateStatement(String content) {
