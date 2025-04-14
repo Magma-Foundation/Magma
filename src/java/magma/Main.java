@@ -324,7 +324,7 @@ public class Main {
 
     private static Optional<String> compileDefinition(String definition, Function<Node, Optional<String>> generator) {
         return compileInfix(definition.strip(), " ", String::lastIndexOf, (beforeName, name) -> {
-            return compileInfix(beforeName.strip(), " ", String::lastIndexOf, (beforeType, type) -> {
+            return compileInfix(beforeName.strip(), " ", (slice, _) -> locateTypeSeparator(slice), (beforeType, type) -> {
                 return compileType(type).flatMap(compiledType -> {
                     List<String> modifiers = Stream.of(beforeType.strip().split(" "))
                             .map(String::strip)
@@ -343,6 +343,24 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static int locateTypeSeparator(String slice) {
+        int depth = 0;
+        for (int i = slice.length() - 1; i >= 0; i--) {
+            char c = slice.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return i;
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
+        }
+
+        return -1;
     }
 
     private static Optional<String> generateFunctionalDefinition(Node node) {
@@ -376,7 +394,7 @@ public class Main {
                 String strippedBase = base.strip();
                 if (isSymbol(strippedBase)) {
                     List_<String> list = Lists.of(args);
-                    if (!isContains(strippedBase, list)) {
+                    if (!isDefined(strippedBase, list)) {
                         expansions = expansions.add(new Tuple<>(strippedBase, list));
                     }
                     return Optional.of(stringify(strippedBase, list));
@@ -388,8 +406,8 @@ public class Main {
         }).or(() -> Optional.of(generatePlaceholder(stripped)));
     }
 
-    private static boolean isContains(String strippedBase, List_<String> list) {
-        return Lists.contains(expansions, new Tuple<>(strippedBase, list),
+    private static boolean isDefined(String base, List_<String> args) {
+        return Lists.contains(expansions, new Tuple<>(base, args),
                 (tuple0, tuple1) -> Tuple.equalsTo(tuple0, tuple1, String::equals,
                         (list1, list2) -> Lists.equalsTo(list1, list2, String::equals)));
     }
