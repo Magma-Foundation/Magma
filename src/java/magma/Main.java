@@ -9,15 +9,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -53,23 +50,23 @@ public class Main {
 
         boolean hasNext();
 
-        char pop();
+        Tuple<Character, DivideState> pop();
     }
 
     private static class MutableDivideState implements DivideState {
-        private final Deque<Character> queue;
+        private final List_<Character> queue;
         private final List_<String> segments;
         private final StringBuilder buffer;
         private final int depth;
 
-        private MutableDivideState(Deque<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
+        private MutableDivideState(List_<Character> queue, List_<String> segments, StringBuilder buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public MutableDivideState(Deque<Character> queue) {
+        public MutableDivideState(List_<Character> queue) {
             this(queue, Lists.emptyList(), new StringBuilder(), 0);
         }
 
@@ -109,13 +106,15 @@ public class Main {
         }
 
         @Override
-        public char pop() {
-            return this.queue.pop();
+        public Tuple<Character, DivideState> pop() {
+            Tuple<Character, List_<Character>> popped = this.queue.pop();
+            return new Tuple<>(popped.left, new MutableDivideState(popped.right, this.segments, this.buffer, this.depth));
         }
 
         @Override
         public DivideState popAndAppend() {
-            return this.append(this.pop());
+            Tuple<Character, DivideState> popped = this.pop();
+            return popped.right.append(popped.left);
         }
 
         @Override
@@ -493,14 +492,14 @@ public class Main {
     }
 
     private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> divideStatementChar) {
-        LinkedList<Character> queue = IntStream.range(0, input.length())
+        List_<Character> queue = Lists.fromNativeList(IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .toList());
 
         DivideState current = new MutableDivideState(queue);
         while (current.hasNext()) {
-            char c = current.pop();
-            current = divideDecorated(current, c, divideStatementChar);
+            Tuple<Character, DivideState> tuple = current.pop();
+            current = divideDecorated(tuple.right, tuple.left, divideStatementChar);
         }
 
         return Lists.toNativeList(current.advance().segments());
@@ -519,14 +518,15 @@ public class Main {
 
         DivideState current = state.append(c);
         while (current.hasNext()) {
-            char popped = current.pop();
-            current = current.append(popped);
+            Tuple<Character, DivideState> poppedTuple = current.pop();
+            char popped = poppedTuple.left;
+            current = poppedTuple.right.append(popped);
 
             if (popped == '\"') {
                 break;
             }
             if (popped == '\\') {
-                current = current.append(current.pop());
+                current = current.popAndAppend();
             }
         }
 
@@ -540,11 +540,11 @@ public class Main {
 
         DivideState appended = current.append('\'');
 
-        char maybeSlash = appended.pop();
-        DivideState withSlash = appended.append(maybeSlash);
+        Tuple<Character, DivideState> maybeSlash = appended.pop();
+        DivideState withSlash = maybeSlash.right.append(maybeSlash.left);
 
         DivideState withEscape;
-        if (maybeSlash == '\\') {
+        if (maybeSlash.left == '\\') {
             withEscape = withSlash.popAndAppend();
         }
         else {
