@@ -507,19 +507,23 @@ public class Main {
     private static Option<String> compileToStruct(String stripped, String infix) {
         return compileInfix(stripped, infix, (_, right) -> {
             return compileInfix(right, "{", (beforeContent, withEnd) -> {
-                return compileSuffix(withEnd, "}", s -> {
-                    String withoutImplements = compileInfix(beforeContent, " implements ", (left, _) -> new Some<>(left))
-                            .orElse(beforeContent).strip();
+                return compileSuffix(withEnd, "}", content -> {
+                    String beforeContent1 = compileInfix(beforeContent, " permits ", (left, _) -> {
+                        return new Some<>(left);
+                    }).orElse(beforeContent);
+
+                    String withoutImplements = compileInfix(beforeContent1, " implements ", (left, _) -> new Some<>(left))
+                            .orElse(beforeContent1).strip();
 
                     return compileInfix(withoutImplements, "(", (nameWithoutParams, withParamEnd) -> {
                         return compileSuffix(withParamEnd.strip(), ")", paramString -> {
                             List_<String> params = divide(paramString, Main::divideValueChar);
                             String stripped1 = nameWithoutParams.strip();
-                            return getString(s, stripped1, params);
+                            return getString(content, stripped1, params);
                         });
                     }).or(() -> {
                         String stripped1 = withoutImplements.strip();
-                        return getString(s, stripped1, Lists.emptyList());
+                        return getString(content, stripped1, Lists.emptyList());
                     });
                 });
             });

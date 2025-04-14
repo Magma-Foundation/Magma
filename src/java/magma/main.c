@@ -51,18 +51,18 @@ typedef struct {
 } Iterators;
 typedef struct {
 	Option_R (*map)();
-	T (*orElse)();
+	char (*orElse)();
 	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
+	Option_char (*or)();
+	char (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_char;
 typedef struct {
 	Option_R (*map)();
-	T (*orElse)();
+	R (*orElse)();
 	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
+	Option_R (*or)();
+	R (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_R;
 typedef struct {
@@ -75,10 +75,10 @@ typedef struct {
 } Option_T;
 typedef struct {
 	Option_R (*map)();
-	T (*orElse)();
+	DivideState (*orElse)();
 	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
+	Option_DivideState (*or)();
+	DivideState (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_DivideState;
 typedef struct {
@@ -95,18 +95,18 @@ typedef struct {
 } DivideState;
 typedef struct {
 	Option_R (*map)();
-	T (*orElse)();
+	int (*orElse)();
 	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
+	Option_int (*or)();
+	int (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_int;
 typedef struct {
 	Option_R (*map)();
-	T (*orElse)();
+	char* (*orElse)();
 	int (*isPresent)();
-	Option_T (*or)();
-	T (*orElseGet)();
+	Option_char_ref (*or)();
+	char* (*orElseGet)();
 	Option_R (*flatMap)();
 } Option_char_ref;
 typedef struct {
