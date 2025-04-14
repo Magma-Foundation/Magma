@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -51,6 +52,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     public static void main(String[] args) {
@@ -65,11 +70,15 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = extracted(input, new State());
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -90,6 +99,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}' && appended.isShallow()) {
+            return appended.exit().advance();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -100,10 +112,31 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.contains("class ")) {
-            return "struct Temp {\n};\n";
+        int classIndex = input.indexOf("class ");
+        if (classIndex >= 0) {
+            String afterKeyword = input.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    return "struct " + name + " {" +
+                            outputContent +
+                            "\n};\n";
+                }
+            }
         }
 
-        return "/* " + input.strip() + " */\n";
+        return generatePlaceholder(input) + "\n";
+    }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input.strip() + " */";
+    }
+
+    private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
     }
 }
