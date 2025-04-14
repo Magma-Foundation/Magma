@@ -54,6 +54,7 @@ enum Option_char_type {
 	None
 };
 typedef struct {
+	Option_char_type __value__;
 	Option_R (*map)();
 	char (*orElse)();
 	int (*isPresent)();
@@ -66,6 +67,7 @@ enum Option_R_type {
 	None
 };
 typedef struct {
+	Option_R_type __value__;
 	Option_R (*map)();
 	R (*orElse)();
 	int (*isPresent)();
@@ -78,6 +80,7 @@ enum Option_T_type {
 	None
 };
 typedef struct {
+	Option_T_type __value__;
 	Option_R (*map)();
 	T (*orElse)();
 	int (*isPresent)();
@@ -90,6 +93,7 @@ enum Option_DivideState_type {
 	None
 };
 typedef struct {
+	Option_DivideState_type __value__;
 	Option_R (*map)();
 	DivideState (*orElse)();
 	int (*isPresent)();
@@ -114,6 +118,7 @@ enum Option_int_type {
 	None
 };
 typedef struct {
+	Option_int_type __value__;
 	Option_R (*map)();
 	int (*orElse)();
 	int (*isPresent)();
@@ -126,6 +131,7 @@ enum Option_char_ref_type {
 	None
 };
 typedef struct {
+	Option_char_ref_type __value__;
 	Option_R (*map)();
 	char* (*orElse)();
 	int (*isPresent)();

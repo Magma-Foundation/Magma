@@ -594,27 +594,26 @@ public class Main {
                 .collect(new Joiner())
                 .orElse("");
 
-        String enums;
+        String content = joined + outputContent;
         if (permits.isEmpty()) {
-            enums = "";
-        }
-        else {
-            String permitsString = permits.iter()
-                    .map(value -> "\n\t" + value)
-                    .collect(new Joiner(""))
-                    .orElse("");
-
-            enums = "enum " + name + "_type {" +
-                    permitsString +
-                    "\n};\n";
+            return generateStruct0(name, content);
         }
 
-        return enums + "typedef struct {" +
-                joined +
-                outputContent +
-                "\n} " +
-                name +
-                ";\n";
+        String permitsString = permits.iter()
+                .map(value -> "\n\t" + value)
+                .collect(new Joiner(""))
+                .orElse("");
+
+        String enumType = name + "_type";
+        String enums = "enum " + enumType + " {" +
+                permitsString +
+                "\n};\n";
+
+        return enums + generateStruct0(name, "\n\t" + enumType + " __value__;" + content);
+    }
+
+    private static String generateStruct0(String name, String content) {
+        return "typedef struct {" + content + "\n} " + name + ";\n";
     }
 
     private static Option<String> compileSuffix(String input, String suffix, Function<String, Option<String>> compiler) {
