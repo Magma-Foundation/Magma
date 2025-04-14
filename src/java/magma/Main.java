@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-    public interface Option<T> {
+    public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
@@ -215,7 +215,7 @@ public class Main {
         }
     }
 
-    public static class None<T> implements Option<T> {
+    public static final class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
