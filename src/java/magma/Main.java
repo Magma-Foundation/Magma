@@ -609,7 +609,7 @@ public class Main {
                 permitsString +
                 "\n};\n";
 
-        return enums + generateStruct0(name, "\n\t" + enumType + " __value__;" + content);
+        return enums + generateStruct0(name, "\n\t" + enumType + " __type;" + content);
     }
 
     private static String generateStruct0(String name, String content) {
