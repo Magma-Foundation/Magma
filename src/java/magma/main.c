@@ -8,32 +8,24 @@
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
 struct Main {
-	private static class State {
-        private final List<String> segments;
-        private int depth;
-        private StringBuilder buffer;
-
-        private (*State)(List<String>, StringBuilder, int);
-	public static void (*main)(String[]);
-	private static String (*compile)(String);
-	private static String (*compileStatements)(String, Function<String, String>);
-	private static String (*compileAll)(String, BiFunction<State, Character, State>, Function<String, String>, BiFunction<StringBuilder, String, StringBuilder>);
-	private static StringBuilder (*mergeStatements)(StringBuilder, String);
-	private static State (*divideStatementChar)(State, char);
-	' && (*appended.isShallow)();/* if (c == '{') {
+	private (*State)(List<String>, StringBuilder, int);
+	void (*main)(String[]);
+	String (*compile)(String);
+	String (*compileStatements)(String, Function<String, String>);
+	String (*compileAll)(String, BiFunction<State, Character, State>, Function<String, String>, BiFunction<StringBuilder, String, StringBuilder>);
+	StringBuilder (*mergeStatements)(StringBuilder, String);
+	State (*divideStatementChar)(State, char);
+	&& (*appended.isShallow)();/* if (c == '{') {
             return appended.enter();
         }
         if (c == '} */
-	') {
-            return (*appended.exit)();/* return appended; *//*  */
+	return (*appended.exit)();/* return appended; *//*  */
 };
 struct ");
         if (classIndex >= 0) {
-	String afterKeyword = (*input.substring)(classIndex + "class);
-	int contentStart = (*afterKeyword.indexOf)();
-	}
-
-        return (*generatePlaceholder)();
+	= (*input.substring)(classIndex + "class);
+	= (*afterKeyword.indexOf)();
+	return (*generatePlaceholder)();
 };
 /* private static String generatePlaceholder(String input) {
         return "/* " + input.strip() + " */";
@@ -47,13 +39,18 @@ struct ");
             int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
                 String beforeName = header.substring(0, nameSeparator).strip();
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                String type = typeSeparator >= 0
+                        ? beforeName.substring(typeSeparator + " ".length()).strip()
+                        : beforeName;
+
                 String name = header.substring(nameSeparator + " ".length()).strip();
 
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     String params = withParams.substring(0, paramEnd).strip();
                     String outputParams = compileAll(params, Main::divideValueChar, Main::compileDefinition, Main::mergeValues);
-                    return "\n\t" + beforeName + " (*" + name + ")(" +
+                    return "\n\t" + type + " (*" + name + ")(" +
                             outputParams +
                             ");";
                 }

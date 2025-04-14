@@ -150,13 +150,18 @@ public class Main {
             int nameSeparator = header.lastIndexOf(" ");
             if (nameSeparator >= 0) {
                 String beforeName = header.substring(0, nameSeparator).strip();
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                String type = typeSeparator >= 0
+                        ? beforeName.substring(typeSeparator + " ".length()).strip()
+                        : beforeName;
+
                 String name = header.substring(nameSeparator + " ".length()).strip();
 
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     String params = withParams.substring(0, paramEnd).strip();
                     String outputParams = compileAll(params, Main::divideValueChar, Main::compileDefinition, Main::mergeValues);
-                    return "\n\t" + beforeName + " (*" + name + ")(" +
+                    return "\n\t" + type + " (*" + name + ")(" +
                             outputParams +
                             ");";
                 }
