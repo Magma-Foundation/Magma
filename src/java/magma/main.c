@@ -24,7 +24,7 @@ struct DivideState {
 	int (*hasNext)();
 	char (*pop)();
 };
-struct MutableDivideState implements DivideState {
+struct MutableDivideState {
 	/* Deque<Character>*/ queue;
 	/* List<String>*/ segments;
 	int depth;

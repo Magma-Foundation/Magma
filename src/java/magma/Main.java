@@ -115,6 +115,7 @@ public class Main {
     }
 
     private static final List<String> structs = new ArrayList<>();
+    private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
         try {
@@ -189,8 +190,11 @@ public class Main {
         return compileInfix(stripped, infix, (_, right) -> {
             return compileInfix(right, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd, "}", s -> {
+                    String newName = compileInfix(name, " implements ", (left, _) -> Optional.of(left.strip()))
+                            .orElse(name);
+
                     String outputContent = compileStatements(s, Main::compileClassMember);
-                    String value = "struct " + name + " {" +
+                    String value = "struct " + newName + " {" +
                             outputContent +
                             "\n};\n";
                     structs.add(value);
