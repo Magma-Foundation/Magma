@@ -736,13 +736,13 @@ public class Main {
             return new Some<>("char");
         }
 
-        return getStringOption(typeParams, typeArgs, stripped).map(inner -> {
+        return getStringOption(stripped, typeParams, typeArgs).map(inner -> {
             dependencies.add(inner);
             return inner;
         });
     }
 
-    private static Option<String> getStringOption(List_<String> typeParams, List_<String> typeArgs, String stripped) {
+    private static Option<String> getStringOption(String stripped, List_<String> typeParams, List_<String> typeArgs) {
         Option<Integer> typeParamIndex = Lists.indexOf(typeParams, stripped, String::equals);
         if (typeParamIndex.isPresent()) {
             return new Some<>(typeArgs.get(typeParamIndex.orElse(null)));
@@ -750,6 +750,10 @@ public class Main {
 
         if (isSymbol(stripped)) {
             return new Some<>(stripped);
+        }
+
+        if(stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()), typeParams, typeArgs).map(result -> result + "*");
         }
 
         return compileGenericType(typeParams, typeArgs, stripped)
