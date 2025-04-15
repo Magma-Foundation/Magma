@@ -18,7 +18,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     private sealed interface Option<T> permits Option.None, Option.Some {
@@ -93,10 +92,6 @@ public class Main {
             return new None<>();
         }
 
-        static <T> Stream<T> stream(Option<T> option) {
-            return option.map(Stream::of).orElseGet(Stream::empty);
-        }
-
         T orElse(T other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
@@ -113,10 +108,10 @@ public class Main {
     private static class State {
         private final Deque<Character> queue;
         private final List<String> segments;
-        private StringBuilder buffer;
+        private String buffer;
         private int depth;
 
-        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+        private State(Deque<Character> queue, List<String> segments, String buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
@@ -124,7 +119,7 @@ public class Main {
         }
 
         public State(Deque<Character> queue) {
-            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+            this(queue, new ArrayList<>(), "", 0);
         }
 
         private boolean isShallow() {
@@ -142,8 +137,8 @@ public class Main {
         }
 
         private State advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments.add(this.buffer);
+            this.buffer = "";
             return this;
         }
 
@@ -152,7 +147,7 @@ public class Main {
         }
 
         private State append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         }
 
@@ -231,16 +226,16 @@ public class Main {
         return compileAndMergeAll(divideAll(input, Main::foldStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Option<String> compileAndMergeAll(List<String> segments, Function<String, Option<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Option<String> compileAndMergeAll(List<String> segments, Function<String, Option<String>> compiler, BiFunction<String, String, String> merger) {
         return compileAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
     }
 
-    private static String mergeAll(List<String> list, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        StringBuilder output = new StringBuilder();
+    private static String mergeAll(List<String> list, BiFunction<String, String, String> merger) {
+        String output = "";
         for (String segment : list) {
             output = merger.apply(output, segment);
         }
-        return output.toString();
+        return output;
     }
 
     private static Option<List<String>> compileAll(List<String> segments, Function<String, Option<String>> compiler) {
@@ -256,8 +251,8 @@ public class Main {
         return maybeCompiled;
     }
 
-    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
-        return output.append(compiled);
+    private static String mergeStatements(String output, String element) {
+        return output + element;
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
@@ -465,15 +460,15 @@ public class Main {
         return appended;
     }
 
-    private static StringBuilder mergeValues(StringBuilder builder, String element) {
+    private static String mergeValues(String builder, String element) {
         return mergeDelimited(builder, element, ", ");
     }
 
-    private static StringBuilder mergeDelimited(StringBuilder builder, String element, String delimiter) {
-        if (builder.isEmpty()) {
-            return builder.append(element);
+    private static String mergeDelimited(String buffer, String element, String delimiter) {
+        if (buffer.isEmpty()) {
+            return element;
         }
-        return builder.append(delimiter).append(element);
+        return buffer + delimiter + element;
     }
 
     private static Option<String> compileDefinition(String definition, List<String> stack, List<String> typeParams, List<String> typeArguments) {

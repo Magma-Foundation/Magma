@@ -16,23 +16,22 @@
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import java.util.stream.IntStream; */
-/* import java.util.stream.Stream; */
 typedef struct {
 } Main;
 typedef struct {
 } State;
 /* private final Deque<Character> queue; */
 /* private final List<String> segments; */
-/* private StringBuilder buffer; */
+/* private String buffer; */
 /* private int depth; */
-/* private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+/* private State(Deque<Character> queue, List<String> segments, String buffer, int depth) {
             this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
 /* public State(Deque<Character> queue) {
-            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+            this(queue, new ArrayList<>(), "", 0);
         } */
 int State_isShallow(){
 }
@@ -62,13 +61,13 @@ Option_char_ref Main_expand(Tuple_char_ref_List_char_ref expansion){
 }
 Option_char_ref Main_compileStatements(char* input, Option_char_ref (*compiler)(char*)){
 }
-Option_char_ref Main_compileAndMergeAll(List_char_ref segments, Option_char_ref (*compiler)(char*), StringBuilder (*merger)(StringBuilder, char*)){
+Option_char_ref Main_compileAndMergeAll(List_char_ref segments, Option_char_ref (*compiler)(char*), char* (*merger)(char*, char*)){
 }
-char* Main_mergeAll(List_char_ref list, StringBuilder (*merger)(StringBuilder, char*)){
+char* Main_mergeAll(List_char_ref list, char* (*merger)(char*, char*)){
 }
 Option_List_char_ref Main_compileAll(List_char_ref segments, Option_char_ref (*compiler)(char*)){
 }
-StringBuilder Main_mergeStatements(StringBuilder output, char* compiled){
+char* Main_mergeStatements(char* output, char* element){
 }
 List_char_ref Main_divideAll(char* input, State (*folder)(State, char)){
 }
@@ -98,9 +97,9 @@ List_char_ref Main_divideValues(char* input){
 }
 State Main_foldValueChar(State state, char c){
 }
-StringBuilder Main_mergeValues(StringBuilder builder, char* element){
+char* Main_mergeValues(char* builder, char* element){
 }
-StringBuilder Main_mergeDelimited(StringBuilder builder, char* element, char* delimiter){
+char* Main_mergeDelimited(char* buffer, char* element, char* delimiter){
 }
 Option_char_ref Main_compileDefinition(char* definition, List_char_ref stack, List_char_ref typeParams, List_char_ref typeArguments){
 }
@@ -124,8 +123,6 @@ Option_char_ref Option_char_ref_of(char* value){
 }
 Option_char_ref Option_char_ref_empty(){
 }
-Stream_char_ref Option_char_ref_stream(Option_char_ref option){
-}
 char* Option_char_ref_orElse(char* other){
 }
 Option_R Option_char_ref_flatMap(Option_R (*mapper)(char*)){
@@ -148,8 +145,6 @@ Option_List_char_ref Option_List_char_ref_of(List_char_ref value){
 }
 Option_List_char_ref Option_List_char_ref_empty(){
 }
-Stream_List_char_ref Option_List_char_ref_stream(Option_List_char_ref option){
-}
 List_char_ref Option_List_char_ref_orElse(List_char_ref other){
 }
 Option_R Option_List_char_ref_flatMap(Option_R (*mapper)(List_char_ref)){
@@ -169,8 +164,6 @@ Option_State Option_State_of(State value){
 }
 Option_State Option_State_empty(){
 }
-Stream_State Option_State_stream(Option_State option){
-}
 State Option_State_orElse(State other){
 }
 Option_R Option_State_flatMap(Option_R (*mapper)(State)){
@@ -189,8 +182,6 @@ typedef struct {
 Option_R Option_R_of(R value){
 }
 Option_R Option_R_empty(){
-}
-Stream_R Option_R_stream(Option_R option){
 }
 R Option_R_orElse(R other){
 }
