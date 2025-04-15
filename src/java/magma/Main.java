@@ -165,6 +165,8 @@ public class Main {
 
     private static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<Tuple<String, List<String>>> visited = new ArrayList<>();
+    private static final List<String> structs = new ArrayList<>();
+    private static final List<String> methods = new ArrayList<>();
     private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -190,30 +192,38 @@ public class Main {
     private static String compile(String input) {
         List<String> segments = divideAll(input, Main::foldStatementChar);
         return compileAll(segments, s -> Option.of(compileRootSegment(s)))
-                .map(compiled -> {
-                    while (!toExpand.isEmpty()) {
-                        ArrayList<Tuple<String, List<String>>> copy = new ArrayList<>(toExpand);
-                        toExpand = new ArrayList<>();
-
-                        boolean anyGenerated = false;
-                        for (Tuple<String, List<String>> tuple : copy) {
-                            if (!visited.contains(tuple)) {
-                                visited.add(tuple);
-                                expand(tuple).ifPresent(compiled::add);
-                                anyGenerated = true;
-                            }
-                        }
-
-                        if (!anyGenerated) {
-                            break;
-                        }
-                    }
-                    return compiled;
-                })
+                .map(Main::assemble)
                 .map(compiled -> mergeAll(compiled, Main::mergeStatements)).orElse("");
     }
 
-    private static Option<String> expand(Tuple<String, List<String>> expansion) {
+    private static List<String> assemble(List<String> compiled) {
+        assembleGenerics(compiled);
+        compiled.addAll(structs);
+        compiled.addAll(methods);
+        return compiled;
+    }
+
+    private static void assembleGenerics(List<String> compiled) {
+        while (!toExpand.isEmpty()) {
+            ArrayList<Tuple<String, List<String>>> copy = new ArrayList<>(toExpand);
+            toExpand = new ArrayList<>();
+
+            boolean anyGenerated = false;
+            for (Tuple<String, List<String>> tuple : copy) {
+                if (!visited.contains(tuple)) {
+                    visited.add(tuple);
+                    assembleEntry(tuple).ifPresent(compiled::add);
+                    anyGenerated = true;
+                }
+            }
+
+            if (!anyGenerated) {
+                break;
+            }
+        }
+    }
+
+    private static Option<String> assembleEntry(Tuple<String, List<String>> expansion) {
         if (expandables.containsKey(expansion.left)) {
             return expandables.get(expansion.left).apply(expansion.right);
         }
@@ -384,9 +394,14 @@ public class Main {
         String realName = typeArguments.isEmpty() ? name : stringify(name, typeArguments);
 
         String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition, realName, typeParams, typeArguments))).orElse("");
-        return Option.of("typedef struct {\n} " +
+        String struct = "typedef struct {" +
+                outputContent +
+                "\n} " +
                 realName +
-                ";\n" + outputContent);
+                ";\n";
+
+        structs.add(struct);
+        return Option.of("");
     }
 
     private static boolean isSymbol(String input) {
@@ -426,9 +441,12 @@ public class Main {
                         : compileValues(inputParams, definition -> compileDefinition(definition, Collections.emptyList(), typeParams, typeArguments));
 
                 return maybeOutputParams.flatMap(outputParams -> {
-                    return Option.of(outputDefinition + "(" +
+                    String value = outputDefinition + "(" +
                             outputParams +
-                            "){" + "\n}\n");
+                            "){" + "\n}\n";
+
+                    methods.add(value);
+                    return Option.of("");
                 });
             }
             else {

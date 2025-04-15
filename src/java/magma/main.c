@@ -16,11 +16,8 @@
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import java.util.stream.IntStream; */
-typedef struct {
-} Main;
-typedef struct {
-} State;
-/* private final Deque<Character> queue; */
+/*  */
+typedef struct {/* private final Deque<Character> queue; */
 /* private final List<String> segments; */
 /* private String buffer; */
 /* private int depth; */
@@ -33,6 +30,32 @@ typedef struct {
 /* public State(Deque<Character> queue) {
             this(queue, new ArrayList<>(), "", 0);
         } */
+/*  */
+
+} State;
+typedef struct {/* private static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>(); */
+/* private static final List<Tuple<String, List<String>>> visited = new ArrayList<>(); */
+/* private static final List<String> structs = new ArrayList<>(); */
+/* private static final List<String> methods = new ArrayList<>(); */
+/* private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>(); */
+/*  */
+
+} Main;
+typedef struct {/*  */
+
+} Option_char_ref;
+typedef struct {/*  */
+
+} Tuple_char_ref_List_char_ref;
+typedef struct {/*  */
+
+} Option_List_char_ref;
+typedef struct {/*  */
+
+} Option_State;
+typedef struct {/*  */
+
+} Option_R;
 int State_isShallow(){
 }
 State State_exit(){
@@ -49,15 +72,15 @@ int State_hasNext(){
 }
 char State_pop(){
 }
-/*  */
-/* private static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>(); */
-/* private static final List<Tuple<String, List<String>>> visited = new ArrayList<>(); */
-/* private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>(); */
 void __main__(char** args){
 }
 char* Main_compile(char* input){
 }
-Option_char_ref Main_expand(Tuple_char_ref_List_char_ref expansion){
+List_char_ref Main_assemble(List_char_ref compiled){
+}
+void Main_assembleGenerics(List_char_ref compiled){
+}
+Option_char_ref Main_assembleEntry(Tuple_char_ref_List_char_ref expansion){
 }
 Option_char_ref Main_compileStatements(char* input, Option_char_ref (*compiler)(char*)){
 }
@@ -115,10 +138,6 @@ char* Main_generateSimpleDefinition(char* type, Option_char_ref maybeName){
 }
 char* Main_generatePlaceholder(char* input){
 }
-/*  */
-/*  */
-typedef struct {
-} Option_char_ref;
 Option_char_ref Option_char_ref_of(char* value){
 }
 Option_char_ref Option_char_ref_empty(){
@@ -135,12 +154,6 @@ char* Option_char_ref_orElseGet(char* (*other)()){
 }
 void Option_char_ref_ifPresent(Consumer_char_ref consumer){
 }
-/*  */
-typedef struct {
-} Tuple_char_ref_List_char_ref;
-/*  */
-typedef struct {
-} Option_List_char_ref;
 Option_List_char_ref Option_List_char_ref_of(List_char_ref value){
 }
 Option_List_char_ref Option_List_char_ref_empty(){
@@ -157,9 +170,6 @@ List_char_ref Option_List_char_ref_orElseGet(List_char_ref (*other)()){
 }
 void Option_List_char_ref_ifPresent(Consumer_List_char_ref consumer){
 }
-/*  */
-typedef struct {
-} Option_State;
 Option_State Option_State_of(State value){
 }
 Option_State Option_State_empty(){
@@ -176,9 +186,6 @@ State Option_State_orElseGet(State (*other)()){
 }
 void Option_State_ifPresent(Consumer_State consumer){
 }
-/*  */
-typedef struct {
-} Option_R;
 Option_R Option_R_of(R value){
 }
 Option_R Option_R_empty(){
@@ -195,7 +202,6 @@ R Option_R_orElseGet(R (*other)()){
 }
 void Option_R_ifPresent(Consumer_R consumer){
 }
-/*  */
 int main(int argc, char **argv){
 	__main__(argv);
 	return 0;
