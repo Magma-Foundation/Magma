@@ -1,4 +1,3 @@
-/* import org.jetbrains.annotations.NotNull; */
 /* import java.io.IOException; */
 /* import java.nio.file.Files; */
 /* import java.nio.file.Path; */
@@ -28,35 +27,24 @@ struct State {
         } */
 struct public State(struct Deque<Character> queue){
 }
-/* private boolean isShallow() {
-            return this.depth == 1;
-        } */
-/* private State exit() {
-            this.depth = this.depth - 1;
-            return this;
-        } */
-/* private State enter() {
-            this.depth = this.depth + 1;
-            return this;
-        } */
-/* private State advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        } */
-/* private boolean isLevel() {
-            return this.depth == 0;
-        } */
+struct boolean isShallow(){
+}
+struct State exit(){
+}
+struct State enter(){
+}
+struct State advance(){
+}
+struct boolean isLevel(){
+}
 struct State append(char c){
 }
-/* public boolean hasNext() {
-            return !this.queue.isEmpty();
-        } */
-/* public char pop() {
-            return this.queue.pop();
-        } */
+struct boolean hasNext(){
+}
+char pop(){
+}
 /*  */
-struct void __main__(char** args){
+void __main__(char** args){
 }
 char* compile(char* input){
 }

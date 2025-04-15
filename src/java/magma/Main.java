@@ -225,7 +225,11 @@ public class Main {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
-                return compileAll(divideStatements(inputParams, Main::foldValueChar), Main::compileDefinition, Main::mergeValues).flatMap(outputParams -> {
+                Optional<String> maybeOutputParams = inputParams.isEmpty()
+                        ? Optional.of("")
+                        : compileAll(divideStatements(inputParams, Main::foldValueChar), Main::compileDefinition, Main::mergeValues);
+
+                return maybeOutputParams.flatMap(outputParams -> {
                     return Optional.of(outputDefinition + "(" +
                             outputParams +
                             "){" + "\n}\n");
