@@ -63,15 +63,15 @@ Option_char* Main_expand(Tuple_char*_List_char* expansion){
 }
 Option_char* Main_compileStatements(char* input, Option_char* (*compiler)(char*)){
 }
-Option_char* Main_compileAndMergeAll(List_char* segments, Option_char* (*compiler)(char*), BiFunction_StringBuilder_char*_StringBuilder merger){
+Option_char* Main_compileAndMergeAll(List_char* segments, Option_char* (*compiler)(char*), StringBuilder (*merger)(StringBuilder, char*)){
 }
-char* Main_mergeAll(List_char* list, BiFunction_StringBuilder_char*_StringBuilder merger){
+char* Main_mergeAll(List_char* list, StringBuilder (*merger)(StringBuilder, char*)){
 }
 Option_List_char* Main_compileAll(List_char* segments, Option_char* (*compiler)(char*)){
 }
 StringBuilder Main_mergeStatements(StringBuilder output, char* compiled){
 }
-List_char* Main_divideAll(char* input, BiFunction_State_char_State folder){
+List_char* Main_divideAll(char* input, State (*folder)(State, char)){
 }
 Option_State Main_foldDoubleQuotes(State current, char c){
 }

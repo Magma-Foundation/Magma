@@ -570,6 +570,10 @@ public class Main {
                             return generateFunctionalDefinition(maybeName, List.of(arguments.get(0)), arguments.get(1));
                         }
 
+                        if(base.equals("BiFunction")) {
+                            return generateFunctionalDefinition(maybeName, List.of(arguments.get(0), arguments.get(1)), arguments.get(2));
+                        }
+
                         Tuple<String, List<String>> entry = new Tuple<>(base, segments);
                         if (!toExpand.contains(entry)) {
                             toExpand.add(entry);
