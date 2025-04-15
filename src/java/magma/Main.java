@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class Main {
     public static void main(String[] args) {
@@ -28,6 +29,10 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return getString(input, Main::compileRootSegment);
+    }
+
+    private static String getString(String input, Function<String, String> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -37,6 +42,11 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             }
             else {
                 if (c == '{') {
@@ -51,7 +61,7 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -68,11 +78,33 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                if (isSymbol(name)) {
+                    String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                    if (withEnd.endsWith("}")) {
+                        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                        String outputContent = getString(inputContent, Main::compileClassSegment);
+                        return "struct " + name + " {\n};\n" + outputContent;
+                    }
+                }
             }
         }
 
         return generatePlaceholder(input) + "\n";
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static String compileClassSegment(String classSegment) {
+        return generatePlaceholder(classSegment);
     }
 
     private static String generatePlaceholder(String input) {
