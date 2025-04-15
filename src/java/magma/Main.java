@@ -30,12 +30,21 @@ public class Main {
     private static String compile(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
+        int depth = 0;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             buffer.append(c);
-            if (c == ';') {
+            if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else {
+                if (c == '{') {
+                    depth++;
+                }
+                if (c == '}') {
+                    depth--;
+                }
             }
         }
         segments.add(buffer.toString());
@@ -53,11 +62,15 @@ public class Main {
             return "";
         }
 
-        return generatePlaceholder(input);
+        if (input.contains("class ")) {
+            return "struct Temp {\n};\n";
+        }
+
+        return generatePlaceholder(input) + "\n";
     }
 
     private static String generatePlaceholder(String input) {
-        String replaced = input
+        String replaced = input.strip()
                 .replace("/* ", "<cmt-start>")
                 .replace(" */", "<cmt-end>");
 
