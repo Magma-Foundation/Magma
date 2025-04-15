@@ -374,10 +374,14 @@ public class Main {
     }
 
     private static StringBuilder mergeValues(StringBuilder builder, String element) {
+        return mergeDelimited(builder, element, ", ");
+    }
+
+    private static StringBuilder mergeDelimited(StringBuilder builder, String element, String delimiter) {
         if (builder.isEmpty()) {
             return builder.append(element);
         }
-        return builder.append(", ").append(element);
+        return builder.append(delimiter).append(element);
     }
 
     private static Option<String> compileDefinition(String definition, List<String> stack) {
@@ -471,15 +475,15 @@ public class Main {
                             return arguments.get(0) + " (*" + maybeName.orElse("") + ")()";
                         }
 
-                        String merged = mergeAll(arguments, Main::mergeValues);
-                        return generateSimpleDefinition("struct " + base + "<" + merged + ">", maybeName);
+                        String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"));
+                        return generateSimpleDefinition(base + "_" + merged, maybeName);
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return Option.of(generateSimpleDefinition("struct " + stripped, maybeName));
+            return Option.of(generateSimpleDefinition(stripped, maybeName));
         }
         else {
             return Option.empty();
