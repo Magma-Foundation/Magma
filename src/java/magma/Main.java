@@ -170,27 +170,39 @@ public class Main {
     }
 
     private static Option<String> compileStatements(String input, Function<String, Option<String>> compiler) {
-        return compileAll(divideStatements(input, Main::foldStatementChar), compiler, Main::mergeStatements);
+        return compileAndMergeAll(divideAll(input, Main::foldStatementChar), compiler, Main::mergeStatements);
     }
 
-    private static Option<String> compileAll(List<String> segments, Function<String, Option<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        Option<StringBuilder> maybeOutput = Option.of(new StringBuilder());
+    private static Option<String> compileAndMergeAll(List<String> segments, Function<String, Option<String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return compileAll(segments, compiler).map(compiled -> mergeAll(compiled, merger));
+    }
+
+    private static String mergeAll(List<String> list, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        StringBuilder output = new StringBuilder();
+        for (String segment : list) {
+            output = merger.apply(output, segment);
+        }
+        return output.toString();
+    }
+
+    private static Option<List<String>> compileAll(List<String> segments, Function<String, Option<String>> compiler) {
+        Option<List<String>> maybeCompiled = Option.of(new ArrayList<String>());
         for (String segment : segments) {
-            maybeOutput = maybeOutput.flatMap(output -> {
+            maybeCompiled = maybeCompiled.flatMap(output -> {
                 return compiler.apply(segment).map(compiled -> {
-                    return merger.apply(output, compiled);
+                    output.add(compiled);
+                    return output;
                 });
             });
         }
-
-        return maybeOutput.map(StringBuilder::toString);
+        return maybeCompiled;
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
         return output.append(compiled);
     }
 
-    private static List<String> divideStatements(String input, BiFunction<State, Character, State> folder) {
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
         LinkedList<Character> queue = IntStream.range(0, input.length())
                 .mapToObj(input::charAt)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -338,7 +350,11 @@ public class Main {
     }
 
     private static Option<String> compileValues(String input, Function<String, Option<String>> compileDefinition) {
-        return compileAll(divideStatements(input, Main::foldValueChar), compileDefinition, Main::mergeValues);
+        return compileAndMergeAll(divideValues(input), compileDefinition, Main::mergeValues);
+    }
+
+    private static List<String> divideValues(String input) {
+        return divideAll(input, Main::foldValueChar);
     }
 
     private static State foldValueChar(State state, char c) {
@@ -384,9 +400,7 @@ public class Main {
             inputType = beforeName;
         }
 
-        return compileType(inputType).map(outputType -> {
-            return outputType + " " + newName;
-        });
+        return compileType(inputType, new Option.Some<>(newName));
     }
 
     private static int findTypeSeparator(String input) {
@@ -407,30 +421,31 @@ public class Main {
         return -1;
     }
 
-    private static Option<String> compileType(String input) {
+    private static Option<String> compileType(String input, Option<String> maybeName) {
         String stripped = input.strip();
         if (stripped.equals("new") || stripped.equals("private")) {
             return Option.empty();
         }
 
         if (stripped.equals("void")) {
-            return Option.of("void");
+            return Option.of(generateSimpleDefinition("void", maybeName));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return Option.of("char");
+            return Option.of(generateSimpleDefinition("char", maybeName));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return Option.of("int");
+            return Option.of(generateSimpleDefinition("int", maybeName));
         }
 
         if (stripped.equals("String")) {
-            return Option.of("char*");
+            return Option.of(generateSimpleDefinition("char*", maybeName));
         }
 
         if (stripped.endsWith("[]")) {
-            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()), new Option.None<>())
+                    .map(value -> generateSimpleDefinition(value + "*", maybeName));
         }
 
         if (stripped.endsWith(">")) {
@@ -440,19 +455,29 @@ public class Main {
                 String base = withoutEnd.substring(0, argsStart).strip();
                 if (isSymbol(base)) {
                     String inputArgs = withoutEnd.substring(argsStart + "<".length());
-                    return compileValues(inputArgs, Main::compileType).map(outputArgs -> {
-                        return base + "<" + outputArgs + ">";
+                    List<String> segments = divideValues(inputArgs);
+                    return compileAll(segments, arg -> compileType(arg, new Option.None<>())).map(arguments -> {
+                        if (base.equals("Supplier")) {
+                            return arguments.get(0) + " (*" + maybeName.orElse("") + ")()";
+                        }
+
+                        String merged = mergeAll(arguments, Main::mergeValues);
+                        return generateSimpleDefinition("struct " + base + "<" + merged + ">", maybeName);
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return Option.of("struct " + stripped);
+            return Option.of(generateSimpleDefinition("struct " + stripped, maybeName));
         }
         else {
             return Option.empty();
         }
+    }
+
+    private static String generateSimpleDefinition(String type, Option<String> maybeName) {
+        return type + maybeName.map(name -> " " + name).orElse("");
     }
 
     private static String generatePlaceholder(String input) {
