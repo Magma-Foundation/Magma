@@ -103,8 +103,21 @@ public class Main {
         return true;
     }
 
-    private static String compileClassSegment(String classSegment) {
-        return generatePlaceholder(classSegment);
+    private static String compileClassSegment(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = input.substring(0, paramStart).strip();
+            int nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String oldName = definition.substring(nameSeparator + " ".length()).strip();
+                if (isSymbol(oldName)) {
+                    String newName = oldName.equals("main") ? "__main__" : oldName;
+                    return "void " + newName + "(){\n}\n";
+                }
+            }
+        }
+
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String input) {
