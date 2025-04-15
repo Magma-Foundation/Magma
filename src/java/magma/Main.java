@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -34,6 +35,31 @@ public class Main {
     }
 
     private static String getString(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::divideStatements, compiler, Main::mergeStatements);
+    }
+
+    private static String compileAll(
+            String input,
+            Function<String, ArrayList<String>> divider,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        ArrayList<String> segments = divider.apply(input);
+
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            String compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
+        }
+
+        return output.toString();
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
+    }
+
+    private static ArrayList<String> divideStatements(String input) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -59,13 +85,7 @@ public class Main {
             }
         }
         segments.add(buffer.toString());
-
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            output.append(compiler.apply(segment));
-        }
-
-        return output.toString();
+        return segments;
     }
 
     private static String compileRootSegment(String input) {
@@ -115,7 +135,22 @@ public class Main {
             return Optional.empty();
         }
 
-        String definition = input.substring(0, paramStart).strip();
+        String inputDefinition = input.substring(0, paramStart).strip();
+        String withParams = input.substring(paramStart + 1);
+
+        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd >= 0) {
+                String params = withParams.substring(0, paramEnd).strip();
+                return Optional.of(outputDefinition + "(){" + "\n}\n");
+            }
+            else {
+                return Optional.empty();
+            }
+        });
+    }
+
+    private static Optional<String> compileDefinition(String definition) {
         int nameSeparator = definition.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return Optional.empty();
@@ -131,8 +166,7 @@ public class Main {
         if (typeSeparator >= 0) {
             String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
             return compileType(inputType).map(outputType -> {
-                String tempContent = outputType.equals("void") ? "" : "\n\treturn 0;";
-                return outputType + " " + newName + "(){" + tempContent + "\n}\n";
+                return outputType + " " + newName;
             });
         }
         return Optional.empty();
