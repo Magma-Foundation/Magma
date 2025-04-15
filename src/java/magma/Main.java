@@ -381,8 +381,7 @@ public class Main {
     }
 
     private static Option<String> assembleStruct(String name, String inputContent, List<String> typeParams, List<String> typeArguments) {
-        String joined = typeArguments.isEmpty() ? "" : "_" + String.join("_", typeArguments);
-        String realName = name + joined;
+        String realName = typeArguments.isEmpty() ? name : stringify(name, typeArguments);
 
         String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition, realName, typeParams, typeArguments))).orElse("");
         return Option.of("typedef struct {\n} " +
@@ -576,7 +575,7 @@ public class Main {
                             return generateFunctionalDefinition(maybeName, List.of(arguments.get(0), arguments.get(1)), arguments.get(2));
                         }
 
-                        Tuple<String, List<String>> entry = new Tuple<>(base, segments);
+                        Tuple<String, List<String>> entry = new Tuple<>(base, arguments);
                         if (!toExpand.contains(entry)) {
                             toExpand.add(entry);
                         }

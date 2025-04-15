@@ -121,45 +121,45 @@ char* Main_generatePlaceholder(char* input){
 /*  */
 /*  */
 typedef struct {
-} Option_String;
-Option_String Option_String_of(String value){
+} Option_char_ref;
+Option_char_ref Option_char_ref_of(char* value){
 }
-Option_String Option_String_empty(){
+Option_char_ref Option_char_ref_empty(){
 }
-Stream_String Option_String_stream(Option_String option){
+Stream_char_ref Option_char_ref_stream(Option_char_ref option){
 }
-String Option_String_orElse(String other){
+char* Option_char_ref_orElse(char* other){
 }
-Option_R Option_String_flatMap(Option_R (*mapper)(String)){
+Option_R Option_char_ref_flatMap(Option_R (*mapper)(char*)){
 }
-Option_R Option_String_map(R (*mapper)(String)){
+Option_R Option_char_ref_map(R (*mapper)(char*)){
 }
-Option_String Option_String_or(Option_String (*other)()){
+Option_char_ref Option_char_ref_or(Option_char_ref (*other)()){
 }
-String Option_String_orElseGet(String (*other)()){
+char* Option_char_ref_orElseGet(char* (*other)()){
 }
-void Option_String_ifPresent(Consumer_String consumer){
+void Option_char_ref_ifPresent(Consumer_char_ref consumer){
 }
 /*  */
 typedef struct {
-} Option_List<String>;
-Option_List<String> Option_List<String>_of(List<String> value){
+} Option_List_char_ref;
+Option_List_char_ref Option_List_char_ref_of(List_char_ref value){
 }
-Option_List<String> Option_List<String>_empty(){
+Option_List_char_ref Option_List_char_ref_empty(){
 }
-Stream_List<String> Option_List<String>_stream(Option_List<String> option){
+Stream_List_char_ref Option_List_char_ref_stream(Option_List_char_ref option){
 }
-List<String> Option_List<String>_orElse(List<String> other){
+List_char_ref Option_List_char_ref_orElse(List_char_ref other){
 }
-Option_R Option_List<String>_flatMap(Option_R (*mapper)(List<String>)){
+Option_R Option_List_char_ref_flatMap(Option_R (*mapper)(List_char_ref)){
 }
-Option_R Option_List<String>_map(R (*mapper)(List<String>)){
+Option_R Option_List_char_ref_map(R (*mapper)(List_char_ref)){
 }
-Option_List<String> Option_List<String>_or(Option_List<String> (*other)()){
+Option_List_char_ref Option_List_char_ref_or(Option_List_char_ref (*other)()){
 }
-List<String> Option_List<String>_orElseGet(List<String> (*other)()){
+List_char_ref Option_List_char_ref_orElseGet(List_char_ref (*other)()){
 }
-void Option_List<String>_ifPresent(Consumer_List<String> consumer){
+void Option_List_char_ref_ifPresent(Consumer_List_char_ref consumer){
 }
 /*  */
 typedef struct {
@@ -181,27 +181,6 @@ Option_State Option_State_or(Option_State (*other)()){
 State Option_State_orElseGet(State (*other)()){
 }
 void Option_State_ifPresent(Consumer_State consumer){
-}
-/*  */
-typedef struct {
-} Option_T;
-Option_T Option_T_of(T value){
-}
-Option_T Option_T_empty(){
-}
-Stream_T Option_T_stream(Option_T option){
-}
-T Option_T_orElse(T other){
-}
-Option_R Option_T_flatMap(Option_R (*mapper)(T)){
-}
-Option_R Option_T_map(R (*mapper)(T)){
-}
-Option_T Option_T_or(Option_T (*other)()){
-}
-T Option_T_orElseGet(T (*other)()){
-}
-void Option_T_ifPresent(Consumer_T consumer){
 }
 /*  */
 typedef struct {
