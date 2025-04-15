@@ -51,11 +51,9 @@ int State_hasNext(){
 char State_pop(){
 }
 /*  */
-/* private record Tuple<A, B>(A left, B right) {
-    } */
 /* private static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>(); */
-/* private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>(); */
 /* private static final List<Tuple<String, List<String>>> visited = new ArrayList<>(); */
+/* private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>(); */
 void __main__(char** args){
 }
 char* Main_compile(char* input){
@@ -140,6 +138,9 @@ char* Option_char_ref_orElseGet(char* (*other)()){
 }
 void Option_char_ref_ifPresent(Consumer_char_ref consumer){
 }
+/*  */
+typedef struct {
+} Tuple_char_ref_List_char_ref;
 /*  */
 typedef struct {
 } Option_List_char_ref;

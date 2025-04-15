@@ -169,8 +169,8 @@ public class Main {
     }
 
     private static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
-    private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>();
     private static final List<Tuple<String, List<String>>> visited = new ArrayList<>();
+    private static List<Tuple<String, List<String>>> toExpand = new ArrayList<>();
 
     public static void main(String[] args) {
         try {
@@ -209,7 +209,7 @@ public class Main {
                             }
                         }
 
-                        if(!anyGenerated) {
+                        if (!anyGenerated) {
                             break;
                         }
                     }
@@ -357,10 +357,15 @@ public class Main {
                 ? beforeContent.substring(0, permitsIndex).strip()
                 : beforeContent;
 
-        int typeParamStart = withoutPermits.indexOf("<");
+        int paramStart = withoutPermits.indexOf("(");
+        String withoutParams = paramStart >= 0
+                ? withoutPermits.substring(0, paramStart).strip()
+                : withoutPermits;
+
+        int typeParamStart = withoutParams.indexOf("<");
         if (typeParamStart >= 0) {
-            var name = withoutPermits.substring(0, typeParamStart).strip();
-            String withTypeEnd = withoutPermits.substring(typeParamStart + "<".length()).strip();
+            var name = withoutParams.substring(0, typeParamStart).strip();
+            String withTypeEnd = withoutParams.substring(typeParamStart + "<".length()).strip();
             if (withTypeEnd.endsWith(">")) {
                 String inputTypeParams = withTypeEnd.substring(0, withTypeEnd.length() - ">".length());
                 List<String> outputTypeParams = divideValues(inputTypeParams)
@@ -373,8 +378,8 @@ public class Main {
             }
         }
 
-        if (isSymbol(withoutPermits)) {
-            return assembleStruct(withoutPermits, inputContent, Collections.emptyList(), Collections.emptyList());
+        if (isSymbol(withoutParams)) {
+            return assembleStruct(withoutParams, inputContent, Collections.emptyList(), Collections.emptyList());
         }
 
         return Option.empty();
@@ -571,7 +576,7 @@ public class Main {
                             return generateFunctionalDefinition(maybeName, List.of(arguments.get(0)), arguments.get(1));
                         }
 
-                        if(base.equals("BiFunction")) {
+                        if (base.equals("BiFunction")) {
                             return generateFunctionalDefinition(maybeName, List.of(arguments.get(0), arguments.get(1)), arguments.get(2));
                         }
 
