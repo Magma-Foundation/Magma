@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -292,7 +293,7 @@ public class Main {
                     String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                        String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition))).orElse("");
+                        String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition, name))).orElse("");
                         return Option.of("struct " + name + " {\n};\n" + outputContent);
                     }
                 }
@@ -312,15 +313,15 @@ public class Main {
         return true;
     }
 
-    private static String compileClassSegment(String input) {
+    private static String compileClassSegment(String input, String structName) {
         return compileClass(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, structName))
                 .orElseGet(() -> generatePlaceholder(input) + "\n");
     }
 
-    private static Option<String> compileMethod(String input) {
+    private static Option<String> compileMethod(String input, String structName) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return Option.empty();
@@ -329,13 +330,13 @@ public class Main {
         String inputDefinition = input.substring(0, paramStart).strip();
         String withParams = input.substring(paramStart + 1);
 
-        return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+        return compileDefinition(inputDefinition, Collections.singletonList(structName)).flatMap(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
                 Option<String> maybeOutputParams = inputParams.isEmpty()
                         ? Option.of("")
-                        : compileValues(inputParams, Main::compileDefinition);
+                        : compileValues(inputParams, definition -> compileDefinition(definition, Collections.emptyList()));
 
                 return maybeOutputParams.flatMap(outputParams -> {
                     return Option.of(outputDefinition + "(" +
@@ -372,24 +373,33 @@ public class Main {
         return appended;
     }
 
-    private static StringBuilder mergeValues(StringBuilder builder, String s) {
+    private static StringBuilder mergeValues(StringBuilder builder, String element) {
         if (builder.isEmpty()) {
-            return builder.append(s);
+            return builder.append(element);
         }
-        return builder.append(", ").append(s);
+        return builder.append(", ").append(element);
     }
 
-    private static Option<String> compileDefinition(String definition) {
+    private static Option<String> compileDefinition(String definition, List<String> stack) {
         int nameSeparator = definition.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return Option.empty();
         }
+
         String beforeName = definition.substring(0, nameSeparator).strip();
         String oldName = definition.substring(nameSeparator + " ".length()).strip();
         if (!isSymbol(oldName)) {
             return Option.empty();
         }
-        String newName = oldName.equals("main") ? "__main__" : oldName;
+
+        String newName;
+        if (oldName.equals("main")) {
+            newName = "__main__";
+        }
+        else {
+            String joined = stack.isEmpty() ? "" : String.join("_", stack) + "_";
+            newName = joined + oldName;
+        }
 
         int typeSeparator = findTypeSeparator(beforeName);
         String inputType;
