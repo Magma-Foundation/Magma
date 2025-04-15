@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -250,12 +251,31 @@ public class Main {
     }
 
     private static Option<String> compileClass(String input) {
-        int classIndex = input.indexOf("class ");
+        return compileToStruct(input, "class ");
+    }
+
+    private static Option<String> compileToStruct(String input, String infix) {
+        int classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            String afterKeyword = input.substring(classIndex + "class ".length());
+            boolean beforeKeyword = Arrays.stream(input.substring(0, classIndex).split(" "))
+                    .map(String::strip)
+                    .filter(modifier -> !modifier.isEmpty())
+                    .allMatch(Main::isSymbol);
+
+            if (!beforeKeyword) {
+                return new Option.None<>();
+            }
+
+            String afterKeyword = input.substring(classIndex + infix.length());
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
+                String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+                int typeParamStart = beforeContent.indexOf("<");
+                String name = typeParamStart >= 0
+                        ? beforeContent.substring(0, typeParamStart).strip()
+                        : beforeContent;
+
                 if (isSymbol(name)) {
                     String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                     if (withEnd.endsWith("}")) {
@@ -282,6 +302,8 @@ public class Main {
 
     private static String compileClassSegment(String input) {
         return compileClass(input)
+                .or(() -> compileToStruct(input, "interface "))
+                .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input) + "\n");
     }

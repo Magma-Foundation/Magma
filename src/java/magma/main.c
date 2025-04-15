@@ -3,6 +3,7 @@
 /* import java.nio.file.Path; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
+/* import java.util.Arrays; */
 /* import java.util.Deque; */
 /* import java.util.LinkedList; */
 /* import java.util.List; */
@@ -13,79 +14,49 @@
 /* import java.util.stream.IntStream; */
 struct Main {
 };
-/* private sealed interface Option<T> permits Option.None, Option.Some {
-        record Some<T>(T value) implements Option<T> {
-            @Override
-            public T orElse(T other) {
-                return this.value;
-            }
-
-            @Override
-            public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-                return mapper.apply(this.value);
-            }
-
-            @Override
-            public <R> Option<R> map(Function<T, R> mapper) {
-                return new Some<>(mapper.apply(this.value));
-            }
-
-            @Override
-            public Option<T> or(Supplier<Option<T>> other) {
-                return this;
-            }
-
-            @Override
-            public T orElseGet(Supplier<T> other) {
-                return this.value;
-            }
-        }
-
-        final class None<T> implements Option<T> {
-            @Override
-            public T orElse(T other) {
-                return other;
-            }
-
-            @Override
-            public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-                return new None<>();
-            }
-
-            @Override
-            public <R> Option<R> map(Function<T, R> mapper) {
-                return new None<>();
-            }
-
-            @Override
-            public Option<T> or(Supplier<Option<T>> other) {
-                return other.get();
-            }
-
-            @Override
-            public T orElseGet(Supplier<T> other) {
-                return other.get();
-            }
-        }
-
-        static <T> Option<T> of(T value) {
-            return new Some<>(value);
-        }
-
-        static <T> Option<T> empty() {
-            return new None<>();
-        }
-
-        T orElse(T other);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        <R> Option<R> map(Function<T, R> mapper);
-
-        Option<T> or(Supplier<Option<T>> other);
-
-        T orElseGet(Supplier<T> other);
-    } */
+struct Option {
+};
+struct Some {
+};
+struct T orElse(struct T other){
+}
+struct Option<R> flatMap(struct Option<R>> mapper){
+}
+struct Option<R> map(struct R> mapper){
+}
+struct Option<T> or(struct Supplier<Option<T>> other){
+}
+struct T orElseGet(struct Supplier<T> other){
+}
+/*  */
+struct None {
+};
+struct T orElse(struct T other){
+}
+struct Option<R> flatMap(struct Option<R>> mapper){
+}
+struct Option<R> map(struct R> mapper){
+}
+struct Option<T> or(struct Supplier<Option<T>> other){
+}
+struct T orElseGet(struct Supplier<T> other){
+}
+/*  */
+struct Option<T> of(struct T value){
+}
+struct Option<T> empty(){
+}
+struct T orElse(struct T other){
+}
+struct Option<R> flatMap(struct Option<R>> mapper){
+}
+struct Option<R> map(struct R> mapper){
+}
+struct Option<T> or(struct Supplier<Option<T>> other){
+}
+struct T orElseGet(struct Supplier<T> other){
+}
+/*  */
 struct State {
 };
 /* private final Deque<Character> queue; */
@@ -138,6 +109,8 @@ struct State foldStatementChar(struct State state, char c){
 char* compileRootSegment(char* input){
 }
 struct Option<String> compileClass(char* input){
+}
+struct Option<String> compileToStruct(char* input, char* infix){
 }
 int isSymbol(char* input){
 }
