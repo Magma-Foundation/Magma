@@ -3,18 +3,19 @@
 /* import java.nio.file.Path; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
+/* import java.util.Optional; */
 /* import java.util.function.Function; */
 struct Main {
 };
 void __main__(){
 }
-void compile(){
+char* compile(){
+	return 0;
 }
-void getString(){
+char* getString(){
+	return 0;
 }
-/* segments.add(buffer.toString()); */void StringBuilder(){
-}
-/* for (String segment : segments) {
+/* segments.add(buffer.toString()); *//* StringBuilder output = new StringBuilder(); *//* for (String segment : segments) {
             output.append(compiler.apply(segment));
         } *//* return output.toString(); *//*  *//* private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) {
@@ -51,20 +52,48 @@ void getString(){
         return true;
     } */
 /* private static String compileClassSegment(String input) {
+        return compileMethod(input).orElseGet(() -> generatePlaceholder(input));
+
+    } */
+/* private static Optional<String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String definition = input.substring(0, paramStart).strip();
-            int nameSeparator = definition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String oldName = definition.substring(nameSeparator + " ".length()).strip();
-                if (isSymbol(oldName)) {
-                    String newName = oldName.equals("main") ? "__main__" : oldName;
-                    return "void " + newName + "(){\n}\n";
-                }
-            }
+        if (paramStart < 0) {
+            return Optional.empty();
         }
 
-        return generatePlaceholder(input);
+        String definition = input.substring(0, paramStart).strip();
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeName = definition.substring(0, nameSeparator).strip();
+        String oldName = definition.substring(nameSeparator + " ".length()).strip();
+        if (!isSymbol(oldName)) {
+            return Optional.empty();
+        }
+        String newName = oldName.equals("main") ? "__main__" : oldName;
+
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+            return compileType(inputType).map(outputType -> {
+                String tempContent = outputType.equals("void") ? "" : "\n\treturn 0;";
+                return outputType + " " + newName + "(){" + tempContent + "\n}\n";
+            });
+        }
+        return Optional.empty();
+    } */
+/* private static Optional<String> compileType(String input) {
+        String stripped = input.strip();
+        if (stripped.equals("new")) {
+            return Optional.empty();
+        }
+
+        if (stripped.equals("String")) {
+            return Optional.of("char*");
+        }
+
+        return Optional.of(stripped);
     } */
 /* private static String generatePlaceholder(String input) {
         String replaced = input.strip()
