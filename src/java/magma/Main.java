@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -291,6 +289,10 @@ public class Main {
         String stripped = input.strip();
         if (stripped.equals("new") || stripped.equals("private")) {
             return Optional.empty();
+        }
+
+        if (stripped.equals("void")) {
+            return Optional.of("void");
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
