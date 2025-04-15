@@ -209,7 +209,7 @@ State foldStatementChar(State state, char c){
         return "<cmt-start>" + replaced + "<cmt-end>";
     } */
 /* } */
-int main(){
-	__main__();
+int main(int argc, char **argv){
+	__main__(argv);
 	return 0;
 }

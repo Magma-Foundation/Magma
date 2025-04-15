@@ -62,7 +62,7 @@ public class Main {
             String input = Files.readString(source);
 
             Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input) + "int main(){\n\t__main__();\n\treturn 0;\n}");
+            Files.writeString(target, compile(input) + "int main(int argc, char **argv){\n\t__main__(argv);\n\treturn 0;\n}");
 
             Process process = new ProcessBuilder("cmd.exe", "/c", "build.bat")
                     .directory(Paths.get(".").toFile())
