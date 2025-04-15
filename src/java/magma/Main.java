@@ -133,6 +133,11 @@ public class Main {
             return "";
         }
 
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input) + "\n");
+
+    }
+
+    private static Optional<String> compileClass(String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
             String afterKeyword = input.substring(classIndex + "class ".length());
@@ -144,13 +149,12 @@ public class Main {
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                         String outputContent = compileStatements(inputContent, definition -> Optional.of(compileClassSegment(definition))).orElse("");
-                        return "struct " + name + " {\n};\n" + outputContent;
+                        return Optional.of("struct " + name + " {\n};\n" + outputContent);
                     }
                 }
             }
         }
-
-        return generatePlaceholder(input) + "\n";
+        return Optional.empty();
     }
 
     private static boolean isSymbol(String input) {
@@ -165,7 +169,9 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileMethod(input).orElseGet(() -> generatePlaceholder(input) + "\n");
+        return compileClass(input)
+                .or(() -> compileMethod(input))
+                .orElseGet(() -> generatePlaceholder(input) + "\n");
     }
 
     private static Optional<String> compileMethod(String input) {

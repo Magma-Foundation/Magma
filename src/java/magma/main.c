@@ -9,50 +9,41 @@
 /* import java.util.function.Function; */
 struct Main {
 };
-/* private static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth;
-
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+struct State {
+};
+/* private final List<String> segments; */
+/* private StringBuilder buffer; */
+/* private int depth; */
+/* private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        }
-
-        public State() {
+        } */
+/* public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        }
-
-        private boolean isShallow() {
+        } */
+/* private boolean isShallow() {
             return this.depth == 1;
-        }
-
-        private State exit() {
+        } */
+/* private State exit() {
             this.depth = this.depth - 1;
             return this;
-        }
-
-        private State enter() {
+        } */
+/* private State enter() {
             this.depth = this.depth + 1;
             return this;
-        }
-
-        private State advance() {
+        } */
+/* private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        }
-
-        private boolean isLevel() {
+        } */
+/* private boolean isLevel() {
             return this.depth == 0;
-        }
-
-        private State append(char c) {
-            this.buffer.append(c);
-            return this;
-        }
-    } */
+        } */
+State append(char c){
+}
+/*  */
 void __main__(char** args){
 }
 char* compile(char* input){
@@ -84,6 +75,10 @@ State foldStatementChar(State state, char c){
             return "";
         }
 
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input) + "\n");
+
+    } */
+/* private static Optional<String> compileClass(String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
             String afterKeyword = input.substring(classIndex + "class ".length());
@@ -95,13 +90,12 @@ State foldStatementChar(State state, char c){
                     if (withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                         String outputContent = compileStatements(inputContent, definition -> Optional.of(compileClassSegment(definition))).orElse("");
-                        return "struct " + name + " {\n};\n" + outputContent;
+                        return Optional.of("struct " + name + " {\n};\n" + outputContent);
                     }
                 }
             }
         }
-
-        return generatePlaceholder(input) + "\n";
+        return Optional.empty();
     } */
 /* private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
@@ -114,7 +108,9 @@ State foldStatementChar(State state, char c){
         return true;
     } */
 /* private static String compileClassSegment(String input) {
-        return compileMethod(input).orElseGet(() -> generatePlaceholder(input) + "\n");
+        return compileClass(input)
+                .or(() -> compileMethod(input))
+                .orElseGet(() -> generatePlaceholder(input) + "\n");
     } */
 /* private static Optional<String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
