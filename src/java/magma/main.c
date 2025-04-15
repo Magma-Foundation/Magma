@@ -59,19 +59,19 @@ void __main__(char** args){
 }
 char* Main_compile(char* input){
 }
-Option_char* Main_expand(Tuple_char*_List_char* expansion){
+Option_char_ref Main_expand(Tuple_char_ref_List_char_ref expansion){
 }
-Option_char* Main_compileStatements(char* input, Option_char* (*compiler)(char*)){
+Option_char_ref Main_compileStatements(char* input, Option_char_ref (*compiler)(char*)){
 }
-Option_char* Main_compileAndMergeAll(List_char* segments, Option_char* (*compiler)(char*), StringBuilder (*merger)(StringBuilder, char*)){
+Option_char_ref Main_compileAndMergeAll(List_char_ref segments, Option_char_ref (*compiler)(char*), StringBuilder (*merger)(StringBuilder, char*)){
 }
-char* Main_mergeAll(List_char* list, StringBuilder (*merger)(StringBuilder, char*)){
+char* Main_mergeAll(List_char_ref list, StringBuilder (*merger)(StringBuilder, char*)){
 }
-Option_List_char* Main_compileAll(List_char* segments, Option_char* (*compiler)(char*)){
+Option_List_char_ref Main_compileAll(List_char_ref segments, Option_char_ref (*compiler)(char*)){
 }
 StringBuilder Main_mergeStatements(StringBuilder output, char* compiled){
 }
-List_char* Main_divideAll(char* input, State (*folder)(State, char)){
+List_char_ref Main_divideAll(char* input, State (*folder)(State, char)){
 }
 Option_State Main_foldDoubleQuotes(State current, char c){
 }
@@ -81,21 +81,21 @@ State Main_foldStatementChar(State state, char c){
 }
 char* Main_compileRootSegment(char* input){
 }
-Option_char* Main_compileClass(char* input){
+Option_char_ref Main_compileClass(char* input){
 }
-Option_char* Main_compileToStruct(char* input, char* infix){
+Option_char_ref Main_compileToStruct(char* input, char* infix){
 }
-Option_char* Main_assembleStruct(char* name, char* inputContent, List_char* typeParams, List_char* typeArguments){
+Option_char_ref Main_assembleStruct(char* name, char* inputContent, List_char_ref typeParams, List_char_ref typeArguments){
 }
 int Main_isSymbol(char* input){
 }
-char* Main_compileClassSegment(char* input, char* structName, List_char* typeParams, List_char* typeArguments){
+char* Main_compileClassSegment(char* input, char* structName, List_char_ref typeParams, List_char_ref typeArguments){
 }
-Option_char* Main_compileMethod(char* input, char* structName, List_char* typeParams, List_char* typeArguments){
+Option_char_ref Main_compileMethod(char* input, char* structName, List_char_ref typeParams, List_char_ref typeArguments){
 }
-Option_char* Main_compileValues(char* input, Option_char* (*compileDefinition)(char*)){
+Option_char_ref Main_compileValues(char* input, Option_char_ref (*compileDefinition)(char*)){
 }
-List_char* Main_divideValues(char* input){
+List_char_ref Main_divideValues(char* input){
 }
 State Main_foldValueChar(State state, char c){
 }
@@ -103,15 +103,17 @@ StringBuilder Main_mergeValues(StringBuilder builder, char* element){
 }
 StringBuilder Main_mergeDelimited(StringBuilder builder, char* element, char* delimiter){
 }
-Option_char* Main_compileDefinition(char* definition, List_char* stack, List_char* typeParams, List_char* typeArguments){
+Option_char_ref Main_compileDefinition(char* definition, List_char_ref stack, List_char_ref typeParams, List_char_ref typeArguments){
 }
 int Main_findTypeSeparator(char* input){
 }
-Option_char* Main_compileType(char* input, Option_char* maybeName, List_char* typeParams, List_char* typeArguments){
+Option_char_ref Main_compileType(char* input, Option_char_ref maybeName, List_char_ref typeParams, List_char_ref typeArguments){
 }
-char* Main_generateFunctionalDefinition(Option_char* name, List_char* paramTypes, char* returnType){
+char* Main_stringify(char* base, List_char_ref arguments){
 }
-char* Main_generateSimpleDefinition(char* type, Option_char* maybeName){
+char* Main_generateFunctionalDefinition(Option_char_ref name, List_char_ref paramTypes, char* returnType){
+}
+char* Main_generateSimpleDefinition(char* type, Option_char_ref maybeName){
 }
 char* Main_generatePlaceholder(char* input){
 }

@@ -579,8 +579,8 @@ public class Main {
                             toExpand.add(entry);
                         }
 
-                        String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"));
-                        return generateSimpleDefinition(base + "_" + merged, maybeName);
+                        String type = stringify(base, arguments);
+                        return generateSimpleDefinition(type, maybeName);
                     });
                 }
             }
@@ -592,6 +592,13 @@ public class Main {
         else {
             return Option.empty();
         }
+    }
+
+    private static String stringify(String base, List<String> arguments) {
+        String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"))
+                .replace("*", "_ref");
+
+        return base + "_" + merged;
     }
 
     private static String generateFunctionalDefinition(Option<String> name, List<String> paramTypes, String returnType) {
