@@ -1,4 +1,4 @@
-/* package magma; *//* 
+/* 
 
 import java.io.IOException; *//* 
 import java.nio.file.Files; *//* 
@@ -49,6 +49,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return ""; *//* 
+        }
+
         return generatePlaceholder(input); *//* 
     }
 

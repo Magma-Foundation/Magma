@@ -49,6 +49,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return "";
+        }
+
         return generatePlaceholder(input);
     }
 
