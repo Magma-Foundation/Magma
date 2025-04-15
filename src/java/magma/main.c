@@ -17,10 +17,10 @@
 /* import java.util.stream.Collectors; */
 /* import java.util.stream.IntStream; */
 /* import java.util.stream.Stream; */
-struct Main {
-};
-struct State {
-};
+typedef struct {
+} Main;
+typedef struct {
+} State;
 /* private final Deque<Character> queue; */
 /* private final List<String> segments; */
 /* private StringBuilder buffer; */
@@ -120,8 +120,8 @@ char* Main_generatePlaceholder(char* input){
 }
 /*  */
 /*  */
-struct Option_String {
-};
+typedef struct {
+} Option_String;
 Option_String Option_String_of(String value){
 }
 Option_String Option_String_empty(){
@@ -141,8 +141,8 @@ String Option_String_orElseGet(String (*other)()){
 void Option_String_ifPresent(Consumer_String consumer){
 }
 /*  */
-struct Option_List<String> {
-};
+typedef struct {
+} Option_List<String>;
 Option_List<String> Option_List<String>_of(List<String> value){
 }
 Option_List<String> Option_List<String>_empty(){
@@ -162,8 +162,8 @@ List<String> Option_List<String>_orElseGet(List<String> (*other)()){
 void Option_List<String>_ifPresent(Consumer_List<String> consumer){
 }
 /*  */
-struct Option_State {
-};
+typedef struct {
+} Option_State;
 Option_State Option_State_of(State value){
 }
 Option_State Option_State_empty(){
@@ -183,8 +183,8 @@ State Option_State_orElseGet(State (*other)()){
 void Option_State_ifPresent(Consumer_State consumer){
 }
 /*  */
-struct Option_T {
-};
+typedef struct {
+} Option_T;
 Option_T Option_T_of(T value){
 }
 Option_T Option_T_empty(){
@@ -204,8 +204,8 @@ T Option_T_orElseGet(T (*other)()){
 void Option_T_ifPresent(Consumer_T consumer){
 }
 /*  */
-struct Option_R {
-};
+typedef struct {
+} Option_R;
 Option_R Option_R_of(R value){
 }
 Option_R Option_R_empty(){

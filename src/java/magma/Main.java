@@ -382,10 +382,12 @@ public class Main {
 
     private static Option<String> assembleStruct(String name, String inputContent, List<String> typeParams, List<String> typeArguments) {
         String joined = typeArguments.isEmpty() ? "" : "_" + String.join("_", typeArguments);
-        String name1 = name + joined;
+        String realName = name + joined;
 
-        String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition, name1, typeParams, typeArguments))).orElse("");
-        return Option.of("struct " + name1 + " {\n};\n" + outputContent);
+        String outputContent = compileStatements(inputContent, definition -> Option.of(compileClassSegment(definition, realName, typeParams, typeArguments))).orElse("");
+        return Option.of("typedef struct {\n} " +
+                realName +
+                ";\n" + outputContent);
     }
 
     private static boolean isSymbol(String input) {
