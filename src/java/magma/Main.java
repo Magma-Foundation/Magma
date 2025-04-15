@@ -1,29 +1,37 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static class State {
+        private final Deque<Character> queue;
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+            this.queue = queue;
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private boolean isShallow() {
@@ -53,6 +61,14 @@ public class Main {
         private State append(char c) {
             this.buffer.append(c);
             return this;
+        }
+
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        public char pop() {
+            return this.queue.pop();
         }
     }
 
@@ -102,13 +118,37 @@ public class Main {
     }
 
     private static List<String> divideStatements(String input, BiFunction<State, Character, State> folder) {
-        State current = new State();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = folder.apply(current, c);
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        State current = new State(queue);
+        while (current.hasNext()) {
+            char c = current.pop();
+
+            State finalCurrent = current;
+            current = foldSingleQuotes(current, c)
+                    .or(() -> foldDoubleQuotes(finalCurrent, c))
+                    .orElseGet(() -> folder.apply(finalCurrent, c));
         }
 
         return current.advance().segments;
+    }
+
+    private static Optional<State> foldDoubleQuotes(State current, char c) {
+        return Optional.empty();
+    }
+
+    private static Optional<State> foldSingleQuotes(State current, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        State current1 = current.append(c);
+        char popped = current1.pop();
+        State appended = current1.append(popped);
+        State state = popped == '\\' ? appended.append(appended.pop()) : appended;
+        return Optional.of(state.append(state.pop()));
     }
 
     private static State foldStatementChar(State state, char c) {
@@ -253,7 +293,9 @@ public class Main {
             return Optional.empty();
         }
 
-        if(stripped.equals("char") || stripped.equals("Character")) return Optional.of("char");
+        if (stripped.equals("char") || stripped.equals("Character")) {
+            return Optional.of("char");
+        }
 
         if (stripped.equals("String")) {
             return Optional.of("char*");
