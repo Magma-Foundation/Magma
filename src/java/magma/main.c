@@ -20,41 +20,41 @@ struct Some {
 };
 struct T orElse(struct T other){
 }
-struct Option<R> flatMap(struct Option<R>> mapper){
+Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper){
 }
-struct Option<R> map(struct R> mapper){
+Option<struct R> map(Function<struct T, struct R> mapper){
 }
-struct Option<T> or(struct Supplier<Option<T>> other){
+Option<struct T> or(Supplier<Option<struct T>> other){
 }
-struct T orElseGet(struct Supplier<T> other){
+struct T orElseGet(Supplier<struct T> other){
 }
 /*  */
 struct None {
 };
 struct T orElse(struct T other){
 }
-struct Option<R> flatMap(struct Option<R>> mapper){
+Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper){
 }
-struct Option<R> map(struct R> mapper){
+Option<struct R> map(Function<struct T, struct R> mapper){
 }
-struct Option<T> or(struct Supplier<Option<T>> other){
+Option<struct T> or(Supplier<Option<struct T>> other){
 }
-struct T orElseGet(struct Supplier<T> other){
+struct T orElseGet(Supplier<struct T> other){
 }
 /*  */
-struct Option<T> of(struct T value){
+Option<struct T> of(struct T value){
 }
-struct Option<T> empty(){
+Option<struct T> empty(){
 }
 struct T orElse(struct T other){
 }
-struct Option<R> flatMap(struct Option<R>> mapper){
+Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper){
 }
-struct Option<R> map(struct R> mapper){
+Option<struct R> map(Function<struct T, struct R> mapper){
 }
-struct Option<T> or(struct Supplier<Option<T>> other){
+Option<struct T> or(Supplier<Option<struct T>> other){
 }
-struct T orElseGet(struct Supplier<T> other){
+struct T orElseGet(Supplier<struct T> other){
 }
 /*  */
 struct State {
@@ -69,7 +69,7 @@ struct State {
             this.buffer = buffer;
             this.depth = depth;
         } */
-struct public State(struct Deque<Character> queue){
+struct public State(Deque<char> queue){
 }
 int isShallow(){
 }
@@ -92,39 +92,43 @@ void __main__(char** args){
 }
 char* compile(char* input){
 }
-struct Option<String> compileStatements(char* input, struct Option<String>> compiler){
+Option<char*> compileStatements(char* input, Function<char*, Option<char*>> compiler){
 }
-struct Option<String> compileAll(struct List<String> segments, struct Option<String>> compiler, struct StringBuilder> merger){
+Option<char*> compileAll(List<char*> segments, Function<char*, Option<char*>> compiler, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
 }
 struct StringBuilder mergeStatements(struct StringBuilder output, char* compiled){
 }
-struct List<String> divideStatements(char* input, struct State> folder){
+List<char*> divideStatements(char* input, BiFunction<struct State, char, struct State> folder){
 }
-struct Option<State> foldDoubleQuotes(struct State current, char c){
+Option<struct State> foldDoubleQuotes(struct State current, char c){
 }
-struct Option<State> foldSingleQuotes(struct State current, char c){
+Option<struct State> foldSingleQuotes(struct State current, char c){
 }
 struct State foldStatementChar(struct State state, char c){
 }
 char* compileRootSegment(char* input){
 }
-struct Option<String> compileClass(char* input){
+Option<char*> compileClass(char* input){
 }
-struct Option<String> compileToStruct(char* input, char* infix){
+Option<char*> compileToStruct(char* input, char* infix){
 }
 int isSymbol(char* input){
 }
 char* compileClassSegment(char* input){
 }
-struct Option<String> compileMethod(char* input){
+Option<char*> compileMethod(char* input){
+}
+Option<char*> compileValues(char* input, Function<char*, Option<char*>> compileDefinition){
 }
 struct State foldValueChar(struct State state, char c){
 }
 struct StringBuilder mergeValues(struct StringBuilder builder, char* s){
 }
-struct Option<String> compileDefinition(char* definition){
+Option<char*> compileDefinition(char* definition){
 }
-struct Option<String> compileType(char* input){
+int findTypeSeparator(char* input){
+}
+Option<char*> compileType(char* input){
 }
 char* generatePlaceholder(char* input){
 }

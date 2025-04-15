@@ -323,7 +323,7 @@ public class Main {
                 String inputParams = withParams.substring(0, paramEnd).strip();
                 Option<String> maybeOutputParams = inputParams.isEmpty()
                         ? Option.of("")
-                        : compileAll(divideStatements(inputParams, Main::foldValueChar), Main::compileDefinition, Main::mergeValues);
+                        : compileValues(inputParams, Main::compileDefinition);
 
                 return maybeOutputParams.flatMap(outputParams -> {
                     return Option.of(outputDefinition + "(" +
@@ -335,6 +335,10 @@ public class Main {
                 return Option.empty();
             }
         });
+    }
+
+    private static Option<String> compileValues(String input, Function<String, Option<String>> compileDefinition) {
+        return compileAll(divideStatements(input, Main::foldValueChar), compileDefinition, Main::mergeValues);
     }
 
     private static State foldValueChar(State state, char c) {
@@ -371,7 +375,7 @@ public class Main {
         }
         String newName = oldName.equals("main") ? "__main__" : oldName;
 
-        int typeSeparator = beforeName.lastIndexOf(" ");
+        int typeSeparator = findTypeSeparator(beforeName);
         String inputType;
         if (typeSeparator >= 0) {
             inputType = beforeName.substring(typeSeparator + " ".length()).strip();
@@ -383,6 +387,24 @@ public class Main {
         return compileType(inputType).map(outputType -> {
             return outputType + " " + newName;
         });
+    }
+
+    private static int findTypeSeparator(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return i;
+            }
+
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
+        }
+        return -1;
     }
 
     private static Option<String> compileType(String input) {
@@ -411,7 +433,26 @@ public class Main {
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
         }
 
-        return Option.of("struct " + stripped);
+        if (stripped.endsWith(">")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            int argsStart = withoutEnd.indexOf("<");
+            if (argsStart >= 0) {
+                String base = withoutEnd.substring(0, argsStart).strip();
+                if (isSymbol(base)) {
+                    String inputArgs = withoutEnd.substring(argsStart + "<".length());
+                    return compileValues(inputArgs, Main::compileType).map(outputArgs -> {
+                        return base + "<" + outputArgs + ">";
+                    });
+                }
+            }
+        }
+
+        if (isSymbol(stripped)) {
+            return Option.of("struct " + stripped);
+        }
+        else {
+            return Option.empty();
+        }
     }
 
     private static String generatePlaceholder(String input) {
