@@ -31,8 +31,9 @@ struct State {
             this.buffer = buffer;
             this.depth = depth;
         } */
-public State_State(Deque_char queue){
-}
+/* public State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
+        } */
 int State_isShallow(){
 }
 State State_exit(){

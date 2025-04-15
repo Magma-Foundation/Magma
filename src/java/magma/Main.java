@@ -528,7 +528,7 @@ public class Main {
             return Option.of(generateSimpleDefinition(typeArguments.get(index), maybeName));
         }
 
-        if (stripped.equals("new") || stripped.equals("private")) {
+        if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
             return Option.empty();
         }
 
