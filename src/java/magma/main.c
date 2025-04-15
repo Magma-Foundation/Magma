@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +12,7 @@ public class Main {
             String input = Files.readString(source);
 
             Path target = source.resolveSibling("main.c");
-            Files.writeString(target, input + "int main(){\n\treturn 0;\n}");
+            Files.writeString(target, compile(input) + "int main(){\n\treturn 0;\n}");
 
             Process process = new ProcessBuilder("cmd.exe", "/c", "build.bat")
                     .directory(Paths.get(".").toFile())
@@ -25,7 +25,15 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    private static String compile(String input) {
+        String replaced = input
+                .replace("<cmt-start>", "<cmt-start>")
+                .replace("<cmt-end>", "<cmt-end>");
+
+        return "<cmt-start>" + replaced + "<cmt-end>";
+    }
 }
-int main(){
+ */int main(){
 	return 0;
 }
