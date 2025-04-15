@@ -472,7 +472,11 @@ public class Main {
                     List<String> segments = divideValues(inputArgs);
                     return compileAll(segments, arg -> compileType(arg, new Option.None<>())).map(arguments -> {
                         if (base.equals("Supplier")) {
-                            return arguments.get(0) + " (*" + maybeName.orElse("") + ")()";
+                            return generateFunctionalDefinition(maybeName, List.of(), arguments.get(0));
+                        }
+
+                        if (base.equals("Function")) {
+                            return generateFunctionalDefinition(maybeName, List.of(arguments.get(0)), arguments.get(1));
                         }
 
                         String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"));
@@ -488,6 +492,12 @@ public class Main {
         else {
             return Option.empty();
         }
+    }
+
+    private static String generateFunctionalDefinition(Option<String> name, List<String> paramTypes, String returnType) {
+        return returnType + " (*" + name.orElse("") + ")(" +
+                String.join(", ", paramTypes) +
+                ")";
     }
 
     private static String generateSimpleDefinition(String type, Option<String> maybeName) {

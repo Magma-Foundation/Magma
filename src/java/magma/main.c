@@ -21,9 +21,9 @@ struct Some {
 };
 T Some_orElse(T other){
 }
-Option_R Some_flatMap(Function_T_Option_R mapper){
+Option_R Some_flatMap(Option_R (*mapper)(T)){
 }
-Option_R Some_map(Function_T_R mapper){
+Option_R Some_map(R (*mapper)(T)){
 }
 Option_T Some_or(Option_T (*other)()){
 }
@@ -34,9 +34,9 @@ struct None {
 };
 T None_orElse(T other){
 }
-Option_R None_flatMap(Function_T_Option_R mapper){
+Option_R None_flatMap(Option_R (*mapper)(T)){
 }
-Option_R None_map(Function_T_R mapper){
+Option_R None_map(R (*mapper)(T)){
 }
 Option_T None_or(Option_T (*other)()){
 }
@@ -49,9 +49,9 @@ Option_T Option_empty(){
 }
 T Option_orElse(T other){
 }
-Option_R Option_flatMap(Function_T_Option_R mapper){
+Option_R Option_flatMap(Option_R (*mapper)(T)){
 }
-Option_R Option_map(Function_T_R mapper){
+Option_R Option_map(R (*mapper)(T)){
 }
 Option_T Option_or(Option_T (*other)()){
 }
@@ -93,13 +93,13 @@ void __main__(char** args){
 }
 char* Main_compile(char* input){
 }
-Option_char* Main_compileStatements(char* input, Function_char*_Option_char* compiler){
+Option_char* Main_compileStatements(char* input, Option_char* (*compiler)(char*)){
 }
-Option_char* Main_compileAndMergeAll(List_char* segments, Function_char*_Option_char* compiler, BiFunction_StringBuilder_char*_StringBuilder merger){
+Option_char* Main_compileAndMergeAll(List_char* segments, Option_char* (*compiler)(char*), BiFunction_StringBuilder_char*_StringBuilder merger){
 }
 char* Main_mergeAll(List_char* list, BiFunction_StringBuilder_char*_StringBuilder merger){
 }
-Option_List_char* Main_compileAll(List_char* segments, Function_char*_Option_char* compiler){
+Option_List_char* Main_compileAll(List_char* segments, Option_char* (*compiler)(char*)){
 }
 StringBuilder Main_mergeStatements(StringBuilder output, char* compiled){
 }
@@ -123,7 +123,7 @@ char* Main_compileClassSegment(char* input, char* structName){
 }
 Option_char* Main_compileMethod(char* input, char* structName){
 }
-Option_char* Main_compileValues(char* input, Function_char*_Option_char* compileDefinition){
+Option_char* Main_compileValues(char* input, Option_char* (*compileDefinition)(char*)){
 }
 List_char* Main_divideValues(char* input){
 }
@@ -138,6 +138,8 @@ Option_char* Main_compileDefinition(char* definition, List_char* stack){
 int Main_findTypeSeparator(char* input){
 }
 Option_char* Main_compileType(char* input, Option_char* maybeName){
+}
+char* Main_generateFunctionalDefinition(Option_char* name, List_char* paramTypes, char* returnType){
 }
 char* Main_generateSimpleDefinition(char* type, Option_char* maybeName){
 }
