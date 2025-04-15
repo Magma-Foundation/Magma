@@ -3,7 +3,7 @@
 /* import java.nio.file.Path; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
-struct Temp {
+struct Main {
 };
 int main(){
 	return 0;
