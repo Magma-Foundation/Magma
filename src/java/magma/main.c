@@ -27,7 +27,7 @@ struct State {
         } */
 struct public State(struct Deque<Character> queue){
 }
-struct boolean isShallow(){
+int isShallow(){
 }
 struct State exit(){
 }
@@ -35,11 +35,11 @@ struct State enter(){
 }
 struct State advance(){
 }
-struct boolean isLevel(){
+int isLevel(){
 }
 struct State append(char c){
 }
-struct boolean hasNext(){
+int hasNext(){
 }
 char pop(){
 }
@@ -66,7 +66,7 @@ char* compileRootSegment(char* input){
 }
 struct Optional<String> compileClass(char* input){
 }
-struct boolean isSymbol(char* input){
+int isSymbol(char* input){
 }
 char* compileClassSegment(char* input){
 }

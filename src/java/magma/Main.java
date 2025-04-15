@@ -303,6 +303,10 @@ public class Main {
             return Optional.of("char");
         }
 
+        if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
+            return Optional.of("int");
+        }
+
         if (stripped.equals("String")) {
             return Optional.of("char*");
         }
