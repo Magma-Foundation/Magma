@@ -253,6 +253,8 @@ public class Main {
             return Optional.empty();
         }
 
+        if(stripped.equals("char") || stripped.equals("Character")) return Optional.of("char");
+
         if (stripped.equals("String")) {
             return Optional.of("char*");
         }
@@ -261,7 +263,7 @@ public class Main {
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
         }
 
-        return Optional.of(stripped);
+        return Optional.of("struct " + stripped);
     }
 
     private static String generatePlaceholder(String input) {

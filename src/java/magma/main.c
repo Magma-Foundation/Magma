@@ -41,22 +41,22 @@ struct State {
 /* private boolean isLevel() {
             return this.depth == 0;
         } */
-State append(char c){
+struct State append(char c){
 }
 /*  */
-void __main__(char** args){
+struct void __main__(char** args){
 }
 char* compile(char* input){
 }
-Optional<String> compileStatements(char* input, Optional<String>> compiler){
+struct Optional<String> compileStatements(char* input, struct Optional<String>> compiler){
 }
-Optional<String> compileAll(List<String> segments, Optional<String>> compiler, StringBuilder> merger){
+struct Optional<String> compileAll(struct List<String> segments, struct Optional<String>> compiler, struct StringBuilder> merger){
 }
-StringBuilder mergeStatements(StringBuilder output, char* compiled){
+struct StringBuilder mergeStatements(struct StringBuilder output, char* compiled){
 }
-List<String> divideStatements(char* input, State> folder){
+struct List<String> divideStatements(char* input, struct State> folder){
 }
-State foldStatementChar(State state, char c){
+struct State foldStatementChar(struct State state, char c){
 }
 /* ' && state.isShallow()) {
             return state.advance().exit();
@@ -187,6 +187,8 @@ State foldStatementChar(State state, char c){
             return Optional.empty();
         }
 
+        if(stripped.equals("char") || stripped.equals("Character")) return Optional.of("char");
+
         if (stripped.equals("String")) {
             return Optional.of("char*");
         }
@@ -195,7 +197,7 @@ State foldStatementChar(State state, char c){
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(value -> value + "*");
         }
 
-        return Optional.of(stripped);
+        return Optional.of("struct " + stripped);
     } */
 /* private static String generatePlaceholder(String input) {
         String replaced = input.strip()
