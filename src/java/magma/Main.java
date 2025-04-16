@@ -108,8 +108,14 @@ public class Main {
         if (stripped.startsWith("import ")) {
             return "// #include <temp.h>\n";
         }
-        if (stripped.contains("class ")) {
-            return "struct Temp {\n};\n";
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                return "struct " + name + " {\n};\n";
+            }
         }
         return "/* " + stripped + " */";
     }
