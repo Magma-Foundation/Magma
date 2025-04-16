@@ -688,6 +688,10 @@ public class Main {
                             return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
                         }
 
+                        if (base.equals("Consumer")) {
+                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0)), "void");
+                        }
+
                         Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
                         if (!toExpand.contains(entry)) {
                             toExpand.add(entry);

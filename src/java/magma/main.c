@@ -167,7 +167,7 @@ Option_char_ref Option_char_ref_or(Option_char_ref (*other)()){
 }
 char* Option_char_ref_orElseGet(char* (*other)()){
 }
-void Option_char_ref_ifPresent(Consumer_char_ref consumer){
+void Option_char_ref_ifPresent(void (*consumer)(char*)){
 }
 int Option_char_ref_isPresent(){
 }
@@ -197,7 +197,7 @@ Option_List__char_ref Option_List__char_ref_or(Option_List__char_ref (*other)())
 }
 List__char_ref Option_List__char_ref_orElseGet(List__char_ref (*other)()){
 }
-void Option_List__char_ref_ifPresent(Consumer_List__char_ref consumer){
+void Option_List__char_ref_ifPresent(void (*consumer)(List__char_ref)){
 }
 int Option_List__char_ref_isPresent(){
 }
@@ -211,7 +211,7 @@ Option_State Option_State_or(Option_State (*other)()){
 }
 State Option_State_orElseGet(State (*other)()){
 }
-void Option_State_ifPresent(Consumer_State consumer){
+void Option_State_ifPresent(void (*consumer)(State)){
 }
 int Option_State_isPresent(){
 }
@@ -225,7 +225,7 @@ Option_R Option_R_or(Option_R (*other)()){
 }
 R Option_R_orElseGet(R (*other)()){
 }
-void Option_R_ifPresent(Consumer_R consumer){
+void Option_R_ifPresent(void (*consumer)(R)){
 }
 int Option_R_isPresent(){
 }
