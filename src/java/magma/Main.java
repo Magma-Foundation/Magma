@@ -114,7 +114,12 @@ public class Main {
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent);
+                    return "struct %s {%s\n};\n".formatted(name, outputContent);
+                }
             }
         }
         return "/* " + stripped + " */";
