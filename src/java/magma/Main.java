@@ -499,7 +499,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (c == '_' || Character.isLetter(c)) {
                 continue;
             }
             return false;
