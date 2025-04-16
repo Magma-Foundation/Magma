@@ -1,4 +1,8 @@
-struct DivideState {/* private final List<String> segments; *//* private int depth; *//* private StringBuilder buffer; *//* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+struct DivideState {
+	/* private final */ /* List<String> */ segments;
+	/* private */ /* int */ depth;
+	/* private */ /* StringBuilder */ buffer;
+	/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -66,23 +70,39 @@ struct DivideState {/* private final List<String> segments; *//* private int dep
     }
 
     private static String compile(String input) {
-        Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment); *//* CompilerState elements = tuple.left.add(tuple.right); *//* String joined = String.join("", elements.structs); *//* return joined + "int main(){\n\treturn 0;\n}\n"; *//* }
+        Tuple<CompilerState, String> tuple = compileStatements(input, new */ /* CompilerState(), */ Main::compileRootSegment);
+	/* CompilerState elements */ /* = */ tuple.left.add(tuple.right);
+	/* String joined = */ /* String.join("", */ elements.structs);
+	/* return joined + "int */ /* main(){\n\treturn */ 0;\n}\n";
+	/* }
 
     private static Tuple<CompilerState, String> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
-        return divideStatements(input).reduce(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler), (_, next) -> next); *//* }
+        return divideStatements(input).reduce(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler), (_, next) */ /* -> */ next);
+	/* }
 
     private static Tuple<CompilerState, String> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
-        CompilerState currentStructs = tuple.left; *//* String currentOutput = tuple.right; *//* Tuple<CompilerState, String> compiledStruct = compiler.apply(currentStructs, element); *//* CompilerState compiledStructs = compiledStruct.left; *//* String compiledElement = compiledStruct.right; *//* return new Tuple<>(compiledStructs, currentOutput + compiledElement); *//* }
+        CompilerState currentStructs */ /* = */ tuple.left;
+	/* String currentOutput */ /* = */ tuple.right;
+	/* Tuple<CompilerState, String> compiledStruct = */ /* compiler.apply(currentStructs, */ element);
+	/* CompilerState compiledStructs */ /* = */ compiledStruct.left;
+	/* String compiledElement */ /* = */ compiledStruct.right;
+	/* return new Tuple<>(compiledStructs, currentOutput */ /* + */ compiledElement);
+	/* }
 
     private static Stream<String> divideStatements(String input) {
-        DivideState current = new DivideState(); *//* for (int i = 0; *//* i < input.length(); *//* i++) {
+        DivideState current = */ /* new */ DivideState();
+	/* for (int i */ /* = */ 0;
+	/* i */ /* < */ input.length();
+	/* i++) {
             char c = input.charAt(i);
             current = divideStatementChar(current, c);
-        }
-        return current.advance().stream(); *//* }
+        } */ /* return */ current.advance().stream();
+	/* }
 
     private static DivideState divideStatementChar(DivideState divideState, char c) {
-        DivideState appended = divideState.append(c); *//* if (c == '; *//* ' && appended.isLevel()) {
+        DivideState appended */ /* = */ divideState.append(c);
+	/* if (c */ /* == */ ';
+	/* ' && appended.isLevel()) {
             return appended.advance();
         }
         if (c == '{') {
@@ -90,11 +110,12 @@ struct DivideState {/* private final List<String> segments; *//* private int dep
         }
         if (c == '}') {
             return appended.exit();
-        }
-        return appended; *//* }
+        } */ /* return */ appended;
+	/* }
 
     private static Tuple<CompilerState, String> compileRootSegment(CompilerState state, String input) {
-        String stripped = input.strip(); *//* if (stripped.startsWith("package ")) {
+        String stripped */ /* = */ input.strip();
+	/* if (stripped.startsWith("package ")) {
             return new Tuple<>(state, "");
         }
 
@@ -102,14 +123,25 @@ struct DivideState {/* private final List<String> segments; *//* private int dep
             return new Tuple<>(state, "// #include <temp.h>\n");
         }
 
-        return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, "/* " + stripped + " */")); *//* }
+        return compileClass(state, stripped).orElseGet(() -> */ /* generatePlaceholderToTuple(state, */ stripped));
+	/* }
+
+    private static Tuple<CompilerState, String> generatePlaceholderToTuple(CompilerState state, String stripped) {
+        return new */ /* Tuple<>(state, */ generatePlaceholder(stripped));
+	/* }
+
+    private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + */ /* " */ */";
+	/* }
 
     private static Optional<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
-        int classIndex = stripped.indexOf("class "); *//* if (classIndex < 0) {
+        int classIndex = */ /* stripped.indexOf("class */ ");
+	/* if (classIndex < 0) {
             return Optional.empty();
         }
 
-        String afterKeyword = stripped.substring(classIndex + "class ".length()); *//* int contentStart = afterKeyword.indexOf("{");
+        String afterKeyword = stripped.substring(classIndex + */ /* "class */ ".length());
+	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
         }
@@ -120,10 +152,48 @@ struct DivideState {/* private final List<String> segments; *//* private int dep
             return Optional.empty();
         }
 
-        String inputContent = withEnd.substring(0, withEnd.length() - "}".length()); *//* Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment); *//* CompilerState outputStructs = outputTuple.left; *//* String outputContent = outputTuple.right; *//* String generated = "struct %s {%s\n}; *//* \n".formatted(name, outputContent); *//* CompilerState withGenerated = outputStructs.add(generated); *//* return Optional.of(new Tuple<>(withGenerated, "")); *//* }
+        String inputContent = withEnd.substring(0, withEnd.length() */ /* - */ "}".length());
+	/* Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, */ /* state, */ Main::compileClassSegment);
+	/* CompilerState outputStructs */ /* = */ outputTuple.left;
+	/* String outputContent */ /* = */ outputTuple.right;
+	/* String generated = "struct */ /* %s */ {%s\n};
+	/* \n".formatted(name, */ outputContent);
+	/* CompilerState withGenerated */ /* = */ outputStructs.add(generated);
+	/* return Optional.of(new */ /* Tuple<>(withGenerated, */ ""));
+	/* }
 
     private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
-        String stripped = input.strip(); *//* return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, "/* " + stripped + " */")); *//*  */
+        String stripped */ /* = */ input.strip();
+	/* return compileClass(state, stripped)
+                .or(() -> compileDefinition(state, stripped))
+                .orElseGet(() -> */ /* generatePlaceholderToTuple(state, */ stripped));
+	/* }
+
+    private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) { */ /* if */ (!input.endsWith(";
+	/* ")) {
+            return Optional.empty();
+        }
+
+        String withoutEnd = input.substring(0, input.length() */ /* - */ ";/* ".length()).strip(); */
+	/* int nameSeparator = */ /* withoutEnd.lastIndexOf(" */ ");
+	/* if (nameSeparator < 0) {
+            return Optional.empty();
+        }
+
+        String beforeName = */ /* withoutEnd.substring(0, */ nameSeparator).strip();
+	/* int typeSeparator = */ /* beforeName.lastIndexOf(" */ ");
+	/* String */ outputBeforeString;
+	/* if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length()).strip();
+            outputBeforeString = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
+        }
+        else {
+            outputBeforeString = generatePlaceholder(beforeName);
+        }
+
+        String name = withoutEnd.substring(nameSeparator + */ /* " */ ".length()).strip();
+	/* return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name */ /* + */ ";/* ")); *//*  */
 };
 struct Main {
 };
