@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -128,36 +129,49 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompilerState, String> compileRootSegment(CompilerState structs, String input) {
+    private static Tuple<CompilerState, String> compileRootSegment(CompilerState state, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
-            return new Tuple<>(structs, "");
+            return new Tuple<>(state, "");
         }
 
         if (stripped.startsWith("import ")) {
-            return new Tuple<>(structs, "// #include <temp.h>\n");
+            return new Tuple<>(state, "// #include <temp.h>\n");
         }
 
+        return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, "/* " + stripped + " */"));
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
         int classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, structs, Main::compileRootSegment);
-                    CompilerState outputStructs = outputTuple.left;
-                    String outputContent = outputTuple.right;
-
-                    String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
-                    CompilerState withGenerated = outputStructs.add(generated);
-                    return new Tuple<>(withGenerated, "");
-                }
-            }
+        if (classIndex < 0) {
+            return Optional.empty();
         }
 
-        return new Tuple<>(structs, "/* " + stripped + " */");
+        String afterKeyword = stripped.substring(classIndex + "class ".length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+
+        String name = afterKeyword.substring(0, contentStart).strip();
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment);
+        CompilerState outputStructs = outputTuple.left;
+        String outputContent = outputTuple.right;
+
+        String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
+        CompilerState withGenerated = outputStructs.add(generated);
+        return Optional.of(new Tuple<>(withGenerated, ""));
+    }
+
+    private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
+        String stripped = input.strip();
+        return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, "/* " + stripped + " */"));
     }
 }
