@@ -558,6 +558,10 @@ public class Main {
 
     private static Option<String> compileStatementOrBlock(String input) {
         String stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return new Some<>("");
+        }
+
         if (stripped.endsWith(";")) {
             String withEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
             return compileStatement(withEnd);
