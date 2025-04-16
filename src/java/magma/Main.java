@@ -536,7 +536,7 @@ public class Main {
                 return maybeOutputParams.flatMap(outputParams -> {
                     if (withEnd.startsWith("{") && withEnd.endsWith("}")) {
                         String inputContent = withEnd.substring("{".length(), withEnd.length() - "}".length());
-                        return compileStatements(inputContent, Main::compileStatement).map(outputContent -> {
+                        return compileStatements(inputContent, Main::compileStatementOrBlock).map(outputContent -> {
                             String value = outputDefinition + "(" +
                                     outputParams +
                                     "){" + outputContent + "\n}\n";
@@ -556,8 +556,28 @@ public class Main {
         });
     }
 
-    private static Option<String> compileStatement(String input) {
-        return new Some<>(generatePlaceholder(input));
+    private static Option<String> compileStatementOrBlock(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+            return compileStatement(withEnd);
+        }
+
+        return new Some<>(generatePlaceholder(stripped));
+    }
+
+    private static Option<String> compileStatement(String withEnd) {
+        if (withEnd.startsWith("return ")) {
+            String value = withEnd.substring("return ".length());
+            return compileValue(value).map(newValue -> {
+                return "\n\treturn " + newValue;
+            });
+        }
+        return new None<>();
+    }
+
+    private static Option<String> compileValue(String value) {
+        return new Some<>(generatePlaceholder(value));
     }
 
     private static Option<String> compileValues(String input, Function<String, Option<String>> compileDefinition) {
