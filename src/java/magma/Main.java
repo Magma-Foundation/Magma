@@ -528,22 +528,36 @@ public class Main {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
+                String withEnd = withParams.substring(paramEnd + ")".length()).strip();
+
                 Option<String> maybeOutputParams;
                 maybeOutputParams = inputParams.isEmpty() ? new Some<>("") : compileValues(inputParams, definition -> compileDefinition(definition, Lists.empty(), typeParams, typeArguments));
 
                 return maybeOutputParams.flatMap(outputParams -> {
-                    String value = outputDefinition + "(" +
-                            outputParams +
-                            "){" + "\n}\n";
+                    if (withEnd.startsWith("{") && withEnd.endsWith("}")) {
+                        String inputContent = withEnd.substring("{".length(), withEnd.length() - "}".length());
+                        return compileStatements(inputContent, Main::compileStatement).map(outputContent -> {
+                            String value = outputDefinition + "(" +
+                                    outputParams +
+                                    "){" + outputContent + "\n}\n";
 
-                    methods.add(value);
-                    return new Some<>("");
+                            methods.add(value);
+                            return "";
+                        });
+                    }
+                    else {
+                        return new None<>();
+                    }
                 });
             }
             else {
                 return new None<>();
             }
         });
+    }
+
+    private static Option<String> compileStatement(String input) {
+        return new Some<>(generatePlaceholder(input));
     }
 
     private static Option<String> compileValues(String input, Function<String, Option<String>> compileDefinition) {
