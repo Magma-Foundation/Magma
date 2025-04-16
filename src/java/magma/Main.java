@@ -273,10 +273,36 @@ public class Main {
         }
     }
 
+    private static final class Node {
+        private final Map<String, String> strings;
+
+        private Node() {
+            this(new HashMap<>());
+        }
+
+        private Node(Map<String, String> strings) {
+            this.strings = strings;
+        }
+
+        private Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String> findString(String propertyKey) {
+            if (this.strings.containsKey(propertyKey)) {
+                return new Some<>(this.strings.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
+        }
+    }
+
     private static final Map<String, Function<List_<String>, Option<String>>> expandables = new HashMap<>();
     private static final List_<Tuple<String, List_<String>>> visited = Lists.empty();
     private static final List_<String> structs = Lists.empty();
-    private static final List_<String> methods = Lists.empty();
+    private static final Map<String, String> methods = new HashMap<>();
     private static List_<Tuple<String, List_<String>>> toExpand = Lists.empty();
 
     public static void main(String[] args) {
@@ -309,7 +335,7 @@ public class Main {
     private static List_<String> assemble(List_<String> compiled) {
         assembleGenerics(compiled);
         compiled.addAll(structs);
-        compiled.addAll(methods);
+        compiled.addAll(Lists.fromNativeCollection(methods.values()));
         return compiled;
     }
 
@@ -553,7 +579,7 @@ public class Main {
                                     outputParams +
                                     "){" + outputContent + "\n}\n";
 
-                            methods.add(value);
+                            //methods.add(value);
                             return "";
                         });
                     }
@@ -717,8 +743,12 @@ public class Main {
     private static Option<String> compileType(String input, Option<String> maybeName, List_<String> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         int index = typeParams.indexOf(stripped);
+        Node withName = maybeName.map(name -> new Node().withString("name", name))
+                .orElse(new Node());
+
         if (index >= 0) {
-            return new Some<>(generateSimpleDefinition(typeArguments.get(index), maybeName));
+            String type = typeArguments.get(index);
+            return new Some<>(generateSimpleDefinition(withName.withString("type", type)));
         }
 
         if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
@@ -726,24 +756,26 @@ public class Main {
         }
 
         if (stripped.equals("void")) {
-            return new Some<>(generateSimpleDefinition("void", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "void")));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return new Some<>(generateSimpleDefinition("char", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "char")));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return new Some<>(generateSimpleDefinition("int", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "int")));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(generateSimpleDefinition("char*", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "char*")));
         }
 
         if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), new None<>(), typeParams, typeArguments)
-                    .map(value -> generateSimpleDefinition(value + "*", maybeName));
+                    .map(value -> {
+                        return generateSimpleDefinition(withName.withString("type", value + "*"));
+                    });
         }
 
         if (stripped.endsWith(">")) {
@@ -777,18 +809,17 @@ public class Main {
                         }
 
                         String type = stringify(base, arguments);
-                        return generateSimpleDefinition(type, maybeName);
+                        return generateSimpleDefinition(withName.withString("type", type));
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(generateSimpleDefinition(stripped, maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", stripped)));
         }
-        else {
-            return new None<>();
-        }
+
+        return new None<>();
     }
 
     private static String stringify(String base, List_<String> arguments) {
@@ -798,16 +829,16 @@ public class Main {
         return base + "_" + merged;
     }
 
-    private static String generateFunctionalDefinition(Option<String> name, List_<String> paramTypes, String returnType) {
+    private static String generateFunctionalDefinition(Option<String> maybeName, List_<String> paramTypes, String returnType) {
         String joined = paramTypes.iter().collect(new Joiner(", ")).orElse("");
 
-        return returnType + " (*" + name.orElse("") + ")(" +
+        return returnType + " (*" + maybeName.orElse("") + ")(" +
                 joined +
                 ")";
     }
 
-    private static String generateSimpleDefinition(String type, Option<String> maybeName) {
-        return type + maybeName.map(name -> " " + name).orElse("");
+    private static String generateSimpleDefinition(Node node) {
+        return node.findString("type").orElse("") + node.findString("name").map(name -> " " + name).orElse("");
     }
 
     private static String generatePlaceholder(String input) {

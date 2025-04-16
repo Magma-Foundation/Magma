@@ -2,6 +2,7 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 class Lists {
@@ -66,5 +67,9 @@ class Lists {
 
     public static <T> Main.List_<T> of(T... elements) {
         return new JavaList<>(Arrays.asList(elements));
+    }
+
+    public static <T> Main.List_<T> fromNativeCollection(Collection<T> collection) {
+        return new JavaList<>(new ArrayList<>(collection));
     }
 }
