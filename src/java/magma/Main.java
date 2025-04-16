@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,6 +62,8 @@ public class Main {
         boolean isPresent();
 
         <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
+
+        Option<T> filter(Predicate<T> predicate);
     }
 
     record Iterator<T>(Head<T> head) {
@@ -209,6 +212,11 @@ public class Main {
         public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
         }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
     }
 
     public static final class None<T> implements Option<T> {
@@ -250,6 +258,11 @@ public class Main {
         public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
         }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -274,14 +287,18 @@ public class Main {
     }
 
     private static final class Node {
+        private final Option<String> maybeType;
         private final Map<String, String> strings;
+        private final Map<String, List_<Node>> nodeLists;
 
         private Node() {
-            this(new HashMap<>());
+            this(new None<>(), new HashMap<>(), new HashMap<>());
         }
 
-        private Node(Map<String, String> strings) {
+        private Node(Option<String> maybeType, Map<String, String> strings, Map<String, List_<Node>> nodeLists) {
+            this.maybeType = maybeType;
             this.strings = strings;
+            this.nodeLists = nodeLists;
         }
 
         private Node withString(String propertyKey, String propertyValue) {
@@ -296,6 +313,24 @@ public class Main {
             else {
                 return new None<>();
             }
+        }
+
+        public Node withNodeList(String propertyKey, List_<Node> propertyValues) {
+            this.nodeLists.put(propertyKey, propertyValues);
+            return this;
+        }
+
+        public Option<List_<Node>> findNodeList(String propertyKey) {
+            if (this.nodeLists.containsKey(propertyKey)) {
+                return new Some<>(this.nodeLists.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
+        }
+
+        public boolean is(String type) {
+            return this.maybeType.filter(value -> value.equals(type)).isPresent();
         }
     }
 
@@ -748,7 +783,7 @@ public class Main {
 
         if (index >= 0) {
             String type = typeArguments.get(index);
-            return new Some<>(generateSimpleDefinition(withName.withString("type", type)));
+            return new Some<>(generateDefinitions(withName.withString("type", type)));
         }
 
         if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
@@ -756,25 +791,25 @@ public class Main {
         }
 
         if (stripped.equals("void")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "void")));
+            return new Some<>(generateDefinitions(withName.withString("type", "void")));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "char")));
+            return new Some<>(generateDefinitions(withName.withString("type", "char")));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "int")));
+            return new Some<>(generateDefinitions(withName.withString("type", "int")));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "char*")));
+            return new Some<>(generateDefinitions(withName.withString("type", "char*")));
         }
 
         if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), new None<>(), typeParams, typeArguments)
                     .map(value -> {
-                        return generateSimpleDefinition(withName.withString("type", value + "*"));
+                        return generateDefinitions(withName.withString("type", value + "*"));
                     });
         }
 
@@ -787,39 +822,79 @@ public class Main {
                     String inputArgs = withoutEnd.substring(argsStart + "<".length());
                     List_<String> segments = divideValues(inputArgs);
                     return compileAll(segments, arg -> compileType(arg, new None<>(), typeParams, typeArguments)).map(arguments -> {
-                        if (base.equals("Supplier")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(), arguments.get(0));
+                        Option<String> maybeFunctionalDefinition = parseFunctionalDefinition(arguments, base, withName).map(Main::generateDefinitions);
+                        if (maybeFunctionalDefinition.isPresent()) {
+                            return maybeFunctionalDefinition.orElse("");
                         }
 
-                        if (base.equals("Function")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0)), arguments.get(1));
-                        }
-
-                        if (base.equals("BiFunction")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
-                        }
-
-                        if (base.equals("Consumer")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0)), "void");
-                        }
-
-                        Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
-                        if (!toExpand.contains(entry)) {
-                            toExpand.add(entry);
-                        }
-
-                        String type = stringify(base, arguments);
-                        return generateSimpleDefinition(withName.withString("type", type));
+                        return getString(arguments, base, withName);
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", stripped)));
+            return new Some<>(generateDefinitions(withName.withString("type", stripped)));
         }
 
         return new None<>();
+    }
+
+    private static Option<Node> parseFunctionalDefinition(List_<String> arguments, String base, Node withName) {
+        if (base.equals("Supplier")) {
+            List_<String> paramTypes = Lists.of();
+            String returnType = arguments.get(0);
+            List_<Node> paramTypesList = paramTypes.iter()
+                    .map(paramType -> new Node().withString("value", paramType))
+                    .collect(new ListCollector<>());
+
+            return new Some<>(withName.withString("return-type", returnType)
+                    .withNodeList("param-types", paramTypesList));
+        }
+
+        if (base.equals("Function")) {
+            List_<String> paramTypes = Lists.of(arguments.get(0));
+            String returnType = arguments.get(1);
+            List_<Node> paramTypesList = paramTypes.iter()
+                    .map(paramType -> new Node().withString("value", paramType))
+                    .collect(new ListCollector<>());
+
+            return new Some<>(withName.withString("return-type", returnType)
+                    .withNodeList("param-types", paramTypesList));
+        }
+
+        if (base.equals("BiFunction")) {
+            List_<String> paramTypes = Lists.of(arguments.get(0), arguments.get(1));
+            String returnType = arguments.get(2);
+            List_<Node> paramTypesList = paramTypes.iter()
+                    .map(paramType -> new Node().withString("value", paramType))
+                    .collect(new ListCollector<>());
+
+            return new Some<>(withName.withString("return-type", returnType)
+                    .withNodeList("param-types", paramTypesList));
+        }
+
+        if (base.equals("Consumer")) {
+            List_<String> paramTypes = Lists.of(arguments.get(0));
+            List_<Node> paramTypesList = paramTypes.iter()
+                    .map(paramType -> new Node().withString("value", paramType))
+                    .collect(new ListCollector<>());
+
+            return new Some<>(withName.withString("return-type", "void")
+                    .withNodeList("param-types", paramTypesList));
+        }
+
+        return new None<>();
+    }
+
+    private static String getString(List_<String> arguments, String base, Node withName) {
+        Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
+        if (!toExpand.contains(entry)) {
+            toExpand.add(entry);
+        }
+
+        String type = stringify(base, arguments);
+        return generateDefinitions(withName.withString("type", type));
     }
 
     private static String stringify(String base, List_<String> arguments) {
@@ -829,16 +904,38 @@ public class Main {
         return base + "_" + merged;
     }
 
-    private static String generateFunctionalDefinition(Option<String> maybeName, List_<String> paramTypes, String returnType) {
-        String joined = paramTypes.iter().collect(new Joiner(", ")).orElse("");
-
-        return returnType + " (*" + maybeName.orElse("") + ")(" +
-                joined +
-                ")";
+    private static String generateDefinitions(Node node) {
+        return generateFunctionalDefinition(node)
+                .or(() -> generateDefinition(node))
+                .orElse("");
     }
 
-    private static String generateSimpleDefinition(Node node) {
-        return node.findString("type").orElse("") + node.findString("name").map(name -> " " + name).orElse("");
+    private static Option<String> generateFunctionalDefinition(Node node) {
+        if (!node.is("functional-definition")) {
+            return new None<>();
+        }
+
+        String returnType = node.findString("return-type").orElse("");
+        String name = node.findString("name").orElse("");
+        String joined = node
+                .findNodeList("param-types")
+                .orElse(Lists.empty())
+                .iter()
+                .map(child -> child.findString("value").orElse(""))
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return new Some<>(returnType + " (*" + name + ")(" + joined + ")");
+    }
+
+    private static Option<String> generateDefinition(Node node) {
+        if (!node.is("definition")) {
+            return new None<>();
+        }
+
+        String type = node.findString("type").orElse("");
+        String nameString = type + node.findString("name").map(name -> " " + name).orElse("");
+        return new Some<>(nameString);
     }
 
     private static String generatePlaceholder(String input) {
