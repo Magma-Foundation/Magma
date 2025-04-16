@@ -594,6 +594,10 @@ public class Main {
 
     private static Option<String> compileValue(String input) {
         String stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return new Some<>(stripped);
+        }
+
         if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             int argStart = withoutEnd.indexOf("(");
