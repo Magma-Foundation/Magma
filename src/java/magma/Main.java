@@ -608,6 +608,11 @@ public class Main {
         int typeSeparator = findTypeSeparator(beforeName);
         String inputType;
         if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            if (beforeType.endsWith(">")) {
+                return new None<>();
+            }
+
             inputType = beforeName.substring(typeSeparator + " ".length()).strip();
         }
         else {

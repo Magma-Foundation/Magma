@@ -41,7 +41,9 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 /*  */
 
 } Main;
-typedef struct {/*  */
+typedef struct {/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
+/* <R> Option<R> map(Function<T, R> mapper); */
+/*  */
 
 } Option_char_ref;
 typedef struct {/*  */
@@ -50,27 +52,38 @@ typedef struct {/*  */
 typedef struct {/*  */
 
 } Tuple_char_ref_List__char_ref;
-typedef struct {/*  */
+typedef struct {/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
+/* <R> Option<R> map(Function<T, R> mapper); */
+/*  */
 
 } Option_List__char_ref;
-typedef struct {/*  */
+typedef struct {/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
+/* <R> Option<R> map(Function<T, R> mapper); */
+/*  */
 
 } Option_State;
-typedef struct {/*  */
-
-} Option_R;
-typedef struct {/*  */
+typedef struct {/* <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Option<R> option = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (option.isPresent()) {
+                    current = option.orElse(null);
+                }
+                else {
+                    return current;
+                }
+            }
+        } */
+/* <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        } */
+/* <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        } */
+/*  */
 
 } Iterator_char_ref;
-typedef struct {/*  */
-
-} Iterator_R;
-typedef struct {/*  */
-
-} Collector_char_ref_C;
-typedef struct {/*  */
-
-} Collector_R_C;
 int State_isShallow(){
 }
 State State_exit(){
@@ -159,10 +172,6 @@ char* Main_generatePlaceholder(char* input){
 }
 char* Option_char_ref_orElse(char* other){
 }
-Option_R Option_char_ref_flatMap(Option_R (*mapper)(char*)){
-}
-Option_R Option_char_ref_map(R (*mapper)(char*)){
-}
 Option_char_ref Option_char_ref_or(Option_char_ref (*other)()){
 }
 char* Option_char_ref_orElseGet(char* (*other)()){
@@ -189,10 +198,6 @@ char* List__char_ref_get(int index){
 }
 List__char_ref Option_List__char_ref_orElse(List__char_ref other){
 }
-Option_R Option_List__char_ref_flatMap(Option_R (*mapper)(List__char_ref)){
-}
-Option_R Option_List__char_ref_map(R (*mapper)(List__char_ref)){
-}
 Option_List__char_ref Option_List__char_ref_or(Option_List__char_ref (*other)()){
 }
 List__char_ref Option_List__char_ref_orElseGet(List__char_ref (*other)()){
@@ -203,10 +208,6 @@ int Option_List__char_ref_isPresent(){
 }
 State Option_State_orElse(State other){
 }
-Option_R Option_State_flatMap(Option_R (*mapper)(State)){
-}
-Option_R Option_State_map(R (*mapper)(State)){
-}
 Option_State Option_State_or(Option_State (*other)()){
 }
 State Option_State_orElseGet(State (*other)()){
@@ -214,40 +215,6 @@ State Option_State_orElseGet(State (*other)()){
 void Option_State_ifPresent(void (*consumer)(State)){
 }
 int Option_State_isPresent(){
-}
-R Option_R_orElse(R other){
-}
-Option_R Option_R_flatMap(Option_R (*mapper)(R)){
-}
-Option_R Option_R_map(R (*mapper)(R)){
-}
-Option_R Option_R_or(Option_R (*other)()){
-}
-R Option_R_orElseGet(R (*other)()){
-}
-void Option_R_ifPresent(void (*consumer)(R)){
-}
-int Option_R_isPresent(){
-}
-R Iterator_char_ref_fold(R initial, R (*folder)(R, char*)){
-}
-Iterator_R Iterator_char_ref_map(R (*mapper)(char*)){
-}
-C Iterator_char_ref_collect(Collector_char_ref_C collector){
-}
-R Iterator_R_fold(R initial, R (*folder)(R, R)){
-}
-Iterator_R Iterator_R_map(R (*mapper)(R)){
-}
-C Iterator_R_collect(Collector_R_C collector){
-}
-C Collector_char_ref_C_createInitial(){
-}
-C Collector_char_ref_C_fold(C current, char* element){
-}
-C Collector_R_C_createInitial(){
-}
-C Collector_R_C_fold(C current, R element){
 }
 int main(int argc, char **argv){
 	__main__(argv);
