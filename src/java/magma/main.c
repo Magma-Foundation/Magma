@@ -50,10 +50,24 @@ typedef struct {/* private final Deque<Character> queue; */
 typedef struct {/*  */
 
 } Joiner;
+typedef struct {/* private final Map<String, String> strings; */
+/* private Node() {
+            this(new HashMap<>());
+        } */
+/* private Node(Map<String, String> strings) {
+            this.strings = strings;
+        } */
+/* private Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        } */
+/*  */
+
+} Node;
 typedef struct {/* private static final Map<String, Function<List_<String>, Option<String>>> expandables = new HashMap<>(); */
 /* private static final List_<Tuple<String, List_<String>>> visited = Lists.empty(); */
 /* private static final List_<String> structs = Lists.empty(); */
-/* private static final List_<String> methods = Lists.empty(); */
+/* private static final Map<String, String> methods = new HashMap<>(); */
 /* private static List_<Tuple<String, List_<String>>> toExpand = Lists.empty(); */
 /* private static String compile(String input) {
         List_<String> segments = divideAll(input, Main::foldStatementChar);
@@ -64,7 +78,7 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 /* private static List_<String> assemble(List_<String> compiled) {
         assembleGenerics(compiled);
         compiled.addAll(structs);
-        compiled.addAll(methods);
+        compiled.addAll(Lists.fromNativeCollection(methods.values()));
         return compiled;
     } */
 /* private static Option<List_<String>> compileAll(List_<String> segments, Function<String, Option<String>> compiler) {
@@ -229,7 +243,7 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
                                     outputParams +
                                     "){" + outputContent + "\n}\n";
 
-                            methods.add(value);
+                            //methods.add(value);
                             return "";
                         });
                     }
@@ -358,8 +372,12 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 /* private static Option<String> compileType(String input, Option<String> maybeName, List_<String> typeParams, List_<String> typeArguments) {
         String stripped = input.strip();
         int index = typeParams.indexOf(stripped);
+        Node withName = maybeName.map(name -> new Node().withString("name", name))
+                .orElse(new Node());
+
         if (index >= 0) {
-            return new Some<>(generateSimpleDefinition(typeArguments.get(index), maybeName));
+            String type = typeArguments.get(index);
+            return new Some<>(generateSimpleDefinition(withName.withString("type", type)));
         }
 
         if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
@@ -367,24 +385,26 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
         }
 
         if (stripped.equals("void")) {
-            return new Some<>(generateSimpleDefinition("void", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "void")));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return new Some<>(generateSimpleDefinition("char", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "char")));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return new Some<>(generateSimpleDefinition("int", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "int")));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(generateSimpleDefinition("char*", maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", "char*")));
         }
 
         if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), new None<>(), typeParams, typeArguments)
-                    .map(value -> generateSimpleDefinition(value + "*", maybeName));
+                    .map(value -> {
+                        return generateSimpleDefinition(withName.withString("type", value + "*"));
+                    });
         }
 
         if (stripped.endsWith(">")) {
@@ -418,18 +438,17 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
                         }
 
                         String type = stringify(base, arguments);
-                        return generateSimpleDefinition(type, maybeName);
+                        return generateSimpleDefinition(withName.withString("type", type));
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(generateSimpleDefinition(stripped, maybeName));
+            return new Some<>(generateSimpleDefinition(withName.withString("type", stripped)));
         }
-        else {
-            return new None<>();
-        }
+
+        return new None<>();
     } */
 /* private static String stringify(String base, List_<String> arguments) {
         String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"))
@@ -437,10 +456,10 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 
         return base + "_" + merged;
     } */
-/* private static String generateFunctionalDefinition(Option<String> name, List_<String> paramTypes, String returnType) {
+/* private static String generateFunctionalDefinition(Option<String> maybeName, List_<String> paramTypes, String returnType) {
         String joined = paramTypes.iter().collect(new Joiner(", ")).orElse("");
 
-        return returnType + " (*" + name.orElse("") + ")(" +
+        return returnType + " (*" + maybeName.orElse("") + ")(" +
                 joined +
                 ")";
     } */
@@ -523,118 +542,6 @@ typedef struct {/* <R> R fold(R initial, BiFunction<R, T, R> folder) {
 /*  */
 
 } Iterator_char_ref;
-int State_isShallow(){
-	return /* this.depth == 1 */;
-}
-int State_isLevel(){
-	return /* this.depth == 0 */;
-}
-int State_hasNext(){
-	return /* !this.queue.isEmpty */();
-}
-char State_pop(){
-	return /* this.queue.pop */();
-}
-Option_char_ref Joiner_createInitial(){
-	return /* new None<> */();
-}
-Option_char_ref Joiner_fold(Option_char_ref current, char* element){
-	return /* new Some<> */();
-}
-void __main__(char** args){/* try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input) + "int main(int argc, char **argv){\n\t__main__(argv);\n\treturn 0;\n}");
-
-            Process process = new ProcessBuilder("cmd.exe", "/c", "build.bat")
-                    .directory(Paths.get(".").toFile())
-                    .inheritIO()
-                    .start();
-
-            process.waitFor();
-        } *//* catch (IOException | InterruptedException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        } */
-}
-void Main_assembleGenerics(List__char_ref compiled){/* while (!toExpand.isEmpty()) {
-            List_<Tuple<String, List_<String>>> copy = toExpand.copy();
-            toExpand = Lists.empty();
-
-            boolean anyGenerated = false;
-
-            for (Tuple<String, List_<String>> tuple : Lists.toNativeList(copy)) {
-                if (!visited.contains(tuple)) {
-                    visited.add(tuple);
-                    assembleEntry(tuple).ifPresent(compiled::add);
-                    anyGenerated = true;
-                }
-            }
-
-            if (!anyGenerated) {
-                break;
-            }
-        } */
-}
-Option_char_ref Main_assembleEntry(Tuple_char_ref_List__char_ref expansion){/* if (expandables.containsKey(expansion.left)) {
-            return expandables.get(expansion.left).apply(expansion.right);
-        } *//* else {
-            return new None<>();
-        } */
-}
-Option_char_ref Main_compileStatements(char* input, Option_char_ref (*compiler)(char*)){
-	return compileAndMergeAll();
-}
-Option_char_ref Main_compileAndMergeAll(List__char_ref segments, Option_char_ref (*compiler)(char*), char* (*merger)(char*, char*)){
-	return compileAll();
-}
-char* Main_mergeAll(List__char_ref list, char* (*merger)(char*, char*)){
-	return /* list.iter */();
-}
-char* Main_mergeStatements(char* output, char* element){
-	return output + element;
-}
-Option_State Main_foldDoubleQuotes(State current, char c){
-	return /* new None<> */();
-}
-char* Main_compileRootSegment(char* input){/* if (input.startsWith("package ")) {
-            return "";
-        } */
-	return compileClass();
-}
-Option_char_ref Main_compileClass(char* input){
-	return compileToStruct();
-}
-char* Main_compileClassSegment(char* input, char* structName, List__char_ref typeParams, List__char_ref typeArguments){
-	return compileClass();
-}
-Option_char_ref Main_compileStatement(char* withEnd){/* if (withEnd.startsWith("return ")) {
-            String value = withEnd.substring("return ".length());
-            return compileValue(value).map(newValue -> {
-                return "\n\treturn " + newValue;
-            });
-        } */
-	return /* new None<> */();
-}
-Option_char_ref Main_compileValues(char* input, Option_char_ref (*compileDefinition)(char*)){
-	return compileAndMergeAll();
-}
-List__char_ref Main_divideValues(char* input){
-	return divideAll();
-}
-char* Main_mergeValues(char* builder, char* element){
-	return mergeDelimited();
-}
-char* Main_mergeDelimited(char* buffer, char* element, char* delimiter){/* if (buffer.isEmpty()) {
-            return element;
-        } */
-	return buffer + delimiter + element;
-}
-char* Main_generateSimpleDefinition(char* type, Option_char_ref maybeName){
-	return type + /* maybeName.map */();
-}
 int main(int argc, char **argv){
 	__main__(argv);
 	return 0;
