@@ -10,18 +10,18 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public class Main {
-    private static class State {
+    private static class DivideState {
         private final List<String> segments;
         private int depth;
         private StringBuilder buffer;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
@@ -29,13 +29,13 @@ public class Main {
             return this.segments.stream();
         }
 
-        private State advance() {
+        private DivideState advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
 
-        private State append(char c) {
+        private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
@@ -44,18 +44,30 @@ public class Main {
             return this.depth == 0;
         }
 
-        public State enter() {
+        public DivideState enter() {
             this.depth++;
             return this;
         }
 
-        public State exit() {
+        public DivideState exit() {
             this.depth--;
             return this;
         }
     }
 
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    private record CompilerState(List<String> structs) {
+        public CompilerState() {
+            this(new ArrayList<>());
+        }
+
+        public CompilerState add(String element) {
+            ArrayList<String> copy = new ArrayList<>(this.structs);
+            copy.add(element);
+            return new CompilerState(copy);
+        }
     }
 
     public static void main(String[] args) {
@@ -71,30 +83,30 @@ public class Main {
     }
 
     private static String compile(String input) {
-        Tuple<List<String>, String> tuple = compileStatements(input, new ArrayList<String>(), Main::compileRootSegment);
-        List<String> elements = new ArrayList<>(tuple.left);
-        elements.add(tuple.right);
-        String joined = String.join("", elements);
+        Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment);
+        CompilerState elements = tuple.left.add(tuple.right);
+
+        String joined = String.join("", elements.structs);
         return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
-    private static Tuple<List<String>, String> compileStatements(String input, List<String> structs, BiFunction<List<String>, String, Tuple<List<String>, String>> compiler) {
+    private static Tuple<CompilerState, String> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
         return divideStatements(input).reduce(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler), (_, next) -> next);
     }
 
-    private static Tuple<List<String>, String> foldSegment(Tuple<List<String>, String> tuple, String element, BiFunction<List<String>, String, Tuple<List<String>, String>> compiler) {
-        List<String> currentStructs = tuple.left;
+    private static Tuple<CompilerState, String> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
+        CompilerState currentStructs = tuple.left;
         String currentOutput = tuple.right;
 
-        Tuple<List<String>, String> compiledStruct = compiler.apply(currentStructs, element);
-        List<String> compiledStructs = compiledStruct.left;
+        Tuple<CompilerState, String> compiledStruct = compiler.apply(currentStructs, element);
+        CompilerState compiledStructs = compiledStruct.left;
         String compiledElement = compiledStruct.right;
 
         return new Tuple<>(compiledStructs, currentOutput + compiledElement);
     }
 
     private static Stream<String> divideStatements(String input) {
-        State current = new State();
+        DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = divideStatementChar(current, c);
@@ -102,8 +114,8 @@ public class Main {
         return current.advance().stream();
     }
 
-    private static State divideStatementChar(State state, char c) {
-        State appended = state.append(c);
+    private static DivideState divideStatementChar(DivideState divideState, char c) {
+        DivideState appended = divideState.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
@@ -116,7 +128,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<List<String>, String> compileRootSegment(List<String> structs, String input) {
+    private static Tuple<CompilerState, String> compileRootSegment(CompilerState structs, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
             return new Tuple<>(structs, "");
@@ -135,15 +147,13 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<List<String>, String> outputTuple = compileStatements(inputContent, structs, Main::compileRootSegment);
-                    List<String> outputStructs = outputTuple.left;
+                    Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, structs, Main::compileRootSegment);
+                    CompilerState outputStructs = outputTuple.left;
                     String outputContent = outputTuple.right;
 
-                    List<String> copy = new ArrayList<>(outputStructs);
                     String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
-                    copy.add(generated);
-
-                    return new Tuple<>(copy, "");
+                    CompilerState withGenerated = outputStructs.add(generated);
+                    return new Tuple<>(withGenerated, "");
                 }
             }
         }
