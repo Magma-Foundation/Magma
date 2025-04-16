@@ -75,9 +75,13 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) {
+        String stripped = input.strip();
+        if (stripped.startsWith("package ")) {
             return "";
         }
-        return "/* " + input + " */";
+        if (stripped.startsWith("import ")) {
+            return "// #include <temp.h>\n";
+        }
+        return "/* " + stripped + " */";
     }
 }
