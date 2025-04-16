@@ -267,6 +267,16 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
             }
         }
 
+        int operatorIndex = stripped.indexOf("+");
+        if (operatorIndex >= 0) {
+            String left = stripped.substring(0, operatorIndex);
+            String right = stripped.substring(operatorIndex + "+".length());
+
+            return compileValue(left).and(() -> compileValue(right)).map(tuple -> {
+                return tuple.left + " + " + tuple.right;
+            });
+        }
+
         return new Some<>(generatePlaceholder(stripped));
     } */
 /* private static State foldValueChar(State state, char c) {
@@ -447,6 +457,7 @@ typedef struct {/* T orElse(T other); */
 /* T orElseGet(Supplier<T> other); */
 /* void ifPresent(Consumer<T> consumer); */
 /* boolean isPresent(); */
+/* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
 /*  */
 
 } Option_char_ref;
@@ -471,6 +482,7 @@ typedef struct {/* T orElse(T other); */
 /* T orElseGet(Supplier<T> other); */
 /* void ifPresent(Consumer<T> consumer); */
 /* boolean isPresent(); */
+/* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
 /*  */
 
 } Option_List__char_ref;
@@ -481,6 +493,7 @@ typedef struct {/* T orElse(T other); */
 /* T orElseGet(Supplier<T> other); */
 /* void ifPresent(Consumer<T> consumer); */
 /* boolean isPresent(); */
+/* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
 /*  */
 
 } Option_State;
@@ -577,7 +590,7 @@ char* Main_mergeAll(List__char_ref list, char* (*merger)(char*, char*)){
 	return /* list.iter */();
 }
 char* Main_mergeStatements(char* output, char* element){
-	return /* output + element */;
+	return /* output */ + /* element */;
 }
 Option_State Main_foldDoubleQuotes(State current, char c){
 	return /* new None<> */();
@@ -613,10 +626,10 @@ char* Main_mergeValues(char* builder, char* element){
 char* Main_mergeDelimited(char* buffer, char* element, char* delimiter){/* if (buffer.isEmpty()) {
             return element;
         } */
-	return /* buffer + delimiter + element */;
+	return /* buffer */ + /* delimiter */ + /* element */;
 }
 char* Main_generateSimpleDefinition(char* type, Option_char_ref maybeName){
-	return /* type + maybeName.map */();
+	return /* type */ + /* maybeName.map */();
 }
 int main(int argc, char **argv){
 	__main__(argv);

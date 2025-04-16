@@ -59,6 +59,8 @@ public class Main {
         void ifPresent(Consumer<T> consumer);
 
         boolean isPresent();
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     record Iterator<T>(Head<T> head) {
@@ -202,6 +204,11 @@ public class Main {
         public boolean isPresent() {
             return true;
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     public static final class None<T> implements Option<T> {
@@ -237,6 +244,11 @@ public class Main {
         @Override
         public boolean isPresent() {
             return false;
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return new None<>();
         }
     }
 
@@ -589,6 +601,16 @@ public class Main {
                 String inputCaller = withoutEnd.substring(0, argStart).strip();
                 return compileValue(inputCaller).map(outputCaller -> outputCaller + "()");
             }
+        }
+
+        int operatorIndex = stripped.indexOf("+");
+        if (operatorIndex >= 0) {
+            String left = stripped.substring(0, operatorIndex);
+            String right = stripped.substring(operatorIndex + "+".length());
+
+            return compileValue(left).and(() -> compileValue(right)).map(tuple -> {
+                return tuple.left + " + " + tuple.right;
+            });
         }
 
         return new Some<>(generatePlaceholder(stripped));
