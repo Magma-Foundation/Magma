@@ -251,7 +251,7 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 
         if (stripped.endsWith(";")) {
             String withEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            return compileStatement(withEnd);
+            return compileStatement(withEnd).map(generated -> generated + ";");
         }
 
         return new Some<>(generatePlaceholder(stripped));
@@ -494,22 +494,22 @@ typedef struct {/* <R> R fold(R initial, BiFunction<R, T, R> folder) {
 
 } Iterator_char_ref;
 int State_isShallow(){
-	return /* this.depth == 1 */
+	return /* this.depth == 1 */;
 }
 int State_isLevel(){
-	return /* this.depth == 0 */
+	return /* this.depth == 0 */;
 }
 int State_hasNext(){
-	return /* !this.queue.isEmpty() */
+	return /* !this.queue.isEmpty() */;
 }
 char State_pop(){
-	return /* this.queue.pop() */
+	return /* this.queue.pop() */;
 }
 Option_char_ref Joiner_createInitial(){
-	return /* new None<>() */
+	return /* new None<>() */;
 }
 Option_char_ref Joiner_fold(Option_char_ref current, char* element){
-	return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */
+	return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */;
 }
 void __main__(char** args){/* try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -555,34 +555,34 @@ Option_char_ref Main_assembleEntry(Tuple_char_ref_List__char_ref expansion){/* i
         } */
 }
 Option_char_ref Main_compileStatements(char* input, Option_char_ref (*compiler)(char*)){
-	return /* compileAndMergeAll(divideAll(input, Main::foldStatementChar), compiler, Main::mergeStatements) */
+	return /* compileAndMergeAll(divideAll(input, Main::foldStatementChar), compiler, Main::mergeStatements) */;
 }
 Option_char_ref Main_compileAndMergeAll(List__char_ref segments, Option_char_ref (*compiler)(char*), char* (*merger)(char*, char*)){
-	return /* compileAll(segments, compiler).map(compiled -> mergeAll(compiled, merger)) */
+	return /* compileAll(segments, compiler).map(compiled -> mergeAll(compiled, merger)) */;
 }
 char* Main_mergeAll(List__char_ref list, char* (*merger)(char*, char*)){
-	return /* list.iter().fold("", merger) */
+	return /* list.iter().fold("", merger) */;
 }
 char* Main_mergeStatements(char* output, char* element){
-	return /* output + element */
+	return /* output + element */;
 }
 Option_State Main_foldDoubleQuotes(State current, char c){
-	return /* new None<>() */
+	return /* new None<>() */;
 }
 char* Main_compileRootSegment(char* input){/* if (input.startsWith("package ")) {
             return "";
         } */
-	return /* compileClass(input).orElseGet(() -> generatePlaceholder(input) + "\n") */
+	return /* compileClass(input).orElseGet(() -> generatePlaceholder(input) + "\n") */;
 }
 Option_char_ref Main_compileClass(char* input){
-	return /* compileToStruct(input, "class ") */
+	return /* compileToStruct(input, "class ") */;
 }
 char* Main_compileClassSegment(char* input, char* structName, List__char_ref typeParams, List__char_ref typeArguments){
 	return /* compileClass(input)
                 .or(() -> compileToStruct(input, "interface "))
                 .or(() -> compileToStruct(input, "record "))
                 .or(() -> compileMethod(input, structName, typeParams, typeArguments))
-                .orElseGet(() -> generatePlaceholder(input) + "\n") */
+                .orElseGet(() -> generatePlaceholder(input) + "\n") */;
 }
 Option_char_ref Main_compileStatement(char* withEnd){/* if (withEnd.startsWith("return ")) {
             String value = withEnd.substring("return ".length());
@@ -590,27 +590,27 @@ Option_char_ref Main_compileStatement(char* withEnd){/* if (withEnd.startsWith("
                 return "\n\treturn " + newValue;
             });
         } */
-	return /* new None<>() */
+	return /* new None<>() */;
 }
 Option_char_ref Main_compileValue(char* value){
-	return /* new Some<>(generatePlaceholder(value)) */
+	return /* new Some<>(generatePlaceholder(value)) */;
 }
 Option_char_ref Main_compileValues(char* input, Option_char_ref (*compileDefinition)(char*)){
-	return /* compileAndMergeAll(divideValues(input), compileDefinition, Main::mergeValues) */
+	return /* compileAndMergeAll(divideValues(input), compileDefinition, Main::mergeValues) */;
 }
 List__char_ref Main_divideValues(char* input){
-	return /* divideAll(input, Main::foldValueChar) */
+	return /* divideAll(input, Main::foldValueChar) */;
 }
 char* Main_mergeValues(char* builder, char* element){
-	return /* mergeDelimited(builder, element, ", ") */
+	return /* mergeDelimited(builder, element, ", ") */;
 }
 char* Main_mergeDelimited(char* buffer, char* element, char* delimiter){/* if (buffer.isEmpty()) {
             return element;
         } */
-	return /* buffer + delimiter + element */
+	return /* buffer + delimiter + element */;
 }
 char* Main_generateSimpleDefinition(char* type, Option_char_ref maybeName){
-	return /* type + maybeName.map(name -> " " + name).orElse("") */
+	return /* type + maybeName.map(name -> " " + name).orElse("") */;
 }
 int main(int argc, char **argv){
 	__main__(argv);

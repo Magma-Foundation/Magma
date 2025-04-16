@@ -564,7 +564,7 @@ public class Main {
 
         if (stripped.endsWith(";")) {
             String withEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            return compileStatement(withEnd);
+            return compileStatement(withEnd).map(generated -> generated + ";");
         }
 
         return new Some<>(generatePlaceholder(stripped));
