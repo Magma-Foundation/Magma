@@ -580,8 +580,18 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<String> compileValue(String value) {
-        return new Some<>(generatePlaceholder(value));
+    private static Option<String> compileValue(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int argStart = withoutEnd.indexOf("(");
+            if (argStart >= 0) {
+                String inputCaller = withoutEnd.substring(0, argStart).strip();
+                return compileValue(inputCaller).map(outputCaller -> outputCaller + "()");
+            }
+        }
+
+        return new Some<>(generatePlaceholder(stripped));
     }
 
     private static Option<String> compileValues(String input, Function<String, Option<String>> compileDefinition) {
