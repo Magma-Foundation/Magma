@@ -776,14 +776,17 @@ public class Main {
     }
 
     private static Option<String> compileType(String input, Option<String> maybeName, List_<String> typeParams, List_<String> typeArguments) {
+        Node withName = maybeName.map(name -> new Node().withString("name", name)).orElse(new Node());
+        return parseType(input, typeParams, typeArguments, withName).map(Main::generateDefinitions);
+    }
+
+    private static Option<Node> parseType(String input, List_<String> typeParams, List_<String> typeArguments, Node withName) {
         String stripped = input.strip();
         int index = typeParams.indexOf(stripped);
-        Node withName = maybeName.map(name -> new Node().withString("name", name))
-                .orElse(new Node());
 
         if (index >= 0) {
             String type = typeArguments.get(index);
-            return new Some<>(generateDefinitions(withName.withString("type", type)));
+            return new Some<>(withName.withString("type", type));
         }
 
         if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
@@ -791,26 +794,24 @@ public class Main {
         }
 
         if (stripped.equals("void")) {
-            return new Some<>(generateDefinitions(withName.withString("type", "void")));
+            return new Some<>(withName.withString("type", "void"));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return new Some<>(generateDefinitions(withName.withString("type", "char")));
+            return new Some<>(withName.withString("type", "char"));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return new Some<>(generateDefinitions(withName.withString("type", "int")));
+            return new Some<>(withName.withString("type", "int"));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(generateDefinitions(withName.withString("type", "char*")));
+            return new Some<>(withName.withString("type", "char*"));
         }
 
         if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), new None<>(), typeParams, typeArguments)
-                    .map(value -> {
-                        return generateDefinitions(withName.withString("type", value + "*"));
-                    });
+                    .map(value -> withName.withString("type", value + "*"));
         }
 
         if (stripped.endsWith(">")) {
@@ -821,23 +822,22 @@ public class Main {
                 if (isSymbol(base)) {
                     String inputArgs = withoutEnd.substring(argsStart + "<".length());
                     List_<String> segments = divideValues(inputArgs);
-                    return compileAll(segments, arg -> compileType(arg, new None<>(), typeParams, typeArguments)).map(arguments -> {
-                        Option<String> maybeFunctionalDefinition = parseFunctionalDefinition(arguments, base, withName).map(Main::generateDefinitions);
-                        if (maybeFunctionalDefinition.isPresent()) {
-                            return maybeFunctionalDefinition.orElse("");
-                        }
-
-                        return getString(arguments, base, withName);
-                    });
+                    return compileAll(segments, arg -> compileType(arg, new None<>(), typeParams, typeArguments))
+                            .map(arguments -> getNodeOption(withName, arguments, base));
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(generateDefinitions(withName.withString("type", stripped)));
+            return new Some<>(withName.withString("type", stripped));
         }
 
         return new None<>();
+    }
+
+    private static Node getNodeOption(Node withName, List_<String> arguments, String base) {
+        return parseFunctionalDefinition(arguments, base, withName)
+                .orElseGet(() -> getString(arguments, base, withName));
     }
 
     private static Option<Node> parseFunctionalDefinition(List_<String> arguments, String base, Node withName) {
@@ -887,14 +887,14 @@ public class Main {
         return new None<>();
     }
 
-    private static String getString(List_<String> arguments, String base, Node withName) {
+    private static Node getString(List_<String> arguments, String base, Node withName) {
         Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
         if (!toExpand.contains(entry)) {
             toExpand.add(entry);
         }
 
         String type = stringify(base, arguments);
-        return generateDefinitions(withName.withString("type", type));
+        return withName.withString("type", type);
     }
 
     private static String stringify(String base, List_<String> arguments) {

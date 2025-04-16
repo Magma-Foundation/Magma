@@ -10,6 +10,7 @@
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Consumer; */
 /* import java.util.function.Function; */
+/* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import java.util.stream.IntStream; */
@@ -50,15 +51,23 @@ typedef struct {/* private final Deque<Character> queue; */
 typedef struct {/*  */
 
 } Joiner;
-typedef struct {/* private final Map<String, String> strings; */
+typedef struct {/* private final Option<String> maybeType; */
+/* private final Map<String, String> strings; */
+/* private final Map<String, List_<Node>> nodeLists; */
 /* private Node() {
-            this(new HashMap<>());
+            this(new None<>(), new HashMap<>(), new HashMap<>());
         } */
-/* private Node(Map<String, String> strings) {
+/* private Node(Option<String> maybeType, Map<String, String> strings, Map<String, List_<Node>> nodeLists) {
+            this.maybeType = maybeType;
             this.strings = strings;
+            this.nodeLists = nodeLists;
         } */
 /* private Node withString(String propertyKey, String propertyValue) {
             this.strings.put(propertyKey, propertyValue);
+            return this;
+        } */
+/* public Node withNodeList(String propertyKey, List_<Node> propertyValues) {
+            this.nodeLists.put(propertyKey, propertyValues);
             return this;
         } */
 /*  */
@@ -377,7 +386,7 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 
         if (index >= 0) {
             String type = typeArguments.get(index);
-            return new Some<>(generateSimpleDefinition(withName.withString("type", type)));
+            return new Some<>(generateDefinitions(withName.withString("type", type)));
         }
 
         if (stripped.equals("new") || stripped.equals("private") || stripped.equals("public")) {
@@ -385,25 +394,25 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
         }
 
         if (stripped.equals("void")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "void")));
+            return new Some<>(generateDefinitions(withName.withString("type", "void")));
         }
 
         if (stripped.equals("char") || stripped.equals("Character")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "char")));
+            return new Some<>(generateDefinitions(withName.withString("type", "char")));
         }
 
         if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "int")));
+            return new Some<>(generateDefinitions(withName.withString("type", "int")));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", "char*")));
+            return new Some<>(generateDefinitions(withName.withString("type", "char*")));
         }
 
         if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length()), new None<>(), typeParams, typeArguments)
                     .map(value -> {
-                        return generateSimpleDefinition(withName.withString("type", value + "*"));
+                        return generateDefinitions(withName.withString("type", value + "*"));
                     });
         }
 
@@ -416,39 +425,31 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
                     String inputArgs = withoutEnd.substring(argsStart + "<".length());
                     List_<String> segments = divideValues(inputArgs);
                     return compileAll(segments, arg -> compileType(arg, new None<>(), typeParams, typeArguments)).map(arguments -> {
-                        if (base.equals("Supplier")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(), arguments.get(0));
+                        Option<String> maybeFunctionalDefinition = parseFunctionalDefinition(arguments, base, withName).map(Main::generateDefinitions);
+                        if (maybeFunctionalDefinition.isPresent()) {
+                            return maybeFunctionalDefinition.orElse("");
                         }
 
-                        if (base.equals("Function")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0)), arguments.get(1));
-                        }
-
-                        if (base.equals("BiFunction")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
-                        }
-
-                        if (base.equals("Consumer")) {
-                            return generateFunctionalDefinition(maybeName, Lists.of(arguments.get(0)), "void");
-                        }
-
-                        Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
-                        if (!toExpand.contains(entry)) {
-                            toExpand.add(entry);
-                        }
-
-                        String type = stringify(base, arguments);
-                        return generateSimpleDefinition(withName.withString("type", type));
+                        return getString(arguments, base, withName);
                     });
                 }
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(generateSimpleDefinition(withName.withString("type", stripped)));
+            return new Some<>(generateDefinitions(withName.withString("type", stripped)));
         }
 
         return new None<>();
+    } */
+/* private static String getString(List_<String> arguments, String base, Node withName) {
+        Tuple<String, List_<String>> entry = new Tuple<>(base, arguments);
+        if (!toExpand.contains(entry)) {
+            toExpand.add(entry);
+        }
+
+        String type = stringify(base, arguments);
+        return generateDefinitions(withName.withString("type", type));
     } */
 /* private static String stringify(String base, List_<String> arguments) {
         String merged = mergeAll(arguments, (builder, element) -> mergeDelimited(builder, element, "_"))
@@ -456,12 +457,31 @@ typedef struct {/* private static final Map<String, Function<List_<String>, Opti
 
         return base + "_" + merged;
     } */
-/* private static String generateFunctionalDefinition(Option<String> maybeName, List_<String> paramTypes, String returnType) {
-        String joined = paramTypes.iter().collect(new Joiner(", ")).orElse("");
+/* private static Option<String> generateFunctionalDefinition(Node node) {
+        if (!node.is("functional-definition")) {
+            return new None<>();
+        }
 
-        return returnType + " (*" + maybeName.orElse("") + ")(" +
-                joined +
-                ")";
+        String returnType = node.findString("return-type").orElse("");
+        String name = node.findString("name").orElse("");
+        String joined = node
+                .findNodeList("param-types")
+                .orElse(Lists.empty())
+                .iter()
+                .map(child -> child.findString("value").orElse(""))
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return new Some<>(returnType + " (*" + name + ")(" + joined + ")");
+    } */
+/* private static Option<String> generateDefinition(Node node) {
+        if (!node.is("definition")) {
+            return new None<>();
+        }
+
+        String type = node.findString("type").orElse("");
+        String nameString = type + node.findString("name").map(name -> " " + name).orElse("");
+        return new Some<>(nameString);
     } */
 /* private static String generatePlaceholder(String input) {
         String replaced = input.strip()
@@ -481,9 +501,10 @@ typedef struct {/* T orElse(T other); */
 /* void ifPresent(Consumer<T> consumer); */
 /* boolean isPresent(); */
 /* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
+/* Option<T> filter(Predicate<T> predicate); */
 /*  */
 
-} Option_char_ref;
+} Option_;
 typedef struct {/* List_<T> add(T element); */
 /* List_<T> addAll(List_<T> elements); */
 /* boolean isEmpty(); */
@@ -494,32 +515,10 @@ typedef struct {/* List_<T> add(T element); */
 /* T get(int index); */
 /*  */
 
-} List__char_ref;
+} List__;
 typedef struct {/*  */
 
-} Tuple_char_ref_List__char_ref;
-typedef struct {/* T orElse(T other); */
-/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
-/* <R> Option<R> map(Function<T, R> mapper); */
-/* Option<T> or(Supplier<Option<T>> other); */
-/* T orElseGet(Supplier<T> other); */
-/* void ifPresent(Consumer<T> consumer); */
-/* boolean isPresent(); */
-/* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
-/*  */
-
-} Option_List__char_ref;
-typedef struct {/* T orElse(T other); */
-/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
-/* <R> Option<R> map(Function<T, R> mapper); */
-/* Option<T> or(Supplier<Option<T>> other); */
-/* T orElseGet(Supplier<T> other); */
-/* void ifPresent(Consumer<T> consumer); */
-/* boolean isPresent(); */
-/* <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other); */
-/*  */
-
-} Option_State;
+} Tuple_;
 typedef struct {/* <R> R fold(R initial, BiFunction<R, T, R> folder) {
             R current = initial;
             while (true) {
@@ -541,7 +540,7 @@ typedef struct {/* <R> R fold(R initial, BiFunction<R, T, R> folder) {
         } */
 /*  */
 
-} Iterator_char_ref;
+} Iterator_;
 int main(int argc, char **argv){
 	__main__(argv);
 	return 0;
