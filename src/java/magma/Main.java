@@ -68,6 +68,10 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input) + "int main(){\n\treturn 0;\n}\n";
+    }
+
+    private static String compileStatements(String input) {
         return divideStatements(input)
                 .map(Main::compileRootSegment)
                 .collect(Collectors.joining());
