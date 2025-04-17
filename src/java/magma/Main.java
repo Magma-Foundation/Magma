@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
@@ -36,6 +37,10 @@ public class Main {
         <R> Stream<R> map(Function<T, R> mapper);
 
         Option<T> next();
+
+        Stream<T> filter(Predicate<T> predicate);
+
+        boolean allMatch(Predicate<T> predicate);
     }
 
     public interface Option<T> {
@@ -53,6 +58,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         void ifPresent(Consumer<T> consumer);
+
+        boolean isEmpty();
     }
 
     public interface Collector<T, C> {
@@ -114,6 +121,11 @@ public class Main {
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     static class None<T> implements Option<T> {
@@ -149,6 +161,11 @@ public class Main {
 
         @Override
         public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
         }
     }
 
@@ -256,6 +273,25 @@ public class Main {
         }
     }
 
+    private static class SingleHead<T> implements Head<T> {
+        private final T element;
+        private boolean retrieved = false;
+
+        public SingleHead(T element) {
+            this.element = element;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.element);
+        }
+    }
+
     public record HeadedStream<T>(Head<T> head) implements Stream<T> {
         @Override
         public Stream<T> concat(Stream<T> other) {
@@ -290,6 +326,20 @@ public class Main {
         @Override
         public Option<T> next() {
             return this.head.next();
+        }
+
+        @Override
+        public Stream<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> new HeadedStream<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
+        }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+        }
+
+        private <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
+            return this.map(mapper).fold(Streams.empty(), Stream::concat);
         }
     }
 
@@ -425,6 +475,23 @@ public class Main {
         }
     }
 
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
+    public static class Streams {
+        public static <T> Stream<T> from(T[] array) {
+            return new HeadedStream<>(new RangeHead(array.length)).map(index -> array[index]);
+        }
+
+        public static <R> Stream<R> empty() {
+            return new HeadedStream<>(new EmptyHead<>());
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -504,9 +571,40 @@ public class Main {
             char next = tuple.left;
             DivideState finalCurrent = tuple.right;
             current = divideSingleQuotes(finalCurrent, next)
+                    .or(() -> divideDoubleQuotes(finalCurrent, next))
                     .orElseGet(() -> divideStatementChar(finalCurrent, next));
         }
         return current.advance().stream();
+    }
+
+    private static Option<DivideState> divideDoubleQuotes(DivideState state, char next) {
+        if (next != '"') {
+            return new None<>();
+        }
+
+        DivideState current = state.append(next);
+        while (true) {
+            Option<Tuple<Character, DivideState>> maybePopped = current.pop();
+            if (maybePopped.isEmpty()) {
+                return new None<>();
+            }
+
+            Tuple<Character, DivideState> tuple = maybePopped.orElse(new Tuple<>('\0', current));
+            char c = tuple.left;
+            current = tuple.right.append(c);
+
+            if (c == '"') {
+                return new Some<>(current);
+            }
+            if (c == '\\') {
+                Option<DivideState> withEnd = current.popAndAppend();
+                if (withEnd.isEmpty()) {
+                    return new None<>();
+                }
+
+                current = withEnd.orElse(current);
+            }
+        }
     }
 
     private static Option<DivideState> divideSingleQuotes(DivideState current, char c) {
@@ -517,7 +615,7 @@ public class Main {
         return current.append(c).pop().flatMap(maybeSlashTuple -> {
             char maybeSlash = maybeSlashTuple.left;
             DivideState withMaybeSlash = maybeSlashTuple.right.append(maybeSlash);
-            Option<DivideState> divideState = maybeSlash == '\\' ? withMaybeSlash.popAndAppend() : new None<>();
+            Option<DivideState> divideState = maybeSlash == '\\' ? withMaybeSlash.popAndAppend() : new Some<>(withMaybeSlash);
             return divideState.flatMap(DivideState::popAndAppend);
         });
     }
@@ -710,14 +808,34 @@ public class Main {
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileConstructionHead(CompilerState state, String beforeName) {
-        int i = beforeName.lastIndexOf(" ");
-        if (i >= 0) {
-            String name = beforeName.substring(i + 1);
-            return new Ok<>(new Tuple<>(state, name));
-        }
-        else {
+        int nameSeparator = beforeName.lastIndexOf(" ");
+        if (nameSeparator < 0) {
             return new Err<>(new CompileError("Name separator not present", beforeName));
         }
+
+        String modifiers = beforeName.substring(0, nameSeparator).strip();
+        boolean areModifiersValid = validateModifiers(modifiers);
+        if (areModifiersValid) {
+            String name = beforeName.substring(nameSeparator + 1);
+            return new Ok<>(new Tuple<>(state, name + " new"));
+        }
+        else {
+            return new Err<>(new CompileError("Invalid modifiers", modifiers));
+        }
+    }
+
+    private static boolean validateModifiers(String modifiers) {
+        return Streams.from(modifiers.split(" "))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .allMatch(Main::isModifier);
+    }
+
+    private static boolean isModifier(String maybeModifier) {
+        return maybeModifier.equals("public")
+                || maybeModifier.equals("private")
+                || maybeModifier.equals("final")
+                || maybeModifier.equals("static");
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileStatement(CompilerState state, String input, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compileDefinition) {
@@ -738,28 +856,42 @@ public class Main {
         }
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
-        Result<String, CompileError> outputBeforeString = compileDefinitionTypeProperty(beforeName)
+        Result<Tuple<CompilerState, String>, CompileError> outputBeforeString = compileDefinitionTypeProperty(state, beforeName)
                 .mapErr(err -> new CompileError("Could not compile type", input, Lists.of(err)));
 
         String oldName = stripped.substring(nameSeparator + " ".length()).strip();
         if (isSymbol(oldName)) {
             String newName = oldName.equals("main") ? "__main__" : oldName;
-            return outputBeforeString.mapValue(type -> new Tuple<>(state, type + " " + newName));
+            return outputBeforeString.mapValue(type -> new Tuple<>(state, type.right + " " + newName));
         }
         else {
             return new Err<>(new CompileError("Not a symbol", oldName));
         }
     }
 
-    private static Result<String, CompileError> compileDefinitionTypeProperty(String beforeName) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileDefinitionTypeProperty(CompilerState state, String beforeName) {
         int typeSeparator = findTypeSeparator(beforeName);
         if (typeSeparator < 0) {
-            return compileType(beforeName);
+            return compileType(state, beforeName);
         }
 
         String beforeType = beforeName.substring(0, typeSeparator).strip();
-        String type1 = beforeName.substring(typeSeparator + " ".length()).strip();
-        return compileType(type1).mapValue(outputType -> generatePlaceholder(beforeType) + " " + outputType);
+
+        int typeParamStart = beforeType.indexOf("<");
+        String withoutTypeParams = typeParamStart >= 0
+                ? beforeType.substring(0, typeParamStart)
+                : beforeType;
+
+        int annotationsSeparator = withoutTypeParams.lastIndexOf("\n");
+        String withoutAnnotations = annotationsSeparator >= 0
+                ? withoutTypeParams.substring(annotationsSeparator)
+                : withoutTypeParams;
+
+        if (!validateModifiers(withoutAnnotations)) {
+            return new Err<>(new CompileError("Invalid modifiers", withoutAnnotations));
+        }
+
+        return compileType(state, beforeName.substring(typeSeparator + " ".length()).strip());
     }
 
     private static int findTypeSeparator(String beforeName) {
@@ -782,6 +914,10 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.equals("boolean") || input.equals("void")) {
+            return false;
+        }
+
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -793,35 +929,59 @@ public class Main {
         return true;
     }
 
-    private static Result<String, CompileError> compileType(String input) {
-        String stripped = input.strip();
-        switch (stripped) {
-            case "public", "private" -> {
-                return new Err<>(new CompileError("This is a reserved keyword", stripped));
-            }
-            case "int", "boolean" -> {
-                return new Ok<>("int");
-            }
-            case "void" -> {
-                return new Ok<>("void");
-            }
-            case "char" -> {
-                return new Ok<>("char");
-            }
-            case "String" -> {
-                return new Ok<>("char*");
-            }
-        }
+    private static Result<Tuple<CompilerState, String>, CompileError> compileType(CompilerState state, String input) {
+        return compileOr(state, input, Lists.of(
+                Main::compilePrimitive,
+                Main::compileGeneric,
+                Main::compileSymbolType
+        ));
+    }
 
+    private static Result<Tuple<CompilerState, String>, CompileError> compileSymbolType(CompilerState state, String input) {
+        String stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return new Ok<>(new Tuple<>(state, "struct " + stripped));
+        }
+        else {
+            return new Err<>(new CompileError("Not a symbol", stripped));
+        }
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileGeneric(CompilerState state, String input) {
+        String stripped = input.strip();
         int typeParamStart = stripped.indexOf("<");
         if (typeParamStart >= 0) {
-            return new Ok<>("struct " + stripped.substring(0, typeParamStart).strip());
+            return new Ok<>(new Tuple<>(state, "struct " + stripped.substring(0, typeParamStart).strip()));
         }
-
-        if (isSymbol(stripped)) {
-            return new Ok<>("struct " + stripped);
+        else {
+            return new Err<>(new CompileError("Not a generic type", input));
         }
+    }
 
-        return new Ok<>(generatePlaceholder(stripped));
+    private static Result<Tuple<CompilerState, String>, CompileError> compilePrimitive(CompilerState state, String input) {
+        String stripped = input.strip();
+        if (stripped.equals("public") || stripped.equals("private")) {
+            return new Err<>(new CompileError("This is a reserved keyword", stripped));
+        }
+        return compilePrimitiveText(stripped).<Result<Tuple<CompilerState, String>, CompileError>>map(result -> new Ok<>(new Tuple<>(state, result)))
+                .orElseGet(() -> new Err<>(new CompileError("Not a valid primitive", stripped)));
+    }
+
+    private static Option<String> compilePrimitiveText(String stripped) {
+        if (stripped.equals("int") || stripped.equals("boolean")) {
+            return new Some<>("int");
+        }
+        else if (stripped.equals("void")) {
+            return new Some<>("void");
+        }
+        else if (stripped.equals("char")) {
+            return new Some<>("char");
+        }
+        else if (stripped.equals("String")) {
+            return new Some<>("char*");
+        }
+        else {
+            return new None<>();
+        }
     }
 }
