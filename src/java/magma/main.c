@@ -1,5 +1,5 @@
 struct DivideState {
-	/* private final */ /* List<String> */ segments;
+	/* private */ /* List<String> */ segments;
 	/* private */ int depth;
 	/* private */ /* StringBuilder */ buffer;
 	/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
@@ -9,7 +9,7 @@ struct DivideState {
         }
 
         public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         }
 
         private Stream<String> stream() {
@@ -17,7 +17,7 @@ struct DivideState {
         }
 
         private DivideState advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -47,13 +47,11 @@ struct DivideState {
 
     private record CompilerState(List<String> structs) {
         public CompilerState() {
-            this(new ArrayList<>());
+            this(Lists.empty());
         }
 
         public CompilerState add(String element) {
-            ArrayList<String> copy = new ArrayList<>(this.structs);
-            copy.add(element);
-            return new CompilerState(copy);
+            return new CompilerState(this.structs.add(element));
         }
     }
 
@@ -72,7 +70,7 @@ struct DivideState {
     private static String compile(String input) {
         Tuple<CompilerState, String> tuple = compileStatements(input, new */ /* CompilerState(), */ Main::compileRootSegment);
 	/* CompilerState elements */ /* = */ tuple.left.add(tuple.right);
-	/* String joined = */ /* String.join("", */ elements.structs);
+	/* String joined = */ /* elements.structs.stream() */ .collect(Collectors.joining());
 	/* return joined + "int */ /* main(){\n\treturn */ 0;\n}\n";
 	/* }
 
@@ -204,7 +202,6 @@ struct DivideState {
 };
 struct Main {
 };
-// #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>

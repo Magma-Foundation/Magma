@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+    public interface List<T> {
+        Stream<T> stream();
+
+        List<T> add(T element);
+    }
+
     private static class DivideState {
-        private final List<String> segments;
+        private List<String> segments;
         private int depth;
         private StringBuilder buffer;
 
@@ -23,7 +28,7 @@ public class Main {
         }
 
         public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         }
 
         private Stream<String> stream() {
@@ -31,7 +36,7 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -61,13 +66,11 @@ public class Main {
 
     private record CompilerState(List<String> structs) {
         public CompilerState() {
-            this(new ArrayList<>());
+            this(Lists.empty());
         }
 
         public CompilerState add(String element) {
-            ArrayList<String> copy = new ArrayList<>(this.structs);
-            copy.add(element);
-            return new CompilerState(copy);
+            return new CompilerState(this.structs.add(element));
         }
     }
 
@@ -87,7 +90,9 @@ public class Main {
         Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment);
         CompilerState elements = tuple.left.add(tuple.right);
 
-        String joined = String.join("", elements.structs);
+        String joined = elements.structs.stream()
+                .collect(Collectors.joining());
+
         return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
