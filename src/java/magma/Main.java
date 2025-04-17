@@ -460,9 +460,10 @@ public class Main {
 
         Optional<String> outputBeforeString = compileType(typeSeparator, beforeName);
 
-        String name = stripped.substring(nameSeparator + " ".length()).strip();
-        if (isSymbol(name)) {
-            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + name));
+        String oldName = stripped.substring(nameSeparator + " ".length()).strip();
+        if (isSymbol(oldName)) {
+            String newName = oldName.equals("main") ? "__main__" : oldName;
+            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + newName));
         }
         else {
             return Optional.empty();

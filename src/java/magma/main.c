@@ -124,7 +124,7 @@ struct Optional next(){
 /* @Override
         public */ struct List fold(){
 }
-/* public static */ void main(){
+/* public static */ void __main__(){
 }
 /* private static */ char* compile(){
 }
