@@ -19,16 +19,16 @@ public class Main {
     private static class DivideState {
         private List<String> segments;
         private int depth;
-        private StringBuilder buffer;
+        private String buffer;
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public DivideState() {
-            this(Lists.empty(), new StringBuilder(), 0);
+            this(Lists.empty(), "", 0);
         }
 
         private Stream<String> stream() {
@@ -36,13 +36,13 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments = this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments = this.segments.add(this.buffer);
+            this.buffer = "";
             return this;
         }
 
         private DivideState append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         }
 
