@@ -322,8 +322,13 @@ public class Main {
 
         @Override
         public String display() {
+            return this.format(0);
+        }
+
+        private String format(int depth) {
             String joined = this.errors.stream()
-                    .map(CompileError::display)
+                    .map(error -> error.format(depth + 1))
+                    .map(display -> "\n" + "\t".repeat(depth) + display)
                     .collect(new Joiner())
                     .orElse("");
 

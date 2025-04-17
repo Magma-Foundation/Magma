@@ -38,7 +38,7 @@ public class Lists {
 
         @Override
         public Main.Option<Main.Tuple<T, Main.List<T>>> pop() {
-            if (!this.list.isEmpty()) {
+            if (this.list.isEmpty()) {
                 return new Main.None<>();
             }
 
