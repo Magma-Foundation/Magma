@@ -35,7 +35,7 @@ struct Main {
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/*  *//* Stream<T> */ stream(){
+/* Stream<T> */ stream(){
 }
 /* List<T> */ add(){
 }

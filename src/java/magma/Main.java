@@ -297,7 +297,9 @@ public class Main {
             return new Tuple<>(state, "// #include <temp.h>\n");
         }
 
-        return compileClass(state, stripped).orElseGet(() -> generatePlaceholderToTuple(state, stripped));
+        return compileClass(state, stripped)
+                .or(() -> compileWhitespace(state, stripped))
+                .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
     }
 
     private static Tuple<CompilerState, String> generatePlaceholderToTuple(CompilerState state, String stripped) {
