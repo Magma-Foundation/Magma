@@ -21,11 +21,6 @@ public class Lists {
             return this;
         }
 
-        @Override
-        public boolean isEmpty() {
-            return this.list.isEmpty();
-        }
-
         private T pop1() {
             return this.list.removeFirst();
         }

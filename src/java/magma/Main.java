@@ -1,10 +1,13 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -13,8 +16,6 @@ public class Main {
         Stream<T> stream();
 
         List<T> add(T element);
-
-        boolean isEmpty();
 
         Option<Tuple<T, List<T>>> pop();
 
@@ -48,6 +49,8 @@ public class Main {
         T orElseGet(Supplier<T> other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        void ifPresent(Consumer<T> consumer);
     }
 
     public interface Collector<T, C> {
@@ -58,6 +61,20 @@ public class Main {
 
     private interface Head<T> {
         Option<T> next();
+    }
+
+    private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+    }
+
+    interface Error {
+        String display();
     }
 
     record Some<T>(T value) implements Option<T> {
@@ -90,6 +107,11 @@ public class Main {
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
     }
 
     static class None<T> implements Option<T> {
@@ -121,6 +143,10 @@ public class Main {
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
         }
     }
 
@@ -174,9 +200,7 @@ public class Main {
         }
 
         public Option<Tuple<Character, DivideState>> pop() {
-            return this.queue.pop().map(tuple -> {
-                return new Tuple<>(tuple.left, new DivideState(tuple.right, this.segments, this.buffer, this.depth));
-            });
+            return this.queue.pop().map(tuple -> new Tuple<>(tuple.left, new DivideState(tuple.right, this.segments, this.buffer, this.depth)));
         }
     }
 
@@ -291,43 +315,161 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
+        private CompileError(String message, String context) {
+            this(message, context, Lists.empty());
+        }
+
+        @Override
+        public String display() {
+            String joined = this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(new Joiner())
+                    .orElse("");
+
+            return this.message + ": " + this.context + joined;
         }
     }
 
-    private static String compile(String input) {
-        Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment);
-        CompilerState elements = tuple.left.addStruct(tuple.right);
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
 
-        Stream<String> left = elements.structs.stream();
-        String joined = left.concat(elements.methods.stream())
-                .collect(new Joiner())
-                .orElse("");
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
 
-        return joined + "int main(){\n\treturn 0;\n}\n";
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
     }
 
-    private static Tuple<CompilerState, String> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
-        return divideStatements(input).fold(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler));
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
     }
 
-    private static Tuple<CompilerState, String> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
+    private record OrState(Option<Tuple<CompilerState, String>> maybeValue, List<CompileError> errors) {
+        public OrState() {
+            this(new None<>(), Lists.empty());
+        }
+
+        public OrState withValue(Tuple<CompilerState, String> value) {
+            return new OrState(new Some<>(value), this.errors);
+        }
+
+        public OrState withError(CompileError error) {
+            return new OrState(this.maybeValue, this.errors.add(error));
+        }
+
+        public Result<Tuple<CompilerState, String>, List<CompileError>> toResult() {
+            return this.maybeValue.<Result<Tuple<CompilerState, String>, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors));
+        }
+    }
+
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }
+
+    public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(input -> compileWithInput(source, input), Some::new)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Option<ApplicationError> compileWithInput(Path source, String input) {
+        Path target = source.resolveSibling("main.c");
+        return compile(input).mapErr(ApplicationError::new).match(output -> writeString(output, target)
+                .map(ThrowableError::new)
+                .map(ApplicationError::new), Some::new);
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Option<IOException> writeString(String output, Path target) {
+        try {
+            Files.writeString(target, output);
+            return new None<>();
+        } catch (IOException e) {
+            return new Some<>(e);
+        }
+    }
+
+    private static Result<String, CompileError> compile(String input) {
+        return compileStatements(input, new CompilerState(), Main::compileRootSegment).mapValue(tuple -> {
+            CompilerState elements = tuple.left.addStruct(tuple.right);
+
+            Stream<String> left = elements.structs.stream();
+            String joined = left.concat(elements.methods.stream())
+                    .collect(new Joiner())
+                    .orElse("");
+
+            return joined + "int main(){\n\treturn 0;\n}\n";
+        });
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compiler) {
+        return divideStatements(input).<Result<Tuple<CompilerState, String>, CompileError>>fold(new Ok<Tuple<CompilerState, String>, CompileError>(new Tuple<>(structs, "")),
+                (current, element) -> current.flatMapValue(inner -> foldSegment(inner, element, compiler)));
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compiler) {
         CompilerState currentStructs = tuple.left;
         String currentOutput = tuple.right;
 
-        Tuple<CompilerState, String> compiledStruct = compiler.apply(currentStructs, element);
-        CompilerState compiledStructs = compiledStruct.left;
-        String compiledElement = compiledStruct.right;
+        return compiler.apply(currentStructs, element).mapValue(compiledStruct -> {
+            CompilerState compiledStructs = compiledStruct.left;
+            String compiledElement = compiledStruct.right;
 
-        return new Tuple<>(compiledStructs, currentOutput + compiledElement);
+            return new Tuple<>(compiledStructs, currentOutput + compiledElement);
+        });
     }
 
     private static Stream<String> divideStatements(String input) {
@@ -381,46 +523,85 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompilerState, String> compileRootSegment(CompilerState state, String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("package ")) {
-            return new Tuple<>(state, "");
-        }
-
-        if (stripped.startsWith("import ")) {
-            return new Tuple<>(state, "// #include <temp.h>\n");
-        }
-
-        return compileClass(state, stripped)
-                .or(() -> compileWhitespace(state, stripped))
-                .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
+    private static Result<Tuple<CompilerState, String>, CompileError> compileRootSegment(CompilerState state, String input) {
+        return compileOr(state, input, Lists.of(
+                Main::compileWhitespace,
+                Main::compilePackage,
+                Main::compileImport,
+                Main::compileClass
+        ));
     }
 
-    private static Tuple<CompilerState, String> generatePlaceholderToTuple(CompilerState state, String stripped) {
-        return new Tuple<>(state, generatePlaceholder(stripped));
+    private static Result<Tuple<CompilerState, String>, CompileError> compileOr(CompilerState state, String input, List<BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>>> rules) {
+        return rules.stream()
+                .fold(new OrState(), (orState, rule) -> rule.apply(state, input).match(orState::withValue, orState::withError))
+                .toResult()
+                .mapErr(errors -> new CompileError("No valid combination present", input, errors));
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileImport(CompilerState state2, String input2) {
+        if (input2.strip().startsWith("import ")) {
+            return new Ok<>(new Tuple<>(state2, "// #include <temp.h>\n"));
+        }
+        else {
+            return createPrefixError(input2, "import ");
+        }
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compilePackage(CompilerState state, String input) {
+        if (input.strip().startsWith("package ")) {
+            return new Ok<>(new Tuple<>(state, ""));
+        }
+        else {
+            return createPrefixError(input, "package ");
+        }
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> createPrefixError(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
     private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
     }
 
-    private static Option<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileClass(CompilerState state, String stripped) {
         return compileToStruct(state, stripped, "class ");
     }
 
-    private static Option<Tuple<CompilerState, String>> compileToStruct(CompilerState state, String input, String infix) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileToStruct(CompilerState state, String input, String infix) {
         String stripped = input.strip();
         int classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
-            return new None<>();
+            return createInfixErr(infix, infix);
         }
 
         String afterKeyword = stripped.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
-            return new None<>();
+            return createInfixErr(afterKeyword, "{");
         }
 
+        String withoutTypeParams = removeTypeParams(afterKeyword, contentStart);
+
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return createSuffixErr(withEnd, "}");
+        }
+
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        CompilerState defined = state.enter().defineType(withoutTypeParams);
+        return compileStatements(inputContent, defined, Main::compileClassSegment).mapValue(outputTuple -> {
+            CompilerState outputStructs = outputTuple.left.exit();
+            String outputContent = outputTuple.right;
+
+            String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
+            CompilerState withGenerated = outputStructs.addStruct(generated);
+            return new Tuple<CompilerState, String>(withGenerated, "");
+        });
+    }
+
+    private static String removeTypeParams(String afterKeyword, int contentStart) {
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
 
         int implementsIndex = beforeContent.indexOf(" implements ");
@@ -434,59 +615,50 @@ public class Main {
                 : withoutImplements.strip();
 
         int typeParamStart = withoutParams.indexOf("<");
-        String withoutTypeParams = typeParamStart >= 0
+        return typeParamStart >= 0
                 ? withoutParams.substring(0, typeParamStart).strip()
                 : withoutParams.strip();
-
-        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return new None<>();
-        }
-
-        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        CompilerState defined = state.enter().defineType(withoutTypeParams);
-        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, defined, Main::compileClassSegment);
-        CompilerState outputStructs = outputTuple.left.exit();
-        String outputContent = outputTuple.right;
-
-        String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
-        CompilerState withGenerated = outputStructs.addStruct(generated);
-        return new Some<Tuple<CompilerState, String>>(new Tuple<CompilerState, String>(withGenerated, ""));
     }
 
-    private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
-        return compileWhitespace(state, input)
-                .or(() -> compileClass(state, input))
-                .or(() -> compileToStruct(state, input, "interface "))
-                .or(() -> compileToStruct(state, input, "record "))
-                .or(() -> compileMethod(state, input))
-                .or(() -> compileStatement(state, input, Main::compileDefinition))
-                .or(() -> compileStatement(state, input, Main::compileInitialization))
-                .orElseGet(() -> generatePlaceholderToTuple(state, input.strip()));
+    private static Err<Tuple<CompilerState, String>, CompileError> createSuffixErr(String input, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
-    private static Option<Tuple<CompilerState, String>> compileWhitespace(CompilerState state, String input) {
+    private static Err<Tuple<CompilerState, String>, CompileError> createInfixErr(String afterKeyword, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", afterKeyword));
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileClassSegment(CompilerState state0, String input0) {
+        return compileOr(state0, input0, Lists.of(
+                Main::compileWhitespace,
+                Main::compileClass,
+                (state, input) -> compileToStruct(state, input, "interface "),
+                (state, input) -> compileToStruct(state, input, "record "),
+                Main::compileMethod,
+                (state, input) -> compileStatement(state, input, Main::compileDefinition),
+                (state, input) -> compileStatement(state, input, Main::compileInitialization)
+        ));
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileWhitespace(CompilerState state, String input) {
         String stripped = input.strip();
         if (stripped.isEmpty()) {
-            return new Some<Tuple<CompilerState, String>>(new Tuple<CompilerState, String>(state, stripped));
+            return new Ok<>(new Tuple<CompilerState, String>(state, stripped));
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not empty", stripped));
         }
     }
 
-    private static Option<Tuple<CompilerState, String>> compileInitialization(CompilerState state, String input) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileInitialization(CompilerState state, String input) {
         int valueSeparator = input.indexOf("=");
-        if (valueSeparator >= 0) {
-            String definition = input.substring(0, valueSeparator).strip();
-            String value = input.substring(valueSeparator + "=".length()).strip();
-            return compileDefinition(state, definition).map(outputDefinition -> {
-                return new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value));
-            });
+        if (valueSeparator < 0) {
+            return createInfixErr(input, "{");
         }
-        else {
-            return new None<>();
-        }
+
+        String definition = input.substring(0, valueSeparator).strip();
+        String value = input.substring(valueSeparator + "=".length()).strip();
+        return compileDefinition(state, definition).mapValue(outputDefinition -> new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value)));
     }
 
     private static String compileValue(String value) {
@@ -507,57 +679,53 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileMethod(CompilerState state, String input) {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String inputDefinition = input.substring(0, paramStart).strip();
-            return compileDefinition(state, inputDefinition).flatMap(definitionTuple -> new Some<Tuple<CompilerState, String>>(new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), "")));
+            return compileDefinition(state, inputDefinition).mapValue(definitionTuple -> new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
         }
         else {
-            return new None<>();
+            return createInfixErr(input, "(");
         }
     }
 
-    private static Option<Tuple<CompilerState, String>> compileStatement(CompilerState state, String input, BiFunction<CompilerState, String, Option<Tuple<CompilerState, String>>> compileDefinition) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileStatement(CompilerState state, String input, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compileDefinition) {
         String stripped = input.strip();
         if (!stripped.endsWith(";")) {
-            return new None<>();
+            return createSuffixErr(stripped, ";");
         }
 
         String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition.apply(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+        return compileDefinition.apply(state, withoutEnd).mapValue(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
     }
 
-    private static Option<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileDefinition(CompilerState state, String input) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
-            return new None<>();
+            return createInfixErr(stripped, " ");
         }
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
-
-        Option<String> outputBeforeString = compileTypeProperty(beforeName);
+        Result<String, CompileError> outputBeforeString;
+        int typeSeparator = findTypeSeparator(beforeName);
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type1 = beforeName.substring(typeSeparator + " ".length()).strip();
+            outputBeforeString = compileType(type1).mapValue(outputType -> generatePlaceholder(beforeType) + " " + outputType);
+        }
+        else {
+            outputBeforeString = compileType(beforeName);
+        }
 
         String oldName = stripped.substring(nameSeparator + " ".length()).strip();
         if (isSymbol(oldName)) {
             String newName = oldName.equals("main") ? "__main__" : oldName;
-            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + newName));
+            return outputBeforeString.mapValue(type -> new Tuple<>(state, type + " " + newName));
         }
         else {
-            return new None<>();
-        }
-    }
-
-    private static Option<String> compileTypeProperty(String beforeName) {
-        int typeSeparator = findTypeSeparator(beforeName);
-        if (typeSeparator >= 0) {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            return compileType(type).map(outputType -> generatePlaceholder(beforeType) + " " + outputType);
-        }
-        else {
-            return compileType(beforeName);
+            return new Err<>(new CompileError("Not a symbol", oldName));
         }
     }
 
@@ -592,37 +760,35 @@ public class Main {
         return true;
     }
 
-    private static Option<String> compileType(String input) {
+    private static Result<String, CompileError> compileType(String input) {
         String stripped = input.strip();
-        if (stripped.equals("public") || stripped.equals("private")) {
-            return new None<>();
-        }
-
-        if (stripped.equals("int") || stripped.equals("boolean")) {
-            return new Some<String>("int");
-        }
-
-        if (stripped.equals("void")) {
-            return new Some<String>("void");
-        }
-
-        if (stripped.equals("char")) {
-            return new Some<String>("char");
-        }
-
-        if (stripped.equals("String")) {
-            return new Some<String>("char*");
+        switch (stripped) {
+            case "public", "private" -> {
+                return new Err<>(new CompileError("This is a reserved keyword", stripped));
+            }
+            case "int", "boolean" -> {
+                return new Ok<>("int");
+            }
+            case "void" -> {
+                return new Ok<>("void");
+            }
+            case "char" -> {
+                return new Ok<>("char");
+            }
+            case "String" -> {
+                return new Ok<>("char*");
+            }
         }
 
         int typeParamStart = stripped.indexOf("<");
         if (typeParamStart >= 0) {
-            return new Some<String>("struct " + stripped.substring(0, typeParamStart).strip());
+            return new Ok<>("struct " + stripped.substring(0, typeParamStart).strip());
         }
 
         if (isSymbol(stripped)) {
-            return new Some<String>("struct " + stripped);
+            return new Ok<>("struct " + stripped);
         }
 
-        return new Some<String>(generatePlaceholder(stripped));
+        return new Ok<>(generatePlaceholder(stripped));
     }
 }
