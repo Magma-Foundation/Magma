@@ -476,7 +476,7 @@ public class Main {
 
     private static String compileType(String input) {
         String stripped = input.strip();
-        if (stripped.equals("int")) {
+        if (stripped.equals("int") || stripped.equals("boolean")) {
             return "int";
         }
         if (stripped.equals("String")) {

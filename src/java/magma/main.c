@@ -39,7 +39,7 @@ struct Stream stream(){
 }
 struct List add(){
 }
-/* boolean */ isEmpty(){
+int isEmpty(){
 }
 /* T */ pop(){
 }
@@ -71,15 +71,15 @@ struct Optional next(){
 }
 /* private */ /* DivideState */ append(){
 }
-/* public */ /* boolean */ isLevel(){
+/* public */ int isLevel(){
 }
 /* public */ /* DivideState */ enter(){
 }
 /* public */ /* DivideState */ exit(){
 }
-/* public */ /* boolean */ isShallow(){
+/* public */ int isShallow(){
 }
-/* public */ /* boolean */ hasNext(){
+/* public */ int hasNext(){
 }
 /* public */ /* char */ pop(){
 }
@@ -153,7 +153,7 @@ struct Optional next(){
 }
 /* private static */ char* compileValue(){
 }
-/* private static */ /* boolean */ isNumber(){
+/* private static */ int isNumber(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileMethod(){
 }
@@ -161,7 +161,7 @@ struct Optional next(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinition(){
 }
-/* private static */ /* boolean */ isSymbol(){
+/* private static */ int isSymbol(){
 }
 /* private static */ char* compileType(){
 }
