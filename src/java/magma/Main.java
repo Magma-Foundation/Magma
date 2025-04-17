@@ -152,19 +152,7 @@ public class Main {
         }
     }
 
-    private static class DivideState {
-        private final List<String> segments;
-        private final String buffer;
-        private final int depth;
-        private final List<Character> queue;
-
-        private DivideState(List<Character> queue, List<String> segments, String buffer, int depth) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-            this.queue = queue;
-        }
-
+    private record DivideState(List<Character> queue, List<String> segments, String buffer, int depth) {
         public DivideState(List<Character> queue) {
             this(queue, Lists.empty(), "", 0);
         }
@@ -711,10 +699,24 @@ public class Main {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String inputDefinition = input.substring(0, paramStart).strip();
-            return compileDefinition(state, inputDefinition).mapValue(definitionTuple -> new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
+            return compileOr(state, inputDefinition, Lists.of(
+                    Main::compileDefinition,
+                    Main::compileConstructionHead
+            )).mapValue(definitionTuple -> new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
         }
         else {
             return createInfixErr(input, "(");
+        }
+    }
+
+    private static Result<Tuple<CompilerState, String>, CompileError> compileConstructionHead(CompilerState state, String beforeName) {
+        int i = beforeName.lastIndexOf(" ");
+        if (i >= 0) {
+            String name = beforeName.substring(i + 1);
+            return new Ok<>(new Tuple<>(state, name));
+        }
+        else {
+            return new Err<>(new CompileError("Name separator not present", beforeName));
         }
     }
 
@@ -750,17 +752,14 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileDefinitionTypeProperty(String beforeName) {
-        Result<String, CompileError> outputBeforeString;
         int typeSeparator = findTypeSeparator(beforeName);
-        if (typeSeparator >= 0) {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type1 = beforeName.substring(typeSeparator + " ".length()).strip();
-            outputBeforeString = compileType(type1).mapValue(outputType -> generatePlaceholder(beforeType) + " " + outputType);
+        if (typeSeparator < 0) {
+            return compileType(beforeName);
         }
-        else {
-            outputBeforeString = compileType(beforeName);
-        }
-        return outputBeforeString;
+
+        String beforeType = beforeName.substring(0, typeSeparator).strip();
+        String type1 = beforeName.substring(typeSeparator + " ".length()).strip();
+        return compileType(type1).mapValue(outputType -> generatePlaceholder(beforeType) + " " + outputType);
     }
 
     private static int findTypeSeparator(String beforeName) {
