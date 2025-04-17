@@ -6,8 +6,8 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -15,6 +15,16 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
+    interface Map<K, V> {
+        Option<V> find(K key);
+
+        Map<K, V> put(K propertyKey, V propertyValue);
+
+        Map<K, V> putAll(Map<K, V> others);
+
+        Stream<Tuple<K, V>> stream();
+    }
+
     public interface List<T> {
         Stream<T> stream();
 
@@ -519,11 +529,48 @@ public class Main {
         }
     }
 
+    static class Maps {
+        record JavaMap<K, V>(java.util.Map<K, V> internalMap) implements Map<K, V> {
+            @Override
+            public Map<K, V> put(K propertyKey, V propertyValue) {
+                this.internalMap.put(propertyKey, propertyValue);
+                return this;
+            }
+
+            @Override
+            public Map<K, V> putAll(Map<K, V> others) {
+                return others.stream().<Map<K, V>>fold(this, (kvMap, kvTuple) -> kvMap.put(kvTuple.left, kvTuple.right));
+            }
+
+            @Override
+            public Stream<Tuple<K, V>> stream() {
+                ArrayList<java.util.Map.Entry<K, V>> entries = new ArrayList<>(this.internalMap.entrySet());
+                return new HeadedStream<>(new RangeHead(entries.size()))
+                        .map(entries::get)
+                        .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
+            }
+
+            @Override
+            public Option<V> find(K key) {
+                if (this.internalMap.containsKey(key)) {
+                    return new Some<>(this.internalMap.get(key));
+                }
+                else {
+                    return new None<>();
+                }
+            }
+        }
+
+        public static <K, V> Map<K, V> empty() {
+            return new JavaMap<>(new HashMap<>());
+        }
+    }
+
     private static final class Node {
         private final Map<String, String> strings;
 
         private Node() {
-            this(new HashMap<>());
+            this(Maps.empty());
         }
 
         private Node(Map<String, String> strings) {
@@ -531,23 +578,15 @@ public class Main {
         }
 
         private Node withString(String propertyKey, String propertyValue) {
-            this.strings.put(propertyKey, propertyValue);
-            return this;
+            return new Node(this.strings.put(propertyKey, propertyValue));
         }
 
         public Option<String> find(String propertyKey) {
-            if (this.strings.containsKey(propertyKey)) {
-                return new Some<>(this.strings.get(propertyKey));
-            }
-            else {
-                return new None<>();
-            }
+            return this.strings.find(propertyKey);
         }
 
         public Node merge(Node other) {
-            HashMap<String, String> copy = new HashMap<>(this.strings);
-            copy.putAll(other.strings);
-            return new Node(copy);
+            return new Node(this.strings.putAll(other.strings));
         }
     }
 

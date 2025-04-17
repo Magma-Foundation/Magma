@@ -19,14 +19,16 @@ public class Lists {
 
         @Override
         public Main.List<T> add(T element) {
-            this.list.add(element);
-            return this;
+            List<T> copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
         }
 
         @Override
         public Main.List<T> setLast(T element) {
-            this.list.set(this.list.size() - 1, element);
-            return this;
+            List<T> copy = new ArrayList<>(this.list);
+            copy.set(this.list.size() - 1, element);
+            return new JavaList<>(copy);
         }
 
         @Override
