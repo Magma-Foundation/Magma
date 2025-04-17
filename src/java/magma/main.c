@@ -1,6 +1,6 @@
 struct DivideState {
 	/* private final */ /* List<String> */ segments;
-	/* private */ /* int */ depth;
+	/* private */ int depth;
 	/* private */ /* StringBuilder */ buffer;
 	/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -186,14 +186,21 @@ struct DivideState {
 	/* if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
             String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            outputBeforeString = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
+            outputBeforeString = generatePlaceholder(beforeType) + " " + compileType(type);
         }
         else {
-            outputBeforeString = generatePlaceholder(beforeName);
+            outputBeforeString = compileType(beforeName);
         }
 
         String name = withoutEnd.substring(nameSeparator + */ /* " */ ".length()).strip();
-	/* return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name */ /* + */ ";/* ")); *//*  */
+	/* return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name */ /* + */ ";/* ")); */
+	/* }
+
+    private static String compileType(String input) {
+        String stripped */ /* = */ input.strip();
+	/* if (stripped.equals("int")) {
+            return "int";
+        } */ /* return */ generatePlaceholder(stripped);/*  */
 };
 struct Main {
 };
