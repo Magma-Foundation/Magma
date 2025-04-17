@@ -238,6 +238,7 @@ public class Main {
     private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
         String stripped = input.strip();
         return compileClass(state, stripped)
+                .or(() -> compileToStruct(state, stripped, "interface "))
                 .or(() -> compileToStruct(state, stripped, "record "))
                 .or(() -> compileMethod(state, stripped))
                 .or(() -> compileDefinitionStatement(state, stripped))

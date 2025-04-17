@@ -1,3 +1,5 @@
+struct List<T> {/*  */
+};
 struct DivideState {
 	/* private final */ /* Deque<Character> */ queue;
 	/* private */ /* List<String> */ segments;
@@ -21,7 +23,9 @@ struct Main {/*  */
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/*  *//* public interface List<T> { */ /* Stream<T> */ stream(){
+/*  *//* Stream<T> */ stream(){
+}
+/* List<T> */ add(){
 }
 /* private */ DivideState(){
 }
