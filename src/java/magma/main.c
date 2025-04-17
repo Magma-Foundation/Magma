@@ -10,17 +10,28 @@ struct DivideState {
 	/* private final */ struct List queue;
 	/* private */ struct List segments;
 	/* private */ int depth;
-	/* private */ char* buffer;
+	/* private */ char* buffer;/* private DivideState(List<String> segments, String buffer, int depth, List<Character> queue) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+            this.queue = queue;
+        } *//* public DivideState(List<Character> queue) {
+            this(Lists.empty(), "", 0, queue);
+        } */
 };
 struct Tuple {
 };
-struct CompilerState {
+struct CompilerState {/* public CompilerState() {
+            this(Lists.empty(), Lists.empty());
+        } */
 };
 struct Joiner {
 };
 struct RangeHead {
 	/* private final */ int length;
-	/* private */ int counter = 0;
+	/* private */ int counter = 0;/* public RangeHead(int length) {
+            this.length = length;
+        } */
 };
 struct HeadedStream {
 };
@@ -41,61 +52,53 @@ struct List add(){
 }
 int isEmpty(){
 }
-/* T */ pop(){
+struct T pop(){
 }
 struct Stream concat(){
 }
-/* <C> */ /* C */ collect(){
+/* <C> */ struct C collect(){
 }
-/* <R> */ /* R */ fold(){
+/* <R> */ struct R fold(){
 }
 /* <R> */ struct Stream map(){
 }
 struct Optional next(){
 }
-/* C */ createInitial(){
+struct C createInitial(){
 }
-/* C */ fold(){
+struct C fold(){
 }
 struct Optional next(){
 }
-/* private */ DivideState(){
-}
-/* public */ DivideState(){
-}
-/* private */ /* DivideState */ popAndAppend(){
+/* private */ struct DivideState popAndAppend(){
 }
 /* private */ struct Stream stream(){
 }
-/* private */ /* DivideState */ advance(){
+/* private */ struct DivideState advance(){
 }
-/* private */ /* DivideState */ append(){
+/* private */ struct DivideState append(){
 }
 /* public */ int isLevel(){
 }
-/* public */ /* DivideState */ enter(){
+/* public */ struct DivideState enter(){
 }
-/* public */ /* DivideState */ exit(){
+/* public */ struct DivideState exit(){
 }
 /* public */ int isShallow(){
 }
 /* public */ int hasNext(){
 }
-/* public */ /* char */ pop(){
+/* public */ struct char pop(){
 }
-/* public */ CompilerState(){
+/* public */ struct CompilerState addStruct(){
 }
-/* public */ /* CompilerState */ addStruct(){
-}
-/* public */ /* CompilerState */ addMethod(){
+/* public */ struct CompilerState addMethod(){
 }
 /* @Override
         public */ struct Optional createInitial(){
 }
 /* @Override
         public */ struct Optional fold(){
-}
-/* public */ RangeHead(){
 }
 /* @Override
         public */ struct Optional next(){
@@ -104,10 +107,10 @@ struct Optional next(){
         public */ struct Stream concat(){
 }
 /* @Override
-        public <C> */ /* C */ collect(){
+        public <C> */ struct C collect(){
 }
 /* @Override
-        public <R> */ /* R */ fold(){
+        public <R> */ struct R fold(){
 }
 /* @Override
         public <R> */ struct Stream map(){
@@ -121,7 +124,7 @@ struct Optional next(){
 /* @Override
         public */ struct List fold(){
 }
-/* public static */ /* void */ main(){
+/* public static */ struct void main(){
 }
 /* private static */ char* compile(){
 }
@@ -133,7 +136,7 @@ struct Optional next(){
 }
 /* private static */ struct Optional divideSingleQuotes(){
 }
-/* private static */ /* DivideState */ divideStatementChar(){
+/* private static */ struct DivideState divideStatementChar(){
 }
 /* private static Tuple<CompilerState, */ /* String> */ compileRootSegment(){
 }
@@ -161,9 +164,11 @@ struct Optional next(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinition(){
 }
+/* private static */ struct Optional compileType(){
+}
 /* private static */ int isSymbol(){
 }
-/* private static */ char* compileType(){
+/* private static */ struct Optional compileType(){
 }
 int main(){
 	return 0;

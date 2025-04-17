@@ -443,22 +443,25 @@ public class Main {
         String beforeName = stripped.substring(0, nameSeparator).strip();
 
         int typeSeparator = beforeName.lastIndexOf(" ");
-        String outputBeforeString;
-        if (typeSeparator >= 0) {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            outputBeforeString = generatePlaceholder(beforeType) + " " + compileType(type);
-        }
-        else {
-            outputBeforeString = compileType(beforeName);
-        }
+        Optional<String> outputBeforeString = compileType(typeSeparator, beforeName);
 
         String name = stripped.substring(nameSeparator + " ".length()).strip();
         if (isSymbol(name)) {
-            return Optional.of(new Tuple<>(state, outputBeforeString + " " + name));
+            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + name));
         }
         else {
             return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileType(int typeSeparator, String beforeName) {
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length()).strip();
+            return compileType(type).map(outputType -> generatePlaceholder(beforeType) + " " + outputType);
+        }
+        else {
+            return compileType(beforeName);
         }
     }
 
@@ -474,20 +477,28 @@ public class Main {
         return true;
     }
 
-    private static String compileType(String input) {
+    private static Optional<String> compileType(String input) {
         String stripped = input.strip();
+        if (stripped.equals("public") || stripped.equals("private")) {
+            return Optional.empty();
+        }
+
         if (stripped.equals("int") || stripped.equals("boolean")) {
-            return "int";
+            return Optional.of("int");
         }
         if (stripped.equals("String")) {
-            return "char*";
+            return Optional.of("char*");
         }
 
         int typeParamStart = stripped.indexOf("<");
         if (typeParamStart >= 0) {
-            return "struct " + stripped.substring(0, typeParamStart).strip();
+            return Optional.of("struct " + stripped.substring(0, typeParamStart).strip());
         }
 
-        return generatePlaceholder(stripped);
+        if (isSymbol(stripped)) {
+            return Optional.of("struct " + stripped);
+        }
+
+        return Optional.of(generatePlaceholder(stripped));
     }
 }
