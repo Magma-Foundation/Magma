@@ -88,7 +88,7 @@ struct Optional next(){
 }
 /* public */ int hasNext(){
 }
-/* public */ struct char pop(){
+/* public */ char pop(){
 }
 /* public */ struct CompilerState addStruct(){
 }

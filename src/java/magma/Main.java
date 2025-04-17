@@ -486,6 +486,11 @@ public class Main {
         if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
         }
+
+        if (stripped.equals("char")) {
+            return Optional.of("char");
+        }
+
         if (stripped.equals("String")) {
             return Optional.of("char*");
         }
