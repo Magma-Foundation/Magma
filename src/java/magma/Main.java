@@ -59,6 +59,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -129,6 +133,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -191,31 +198,40 @@ public class Main {
         String stripped = input.strip();
         return compileClass(state, stripped)
                 .or(() -> compileMethod(state, stripped))
-                .or(() -> compileDefinition(state, stripped))
+                .or(() -> compileDefinitionStatement(state, stripped))
                 .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
     }
 
     private static Optional<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {
-        if (input.contains("(")) {
-            return Optional.of(new Tuple<>(state.addMethod("void temp(){\n}\n"), ""));
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String inputDefinition = input.substring(0, paramStart).strip();
+            return compileDefinition(state, inputDefinition).flatMap(definitionTuple -> {
+                return Optional.of(new Tuple<>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
+            });
         }
         else {
             return Optional.empty();
         }
     }
 
-    private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {
+    private static Optional<Tuple<CompilerState, String>> compileDefinitionStatement(CompilerState state, String input) {
         if (!input.endsWith(";")) {
             return Optional.empty();
         }
 
-        String withoutEnd = input.substring(0, input.length() - ";".length()).strip();
-        int nameSeparator = withoutEnd.lastIndexOf(" ");
+        String withoutEnd = input.substring(0, input.length() - ";".length());
+        return compileDefinition(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {
+        String stripped = input.strip();
+        int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return Optional.empty();
         }
 
-        String beforeName = withoutEnd.substring(0, nameSeparator).strip();
+        String beforeName = stripped.substring(0, nameSeparator).strip();
 
         int typeSeparator = beforeName.lastIndexOf(" ");
         String outputBeforeString;
@@ -228,9 +244,9 @@ public class Main {
             outputBeforeString = compileType(beforeName);
         }
 
-        String name = withoutEnd.substring(nameSeparator + " ".length()).strip();
+        String name = stripped.substring(nameSeparator + " ".length()).strip();
         if (isSymbol(name)) {
-            return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name + ";"));
+            return Optional.of(new Tuple<>(state, outputBeforeString + " " + name));
         }
         else {
             return Optional.empty();
