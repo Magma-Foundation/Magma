@@ -1,7 +1,7 @@
 struct DivideState {
 	/* private */ /* List<String> */ segments;
 	/* private */ int depth;
-	/* private */ /* String */ buffer;
+	/* private */ char* buffer;
 	/* private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
@@ -180,7 +180,7 @@ struct DivideState {
 
         String beforeName = */ /* withoutEnd.substring(0, */ nameSeparator).strip();
 	/* int typeSeparator = */ /* beforeName.lastIndexOf(" */ ");
-	/* String */ outputBeforeString;
+	char* outputBeforeString;
 	/* if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
             String type = beforeName.substring(typeSeparator + " ".length()).strip();
@@ -198,6 +198,9 @@ struct DivideState {
         String stripped */ /* = */ input.strip();
 	/* if (stripped.equals("int")) {
             return "int";
+        }
+        if (stripped.equals("String")) {
+            return "char*";
         } */ /* return */ generatePlaceholder(stripped);/*  */
 };
 struct Main {

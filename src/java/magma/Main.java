@@ -223,6 +223,9 @@ public class Main {
         if (stripped.equals("int")) {
             return "int";
         }
+        if (stripped.equals("String")) {
+            return "char*";
+        }
         return generatePlaceholder(stripped);
     }
 }
