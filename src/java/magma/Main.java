@@ -358,13 +358,38 @@ public class Main {
     }
 
     private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
+        return compileWhitespace(state, input)
+                .or(() -> compileClass(state, input))
+                .or(() -> compileToStruct(state, input, "interface "))
+                .or(() -> compileToStruct(state, input, "record "))
+                .or(() -> compileMethod(state, input))
+                .or(() -> compileStatement(state, input, Main::compileDefinition))
+                .or(() -> compileStatement(state, input, Main::compileInitialization))
+                .orElseGet(() -> generatePlaceholderToTuple(state, input.strip()));
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileWhitespace(CompilerState state, String input) {
         String stripped = input.strip();
-        return compileClass(state, stripped)
-                .or(() -> compileToStruct(state, stripped, "interface "))
-                .or(() -> compileToStruct(state, stripped, "record "))
-                .or(() -> compileMethod(state, stripped))
-                .or(() -> compileDefinitionStatement(state, stripped))
-                .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
+        if (stripped.isEmpty()) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileInitialization(CompilerState state, String input) {
+        int valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            String definition = input.substring(0, valueSeparator).strip();
+            String value = input.substring(valueSeparator + "=".length()).strip();
+            return compileDefinition(state, definition).map(outputDefinition -> {
+                return new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + generatePlaceholder(value));
+            });
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {
@@ -378,13 +403,14 @@ public class Main {
         }
     }
 
-    private static Optional<Tuple<CompilerState, String>> compileDefinitionStatement(CompilerState state, String input) {
-        if (!input.endsWith(";")) {
+    private static Optional<Tuple<CompilerState, String>> compileStatement(CompilerState state, String input, BiFunction<CompilerState, String, Optional<Tuple<CompilerState, String>>> compileDefinition) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
-        String withoutEnd = input.substring(0, input.length() - ";".length());
-        return compileDefinition(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+        String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return compileDefinition.apply(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
     }
 
     private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {

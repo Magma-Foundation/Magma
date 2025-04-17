@@ -1,31 +1,32 @@
-struct List {/*  */
+struct List {
 };
-struct Stream {/*  */
+struct Stream {
 };
-struct Collector {/*  */
+struct Collector {
 };
-struct Head {/*  */
+struct Head {
 };
 struct DivideState {
 	/* private final */ /* List<Character> */ queue;
 	/* private */ /* List<String> */ segments;
 	/* private */ int depth;
-	/* private */ char* buffer;/*  */
+	/* private */ char* buffer;
 };
-struct Tuple {/*  */
+struct Tuple {
 };
-struct CompilerState {/*  */
+struct CompilerState {
 };
-struct Joiner {/*  */
+struct Joiner {
 };
 struct RangeHead {
-	/* private final */ int length;/* private int counter = 0; *//*  */
+	/* private final */ int length;
+	/* private */ int counter = /* 0 */;
 };
-struct HeadedStream {/*  */
+struct HeadedStream {
 };
-struct ListCollector {/*  */
+struct ListCollector {
 };
-struct Main {/*  */
+struct Main {
 };
 // #include <temp.h>
 // #include <temp.h>
@@ -146,9 +147,13 @@ struct Main {/*  */
 }
 /* private static Tuple<CompilerState, */ /* String> */ compileClassSegment(){
 }
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileWhitespace(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileInitialization(){
+}
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileMethod(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinitionStatement(){
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileStatement(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinition(){
 }
