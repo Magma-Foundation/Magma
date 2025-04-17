@@ -640,23 +640,32 @@ public class Main {
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileStatements(String input, CompilerState structs, Rule compiler) {
-        return divideStatements(input).<Result<Tuple<CompilerState, String>, CompileError>>fold(new Ok<Tuple<CompilerState, String>, CompileError>(new Tuple<>(structs, "")),
-                (current, element) -> current.flatMapValue(inner -> foldSegment(inner, element, compiler)));
+        return compileAll(structs, divideStatements(input), compiler, Main::mergeStatements);
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> foldSegment(Tuple<CompilerState, String> tuple, String element, Rule compiler) {
-        CompilerState currentStructs = tuple.left;
-        String currentOutput = tuple.right;
+    private static Result<Tuple<CompilerState, String>, CompileError> compileAll(CompilerState State, Stream<String> stream, Rule compiler, BiFunction<String, String, String> merger) {
+        return stream.<Result<Tuple<CompilerState, String>, CompileError>>fold(new Ok<Tuple<CompilerState, String>, CompileError>(new Tuple<>(State, "")), (current, element) -> current.flatMapValue(inner -> {
+            CompilerState currentStructs = inner.left;
+            String currentOutput = inner.right;
 
-        return compiler.apply(currentStructs, element).mapValue(compiledStruct -> {
-            CompilerState compiledStructs = compiledStruct.left;
-            String compiledElement = compiledStruct.right;
+            return compiler.apply(currentStructs, element).mapValue(compiledStruct -> {
+                CompilerState compiledStructs = compiledStruct.left;
+                String compiledElement = compiledStruct.right;
 
-            return new Tuple<>(compiledStructs, currentOutput + compiledElement);
-        });
+                return new Tuple<>(compiledStructs, merger.apply(currentOutput, compiledElement));
+            });
+        }));
+    }
+
+    private static String mergeStatements(String currentOutput, String compiledElement) {
+        return currentOutput + compiledElement;
     }
 
     private static Stream<String> divideStatements(String input) {
+        return divideAll(input, Main::foldStatementChar);
+    }
+
+    private static Stream<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
         List<Character> queue = new HeadedStream<>(new RangeHead(input.length()))
                 .map(input::charAt)
                 .collect(new ListCollector<>());
@@ -673,7 +682,7 @@ public class Main {
             DivideState finalCurrent = tuple.right;
             current = divideSingleQuotes(finalCurrent, next)
                     .or(() -> divideDoubleQuotes(finalCurrent, next))
-                    .orElseGet(() -> divideStatementChar(finalCurrent, next));
+                    .orElseGet(() -> folder.apply(finalCurrent, next));
         }
         return current.advance().stream();
     }
@@ -721,7 +730,7 @@ public class Main {
         });
     }
 
-    private static DivideState divideStatementChar(DivideState divideState, char c) {
+    private static DivideState foldStatementChar(DivideState divideState, char c) {
         DivideState appended = divideState.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -1089,14 +1098,44 @@ public class Main {
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileGeneric(CompilerState state, String input) {
         String stripped = input.strip();
-        int typeParamStart = stripped.indexOf("<");
-        if (typeParamStart >= 0) {
-            String slice = stripped.substring(0, typeParamStart).strip();
-            return new Ok<>(new Tuple<>(state, "struct " + slice));
+        if (!stripped.endsWith(">")) {
+            return createSuffixErr(stripped, ">");
         }
-        else {
+
+        String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+        int typeParamStart = withoutEnd.indexOf("<");
+        if (typeParamStart < 0) {
             return new Err<>(new CompileError("Not a generic type", input));
         }
+
+        String base = withoutEnd.substring(0, typeParamStart).strip();
+        String typeArguments = withoutEnd.substring(typeParamStart + "<".length());
+        return compileAll(state, divideAll(typeArguments, Main::foldValueChar), Main::compileType, Main::mergeValues).flatMapValue(compiledTypeArguments -> {
+            String joined = base + "_" + compiledTypeArguments.right.replace("*", "_ref");
+            return new Ok<>(new Tuple<>(compiledTypeArguments.left, joined));
+        });
+    }
+
+    private static String mergeValues(String current, String next) {
+        if (current.isEmpty()) {
+            return next;
+        }
+        return current + "_" + next;
+    }
+
+    private static DivideState foldValueChar(DivideState state, char c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+
+        DivideState appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compilePrimitive(CompilerState state, String input) {

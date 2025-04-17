@@ -25,9 +25,9 @@ struct DivideState {
 struct Tuple {
 };
 struct CompilerState {
-	struct List structs_DivideState;
-	struct List methods_DivideState;
-	struct List frames_DivideState;
+	List_char_ref structs_DivideState;
+	List_char_ref methods_DivideState;
+	List_List_char_ref frames_DivideState;
 };
 struct Joiner {
 };
@@ -66,7 +66,7 @@ struct JavaMap {
 struct Maps {
 };
 struct Node {
-	struct Map strings_Maps;
+	Map_char_ref_char_ref strings_Maps;
 };
 struct Main {
 };
@@ -83,49 +83,49 @@ struct Main {
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-struct Option find_Main(){
+Option_struct V find_Main(){
 }
-struct Map put_Main(){
+Map_struct K_struct V put_Main(){
 }
-struct Map putAll_Main(){
+Map_struct K_struct V putAll_Main(){
 }
-struct Stream stream_Main(){
+Stream_Tuple_struct K_struct V stream_Main(){
 }
-struct Stream stream_Main(){
+Stream_struct T stream_Main(){
 }
-struct List add_Main(){
+List_struct T add_Main(){
 }
-struct Option pop_Main(){
+Option_Tuple_struct T_List_struct T pop_Main(){
 }
-struct Option last_Main(){
+Option_struct T last_Main(){
 }
-struct List setLast_Main(){
+List_struct T setLast_Main(){
 }
-struct List sort_Main(){
+List_struct T sort_Main(){
 }
-struct List mapLast_Main(){
+List_struct T mapLast_Main(){
 }
 int size_Main(){
 }
-struct Stream concat_Map(){
+Stream_struct T concat_Map(){
 }
 struct C collect_Map(){
 }
 struct R fold_Map(){
 }
-struct Stream map_Map(){
+Stream_struct R map_Map(){
 }
-struct Option next_Map(){
+Option_struct T next_Map(){
 }
-struct Stream filter_Map(){
+Stream_struct T filter_Map(){
 }
 int allMatch_Map(){
 }
-struct Stream flatMap_Map(){
+Stream_struct R flatMap_Map(){
 }
-struct Option map_List(){
+Option_struct R map_List(){
 }
-struct Option or_List(){
+Option_struct T or_List(){
 }
 struct T orElse_List(){
 }
@@ -133,7 +133,7 @@ int isPresent_List(){
 }
 struct T orElseGet_List(){
 }
-struct Option flatMap_List(){
+Option_struct R flatMap_List(){
 }
 void ifPresent_List(){
 }
@@ -143,23 +143,23 @@ struct C createInitial_Stream(){
 }
 struct C fold_Stream(){
 }
-struct Option next_Option(){
+Option_struct T next_Option(){
 }
 struct R match_Collector(){
 }
-struct Result mapErr_Collector(){
+Result_struct T_struct R mapErr_Collector(){
 }
-struct Result mapValue_Collector(){
+Result_struct R_struct X mapValue_Collector(){
 }
-struct Result flatMapValue_Collector(){
+Result_struct R_struct X flatMapValue_Collector(){
 }
 char* display_Head(){
 }
-struct Result apply_Result(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError apply_Result(){
 }
-struct Option map_Error(){
+Option_struct R map_Error(){
 }
-struct Option or_Error(){
+Option_struct T or_Error(){
 }
 struct T orElse_Error(){
 }
@@ -167,15 +167,15 @@ int isPresent_Error(){
 }
 struct T orElseGet_Error(){
 }
-struct Option flatMap_Error(){
+Option_struct R flatMap_Error(){
 }
 void ifPresent_Error(){
 }
 int isEmpty_Error(){
 }
-struct Option map_Rule(){
+Option_struct R map_Rule(){
 }
-struct Option or_Rule(){
+Option_struct T or_Rule(){
 }
 struct T orElse_Rule(){
 }
@@ -183,7 +183,7 @@ int isPresent_Rule(){
 }
 struct T orElseGet_Rule(){
 }
-struct Option flatMap_Rule(){
+Option_struct R flatMap_Rule(){
 }
 void ifPresent_Rule(){
 }
@@ -191,9 +191,9 @@ int isEmpty_Rule(){
 }
 struct DivideState new_Some(){
 }
-struct Option popAndAppend_Some(){
+Option_struct DivideState popAndAppend_Some(){
 }
-struct Stream stream_Some(){
+Stream_char_ref stream_Some(){
 }
 struct DivideState advance_Some(){
 }
@@ -207,7 +207,7 @@ struct DivideState exit_Some(){
 }
 int isShallow_Some(){
 }
-struct Option pop_Some(){
+Option_Tuple_struct Character_struct DivideState pop_Some(){
 }
 struct CompilerState new_DivideState(){
 }
@@ -221,43 +221,43 @@ struct CompilerState defineType_DivideState(){
 }
 struct CompilerState enter_DivideState(){
 }
-struct Option exit_DivideState(){
+Option_struct CompilerState exit_DivideState(){
 }
-struct Option createInitial_Tuple(){
+Option_char_ref createInitial_Tuple(){
 }
-struct Option fold_Tuple(){
+Option_char_ref fold_Tuple(){
 }
 struct RangeHead new_CompilerState(){
 }
-struct Option next_CompilerState(){
+Option_struct Integer next_CompilerState(){
 }
 struct SingleHead new_Joiner(){
 }
-struct Option next_Joiner(){
+Option_struct T next_Joiner(){
 }
-struct Stream concat_RangeHead(){
+Stream_struct T concat_RangeHead(){
 }
 struct C collect_RangeHead(){
 }
 struct R fold_RangeHead(){
 }
-struct Stream map_RangeHead(){
+Stream_struct R map_RangeHead(){
 }
-struct Option next_RangeHead(){
+Option_struct T next_RangeHead(){
 }
-struct Stream filter_RangeHead(){
+Stream_struct T filter_RangeHead(){
 }
 int allMatch_RangeHead(){
 }
-struct Stream flatMap_RangeHead(){
+Stream_struct R flatMap_RangeHead(){
 }
-struct List createInitial_SingleHead(){
+List_struct T createInitial_SingleHead(){
 }
-struct List fold_SingleHead(){
+List_struct T fold_SingleHead(){
 }
-struct Option createInitial_HeadedStream(){
+Option_struct Integer createInitial_HeadedStream(){
 }
-struct Option fold_HeadedStream(){
+Option_struct Integer fold_HeadedStream(){
 }
 struct CompileError new_ListCollector(){
 }
@@ -269,19 +269,19 @@ int computeMaxDepth_ListCollector(){
 }
 struct R match_Max(){
 }
-struct Result mapErr_Max(){
+Result_struct T_struct R mapErr_Max(){
 }
-struct Result mapValue_Max(){
+Result_struct R_struct X mapValue_Max(){
 }
-struct Result flatMapValue_Max(){
+Result_struct R_struct X flatMapValue_Max(){
 }
 struct R match_CompileError(){
 }
-struct Result mapErr_CompileError(){
+Result_struct T_struct R mapErr_CompileError(){
 }
-struct Result mapValue_CompileError(){
+Result_struct R_struct X mapValue_CompileError(){
 }
-struct Result flatMapValue_CompileError(){
+Result_struct R_struct X flatMapValue_CompileError(){
 }
 struct OrState new_Err(){
 }
@@ -289,27 +289,27 @@ struct OrState withValue_Err(){
 }
 struct OrState withError_Err(){
 }
-struct Result toResult_Err(){
+Result_Tuple_struct CompilerState_char_ref_List_struct CompileError toResult_Err(){
 }
 char* display_Ok(){
 }
 char* display_OrState(){
 }
-struct Option next_ThrowableError(){
+Option_struct T next_ThrowableError(){
 }
-struct Stream from_ApplicationError(){
+Stream_struct T from_ApplicationError(){
 }
-struct Stream empty_ApplicationError(){
+Stream_struct R empty_ApplicationError(){
 }
-struct Map put_EmptyHead(){
+Map_struct K_struct V put_EmptyHead(){
 }
-struct Map putAll_EmptyHead(){
+Map_struct K_struct V putAll_EmptyHead(){
 }
-struct Stream stream_EmptyHead(){
+Stream_Tuple_struct K_struct V stream_EmptyHead(){
 }
-struct Option find_EmptyHead(){
+Option_struct V find_EmptyHead(){
 }
-struct Map empty_Streams(){
+Map_struct K_struct V empty_Streams(){
 }
 struct Node new_Maps(){
 }
@@ -317,99 +317,107 @@ struct Node new_Maps(){
 }
 struct Node withString_Maps(){
 }
-struct Option find_Maps(){
+Option_char_ref find_Maps(){
 }
 struct Node merge_Maps(){
 }
 void __main___JavaMap(){
 }
-struct Option compileWithInput_JavaMap(){
+Option_struct ApplicationError compileWithInput_JavaMap(){
 }
-struct Result readString_JavaMap(){
+Result_char_ref_struct IOException readString_JavaMap(){
 }
-struct Option writeString_JavaMap(){
+Option_struct IOException writeString_JavaMap(){
 }
-struct Result compile_JavaMap(){
+Result_char_ref_struct CompileError compile_JavaMap(){
 }
-struct Result compileStatements_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileStatements_JavaMap(){
 }
-struct Result foldSegment_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileAll_JavaMap(){
 }
-struct Stream divideStatements_JavaMap(){
+char* mergeStatements_JavaMap(){
 }
-struct Option divideDoubleQuotes_JavaMap(){
+Stream_char_ref divideStatements_JavaMap(){
 }
-struct Option divideSingleQuotes_JavaMap(){
+Stream_char_ref divideAll_JavaMap(){
 }
-struct DivideState divideStatementChar_JavaMap(){
+Option_struct DivideState divideDoubleQuotes_JavaMap(){
 }
-struct Result compileRootSegment_JavaMap(){
+Option_struct DivideState divideSingleQuotes_JavaMap(){
 }
-struct Result compileOr_JavaMap(){
+struct DivideState foldStatementChar_JavaMap(){
 }
-struct Result compileImport_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileRootSegment_JavaMap(){
 }
-struct Result compilePackage_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileOr_JavaMap(){
 }
-struct Result createPrefixError_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileImport_JavaMap(){
+}
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compilePackage_JavaMap(){
+}
+Result_Tuple_struct CompilerState_char_ref_struct CompileError createPrefixError_JavaMap(){
 }
 char* generatePlaceholder_JavaMap(){
 }
-struct Result compileClass_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileClass_JavaMap(){
 }
-struct Result compileToStruct_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileToStruct_JavaMap(){
 }
 char* removeTypeParams_JavaMap(){
 }
-struct Err createSuffixErr_JavaMap(){
+Err_Tuple_struct CompilerState_char_ref_struct CompileError createSuffixErr_JavaMap(){
 }
-struct Result createInfixErr_JavaMap(){
+Result_Tuple_struct CompilerState_struct T_struct CompileError createInfixErr_JavaMap(){
 }
-struct Result compileClassSegment_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileClassSegment_JavaMap(){
 }
 struct Rule compileWithType_JavaMap(){
 }
-struct Result compileWhitespace_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileWhitespace_JavaMap(){
 }
-struct Result compileInitialization_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileInitialization_JavaMap(){
 }
 char* compileValue_JavaMap(){
 }
 int isNumber_JavaMap(){
 }
-struct Result compileMethod_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileMethod_JavaMap(){
 }
-struct Result compileConstructionHead_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileConstructionHead_JavaMap(){
 }
 int validateModifiers_JavaMap(){
 }
 int isModifier_JavaMap(){
 }
-struct Result compileStatement_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileStatement_JavaMap(){
 }
-struct Result parseDefinition_JavaMap(){
+Result_Tuple_struct CompilerState_struct Node_struct CompileError parseDefinition_JavaMap(){
 }
 char* getLast_JavaMap(){
 }
-struct Result getTupleCompileErrorResult_JavaMap(){
+Result_Tuple_struct CompilerState_struct Node_struct CompileError getTupleCompileErrorResult_JavaMap(){
 }
-struct Result generateDefinition_JavaMap(){
+Result_char_ref_struct CompileError generateDefinition_JavaMap(){
 }
-struct Result compileDefinitionTypeProperty_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileDefinitionTypeProperty_JavaMap(){
 }
 int findTypeSeparator_JavaMap(){
 }
 int isSymbol_JavaMap(){
 }
-struct Result compileType_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileType_JavaMap(){
 }
-struct Result compileSymbolType_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileSymbolType_JavaMap(){
 }
-struct Result compileGeneric_JavaMap(){
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compileGeneric_JavaMap(){
 }
-struct Result compilePrimitive_JavaMap(){
+char* mergeValues_JavaMap(){
 }
-struct Option compilePrimitiveText_JavaMap(){
+struct DivideState foldValueChar_JavaMap(){
+}
+Result_Tuple_struct CompilerState_char_ref_struct CompileError compilePrimitive_JavaMap(){
+}
+Option_char_ref compilePrimitiveText_JavaMap(){
 }
 int main(){
 	return 0;
