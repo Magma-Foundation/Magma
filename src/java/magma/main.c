@@ -2,7 +2,7 @@ struct List {
 };
 struct Stream {
 };
-struct Optional {
+struct Option {
 };
 struct Collector {
 };
@@ -68,11 +68,11 @@ struct Stream concat(){
 }
 /* <R> */ struct Stream map(){
 }
-struct Optional next(){
+struct Option next(){
 }
-/* <R> */ struct Optional map(){
+/* <R> */ struct Option map(){
 }
-struct Optional or(){
+struct Option or(){
 }
 struct T orElse(){
 }
@@ -80,37 +80,19 @@ int isPresent(){
 }
 struct T orElseGet(){
 }
-/* <R> */ struct Optional flatMap(){
+/* <R> */ struct Option flatMap(){
 }
 struct C createInitial(){
 }
 struct C fold(){
 }
-struct Optional next(){
+struct Option next(){
 }
 /* @Override
-        public <R> */ struct Optional map(){
+        public <R> */ struct Option map(){
 }
 /* @Override
-        public */ struct Optional or(){
-}
-/* @Override
-        public */ struct T orElse(){
-}
-/* @Override
-        public */ int isPresent(){
-}
-/* @Override
-        public */ struct T orElseGet(){
-}
-/* @Override
-        public <R> */ struct Optional flatMap(){
-}
-/* @Override
-        public <R> */ struct Optional map(){
-}
-/* @Override
-        public */ struct Optional or(){
+        public */ struct Option or(){
 }
 /* @Override
         public */ struct T orElse(){
@@ -122,7 +104,25 @@ struct Optional next(){
         public */ struct T orElseGet(){
 }
 /* @Override
-        public <R> */ struct Optional flatMap(){
+        public <R> */ struct Option flatMap(){
+}
+/* @Override
+        public <R> */ struct Option map(){
+}
+/* @Override
+        public */ struct Option or(){
+}
+/* @Override
+        public */ struct T orElse(){
+}
+/* @Override
+        public */ int isPresent(){
+}
+/* @Override
+        public */ struct T orElseGet(){
+}
+/* @Override
+        public <R> */ struct Option flatMap(){
 }
 /* private */ struct DivideState popAndAppend(){
 }
@@ -149,13 +149,13 @@ struct Optional next(){
 /* public */ struct CompilerState addMethod(){
 }
 /* @Override
-        public */ struct Optional createInitial(){
+        public */ struct Option createInitial(){
 }
 /* @Override
-        public */ struct Optional fold(){
+        public */ struct Option fold(){
 }
 /* @Override
-        public */ struct Optional next(){
+        public */ struct Option next(){
 }
 /* @Override
         public */ struct Stream concat(){
@@ -170,7 +170,7 @@ struct Optional next(){
         public <R> */ struct Stream map(){
 }
 /* @Override
-        public */ struct Optional next(){
+        public */ struct Option next(){
 }
 /* @Override
         public */ struct List createInitial(){
@@ -188,7 +188,7 @@ struct Optional next(){
 }
 /* private static */ struct Stream divideStatements(){
 }
-/* private static */ struct Optional divideSingleQuotes(){
+/* private static */ struct Option divideSingleQuotes(){
 }
 /* private static */ struct DivideState divideStatementChar(){
 }
@@ -198,31 +198,33 @@ struct Optional next(){
 }
 /* private static */ char* generatePlaceholder(){
 }
-/* private static */ struct Optional compileClass(){
+/* private static */ struct Option compileClass(){
 }
-/* private static */ struct Optional compileToStruct(){
+/* private static */ struct Option compileToStruct(){
 }
 /* private static */ struct Tuple compileClassSegment(){
 }
-/* private static */ struct Optional compileWhitespace(){
+/* private static */ struct Option compileWhitespace(){
 }
-/* private static */ struct Optional compileInitialization(){
+/* private static */ struct Option compileInitialization(){
 }
 /* private static */ char* compileValue(){
 }
 /* private static */ int isNumber(){
 }
-/* private static */ struct Optional compileMethod(){
+/* private static */ struct Option compileMethod(){
 }
-/* private static */ struct Optional compileStatement(){
+/* private static */ struct Option compileStatement(){
 }
-/* private static */ struct Optional compileDefinition(){
+/* private static */ struct Option compileDefinition(){
 }
-/* private static */ struct Optional compileType(){
+/* private static */ struct Option compileTypeProperty(){
+}
+/* private static */ int findTypeSeparator(){
 }
 /* private static */ int isSymbol(){
 }
-/* private static */ struct Optional compileType(){
+/* private static */ struct Option compileType(){
 }
 int main(){
 	return 0;

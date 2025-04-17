@@ -521,6 +521,31 @@ public class Main {
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
 
+        Option<String> outputBeforeString = compileTypeProperty(beforeName);
+
+        String oldName = stripped.substring(nameSeparator + " ".length()).strip();
+        if (isSymbol(oldName)) {
+            String newName = oldName.equals("main") ? "__main__" : oldName;
+            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + newName));
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static Option<String> compileTypeProperty(String beforeName) {
+        int typeSeparator = findTypeSeparator(beforeName);
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length()).strip();
+            return compileType(type).map(outputType -> generatePlaceholder(beforeType) + " " + outputType);
+        }
+        else {
+            return compileType(beforeName);
+        }
+    }
+
+    private static int findTypeSeparator(String beforeName) {
         int typeSeparator = -1;
         int depth = 0;
         for (int i = beforeName.length() - 1; i >= 0; i--) {
@@ -536,28 +561,7 @@ public class Main {
                 depth--;
             }
         }
-
-        Option<String> outputBeforeString = compileType(typeSeparator, beforeName);
-
-        String oldName = stripped.substring(nameSeparator + " ".length()).strip();
-        if (isSymbol(oldName)) {
-            String newName = oldName.equals("main") ? "__main__" : oldName;
-            return outputBeforeString.map(type -> new Tuple<>(state, type + " " + newName));
-        }
-        else {
-            return new None<>();
-        }
-    }
-
-    private static Option<String> compileType(int typeSeparator, String beforeName) {
-        if (typeSeparator >= 0) {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            return compileType(type).map(outputType -> generatePlaceholder(beforeType) + " " + outputType);
-        }
-        else {
-            return compileType(beforeName);
-        }
+        return typeSeparator;
     }
 
     private static boolean isSymbol(String input) {
