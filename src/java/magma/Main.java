@@ -1089,7 +1089,7 @@ public class Main {
     private static Result<Tuple<CompilerState, String>, CompileError> compileSymbolType(CompilerState state, String input) {
         String stripped = input.strip();
         if (isSymbol(stripped)) {
-            return new Ok<>(new Tuple<>(state, "struct " + stripped));
+            return new Ok<>(new Tuple<>(state, stripped));
         }
         else {
             return new Err<>(new CompileError("Not a symbol", stripped));
