@@ -7,8 +7,8 @@ struct Collector {
 struct Head {
 };
 struct DivideState {
-	/* private final */ /* List<Character> */ queue;
-	/* private */ /* List<String> */ segments;
+	/* private final */ struct List queue;
+	/* private */ struct List segments;
 	/* private */ int depth;
 	/* private */ char* buffer;
 };
@@ -35,29 +35,29 @@ struct Main {
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/* Stream<T> */ stream(){
+struct Stream stream(){
 }
-/* List<T> */ add(){
+struct List add(){
 }
 /* boolean */ isEmpty(){
 }
 /* T */ pop(){
 }
-/* Stream<T> */ concat(){
+struct Stream concat(){
 }
 /* <C> */ /* C */ collect(){
 }
 /* <R> */ /* R */ fold(){
 }
-/* <R> */ /* Stream<R> */ map(){
+/* <R> */ struct Stream map(){
 }
-/* Optional<T> */ next(){
+struct Optional next(){
 }
 /* C */ createInitial(){
 }
 /* C */ fold(){
 }
-/* Optional<T> */ next(){
+struct Optional next(){
 }
 /* private */ DivideState(){
 }
@@ -65,7 +65,7 @@ struct Main {
 }
 /* private */ /* DivideState */ popAndAppend(){
 }
-/* private */ /* Stream<String> */ stream(){
+/* private */ struct Stream stream(){
 }
 /* private */ /* DivideState */ advance(){
 }
@@ -90,18 +90,18 @@ struct Main {
 /* public */ /* CompilerState */ addMethod(){
 }
 /* @Override
-        public */ /* Optional<String> */ createInitial(){
+        public */ struct Optional createInitial(){
 }
 /* @Override
-        public */ /* Optional<String> */ fold(){
+        public */ struct Optional fold(){
 }
 /* public */ RangeHead(){
 }
 /* @Override
-        public */ /* Optional<Integer> */ next(){
+        public */ struct Optional next(){
 }
 /* @Override
-        public */ /* Stream<T> */ concat(){
+        public */ struct Stream concat(){
 }
 /* @Override
         public <C> */ /* C */ collect(){
@@ -110,16 +110,16 @@ struct Main {
         public <R> */ /* R */ fold(){
 }
 /* @Override
-        public <R> */ /* Stream<R> */ map(){
+        public <R> */ struct Stream map(){
 }
 /* @Override
-        public */ /* Optional<T> */ next(){
+        public */ struct Optional next(){
 }
 /* @Override
-        public */ /* List<T> */ createInitial(){
+        public */ struct List createInitial(){
 }
 /* @Override
-        public */ /* List<T> */ fold(){
+        public */ struct List fold(){
 }
 /* public static */ /* void */ main(){
 }
@@ -129,9 +129,9 @@ struct Main {
 }
 /* private static Tuple<CompilerState, */ /* String> */ foldSegment(){
 }
-/* private static */ /* Stream<String> */ divideStatements(){
+/* private static */ struct Stream divideStatements(){
 }
-/* private static */ /* Optional<DivideState> */ divideSingleQuotes(){
+/* private static */ struct Optional divideSingleQuotes(){
 }
 /* private static */ /* DivideState */ divideStatementChar(){
 }

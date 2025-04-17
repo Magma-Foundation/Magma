@@ -482,6 +482,12 @@ public class Main {
         if (stripped.equals("String")) {
             return "char*";
         }
+
+        int typeParamStart = stripped.indexOf("<");
+        if (typeParamStart >= 0) {
+            return "struct " + stripped.substring(0, typeParamStart).strip();
+        }
+
         return generatePlaceholder(stripped);
     }
 }
