@@ -3,6 +3,7 @@ package magma;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class Lists {
     record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
@@ -34,6 +35,13 @@ public class Lists {
         public Main.List<T> setLast(T element) {
             this.list.set(this.list.size() - 1, element);
             return this;
+        }
+
+        @Override
+        public Main.List<T> sort(BiFunction<T, T, Integer> comparator) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.sort(comparator::apply);
+            return new JavaList<>(copy);
         }
 
         @Override

@@ -22,6 +22,8 @@ public class Main {
         T last();
 
         List<T> setLast(T element);
+
+        List<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
     public interface Stream<T> {
@@ -315,6 +317,18 @@ public class Main {
         }
     }
 
+    private static class Max implements Collector<Integer, Option<Integer>> {
+        @Override
+        public Option<Integer> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Integer> fold(Option<Integer> current, Integer element) {
+            return new Some<>(current.map(inner -> inner > element ? inner : element).orElse(element));
+        }
+    }
+
     private record CompileError(String message, String context, List<CompileError> errors) implements Error {
         private CompileError(String message, String context) {
             this(message, context, Lists.empty());
@@ -326,13 +340,22 @@ public class Main {
         }
 
         private String format(int depth) {
-            String joined = this.errors.stream()
+            String joined = this.errors
+                    .sort((first, second) -> first.computeMaxDepth() - second.computeMaxDepth())
+                    .stream()
                     .map(error -> error.format(depth + 1))
                     .map(display -> "\n" + "\t".repeat(depth) + display)
                     .collect(new Joiner())
                     .orElse("");
 
             return this.message + ": " + this.context + joined;
+        }
+
+        private int computeMaxDepth() {
+            return 1 + this.errors.stream()
+                    .map(CompileError::computeMaxDepth)
+                    .collect(new Max())
+                    .orElse(0);
         }
     }
 
