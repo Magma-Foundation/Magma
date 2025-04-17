@@ -94,6 +94,9 @@ public class Main {
         String display();
     }
 
+    interface Rule extends BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> {
+    }
+
     record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -222,17 +225,27 @@ public class Main {
     public record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompilerState(List<String> structs, List<String> methods, List<List<String>> frames) {
+    private static final class CompilerState {
+        private final List<String> structs;
+        private final List<String> methods;
+        private final List<List<String>> frames;
+
+        private CompilerState(List<String> structs, List<String> methods, List<List<String>> frames) {
+            this.structs = structs;
+            this.methods = methods;
+            this.frames = frames;
+        }
+
         public CompilerState() {
             this(Lists.empty(), Lists.empty(), Lists.of(Lists.empty()));
         }
 
         public CompilerState addStruct(String element) {
-            return new CompilerState(this.structs.add(element), this.methods, Lists.empty());
+            return new CompilerState(this.structs.add(element), this.methods, frames);
         }
 
         public CompilerState addMethod(String element) {
-            return new CompilerState(this.structs, this.methods.add(element), Lists.empty());
+            return new CompilerState(this.structs, this.methods.add(element), frames);
         }
 
         public CompilerState defineType(String name) {
@@ -247,7 +260,8 @@ public class Main {
             if (this.frames.size() == 1) {
                 return new None<>();
             }
-            return new Some<>(new CompilerState(this.structs, this.methods, this.frames.pop().map(Tuple::right).orElse(null)));
+
+            return this.frames.pop().map(listListTuple -> new CompilerState(this.structs, this.methods, listListTuple.right));
         }
     }
 
@@ -582,12 +596,12 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compiler) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileStatements(String input, CompilerState structs, Rule compiler) {
         return divideStatements(input).<Result<Tuple<CompilerState, String>, CompileError>>fold(new Ok<Tuple<CompilerState, String>, CompileError>(new Tuple<>(structs, "")),
                 (current, element) -> current.flatMapValue(inner -> foldSegment(inner, element, compiler)));
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compiler) {
+    private static Result<Tuple<CompilerState, String>, CompileError> foldSegment(Tuple<CompilerState, String> tuple, String element, Rule compiler) {
         CompilerState currentStructs = tuple.left;
         String currentOutput = tuple.right;
 
@@ -690,7 +704,7 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> compileOr(CompilerState state, String input, List<BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>>> rules) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileOr(CompilerState state, String input, List<Rule> rules) {
         return rules.stream()
                 .fold(new OrState(), (orState, rule) -> rule.apply(state, input).match(orState::withValue, orState::withError))
                 .toResult()
@@ -793,13 +807,20 @@ public class Main {
         return compileOr(state0, input0, Lists.of(
                 Main::compileWhitespace,
                 Main::compileClass,
-                (state, input) -> compileToStruct(state, input, "interface "),
-                (state, input) -> compileToStruct(state, input, "record "),
+                compileWithType("interface", (state, input) -> compileToStruct(state, input, "interface ")),
+                compileWithType("record", (state, input) -> compileToStruct(state, input, "record ")),
                 Main::compileMethod,
-                (state, input) -> compileStatement(state, input, (state1, input1) -> parseDefinition(state1, input1)
-                        .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated)))),
+                (state, input) -> compileStatement(state, input, (state1, input1) -> parseDefinition(state1, input1).flatMapValue((Tuple<CompilerState, Node> tuple) -> {
+                    return generateDefinition(tuple.right).mapValue(generated -> {
+                        return new Tuple<>(tuple.left, generated);
+                    });
+                })),
                 (state, input) -> compileStatement(state, input, Main::compileInitialization)
         ));
+    }
+
+    private static Rule compileWithType(String type, Rule childRule) {
+        return (state, input) -> childRule.apply(state, input).mapErr(err -> new CompileError("Cannot compile type '" + type + "'", input, Lists.of(err)));
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileWhitespace(CompilerState state, String input) {
@@ -850,7 +871,10 @@ public class Main {
                     (state1, input1) -> parseDefinition(state1, input1)
                             .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated))),
                     Main::compileConstructionHead
-            )).mapValue(definitionTuple -> new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
+            )).mapValue(definitionTuple -> {
+                CompilerState compilerState = definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n");
+                return new Tuple<CompilerState, String>(compilerState, "");
+            });
         }
         else {
             return createInfixErr(input, "(");
@@ -888,7 +912,7 @@ public class Main {
                 || maybeModifier.equals("static");
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> compileStatement(CompilerState state, String input, BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> compileDefinition) {
+    private static Result<Tuple<CompilerState, String>, CompileError> compileStatement(CompilerState state, String input, Rule compileDefinition) {
         String stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return createSuffixErr(stripped, ";");
