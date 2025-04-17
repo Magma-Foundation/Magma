@@ -1046,7 +1046,10 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        if (input.equals("boolean") || input.equals("void") || input.equals("int")) {
+        if (input.equals("boolean")
+                || input.equals("void")
+                || input.equals("int")
+                || input.equals("record")) {
             return false;
         }
 

@@ -20,12 +20,14 @@ struct Some {
 };
 struct None {
 };
+struct DivideState {
+};
 struct Tuple {
 };
 struct CompilerState {
-	struct List structs_None;
-	struct List methods_None;
-	struct List frames_None;
+	struct List structs_DivideState;
+	struct List methods_DivideState;
+	struct List frames_DivideState;
 };
 struct Joiner {
 };
@@ -43,9 +45,17 @@ struct ListCollector {
 };
 struct Max {
 };
+struct CompileError {
+};
 struct Err {
 };
 struct Ok {
+};
+struct OrState {
+};
+struct ThrowableError {
+};
+struct ApplicationError {
 };
 struct EmptyHead {
 };
@@ -177,21 +187,39 @@ void ifPresent_Rule(){
 }
 int isEmpty_Rule(){
 }
-struct record DivideState_Some(){
+struct DivideState new_Some(){
 }
-struct CompilerState new_None(){
+struct Option popAndAppend_Some(){
 }
-struct CompilerState new_None(){
+struct Stream stream_Some(){
 }
-struct CompilerState addStruct_None(){
+struct DivideState advance_Some(){
 }
-struct CompilerState addMethod_None(){
+struct DivideState append_Some(){
 }
-struct CompilerState defineType_None(){
+int isLevel_Some(){
 }
-struct CompilerState enter_None(){
+struct DivideState enter_Some(){
 }
-struct Option exit_None(){
+struct DivideState exit_Some(){
+}
+int isShallow_Some(){
+}
+struct Option pop_Some(){
+}
+struct CompilerState new_DivideState(){
+}
+struct CompilerState new_DivideState(){
+}
+struct CompilerState addStruct_DivideState(){
+}
+struct CompilerState addMethod_DivideState(){
+}
+struct CompilerState defineType_DivideState(){
+}
+struct CompilerState enter_DivideState(){
+}
+struct Option exit_DivideState(){
 }
 struct Option createInitial_Tuple(){
 }
@@ -229,15 +257,13 @@ struct Option createInitial_HeadedStream(){
 }
 struct Option fold_HeadedStream(){
 }
-struct record CompileError_ListCollector(){
+struct CompileError new_ListCollector(){
 }
-struct R match_ListCollector(){
+struct String display_ListCollector(){
 }
-struct Result mapErr_ListCollector(){
+struct String format_ListCollector(){
 }
-struct Result mapValue_ListCollector(){
-}
-struct Result flatMapValue_ListCollector(){
+int computeMaxDepth_ListCollector(){
 }
 struct R match_Max(){
 }
@@ -247,23 +273,37 @@ struct Result mapValue_Max(){
 }
 struct Result flatMapValue_Max(){
 }
-struct record OrState_Err(){
+struct R match_CompileError(){
 }
-struct record ThrowableError_Err(){
+struct Result mapErr_CompileError(){
 }
-struct record ApplicationError_Err(){
+struct Result mapValue_CompileError(){
 }
-struct Option next_Err(){
+struct Result flatMapValue_CompileError(){
 }
-struct Stream from_Ok(){
+struct OrState new_Err(){
 }
-struct Map put_Ok(){
+struct OrState withValue_Err(){
 }
-struct Map putAll_Ok(){
+struct OrState withError_Err(){
 }
-struct Stream stream_Ok(){
+struct Result toResult_Err(){
 }
-struct Option find_Ok(){
+struct String display_Ok(){
+}
+struct String display_OrState(){
+}
+struct Option next_ThrowableError(){
+}
+struct Stream from_ApplicationError(){
+}
+struct Map put_ApplicationError(){
+}
+struct Map putAll_ApplicationError(){
+}
+struct Stream stream_ApplicationError(){
+}
+struct Option find_ApplicationError(){
 }
 struct Map empty_EmptyHead(){
 }
