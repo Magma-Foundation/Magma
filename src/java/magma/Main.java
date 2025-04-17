@@ -736,6 +736,20 @@ public class Main {
         }
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
+        Result<String, CompileError> outputBeforeString = compileDefinitionTypeProperty(beforeName)
+                .mapErr(err -> new CompileError("Could not compile type", input, Lists.of(err)));
+
+        String oldName = stripped.substring(nameSeparator + " ".length()).strip();
+        if (isSymbol(oldName)) {
+            String newName = oldName.equals("main") ? "__main__" : oldName;
+            return outputBeforeString.mapValue(type -> new Tuple<>(state, type + " " + newName));
+        }
+        else {
+            return new Err<>(new CompileError("Not a symbol", oldName));
+        }
+    }
+
+    private static Result<String, CompileError> compileDefinitionTypeProperty(String beforeName) {
         Result<String, CompileError> outputBeforeString;
         int typeSeparator = findTypeSeparator(beforeName);
         if (typeSeparator >= 0) {
@@ -746,15 +760,7 @@ public class Main {
         else {
             outputBeforeString = compileType(beforeName);
         }
-
-        String oldName = stripped.substring(nameSeparator + " ".length()).strip();
-        if (isSymbol(oldName)) {
-            String newName = oldName.equals("main") ? "__main__" : oldName;
-            return outputBeforeString.mapValue(type -> new Tuple<>(state, type + " " + newName));
-        }
-        else {
-            return new Err<>(new CompileError("Not a symbol", oldName));
-        }
+        return outputBeforeString;
     }
 
     private static int findTypeSeparator(String beforeName) {
