@@ -2,9 +2,15 @@ struct List {
 };
 struct Stream {
 };
+struct Optional {
+};
 struct Collector {
 };
 struct Head {
+};
+struct Some {
+};
+struct None {
 };
 struct DivideState {
 	/* private final */ struct List queue;
@@ -64,11 +70,59 @@ struct Stream concat(){
 }
 struct Optional next(){
 }
+/* <R> */ struct Optional map(){
+}
+struct Optional or(){
+}
+struct T orElse(){
+}
+int isPresent(){
+}
+struct T orElseGet(){
+}
+/* <R> */ struct Optional flatMap(){
+}
 struct C createInitial(){
 }
 struct C fold(){
 }
 struct Optional next(){
+}
+/* @Override
+        public <R> */ struct Optional map(){
+}
+/* @Override
+        public */ struct Optional or(){
+}
+/* @Override
+        public */ struct T orElse(){
+}
+/* @Override
+        public */ int isPresent(){
+}
+/* @Override
+        public */ struct T orElseGet(){
+}
+/* @Override
+        public <R> */ struct Optional flatMap(){
+}
+/* @Override
+        public <R> */ struct Optional map(){
+}
+/* @Override
+        public */ struct Optional or(){
+}
+/* @Override
+        public */ struct T orElse(){
+}
+/* @Override
+        public */ int isPresent(){
+}
+/* @Override
+        public */ struct T orElseGet(){
+}
+/* @Override
+        public <R> */ struct Optional flatMap(){
 }
 /* private */ struct DivideState popAndAppend(){
 }
