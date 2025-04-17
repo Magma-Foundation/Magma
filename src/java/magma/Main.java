@@ -487,6 +487,10 @@ public class Main {
             return Optional.of("int");
         }
 
+        if (stripped.equals("void")) {
+            return Optional.of("void");
+        }
+
         if (stripped.equals("char")) {
             return Optional.of("char");
         }
