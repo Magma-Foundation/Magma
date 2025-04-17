@@ -325,7 +325,23 @@ public class Main {
             return Optional.empty();
         }
 
-        String name = afterKeyword.substring(0, contentStart).strip();
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        int implementsIndex = beforeContent.indexOf(" implements ");
+        String withoutImplements = implementsIndex >= 0
+                ? beforeContent.substring(0, implementsIndex).strip()
+                : beforeContent.strip();
+
+        int paramStart = withoutImplements.indexOf("(");
+        String withoutParams = paramStart >= 0
+                ? withoutImplements.substring(0, withoutImplements.indexOf("(")).strip()
+                : withoutImplements.strip();
+
+        int typeParamStart = withoutParams.indexOf("<");
+        String withoutTypeParams = typeParamStart >= 0
+                ? withoutParams.substring(0, typeParamStart).strip()
+                : withoutParams.strip();
+
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
@@ -336,7 +352,7 @@ public class Main {
         CompilerState outputStructs = outputTuple.left;
         String outputContent = outputTuple.right;
 
-        String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
+        String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
         CompilerState withGenerated = outputStructs.addStruct(generated);
         return Optional.of(new Tuple<>(withGenerated, ""));
     }

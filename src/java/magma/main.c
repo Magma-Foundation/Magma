@@ -1,10 +1,10 @@
-struct List<T> {/*  */
+struct List {/*  */
 };
-struct Stream<T> {/*  */
+struct Stream {/*  */
 };
-struct Collector<T, C> {/*  */
+struct Collector {/*  */
 };
-struct Head<T> {/*  */
+struct Head {/*  */
 };
 struct DivideState {
 	/* private final */ /* List<Character> */ queue;
@@ -12,18 +12,18 @@ struct DivideState {
 	/* private */ int depth;
 	/* private */ char* buffer;/*  */
 };
-struct Tuple<A, B>(A left, B right) {/*  */
+struct Tuple {/*  */
 };
-struct CompilerState(List<String> structs, List<String> methods) {/*  */
+struct CompilerState {/*  */
 };
-struct Joiner implements Collector<String, Optional<String>> {/*  */
+struct Joiner {/*  */
 };
-struct RangeHead implements Head<Integer> {
+struct RangeHead {
 	/* private final */ int length;/* private int counter = 0; *//*  */
 };
-struct HeadedStream<T>(Head<T> head) implements Stream<T> {/*  */
+struct HeadedStream {/*  */
 };
-struct ListCollector<T> implements Collector<T, List<T>> {/*  */
+struct ListCollector {/*  */
 };
 struct Main {/*  */
 };
