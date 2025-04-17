@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Main {
     public interface List<T> {
         Stream<T> stream();
 
         List<T> add(T element);
+
+        boolean isEmpty();
+
+        T pop();
     }
 
     public interface Stream<T> {
@@ -42,19 +42,19 @@ public class Main {
     }
 
     private static class DivideState {
-        private final Deque<Character> queue;
+        private final List<Character> queue;
         private List<String> segments;
         private int depth;
         private String buffer;
 
-        private DivideState(List<String> segments, String buffer, int depth, Deque<Character> queue) {
+        private DivideState(List<String> segments, String buffer, int depth, List<Character> queue) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
             this.queue = queue;
         }
 
-        public DivideState(Deque<Character> queue) {
+        public DivideState(List<Character> queue) {
             this(Lists.empty(), "", 0, queue);
         }
 
@@ -191,6 +191,18 @@ public class Main {
         }
     }
 
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -231,9 +243,9 @@ public class Main {
     }
 
     private static Stream<String> divideStatements(String input) {
-        Deque<Character> queue = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+        List<Character> queue = new HeadedStream<>(new RangeHead(input.length()))
+                .map(input::charAt)
+                .collect(new ListCollector<>());
 
         DivideState current = new DivideState(queue);
         while (current.hasNext()) {
@@ -343,9 +355,7 @@ public class Main {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String inputDefinition = input.substring(0, paramStart).strip();
-            return compileDefinition(state, inputDefinition).flatMap(definitionTuple -> {
-                return Optional.of(new Tuple<>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
-            });
+            return compileDefinition(state, inputDefinition).flatMap(definitionTuple -> Optional.of(new Tuple<>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), "")));
         }
         else {
             return Optional.empty();

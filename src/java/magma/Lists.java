@@ -1,7 +1,6 @@
 package magma;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 public class Lists {
     record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
@@ -11,13 +10,23 @@ public class Lists {
 
         @Override
         public Main.Stream<T> stream() {
-            return new Main.HeadedStream<>(new Main.RangeHead(list.size())).map(list::get);
+            return new Main.HeadedStream<>(new Main.RangeHead(this.list.size())).map(this.list::get);
         }
 
         @Override
         public Main.List<T> add(T element) {
             this.list.add(element);
             return this;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.list.isEmpty();
+        }
+
+        @Override
+        public T pop() {
+            return this.list.removeFirst();
         }
     }
 

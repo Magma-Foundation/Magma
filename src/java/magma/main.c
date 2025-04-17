@@ -7,7 +7,7 @@ struct Collector<T, C> {/*  */
 struct Head<T> {/*  */
 };
 struct DivideState {
-	/* private final */ /* Deque<Character> */ queue;
+	/* private final */ /* List<Character> */ queue;
 	/* private */ /* List<String> */ segments;
 	/* private */ int depth;
 	/* private */ char* buffer;/*  */
@@ -23,12 +23,10 @@ struct RangeHead implements Head<Integer> {
 };
 struct HeadedStream<T>(Head<T> head) implements Stream<T> {/*  */
 };
+struct ListCollector<T> implements Collector<T, List<T>> {/*  */
+};
 struct Main {/*  */
 };
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
@@ -39,6 +37,10 @@ struct Main {/*  */
 /*  *//* Stream<T> */ stream(){
 }
 /* List<T> */ add(){
+}
+/* boolean */ isEmpty(){
+}
+/* T */ pop(){
 }
 /* Stream<T> */ concat(){
 }
@@ -111,6 +113,12 @@ struct Main {/*  */
 }
 /* @Override
         public */ /* Optional<T> */ next(){
+}
+/* @Override
+        public */ /* List<T> */ createInitial(){
+}
+/* @Override
+        public */ /* List<T> */ fold(){
 }
 /* public static */ /* void */ main(){
 }
