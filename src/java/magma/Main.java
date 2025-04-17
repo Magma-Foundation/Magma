@@ -484,6 +484,9 @@ public class Main {
         }
 
         public OrState withValue(Tuple<CompilerState, String> value) {
+            if (this.maybeValue.isPresent()) {
+                return this;
+            }
             return new OrState(new Some<>(value), this.errors);
         }
 
@@ -1086,7 +1089,8 @@ public class Main {
         String stripped = input.strip();
         int typeParamStart = stripped.indexOf("<");
         if (typeParamStart >= 0) {
-            return new Ok<>(new Tuple<>(state, "struct " + stripped.substring(0, typeParamStart).strip()));
+            String slice = stripped.substring(0, typeParamStart).strip();
+            return new Ok<>(new Tuple<>(state, "struct " + slice));
         }
         else {
             return new Err<>(new CompileError("Not a generic type", input));

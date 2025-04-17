@@ -59,6 +59,8 @@ struct ApplicationError {
 };
 struct EmptyHead {
 };
+struct Streams {
+};
 struct JavaMap {
 };
 struct Maps {
@@ -151,7 +153,7 @@ struct Result mapValue_Collector(){
 }
 struct Result flatMapValue_Collector(){
 }
-struct String display_Head(){
+char* display_Head(){
 }
 struct Result apply_Result(){
 }
@@ -187,7 +189,7 @@ void ifPresent_Rule(){
 }
 int isEmpty_Rule(){
 }
-struct DivideState new_Some(){
+struct public DivideState_Some(){
 }
 struct Option popAndAppend_Some(){
 }
@@ -207,9 +209,9 @@ int isShallow_Some(){
 }
 struct Option pop_Some(){
 }
-struct CompilerState new_DivideState(){
+struct private CompilerState_DivideState(){
 }
-struct CompilerState new_DivideState(){
+struct public CompilerState_DivideState(){
 }
 struct CompilerState addStruct_DivideState(){
 }
@@ -225,11 +227,11 @@ struct Option createInitial_Tuple(){
 }
 struct Option fold_Tuple(){
 }
-struct RangeHead new_CompilerState(){
+struct public RangeHead_CompilerState(){
 }
 struct Option next_CompilerState(){
 }
-struct SingleHead new_Joiner(){
+struct public SingleHead_Joiner(){
 }
 struct Option next_Joiner(){
 }
@@ -257,11 +259,11 @@ struct Option createInitial_HeadedStream(){
 }
 struct Option fold_HeadedStream(){
 }
-struct CompileError new_ListCollector(){
+struct private CompileError_ListCollector(){
 }
-struct String display_ListCollector(){
+char* display_ListCollector(){
 }
-struct String format_ListCollector(){
+char* format_ListCollector(){
 }
 int computeMaxDepth_ListCollector(){
 }
@@ -281,7 +283,7 @@ struct Result mapValue_CompileError(){
 }
 struct Result flatMapValue_CompileError(){
 }
-struct OrState new_Err(){
+struct public OrState_Err(){
 }
 struct OrState withValue_Err(){
 }
@@ -289,27 +291,29 @@ struct OrState withError_Err(){
 }
 struct Result toResult_Err(){
 }
-struct String display_Ok(){
+char* display_Ok(){
 }
-struct String display_OrState(){
+char* display_OrState(){
 }
 struct Option next_ThrowableError(){
 }
 struct Stream from_ApplicationError(){
 }
-struct Map put_ApplicationError(){
+struct Stream empty_ApplicationError(){
 }
-struct Map putAll_ApplicationError(){
+struct Map put_EmptyHead(){
 }
-struct Stream stream_ApplicationError(){
+struct Map putAll_EmptyHead(){
 }
-struct Option find_ApplicationError(){
+struct Stream stream_EmptyHead(){
 }
-struct Map empty_EmptyHead(){
+struct Option find_EmptyHead(){
 }
-struct Node new_Maps(){
+struct Map empty_Streams(){
 }
-struct Node new_Maps(){
+struct private Node_Maps(){
+}
+struct private Node_Maps(){
 }
 struct Node withString_Maps(){
 }
@@ -349,13 +353,13 @@ struct Result compilePackage_JavaMap(){
 }
 struct Result createPrefixError_JavaMap(){
 }
-struct String generatePlaceholder_JavaMap(){
+char* generatePlaceholder_JavaMap(){
 }
 struct Result compileClass_JavaMap(){
 }
 struct Result compileToStruct_JavaMap(){
 }
-struct String removeTypeParams_JavaMap(){
+char* removeTypeParams_JavaMap(){
 }
 struct Err createSuffixErr_JavaMap(){
 }
@@ -369,7 +373,7 @@ struct Result compileWhitespace_JavaMap(){
 }
 struct Result compileInitialization_JavaMap(){
 }
-struct String compileValue_JavaMap(){
+char* compileValue_JavaMap(){
 }
 int isNumber_JavaMap(){
 }
@@ -385,7 +389,7 @@ struct Result compileStatement_JavaMap(){
 }
 struct Result parseDefinition_JavaMap(){
 }
-struct String getLast_JavaMap(){
+char* getLast_JavaMap(){
 }
 struct Result getTupleCompileErrorResult_JavaMap(){
 }
