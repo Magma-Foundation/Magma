@@ -384,12 +384,30 @@ public class Main {
             String definition = input.substring(0, valueSeparator).strip();
             String value = input.substring(valueSeparator + "=".length()).strip();
             return compileDefinition(state, definition).map(outputDefinition -> {
-                return new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + generatePlaceholder(value));
+                return new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value));
             });
         }
         else {
             return Optional.empty();
         }
+    }
+
+    private static String compileValue(String value) {
+        if (isNumber(value.strip())) {
+            return value;
+        }
+        return generatePlaceholder(value);
+    }
+
+    private static boolean isNumber(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Optional<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {

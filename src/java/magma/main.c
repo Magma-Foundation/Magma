@@ -20,7 +20,7 @@ struct Joiner {
 };
 struct RangeHead {
 	/* private final */ int length;
-	/* private */ int counter = /* 0 */;
+	/* private */ int counter = 0;
 };
 struct HeadedStream {
 };
@@ -150,6 +150,10 @@ struct Main {
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileWhitespace(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileInitialization(){
+}
+/* private static */ char* compileValue(){
+}
+/* private static */ /* boolean */ isNumber(){
 }
 /* private static Optional<Tuple<CompilerState, */ /* String>> */ compileMethod(){
 }
