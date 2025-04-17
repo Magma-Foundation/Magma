@@ -16,7 +16,11 @@ public class Main {
 
         boolean isEmpty();
 
-        T pop();
+        Option<Tuple<T, List<T>>> pop();
+
+        T last();
+
+        List<T> setLast(T element);
     }
 
     public interface Stream<T> {
@@ -121,12 +125,12 @@ public class Main {
     }
 
     private static class DivideState {
+        private final List<String> segments;
+        private final String buffer;
+        private final int depth;
         private final List<Character> queue;
-        private List<String> segments;
-        private int depth;
-        private String buffer;
 
-        private DivideState(List<String> segments, String buffer, int depth, List<Character> queue) {
+        private DivideState(List<Character> queue, List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -134,11 +138,11 @@ public class Main {
         }
 
         public DivideState(List<Character> queue) {
-            this(Lists.empty(), "", 0, queue);
+            this(queue, Lists.empty(), "", 0);
         }
 
-        private DivideState popAndAppend() {
-            return this.append(this.pop());
+        private Option<DivideState> popAndAppend() {
+            return this.pop().map(popped -> popped.right.append(popped.left));
         }
 
         private Stream<String> stream() {
@@ -146,14 +150,11 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments = this.segments.add(this.buffer);
-            this.buffer = "";
-            return this;
+            return new DivideState(this.queue, this.segments.add(this.buffer), "", this.depth);
         }
 
         private DivideState append(char c) {
-            this.buffer = this.buffer + c;
-            return this;
+            return new DivideState(this.queue, this.segments, this.buffer + c, this.depth);
         }
 
         public boolean isLevel() {
@@ -161,42 +162,50 @@ public class Main {
         }
 
         public DivideState enter() {
-            this.depth++;
-            return this;
+            return new DivideState(this.queue, this.segments, this.buffer, this.depth + 1);
         }
 
         public DivideState exit() {
-            this.depth--;
-            return this;
+            return new DivideState(this.queue, this.segments, this.buffer, this.depth - 1);
         }
 
         public boolean isShallow() {
             return this.depth == 1;
         }
 
-        public boolean hasNext() {
-            return !this.queue.isEmpty();
-        }
-
-        public char pop() {
-            return this.queue.pop();
+        public Option<Tuple<Character, DivideState>> pop() {
+            return this.queue.pop().map(tuple -> {
+                return new Tuple<>(tuple.left, new DivideState(tuple.right, this.segments, this.buffer, this.depth));
+            });
         }
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    public record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompilerState(List<String> structs, List<String> methods) {
+    private record CompilerState(List<String> structs, List<String> methods, List<List<String>> frames) {
         public CompilerState() {
-            this(Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.of(Lists.empty()));
         }
 
         public CompilerState addStruct(String element) {
-            return new CompilerState(this.structs.add(element), this.methods);
+            return new CompilerState(this.structs.add(element), this.methods, Lists.empty());
         }
 
         public CompilerState addMethod(String element) {
-            return new CompilerState(this.structs, this.methods.add(element));
+            return new CompilerState(this.structs, this.methods.add(element), Lists.empty());
+        }
+
+        public CompilerState defineType(String name) {
+            return new CompilerState(this.structs, this.methods, this.frames.setLast(this.frames.last().add(name)));
+        }
+
+        public CompilerState enter() {
+            return new CompilerState(this.structs, this.methods, this.frames.add(Lists.empty()));
+        }
+
+        public CompilerState exit() {
+            return new CompilerState(this.structs, this.methods, this.frames.pop().map(Tuple::right).orElse(null));
         }
     }
 
@@ -327,11 +336,17 @@ public class Main {
                 .collect(new ListCollector<>());
 
         DivideState current = new DivideState(queue);
-        while (current.hasNext()) {
-            char c = current.pop();
-            DivideState finalCurrent = current;
-            current = divideSingleQuotes(current, c)
-                    .orElseGet(() -> divideStatementChar(finalCurrent, c));
+        while (true) {
+            Option<Tuple<Character, DivideState>> maybeNext = current.pop();
+            if (!maybeNext.isPresent()) {
+                break;
+            }
+
+            Tuple<Character, DivideState> tuple = maybeNext.orElse(new Tuple<>('\0', current));
+            char next = tuple.left;
+            DivideState finalCurrent = tuple.right;
+            current = divideSingleQuotes(finalCurrent, next)
+                    .orElseGet(() -> divideStatementChar(finalCurrent, next));
         }
         return current.advance().stream();
     }
@@ -340,13 +355,13 @@ public class Main {
         if (c != '\'') {
             return new None<>();
         }
-        DivideState appended = current.append(c);
-        char maybeSlash = appended.pop();
 
-        DivideState withMaybeSlash = appended.append(maybeSlash);
-        DivideState divideState = maybeSlash == '\\' ? withMaybeSlash.popAndAppend() : withMaybeSlash;
-
-        return new Some<DivideState>(divideState.popAndAppend());
+        return current.append(c).pop().flatMap(maybeSlashTuple -> {
+            char maybeSlash = maybeSlashTuple.left;
+            DivideState withMaybeSlash = maybeSlashTuple.right.append(maybeSlash);
+            Option<DivideState> divideState = maybeSlash == '\\' ? withMaybeSlash.popAndAppend() : new None<>();
+            return divideState.flatMap(DivideState::popAndAppend);
+        });
     }
 
     private static DivideState divideStatementChar(DivideState divideState, char c) {
@@ -429,8 +444,9 @@ public class Main {
         }
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment);
-        CompilerState outputStructs = outputTuple.left;
+        CompilerState defined = state.enter().defineType(withoutTypeParams);
+        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, defined, Main::compileClassSegment);
+        CompilerState outputStructs = outputTuple.left.exit();
         String outputContent = outputTuple.right;
 
         String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
