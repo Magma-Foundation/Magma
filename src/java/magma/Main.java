@@ -167,12 +167,17 @@ public class Main {
     }
 
     private static Optional<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
-        int classIndex = stripped.indexOf("class ");
+        return compileToStruct(state, stripped, "class ");
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileToStruct(CompilerState state, String input, String infix) {
+        String stripped = input.strip();
+        int classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return Optional.empty();
         }
 
-        String afterKeyword = stripped.substring(classIndex + "class ".length());
+        String afterKeyword = stripped.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
@@ -197,6 +202,7 @@ public class Main {
     private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
         String stripped = input.strip();
         return compileClass(state, stripped)
+                .or(() -> compileToStruct(state, stripped, "record "))
                 .or(() -> compileMethod(state, stripped))
                 .or(() -> compileDefinitionStatement(state, stripped))
                 .orElseGet(() -> generatePlaceholderToTuple(state, stripped));

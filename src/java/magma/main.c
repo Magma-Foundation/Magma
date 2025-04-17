@@ -3,8 +3,11 @@ struct DivideState {
 	/* private */ int depth;
 	/* private */ char* buffer;/*  */
 };
-struct Main {/* private record Tuple<A, B>(A left, B right) {
-    } *//* ' && appended.isShallow()) {
+struct Tuple<A, B>(A left, B right) {/*  */
+};
+struct CompilerState(List<String> structs, List<String> methods) {/*  */
+};
+struct Main {/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* if (c == '{') {
             return appended.enter();
@@ -13,24 +16,6 @@ struct Main {/* private record Tuple<A, B>(A left, B right) {
             return appended.exit();
         } */
 	/* return */ appended;/*  */
-};
-struct ");
-        if (classIndex < 0) {/* return Optional.empty(); *//* }
-
-        String afterKeyword = stripped.substring(classIndex + "class ".length());
-        int contentStart = afterKeyword.indexOf("{"); *//* if (contentStart < 0) {
-            return Optional.empty();
-        } *//* String name = afterKeyword.substring(0, contentStart).strip(); *//* String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("} *//* ")) {
-            return Optional.empty();
-        } *//* String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment);
-        CompilerState outputStructs = outputTuple.left;
-        String outputContent = outputTuple.right;
-
-        String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
-        CompilerState withGenerated = outputStructs.addStruct(generated);
-        return Optional.of(new Tuple<>(withGenerated, "")); */
 };
 // #include <temp.h>
 // #include <temp.h>
@@ -55,9 +40,39 @@ struct ");
         return new Tuple<>(state, generatePlaceholder(stripped));
     } *//* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
+    } *//* private static Optional<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
+        return compileToStruct(state, stripped, "class ");
+    } *//* private static Optional<Tuple<CompilerState, String>> compileToStruct(CompilerState state, String input, String infix) {
+        String stripped = input.strip();
+        int classIndex = stripped.indexOf(infix);
+        if (classIndex < 0) {
+            return Optional.empty();
+        }
+
+        String afterKeyword = stripped.substring(classIndex + infix.length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+
+        String name = afterKeyword.substring(0, contentStart).strip();
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment);
+        CompilerState outputStructs = outputTuple.left;
+        String outputContent = outputTuple.right;
+
+        String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
+        CompilerState withGenerated = outputStructs.addStruct(generated);
+        return Optional.of(new Tuple<>(withGenerated, ""));
     } *//* private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
         String stripped = input.strip();
         return compileClass(state, stripped)
+                .or(() -> compileToStruct(state, stripped, "record "))
                 .or(() -> compileMethod(state, stripped))
                 .or(() -> compileDefinitionStatement(state, stripped))
                 .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
@@ -145,7 +160,11 @@ struct ");
 }
 /* public */ /* boolean */ isShallow(){
 }
-/* private */ /* record */ CompilerState(){
+/* public */ CompilerState(){
+}
+/* public */ /* CompilerState */ addStruct(){
+}
+/* public */ /* CompilerState */ addMethod(){
 }
 /* public static */ /* void */ main(){
 }
