@@ -94,7 +94,8 @@ public class Main {
         String display();
     }
 
-    interface Rule extends BiFunction<CompilerState, String, Result<Tuple<CompilerState, String>, CompileError>> {
+    private interface Rule {
+        Result<Tuple<CompilerState, String>, CompileError> apply(CompilerState state, String input);
     }
 
     record Some<T>(T value) implements Option<T> {
@@ -241,11 +242,11 @@ public class Main {
         }
 
         public CompilerState addStruct(String element) {
-            return new CompilerState(this.structs.add(element), this.methods, frames);
+            return new CompilerState(this.structs.add(element), this.methods, this.frames);
         }
 
         public CompilerState addMethod(String element) {
-            return new CompilerState(this.structs, this.methods.add(element), frames);
+            return new CompilerState(this.structs, this.methods.add(element), this.frames);
         }
 
         public CompilerState defineType(String name) {
@@ -842,7 +843,7 @@ public class Main {
         String definition = input.substring(0, valueSeparator).strip();
         String value = input.substring(valueSeparator + "=".length()).strip();
         return parseDefinition(state, definition)
-                .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated))).mapValue(outputDefinition -> new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value)));
+                .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated)));
     }
 
     private static String compileValue(String value) {
@@ -891,7 +892,7 @@ public class Main {
         boolean areModifiersValid = validateModifiers(modifiers);
         if (areModifiersValid) {
             String name = beforeName.substring(nameSeparator + 1);
-            return new Ok<>(new Tuple<>(state, name + " new"));
+            return new Ok<>(new Tuple<>(state, "struct " + name + " new_" + getLast(state)));
         }
         else {
             return new Err<>(new CompileError("Invalid modifiers", modifiers));
@@ -937,15 +938,18 @@ public class Main {
         }
 
         String newName = oldName.equals("main") ? "__main__" : oldName;
-        String last = state.frames
+        String last = getLast(state);
+        Node withName = new Node().withString("name", newName + "_" + last);
+        return getTupleCompileErrorResult(state, input, beforeName)
+                .mapValue((Tuple<CompilerState, Node> other) -> new Tuple<>(other.left, withName.merge(other.right)));
+    }
+
+    private static String getLast(CompilerState state) {
+        return state.frames
                 .stream()
                 .flatMap(List::stream)
                 .next()
                 .orElse("");
-
-        Node withName = new Node().withString("name", newName + "_" + last);
-        return getTupleCompileErrorResult(state, input, beforeName)
-                .mapValue((Tuple<CompilerState, Node> other) -> new Tuple<>(other.left, withName.merge(other.right)));
     }
 
     private static Result<Tuple<CompilerState, Node>, CompileError> getTupleCompileErrorResult(CompilerState state, String input, String beforeName) {
@@ -1003,7 +1007,7 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        if (input.equals("boolean") || input.equals("void")) {
+        if (input.equals("boolean") || input.equals("void") || input.equals("int")) {
             return false;
         }
 

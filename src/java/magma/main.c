@@ -12,7 +12,7 @@ struct Result {
 };
 struct Error {
 };
-struct Rule extends BiFunction {
+struct Rule {
 };
 struct Some {
 };
@@ -30,12 +30,12 @@ struct CompilerState {
 struct Joiner {
 };
 struct RangeHead {
-	struct int length_Tuple;
-	struct int counter_Tuple = 0;
+	int length_Tuple;
+	int counter_Tuple;
 };
 struct SingleHead {
 	struct T element_CompilerState;
-	int retrieved_CompilerState = /* false */;
+	int retrieved_CompilerState;
 };
 struct HeadedStream {
 };
@@ -91,7 +91,7 @@ struct List sort_Main(){
 }
 struct List mapLast_Main(){
 }
-struct int size_Main(){
+int size_Main(){
 }
 struct Stream concat_Main(){
 }
@@ -141,6 +141,8 @@ struct Result flatMapValue_Collector(){
 }
 struct String display_Head(){
 }
+struct Result apply_Result(){
+}
 struct Option map_Error(){
 }
 struct Option or_Error(){
@@ -157,23 +159,23 @@ void ifPresent_Error(){
 }
 int isEmpty_Error(){
 }
-struct Option map_Rule extends BiFunction(){
+struct Option map_Rule(){
 }
-struct Option or_Rule extends BiFunction(){
+struct Option or_Rule(){
 }
-struct T orElse_Rule extends BiFunction(){
+struct T orElse_Rule(){
 }
-int isPresent_Rule extends BiFunction(){
+int isPresent_Rule(){
 }
-struct T orElseGet_Rule extends BiFunction(){
+struct T orElseGet_Rule(){
 }
-struct Option flatMap_Rule extends BiFunction(){
+struct Option flatMap_Rule(){
 }
-void ifPresent_Rule extends BiFunction(){
+void ifPresent_Rule(){
 }
-int isEmpty_Rule extends BiFunction(){
+int isEmpty_Rule(){
 }
-DivideState new(){
+struct DivideState new_Some(){
 }
 struct Option popAndAppend_Some(){
 }
@@ -195,9 +197,9 @@ struct Option pop_Some(){
 }
 struct record DivideState_Some(){
 }
-CompilerState new(){
+struct CompilerState new_None(){
 }
-CompilerState new(){
+struct CompilerState new_None(){
 }
 struct CompilerState addStruct_None(){
 }
@@ -213,11 +215,11 @@ struct Option createInitial_DivideState(){
 }
 struct Option fold_DivideState(){
 }
-RangeHead new(){
+struct RangeHead new_Tuple(){
 }
 struct Option next_Tuple(){
 }
-SingleHead new(){
+struct SingleHead new_CompilerState(){
 }
 struct Option next_CompilerState(){
 }
@@ -245,13 +247,13 @@ struct Option createInitial_SingleHead(){
 }
 struct Option fold_SingleHead(){
 }
-CompileError new(){
+struct CompileError new_HeadedStream(){
 }
 struct String display_HeadedStream(){
 }
 struct String format_HeadedStream(){
 }
-struct int computeMaxDepth_HeadedStream(){
+int computeMaxDepth_HeadedStream(){
 }
 struct record CompileError_HeadedStream(){
 }
@@ -271,7 +273,7 @@ struct Result mapValue_ListCollector(){
 }
 struct Result flatMapValue_ListCollector(){
 }
-OrState new(){
+struct OrState new_Max(){
 }
 struct OrState withValue_Max(){
 }
@@ -297,9 +299,9 @@ struct Stream empty_CompileError(){
 }
 struct Stream from_CompileError(){
 }
-Node new(){
+struct Node new_CompileError(){
 }
-Node new(){
+struct Node new_CompileError(){
 }
 struct Node withString_CompileError(){
 }
@@ -379,13 +381,15 @@ struct Result compileStatement_Err(){
 }
 struct Result parseDefinition_Err(){
 }
+struct String getLast_Err(){
+}
 struct Result getTupleCompileErrorResult_Err(){
 }
 struct Result generateDefinition_Err(){
 }
 struct Result compileDefinitionTypeProperty_Err(){
 }
-struct int findTypeSeparator_Err(){
+int findTypeSeparator_Err(){
 }
 int isSymbol_Err(){
 }
