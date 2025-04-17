@@ -54,8 +54,13 @@ struct EmptyHead {
 };
 struct Streams {
 };
+struct Node {
+	struct Map strings;
+};
 struct Main {
 };
+// #include <temp.h>
+// #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
@@ -281,6 +286,16 @@ struct Stream empty(){
 }
 struct Stream from(){
 }
+Node new(){
+}
+Node new(){
+}
+struct Node withString(){
+}
+struct Option find(){
+}
+struct Node merge(){
+}
 void __main__(){
 }
 struct Option compileWithInput(){
@@ -323,7 +338,7 @@ struct String removeTypeParams(){
 }
 struct Err createSuffixErr(){
 }
-struct Err createInfixErr(){
+struct Result createInfixErr(){
 }
 struct Result compileClassSegment(){
 }
@@ -345,7 +360,11 @@ int isModifier(){
 }
 struct Result compileStatement(){
 }
-struct Result compileDefinition(){
+struct Result parseDefinition(){
+}
+struct Result getTupleCompileErrorResult(){
+}
+struct Result generateDefinition(){
 }
 struct Result compileDefinitionTypeProperty(){
 }

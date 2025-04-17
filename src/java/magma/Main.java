@@ -6,6 +6,8 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -492,6 +494,38 @@ public class Main {
         }
     }
 
+    private static final class Node {
+        private final Map<String, String> strings;
+
+        private Node() {
+            this(new HashMap<>());
+        }
+
+        private Node(Map<String, String> strings) {
+            this.strings = strings;
+        }
+
+        private Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String> find(String propertyKey) {
+            if (this.strings.containsKey(propertyKey)) {
+                return new Some<>(this.strings.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
+        }
+
+        public Node merge(Node other) {
+            HashMap<String, String> copy = new HashMap<>(this.strings);
+            copy.putAll(other.strings);
+            return new Node(copy);
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -738,7 +772,7 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
-    private static Err<Tuple<CompilerState, String>, CompileError> createInfixErr(String input, String infix) {
+    private static <T> Result<Tuple<CompilerState, T>, CompileError> createInfixErr(String input, String infix) {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
@@ -749,7 +783,8 @@ public class Main {
                 (state, input) -> compileToStruct(state, input, "interface "),
                 (state, input) -> compileToStruct(state, input, "record "),
                 Main::compileMethod,
-                (state, input) -> compileStatement(state, input, Main::compileDefinition),
+                (state, input) -> compileStatement(state, input, (state1, input1) -> parseDefinition(state1, input1)
+                        .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated)))),
                 (state, input) -> compileStatement(state, input, Main::compileInitialization)
         ));
     }
@@ -772,7 +807,8 @@ public class Main {
 
         String definition = input.substring(0, valueSeparator).strip();
         String value = input.substring(valueSeparator + "=".length()).strip();
-        return compileDefinition(state, definition).mapValue(outputDefinition -> new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value)));
+        return parseDefinition(state, definition)
+                .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated))).mapValue(outputDefinition -> new Tuple<>(outputDefinition.left, outputDefinition.right + " = " + compileValue(value)));
     }
 
     private static String compileValue(String value) {
@@ -798,7 +834,8 @@ public class Main {
         if (paramStart >= 0) {
             String inputDefinition = input.substring(0, paramStart).strip();
             return compileOr(state, inputDefinition, Lists.of(
-                    Main::compileDefinition,
+                    (state1, input1) -> parseDefinition(state1, input1)
+                            .flatMapValue((Tuple<CompilerState, Node> tuple) -> generateDefinition(tuple.right).mapValue(generated -> new Tuple<>(tuple.left, generated))),
                     Main::compileConstructionHead
             )).mapValue(definitionTuple -> new Tuple<CompilerState, String>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
         }
@@ -848,7 +885,7 @@ public class Main {
         return compileDefinition.apply(state, withoutEnd).mapValue(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
     }
 
-    private static Result<Tuple<CompilerState, String>, CompileError> compileDefinition(CompilerState state, String input) {
+    private static Result<Tuple<CompilerState, Node>, CompileError> parseDefinition(CompilerState state, String input) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -856,17 +893,27 @@ public class Main {
         }
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
-        Result<Tuple<CompilerState, String>, CompileError> outputBeforeString = compileDefinitionTypeProperty(state, beforeName)
-                .mapErr(err -> new CompileError("Could not compile type", input, Lists.of(err)));
 
         String oldName = stripped.substring(nameSeparator + " ".length()).strip();
-        if (isSymbol(oldName)) {
-            String newName = oldName.equals("main") ? "__main__" : oldName;
-            return outputBeforeString.mapValue(type -> new Tuple<>(state, type.right + " " + newName));
-        }
-        else {
+        if (!isSymbol(oldName)) {
             return new Err<>(new CompileError("Not a symbol", oldName));
         }
+
+        String newName = oldName.equals("main") ? "__main__" : oldName;
+        Node withName = new Node().withString("name", newName);
+        return getTupleCompileErrorResult(state, input, beforeName)
+                .mapValue((Tuple<CompilerState, Node> other) -> new Tuple<>(other.left, withName.merge(other.right)));
+    }
+
+    private static Result<Tuple<CompilerState, Node>, CompileError> getTupleCompileErrorResult(CompilerState state, String input, String beforeName) {
+        return compileDefinitionTypeProperty(state, beforeName)
+                .mapErr(err -> new CompileError("Could not compile type", input, Lists.of(err)))
+                .mapValue(type1 -> new Node().withString("type", type1.right))
+                .mapValue(type -> new Tuple<>(state, type));
+    }
+
+    private static Result<String, CompileError> generateDefinition(Node node) {
+        return new Ok<>(node.find("type").orElse("") + " " + node.find("name").orElse(""));
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileDefinitionTypeProperty(CompilerState state, String beforeName) {
