@@ -601,7 +601,7 @@ public class Main {
         String stripped = input.strip();
         int classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
-            return createInfixErr(infix, infix);
+            return createInfixErr(input, infix);
         }
 
         String afterKeyword = stripped.substring(classIndex + infix.length());
@@ -652,8 +652,8 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
-    private static Err<Tuple<CompilerState, String>, CompileError> createInfixErr(String afterKeyword, String infix) {
-        return new Err<>(new CompileError("Infix '" + infix + "' not present", afterKeyword));
+    private static Err<Tuple<CompilerState, String>, CompileError> createInfixErr(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
     private static Result<Tuple<CompilerState, String>, CompileError> compileClassSegment(CompilerState state0, String input0) {
