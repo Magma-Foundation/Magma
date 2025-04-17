@@ -10,8 +10,8 @@ public class Lists {
         }
 
         @Override
-        public Stream<T> stream() {
-            return this.list.stream();
+        public Main.Stream<T> stream() {
+            return new Main.HeadedStream<>(new Main.RangeHead(list.size())).map(list::get);
         }
 
         @Override

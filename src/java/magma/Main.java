@@ -8,15 +8,37 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     public interface List<T> {
         Stream<T> stream();
 
         List<T> add(T element);
+    }
+
+    public interface Stream<T> {
+        Stream<T> concat(Stream<T> other);
+
+        <C> C collect(Collector<T, C> collector);
+
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Stream<R> map(Function<T, R> mapper);
+
+        Optional<T> next();
+    }
+
+    public interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private interface Head<T> {
+        Optional<T> next();
     }
 
     private static class DivideState {
@@ -99,6 +121,76 @@ public class Main {
         }
     }
 
+    private static class Joiner implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        }
+    }
+
+    public static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter < this.length) {
+                int value = this.counter;
+                this.counter++;
+                return Optional.of(value);
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+    }
+
+    public record HeadedStream<T>(Head<T> head) implements Stream<T> {
+        @Override
+        public Stream<T> concat(Stream<T> other) {
+            return new HeadedStream<>(() -> this.head.next().or(other::next));
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Optional<R> result = this.next().map(next -> folder.apply(finalCurrent, next));
+                if (result.isPresent()) {
+                    current = result.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <R> Stream<R> map(Function<T, R> mapper) {
+            return new HeadedStream<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public Optional<T> next() {
+            return this.head.next();
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -115,14 +207,16 @@ public class Main {
         Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment);
         CompilerState elements = tuple.left.addStruct(tuple.right);
 
-        String joined = Stream.concat(elements.structs.stream(), elements.methods.stream())
-                .collect(Collectors.joining());
+        Stream<String> left = elements.structs.stream();
+        String joined = left.concat(elements.methods.stream())
+                .collect(new Joiner())
+                .orElse("");
 
         return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
     private static Tuple<CompilerState, String> compileStatements(String input, CompilerState structs, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {
-        return divideStatements(input).reduce(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler), (_, next) -> next);
+        return divideStatements(input).fold(new Tuple<>(structs, ""), (tuple, element) -> foldSegment(tuple, element, compiler));
     }
 
     private static Tuple<CompilerState, String> foldSegment(Tuple<CompilerState, String> tuple, String element, BiFunction<CompilerState, String, Tuple<CompilerState, String>> compiler) {

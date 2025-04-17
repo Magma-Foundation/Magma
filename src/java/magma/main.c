@@ -1,5 +1,11 @@
 struct List<T> {/*  */
 };
+struct Stream<T> {/*  */
+};
+struct Collector<T, C> {/*  */
+};
+struct Head<T> {/*  */
+};
 struct DivideState {
 	/* private final */ /* Deque<Character> */ queue;
 	/* private */ /* List<String> */ segments;
@@ -9,6 +15,13 @@ struct DivideState {
 struct Tuple<A, B>(A left, B right) {/*  */
 };
 struct CompilerState(List<String> structs, List<String> methods) {/*  */
+};
+struct Joiner implements Collector<String, Optional<String>> {/*  */
+};
+struct RangeHead implements Head<Integer> {
+	/* private final */ int length;/* private int counter = 0; *//*  */
+};
+struct HeadedStream<T>(Head<T> head) implements Stream<T> {/*  */
 };
 struct Main {/*  */
 };
@@ -26,6 +39,22 @@ struct Main {/*  */
 /*  *//* Stream<T> */ stream(){
 }
 /* List<T> */ add(){
+}
+/* Stream<T> */ concat(){
+}
+/* <C> */ /* C */ collect(){
+}
+/* <R> */ /* R */ fold(){
+}
+/* <R> */ /* Stream<R> */ map(){
+}
+/* Optional<T> */ next(){
+}
+/* C */ createInitial(){
+}
+/* C */ fold(){
+}
+/* Optional<T> */ next(){
 }
 /* private */ DivideState(){
 }
@@ -56,6 +85,32 @@ struct Main {/*  */
 /* public */ /* CompilerState */ addStruct(){
 }
 /* public */ /* CompilerState */ addMethod(){
+}
+/* @Override
+        public */ /* Optional<String> */ createInitial(){
+}
+/* @Override
+        public */ /* Optional<String> */ fold(){
+}
+/* public */ RangeHead(){
+}
+/* @Override
+        public */ /* Optional<Integer> */ next(){
+}
+/* @Override
+        public */ /* Stream<T> */ concat(){
+}
+/* @Override
+        public <C> */ /* C */ collect(){
+}
+/* @Override
+        public <R> */ /* R */ fold(){
+}
+/* @Override
+        public <R> */ /* Stream<R> */ map(){
+}
+/* @Override
+        public */ /* Optional<T> */ next(){
 }
 /* public static */ /* void */ main(){
 }
