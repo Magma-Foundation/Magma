@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Lists {
     record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
@@ -22,15 +23,6 @@ public class Lists {
             return this;
         }
 
-        private T pop1() {
-            return this.list.removeFirst();
-        }
-
-        @Override
-        public T last() {
-            return this.list.getLast();
-        }
-
         @Override
         public Main.List<T> setLast(T element) {
             this.list.set(this.list.size() - 1, element);
@@ -45,6 +37,16 @@ public class Lists {
         }
 
         @Override
+        public Main.List<T> mapLast(Function<T, T> mapper) {
+            return this.last().map(mapper).map(this::setLast).orElse(this);
+        }
+
+        @Override
+        public int size() {
+            return this.list.size();
+        }
+
+        @Override
         public Main.Option<Main.Tuple<T, Main.List<T>>> pop() {
             if (this.list.isEmpty()) {
                 return new Main.None<>();
@@ -53,6 +55,16 @@ public class Lists {
             T first = this.list.getFirst();
             List<T> slice = this.list.subList(1, this.list.size());
             return new Main.Some<>(new Main.Tuple<>(first, new JavaList<>(slice)));
+        }
+
+        @Override
+        public Main.Option<T> last() {
+            if (this.list.isEmpty()) {
+                return new Main.None<>();
+            }
+            else {
+                return new Main.Some<>(this.list.getLast());
+            }
         }
     }
 

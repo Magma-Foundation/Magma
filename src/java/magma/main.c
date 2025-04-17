@@ -25,12 +25,12 @@ struct CompilerState {
 struct Joiner {
 };
 struct RangeHead {
-	struct int length;
-	struct int counter = 0;
+	struct int length_RangeHead;
+	struct int counter_RangeHead = 0;
 };
 struct SingleHead {
-	struct T element;
-	int retrieved = /* false */;
+	struct T element_SingleHead;
+	int retrieved_SingleHead = /* false */;
 };
 struct HeadedStream {
 };
@@ -55,7 +55,7 @@ struct EmptyHead {
 struct Streams {
 };
 struct Node {
-	struct Map strings;
+	struct Map strings_Node;
 };
 struct Main {
 };
@@ -72,315 +72,319 @@ struct Main {
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-struct Stream stream(){
+struct Stream stream_Main(){
 }
-struct List add(){
+struct List add_(){
 }
-struct Option pop(){
+struct Option pop_(){
 }
-struct T last(){
+struct Option last_(){
 }
-struct List setLast(){
+struct List setLast_(){
 }
-struct List sort(){
+struct List sort_(){
 }
-struct Stream concat(){
+struct List mapLast_(){
 }
-struct C collect(){
+struct Stream concat_Stream(){
 }
-struct R fold(){
+struct C collect_(){
 }
-struct Stream map(){
+struct R fold_(){
 }
-struct Option next(){
+struct Stream map_(){
 }
-struct Stream filter(){
+struct Option next_(){
 }
-int allMatch(){
+struct Stream filter_(){
 }
-struct Option map(){
+int allMatch_(){
 }
-struct Option or(){
+struct Stream flatMap_(){
 }
-struct T orElse(){
+struct Option map_Option(){
 }
-int isPresent(){
+struct Option or_(){
 }
-struct T orElseGet(){
+struct T orElse_(){
 }
-struct Option flatMap(){
+int isPresent_(){
 }
-void ifPresent(){
+struct T orElseGet_(){
 }
-int isEmpty(){
+struct Option flatMap_(){
 }
-struct C createInitial(){
+void ifPresent_(){
 }
-struct C fold(){
+int isEmpty_(){
 }
-struct Option next(){
+struct C createInitial_Collector(){
 }
-struct R match(){
+struct C fold_(){
 }
-struct Result mapErr(){
+struct Option next_Head(){
 }
-struct Result mapValue(){
+struct R match_Result(){
 }
-struct Result flatMapValue(){
+struct Result mapErr_(){
 }
-struct String display(){
+struct Result mapValue_(){
 }
-struct Option map(){
+struct Result flatMapValue_(){
 }
-struct Option or(){
+struct String display_Error(){
 }
-struct T orElse(){
+struct Option map_Some(){
 }
-int isPresent(){
+struct Option or_(){
 }
-struct T orElseGet(){
+struct T orElse_(){
 }
-struct Option flatMap(){
+int isPresent_(){
 }
-void ifPresent(){
+struct T orElseGet_(){
 }
-int isEmpty(){
+struct Option flatMap_(){
 }
-struct Option map(){
+void ifPresent_(){
 }
-struct Option or(){
+int isEmpty_(){
 }
-struct T orElse(){
+struct Option map_None(){
 }
-int isPresent(){
+struct Option or_(){
 }
-struct T orElseGet(){
+struct T orElse_(){
 }
-struct Option flatMap(){
+int isPresent_(){
 }
-void ifPresent(){
+struct T orElseGet_(){
 }
-int isEmpty(){
+struct Option flatMap_(){
+}
+void ifPresent_(){
+}
+int isEmpty_(){
 }
 DivideState new(){
 }
-struct Option popAndAppend(){
+struct Option popAndAppend_(){
 }
-struct Stream stream(){
+struct Stream stream_(){
 }
-struct DivideState advance(){
+struct DivideState advance_(){
 }
-struct DivideState append(){
+struct DivideState append_(){
 }
-int isLevel(){
+int isLevel_(){
 }
-struct DivideState enter(){
+struct DivideState enter_(){
 }
-struct DivideState exit(){
+struct DivideState exit_(){
 }
-int isShallow(){
+int isShallow_(){
 }
-struct Option pop(){
+struct Option pop_(){
 }
-struct record DivideState(){
+struct record DivideState_DivideState(){
 }
 CompilerState new(){
 }
-struct CompilerState addStruct(){
+struct CompilerState addStruct_(){
 }
-struct CompilerState addMethod(){
+struct CompilerState addMethod_(){
 }
-struct CompilerState defineType(){
+struct CompilerState defineType_(){
 }
-struct CompilerState enter(){
+struct CompilerState enter_(){
 }
-struct CompilerState exit(){
+struct CompilerState exit_(){
 }
-struct record CompilerState(){
+struct record CompilerState_CompilerState(){
 }
-struct Option createInitial(){
+struct Option createInitial_Joiner(){
 }
-struct Option fold(){
+struct Option fold_(){
 }
 RangeHead new(){
 }
-struct Option next(){
+struct Option next_(){
 }
 SingleHead new(){
 }
-struct Option next(){
+struct Option next_(){
 }
-struct Stream concat(){
+struct Stream concat_HeadedStream(){
 }
-struct C collect(){
+struct C collect_(){
 }
-struct R fold(){
+struct R fold_(){
 }
-struct Stream map(){
+struct Stream map_(){
 }
-struct Option next(){
+struct Option next_(){
 }
-struct Stream filter(){
+struct Stream filter_(){
 }
-int allMatch(){
+int allMatch_(){
 }
-struct Stream flatMap(){
+struct Stream flatMap_(){
 }
-struct List createInitial(){
+struct List createInitial_ListCollector(){
 }
-struct List fold(){
+struct List fold_(){
 }
-struct Option createInitial(){
+struct Option createInitial_Max(){
 }
-struct Option fold(){
+struct Option fold_(){
 }
 CompileError new(){
 }
-struct String display(){
+struct String display_(){
 }
-struct String format(){
+struct String format_(){
 }
-struct int computeMaxDepth(){
+struct int computeMaxDepth_(){
 }
-struct record CompileError(){
+struct record CompileError_CompileError(){
 }
-struct R match(){
+struct R match_Err(){
 }
-struct Result mapErr(){
+struct Result mapErr_(){
 }
-struct Result mapValue(){
+struct Result mapValue_(){
 }
-struct Result flatMapValue(){
+struct Result flatMapValue_(){
 }
-struct R match(){
+struct R match_Ok(){
 }
-struct Result mapErr(){
+struct Result mapErr_(){
 }
-struct Result mapValue(){
+struct Result mapValue_(){
 }
-struct Result flatMapValue(){
+struct Result flatMapValue_(){
 }
 OrState new(){
 }
-struct OrState withValue(){
+struct OrState withValue_(){
 }
-struct OrState withError(){
+struct OrState withError_(){
 }
-struct Result toResult(){
+struct Result toResult_(){
 }
-struct record OrState(){
+struct record OrState_OrState(){
 }
-struct String display(){
+struct String display_ThrowableError(){
 }
-struct record ThrowableError(){
+struct record ThrowableError_ThrowableError(){
 }
-struct String display(){
+struct String display_ApplicationError(){
 }
-struct record ApplicationError(){
+struct record ApplicationError_ApplicationError(){
 }
-struct Option next(){
+struct Option next_EmptyHead(){
 }
-struct Stream from(){
+struct Stream from_Streams(){
 }
-struct Stream empty(){
+struct Stream empty_(){
 }
-struct Stream from(){
-}
-Node new(){
+struct Stream from_Streams(){
 }
 Node new(){
 }
-struct Node withString(){
+Node new(){
 }
-struct Option find(){
+struct Node withString_(){
 }
-struct Node merge(){
+struct Option find_(){
 }
-void __main__(){
+struct Node merge_(){
 }
-struct Option compileWithInput(){
+void __main___(){
 }
-struct Result readString(){
+struct Option compileWithInput_(){
 }
-struct Option writeString(){
+struct Result readString_(){
 }
-struct Result compile(){
+struct Option writeString_(){
 }
-struct Result compileStatements(){
+struct Result compile_(){
 }
-struct Result foldSegment(){
+struct Result compileStatements_(){
 }
-struct Stream divideStatements(){
+struct Result foldSegment_(){
 }
-struct Option divideDoubleQuotes(){
+struct Stream divideStatements_(){
 }
-struct Option divideSingleQuotes(){
+struct Option divideDoubleQuotes_(){
 }
-struct DivideState divideStatementChar(){
+struct Option divideSingleQuotes_(){
 }
-struct Result compileRootSegment(){
+struct DivideState divideStatementChar_(){
 }
-struct Result compileOr(){
+struct Result compileRootSegment_(){
 }
-struct Result compileImport(){
+struct Result compileOr_(){
 }
-struct Result compilePackage(){
+struct Result compileImport_(){
 }
-struct Result createPrefixError(){
+struct Result compilePackage_(){
 }
-struct String generatePlaceholder(){
+struct Result createPrefixError_(){
 }
-struct Result compileClass(){
+struct String generatePlaceholder_(){
 }
-struct Result compileToStruct(){
+struct Result compileClass_(){
 }
-struct String removeTypeParams(){
+struct Result compileToStruct_(){
 }
-struct Err createSuffixErr(){
+struct String removeTypeParams_(){
 }
-struct Result createInfixErr(){
+struct Err createSuffixErr_(){
 }
-struct Result compileClassSegment(){
+struct Result createInfixErr_(){
 }
-struct Result compileWhitespace(){
+struct Result compileClassSegment_(){
 }
-struct Result compileInitialization(){
+struct Result compileWhitespace_(){
 }
-struct String compileValue(){
+struct Result compileInitialization_(){
 }
-int isNumber(){
+struct String compileValue_(){
 }
-struct Result compileMethod(){
+int isNumber_(){
 }
-struct Result compileConstructionHead(){
+struct Result compileMethod_(){
 }
-int validateModifiers(){
+struct Result compileConstructionHead_(){
 }
-int isModifier(){
+int validateModifiers_(){
 }
-struct Result compileStatement(){
+int isModifier_(){
 }
-struct Result parseDefinition(){
+struct Result compileStatement_(){
 }
-struct Result getTupleCompileErrorResult(){
+struct Result parseDefinition_(){
 }
-struct Result generateDefinition(){
+struct Result getTupleCompileErrorResult_(){
 }
-struct Result compileDefinitionTypeProperty(){
+struct Result generateDefinition_(){
 }
-struct int findTypeSeparator(){
+struct Result compileDefinitionTypeProperty_(){
 }
-int isSymbol(){
+struct int findTypeSeparator_(){
 }
-struct Result compileType(){
+int isSymbol_(){
 }
-struct Result compileSymbolType(){
+struct Result compileType_(){
 }
-struct Result compileGeneric(){
+struct Result compileSymbolType_(){
 }
-struct Result compilePrimitive(){
+struct Result compileGeneric_(){
 }
-struct Option compilePrimitiveText(){
+struct Result compilePrimitive_(){
+}
+struct Option compilePrimitiveText_(){
 }
 int main(){
 	return 0;

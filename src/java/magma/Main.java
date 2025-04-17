@@ -22,11 +22,15 @@ public class Main {
 
         Option<Tuple<T, List<T>>> pop();
 
-        T last();
+        Option<T> last();
 
         List<T> setLast(T element);
 
         List<T> sort(BiFunction<T, T, Integer> comparator);
+
+        List<T> mapLast(Function<T, T> mapper);
+
+        int size();
     }
 
     public interface Stream<T> {
@@ -43,6 +47,8 @@ public class Main {
         Stream<T> filter(Predicate<T> predicate);
 
         boolean allMatch(Predicate<T> predicate);
+
+        <R> Stream<R> flatMap(Function<T, Stream<R>> mapper);
     }
 
     public interface Option<T> {
@@ -230,15 +236,18 @@ public class Main {
         }
 
         public CompilerState defineType(String name) {
-            return new CompilerState(this.structs, this.methods, this.frames.setLast(this.frames.last().add(name)));
+            return new CompilerState(this.structs, this.methods, this.frames.mapLast(last -> last.add(name)));
         }
 
         public CompilerState enter() {
             return new CompilerState(this.structs, this.methods, this.frames.add(Lists.empty()));
         }
 
-        public CompilerState exit() {
-            return new CompilerState(this.structs, this.methods, this.frames.pop().map(Tuple::right).orElse(null));
+        public Option<CompilerState> exit() {
+            if (this.frames.size() == 1) {
+                return new None<>();
+            }
+            return new Some<>(new CompilerState(this.structs, this.methods, this.frames.pop().map(Tuple::right).orElse(null)));
         }
     }
 
@@ -340,7 +349,8 @@ public class Main {
             return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
         }
 
-        private <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
+        @Override
+        public <R> Stream<R> flatMap(Function<T, Stream<R>> mapper) {
             return this.map(mapper).fold(Streams.empty(), Stream::concat);
         }
     }
@@ -739,13 +749,16 @@ public class Main {
 
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         CompilerState defined = state.enter().defineType(withoutTypeParams);
-        return compileStatements(inputContent, defined, Main::compileClassSegment).mapValue(outputTuple -> {
-            CompilerState outputStructs = outputTuple.left.exit();
-            String outputContent = outputTuple.right;
+        return compileStatements(inputContent, defined, Main::compileClassSegment).flatMapValue(outputTuple -> {
+            return outputTuple.left.exit().<Result<Tuple<CompilerState, String>, CompileError>>map(outputState -> {
+                String outputContent = outputTuple.right;
 
-            String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
-            CompilerState withGenerated = outputStructs.addStruct(generated);
-            return new Tuple<CompilerState, String>(withGenerated, "");
+                String generated = "struct %s {%s\n};\n".formatted(withoutTypeParams, outputContent);
+                CompilerState withGenerated = outputState.addStruct(generated);
+                return new Ok<>(new Tuple<CompilerState, String>(withGenerated, ""));
+            }).orElseGet(() -> {
+                return new Err<>(new CompileError("Cannot exit a state with only one frame", input));
+            });
         });
     }
 
@@ -900,7 +913,13 @@ public class Main {
         }
 
         String newName = oldName.equals("main") ? "__main__" : oldName;
-        Node withName = new Node().withString("name", newName);
+        String last = state.frames
+                .stream()
+                .flatMap(List::stream)
+                .next()
+                .orElse("");
+
+        Node withName = new Node().withString("name", newName + "_" + last);
         return getTupleCompileErrorResult(state, input, beforeName)
                 .mapValue((Tuple<CompilerState, Node> other) -> new Tuple<>(other.left, withName.merge(other.right)));
     }
@@ -908,8 +927,7 @@ public class Main {
     private static Result<Tuple<CompilerState, Node>, CompileError> getTupleCompileErrorResult(CompilerState state, String input, String beforeName) {
         return compileDefinitionTypeProperty(state, beforeName)
                 .mapErr(err -> new CompileError("Could not compile type", input, Lists.of(err)))
-                .mapValue(type1 -> new Node().withString("type", type1.right))
-                .mapValue(type -> new Tuple<>(state, type));
+                .mapValue(type1 -> new Tuple<>(type1.left, new Node().withString("type", type1.right)));
     }
 
     private static Result<String, CompileError> generateDefinition(Node node) {
