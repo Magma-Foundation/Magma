@@ -229,7 +229,24 @@ public class Main {
         }
 
         String name = withoutEnd.substring(nameSeparator + " ".length()).strip();
-        return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name + ";"));
+        if (isSymbol(name)) {
+            return Optional.of(new Tuple<>(state, "\n\t" + outputBeforeString + " " + name + ";"));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private static String compileType(String input) {
