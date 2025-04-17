@@ -189,7 +189,7 @@ void ifPresent_Rule(){
 }
 int isEmpty_Rule(){
 }
-struct public DivideState_Some(){
+struct DivideState new_Some(){
 }
 struct Option popAndAppend_Some(){
 }
@@ -209,9 +209,9 @@ int isShallow_Some(){
 }
 struct Option pop_Some(){
 }
-struct private CompilerState_DivideState(){
+struct CompilerState new_DivideState(){
 }
-struct public CompilerState_DivideState(){
+struct CompilerState new_DivideState(){
 }
 struct CompilerState addStruct_DivideState(){
 }
@@ -227,11 +227,11 @@ struct Option createInitial_Tuple(){
 }
 struct Option fold_Tuple(){
 }
-struct public RangeHead_CompilerState(){
+struct RangeHead new_CompilerState(){
 }
 struct Option next_CompilerState(){
 }
-struct public SingleHead_Joiner(){
+struct SingleHead new_Joiner(){
 }
 struct Option next_Joiner(){
 }
@@ -259,7 +259,7 @@ struct Option createInitial_HeadedStream(){
 }
 struct Option fold_HeadedStream(){
 }
-struct private CompileError_ListCollector(){
+struct CompileError new_ListCollector(){
 }
 char* display_ListCollector(){
 }
@@ -283,7 +283,7 @@ struct Result mapValue_CompileError(){
 }
 struct Result flatMapValue_CompileError(){
 }
-struct public OrState_Err(){
+struct OrState new_Err(){
 }
 struct OrState withValue_Err(){
 }
@@ -311,9 +311,9 @@ struct Option find_EmptyHead(){
 }
 struct Map empty_Streams(){
 }
-struct private Node_Maps(){
+struct Node new_Maps(){
 }
-struct private Node_Maps(){
+struct Node new_Maps(){
 }
 struct Node withString_Maps(){
 }

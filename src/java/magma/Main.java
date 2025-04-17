@@ -1052,7 +1052,9 @@ public class Main {
         if (input.equals("boolean")
                 || input.equals("void")
                 || input.equals("int")
-                || input.equals("record")) {
+                || input.equals("record")
+                || input.equals("public")
+                || input.equals("private")) {
             return false;
         }
 
