@@ -64,13 +64,17 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompilerState(List<String> structs) {
+    private record CompilerState(List<String> structs, List<String> methods) {
         public CompilerState() {
-            this(Lists.empty());
+            this(Lists.empty(), Lists.empty());
         }
 
-        public CompilerState add(String element) {
-            return new CompilerState(this.structs.add(element));
+        public CompilerState addStruct(String element) {
+            return new CompilerState(this.structs.add(element), this.methods);
+        }
+
+        public CompilerState addMethod(String element) {
+            return new CompilerState(this.structs, this.methods.add(element));
         }
     }
 
@@ -88,9 +92,9 @@ public class Main {
 
     private static String compile(String input) {
         Tuple<CompilerState, String> tuple = compileStatements(input, new CompilerState(), Main::compileRootSegment);
-        CompilerState elements = tuple.left.add(tuple.right);
+        CompilerState elements = tuple.left.addStruct(tuple.right);
 
-        String joined = elements.structs.stream()
+        String joined = Stream.concat(elements.structs.stream(), elements.methods.stream())
                 .collect(Collectors.joining());
 
         return joined + "int main(){\n\treturn 0;\n}\n";
@@ -179,15 +183,25 @@ public class Main {
         String outputContent = outputTuple.right;
 
         String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
-        CompilerState withGenerated = outputStructs.add(generated);
+        CompilerState withGenerated = outputStructs.addStruct(generated);
         return Optional.of(new Tuple<>(withGenerated, ""));
     }
 
     private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
         String stripped = input.strip();
         return compileClass(state, stripped)
+                .or(() -> compileMethod(state, stripped))
                 .or(() -> compileDefinition(state, stripped))
                 .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
+    }
+
+    private static Optional<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {
+        if (input.contains("(")) {
+            return Optional.of(new Tuple<>(state.addMethod("void temp(){\n}\n"), ""));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {
