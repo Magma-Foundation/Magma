@@ -1,4 +1,5 @@
 struct DivideState {
+	/* private final */ /* Deque<Character> */ queue;
 	/* private */ /* List<String> */ segments;
 	/* private */ int depth;
 	/* private */ char* buffer;/*  */
@@ -7,15 +8,7 @@ struct Tuple<A, B>(A left, B right) {/*  */
 };
 struct CompilerState(List<String> structs, List<String> methods) {/*  */
 };
-struct Main {/* ' && appended.isShallow()) {
-            return appended.advance().exit();
-        } *//* if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '} *//* ') {
-            return appended.exit();
-        } */
-	/* return */ appended;/*  */
+struct Main {/*  */
 };
 // #include <temp.h>
 // #include <temp.h>
@@ -25,126 +18,16 @@ struct Main {/* ' && appended.isShallow()) {
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/* private static Tuple<CompilerState, String> compileRootSegment(CompilerState state, String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("package ")) {
-            return new Tuple<>(state, "");
-        }
-
-        if (stripped.startsWith("import ")) {
-            return new Tuple<>(state, "// #include <temp.h>\n");
-        }
-
-        return compileClass(state, stripped).orElseGet(() -> generatePlaceholderToTuple(state, stripped));
-    } *//* private static Tuple<CompilerState, String> generatePlaceholderToTuple(CompilerState state, String stripped) {
-        return new Tuple<>(state, generatePlaceholder(stripped));
-    } *//* private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */";
-    } *//* private static Optional<Tuple<CompilerState, String>> compileClass(CompilerState state, String stripped) {
-        return compileToStruct(state, stripped, "class ");
-    } *//* private static Optional<Tuple<CompilerState, String>> compileToStruct(CompilerState state, String input, String infix) {
-        String stripped = input.strip();
-        int classIndex = stripped.indexOf(infix);
-        if (classIndex < 0) {
-            return Optional.empty();
-        }
-
-        String afterKeyword = stripped.substring(classIndex + infix.length());
-        int contentStart = afterKeyword.indexOf("{");
-        if (contentStart < 0) {
-            return Optional.empty();
-        }
-
-        String name = afterKeyword.substring(0, contentStart).strip();
-        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return Optional.empty();
-        }
-
-        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<CompilerState, String> outputTuple = compileStatements(inputContent, state, Main::compileClassSegment);
-        CompilerState outputStructs = outputTuple.left;
-        String outputContent = outputTuple.right;
-
-        String generated = "struct %s {%s\n};\n".formatted(name, outputContent);
-        CompilerState withGenerated = outputStructs.addStruct(generated);
-        return Optional.of(new Tuple<>(withGenerated, ""));
-    } *//* private static Tuple<CompilerState, String> compileClassSegment(CompilerState state, String input) {
-        String stripped = input.strip();
-        return compileClass(state, stripped)
-                .or(() -> compileToStruct(state, stripped, "record "))
-                .or(() -> compileMethod(state, stripped))
-                .or(() -> compileDefinitionStatement(state, stripped))
-                .orElseGet(() -> generatePlaceholderToTuple(state, stripped));
-    } *//* private static Optional<Tuple<CompilerState, String>> compileMethod(CompilerState state, String input) {
-        int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String inputDefinition = input.substring(0, paramStart).strip();
-            return compileDefinition(state, inputDefinition).flatMap(definitionTuple -> {
-                return Optional.of(new Tuple<>(definitionTuple.left.addMethod(definitionTuple.right + "(){\n}\n"), ""));
-            });
-        }
-        else {
-            return Optional.empty();
-        }
-    } *//* private static Optional<Tuple<CompilerState, String>> compileDefinitionStatement(CompilerState state, String input) {
-        if (!input.endsWith(";")) {
-            return Optional.empty();
-        }
-
-        String withoutEnd = input.substring(0, input.length() - ";".length());
-        return compileDefinition(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
-    } *//* private static Optional<Tuple<CompilerState, String>> compileDefinition(CompilerState state, String input) {
-        String stripped = input.strip();
-        int nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator < 0) {
-            return Optional.empty();
-        }
-
-        String beforeName = stripped.substring(0, nameSeparator).strip();
-
-        int typeSeparator = beforeName.lastIndexOf(" ");
-        String outputBeforeString;
-        if (typeSeparator >= 0) {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            outputBeforeString = generatePlaceholder(beforeType) + " " + compileType(type);
-        }
-        else {
-            outputBeforeString = compileType(beforeName);
-        }
-
-        String name = stripped.substring(nameSeparator + " ".length()).strip();
-        if (isSymbol(name)) {
-            return Optional.of(new Tuple<>(state, outputBeforeString + " " + name));
-        }
-        else {
-            return Optional.empty();
-        }
-    } *//* private static boolean isSymbol(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        }
-
-        return true;
-    } *//* private static String compileType(String input) {
-        String stripped = input.strip();
-        if (stripped.equals("int")) {
-            return "int";
-        }
-        if (stripped.equals("String")) {
-            return "char*";
-        }
-        return generatePlaceholder(stripped);
-    } *//* } *//* public interface List<T> { */ /* Stream<T> */ stream(){
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+/*  *//* public interface List<T> { */ /* Stream<T> */ stream(){
 }
 /* private */ DivideState(){
 }
 /* public */ DivideState(){
+}
+/* private */ /* DivideState */ popAndAppend(){
 }
 /* private */ /* Stream<String> */ stream(){
 }
@@ -159,6 +42,10 @@ struct Main {/* ' && appended.isShallow()) {
 /* public */ /* DivideState */ exit(){
 }
 /* public */ /* boolean */ isShallow(){
+}
+/* public */ /* boolean */ hasNext(){
+}
+/* public */ /* char */ pop(){
 }
 /* public */ CompilerState(){
 }
@@ -176,7 +63,31 @@ struct Main {/* ' && appended.isShallow()) {
 }
 /* private static */ /* Stream<String> */ divideStatements(){
 }
+/* private static */ /* Optional<DivideState> */ divideSingleQuotes(){
+}
 /* private static */ /* DivideState */ divideStatementChar(){
+}
+/* private static Tuple<CompilerState, */ /* String> */ compileRootSegment(){
+}
+/* private static Tuple<CompilerState, */ /* String> */ generatePlaceholderToTuple(){
+}
+/* private static */ char* generatePlaceholder(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileClass(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileToStruct(){
+}
+/* private static Tuple<CompilerState, */ /* String> */ compileClassSegment(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileMethod(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinitionStatement(){
+}
+/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinition(){
+}
+/* private static */ /* boolean */ isSymbol(){
+}
+/* private static */ char* compileType(){
 }
 int main(){
 	return 0;

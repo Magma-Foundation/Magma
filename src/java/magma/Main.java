@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
@@ -17,18 +20,24 @@ public class Main {
     }
 
     private static class DivideState {
+        private final Deque<Character> queue;
         private List<String> segments;
         private int depth;
         private String buffer;
 
-        private DivideState(List<String> segments, String buffer, int depth) {
+        private DivideState(List<String> segments, String buffer, int depth, Deque<Character> queue) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+            this.queue = queue;
         }
 
-        public DivideState() {
-            this(Lists.empty(), "", 0);
+        public DivideState(Deque<Character> queue) {
+            this(Lists.empty(), "", 0, queue);
+        }
+
+        private DivideState popAndAppend() {
+            return this.append(this.pop());
         }
 
         private Stream<String> stream() {
@@ -62,6 +71,14 @@ public class Main {
 
         public boolean isShallow() {
             return this.depth == 1;
+        }
+
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        public char pop() {
+            return this.queue.pop();
         }
     }
 
@@ -120,12 +137,31 @@ public class Main {
     }
 
     private static Stream<String> divideStatements(String input) {
-        DivideState current = new DivideState();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = divideStatementChar(current, c);
+        Deque<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        DivideState current = new DivideState(queue);
+        while (current.hasNext()) {
+            char c = current.pop();
+            DivideState finalCurrent = current;
+            current = divideSingleQuotes(current, c)
+                    .orElseGet(() -> divideStatementChar(finalCurrent, c));
         }
         return current.advance().stream();
+    }
+
+    private static Optional<DivideState> divideSingleQuotes(DivideState current, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+        DivideState appended = current.append(c);
+        char maybeSlash = appended.pop();
+
+        DivideState withMaybeSlash = appended.append(maybeSlash);
+        DivideState divideState = maybeSlash == '\\' ? withMaybeSlash.popAndAppend() : withMaybeSlash;
+
+        return Optional.of(divideState.popAndAppend());
     }
 
     private static DivideState divideStatementChar(DivideState divideState, char c) {
