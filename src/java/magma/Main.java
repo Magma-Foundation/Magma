@@ -442,7 +442,22 @@ public class Main {
 
         String beforeName = stripped.substring(0, nameSeparator).strip();
 
-        int typeSeparator = beforeName.lastIndexOf(" ");
+        int typeSeparator = -1;
+        int depth = 0;
+        for (int i = beforeName.length() - 1; i >= 0; i--) {
+            char c = beforeName.charAt(i);
+            if (c == ' ' && depth == 0) {
+                typeSeparator = i;
+                break;
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
+        }
+
         Optional<String> outputBeforeString = compileType(typeSeparator, beforeName);
 
         String name = stripped.substring(nameSeparator + " ".length()).strip();

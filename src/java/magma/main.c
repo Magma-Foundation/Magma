@@ -128,9 +128,9 @@ struct Optional next(){
 }
 /* private static */ char* compile(){
 }
-/* private static Tuple<CompilerState, */ /* String> */ compileStatements(){
+/* private static */ struct Tuple compileStatements(){
 }
-/* private static Tuple<CompilerState, */ /* String> */ foldSegment(){
+/* private static */ struct Tuple foldSegment(){
 }
 /* private static */ struct Stream divideStatements(){
 }
@@ -138,31 +138,31 @@ struct Optional next(){
 }
 /* private static */ struct DivideState divideStatementChar(){
 }
-/* private static Tuple<CompilerState, */ /* String> */ compileRootSegment(){
+/* private static */ struct Tuple compileRootSegment(){
 }
-/* private static Tuple<CompilerState, */ /* String> */ generatePlaceholderToTuple(){
+/* private static */ struct Tuple generatePlaceholderToTuple(){
 }
 /* private static */ char* generatePlaceholder(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileClass(){
+/* private static */ struct Optional compileClass(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileToStruct(){
+/* private static */ struct Optional compileToStruct(){
 }
-/* private static Tuple<CompilerState, */ /* String> */ compileClassSegment(){
+/* private static */ struct Tuple compileClassSegment(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileWhitespace(){
+/* private static */ struct Optional compileWhitespace(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileInitialization(){
+/* private static */ struct Optional compileInitialization(){
 }
 /* private static */ char* compileValue(){
 }
 /* private static */ int isNumber(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileMethod(){
+/* private static */ struct Optional compileMethod(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileStatement(){
+/* private static */ struct Optional compileStatement(){
 }
-/* private static Optional<Tuple<CompilerState, */ /* String>> */ compileDefinition(){
+/* private static */ struct Optional compileDefinition(){
 }
 /* private static */ struct Optional compileType(){
 }
