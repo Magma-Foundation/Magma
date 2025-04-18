@@ -57,6 +57,10 @@ public class Main {
         boolean test(String input);
     }
 
+    interface Selector {
+        Tuple<String, String> select(List<String> segments);
+    }
+
     record CompileError(String message, String context, List<CompileError> errors) implements Error {
         CompileError(String message, String context) {
             this(message, context, new ArrayList<>());
@@ -584,8 +588,16 @@ public class Main {
     private static class InvocationStartLocator implements Locator {
         @Override
         public Optional<Integer> locate(String input, String infix) {
+
+
             int depth = 0;
-            for (int i = 0; i < input.length(); i++) {
+
+            LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length())
+                    .map(index -> input.length() - index - 1)
+                    .mapToObj(index -> new Tuple<>(index, input.charAt(index)))
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            for (int i = input.length() - 1; i >= 0; i--) {
                 char c = input.charAt(i);
                 if (c == '(' && depth == 0) {
                     return Optional.of(i);
@@ -625,15 +637,18 @@ public class Main {
         }
     }
 
-    private record FoldingSplitter(Folder folder) implements Splitter {
+    private record FoldingSplitter(Folder folder, Selector selector) implements Splitter {
+        private FoldingSplitter(Folder folder) {
+            this(folder, new FirstSelector());
+        }
+
         @Override
         public Result<Tuple<String, String>, CompileError> split(String input) {
             List<String> divided = new FoldingDivider(this.folder).divide(input);
             if (divided.size() < 2) {
                 return new Err<>(new CompileError("No segments found", input));
             }
-            String joined = String.join("", divided.subList(1, divided.size()));
-            return new Ok<>(new Tuple<>(divided.getFirst(), joined));
+            return new Ok<>(this.selector.select(divided));
         }
     }
 
@@ -701,6 +716,40 @@ public class Main {
                 return false;
             }
             return true;
+        }
+    }
+
+    private static class InvocationStartSplitter implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            State appended = state.append(c);
+            if (c == '(' && appended.isLevel()) {
+                return appended.advance().enter();
+            }
+
+            if (c == '(') {
+                return appended.enter();
+            }
+            if (c == ')') {
+                return appended.exit();
+            }
+            return appended;
+        }
+    }
+
+    public static class FirstSelector implements Selector {
+        @Override
+        public Tuple<String, String> select(List<String> segments) {
+            String joined = String.join("", segments.subList(1, segments.size()));
+            return new Tuple<String, String>(segments.getFirst(), joined);
+        }
+    }
+
+    public static class LastSelector implements Selector {
+        @Override
+        public Tuple<String, String> select(List<String> segments) {
+            String joined = String.join("", segments.subList(0, segments.size() - 1));
+            return new Tuple<String, String>(joined, segments.getLast());
         }
     }
 
@@ -831,8 +880,8 @@ public class Main {
     private static OrRule createStatementValueRule() {
         return new OrRule(List.of(
                 createReturnRule(),
-                createInvocationRule(createValueRule()),
-                createInitializationRule()
+                new TypeRule("invocation", createInvocationRule(createValueRule())),
+                new TypeRule("initialization", createInitializationRule())
         ));
     }
 
@@ -851,19 +900,19 @@ public class Main {
 
     private static StripRule createInvokableRule(Rule caller, Rule value) {
         NodeListRule arguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), value);
-        final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
-        return new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"));
+        FoldingSplitter splitter = new FoldingSplitter(new InvocationStartSplitter(), new LastSelector());
+        return new StripRule(new SuffixRule(new InfixRule(new SuffixRule(caller, "("), splitter, arguments), ")"));
     }
 
     private static Rule createValueRule() {
         LazyRule valueRule = new LazyRule();
         valueRule.set(new OrRule(List.of(
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
-                createInvocationRule(valueRule),
-                createAccessRule(valueRule, "."),
-                createAccessRule(valueRule, "::"),
-                new StripRule(new FilterRule(new StringRule("value"), new NumberRule())),
-                createSymbolRule("value")
+                new TypeRule("invocation", createInvocationRule(valueRule)),
+                new TypeRule("data-access", createAccessRule(valueRule, ".")),
+                new TypeRule("method-access", createAccessRule(valueRule, "::")),
+                new TypeRule("number", new StripRule(new FilterRule(new StringRule("value"), new NumberRule()))),
+                new TypeRule("symbol-value", createSymbolRule("value"))
         )));
         return valueRule;
     }
