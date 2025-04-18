@@ -792,19 +792,19 @@ public class Main {
 
         NodeListRule typeParameters = new NodeListRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
         Rule name1 = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(name, "<", typeParameters), ">")),
-                name
+                new ContextRule("With type parameters", new StripRule(new SuffixRule(new InfixRule(name, "<", typeParameters), ">"))),
+                new ContextRule("Without type parameters", name)
         ));
 
         Rule maybeWithParams = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(name1, "(", params), ")")),
-                name1
+                new ContextRule("With params", new StripRule(new SuffixRule(new InfixRule(name1, "(", params), ")"))),
+                new ContextRule("Without params", name1)
         ));
 
         final LastLocator lastLocator = new LastLocator();
         Rule beforeContent = new OrRule(List.of(
-                new InfixRule(maybeWithParams, new LocatingSplitter(" implements ", lastLocator), createSymbolRule("super-type")),
-                maybeWithParams
+                new ContextRule("With implements", new InfixRule(maybeWithParams, new LocatingSplitter(" implements ", lastLocator), new NodeRule("super-type", createTypeRule()))),
+                new ContextRule("Without implements", maybeWithParams)
         ));
 
         return new InfixRule(createModifiersRule(), infix, new InfixRule(beforeContent, "{", new StripRule(new SuffixRule(childRule, "}"))));
@@ -861,32 +861,32 @@ public class Main {
         LazyRule statementOrBlock = new LazyRule();
         statementOrBlock.set(new OrRule(List.of(
                 createWhitespaceRule(),
-                createIfRule(statementOrBlock),
-                createStatementRule(createStatementValueRule())
+                createIfRule(statementOrBlock, statementOrBlock),
+                createStatementRule(createStatementValueRule(statementOrBlock))
         )));
         return statementOrBlock;
     }
 
-    private static TypeRule createIfRule(LazyRule statementOrBlock) {
-        NodeRule condition = new NodeRule("condition", createValueRule());
+    private static TypeRule createIfRule(LazyRule statementOrBlock, Rule statementOrBlockRule) {
+        NodeRule condition = new NodeRule("condition", createValueRule(statementOrBlockRule));
         Rule beforeContent = new StripRule(new PrefixRule("if (", new SuffixRule(condition, ") {")));
         return new TypeRule("if", createContentRule(beforeContent, statementOrBlock));
     }
 
-    private static OrRule createStatementValueRule() {
+    private static OrRule createStatementValueRule(Rule statementOrBlockRule) {
         return new OrRule(List.of(
-                createReturnRule(),
-                new TypeRule("invocation", createInvocationRule(createValueRule())),
-                new TypeRule("initialization", createInitializationRule())
+                createReturnRule(statementOrBlockRule),
+                new TypeRule("invocation", createInvocationRule(createValueRule(statementOrBlockRule))),
+                new TypeRule("initialization", createInitializationRule(statementOrBlockRule))
         ));
     }
 
-    private static InfixRule createInitializationRule() {
-        return new InfixRule(new NodeRule("definition", createDefinitionRule()), new LocatingSplitter("=", new FirstLocator()), new NodeRule("value", createValueRule()));
+    private static InfixRule createInitializationRule(Rule statementOrBlockRule) {
+        return new InfixRule(new NodeRule("definition", createDefinitionRule()), new LocatingSplitter("=", new FirstLocator()), new NodeRule("value", createValueRule(statementOrBlockRule)));
     }
 
-    private static TypeRule createReturnRule() {
-        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", createValueRule()))));
+    private static TypeRule createReturnRule(Rule statementOrBlockRule) {
+        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", createValueRule(statementOrBlockRule)))));
     }
 
     private static StripRule createInvocationRule(Rule value) {
@@ -900,13 +900,13 @@ public class Main {
         return new StripRule(new SuffixRule(new InfixRule(new SuffixRule(caller, "("), splitter, arguments), ")"));
     }
 
-    private static Rule createValueRule() {
+    private static Rule createValueRule(Rule statementOrBlockRule) {
         LazyRule valueRule = new LazyRule();
         valueRule.set(new OrRule(List.of(
                 new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))),
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 new TypeRule("invocation", createInvocationRule(valueRule)),
-                createLambdaRule(valueRule),
+                createLambdaRule(valueRule, statementOrBlockRule),
                 createOperatorRule(valueRule),
                 new TypeRule("data-access", createAccessRule(valueRule, ".")),
                 new TypeRule("method-access", createAccessRule(valueRule, "::")),
@@ -922,8 +922,14 @@ public class Main {
         return new TypeRule("add", new InfixRule(left, new FoldingSplitter(new OperatorFolder('+')), right));
     }
 
-    private static TypeRule createLambdaRule(LazyRule valueRule) {
-        return new TypeRule("lambda", new InfixRule(new StringRule("before-lambda"), new LocatingSplitter("->"), new NodeRule("child", valueRule)));
+    private static TypeRule createLambdaRule(LazyRule valueRule, Rule statementOrBlockRule) {
+        StringRule beforeLambda = new StringRule("before-lambda");
+        NodeRule child = new NodeRule("child", valueRule);
+        Rule childRule = new InfixRule(beforeLambda, new LocatingSplitter("->"), child);
+        return new TypeRule("lambda", new OrRule(List.of(
+                createContentRule(new StripRule(new SuffixRule(beforeLambda, "->")), statementOrBlockRule),
+                childRule
+        )));
     }
 
     private static InfixRule createAccessRule(LazyRule valueRule, String infix) {
