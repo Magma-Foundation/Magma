@@ -134,9 +134,7 @@
 			"value" : "Stream"
 		}]
 	}, {
-		"value" : "
-
-public class Main {
+		"value" : "public class Main {
     private interface Rule {
         Optional<Node> parse(String input);
     }
@@ -199,6 +197,10 @@ public class Main {
             this.strings.putAll(other.strings);
             this.nodeLists.putAll(other.nodeLists);
             return this;
+        }
+
+        public String display() {
+            return this.format(0);
         }
     }
 
@@ -267,12 +269,24 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
+    private record OrRule(List<Rule> rules) implements Rule {
+        @Override
+        public Optional<Node> parse(String input) {
+            for (Rule rule : this.rules()) {
+                Optional<Node> parsed = rule.parse(input);
+                if (parsed.isPresent()) {
+                    return parsed;
+                }
+            }
 
-            ArrayList<String> segments = new ArrayList<>();
+            return Optional.empty();
+        }
+    }
+
+    public static class StatementDivider implements Divider {
+        @Override
+        public List<String> divide(String input) {
+            ArrayList<String> segments = new ArrayList<String>();
             StringBuilder buffer = new StringBuilder();
             int depth = 0;
             for (int i = 0; i < input.length(); i++) {
@@ -292,27 +306,41 @@ public class Main {
                 }
             }
             segments.add(buffer.toString());
+            return segments;
+        }
+    }
 
-            List<Node> children = segments.stream()
-                    .map(Main::compileRootSegment)
-                    .toList();
+    public static void main(String[] args) {
+        try {
+            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+            String input = Files.readString(source);
+            String output = compile(input);
 
-            String formatted = new Node().withNodeList("children", children).format(0);
             Path target = source.resolveSibling("Main.java.ast.json");
-            Files.writeString(target, formatted);
+            Files.writeString(target, output);
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    private static Node compileRootSegment(String value) {
-        return createNamespacedRule().parse(value).orElseGet(() -> new Node().withString("value", value));
+    private static String compile(String input) {
+        return new DivideRule("children", new StatementDivider(), getValue())
+                .parse(input)
+                .map(Node::display)
+                .orElse("");
     }
 
-    private static StripRule createNamespacedRule() {
-        StringRule type = new StringRule("type");
-        StringRule segment = new StringRule("value");
+    private static OrRule getValue() {
+        return new OrRule(List.of(
+                createNamespacedRule(),
+                new StripRule(new StringRule("value"))
+        ));
+    }
+
+    private static Rule createNamespacedRule() {
+        Rule type = new StringRule("type");
+        Rule segment = new StringRule("value");
         DivideRule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
         return new StripRule(new SuffixRule(new InfixRule(type, " ", segments), ";"));
     }
