@@ -36,14 +36,29 @@ public class Main {
 
 
             String collect = segments.stream()
-                    .map(value -> "{\n\t\t\"value:\" : \"" + value.strip() + "\"\n\t},  ")
+                    .map(value -> {
+                        String stripped = value.strip();
+                        String value1 = createJSONProperty(2, "value", "\"" + stripped + "\"");
+                        return createJSONObject(1, value1) + ", ";
+                    })
                     .collect(Collectors.joining());
 
             Path target = source.resolveSibling("Main.java.ast.json");
-            Files.writeString(target, "{\n\t\"children\" : [" + collect + "]\n}");
+            String children = createJSONProperty(1, "children", "[" + collect + "]");
+            Files.writeString(target, createJSONObject(0, children));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static String createJSONObject(int depth, String content) {
+        String indent = "\t".repeat(depth);
+        return "{" + content + "\n" + indent + "}";
+    }
+
+    private static String createJSONProperty(int depth, String name, String value) {
+        String indent = "\t".repeat(depth);
+        return "\n" + indent + "\"" + name + "\" : " + value;
     }
 }

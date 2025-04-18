@@ -1,20 +1,20 @@
 {
 	"children" : [{
-		"value:" : "package magma;"
+		"value" : "package magma;"
 	},  {
-		"value:" : "import java.io.IOException;"
+		"value" : "import java.io.IOException;"
 	},  {
-		"value:" : "import java.nio.file.Files;"
+		"value" : "import java.nio.file.Files;"
 	},  {
-		"value:" : "import java.nio.file.Path;"
+		"value" : "import java.nio.file.Path;"
 	},  {
-		"value:" : "import java.nio.file.Paths;"
+		"value" : "import java.nio.file.Paths;"
 	},  {
-		"value:" : "import java.util.ArrayList;"
+		"value" : "import java.util.ArrayList;"
 	},  {
-		"value:" : "import java.util.stream.Collectors;"
+		"value" : "import java.util.stream.Collectors;"
 	},  {
-		"value:" : "public class Main {
+		"value" : "public class Main {
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -43,15 +43,21 @@
 
 
             String collect = segments.stream()
-                    .map(value -> "{\n\t\t\"value:\" : \"" + value.strip() + "\"\n\t},  ")
+                    .map(value -> "{" + createJSONProperty(2, "value", "\"" + value.strip() + "\"") + "\n\t},  ")
                     .collect(Collectors.joining());
 
             Path target = source.resolveSibling("Main.java.ast.json");
-            Files.writeString(target, "{\n\t\"children\" : [" + collect + "]\n}");
+            String children = createJSONProperty(1, "children", "[" + collect + "]");
+            Files.writeString(target, "{" + children + "\n}");
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static String createJSONProperty(int depth, String name, String value) {
+        String indent = "\t".repeat(depth);
+        return "\n" + indent + "\"" + name + "\" : " + value;
     }
 }"
 	},  ]
