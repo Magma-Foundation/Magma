@@ -585,34 +585,6 @@ public class Main {
         }
     }
 
-    private static class InvocationStartLocator implements Locator {
-        @Override
-        public Optional<Integer> locate(String input, String infix) {
-
-
-            int depth = 0;
-
-            LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length())
-                    .map(index -> input.length() - index - 1)
-                    .mapToObj(index -> new Tuple<>(index, input.charAt(index)))
-                    .collect(Collectors.toCollection(LinkedList::new));
-
-            for (int i = input.length() - 1; i >= 0; i--) {
-                char c = input.charAt(i);
-                if (c == '(' && depth == 0) {
-                    return Optional.of(i);
-                }
-                if (c == ')') {
-                    depth++;
-                }
-                if (c == '(') {
-                    depth--;
-                }
-            }
-            return Optional.empty();
-        }
-    }
-
     public record LocatingSplitter(String infix, Locator locator) implements Splitter {
         public LocatingSplitter(String infix) {
             this(infix, new FirstLocator());
@@ -633,11 +605,11 @@ public class Main {
     private static class ContentStartFolder implements Folder {
         @Override
         public State fold(State state, char c) {
+            State appended = state.append(c);
             if (c == '{') {
-                return state.advance();
+                return appended.advance();
             }
-
-            return state.append(c);
+            return appended;
         }
     }
 
@@ -757,6 +729,25 @@ public class Main {
         }
     }
 
+    private record OperatorFolder(char operator) implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            if (c == this.operator) {
+                return state.advance();
+            }
+
+            if (c == '(') {
+                return state.enter();
+            }
+
+            if (c == ')') {
+                return state.exit();
+            }
+
+            return state;
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         JavaFiles.readString(source)
@@ -862,7 +853,8 @@ public class Main {
     private static Rule createContentRule(Rule withParams, Rule childRule) {
         Rule child = new ContextRule("Invalid child", childRule);
         NodeListRule children = new NodeListRule("children", new FoldingDivider(new StatementFolder()), child);
-        return new InfixRule(withParams, new FoldingSplitter(new ContentStartFolder()), new StripRule(new SuffixRule(children, "}")));
+        FoldingSplitter splitter = new FoldingSplitter(new ContentStartFolder());
+        return new InfixRule(new SuffixRule(withParams, "{"), splitter, new StripRule(new SuffixRule(children, "}")));
     }
 
     private static Rule createStatementOrBlockRule() {
@@ -911,6 +903,7 @@ public class Main {
     private static Rule createValueRule() {
         LazyRule valueRule = new LazyRule();
         valueRule.set(new OrRule(List.of(
+                new StripRule(new PrefixRule("\"", new SuffixRule(new StringRule("value"), "\""))),
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 new TypeRule("invocation", createInvocationRule(valueRule)),
                 createLambdaRule(valueRule),
@@ -924,7 +917,9 @@ public class Main {
     }
 
     private static TypeRule createOperatorRule(LazyRule valueRule) {
-        return new TypeRule("add", new InfixRule(new NodeRule("left", valueRule), "+", new NodeRule("right", valueRule)));
+        NodeRule left = new NodeRule("left", valueRule);
+        NodeRule right = new NodeRule("right", valueRule);
+        return new TypeRule("add", new InfixRule(left, new FoldingSplitter(new OperatorFolder('+')), right));
     }
 
     private static TypeRule createLambdaRule(LazyRule valueRule) {
@@ -966,6 +961,7 @@ public class Main {
         LazyRule typeRule = new LazyRule();
         typeRule.set(new OrRule(List.of(
                 createGenericRule(typeRule),
+                new InfixRule(new NodeRule("parent", typeRule), new LocatingSplitter(".", new LastLocator()), new StringRule("child")),
                 createSymbolRule("symbol")
         )));
         return typeRule;
