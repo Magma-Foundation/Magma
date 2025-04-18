@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,10 +12,15 @@ public class Main {
             String input = Files.readString(path);
 
             Path target = path.resolveSibling("main.c");
-            Files.writeString(target, input);
+            Files.writeString(target, compile(input));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
+
+    private static String compile(String input) {
+        return "/* " + input + " */";
+    }
 }
+ */
