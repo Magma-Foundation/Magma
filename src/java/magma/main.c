@@ -5,54 +5,54 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/* public */ struct Main {/* /* private static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth;
+// #include <temp.h>
+/* public */ struct Main {/* /* private static */ struct State {/* /* private final List<String> segments; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; *//* 
 
         private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        }
+        } *//* 
 
         public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        }
+        } *//* 
 
         private State exit() {
             this.depth = this.depth - 1;
             return this;
-        }
+        } *//* 
 
         private State enter() {
             this.depth = this.depth + 1;
             return this;
-        }
+        } *//* 
 
         private State advance() {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        }
+        } *//* 
 
         private boolean isShallow() {
             return this.depth == 1;
-        }
+        } *//* 
 
         private State append(char c) {
             this.buffer.append(c);
             return this;
-        }
+        } *//* 
 
         private boolean isLevel() {
             return this.depth == 0;
-        }
+        } *//* 
 
         public List<String> segments() {
             return this.segments;
-        }
-    } *//* 
+        } *//* 
+     */ */};/* 
 
     public static void main(String[] args) {
         try {
@@ -107,13 +107,19 @@
             return appended.exit();
         } *//* 
         return appended; *//* 
-     */ */};/* private static String compileRootSegment(String input) {
+     */ */};/* 
+
+    private static String compileRootSegment(String input) {
         if (input.startsWith("package ")) {
             return "";
         }
         if (input.strip().startsWith("import ")) {
             return "// #include <temp.h>\n";
         }
+
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+
+    } *//* private static Optional<String> compileClass(String input) {
         int classIndex = input.indexOf(" */ struct ");
         if (classIndex >= 0) {/* /* String modifiers = input.substring(0, classIndex).strip(); *//* 
             String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
@@ -124,17 +130,17 @@
                 if (withEnd.endsWith("}")) {
                     String inputContent = generatePlaceholder(withEnd.substring(0, withEnd.length() - "}".length()));
                     String content = compileStatements(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(modifiers) + " struct " +
+                    return Optional.of(generatePlaceholder(modifiers) + " struct " +
                             name +
-                            " {" + content + "};";
+                            " {" + content + "};");
                 }
             } *//* 
         }
-        return generatePlaceholder(input);
+        return Optional.empty();
      */ */};/* 
 
     private static String compileClassSegment(String classSegment) {
-        return generatePlaceholder(classSegment);
+        return compileClass(classSegment).orElseGet(() -> generatePlaceholder(classSegment));
     } *//* 
 
     private static String generatePlaceholder(String input) {
