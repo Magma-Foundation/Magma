@@ -134,7 +134,8 @@
 			"value" : "Stream"
 		}]
 	}, {
-		"value" : "public class Main {
+		"name" : "Main ", 
+		"with-end" : "
     private interface Rule {
         Optional<Node> parse(String input);
     }
@@ -334,8 +335,17 @@
     private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
+                createClassRule(),
                 new StripRule(new StringRule("value"))
         ));
+    }
+
+    private static InfixRule createClassRule() {
+        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StringRule("with-end")));
+    }
+
+    private static DivideRule createModifiersRule() {
+        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("modifiers")));
     }
 
     private static Rule createNamespacedRule() {
@@ -344,6 +354,9 @@
         DivideRule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
         return new StripRule(new SuffixRule(new InfixRule(type, " ", segments), ";"));
     }
-}"
+}", 
+		"modifiers" : [{
+			"modifiers" : "public"
+		}]
 	}]
 }

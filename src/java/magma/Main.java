@@ -214,8 +214,17 @@ public class Main {
     private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
+                createClassRule(),
                 new StripRule(new StringRule("value"))
         ));
+    }
+
+    private static InfixRule createClassRule() {
+        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StringRule("with-end")));
+    }
+
+    private static DivideRule createModifiersRule() {
+        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("modifiers")));
     }
 
     private static Rule createNamespacedRule() {
