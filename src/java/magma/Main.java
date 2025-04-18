@@ -487,6 +487,13 @@ public class Main {
         }
     }
 
+    private static class EmptyRule implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return input.isEmpty() ? new Ok<>(new Node()) : new Err<>(new CompileError("Not empty", input));
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -548,11 +555,16 @@ public class Main {
     private static Rule createClassSegmentRule() {
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
+                createWhitespaceRule(),
                 createStructuredRule("interface ", classSegmentRule),
                 createStructuredRule("record ", classSegmentRule),
                 createMethodRule()
         )));
         return classSegmentRule;
+    }
+
+    private static Rule createWhitespaceRule() {
+        return new StripRule(new EmptyRule());
     }
 
     private static Rule createMethodRule() {
