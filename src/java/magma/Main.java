@@ -228,9 +228,10 @@ public class Main {
         return new StripRule(new StringRule("value"));
     }
 
-    private static InfixRule createClassRule() {
+    private static Rule createClassRule() {
         Rule childRule = new DivideRule("with-end", new StatementDivider(), createClassSegmentRule());
-        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StripRule(new SuffixRule(childRule, "}"))));
+        Rule name = new StripRule(new StringRule("name"));
+        return new InfixRule(createModifiersRule(), "class ", new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }
 
     private static Rule createClassSegmentRule() {
