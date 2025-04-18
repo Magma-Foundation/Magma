@@ -1,23 +1,90 @@
 {
-	"value" : "package magma;
+	"children" : [{
+		"value:" : "package magma;"
+	},  {
+		"value:" : "
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;"
+	},  {
+		"value:" : "
+import java.nio.file.Files;"
+	},  {
+		"value:" : "
+import java.nio.file.Path;"
+	},  {
+		"value:" : "
+import java.nio.file.Paths;"
+	},  {
+		"value:" : "
+import java.util.ArrayList;"
+	},  {
+		"value:" : "
+import java.util.stream.Collectors;"
+	},  {
+		"value:" : "
 
 public class Main {
     public static void main(String[] args) {
         try {
-            Path source = Paths.get(., src, java, magma, Main.java);
-            String input = Files.readString(source);
+            Path source = Paths.get(".", "src", "java", "magma", "Main.java");"
+	},  {
+		"value:" : "
+            String input = Files.readString(source);"
+	},  {
+		"value:" : "
 
-            Path target = source.resolveSibling(Main.java.ast.json);
-            Files.writeString(target, {\n\t\value\ : \ + input.replace(\, ) + \\n});
+            ArrayList<String> segments = new ArrayList<>();"
+	},  {
+		"value:" : "
+            StringBuilder buffer = new StringBuilder();"
+	},  {
+		"value:" : "
+            for (int i = 0;"
+	},  {
+		"value:" : " i < input.length();"
+	},  {
+		"value:" : " i++) {
+                char c = input.charAt(i);"
+	},  {
+		"value:" : "
+                buffer.append(c);"
+	},  {
+		"value:" : "
+                if(c == ';"
+	},  {
+		"value:" : "') {
+                    segments.add(buffer.toString());"
+	},  {
+		"value:" : "
+                    buffer = new StringBuilder();"
+	},  {
+		"value:" : "
+                }
+            }
+            segments.add(buffer.toString());"
+	},  {
+		"value:" : "
+
+
+            String collect = segments.stream()
+                    .map(value -> "{\n\t\t\"value:\" : \"" + value + "\"\n\t},  ")
+                    .collect(Collectors.joining());"
+	},  {
+		"value:" : "
+
+            Path target = source.resolveSibling("Main.java.ast.json");"
+	},  {
+		"value:" : "
+            Files.writeString(target, "{\n\t\"children\" : [" + collect + "]\n}");"
+	},  {
+		"value:" : "
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            e.printStackTrace();"
+	},  {
+		"value:" : "
         }
     }
 }"
+	},  ]
 }
