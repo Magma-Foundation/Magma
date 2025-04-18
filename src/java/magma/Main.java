@@ -245,14 +245,14 @@ public class Main {
         private final Rule rightRule;
         private final Splitter splitter;
 
-        private InfixRule(Rule leftRule, Rule rightRule, Splitter splitter) {
+        private InfixRule(Rule leftRule, Splitter splitter, Rule rightRule) {
             this.leftRule = leftRule;
             this.rightRule = rightRule;
             this.splitter = splitter;
         }
 
         private InfixRule(Rule leftRule, String infix, Rule rightRule) {
-            this(leftRule, rightRule, new LocatingSplitter(infix, new FirstLocator()));
+            this(leftRule, new LocatingSplitter(infix, new FirstLocator()), rightRule);
         }
 
         @Override
@@ -633,6 +633,29 @@ public class Main {
         }
     }
 
+    private record SymbolRule(Rule rule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            if (this.isSymbol(input)) {
+                return this.rule.parse(input);
+            }
+            else {
+                return new Err<>(new CompileError("Not a symbol", input));
+            }
+        }
+
+        private boolean isSymbol(String input) {
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (Character.isLetter(c)) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         JavaFiles.readString(source)
@@ -681,7 +704,7 @@ public class Main {
 
         final LastLocator lastLocator = new LastLocator();
         Rule beforeContent = new OrRule(List.of(
-                new InfixRule(maybeWithParams, createSymbolRule("super-type"), new LocatingSplitter(" implements ", lastLocator)),
+                new InfixRule(maybeWithParams, new LocatingSplitter(" implements ", lastLocator), createSymbolRule("super-type")),
                 maybeWithParams
         ));
 
@@ -731,7 +754,7 @@ public class Main {
     private static Rule createContentRule(Rule withParams, Rule childRule) {
         Rule child = new ContextRule("Invalid child", childRule);
         DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), child);
-        return new InfixRule(withParams, new StripRule(new SuffixRule(children, "}")), new FoldingSplitter(new ContentStartFolder()));
+        return new InfixRule(withParams, new FoldingSplitter(new ContentStartFolder()), new StripRule(new SuffixRule(children, "}")));
     }
 
     private static Rule createStatementOrBlockRule() {
@@ -765,7 +788,7 @@ public class Main {
         NodeRule caller = new NodeRule("caller", createValueRule());
         DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule());
         final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
-        return new StripRule(new SuffixRule(new InfixRule(caller, arguments, new LocatingSplitter("(", invocationStartLocator)), ")"));
+        return new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"));
     }
 
     private static Rule createValueRule() {
@@ -775,9 +798,14 @@ public class Main {
     }
 
     private static Rule createDefinitionRule() {
-        Rule type = new NodeRule("type", createTypeRule());
+        NodeRule type = new NodeRule("type", createTypeRule());
+        Rule beforeName = new OrRule(List.of(
+                new StripRule(new InfixRule(type, new LocatingSplitter(" ", new LastLocator()), type)),
+                type
+        ));
+
         Rule name = new StringRule("name");
-        return new StripRule(new InfixRule(type, name, new LocatingSplitter(" ", new LastLocator())));
+        return new StripRule(new InfixRule(beforeName, new LocatingSplitter(" ", new LastLocator()), name));
     }
 
     private static Rule createTypeRule() {
@@ -796,7 +824,7 @@ public class Main {
     }
 
     private static StripRule createSymbolRule(String propertyKey) {
-        return new StripRule(new StringRule(propertyKey));
+        return new StripRule(new SymbolRule(new StringRule(propertyKey)));
     }
 
     private static DivideRule createModifiersRule() {

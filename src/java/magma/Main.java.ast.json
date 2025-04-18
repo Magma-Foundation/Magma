@@ -178,57 +178,22 @@
 			"children" : [{
 				"name" : "mapper)", 
 				"type" : {
-					"base" : {
-						"symbol" : ""
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"symbol" : "X> mapValue(Function<T, R"
-					}]
+					"symbol" : "R>"
 				}
 			}, {
 				"name" : "mapper)", 
 				"type" : {
-					"base" : {
-						"symbol" : ""
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"base" : {
-							"symbol" : "X> flatMapValue(Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"symbol" : "Result<R, X"
-						}]
-					}]
+					"symbol" : "X>>"
 				}
 			}, {
 				"name" : "whenErr)", 
 				"type" : {
-					"base" : {
-						"symbol" : ""
-					}, 
-					"arguments" : [{
-						"symbol" : "R> R match(Function<T, R> whenOk"
-					}, {
-						"symbol" : "Function<X, R"
-					}]
+					"symbol" : "R>"
 				}
 			}, {
 				"name" : "mapper)", 
 				"type" : {
-					"base" : {
-						"symbol" : ""
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<T"
-					}, {
-						"symbol" : "R> mapErr(Function<X, R"
-					}]
+					"symbol" : "R>"
 				}
 			}, {
 			}], 
@@ -240,7 +205,7 @@
 			"children" : [{
 				"name" : "input)", 
 				"type" : {
-					"symbol" : "Result<Node, CompileError> parse(String"
+					"symbol" : "parse(String"
 				}
 			}, {
 			}], 
@@ -260,7 +225,7 @@
 			"children" : [{
 				"name" : "input)", 
 				"type" : {
-					"symbol" : "List<String> divide(String"
+					"symbol" : "divide(String"
 				}
 			}, {
 			}], 
@@ -272,7 +237,7 @@
 			"children" : [{
 				"name" : "c)", 
 				"type" : {
-					"symbol" : "State fold(State state, char"
+					"symbol" : "char"
 				}
 			}, {
 			}], 
@@ -312,7 +277,7 @@
 			"children" : [{
 				"name" : "infix)", 
 				"type" : {
-					"symbol" : "Optional<Integer> locate(String input, String"
+					"symbol" : "String"
 				}
 			}, {
 			}], 
@@ -324,7 +289,7 @@
 			"children" : [{
 				"name" : "input)", 
 				"type" : {
-					"symbol" : "Result<Tuple<String, String>, CompileError> split(String"
+					"symbol" : "split(String"
 				}
 			}, {
 			}], 
@@ -356,8 +321,7 @@
 			}, {
 				"name" : "display", 
 				"type" : {
-					"symbol" : "@Override
-        public String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 				}], 
@@ -370,7 +334,7 @@
 			}, {
 				"name" : "format", 
 				"type" : {
-					"symbol" : "private String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 					"name" : "depth", 
@@ -402,7 +366,7 @@
 			}, {
 				"name" : "maxDepth", 
 				"type" : {
-					"symbol" : "private int"
+					"symbol" : "int"
 				}, 
 				"params" : [{
 				}], 
@@ -459,7 +423,7 @@
 			}, {
 				"name" : "createJSONProperty", 
 				"type" : {
-					"symbol" : "private static String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 					"name" : "depth", 
@@ -490,7 +454,7 @@
 			}, {
 				"name" : "format", 
 				"type" : {
-					"symbol" : "private String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 					"name" : "depth", 
@@ -528,7 +492,7 @@
 				"name" : "formatNodes", 
 				"type" : {
 					"base" : {
-						"symbol" : "private Stream"
+						"symbol" : "Stream"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -552,7 +516,7 @@
 				"name" : "formatNodeLists", 
 				"type" : {
 					"base" : {
-						"symbol" : "private Stream"
+						"symbol" : "Stream"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -575,7 +539,7 @@
 			}, {
 				"name" : "formatNodeList", 
 				"type" : {
-					"symbol" : "private String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 					"name" : "depth", 
@@ -586,17 +550,10 @@
 					"name" : "entry", 
 					"type" : {
 						"base" : {
-							"symbol" : "Map.Entry"
+							"symbol" : "List"
 						}, 
 						"arguments" : [{
-							"symbol" : "String"
-						}, {
-							"base" : {
-								"symbol" : "List"
-							}, 
-							"arguments" : [{
-								"symbol" : "Node"
-							}]
+							"symbol" : "Node>"
 						}]
 					}
 				}], 
@@ -617,7 +574,7 @@
 				"name" : "formatStrings", 
 				"type" : {
 					"base" : {
-						"symbol" : "private Stream"
+						"symbol" : "Stream"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -640,7 +597,7 @@
 			}, {
 				"name" : "withString", 
 				"type" : {
-					"symbol" : "public Node"
+					"symbol" : "Node"
 				}, 
 				"params" : [{
 					"name" : "propertyKey", 
@@ -666,7 +623,7 @@
 			}, {
 				"name" : "withNodeList", 
 				"type" : {
-					"symbol" : "public Node"
+					"symbol" : "Node"
 				}, 
 				"params" : [{
 					"name" : "propertyKey", 
@@ -697,7 +654,7 @@
 			}, {
 				"name" : "merge", 
 				"type" : {
-					"symbol" : "public Node"
+					"symbol" : "Node"
 				}, 
 				"params" : [{
 					"name" : "other", 
@@ -726,7 +683,7 @@
 			}, {
 				"name" : "display", 
 				"type" : {
-					"symbol" : "public String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 				}], 
@@ -739,7 +696,7 @@
 			}, {
 				"name" : "withNode", 
 				"type" : {
-					"symbol" : "public Node"
+					"symbol" : "Node"
 				}, 
 				"params" : [{
 					"name" : "propertyKey", 
@@ -778,42 +735,21 @@
 			"params" : [{
 				"name" : "strings", 
 				"type" : {
-					"base" : {
-						"symbol" : "Map"
-					}, 
-					"arguments" : [{
-						"symbol" : "String"
-					}, {
-						"symbol" : "String"
-					}]
+					"symbol" : "String>"
 				}
 			}, {
 				"name" : "nodes", 
 				"type" : {
-					"base" : {
-						"symbol" : "Map"
-					}, 
-					"arguments" : [{
-						"symbol" : "String"
-					}, {
-						"symbol" : "Node"
-					}]
+					"symbol" : "Node>"
 				}
 			}, {
 				"name" : "nodeLists", 
 				"type" : {
 					"base" : {
-						"symbol" : "Map"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
-						"symbol" : "String"
-					}, {
-						"base" : {
-							"symbol" : "List"
-						}, 
-						"arguments" : [{
-							"symbol" : "Node"
-						}]
+						"symbol" : "Node>"
 					}]
 				}
 			}]
@@ -823,15 +759,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -871,8 +799,7 @@
 				"name" : "divide", 
 				"type" : {
 					"base" : {
-						"symbol" : "@Override
-        public List"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -915,15 +842,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -943,36 +862,12 @@
 			}, {
 				"name" : "foldChild", 
 				"type" : {
-					"base" : {
-						"symbol" : "private Result"
-					}, 
-					"arguments" : [{
-						"base" : {
-							"symbol" : "List"
-						}, 
-						"arguments" : [{
-							"symbol" : "Node"
-						}]
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "maybeChildren", 
 					"type" : {
-						"base" : {
-							"symbol" : "Result"
-						}, 
-						"arguments" : [{
-							"base" : {
-								"symbol" : "List"
-							}, 
-							"arguments" : [{
-								"symbol" : "Node"
-							}]
-						}, {
-							"symbol" : "CompileError"
-						}]
+						"symbol" : "CompileError>"
 					}
 				}, {
 					"name" : "child", 
@@ -1024,27 +919,12 @@
 			"children" : [{
 				"name" : "mapValue", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"symbol" : "X"
-					}]
+					"symbol" : "X>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1056,34 +936,12 @@
 			}, {
 				"name" : "flatMapValue", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"symbol" : "X"
-					}]
+					"symbol" : "X>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"base" : {
-								"symbol" : "Result"
-							}, 
-							"arguments" : [{
-								"symbol" : "R"
-							}, {
-								"symbol" : "X"
-							}]
-						}]
+						"symbol" : "X>>"
 					}
 				}], 
 				"children" : [{
@@ -1095,32 +953,17 @@
 			}, {
 				"name" : "match", 
 				"type" : {
-					"symbol" : "@Override
-        public <R> R"
+					"symbol" : "R"
 				}, 
 				"params" : [{
 					"name" : "whenOk", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}, {
 					"name" : "whenErr", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "X"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1132,27 +975,12 @@
 			}, {
 				"name" : "mapErr", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<T"
-					}, {
-						"symbol" : "R"
-					}]
+					"symbol" : "R>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "X"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1187,8 +1015,7 @@
 				"name" : "locate", 
 				"type" : {
 					"base" : {
-						"symbol" : "@Override
-        public Optional"
+						"symbol" : "Optional"
 					}, 
 					"arguments" : [{
 						"symbol" : "Integer"
@@ -1236,27 +1063,12 @@
 			"children" : [{
 				"name" : "mapValue", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"symbol" : "X"
-					}]
+					"symbol" : "X>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1268,34 +1080,12 @@
 			}, {
 				"name" : "flatMapValue", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<R"
-					}, {
-						"symbol" : "X"
-					}]
+					"symbol" : "X>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"base" : {
-								"symbol" : "Result"
-							}, 
-							"arguments" : [{
-								"symbol" : "R"
-							}, {
-								"symbol" : "X"
-							}]
-						}]
+						"symbol" : "X>>"
 					}
 				}], 
 				"children" : [{
@@ -1307,32 +1097,17 @@
 			}, {
 				"name" : "match", 
 				"type" : {
-					"symbol" : "@Override
-        public <R> R"
+					"symbol" : "R"
 				}, 
 				"params" : [{
 					"name" : "whenOk", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "T"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}, {
 					"name" : "whenErr", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "X"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1344,27 +1119,12 @@
 			}, {
 				"name" : "mapErr", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public"
-					}, 
-					"arguments" : [{
-						"symbol" : "R> Result<T"
-					}, {
-						"symbol" : "R"
-					}]
+					"symbol" : "R>"
 				}, 
 				"params" : [{
 					"name" : "mapper", 
 					"type" : {
-						"base" : {
-							"symbol" : "Function"
-						}, 
-						"arguments" : [{
-							"symbol" : "X"
-						}, {
-							"symbol" : "R"
-						}]
+						"symbol" : "R>"
 					}
 				}], 
 				"children" : [{
@@ -1390,17 +1150,17 @@
 			"children" : [{
 				"name" : "leftRule", 
 				"type" : {
-					"symbol" : "private final Rule"
+					"symbol" : "Rule"
 				}
 			}, {
 				"name" : "rightRule", 
 				"type" : {
-					"symbol" : "private final Rule"
+					"symbol" : "Rule"
 				}
 			}, {
 				"name" : "splitter", 
 				"type" : {
-					"symbol" : "private final Splitter"
+					"symbol" : "Splitter"
 				}
 			}, {
 				"name" : "InfixRule", 
@@ -1413,14 +1173,14 @@
 						"symbol" : "Rule"
 					}
 				}, {
-					"name" : "rightRule", 
-					"type" : {
-						"symbol" : "Rule"
-					}
-				}, {
 					"name" : "splitter", 
 					"type" : {
 						"symbol" : "Splitter"
+					}
+				}, {
+					"name" : "rightRule", 
+					"type" : {
+						"symbol" : "Rule"
 					}
 				}], 
 				"children" : [{
@@ -1460,22 +1220,14 @@
 				}], 
 				"children" : [{
 					"value" : {
-						"value" : "ftRule, rightRule, new LocatingSplitter(infix, new FirstLocator()))"
+						"value" : "ftRule, new LocatingSplitter(infix, new FirstLocator()), rightRule)"
 					}
 				}, {
 				}]
 			}, {
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -1492,26 +1244,12 @@
 			}, {
 				"name" : "getNodeCompileErrorResult", 
 				"type" : {
-					"base" : {
-						"symbol" : "private Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "tuple", 
 					"type" : {
-						"base" : {
-							"symbol" : "Tuple"
-						}, 
-						"arguments" : [{
-							"symbol" : "String"
-						}, {
-							"symbol" : "String"
-						}]
+						"symbol" : "String>"
 					}
 				}], 
 				"children" : [{
@@ -1561,15 +1299,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -1627,15 +1357,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "value", 
@@ -1689,7 +1411,7 @@
 				}, {
 					"name" : "withValue", 
 					"type" : {
-						"symbol" : "public OrState"
+						"symbol" : "OrState"
 					}, 
 					"params" : [{
 						"name" : "value", 
@@ -1716,7 +1438,7 @@
 				}, {
 					"name" : "withError", 
 					"type" : {
-						"symbol" : "public OrState"
+						"symbol" : "OrState"
 					}, 
 					"params" : [{
 						"name" : "error", 
@@ -1738,17 +1460,10 @@
 					"name" : "toResult", 
 					"type" : {
 						"base" : {
-							"symbol" : "public Result"
+							"symbol" : "List"
 						}, 
 						"arguments" : [{
-							"symbol" : "Node"
-						}, {
-							"base" : {
-								"symbol" : "List"
-							}, 
-							"arguments" : [{
-								"symbol" : "CompileError"
-							}]
+							"symbol" : "CompileError>"
 						}]
 					}, 
 					"params" : [{
@@ -1788,15 +1503,7 @@
 			}, {
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -1843,8 +1550,7 @@
 				"name" : "divide", 
 				"type" : {
 					"base" : {
-						"symbol" : "@Override
-        public List"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -1896,7 +1602,7 @@
 				"name" : "foldDoubleQuotes", 
 				"type" : {
 					"base" : {
-						"symbol" : "private Optional"
+						"symbol" : "Optional"
 					}, 
 					"arguments" : [{
 						"symbol" : "State"
@@ -1971,7 +1677,7 @@
 				"name" : "foldSingleQuotes", 
 				"type" : {
 					"base" : {
-						"symbol" : "private Optional"
+						"symbol" : "Optional"
 					}, 
 					"arguments" : [{
 						"symbol" : "State"
@@ -2045,12 +1751,12 @@
 			"children" : [{
 				"name" : "Optional.empty()", 
 				"type" : {
-					"symbol" : "private Optional<Rule> maybeChildRule ="
+					"symbol" : "="
 				}
 			}, {
 				"name" : "set", 
 				"type" : {
-					"symbol" : "public void"
+					"symbol" : "void"
 				}, 
 				"params" : [{
 					"name" : "childRule", 
@@ -2067,15 +1773,7 @@
 			}, {
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -2112,15 +1810,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -2164,7 +1854,7 @@
 				"name" : "segments", 
 				"type" : {
 					"base" : {
-						"symbol" : "private final List"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -2174,7 +1864,7 @@
 				"name" : "queue", 
 				"type" : {
 					"base" : {
-						"symbol" : "private final LinkedList"
+						"symbol" : "LinkedList"
 					}, 
 					"arguments" : [{
 						"symbol" : "Character"
@@ -2183,12 +1873,12 @@
 			}, {
 				"name" : "buffer", 
 				"type" : {
-					"symbol" : "private StringBuilder"
+					"symbol" : "StringBuilder"
 				}
 			}, {
 				"name" : "depth", 
 				"type" : {
-					"symbol" : "private int"
+					"symbol" : "int"
 				}
 			}, {
 				"name" : "State", 
@@ -2269,7 +1959,7 @@
 			}, {
 				"name" : "enter", 
 				"type" : {
-					"symbol" : "private State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 				}], 
@@ -2286,7 +1976,7 @@
 			}, {
 				"name" : "exit", 
 				"type" : {
-					"symbol" : "private State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 				}], 
@@ -2303,7 +1993,7 @@
 			}, {
 				"name" : "isLevel", 
 				"type" : {
-					"symbol" : "private boolean"
+					"symbol" : "boolean"
 				}, 
 				"params" : [{
 				}], 
@@ -2316,7 +2006,7 @@
 			}, {
 				"name" : "append", 
 				"type" : {
-					"symbol" : "private State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 					"name" : "c", 
@@ -2337,7 +2027,7 @@
 			}, {
 				"name" : "advance", 
 				"type" : {
-					"symbol" : "private State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 				}], 
@@ -2358,7 +2048,7 @@
 			}, {
 				"name" : "isShallow", 
 				"type" : {
-					"symbol" : "private boolean"
+					"symbol" : "boolean"
 				}, 
 				"params" : [{
 				}], 
@@ -2372,7 +2062,7 @@
 				"name" : "getSegments", 
 				"type" : {
 					"base" : {
-						"symbol" : "public List"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -2389,7 +2079,7 @@
 			}, {
 				"name" : "getBuffer", 
 				"type" : {
-					"symbol" : "public StringBuilder"
+					"symbol" : "StringBuilder"
 				}, 
 				"params" : [{
 				}], 
@@ -2402,7 +2092,7 @@
 			}, {
 				"name" : "setBuffer", 
 				"type" : {
-					"symbol" : "public void"
+					"symbol" : "void"
 				}, 
 				"params" : [{
 					"name" : "buffer", 
@@ -2419,7 +2109,7 @@
 			}, {
 				"name" : "getDepth", 
 				"type" : {
-					"symbol" : "public int"
+					"symbol" : "int"
 				}, 
 				"params" : [{
 				}], 
@@ -2432,7 +2122,7 @@
 			}, {
 				"name" : "setDepth", 
 				"type" : {
-					"symbol" : "public void"
+					"symbol" : "void"
 				}, 
 				"params" : [{
 					"name" : "depth", 
@@ -2450,7 +2140,7 @@
 				"name" : "segments", 
 				"type" : {
 					"base" : {
-						"symbol" : "public List"
+						"symbol" : "List"
 					}, 
 					"arguments" : [{
 						"symbol" : "String"
@@ -2467,7 +2157,7 @@
 			}, {
 				"name" : "hasNext", 
 				"type" : {
-					"symbol" : "public boolean"
+					"symbol" : "boolean"
 				}, 
 				"params" : [{
 				}], 
@@ -2480,7 +2170,7 @@
 			}, {
 				"name" : "pop", 
 				"type" : {
-					"symbol" : "public char"
+					"symbol" : "char"
 				}, 
 				"params" : [{
 				}], 
@@ -2493,7 +2183,7 @@
 			}, {
 				"name" : "peek", 
 				"type" : {
-					"symbol" : "public Character"
+					"symbol" : "Character"
 				}, 
 				"params" : [{
 				}], 
@@ -2524,8 +2214,7 @@
 			"children" : [{
 				"name" : "fold", 
 				"type" : {
-					"symbol" : "@Override
-        public State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 					"name" : "state", 
@@ -2609,8 +2298,7 @@
 			"children" : [{
 				"name" : "fold", 
 				"type" : {
-					"symbol" : "@Override
-        public State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 					"name" : "state", 
@@ -2708,8 +2396,7 @@
 			"children" : [{
 				"name" : "display", 
 				"type" : {
-					"symbol" : "@Override
-        public String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 				}], 
@@ -2752,8 +2439,7 @@
 			"children" : [{
 				"name" : "display", 
 				"type" : {
-					"symbol" : "@Override
-        public String"
+					"symbol" : "String"
 				}, 
 				"params" : [{
 				}], 
@@ -2789,8 +2475,7 @@
 				"name" : "locate", 
 				"type" : {
 					"base" : {
-						"symbol" : "@Override
-        public Optional"
+						"symbol" : "Optional"
 					}, 
 					"arguments" : [{
 						"symbol" : "Integer"
@@ -2838,15 +2523,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -2881,15 +2558,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -2934,15 +2603,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -2987,8 +2648,7 @@
 				"name" : "locate", 
 				"type" : {
 					"base" : {
-						"symbol" : "@Override
-        public Optional"
+						"symbol" : "Optional"
 					}, 
 					"arguments" : [{
 						"symbol" : "Integer"
@@ -3076,22 +2736,7 @@
 			"children" : [{
 				"name" : "split", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"base" : {
-							"symbol" : "Tuple"
-						}, 
-						"arguments" : [{
-							"symbol" : "String"
-						}, {
-							"symbol" : "String"
-						}]
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -3141,8 +2786,7 @@
 			"children" : [{
 				"name" : "fold", 
 				"type" : {
-					"symbol" : "@Override
-        public State"
+					"symbol" : "State"
 				}, 
 				"params" : [{
 					"name" : "state", 
@@ -3196,22 +2840,7 @@
 			"children" : [{
 				"name" : "split", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"base" : {
-							"symbol" : "Tuple"
-						}, 
-						"arguments" : [{
-							"symbol" : "String"
-						}, {
-							"symbol" : "String"
-						}]
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -3268,15 +2897,7 @@
 			"children" : [{
 				"name" : "parse", 
 				"type" : {
-					"base" : {
-						"symbol" : "@Override
-        public Result"
-					}, 
-					"arguments" : [{
-						"symbol" : "Node"
-					}, {
-						"symbol" : "CompileError"
-					}]
+					"symbol" : "CompileError>"
 				}, 
 				"params" : [{
 					"name" : "input", 
@@ -3317,7 +2938,7 @@
 		}, {
 			"name" : "main", 
 			"type" : {
-				"symbol" : "public static void"
+				"symbol" : "void"
 			}, 
 			"params" : [{
 				"name" : "args", 
@@ -3342,7 +2963,7 @@
 			"name" : "runWithInput", 
 			"type" : {
 				"base" : {
-					"symbol" : "private static Optional"
+					"symbol" : "Optional"
 				}, 
 				"arguments" : [{
 					"symbol" : "ApplicationError"
@@ -3373,14 +2994,7 @@
 		}, {
 			"name" : "compile", 
 			"type" : {
-				"base" : {
-					"symbol" : "private static Result"
-				}, 
-				"arguments" : [{
-					"symbol" : "String"
-				}, {
-					"symbol" : "CompileError"
-				}]
+				"symbol" : "CompileError>"
 			}, 
 			"params" : [{
 				"name" : "input", 
@@ -3399,7 +3013,7 @@
 		}, {
 			"name" : "createRootSegmentRule", 
 			"type" : {
-				"symbol" : "private static OrRule"
+				"symbol" : "OrRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3416,7 +3030,7 @@
 		}, {
 			"name" : "createClassRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 				"name" : "classSegmentRule", 
@@ -3433,7 +3047,7 @@
 		}, {
 			"name" : "createStructuredRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 				"name" : "infix", 
@@ -3476,7 +3090,7 @@
 			}, {
 				"value" : {
 					"value" : "foreContent = new OrRule(List.of(
-                new InfixRule(maybeWithParams, createSymbolRule("super-type"), new LocatingSplitter(" implements ", lastLocator)),
+                new InfixRule(maybeWithParams, new LocatingSplitter(" implements ", lastLocator), createSymbolRule("super-type")),
                 maybeWithParams
         ))"
 				}
@@ -3489,7 +3103,7 @@
 		}, {
 			"name" : "createParamRule", 
 			"type" : {
-				"symbol" : "private static OrRule"
+				"symbol" : "OrRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3505,7 +3119,7 @@
 		}, {
 			"name" : "createClassSegmentRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3533,7 +3147,7 @@
 		}, {
 			"name" : "createWhitespaceRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3546,7 +3160,7 @@
 		}, {
 			"name" : "createMethodRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3581,7 +3195,7 @@
 		}, {
 			"name" : "createContentRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 				"name" : "withParams", 
@@ -3604,14 +3218,14 @@
 				}
 			}, {
 				"value" : {
-					"value" : "new InfixRule(withParams, new StripRule(new SuffixRule(children, "}")), new FoldingSplitter(new ContentStartFolder()))"
+					"value" : "new InfixRule(withParams, new FoldingSplitter(new ContentStartFolder()), new StripRule(new SuffixRule(children, "}")))"
 				}
 			}, {
 			}]
 		}, {
 			"name" : "createStatementOrBlockRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3636,7 +3250,7 @@
 		}, {
 			"name" : "createIfRule", 
 			"type" : {
-				"symbol" : "private static TypeRule"
+				"symbol" : "TypeRule"
 			}, 
 			"params" : [{
 				"name" : "statementOrBlock", 
@@ -3661,7 +3275,7 @@
 		}, {
 			"name" : "createStatementRule", 
 			"type" : {
-				"symbol" : "private static OrRule"
+				"symbol" : "OrRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3677,7 +3291,7 @@
 		}, {
 			"name" : "createReturnRule", 
 			"type" : {
-				"symbol" : "private static TypeRule"
+				"symbol" : "TypeRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3690,7 +3304,7 @@
 		}, {
 			"name" : "createInvocationRule", 
 			"type" : {
-				"symbol" : "private static StripRule"
+				"symbol" : "StripRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3708,14 +3322,14 @@
 				}
 			}, {
 				"value" : {
-					"value" : "new StripRule(new SuffixRule(new InfixRule(caller, arguments, new LocatingSplitter("(", invocationStartLocator)), ")"))"
+					"value" : "new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"))"
 				}
 			}, {
 			}]
 		}, {
 			"name" : "createValueRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3730,13 +3344,20 @@
 		}, {
 			"name" : "createDefinitionRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
 			"children" : [{
 				"value" : {
-					"value" : "pe = new NodeRule("type", createTypeRule())"
+					"value" : "e type = new NodeRule("type", createTypeRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "foreName = new OrRule(List.of(
+                new StripRule(new InfixRule(type, new LocatingSplitter(" ", new LastLocator()), type)),
+                type
+        ))"
 				}
 			}, {
 				"value" : {
@@ -3744,14 +3365,14 @@
 				}
 			}, {
 				"value" : {
-					"value" : "new StripRule(new InfixRule(type, name, new LocatingSplitter(" ", new LastLocator())))"
+					"value" : "new StripRule(new InfixRule(beforeName, new LocatingSplitter(" ", new LastLocator()), name))"
 				}
 			}, {
 			}]
 		}, {
 			"name" : "createTypeRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3775,7 +3396,7 @@
 		}, {
 			"name" : "createGenericRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 				"name" : "typeRule", 
@@ -3800,7 +3421,7 @@
 		}, {
 			"name" : "createSymbolRule", 
 			"type" : {
-				"symbol" : "private static StripRule"
+				"symbol" : "StripRule"
 			}, 
 			"params" : [{
 				"name" : "propertyKey", 
@@ -3817,7 +3438,7 @@
 		}, {
 			"name" : "createModifiersRule", 
 			"type" : {
-				"symbol" : "private static DivideRule"
+				"symbol" : "DivideRule"
 			}, 
 			"params" : [{
 			}], 
@@ -3830,7 +3451,7 @@
 		}, {
 			"name" : "createNamespacedRule", 
 			"type" : {
-				"symbol" : "private static Rule"
+				"symbol" : "Rule"
 			}, 
 			"params" : [{
 			}], 
@@ -3855,7 +3476,7 @@
 		}, {
 			"name" : "createStatementRule", 
 			"type" : {
-				"symbol" : "private static StripRule"
+				"symbol" : "StripRule"
 			}, 
 			"params" : [{
 				"name" : "childRule", 
