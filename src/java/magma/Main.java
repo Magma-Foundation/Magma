@@ -289,8 +289,20 @@ public class Main {
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart);
             String withParams = input.substring(paramStart + "(".length());
-            return compileDefinition(state, definition).map(outputDefinition -> {
-                return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + "(" + generatePlaceholder(withParams));
+            return compileDefinition(state, definition).flatMap(outputDefinition -> {
+                int paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    String params = withParams.substring(0, paramEnd);
+
+                    String oldBody = withParams.substring(paramEnd + ")".length());
+                    String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
+
+                    String generated = "\n\t" + outputDefinition.right + "(" + generatePlaceholder(params) + ")" + newBody;
+                    return Optional.of(new Tuple<>(outputDefinition.left, generated));
+                }
+                else {
+                    return Optional.empty();
+                }
             });
         }
         return Optional.empty();
