@@ -67,9 +67,9 @@ public class Main {
             List<CompileError> copy = new ArrayList<>(this.errors);
             copy.sort(Comparator.comparingInt(CompileError::maxDepth));
 
-            String joined = copy.stream()
-                    .map(error -> error.format(depth + 1))
-                    .map(display -> "\n" + "\t".repeat(depth + 1) + display)
+            String joined = IntStream.range(0, copy.size())
+                    .mapToObj(index -> index + ") " + copy.get(index).format(depth + 1))
+                    .map(display -> "\n" + "| ".repeat(depth + 1) + display)
                     .collect(Collectors.joining());
 
             return this.message + ": " + this.context + joined;
@@ -697,9 +697,16 @@ public class Main {
         Rule param = createParamRule();
 
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
-        Rule maybeWithParams = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
+
+        DivideRule typeParameters = new DivideRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
+        Rule name1 = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name, "<", typeParameters), ">")),
                 name
+        ));
+
+        Rule maybeWithParams = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name1, "(", params), ")")),
+                name1
         ));
 
         final LastLocator lastLocator = new LastLocator();
@@ -722,7 +729,7 @@ public class Main {
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createWhitespaceRule(),
-                createStructuredRule("interface ", classSegmentRule),
+                new TypeRule("interface", createStructuredRule("interface ", classSegmentRule)),
                 new TypeRule("record", createStructuredRule("record ", classSegmentRule)),
                 createClassRule(classSegmentRule),
                 new TypeRule("method", createMethodRule()),
