@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -277,30 +279,60 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
                 .or(() -> compileStructured("interface ", state, input))
+                .or(() -> compileMethod(state, input))
                 .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> compileContent(state, input));
     }
 
+    private static @NotNull Optional<? extends Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = input.substring(0, paramStart);
+            String withParams = input.substring(paramStart + "(".length());
+            return compileDefinition(state, definition).map(outputDefinition -> {
+                return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + "(" + generatePlaceholder(withParams));
+            });
+        }
+        return Optional.empty();
+    }
+
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            int nameSeparator = withoutEnd.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = withoutEnd.substring(0, nameSeparator).strip();
-                String name = withoutEnd.substring(nameSeparator + " ".length());
-
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    String beforeType = beforeName.substring(0, typeSeparator).strip();
-                    String type = beforeName.substring(typeSeparator + " ".length());
-
-                    return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
-                }
-            }
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
         }
+        String inputDefinition = stripped.substring(0, stripped.length() - ";".length());
+        return compileDefinition(state, inputDefinition).map(outputDefinition -> {
+            return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + ";");
+        });
+    }
 
-        return Optional.empty();
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String definition) {
+        String withoutEnd = definition.strip();
+        int nameSeparator = withoutEnd.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeName = withoutEnd.substring(0, nameSeparator).strip();
+        String name = withoutEnd.substring(nameSeparator + " ".length());
+
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return generateDefinition(state, generatePlaceholder(beforeName), name);
+        }
+        String beforeType = beforeName.substring(0, typeSeparator).strip();
+        String type = beforeName.substring(typeSeparator + " ".length());
+        String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
+        return generateDefinition(state, outputBeforeName, name);
+    }
+
+    private static Optional<Tuple<CompileState, String>> generateDefinition(
+            CompileState state,
+            String outputBeforeName,
+            String name
+    ) {
+        String generated = outputBeforeName + " " + name;
+        return Optional.of(new Tuple<>(state, generated));
     }
 
     private static String generatePlaceholder(String input) {
