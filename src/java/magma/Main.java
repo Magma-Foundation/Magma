@@ -195,6 +195,19 @@ public class Main {
         }
     }
 
+    private static class LazyRule implements Rule {
+        private Optional<Rule> maybeChildRule = Optional.empty();
+
+        public void set(Rule childRule) {
+            this.maybeChildRule = Optional.of(childRule);
+        }
+
+        @Override
+        public Optional<Node> parse(String input) {
+            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -219,7 +232,7 @@ public class Main {
     private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
-                createClassRule(),
+                createStructuredRule("class ", createClassSegmentRule()),
                 createContentRule()
         ));
     }
@@ -228,16 +241,19 @@ public class Main {
         return new StripRule(new StringRule("value"));
     }
 
-    private static Rule createClassRule() {
-        Rule childRule = new DivideRule("with-end", new StatementDivider(), createClassSegmentRule());
+    private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
+        Rule childRule = new DivideRule("children", new StatementDivider(), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
-        return new InfixRule(createModifiersRule(), "class ", new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
+        return new InfixRule(createModifiersRule(), infix, new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }
 
     private static Rule createClassSegmentRule() {
-        return new OrRule(List.of(
+        LazyRule classSegmentRule = new LazyRule();
+        classSegmentRule.set(new OrRule(List.of(
+                createStructuredRule("interface ", classSegmentRule),
                 createContentRule()
-        ));
+        )));
+        return classSegmentRule;
     }
 
     private static DivideRule createModifiersRule() {

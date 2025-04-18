@@ -135,17 +135,26 @@
 		}]
 	}, {
 		"name" : "Main", 
-		"modifiers" : [{
-			"value" : "public"
-		}], 
-		"with-end" : [{
-			"value" : "private interface Rule {
-        Optional<Node> parse(String input);
-    }"
+		"children" : [{
+			"name" : "Rule", 
+			"children" : [{
+				"value" : "Optional<Node> parse(String input);"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : "private"
+			}]
 		}, {
-			"value" : "interface Divider {
-        List<String> divide(String input);
-    }"
+			"name" : "Divider", 
+			"children" : [{
+				"value" : "List<String> divide(String input);"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}]
 		}, {
 			"value" : "private record Node(Map<String, String> strings, Map<String, java.util.List<Node>> nodeLists) {
         public Node() {
@@ -319,6 +328,38 @@
         }"
 		}, {
 			"value" : ""
+		}], 
+		"modifiers" : [{
+			"value" : "public"
+		}]
+	}, {
+		"name" : "LazyRule implements Rule", 
+		"children" : [{
+			"value" : "private Optional<Rule> maybeChildRule = Optional.empty();"
+		}, {
+			"value" : "public void set(Rule childRule) {
+            this.maybeChildRule = Optional.of(childRule);
+        }"
+		}, {
+			"value" : "@Override
+        public Optional<Node> parse(String input) {
+            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
+        }"
+		}, {
+			"value" : ""
+		}], 
+		"modifiers" : [{
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : "private"
+		}, {
+			"value" : "static"
 		}]
 	}, {
 		"value" : "public static void main(String[] args) {
@@ -345,7 +386,7 @@
 		"value" : "private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
-                createClassRule(),
+                createStructuredRule("class ", createClassSegmentRule()),
                 createContentRule()
         ));
     }"
@@ -354,112 +395,19 @@
         return new StripRule(new StringRule("value"));
     }"
 	}, {
-		"name" : "", new InfixRule(name, "", 
-		"modifiers" : [{
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : "private"
-		}, {
-			"value" : "static"
-		}, {
-			"value" : "Rule"
-		}, {
-			"value" : "createClassRule()"
-		}, {
-			"value" : "{"
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : "Rule"
-		}, {
-			"value" : "childRule"
-		}, {
-			"value" : "="
-		}, {
-			"value" : "new"
-		}, {
-			"value" : "DivideRule("with-end","
-		}, {
-			"value" : "new"
-		}, {
-			"value" : "StatementDivider(),"
-		}, {
-			"value" : "createClassSegmentRule());"
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : "Rule"
-		}, {
-			"value" : "name"
-		}, {
-			"value" : "="
-		}, {
-			"value" : "new"
-		}, {
-			"value" : "StripRule(new"
-		}, {
-			"value" : "StringRule("name"));"
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : "return"
-		}, {
-			"value" : "new"
-		}, {
-			"value" : "InfixRule(createModifiersRule(),"
-		}, {
-			"value" : """
-		}], 
-		"with-end" : [{
-			"value" : "", new StripRule(new SuffixRule(childRule, "}"))));"
-		}]
+		"value" : "private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
+        Rule childRule = new DivideRule("children", new StatementDivider(), classSegmentRule);
+        Rule name = new StripRule(new StringRule("name"));
+        return new InfixRule(createModifiersRule(), infix, new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
+    }"
 	}, {
 		"value" : "private static Rule createClassSegmentRule() {
-        return new OrRule(List.of(
+        LazyRule classSegmentRule = new LazyRule();
+        classSegmentRule.set(new OrRule(List.of(
+                createStructuredRule("interface ", classSegmentRule),
                 createContentRule()
-        ));
+        )));
+        return classSegmentRule;
     }"
 	}, {
 		"value" : "private static DivideRule createModifiersRule() {
