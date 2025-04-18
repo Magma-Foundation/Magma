@@ -197,12 +197,33 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> divider, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        List<String> segments = divide(input, divider);
+        Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
+        return new Tuple<>(compiled.left, mergeAll(merger, compiled));
+    }
 
-        Tuple<CompileState, StringBuilder> fold = segments.iter().fold(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()),
-                (current, element) -> compileSegment(compiler, current, element, merger));
+    private static Tuple<CompileState, List<String>> parseAll(
+            CompileState state,
+            String input,
+            BiFunction<DivideState, Character, DivideState> divider,
+            BiFunction<CompileState, String, Tuple<CompileState, String>> compiler
+    ) {
+        return divide(input, divider).iter().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()),
+                (current, element) -> parseElement(compiler, current, element));
+    }
 
-        return new Tuple<>(fold.left, fold.right.toString());
+    private static Tuple<CompileState, List<String>> parseElement(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, List<String>> current, String element) {
+        CompileState currentState = current.left;
+        List<String> currentCache = current.right;
+
+        Tuple<CompileState, String> compiledTuple = compiler.apply(currentState, element);
+        CompileState newState = compiledTuple.left;
+        String compiled = compiledTuple.right;
+
+        return new Tuple<>(newState, currentCache.add(compiled));
+    }
+
+    private static String mergeAll(BiFunction<StringBuilder, String, StringBuilder> merger, Tuple<CompileState, List<String>> fold) {
+        return fold.right.iter().fold(new StringBuilder(), merger).toString();
     }
 
     private static Tuple<CompileState, StringBuilder> compileSegment(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, StringBuilder> current, String element, BiFunction<StringBuilder, String, StringBuilder> merger) {
@@ -405,7 +426,7 @@ public class Main {
             if (argumentsStart >= 0) {
                 String base = withoutEnd.substring(0, argumentsStart).strip();
                 String params = withoutEnd.substring(argumentsStart + "<".length());
-                Tuple<CompileState, String> newTypes = compileValues(state, params, Main::compileType);
+                Tuple<CompileState, String> newTypes = compileAll(state, params, Main::compileValueChar, Main::compileType, Main::mergeValues);
                 return new Tuple<>(newTypes.left, base + "<" + newTypes.right + ">");
             }
         }
