@@ -134,7 +134,7 @@
 			"value" : "Stream"
 		}]
 	}, {
-		"name" : "Main ", 
+		"name" : "Main", 
 		"modifiers" : [{
 			"value" : "public"
 		}], 
@@ -354,7 +354,7 @@
         return new StripRule(new StringRule("value"));
     }"
 	}, {
-		"name" : "", new InfixRule(new StringRule("name"), "", 
+		"name" : "", new InfixRule(name, "", 
 		"modifiers" : [{
 			"value" : ""
 		}, {
@@ -368,7 +368,7 @@
 		}, {
 			"value" : "static"
 		}, {
-			"value" : "InfixRule"
+			"value" : "Rule"
 		}, {
 			"value" : "createClassRule()"
 		}, {
@@ -403,6 +403,32 @@
 			"value" : "StatementDivider(),"
 		}, {
 			"value" : "createClassSegmentRule());"
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : "Rule"
+		}, {
+			"value" : "name"
+		}, {
+			"value" : "="
+		}, {
+			"value" : "new"
+		}, {
+			"value" : "StripRule(new"
+		}, {
+			"value" : "StringRule("name"));"
 		}, {
 			"value" : ""
 		}, {
