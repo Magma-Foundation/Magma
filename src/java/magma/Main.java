@@ -657,19 +657,25 @@ public class Main {
 
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
         Rule withParams = new StripRule(new SuffixRule(params, ")"));
-        Rule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementOrBlockRule());
 
         return new InfixRule(beforeParams, "(", new OrRule(List.of(
                 new StripRule(new SuffixRule(withParams, ";")),
-                new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
+                createContentRule(withParams, createStatementOrBlockRule())
         )));
     }
 
+    private static Rule createContentRule(Rule withParams, Rule statementOrBlock) {
+        return new InfixRule(withParams, "{", new StripRule(new SuffixRule(new DivideRule("children", new FoldingDivider(new StatementFolder()), statementOrBlock), "}")));
+    }
+
     private static Rule createStatementOrBlockRule() {
-        return new OrRule(List.of(
-                new StripRule(new SuffixRule(createStatementRule(), ";")),
-                createWhitespaceRule()
-        ));
+        LazyRule statementOrBlock = new LazyRule();
+        statementOrBlock.set(new OrRule(List.of(
+                createWhitespaceRule(),
+                createContentRule(new PrefixRule("if (", new SuffixRule(new NodeRule("condition", createValueRule()), ")")), statementOrBlock),
+                new StripRule(new SuffixRule(createStatementRule(), ";"))
+        )));
+        return statementOrBlock;
     }
 
     private static OrRule createStatementRule() {
