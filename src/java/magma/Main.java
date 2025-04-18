@@ -598,8 +598,12 @@ public class Main {
     private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
-                createStructuredRule("class ", createClassSegmentRule())
+                createClassRule(createClassSegmentRule())
         ));
+    }
+
+    private static Rule createClassRule(Rule classSegmentRule) {
+        return new TypeRule("class", createStructuredRule("class ", classSegmentRule));
     }
 
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
@@ -634,6 +638,7 @@ public class Main {
                 createWhitespaceRule(),
                 createStructuredRule("interface ", classSegmentRule),
                 new TypeRule("record", createStructuredRule("record ", classSegmentRule)),
+                createClassRule(classSegmentRule),
                 new TypeRule("method", createMethodRule())
         )));
         return classSegmentRule;
