@@ -5,11 +5,7 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/* public */ struct List<T> {/* Iterator<T> iter(); */
-	/* List<T> */ /* add(T */ element);/* 
-     */
-};
-/* private */ struct Collector<T, C> {/* C createInitial(); */
+/* public */ struct Collector<T, C> {/* C createInitial(); */
 	/* C fold(C current, */ /* T */ element);/* 
      */
 };
@@ -17,6 +13,10 @@
 	/* <C> C collect(Collector<T, */ /* C> */ collector);
 	/* <R> R fold(R initial, BiFunction<R, T, */ /* R> */ folder);
 	/* <R> Iterator<R> map(Function<T, */ /* R> */ mapper);/* 
+     */
+};
+/* public */ struct List<T> {/* Iterator<T> iter(); */
+	/* List<T> */ /* add(T */ element);/* 
      */
 };
 /* private */ struct Head<T> {/* Optional<T> next(); *//* 

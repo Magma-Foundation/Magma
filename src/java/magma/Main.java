@@ -9,13 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    public interface List<T> {
-        Iterator<T> iter();
-
-        List<T> add(T element);
-    }
-
-    private interface Collector<T, C> {
+    public interface Collector<T, C> {
         C createInitial();
 
         C fold(C current, T element);
@@ -27,6 +21,12 @@ public class Main {
         <R> R fold(R initial, BiFunction<R, T, R> folder);
 
         <R> Iterator<R> map(Function<T, R> mapper);
+    }
+
+    public interface List<T> {
+        Iterator<T> iter();
+
+        List<T> add(T element);
     }
 
     private interface Head<T> {
