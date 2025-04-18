@@ -400,10 +400,11 @@ public class Main {
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(">")) {
-            int argumentsStart = stripped.indexOf("<");
+            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            int argumentsStart = withoutEnd.indexOf("<");
             if (argumentsStart >= 0) {
-                String base = stripped.substring(0, argumentsStart).strip();
-                String params = stripped.substring(argumentsStart + "<".length());
+                String base = withoutEnd.substring(0, argumentsStart).strip();
+                String params = withoutEnd.substring(argumentsStart + "<".length());
                 Tuple<CompileState, String> newTypes = compileValues(state, params, Main::compileType);
                 return new Tuple<>(newTypes.left, base + "<" + newTypes.right + ">");
             }
