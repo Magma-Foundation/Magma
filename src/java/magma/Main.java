@@ -150,7 +150,11 @@ public class Main {
             return new Tuple<>(state.addImport("// #include <temp.h>\n"), "");
         }
 
-        return compileClass(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileClass(state, input).orElseGet(() -> compileContent(state, input));
+    }
+
+    private static Tuple<CompileState, String> compileContent(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
@@ -166,7 +170,7 @@ public class Main {
                     String inputContent = generatePlaceholder(withEnd.substring(0, withEnd.length() - "}".length()));
                     Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 
-                    String format = "%s struct %s {%s};";
+                    String format = "%s struct %s {%s\n};\n";
                     String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
                     return Optional.of(new Tuple<>(content.left.addStruct(message), ""));
                 }
@@ -175,8 +179,21 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String classSegment) {
-        return compileClass(state, classSegment).orElseGet(() -> new Tuple<>(state, generatePlaceholder(classSegment)));
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+        return compileClass(state, input)
+                .or(() -> compileDefinitionStatement(state, input))
+                .orElseGet(() -> compileContent(state, input));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(withoutEnd) + ";"));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static String generatePlaceholder(String input) {
