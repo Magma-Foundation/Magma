@@ -1,36 +1,28 @@
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-/* public */ struct Main {/* /* private static */ struct State {/* /* private final List<String> segments; *//* 
+/* /* private static */ struct DivideState {/* /* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } *//* 
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } *//* 
 
-        private State exit() {
+        private DivideState exit() {
             this.depth = this.depth - 1;
             return this;
         } *//* 
 
-        private State enter() {
+        private DivideState enter() {
             this.depth = this.depth + 1;
             return this;
         } *//* 
 
-        private State advance() {
+        private DivideState advance() {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -40,7 +32,7 @@
             return this.depth == 1;
         } *//* 
 
-        private State append(char c) {
+        private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         } *//* 
@@ -52,7 +44,21 @@
         public List<String> segments() {
             return this.segments;
         } *//* 
-     */ */};/* 
+     */ */};/* public */ struct Main {/* 
+
+    record Tuple<A, B>(A left, B right) {
+    } *//* 
+
+    record CompileState(List<String> structs) {
+        public CompileState() {
+            this(new ArrayList<>());
+        }
+
+        public CompileState addStruct(String struct) {
+            this.structs.add(struct);
+            return this;
+        }
+    } *//* 
 
     public static void main(String[] args) {
         try {
@@ -68,22 +74,29 @@
     } *//* 
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        CompileState oldState = new CompileState();
+        Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
+        CompileState newState = output.left;
+        String joinedStructs = String.join("", newState.structs);
+        return joinedStructs + output.right;
     } *//* 
 
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
         List<String> segments = divide(input);
 
-        StringBuilder output = new StringBuilder();
+        Tuple<CompileState, StringBuilder> current = new Tuple<>(state, new StringBuilder());
         for (String segment : segments) {
-            output.append(compiler.apply(segment));
+            Tuple<CompileState, String> compiled = compiler.apply(current.left, segment);
+            CompileState newState = compiled.left;
+            StringBuilder newCache = current.right.append(compiled.right);
+            current = new Tuple<>(newState, newCache);
         }
 
-        return output.toString();
+        return new Tuple<>(current.left, current.right.toString());
     } *//* 
 
     private static List<String> divide(String input) {
-        State current = new State();
+        DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = foldStatementChar(current, c);
@@ -92,8 +105,8 @@
         return current.advance().segments;
     } *//* 
 
-    private static State foldStatementChar(State state, char c) {
-        State appended = state.append(c);
+    private static DivideState foldStatementChar(DivideState state, char c) {
+        DivideState appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
@@ -107,19 +120,7 @@
             return appended.exit();
         } *//* 
         return appended; *//* 
-     */ */};/* 
-
-    private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) {
-            return "";
-        }
-        if (input.strip().startsWith("import ")) {
-            return "// #include <temp.h>\n";
-        }
-
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
-
-    } *//* private static Optional<String> compileClass(String input) {
+     */ */};/* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf(" */ struct ");
         if (classIndex >= 0) {/* /* String modifiers = input.substring(0, classIndex).strip(); *//* 
             String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
@@ -129,18 +130,39 @@
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = generatePlaceholder(withEnd.substring(0, withEnd.length() - "}".length()));
-                    String content = compileStatements(inputContent, Main::compileClassSegment);
-                    return Optional.of(generatePlaceholder(modifiers) + " struct " +
-                            name +
-                            " {" + content + "};");
+                    Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
+
+                    String format = "%s struct %s {%s};";
+                    String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
+                    return Optional.of(new Tuple<>(content.left.addStruct(message), ""));
                 }
             } *//* 
         }
         return Optional.empty();
-     */ */};/* 
+     */ */};// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+/* 
 
-    private static String compileClassSegment(String classSegment) {
-        return compileClass(classSegment).orElseGet(() -> generatePlaceholder(classSegment));
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
+        if (input.startsWith("package ")) {
+            return new Tuple<>(state, "");
+        }
+        if (input.strip().startsWith("import ")) {
+            return new Tuple<>(state, "// #include <temp.h>\n");
+        }
+
+        return compileClass(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    } *//* 
+
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String classSegment) {
+        return compileClass(state, classSegment).orElseGet(() -> new Tuple<>(state, generatePlaceholder(classSegment)));
     } *//* 
 
     private static String generatePlaceholder(String input) {
