@@ -1,10 +1,9 @@
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Path; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.ArrayList; *//* 
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+/* 
 
 public class Main {
     public static void main(String[] args) {
@@ -42,6 +41,12 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return ""; *//* 
+        }
+        if (input.strip().startsWith("import ")) {
+            return "// #include <temp.h>\n"; *//* 
+        }
         return generatePlaceholder(input); *//* 
     }
 

@@ -42,6 +42,12 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return "";
+        }
+        if (input.strip().startsWith("import ")) {
+            return "// #include <temp.h>\n";
+        }
         return generatePlaceholder(input);
     }
 
