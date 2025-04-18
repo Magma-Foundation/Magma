@@ -817,7 +817,7 @@ public class Main {
         statementOrBlock.set(new OrRule(List.of(
                 createWhitespaceRule(),
                 createIfRule(statementOrBlock),
-                new StripRule(new SuffixRule(createStatementRule(), ";"))
+                createStatementRule(createStatementValueRule())
         )));
         return statementOrBlock;
     }
@@ -828,11 +828,16 @@ public class Main {
         return new TypeRule("if", createContentRule(beforeContent, statementOrBlock));
     }
 
-    private static OrRule createStatementRule() {
+    private static OrRule createStatementValueRule() {
         return new OrRule(List.of(
                 createReturnRule(),
-                createInvocationRule(createValueRule())
+                createInvocationRule(createValueRule()),
+                createInitializationRule()
         ));
+    }
+
+    private static InfixRule createInitializationRule() {
+        return new InfixRule(new NodeRule("definition", createDefinitionRule()), new LocatingSplitter("=", new FirstLocator()), new NodeRule("value", createValueRule()));
     }
 
     private static TypeRule createReturnRule() {
@@ -855,15 +860,16 @@ public class Main {
         valueRule.set(new OrRule(List.of(
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 createInvocationRule(valueRule),
-                createDataAccessRule(valueRule),
+                createAccessRule(valueRule, "."),
+                createAccessRule(valueRule, "::"),
                 new StripRule(new FilterRule(new StringRule("value"), new NumberRule())),
                 createSymbolRule("value")
         )));
         return valueRule;
     }
 
-    private static InfixRule createDataAccessRule(LazyRule valueRule) {
-        return new InfixRule(new NodeRule("parent", valueRule), new LocatingSplitter(".", new LastLocator()), createSymbolRule("property"));
+    private static InfixRule createAccessRule(LazyRule valueRule, String infix) {
+        return new InfixRule(new NodeRule("parent", valueRule), new LocatingSplitter(infix, new LastLocator()), createSymbolRule("property"));
     }
 
     private static Rule createDefinitionRule() {
