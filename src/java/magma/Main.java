@@ -502,6 +502,13 @@ public class Main {
         }
     }
 
+    private record PrefixRule(String prefix, Rule rule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return this.rule.parse(input.substring(this.prefix.length()));
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -599,15 +606,41 @@ public class Main {
 
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
         Rule withParams = new StripRule(new SuffixRule(params, ")"));
-        Rule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
+        Rule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementOrBlockRule());
+
         return new InfixRule(beforeParams, "(", new OrRule(List.of(
                 new StripRule(new SuffixRule(withParams, ";")),
                 new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
         )));
     }
 
-    private static Rule createStatementRule() {
+    private static Rule createStatementOrBlockRule() {
         return new OrRule(List.of(
+                new StripRule(new SuffixRule(createStatementRule(), ";")),
+                createWhitespaceRule()
+        ));
+    }
+
+    private static OrRule createStatementRule() {
+        return new OrRule(List.of(
+                createReturnRule(),
+                createInvocationRule()
+        ));
+    }
+
+    private static TypeRule createReturnRule() {
+        return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", createValueRule()))));
+    }
+
+    private static StripRule createInvocationRule() {
+        NodeRule caller = new NodeRule("caller", createValueRule());
+        DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule());
+        return new StripRule(new SuffixRule(new InfixRule(caller, "(", arguments), ")"));
+    }
+
+    private static Rule createValueRule() {
+        return new OrRule(List.of(
+                createSymbolRule("value")
         ));
     }
 
