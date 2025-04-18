@@ -5,6 +5,23 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
+/* public */ struct List<T> {/* Iterator<T> iter(); */
+	/* List<T> */ /* add(T */ element);/* 
+     */
+};
+/* private */ struct Collector<T, C> {/* C createInitial(); */
+	/* C fold(C current, */ /* T */ element);/* 
+     */
+};
+/* public */ struct Iterator<T> {
+	/* <C> C collect(Collector<T, */ /* C> */ collector);
+	/* <R> R fold(R initial, BiFunction<R, T, */ /* R> */ folder);
+	/* <R> Iterator<R> map(Function<T, */ /* R> */ mapper);/* 
+     */
+};
+/* private */ struct Head<T> {/* Optional<T> next(); *//* 
+     */
+};
 /* private static */ struct DivideState {
 	/* private final */ /* List<String> */ segments;
 	/* private */ /* StringBuilder */ buffer;
@@ -85,29 +102,7 @@
         } *//* 
      */
 };
-/* public */ struct Main {/* public interface List<T> {
-        Iterator<T> iter();
-
-        List<T> add(T element);
-    } *//* 
-
-    private interface Collector<T, C> {
-        C createInitial();
-
-        C fold(C current, T element);
-    } *//* 
-
-    public interface Iterator<T> {
-        <C> C collect(Collector<T, C> collector);
-
-        <R> R fold(R initial, BiFunction<R, T, R> folder);
-
-        <R> Iterator<R> map(Function<T, R> mapper);
-    } *//* 
-
-    private interface Head<T> {
-        Optional<T> next();
-    } *//* 
+/* public */ struct Main {/* 
 
     record Tuple<A, B>(A left, B right) {
     } *//* 
@@ -228,26 +223,6 @@
         return appended; *//* 
      */
 };
-/* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        int classIndex = input.indexOf(" */ struct ");
-        if (classIndex >= 0) {
-	/* String modifiers = */ /* input.substring(0, */ classIndex).strip();
-	/* String afterKeyword = input.substring(classIndex + */ /* "class */ ".length());/* 
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
-
-                    String format = "%s struct %s {%s\n};\n";
-                    String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
-                    return Optional.of(new Tuple<>(content.left.addStruct(message), ""));
-                }
-            } */
-	/* } */ /* return */ Optional.empty();
-};
 /* 
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -265,8 +240,35 @@
         return new Tuple<>(state, generatePlaceholder(input));
     } *//* 
 
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
+        return compileStructured("class ", state, input);
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileStructured(String infix, CompileState state, String input) {
+        int classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            String modifiers = input.substring(0, classIndex).strip();
+            String afterKeyword = input.substring(classIndex + infix.length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
+
+                    String format = "%s struct %s {%s\n};\n";
+                    String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
+                    return Optional.of(new Tuple<>(content.left.addStruct(message), ""));
+                }
+            }
+        }
+        return Optional.empty();
+    } *//* 
+
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
+                .or(() -> compileStructured("interface ", state, input))
                 .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> compileContent(state, input));
     } *//* 

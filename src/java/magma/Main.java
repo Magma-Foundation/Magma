@@ -249,10 +249,14 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        int classIndex = input.indexOf("class ");
+        return compileStructured("class ", state, input);
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileStructured(String infix, CompileState state, String input) {
+        int classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             String modifiers = input.substring(0, classIndex).strip();
-            String afterKeyword = input.substring(classIndex + "class ".length());
+            String afterKeyword = input.substring(classIndex + infix.length());
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
@@ -272,6 +276,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
+                .or(() -> compileStructured("interface ", state, input))
                 .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> compileContent(state, input));
     }
