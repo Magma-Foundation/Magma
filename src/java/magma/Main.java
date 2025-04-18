@@ -1,9 +1,7 @@
 package magma;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -190,7 +188,7 @@ public class Main {
         }
     }
 
-    private record Err<T, X>(X error) implements Result<T, X> {
+    public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> Result<R, X> mapValue(Function<T, R> mapper) {
             return new Err<>(this.error);
@@ -637,7 +635,7 @@ public class Main {
 
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readString(source)
+        JavaFiles.readString(source)
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new).match(input -> runWithInput(source, input), Optional::of)
                 .ifPresent(error -> System.err.println(error.display()));
@@ -646,27 +644,10 @@ public class Main {
     private static Optional<ApplicationError> runWithInput(Path source, String input) {
         return compile(input).mapErr(ApplicationError::new).match(output -> {
             Path target = source.resolveSibling("Main.java.ast.json");
-            return writeString(output, target)
+            return JavaFiles.writeString(output, target)
                     .map(ThrowableError::new)
                     .map(ApplicationError::new);
         }, Optional::of);
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
-    }
-
-    private static Optional<IOException> writeString(String output, Path target) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
     }
 
     private static Result<String, CompileError> compile(String input) {
@@ -677,6 +658,7 @@ public class Main {
 
     private static OrRule createRootSegmentRule() {
         return new OrRule(List.of(
+                createWhitespaceRule(),
                 createNamespacedRule(),
                 createClassRule(createClassSegmentRule())
         ));

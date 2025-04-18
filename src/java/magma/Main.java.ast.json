@@ -11,15 +11,6 @@
 		}, {
 			"value" : "io"
 		}, {
-			"value" : "IOException"
-		}]
-	}, {
-		"type" : "import", 
-		"segments" : [{
-			"value" : "java"
-		}, {
-			"value" : "io"
-		}, {
 			"value" : "PrintWriter"
 		}]
 	}, {
@@ -30,17 +21,6 @@
 			"value" : "io"
 		}, {
 			"value" : "StringWriter"
-		}]
-	}, {
-		"type" : "import", 
-		"segments" : [{
-			"value" : "java"
-		}, {
-			"value" : "nio"
-		}, {
-			"value" : "file"
-		}, {
-			"value" : "Files"
 		}]
 	}, {
 		"type" : "import", 
@@ -89,7 +69,25 @@
 		}, {
 			"value" : "util"
 		}, {
+			"value" : "Comparator"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "util"
+		}, {
 			"value" : "HashMap"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "util"
+		}, {
+			"value" : "LinkedList"
 		}]
 	}, {
 		"type" : "import", 
@@ -117,17 +115,6 @@
 			"value" : "util"
 		}, {
 			"value" : "Optional"
-		}]
-	}, {
-		"type" : "import", 
-		"segments" : [{
-			"value" : "java"
-		}, {
-			"value" : "util"
-		}, {
-			"value" : "function"
-		}, {
-			"value" : "BiFunction"
 		}]
 	}, {
 		"type" : "import", 
@@ -171,6 +158,17 @@
 		}, {
 			"value" : "stream"
 		}, {
+			"value" : "IntStream"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "util"
+		}, {
+			"value" : "stream"
+		}, {
 			"value" : "Stream"
 		}]
 	}, {
@@ -178,15 +176,61 @@
 		"children" : [{
 			"name" : "Result<T, X>", 
 			"children" : [{
-				"value" : "<R> Result<R, X> mapValue(Function<T, R> mapper);"
+				"name" : "mapper)", 
+				"type" : {
+					"base" : {
+						"symbol" : ""
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"symbol" : "X> mapValue(Function<T, R"
+					}]
+				}
 			}, {
-				"value" : "<R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);"
+				"name" : "mapper)", 
+				"type" : {
+					"base" : {
+						"symbol" : ""
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"base" : {
+							"symbol" : "X> flatMapValue(Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"symbol" : "Result<R, X"
+						}]
+					}]
+				}
 			}, {
-				"value" : "<R> R match(Function<T, R> whenOk, Function<X, R> whenErr);"
+				"name" : "whenErr)", 
+				"type" : {
+					"base" : {
+						"symbol" : ""
+					}, 
+					"arguments" : [{
+						"symbol" : "R> R match(Function<T, R> whenOk"
+					}, {
+						"symbol" : "Function<X, R"
+					}]
+				}
 			}, {
-				"value" : "<R> Result<T, R> mapErr(Function<X, R> mapper);"
+				"name" : "mapper)", 
+				"type" : {
+					"base" : {
+						"symbol" : ""
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<T"
+					}, {
+						"symbol" : "R> mapErr(Function<X, R"
+					}]
+				}
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -194,22 +238,11 @@
 		}, {
 			"name" : "Rule", 
 			"children" : [{
-				"definition" : {
-					"name" : "CompileError> parse", 
-					"type" : {
-						"symbol" : "Result<Node,"
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
-					}
-				}]
+				"name" : "input)", 
+				"type" : {
+					"symbol" : "Result<Node, CompileError> parse(String"
+				}
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -225,27 +258,11 @@
 		}, {
 			"name" : "Divider", 
 			"children" : [{
-				"definition" : {
-					"name" : "divide", 
-					"type" : {
-						"base" : {
-							"symbol" : "List"
-						}, 
-						"arguments" : [{
-							"symbol" : "String"
-						}]
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
-					}
-				}]
+				"name" : "input)", 
+				"type" : {
+					"symbol" : "List<String> divide(String"
+				}
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -253,29 +270,11 @@
 		}, {
 			"name" : "Folder", 
 			"children" : [{
-				"definition" : {
-					"name" : "fold", 
-					"type" : {
-						"symbol" : "State"
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "state", 
-						"type" : {
-							"symbol" : "State"
-						}
-					}
-				}, {
-					"definition" : {
-						"name" : "c", 
-						"type" : {
-							"symbol" : "char"
-						}
-					}
-				}]
+				"name" : "c)", 
+				"type" : {
+					"symbol" : "State fold(State state, char"
+				}
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -291,9 +290,11 @@
 		}, {
 			"name" : "Error", 
 			"children" : [{
-				"value" : "String display();"
+				"name" : "display()", 
+				"type" : {
+					"symbol" : "String"
+				}
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -307,369 +308,544 @@
 				"value" : "private"
 			}]
 		}, {
-			"name" : "CompileError(String message, String context, List<CompileError> errors) implements Error", 
+			"name" : "Locator", 
 			"children" : [{
-				"value" : "CompileError(String message, String context) {
-            this(message, context, new ArrayList<>());
-        }"
+				"name" : "infix)", 
+				"type" : {
+					"symbol" : "Optional<Integer> locate(String input, String"
+				}
 			}, {
-				"value" : "@Override
-        public String display() {
-            return this.message + ": " + this.context + this.errors.stream()
-                    .map(CompileError::display)
-                    .collect(Collectors.joining());
-        }"
-			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
 			}]
 		}, {
-			"name" : "Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists)", 
+			"name" : "Splitter", 
 			"children" : [{
-				"value" : "public Node() {
-            this(new HashMap<>(), new HashMap<>(), new HashMap<>());
-        }"
+				"name" : "input)", 
+				"type" : {
+					"symbol" : "Result<Tuple<String, String>, CompileError> split(String"
+				}
 			}, {
-				"definition" : {
-					"name" : "static String createJSONProperty", 
-					"type" : {
-						"symbol" : "private"
-					}
-				}, 
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}]
+		}, {
+			"name" : "CompileError", 
+			"super-type" : "Error", 
+			"children" : [{
+				"name" : "CompileError", 
 				"params" : [{
-					"definition" : {
-						"name" : "depth", 
-						"type" : {
-							"symbol" : "int"
-						}
+					"name" : "message", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}, {
-					"definition" : {
-						"name" : "name", 
-						"type" : {
-							"symbol" : "String"
-						}
-					}
-				}, {
-					"definition" : {
-						"name" : "value", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "context", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "String indent = "\t".repeat(depth);"
+					"value" : {
+						"value" : "ssage, context, new ArrayList<>())"
+					}
 				}, {
-					"value" : "return "\n" + indent + "\"" + name + "\" : " + value;"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"definition" : {
-					"name" : "String format", 
-					"type" : {
-						"symbol" : "private"
-					}
+				"name" : "display", 
+				"type" : {
+					"symbol" : "@Override
+        public String"
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "depth", 
-						"type" : {
-							"symbol" : "int"
-						}
-					}
 				}], 
 				"children" : [{
-					"value" : "Stream<String> stringStream = this.formatStrings(depth);"
+					"value" : {
+						"value" : "this.format(0)"
+					}
 				}, {
-					"value" : "Stream<String> nodesStream = this.formatNodes(depth);"
-				}, {
-					"value" : "Stream<String> nodeListsStream = this.formatNodeLists(depth);"
-				}, {
-					"value" : "String content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "));"
-				}, {
-					"value" : "String indent = "\t".repeat(depth);"
-				}, {
-					"value" : "return "{" + content + "\n" + indent + "}"
-				}, {
-					"value" : "";"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"definition" : {
-					"name" : "Stream<String> formatNodes", 
-					"type" : {
-						"symbol" : "private"
-					}
+				"name" : "format", 
+				"type" : {
+					"symbol" : "private String"
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "depth", 
-						"type" : {
-							"symbol" : "int"
-						}
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.nodes.entrySet()
+					"value" : {
+						"value" : "mpileError> copy = new ArrayList<>(this.errors)"
+					}
+				}, {
+					"value" : {
+						"value" : "rt(Comparator.comparingInt(CompileError::maxDepth))"
+					}
+				}, {
+					"value" : {
+						"value" : "joined = copy.stream()
+                    .map(error -> error.format(depth + 1))
+                    .map(display -> "\n" + "\t".repeat(depth + 1) + display)
+                    .collect(Collectors.joining())"
+					}
+				}, {
+					"value" : {
+						"value" : "this.message + ": " + this.context + joined"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "maxDepth", 
+				"type" : {
+					"symbol" : "private int"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "1 + this.errors.stream()
+                    .mapToInt(CompileError::maxDepth)
+                    .max()
+                    .orElse(0)"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}], 
+			"params" : [{
+				"name" : "message", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "context", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "errors", 
+				"type" : {
+					"base" : {
+						"symbol" : "List"
+					}, 
+					"arguments" : [{
+						"symbol" : "CompileError"
+					}]
+				}
+			}]
+		}, {
+			"name" : "Node", 
+			"children" : [{
+				"name" : "Node", 
+				"type" : {
+					"symbol" : "public"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "w HashMap<>(), new HashMap<>(), new HashMap<>())"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "createJSONProperty", 
+				"type" : {
+					"symbol" : "private static String"
+				}, 
+				"params" : [{
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}, {
+					"name" : "name", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "value", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "indent = "\t".repeat(depth)"
+					}
+				}, {
+					"value" : {
+						"value" : ""\n" + indent + "\"" + name + "\" : " + value"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "format", 
+				"type" : {
+					"symbol" : "private String"
+				}, 
+				"params" : [{
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "String> stringStream = this.formatStrings(depth)"
+					}
+				}, {
+					"value" : {
+						"value" : "String> nodesStream = this.formatNodes(depth)"
+					}
+				}, {
+					"value" : {
+						"value" : "String> nodeListsStream = this.formatNodeLists(depth)"
+					}
+				}, {
+					"value" : {
+						"value" : "content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "))"
+					}
+				}, {
+					"value" : {
+						"value" : "indent = "\t".repeat(depth)"
+					}
+				}, {
+					"value" : {
+						"value" : ""{" + content + "\n" + indent + "}""
+					}
+				}, {
+				}]
+			}, {
+				"name" : "formatNodes", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Stream"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
+				}, 
+				"params" : [{
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.nodes.entrySet()
                     .stream()
-                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)));"
+                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)))"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"definition" : {
-					"name" : "Stream<String> formatNodeLists", 
-					"type" : {
-						"symbol" : "private"
-					}
+				"name" : "formatNodeLists", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Stream"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "depth", 
-						"type" : {
-							"symbol" : "int"
-						}
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.nodeLists.entrySet()
+					"value" : {
+						"value" : "this.nodeLists.entrySet()
                     .stream()
-                    .map(entry -> this.formatNodeList(depth, entry));"
+                    .map(entry -> this.formatNodeList(depth, entry))"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : "private String formatNodeList(int depth, Map.Entry<String, List<Node>> entry) {
-            String joined = entry.getValue()
-                    .stream()
-                    .map(node -> node.format(depth + 1))
-                    .collect(Collectors.joining(", "));
-
-            return createJSONProperty(depth + 1, entry.getKey(), "[" + joined + "]");
-        }"
-			}, {
-				"definition" : {
-					"name" : "Stream<String> formatStrings", 
-					"type" : {
-						"symbol" : "private"
-					}
+				"name" : "formatNodeList", 
+				"type" : {
+					"symbol" : "private String"
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "depth", 
-						"type" : {
-							"symbol" : "int"
-						}
-					}
-				}], 
-				"children" : [{
-					"value" : "return this.strings.entrySet()
-                    .stream()
-                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), "\"" + entry.getValue() + "\""));"
-				}, {
-					"value" : ""
-				}]
-			}, {
-				"definition" : {
-					"name" : "Node withString", 
+					"name" : "depth", 
 					"type" : {
-						"symbol" : "public"
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "propertyKey", 
-						"type" : {
-							"symbol" : "String"
-						}
+						"symbol" : "int"
 					}
 				}, {
-					"definition" : {
-						"name" : "propertyValue", 
-						"type" : {
-							"symbol" : "String"
-						}
-					}
-				}], 
-				"children" : [{
-					"value" : "this.strings.put(propertyKey, propertyValue);"
-				}, {
-					"value" : "return this;"
-				}, {
-					"value" : ""
-				}]
-			}, {
-				"definition" : {
-					"name" : "Node withNodeList", 
+					"name" : "entry", 
 					"type" : {
-						"symbol" : "public"
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "propertyKey", 
-						"type" : {
+						"base" : {
+							"symbol" : "Map.Entry"
+						}, 
+						"arguments" : [{
 							"symbol" : "String"
-						}
-					}
-				}, {
-					"definition" : {
-						"name" : "propertyValues", 
-						"type" : {
+						}, {
 							"base" : {
 								"symbol" : "List"
 							}, 
 							"arguments" : [{
 								"symbol" : "Node"
 							}]
-						}
+						}]
 					}
 				}], 
 				"children" : [{
-					"value" : "this.nodeLists.put(propertyKey, propertyValues);"
+					"value" : {
+						"value" : "joined = entry.getValue()
+                    .stream()
+                    .map(node -> node.format(depth + 1))
+                    .collect(Collectors.joining(", "))"
+					}
 				}, {
-					"value" : "return this;"
+					"value" : {
+						"value" : "createJSONProperty(depth + 1, entry.getKey(), "[" + joined + "]")"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"definition" : {
-					"name" : "Node merge", 
-					"type" : {
-						"symbol" : "public"
-					}
+				"name" : "formatStrings", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Stream"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "other", 
-						"type" : {
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.strings.entrySet()
+                    .stream()
+                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), "\"" + entry.getValue() + "\""))"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "withString", 
+				"type" : {
+					"symbol" : "public Node"
+				}, 
+				"params" : [{
+					"name" : "propertyKey", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "propertyValue", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "rings.put(propertyKey, propertyValue)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "withNodeList", 
+				"type" : {
+					"symbol" : "public Node"
+				}, 
+				"params" : [{
+					"name" : "propertyKey", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "propertyValues", 
+					"type" : {
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
 							"symbol" : "Node"
-						}
+						}]
 					}
 				}], 
 				"children" : [{
-					"value" : "this.strings.putAll(other.strings);"
+					"value" : {
+						"value" : "deLists.put(propertyKey, propertyValues)"
+					}
 				}, {
-					"value" : "this.nodes.putAll(other.nodes);"
+					"value" : {
+						"value" : "this"
+					}
 				}, {
-					"value" : "this.nodeLists.putAll(other.nodeLists);"
-				}, {
-					"value" : "return this;"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : "public String display() {
-            return this.format(0);
-        }"
-			}, {
-				"definition" : {
-					"name" : "Node withNode", 
-					"type" : {
-						"symbol" : "public"
-					}
+				"name" : "merge", 
+				"type" : {
+					"symbol" : "public Node"
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "propertyKey", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "other", 
+					"type" : {
+						"symbol" : "Node"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "rings.putAll(other.strings)"
 					}
 				}, {
-					"definition" : {
-						"name" : "propertyValue", 
-						"type" : {
+					"value" : {
+						"value" : "des.putAll(other.nodes)"
+					}
+				}, {
+					"value" : {
+						"value" : "deLists.putAll(other.nodeLists)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "display", 
+				"type" : {
+					"symbol" : "public String"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.format(0)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "withNode", 
+				"type" : {
+					"symbol" : "public Node"
+				}, 
+				"params" : [{
+					"name" : "propertyKey", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "propertyValue", 
+					"type" : {
+						"symbol" : "Node"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "des.put(propertyKey, propertyValue)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "strings", 
+				"type" : {
+					"base" : {
+						"symbol" : "Map"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}, {
+						"symbol" : "String"
+					}]
+				}
+			}, {
+				"name" : "nodes", 
+				"type" : {
+					"base" : {
+						"symbol" : "Map"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}, {
+						"symbol" : "Node"
+					}]
+				}
+			}, {
+				"name" : "nodeLists", 
+				"type" : {
+					"base" : {
+						"symbol" : "Map"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}, {
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
 							"symbol" : "Node"
-						}
-					}
-				}], 
-				"children" : [{
-					"value" : "this.nodes.put(propertyKey, propertyValue);"
-				}, {
-					"value" : "return this;"
-				}, {
-					"value" : ""
-				}]
-			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
+						}]
+					}]
+				}
 			}]
 		}, {
-			"name" : "Ok<T, X>(T value) implements Result<T, X>", 
+			"name" : "StringRule", 
+			"super-type" : "Rule", 
 			"children" : [{
-				"value" : "@Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Ok<>(mapper.apply(this.value));
-        }"
-			}, {
-				"value" : "@Override
-        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-            return mapper.apply(this.value);
-        }"
-			}, {
-				"value" : "@Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        }"
-			}, {
-				"value" : "@Override
-        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
-            return new Ok<>(this.value);
-        }"
-			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
-			}]
-		}, {
-			"name" : "StringRule(String propertyKey) implements Rule", 
-			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "return new Ok<>(new Node().withString(this.propertyKey, input));"
+					"value" : {
+						"value" : "new Ok<>(new Node().withString(this.propertyKey, input))"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -681,31 +857,40 @@
 				"value" : ""
 			}, {
 				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "propertyKey", 
+				"type" : {
+					"symbol" : "String"
+				}
 			}]
 		}, {
-			"name" : "DelimitedDivider(String delimiter) implements Divider", 
+			"name" : "DelimitedDivider", 
+			"super-type" : "Divider", 
 			"children" : [{
-				"definition" : {
-					"name" : "       public List<String> divide", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "divide", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public List"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "return Arrays.asList(input.split(Pattern.quote(this.delimiter)));"
+					"value" : {
+						"value" : "Arrays.asList(input.split(Pattern.quote(this.delimiter)))"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -717,201 +902,625 @@
 				"value" : ""
 			}, {
 				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "delimiter", 
+				"type" : {
+					"symbol" : "String"
+				}
 			}]
 		}, {
-			"name" : "DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule", 
+			"name" : "DivideRule", 
+			"super-type" : "Rule", 
 			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.divider.divide(input)
+					"value" : {
+						"value" : "this.divider.divide(input)
                     .stream()
                     .reduce(new Ok<>(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
-                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children));"
+                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children))"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : "private Result<List<Node>, CompileError> foldChild(Result<List<Node>, CompileError> maybeChildren, String child) {
-            return maybeChildren.flatMapValue(children -> this.childRule.parse(child).mapValue(compiled -> {
+				"name" : "foldChild", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Result"
+					}, 
+					"arguments" : [{
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
+							"symbol" : "Node"
+						}]
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "maybeChildren", 
+					"type" : {
+						"base" : {
+							"symbol" : "Result"
+						}, 
+						"arguments" : [{
+							"base" : {
+								"symbol" : "List"
+							}, 
+							"arguments" : [{
+								"symbol" : "Node"
+							}]
+						}, {
+							"symbol" : "CompileError"
+						}]
+					}
+				}, {
+					"name" : "child", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "maybeChildren.flatMapValue(children -> this.childRule.parse(child).mapValue(compiled -> {
                 children.add(compiled);
                 return children;
-            }));
-        }"
-			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
-			}]
-		}, {
-			"name" : "Err<T, X>(X error) implements Result<T, X>", 
-			"children" : [{
-				"value" : "@Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Err<>(this.error);
-        }"
-			}, {
-				"value" : "@Override
-        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-            return new Err<>(this.error);
-        }"
-			}, {
-				"value" : "@Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(this.error);
-        }"
-			}, {
-				"value" : "@Override
-        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
-            return new Err<>(mapper.apply(this.error));
-        }"
-			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
-			}]
-		}, {
-			"name" : "InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule", 
-			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
+            }))"
 					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "propertyKey", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "divider", 
+				"type" : {
+					"symbol" : "Divider"
+				}
+			}, {
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "Err<T, X>", 
+			"super-type" : "Result<T, X>", 
+			"children" : [{
+				"name" : "mapValue", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"symbol" : "X"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"symbol" : "R"
+						}]
 					}
 				}], 
 				"children" : [{
-					"value" : "int index = input.indexOf(this.infix);"
+					"value" : {
+						"value" : "new Err<>(this.error)"
+					}
 				}, {
-					"value" : "if (index < 0) {
-                return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
-            }"
-				}, {
-					"value" : "String left = input.substring(0, index);"
-				}, {
-					"value" : "String right = input.substring(index + this.infix.length());"
-				}, {
-					"value" : "return this.leftRule.parse(left).flatMapValue(withLeft -> this.rightRule.parse(right).mapValue(withLeft::merge));"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
-			}]
-		}, {
-			"name" : "SuffixRule(Rule childRule, String suffix) implements Rule", 
-			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "flatMapValue", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"symbol" : "X"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"base" : {
+								"symbol" : "Result"
+							}, 
+							"arguments" : [{
+								"symbol" : "R"
+							}, {
+								"symbol" : "X"
+							}]
+						}]
 					}
 				}], 
 				"children" : [{
-					"value" : "if (!input.endsWith(this.suffix())) {
-                return new Err<>(new CompileError("Suffix '" + this.suffix + "' not present", input));
-            }"
+					"value" : {
+						"value" : "new Err<>(this.error)"
+					}
 				}, {
-					"value" : "String slice = input.substring(0, input.length() - this.suffix().length());"
-				}, {
-					"value" : "return this.childRule().parse(slice);"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : ""
-			}], 
-			"modifiers" : [{
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : ""
-			}, {
-				"value" : "private"
-			}]
-		}, {
-			"name" : "StripRule(Rule childRule) implements Rule", 
-			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "match", 
+				"type" : {
+					"symbol" : "@Override
+        public <R> R"
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "value", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "whenOk", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}, {
+					"name" : "whenErr", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "X"
+						}, {
+							"symbol" : "R"
+						}]
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.childRule.parse(value.strip());"
+					"value" : {
+						"value" : "whenErr.apply(this.error)"
+					}
 				}, {
-					"value" : ""
 				}]
 			}, {
+				"name" : "mapErr", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<T"
+					}, {
+						"symbol" : "R"
+					}]
+				}, 
+				"params" : [{
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "X"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "new Err<>(mapper.apply(this.error))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
 				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "public"
+			}], 
+			"params" : [{
+				"name" : "error", 
+				"type" : {
+					"symbol" : "X"
+				}
+			}]
+		}, {
+			"name" : "FirstLocator", 
+			"super-type" : "Locator", 
+			"children" : [{
+				"name" : "locate", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Optional"
+					}, 
+					"arguments" : [{
+						"symbol" : "Integer"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "infix", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ex = input.indexOf(infix)"
+					}
+				}, {
+					"value" : {
+						"value" : "index == -1 ? Optional.empty() : Optional.of(index)"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "public"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "Ok<T, X>", 
+			"super-type" : "Result<T, X>", 
+			"children" : [{
+				"name" : "mapValue", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"symbol" : "X"
+					}]
+				}, 
+				"params" : [{
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "new Ok<>(mapper.apply(this.value))"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "flatMapValue", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<R"
+					}, {
+						"symbol" : "X"
+					}]
+				}, 
+				"params" : [{
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"base" : {
+								"symbol" : "Result"
+							}, 
+							"arguments" : [{
+								"symbol" : "R"
+							}, {
+								"symbol" : "X"
+							}]
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "mapper.apply(this.value)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "match", 
+				"type" : {
+					"symbol" : "@Override
+        public <R> R"
+				}, 
+				"params" : [{
+					"name" : "whenOk", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "T"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}, {
+					"name" : "whenErr", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "X"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "whenOk.apply(this.value)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "mapErr", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public"
+					}, 
+					"arguments" : [{
+						"symbol" : "R> Result<T"
+					}, {
+						"symbol" : "R"
+					}]
+				}, 
+				"params" : [{
+					"name" : "mapper", 
+					"type" : {
+						"base" : {
+							"symbol" : "Function"
+						}, 
+						"arguments" : [{
+							"symbol" : "X"
+						}, {
+							"symbol" : "R"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "new Ok<>(this.value)"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}], 
+			"params" : [{
+				"name" : "value", 
+				"type" : {
+					"symbol" : "T"
+				}
+			}]
+		}, {
+			"name" : "InfixRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "leftRule", 
+				"type" : {
+					"symbol" : "private final Rule"
+				}
+			}, {
+				"name" : "rightRule", 
+				"type" : {
+					"symbol" : "private final Rule"
+				}
+			}, {
+				"name" : "splitter", 
+				"type" : {
+					"symbol" : "private final Splitter"
+				}
+			}, {
+				"name" : "InfixRule", 
+				"type" : {
+					"symbol" : "private"
+				}, 
+				"params" : [{
+					"name" : "leftRule", 
+					"type" : {
+						"symbol" : "Rule"
+					}
+				}, {
+					"name" : "rightRule", 
+					"type" : {
+						"symbol" : "Rule"
+					}
+				}, {
+					"name" : "splitter", 
+					"type" : {
+						"symbol" : "Splitter"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ftRule = leftRule"
+					}
+				}, {
+					"value" : {
+						"value" : "ghtRule = rightRule"
+					}
+				}, {
+					"value" : {
+						"value" : "litter = splitter"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "InfixRule", 
+				"type" : {
+					"symbol" : "private"
+				}, 
+				"params" : [{
+					"name" : "leftRule", 
+					"type" : {
+						"symbol" : "Rule"
+					}
+				}, {
+					"name" : "infix", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "rightRule", 
+					"type" : {
+						"symbol" : "Rule"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ftRule, rightRule, new LocatingSplitter(infix, new FirstLocator()))"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.splitter.split(input).flatMapValue(this::getNodeCompileErrorResult)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "getNodeCompileErrorResult", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "tuple", 
+					"type" : {
+						"base" : {
+							"symbol" : "Tuple"
+						}, 
+						"arguments" : [{
+							"symbol" : "String"
+						}, {
+							"symbol" : "String"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.leftRule.parse(tuple.left).flatMapValue(withLeft -> this.rightRule.parse(tuple.right).mapValue(withLeft::merge))"
+					}
+				}, {
+				}]
+			}, {
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -923,67 +1532,234 @@
 				"value" : ""
 			}, {
 				"value" : "private"
+			}, {
+				"value" : "static"
+			}, {
+				"value" : "final"
 			}]
 		}, {
-			"name" : "OrRule(List<Rule> rules) implements Rule", 
+			"name" : "Tuple<A, B>", 
+			"children" : [{
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}], 
+			"params" : [{
+				"name" : "left", 
+				"type" : {
+					"symbol" : "A"
+				}
+			}, {
+				"name" : "right", 
+				"type" : {
+					"symbol" : "B"
+				}
+			}]
+		}, {
+			"name" : "SuffixRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"condition" : {
+						"value" : "!input.endsWith(this.suffix())"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "new Err<>(new CompileError("Suffix '" + this.suffix + "' not present", input))"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "slice = input.substring(0, input.length() - this.suffix().length())"
+					}
+				}, {
+					"value" : {
+						"value" : "this.childRule().parse(slice)"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}, {
+				"name" : "suffix", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}]
+		}, {
+			"name" : "StripRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "value", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.childRule.parse(value.strip())"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "OrRule", 
+			"super-type" : "Rule", 
 			"children" : [{
 				"name" : "OrState", 
 				"children" : [{
-					"value" : "public OrState() {
-                this(Optional.empty(), new ArrayList<>());
-            }"
-				}, {
-					"definition" : {
-						"name" : "OrState withValue", 
-						"type" : {
-							"symbol" : "public"
-						}
+					"name" : "OrState", 
+					"type" : {
+						"symbol" : "public"
 					}, 
 					"params" : [{
-						"definition" : {
-							"name" : "value", 
-							"type" : {
-								"symbol" : "Node"
-							}
+					}], 
+					"children" : [{
+						"value" : {
+							"value" : "tional.empty(), new ArrayList<>())"
+						}
+					}, {
+					}]
+				}, {
+					"name" : "withValue", 
+					"type" : {
+						"symbol" : "public OrState"
+					}, 
+					"params" : [{
+						"name" : "value", 
+						"type" : {
+							"symbol" : "Node"
 						}
 					}], 
 					"children" : [{
-						"value" : "if (this.maybeValue.isPresent()) {
-                    return this;
-                }"
+						"condition" : {
+							"value" : "this.maybeValue.isPresent()"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : "this"
+							}
+						}, {
+						}]
 					}, {
-						"value" : "return new OrState(Optional.of(value), this.errors);"
+						"value" : {
+							"value" : "new OrState(Optional.of(value), this.errors)"
+						}
 					}, {
-						"value" : ""
 					}]
 				}, {
-					"definition" : {
-						"name" : "OrState withError", 
-						"type" : {
-							"symbol" : "public"
-						}
+					"name" : "withError", 
+					"type" : {
+						"symbol" : "public OrState"
 					}, 
 					"params" : [{
-						"definition" : {
-							"name" : "error", 
-							"type" : {
+						"name" : "error", 
+						"type" : {
+							"symbol" : "CompileError"
+						}
+					}], 
+					"children" : [{
+						"value" : {
+							"value" : "rors.add(error)"
+						}
+					}, {
+						"value" : {
+							"value" : "new OrState(this.maybeValue, this.errors)"
+						}
+					}, {
+					}]
+				}, {
+					"name" : "toResult", 
+					"type" : {
+						"base" : {
+							"symbol" : "public Result"
+						}, 
+						"arguments" : [{
+							"symbol" : "Node"
+						}, {
+							"base" : {
+								"symbol" : "List"
+							}, 
+							"arguments" : [{
 								"symbol" : "CompileError"
-							}
-						}
+							}]
+						}]
+					}, 
+					"params" : [{
 					}], 
 					"children" : [{
-						"value" : "this.errors.add(error);"
+						"value" : {
+							"value" : "this.maybeValue.<Result<Node, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors))"
+						}
 					}, {
-						"value" : "return new OrState(this.maybeValue, this.errors);"
-					}, {
-						"value" : ""
 					}]
 				}, {
-					"value" : "public Result<Node, List<CompileError>> toResult() {
-                return this.maybeValue.<Result<Node, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors));
-            }"
-				}, {
-					"value" : ""
 				}], 
 				"modifiers" : [{
 					"value" : "private"
@@ -1010,38 +1786,33 @@
 					}
 				}]
 			}, {
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.rules.stream().reduce(new OrState(), new BiFunction<OrState, Rule, OrState>() {
-                @Override
-                public OrState apply(OrState orState, Rule rule) {
-                    return rule.parse(input).match(orState::withValue, orState::withError);
-                }
-            }"
-				}, {
-					"value" : ", (_, next) -> next).toResult().mapErr(errs -> {
+					"value" : {
+						"value" : "this.rules.stream().reduce(new OrState(), (orState, rule) -> rule.parse(input).match(orState::withValue, orState::withError), (_, next) -> next).toResult().mapErr(errs -> {
                 return new CompileError("No valid rule", input, errs);
-            }"
+            })"
+					}
 				}, {
-					"value" : ");"
-				}, {
-					"value" : ""
 				}]
 			}, {
-				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -1053,100 +1824,203 @@
 				"value" : ""
 			}, {
 				"value" : "private"
-			}]
-		}, {
-			"definition" : {
-				"name" : "static class FoldingDivider implements Divider {
-        private final Folder folder;
-
-        public FoldingDivider", 
-				"type" : {
-					"symbol" : "public"
-				}
-			}, 
-			"params" : [{
-				"definition" : {
-					"name" : "folder", 
-					"type" : {
-						"symbol" : "Folder"
-					}
-				}
 			}], 
-			"children" : [{
-				"value" : "this.folder = folder;"
-			}, {
-				"value" : "}
-
-        @Override
-        public List<String> divide(String input) {
-            State current = new State();"
-			}, {
-				"value" : "for (int i = 0;"
-			}, {
-				"value" : "i < input.length();"
-			}, {
-				"value" : "i++) {
-                char c = input.charAt(i);
-                current = this.folder.fold(current, c);
-            }"
-			}, {
-				"value" : "return current.advance().segments();"
-			}, {
-				"value" : "}"
-			}]
-		}, {
-			"definition" : {
-				"name" : "static class LazyRule implements Rule {
-        private Optional<Rule> maybeChildRule = Optional.empty", 
-				"type" : {
-					"symbol" : "private"
-				}
-			}, 
 			"params" : [{
-				"definition" : {
-					"name" : "       public void set(Rule childRule", 
-					"type" : {
-						"symbol" : ");"
-					}
+				"name" : "rules", 
+				"type" : {
+					"base" : {
+						"symbol" : "List"
+					}, 
+					"arguments" : [{
+						"symbol" : "Rule"
+					}]
 				}
-			}], 
-			"children" : [{
-				"value" : "this.maybeChildRule = Optional.of(childRule);"
-			}, {
-				"value" : "}
-
-        @Override
-        public Result<Node, CompileError> parse(String input) {
-            return this.maybeChildRule
-                    .map(childRule -> childRule.parse(input))
-                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)));"
-			}, {
-				"value" : "}"
 			}]
 		}, {
-			"name" : "NodeRule(String propertyKey, Rule childRule) implements Rule", 
+			"name" : "FoldingDivider", 
+			"super-type" : "Divider", 
 			"children" : [{
-				"definition" : {
-					"name" : "       public Result<Node, CompileError> parse", 
-					"type" : {
-						"symbol" : "@Override"
-					}
+				"name" : "divide", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public List"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
 				}, 
 				"params" : [{
-					"definition" : {
-						"name" : "input", 
-						"type" : {
-							"symbol" : "String"
-						}
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.childRule.parse(input).mapValue(node -> new Node().withNode(this.propertyKey, node));"
+					"value" : {
+						"value" : "ist<Character> queue = IntStream.range(0, input.length())
+                    .mapToObj(input::charAt)
+                    .collect(Collectors.toCollection(LinkedList::new))"
+					}
 				}, {
-					"value" : ""
+					"value" : {
+						"value" : "urrent = new State(queue)"
+					}
+				}, {
+					"condition" : {
+						"value" : "e (current.hasNext()"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "= current.pop()"
+						}
+					}, {
+						"value" : {
+							"value" : "inalCurrent = current"
+						}
+					}, {
+						"value" : {
+							"value" : "= this.foldDoubleQuotes(finalCurrent, c)
+                        .or(() -> this.foldSingleQuotes(finalCurrent, c))
+                        .orElseGet(() -> this.folder.fold(finalCurrent, c))"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "current.advance().segments()"
+					}
+				}, {
 				}]
 			}, {
-				"value" : ""
+				"name" : "foldDoubleQuotes", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Optional"
+					}, 
+					"arguments" : [{
+						"symbol" : "State"
+					}]
+				}, 
+				"params" : [{
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}, {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}], 
+				"children" : [{
+					"condition" : {
+						"value" : "c != '"'"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "Optional.empty()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "urrent = state.append(c)"
+					}
+				}, {
+					"condition" : {
+						"value" : "e (current.hasNext()"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "pped = current.pop()"
+						}
+					}, {
+						"value" : {
+							"value" : "= current.append(popped)"
+						}
+					}, {
+						"condition" : {
+							"value" : "popped == '\\'"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : "= current.append(current.pop())"
+							}
+						}, {
+						}]
+					}, {
+						"condition" : {
+							"value" : "popped == '"'"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : "Optional.of(current)"
+							}
+						}, {
+						}]
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "Optional.empty()"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "foldSingleQuotes", 
+				"type" : {
+					"base" : {
+						"symbol" : "private Optional"
+					}, 
+					"arguments" : [{
+						"symbol" : "State"
+					}]
+				}, 
+				"params" : [{
+					"name" : "current", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}, {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}], 
+				"children" : [{
+					"condition" : {
+						"value" : "c != '\''"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "Optional.empty()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "ithStart = current.append(c)"
+					}
+				}, {
+					"value" : {
+						"value" : "xt = withStart.pop()"
+					}
+				}, {
+					"value" : {
+						"value" : "ithNext = withStart.append(next)"
+					}
+				}, {
+					"value" : {
+						"value" : "ithSlash = next == '\\' ? withNext.append(withNext.pop()) : withNext"
+					}
+				}, {
+					"value" : {
+						"value" : "Optional.of(withSlash.append(withSlash.pop()))"
+					}
+				}, {
+				}]
+			}, {
 			}], 
 			"modifiers" : [{
 				"value" : ""
@@ -1158,21 +2032,180 @@
 				"value" : ""
 			}, {
 				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "folder", 
+				"type" : {
+					"symbol" : "Folder"
+				}
 			}]
 		}, {
-			"definition" : {
-				"name" : "static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth;
-
-        private State", 
+			"name" : "LazyRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "Optional.empty()", 
+				"type" : {
+					"symbol" : "private Optional<Rule> maybeChildRule ="
+				}
+			}, {
+				"name" : "set", 
+				"type" : {
+					"symbol" : "public void"
+				}, 
+				"params" : [{
+					"name" : "childRule", 
+					"type" : {
+						"symbol" : "Rule"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ybeChildRule = Optional.of(childRule)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.maybeChildRule
+                    .map(childRule -> childRule.parse(input))
+                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "NodeRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.childRule.parse(input).mapValue(node -> new Node().withNode(this.propertyKey, node))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "propertyKey", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "State", 
+			"children" : [{
+				"name" : "segments", 
+				"type" : {
+					"base" : {
+						"symbol" : "private final List"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
+				}
+			}, {
+				"name" : "queue", 
+				"type" : {
+					"base" : {
+						"symbol" : "private final LinkedList"
+					}, 
+					"arguments" : [{
+						"symbol" : "Character"
+					}]
+				}
+			}, {
+				"name" : "buffer", 
+				"type" : {
+					"symbol" : "private StringBuilder"
+				}
+			}, {
+				"name" : "depth", 
+				"type" : {
+					"symbol" : "private int"
+				}
+			}, {
+				"name" : "State", 
 				"type" : {
 					"symbol" : "private"
-				}
-			}, 
-			"params" : [{
-				"definition" : {
+				}, 
+				"params" : [{
+					"name" : "queue", 
+					"type" : {
+						"base" : {
+							"symbol" : "LinkedList"
+						}, 
+						"arguments" : [{
+							"symbol" : "Character"
+						}]
+					}
+				}, {
 					"name" : "segments", 
 					"type" : {
 						"base" : {
@@ -1182,366 +2215,1665 @@
 							"symbol" : "String"
 						}]
 					}
-				}
-			}, {
-				"definition" : {
+				}, {
 					"name" : "buffer", 
 					"type" : {
 						"symbol" : "StringBuilder"
 					}
-				}
-			}, {
-				"definition" : {
+				}, {
 					"name" : "depth", 
 					"type" : {
 						"symbol" : "int"
 					}
-				}
-			}], 
-			"children" : [{
-				"value" : "this.segments = segments;"
-			}, {
-				"value" : "this.buffer = buffer;"
-			}, {
-				"value" : "this.depth = depth;"
-			}, {
-				"value" : "}
-
-        public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);"
-			}, {
-				"value" : "}
-
-        private State enter() {
-            this.setDepth(this.getDepth() + 1);"
-			}, {
-				"value" : "return this;"
-			}, {
-				"value" : "}
-
-        private State exit() {
-            this.setDepth(this.getDepth() - 1);"
-			}, {
-				"value" : "return this;"
-			}, {
-				"value" : "}
-
-        private boolean isLevel() {
-            return this.getDepth() == 0;"
-			}, {
-				"value" : "}
-
-        private State append(char c) {
-            this.getBuffer().append(c);"
-			}, {
-				"value" : "return this;"
-			}, {
-				"value" : "}
-
-        private State advance() {
-            this.segments().add(this.getBuffer().toString());"
-			}, {
-				"value" : "this.setBuffer(new StringBuilder());"
-			}, {
-				"value" : "return this;"
-			}, {
-				"value" : "}
-
-        private boolean isShallow() {
-            return this.getDepth() == 1;"
-			}, {
-				"value" : "}
-
-        public List<String> getSegments() {
-            return this.segments;"
-			}, {
-				"value" : "}
-
-        public StringBuilder getBuffer() {
-            return this.buffer;"
-			}, {
-				"value" : "}
-
-        public void setBuffer(StringBuilder buffer) {
-            this.buffer = buffer;"
-			}, {
-				"value" : "}
-
-        public int getDepth() {
-            return this.depth;"
-			}, {
-				"value" : "}
-
-        public void setDepth(int depth) {
-            this.depth = depth;"
-			}, {
-				"value" : "}
-
-        public List<String> segments() {
-            return this.segments;"
-			}, {
-				"value" : "}"
-			}]
-		}, {
-			"definition" : {
-				"name" : "static class StatementFolder implements Folder {
-        @Override
-        public State fold", 
-				"type" : {
-					"symbol" : "private"
-				}
-			}, 
-			"params" : [{
-				"definition" : {
-					"name" : "state", 
-					"type" : {
-						"symbol" : "State"
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "gments = segments"
 					}
-				}
+				}, {
+					"value" : {
+						"value" : "ffer = buffer"
+					}
+				}, {
+					"value" : {
+						"value" : "pth = depth"
+					}
+				}, {
+					"value" : {
+						"value" : "eue = queue"
+					}
+				}, {
+				}]
 			}, {
-				"definition" : {
+				"name" : "State", 
+				"type" : {
+					"symbol" : "public"
+				}, 
+				"params" : [{
+					"name" : "queue", 
+					"type" : {
+						"base" : {
+							"symbol" : "LinkedList"
+						}, 
+						"arguments" : [{
+							"symbol" : "Character"
+						}]
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "eue, new ArrayList<>(), new StringBuilder(), 0)"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "enter", 
+				"type" : {
+					"symbol" : "private State"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "tDepth(this.getDepth() + 1)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "exit", 
+				"type" : {
+					"symbol" : "private State"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "tDepth(this.getDepth() - 1)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "isLevel", 
+				"type" : {
+					"symbol" : "private boolean"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.getDepth() == 0"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "append", 
+				"type" : {
+					"symbol" : "private State"
+				}, 
+				"params" : [{
 					"name" : "c", 
 					"type" : {
 						"symbol" : "char"
 					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "tBuffer().append(c)"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "advance", 
+				"type" : {
+					"symbol" : "private State"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "gments().add(this.getBuffer().toString())"
+					}
+				}, {
+					"value" : {
+						"value" : "tBuffer(new StringBuilder())"
+					}
+				}, {
+					"value" : {
+						"value" : "this"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "isShallow", 
+				"type" : {
+					"symbol" : "private boolean"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.getDepth() == 1"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "getSegments", 
+				"type" : {
+					"base" : {
+						"symbol" : "public List"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.segments"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "getBuffer", 
+				"type" : {
+					"symbol" : "public StringBuilder"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.buffer"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "setBuffer", 
+				"type" : {
+					"symbol" : "public void"
+				}, 
+				"params" : [{
+					"name" : "buffer", 
+					"type" : {
+						"symbol" : "StringBuilder"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ffer = buffer"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "getDepth", 
+				"type" : {
+					"symbol" : "public int"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.depth"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "setDepth", 
+				"type" : {
+					"symbol" : "public void"
+				}, 
+				"params" : [{
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "pth = depth"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "segments", 
+				"type" : {
+					"base" : {
+						"symbol" : "public List"
+					}, 
+					"arguments" : [{
+						"symbol" : "String"
+					}]
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.segments"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "hasNext", 
+				"type" : {
+					"symbol" : "public boolean"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "!this.queue.isEmpty()"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "pop", 
+				"type" : {
+					"symbol" : "public char"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.queue.pop()"
+					}
+				}, {
+				}]
+			}, {
+				"name" : "peek", 
+				"type" : {
+					"symbol" : "public Character"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.queue.peek()"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "StatementFolder", 
+			"super-type" : "Folder", 
+			"children" : [{
+				"name" : "fold", 
+				"type" : {
+					"symbol" : "@Override
+        public State"
+				}, 
+				"params" : [{
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}, {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ppended = state.append(c)"
+					}
+				}, {
+					"condition" : {
+						"value" : "c == ';' && appended.isLevel()"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.advance()"
+						}
+					}, {
+					}]
+				}, {
+					"condition" : {
+						"value" : "c == '}' && appended.isShallow()"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.advance().exit()"
+						}
+					}, {
+					}]
+				}, {
+					"condition" : {
+						"value" : "c == '{' || c == '('"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.enter()"
+						}
+					}, {
+					}]
+				}, {
+					"condition" : {
+						"value" : "c == '}' || c == ')'"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.exit()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "appended"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "ValueFolder", 
+			"super-type" : "Folder", 
+			"children" : [{
+				"name" : "fold", 
+				"type" : {
+					"symbol" : "@Override
+        public State"
+				}, 
+				"params" : [{
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}, {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}], 
+				"children" : [{
+					"condition" : {
+						"value" : "c == ',' && state.isLevel()"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "state.advance()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "ppended = state.append(c)"
+					}
+				}, {
+					"condition" : {
+						"value" : "c == '-'"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "er peek = state.peek()"
+						}
+					}, {
+						"condition" : {
+							"value" : "peek == '>'"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : "pped = state.pop()"
+							}
+						}, {
+							"value" : {
+								"value" : "state.append(popped)"
+							}
+						}, {
+						}]
+					}, {
+					}]
+				}, {
+					"condition" : {
+						"value" : "c == '<' || c == '('"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.enter()"
+						}
+					}, {
+					}]
+				}, {
+					"condition" : {
+						"value" : "c == '>' || c == ')'"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.exit()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "appended"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "ThrowableError", 
+			"super-type" : "Error", 
+			"children" : [{
+				"name" : "display", 
+				"type" : {
+					"symbol" : "@Override
+        public String"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "riter writer = new StringWriter()"
+					}
+				}, {
+					"value" : {
+						"value" : "rowable.printStackTrace(new PrintWriter(writer))"
+					}
+				}, {
+					"value" : {
+						"value" : "writer.toString()"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "throwable", 
+				"type" : {
+					"symbol" : "Throwable"
+				}
+			}]
+		}, {
+			"name" : "ApplicationError", 
+			"super-type" : "Error", 
+			"children" : [{
+				"name" : "display", 
+				"type" : {
+					"symbol" : "@Override
+        public String"
+				}, 
+				"params" : [{
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.error.display()"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "error", 
+				"type" : {
+					"symbol" : "Error"
+				}
+			}]
+		}, {
+			"name" : "LastLocator", 
+			"super-type" : "Locator", 
+			"children" : [{
+				"name" : "locate", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Optional"
+					}, 
+					"arguments" : [{
+						"symbol" : "Integer"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "infix", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ex = input.lastIndexOf(infix)"
+					}
+				}, {
+					"value" : {
+						"value" : "index == -1 ? Optional.empty() : Optional.of(index)"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "EmptyRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "input.isEmpty() ? new Ok<>(new Node()) : new Err<>(new CompileError("Not empty", input))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "TypeRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.childRule.parse(input)
+                    .mapErr(err -> new CompileError("Cannot assign type '" + this.type + "'", input, List.of(err)))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "type", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "PrefixRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.rule.parse(input.substring(this.prefix.length()))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "prefix", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "rule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "InvocationStartLocator", 
+			"super-type" : "Locator", 
+			"children" : [{
+				"name" : "locate", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Optional"
+					}, 
+					"arguments" : [{
+						"symbol" : "Integer"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}, {
+					"name" : "infix", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "th = 0"
+					}
+				}, {
+					"condition" : {
+						"value" : "(int i = 0; i < input.length(); i++"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "= input.charAt(i)"
+						}
+					}, {
+						"condition" : {
+							"value" : "c == '(' && depth == 0"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : "Optional.of(i)"
+							}
+						}, {
+						}]
+					}, {
+						"condition" : {
+							"value" : "c == ')'"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : ""
+							}
+						}, {
+						}]
+					}, {
+						"condition" : {
+							"value" : "c == '('"
+						}, 
+						"children" : [{
+							"value" : {
+								"value" : ""
+							}
+						}, {
+						}]
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "Optional.empty()"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "LocatingSplitter", 
+			"super-type" : "Splitter", 
+			"children" : [{
+				"name" : "split", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"base" : {
+							"symbol" : "Tuple"
+						}, 
+						"arguments" : [{
+							"symbol" : "String"
+						}, {
+							"symbol" : "String"
+						}]
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.locator().locate(input, this.infix()).<Result<Tuple<String, String>, CompileError>>map(index -> {
+                String left = input.substring(0, index);
+                String right = input.substring(index + this.infix().length());
+                return new Ok<>(new Tuple<>(left, right));
+            }).orElseGet(() -> {
+                return new Err<>(new CompileError("Infix '" + this.infix() + "' not present", input));
+            })"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "public"
+			}], 
+			"params" : [{
+				"name" : "infix", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "locator", 
+				"type" : {
+					"symbol" : "Locator"
+				}
+			}]
+		}, {
+			"name" : "ContentStartFolder", 
+			"super-type" : "Folder", 
+			"children" : [{
+				"name" : "fold", 
+				"type" : {
+					"symbol" : "@Override
+        public State"
+				}, 
+				"params" : [{
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}, {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ppended = state.append(c)"
+					}
+				}, {
+					"condition" : {
+						"value" : "c == '{'"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "appended.advance()"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "appended"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}, {
+				"value" : "static"
+			}]
+		}, {
+			"name" : "FoldingSplitter", 
+			"super-type" : "Splitter", 
+			"children" : [{
+				"name" : "split", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"base" : {
+							"symbol" : "Tuple"
+						}, 
+						"arguments" : [{
+							"symbol" : "String"
+						}, {
+							"symbol" : "String"
+						}]
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "ring> divided = new FoldingDivider(this.folder).divide(input)"
+					}
+				}, {
+					"condition" : {
+						"value" : "divided.size() < 2"
+					}, 
+					"children" : [{
+						"value" : {
+							"value" : "new Err<>(new CompileError("No segments found", input))"
+						}
+					}, {
+					}]
+				}, {
+					"value" : {
+						"value" : "joined = String.join("", divided.subList(1, divided.size()))"
+					}
+				}, {
+					"value" : {
+						"value" : "new Ok<>(new Tuple<>(divided.getFirst(), joined))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "folder", 
+				"type" : {
+					"symbol" : "Folder"
+				}
+			}]
+		}, {
+			"name" : "ContextRule", 
+			"super-type" : "Rule", 
+			"children" : [{
+				"name" : "parse", 
+				"type" : {
+					"base" : {
+						"symbol" : "@Override
+        public Result"
+					}, 
+					"arguments" : [{
+						"symbol" : "Node"
+					}, {
+						"symbol" : "CompileError"
+					}]
+				}, 
+				"params" : [{
+					"name" : "input", 
+					"type" : {
+						"symbol" : "String"
+					}
+				}], 
+				"children" : [{
+					"value" : {
+						"value" : "this.rule.parse(input).mapErr(err -> new CompileError(this.message, input, List.of(err)))"
+					}
+				}, {
+				}]
+			}, {
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}], 
+			"params" : [{
+				"name" : "message", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "rule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}]
+		}, {
+			"name" : "main", 
+			"type" : {
+				"symbol" : "public static void"
+			}, 
+			"params" : [{
+				"name" : "args", 
+				"type" : {
+					"symbol" : "String[]"
 				}
 			}], 
 			"children" : [{
-				"value" : "State appended = state.append(c);"
+				"value" : {
+					"value" : "urce = Paths.get(".", "src", "java", "magma", "Main.java")"
+				}
 			}, {
-				"value" : "if (c == ';"
+				"value" : {
+					"value" : "es.readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new).match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()))"
+				}
 			}, {
-				"value" : "' && appended.isLevel()) {
-                return appended.advance();
-            }"
-			}, {
-				"value" : "if (c == '}' && appended.isShallow()) {
-                return appended.advance().exit();"
-			}, {
-				"value" : "}
-            if (c == '{') {
-                return appended.enter();
-            }"
-			}, {
-				"value" : "if (c == '}') {
-                return appended.exit();"
-			}, {
-				"value" : "}
-            return appended;"
 			}]
 		}, {
-			"value" : ""
+			"name" : "runWithInput", 
+			"type" : {
+				"base" : {
+					"symbol" : "private static Optional"
+				}, 
+				"arguments" : [{
+					"symbol" : "ApplicationError"
+				}]
+			}, 
+			"params" : [{
+				"name" : "source", 
+				"type" : {
+					"symbol" : "Path"
+				}
+			}, {
+				"name" : "input", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "compile(input).mapErr(ApplicationError::new).match(output -> {
+            Path target = source.resolveSibling("Main.java.ast.json");
+            return JavaFiles.writeString(output, target)
+                    .map(ThrowableError::new)
+                    .map(ApplicationError::new);
+        }, Optional::of)"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "compile", 
+			"type" : {
+				"base" : {
+					"symbol" : "private static Result"
+				}, 
+				"arguments" : [{
+					"symbol" : "String"
+				}, {
+					"symbol" : "CompileError"
+				}]
+			}, 
+			"params" : [{
+				"name" : "input", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new DivideRule("children", new FoldingDivider(new StatementFolder()), createRootSegmentRule())
+                .parse(input)
+                .mapValue(Node::display)"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createRootSegmentRule", 
+			"type" : {
+				"symbol" : "private static OrRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new OrRule(List.of(
+                createWhitespaceRule(),
+                createNamespacedRule(),
+                createClassRule(createClassSegmentRule())
+        ))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createClassRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+				"name" : "classSegmentRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new TypeRule("class", createStructuredRule("class ", classSegmentRule))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createStructuredRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+				"name" : "infix", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}, {
+				"name" : "classSegmentRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "ildRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule)"
+				}
+			}, {
+				"value" : {
+					"value" : "me = createSymbolRule("name")"
+				}
+			}, {
+				"value" : {
+					"value" : "ram = createParamRule()"
+				}
+			}, {
+				"value" : {
+					"value" : "rams = new DivideRule("params", new FoldingDivider(new ValueFolder()), param)"
+				}
+			}, {
+				"value" : {
+					"value" : "ybeWithParams = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
+                name
+        ))"
+				}
+			}, {
+				"value" : {
+					"value" : "astLocator lastLocator = new LastLocator()"
+				}
+			}, {
+				"value" : {
+					"value" : "foreContent = new OrRule(List.of(
+                new InfixRule(maybeWithParams, createSymbolRule("super-type"), new LocatingSplitter(" implements ", lastLocator)),
+                maybeWithParams
+        ))"
+				}
+			}, {
+				"value" : {
+					"value" : "new InfixRule(createModifiersRule(), infix, new InfixRule(beforeContent, "{", new StripRule(new SuffixRule(childRule, "}"))))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createParamRule", 
+			"type" : {
+				"symbol" : "private static OrRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new OrRule(List.of(
+                createWhitespaceRule(),
+                createDefinitionRule()
+        ))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createClassSegmentRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "e classSegmentRule = new LazyRule()"
+				}
+			}, {
+				"value" : {
+					"value" : "gmentRule.set(new OrRule(List.of(
+                createWhitespaceRule(),
+                createStructuredRule("interface ", classSegmentRule),
+                new TypeRule("record", createStructuredRule("record ", classSegmentRule)),
+                createClassRule(classSegmentRule),
+                new TypeRule("method", createMethodRule()),
+                new StripRule(new SuffixRule(createDefinitionRule(), ";"))
+        )))"
+				}
+			}, {
+				"value" : {
+					"value" : "classSegmentRule"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createWhitespaceRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new StripRule(new EmptyRule())"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createMethodRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "finition = createDefinitionRule()"
+				}
+			}, {
+				"value" : {
+					"value" : "foreParams = new OrRule(List.of(
+                definition,
+                createSymbolRule("name")
+        ))"
+				}
+			}, {
+				"value" : {
+					"value" : "rams = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "thParams = new StripRule(new SuffixRule(params, ") {"))"
+				}
+			}, {
+				"value" : {
+					"value" : "new InfixRule(beforeParams, "(", new OrRule(List.of(
+                new ContextRule("Without body", new StripRule(new SuffixRule(withParams, ";"))),
+                new ContextRule("With body", createContentRule(withParams, createStatementOrBlockRule()))
+        )))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createContentRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+				"name" : "withParams", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}, {
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "ild = new ContextRule("Invalid child", childRule)"
+				}
+			}, {
+				"value" : {
+					"value" : "ule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), child)"
+				}
+			}, {
+				"value" : {
+					"value" : "new InfixRule(withParams, new StripRule(new SuffixRule(children, "}")), new FoldingSplitter(new ContentStartFolder()))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createStatementOrBlockRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "e statementOrBlock = new LazyRule()"
+				}
+			}, {
+				"value" : {
+					"value" : "ntOrBlock.set(new OrRule(List.of(
+                createWhitespaceRule(),
+                createIfRule(statementOrBlock),
+                new StripRule(new SuffixRule(createStatementRule(), ";"))
+        )))"
+				}
+			}, {
+				"value" : {
+					"value" : "statementOrBlock"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createIfRule", 
+			"type" : {
+				"symbol" : "private static TypeRule"
+			}, 
+			"params" : [{
+				"name" : "statementOrBlock", 
+				"type" : {
+					"symbol" : "LazyRule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "e condition = new NodeRule("condition", createValueRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "foreContent = new StripRule(new PrefixRule("if (", new SuffixRule(condition, ") {")))"
+				}
+			}, {
+				"value" : {
+					"value" : "new TypeRule("if", createContentRule(beforeContent, statementOrBlock))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createStatementRule", 
+			"type" : {
+				"symbol" : "private static OrRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new OrRule(List.of(
+                createReturnRule(),
+                createInvocationRule()
+        ))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createReturnRule", 
+			"type" : {
+				"symbol" : "private static TypeRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", createValueRule()))))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createInvocationRule", 
+			"type" : {
+				"symbol" : "private static StripRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "e caller = new NodeRule("caller", createValueRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "ule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "nvocationStartLocator invocationStartLocator = new InvocationStartLocator()"
+				}
+			}, {
+				"value" : {
+					"value" : "new StripRule(new SuffixRule(new InfixRule(caller, arguments, new LocatingSplitter("(", invocationStartLocator)), ")"))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createValueRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new OrRule(List.of(
+                createSymbolRule("value")
+        ))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createDefinitionRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "pe = new NodeRule("type", createTypeRule())"
+				}
+			}, {
+				"value" : {
+					"value" : "me = new StringRule("name")"
+				}
+			}, {
+				"value" : {
+					"value" : "new StripRule(new InfixRule(type, name, new LocatingSplitter(" ", new LastLocator())))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createTypeRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "e typeRule = new LazyRule()"
+				}
+			}, {
+				"value" : {
+					"value" : "e.set(new OrRule(List.of(
+                createGenericRule(typeRule),
+                createSymbolRule("symbol")
+        )))"
+				}
+			}, {
+				"value" : {
+					"value" : "typeRule"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createGenericRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+				"name" : "typeRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "se = new NodeRule("base", createSymbolRule("symbol"))"
+				}
+			}, {
+				"value" : {
+					"value" : "guments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule)"
+				}
+			}, {
+				"value" : {
+					"value" : "new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createSymbolRule", 
+			"type" : {
+				"symbol" : "private static StripRule"
+			}, 
+			"params" : [{
+				"name" : "propertyKey", 
+				"type" : {
+					"symbol" : "String"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new StripRule(new StringRule(propertyKey))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createModifiersRule", 
+			"type" : {
+				"symbol" : "private static DivideRule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new DivideRule("modifiers", new DelimitedDivider(" "), createSymbolRule("value"))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createNamespacedRule", 
+			"type" : {
+				"symbol" : "private static Rule"
+			}, 
+			"params" : [{
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "pe = new StringRule("type")"
+				}
+			}, {
+				"value" : {
+					"value" : "gment = new StringRule("value")"
+				}
+			}, {
+				"value" : {
+					"value" : "gments = new DivideRule("segments", new DelimitedDivider("."), segment)"
+				}
+			}, {
+				"value" : {
+					"value" : "createStatementRule(new InfixRule(type, " ", segments))"
+				}
+			}, {
+			}]
+		}, {
+			"name" : "createStatementRule", 
+			"type" : {
+				"symbol" : "private static StripRule"
+			}, 
+			"params" : [{
+				"name" : "childRule", 
+				"type" : {
+					"symbol" : "Rule"
+				}
+			}], 
+			"children" : [{
+				"value" : {
+					"value" : "new StripRule(new SuffixRule(childRule, ";"))"
+				}
+			}, {
+			}]
+		}, {
 		}], 
 		"modifiers" : [{
 			"value" : "public"
 		}]
 	}, {
-		"name" : "ValueFolder implements Folder", 
-		"children" : [{
-			"definition" : {
-				"name" : "       public State fold", 
-				"type" : {
-					"symbol" : "@Override"
-				}
-			}, 
-			"params" : [{
-				"definition" : {
-					"name" : "state", 
-					"type" : {
-						"symbol" : "State"
-					}
-				}
-			}, {
-				"definition" : {
-					"name" : "c", 
-					"type" : {
-						"symbol" : "char"
-					}
-				}
-			}], 
-			"children" : [{
-				"value" : "if (c == ',') {
-                return state.advance();
-            }"
-			}, {
-				"value" : "State appended = state.append(c);"
-			}, {
-				"value" : "if (c == '<') {
-                return appended.enter();
-            }"
-			}, {
-				"value" : "if (c == '>') {
-                return appended.exit();
-            }"
-			}, {
-				"value" : "return appended;"
-			}, {
-				"value" : ""
-			}]
-		}, {
-			"value" : ""
-		}], 
-		"modifiers" : [{
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : ""
-		}, {
-			"value" : "private"
-		}, {
-			"value" : "static"
-		}]
-	}, {
-		"value" : "private record ThrowableError(Throwable throwable) implements Error {
-        @Override
-        public String display() {
-            StringWriter writer = new StringWriter();
-            this.throwable.printStackTrace(new PrintWriter(writer));
-            return writer.toString();
-        }
-    }"
-	}, {
-		"value" : "private record ApplicationError(Error error) implements Error {
-        @Override
-        public String display() {
-            return this.error.display();
-        }
-    }"
-	}, {
-		"value" : "public static void main(String[] args) {
-        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        readString(source)
-                .mapErr(ThrowableError::new)
-                .mapErr(ApplicationError::new).match(input -> runWithInput(source, input), Optional::of)
-                .ifPresent(error -> System.err.println(error.display()));
-    }"
-	}, {
-		"value" : "private static Optional<ApplicationError> runWithInput(Path source, String input) {
-        return compile(input).mapErr(ApplicationError::new).match(output -> {
-            Path target = source.resolveSibling("Main.java.ast.json");
-            return writeString(output, target)
-                    .map(ThrowableError::new)
-                    .map(ApplicationError::new);
-        }, Optional::of);
-    }"
-	}, {
-		"value" : "private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
-    }"
-	}, {
-		"value" : "private static Optional<IOException> writeString(String output, Path target) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
-    }"
-	}, {
-		"value" : "private static Result<String, CompileError> compile(String input) {
-        return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
-                .parse(input)
-                .mapValue(Node::display);
-    }"
-	}, {
-		"value" : "private static OrRule getValue() {
-        return new OrRule(List.of(
-                createNamespacedRule(),
-                createStructuredRule("class ", createClassSegmentRule()),
-                createContentRule()
-        ));
-    }"
-	}, {
-		"value" : "private static StripRule createContentRule() {
-        return new StripRule(new StringRule("value"));
-    }"
-	}, {
-		"value" : "private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
-        Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
-        Rule name = new StripRule(new StringRule("name"));
-        DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createDefinitionRule());
-        Rule maybeWithParams = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
-                name
-        ));
-        return new InfixRule(createModifiersRule(), infix, new InfixRule(maybeWithParams, "{", new StripRule(new SuffixRule(childRule, "}"))));
-    }"
-	}, {
-		"value" : "private static Rule createClassSegmentRule() {
-        LazyRule classSegmentRule = new LazyRule();
-        classSegmentRule.set(new OrRule(List.of(
-                createStructuredRule("interface ", classSegmentRule),
-                createStructuredRule("record ", classSegmentRule),
-                createMethodRule(),
-                createContentRule()
-        )));
-        return classSegmentRule;
-    }"
-	}, {
-		"value" : "private static Rule createMethodRule() {
-        Rule definition = new NodeRule("definition", createDefinitionRule());
-        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
-        Rule withParams = new StripRule(new SuffixRule(params, ")"));
-        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
-        return new InfixRule(definition, "(", new OrRule(List.of(
-                new StripRule(new SuffixRule(withParams, ";")),
-                new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
-        )));
-    }"
-	}, {
-		"value" : "private static Rule createStatementRule() {
-        return new OrRule(List.of(
-                createContentRule()
-        ));
-    }"
-	}, {
-		"value" : "private static Rule createDefinitionRule() {
-        Rule type = new NodeRule("type", createTypeRule());
-        Rule name = new StringRule("name");
-        return new StripRule(new InfixRule(type, " ", name));
-    }"
-	}, {
-		"value" : "private static Rule createTypeRule() {
-        LazyRule typeRule = new LazyRule();
-        typeRule.set(new OrRule(List.of(
-                createGenericRule(typeRule),
-                createSymbolRule()
-        )));
-        return typeRule;
-    }"
-	}, {
-		"value" : "private static Rule createGenericRule(Rule typeRule) {
-        Rule base = new NodeRule("base", createSymbolRule());
-        Rule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
-        return new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"));
-    }"
-	}, {
-		"value" : "private static StripRule createSymbolRule() {
-        return new StripRule(new StringRule("symbol"));
-    }"
-	}, {
-		"value" : "private static DivideRule createModifiersRule() {
-        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("value")));
-    }"
-	}, {
-		"value" : "private static Rule createNamespacedRule() {
-        Rule type = new StringRule("type");
-        Rule segment = new StringRule("value");
-        Rule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
-        return createStatementRule(new InfixRule(type, " ", segments));
-    }"
-	}, {
-		"value" : "private static StripRule createStatementRule(Rule childRule) {
-        return new StripRule(new SuffixRule(childRule, ";"));
-    }"
-	}, {
-		"value" : "}"
 	}]
 }
