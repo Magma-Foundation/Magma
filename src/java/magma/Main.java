@@ -819,6 +819,10 @@ public class Main {
 
     private static StripRule createInvocationRule(Rule value) {
         NodeRule caller = new NodeRule("caller", value);
+        return createInvokableRule(caller, value);
+    }
+
+    private static StripRule createInvokableRule(Rule caller, Rule value) {
         DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), value);
         final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
         return new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"));
@@ -827,6 +831,7 @@ public class Main {
     private static Rule createValueRule() {
         LazyRule valueRule = new LazyRule();
         valueRule.set(new OrRule(List.of(
+                new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 createInvocationRule(valueRule),
                 createSymbolRule("value")
         )));
