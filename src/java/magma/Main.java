@@ -191,9 +191,16 @@ public class Main {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
             int nameSeparator = withoutEnd.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                String beforeName = withoutEnd.substring(0, nameSeparator);
+                String beforeName = withoutEnd.substring(0, nameSeparator).strip();
                 String name = withoutEnd.substring(nameSeparator + " ".length());
-                return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeName) + " " + name + ";"));
+
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                if (typeSeparator >= 0) {
+                    String beforeType = beforeName.substring(0, typeSeparator).strip();
+                    String type = beforeName.substring(typeSeparator + " ".length());
+
+                    return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                }
             }
         }
 
