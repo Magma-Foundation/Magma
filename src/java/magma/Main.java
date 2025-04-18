@@ -215,16 +215,27 @@ public class Main {
         return new OrRule(List.of(
                 createNamespacedRule(),
                 createClassRule(),
-                new StripRule(new StringRule("value"))
+                createContentRule()
         ));
     }
 
+    private static StripRule createContentRule() {
+        return new StripRule(new StringRule("value"));
+    }
+
     private static InfixRule createClassRule() {
-        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StringRule("with-end")));
+        Rule childRule = new DivideRule("with-end", new StatementDivider(), createClassSegmentRule());
+        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StripRule(new SuffixRule(childRule, "}"))));
+    }
+
+    private static Rule createClassSegmentRule() {
+        return new OrRule(List.of(
+                createContentRule()
+        ));
     }
 
     private static DivideRule createModifiersRule() {
-        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("modifiers")));
+        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("value")));
     }
 
     private static Rule createNamespacedRule() {

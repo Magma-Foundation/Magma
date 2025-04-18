@@ -135,8 +135,11 @@
 		}]
 	}, {
 		"name" : "Main ", 
-		"with-end" : "
-    private interface Rule {
+		"modifiers" : [{
+			"value" : "public"
+		}], 
+		"with-end" : [{
+			"value" : "private interface Rule {
         Optional<Node> parse(String input);
     }
 
@@ -336,16 +339,27 @@
         return new OrRule(List.of(
                 createNamespacedRule(),
                 createClassRule(),
-                new StripRule(new StringRule("value"))
+                createContentRule()
         ));
     }
 
+    private static StripRule createContentRule() {
+        return new StripRule(new StringRule("value"));
+    }
+
     private static InfixRule createClassRule() {
-        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StringRule("with-end")));
+        Rule childRule = new DivideRule("with-end", new StatementDivider(), createClassSegmentRule());
+        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StripRule(new SuffixRule(childRule, "}"))));
+    }
+
+    private static Rule createClassSegmentRule() {
+        return new OrRule(List.of(
+                createContentRule()
+        ));
     }
 
     private static DivideRule createModifiersRule() {
-        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("modifiers")));
+        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("value")));
     }
 
     private static Rule createNamespacedRule() {
@@ -353,10 +367,7 @@
         Rule segment = new StringRule("value");
         DivideRule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
         return new StripRule(new SuffixRule(new InfixRule(type, " ", segments), ";"));
-    }
-}", 
-		"modifiers" : [{
-			"modifiers" : "public"
+    }"
 		}]
 	}]
 }
