@@ -46,6 +46,10 @@ public class Main {
         String display();
     }
 
+    interface Locator {
+        Optional<Integer> locate(String input, String infix);
+    }
+
     record CompileError(String message, String context, List<CompileError> errors) implements Error {
         CompileError(String message, String context) {
             this(message, context, new ArrayList<>());
@@ -225,14 +229,31 @@ public class Main {
         }
     }
 
-    private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
+    public static class FirstLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int index = input.indexOf(infix);
+            return index == -1 ? Optional.empty() : Optional.of(index);
+        }
+    }
+
+    private record InfixRule(Rule leftRule, String infix, Rule rightRule, Locator locator) implements Rule {
+        private InfixRule(Rule leftRule, String infix, Rule rightRule) {
+            this(leftRule, infix, rightRule, new FirstLocator());
+        }
+
         @Override
         public Result<Node, CompileError> parse(String input) {
-            int index = input.indexOf(this.infix);
-            if (index < 0) {
-                return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
-            }
+            return this.locator.locate(input, this.infix)
+                    .map(index -> this.split(input, index))
+                    .orElseGet(() -> this.createErr(input));
+        }
 
+        private Result<Node, CompileError> createErr(String input) {
+            return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
+        }
+
+        private Result<Node, CompileError> split(String input, Integer index) {
             String left = input.substring(0, index);
             String right = input.substring(index + this.infix.length());
             return this.leftRule.parse(left).flatMapValue(withLeft -> this.rightRule.parse(right).mapValue(withLeft::merge));
@@ -427,7 +448,7 @@ public class Main {
     private static class ValueFolder implements Folder {
         @Override
         public State fold(State state, char c) {
-            if (c == ',') {
+            if (c == ',' && state.isLevel()) {
                 return state.advance();
             }
 
@@ -455,6 +476,14 @@ public class Main {
         @Override
         public String display() {
             return this.error.display();
+        }
+    }
+
+    private static class LastLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int index = input.lastIndexOf(infix);
+            return index == -1 ? Optional.empty() : Optional.of(index);
         }
     }
 
@@ -545,7 +574,7 @@ public class Main {
     private static Rule createDefinitionRule() {
         Rule type = new NodeRule("type", createTypeRule());
         Rule name = new StringRule("name");
-        return new StripRule(new InfixRule(type, " ", name));
+        return new StripRule(new InfixRule(type, " ", name, new LastLocator()));
     }
 
     private static Rule createTypeRule() {
