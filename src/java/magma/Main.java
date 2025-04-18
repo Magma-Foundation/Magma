@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -36,20 +37,48 @@ public class Main {
 
 
             String collect = segments.stream()
-                    .map(value -> {
-                        String stripped = value.strip();
-                        String value1 = createJSONProperty(2, "value", "\"" + stripped + "\"");
-                        return createJSONObject(1, value1) + ", ";
-                    })
-                    .collect(Collectors.joining());
+                    .map(Main::compileRootSegment)
+                    .collect(Collectors.joining(", "));
+            String children = createJSONProperty(1, "children", "[" + collect + "]");
 
             Path target = source.resolveSibling("Main.java.ast.json");
-            String children = createJSONProperty(1, "children", "[" + collect + "]");
             Files.writeString(target, createJSONObject(0, children));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static String compileRootSegment(String value) {
+        String stripped = value.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            int prefixSegment = withoutEnd.indexOf(" ");
+            if (prefixSegment >= 0) {
+                String left = withoutEnd.substring(0, prefixSegment);
+                String right = withoutEnd.substring(prefixSegment + " ".length());
+                return generateStrings(1, Map.of("type", left, "segments", right));
+            }
+        }
+
+        return toValue(stripped);
+    }
+
+    private static String generateStrings(int depth, Map<String, String> strings) {
+        String joined = strings.entrySet()
+                .stream()
+                .map(entry -> createStringProperty(depth + 1, entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(", "));
+
+        return createJSONObject(depth, joined);
+    }
+
+    private static String toValue(String stripped) {
+        return generateStrings(1, Map.of("value", stripped));
+    }
+
+    private static String createStringProperty(int depth, String name, String content) {
+        return createJSONProperty(depth, name, "\"" + content + "\"");
     }
 
     private static String createJSONObject(int depth, String content) {
