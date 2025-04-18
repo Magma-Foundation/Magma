@@ -362,7 +362,12 @@ public class Main {
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
         Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
-        return new InfixRule(createModifiersRule(), infix, new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
+        DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createDefinitionRule());
+        Rule maybeWithParams = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
+                name
+        ));
+        return new InfixRule(createModifiersRule(), infix, new InfixRule(maybeWithParams, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }
 
     private static Rule createClassSegmentRule() {
