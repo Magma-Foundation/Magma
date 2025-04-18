@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 public class Main {
     private static class DivideState {
@@ -63,13 +62,18 @@ public class Main {
     record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(List<String> structs) {
+    record CompileState(List<String> imports, List<String> structs) {
         public CompileState() {
-            this(new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>());
         }
 
         public CompileState addStruct(String struct) {
             this.structs.add(struct);
+            return this;
+        }
+
+        public CompileState addImport(String imports) {
+            this.imports.add(imports);
             return this;
         }
     }
@@ -91,8 +95,10 @@ public class Main {
         CompileState oldState = new CompileState();
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
         CompileState newState = output.left;
+
+        String joinedImports = String.join("", newState.imports);
         String joinedStructs = String.join("", newState.structs);
-        return joinedStructs + output.right;
+        return joinedImports + joinedStructs + output.right;
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
@@ -141,7 +147,7 @@ public class Main {
             return new Tuple<>(state, "");
         }
         if (input.strip().startsWith("import ")) {
-            return new Tuple<>(state, "// #include <temp.h>\n");
+            return new Tuple<>(state.addImport("// #include <temp.h>\n"), "");
         }
 
         return compileClass(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));

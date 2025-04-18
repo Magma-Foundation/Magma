@@ -1,3 +1,11 @@
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
 /* /* private static */ struct DivideState {/* /* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
@@ -49,13 +57,18 @@
     record Tuple<A, B>(A left, B right) {
     } *//* 
 
-    record CompileState(List<String> structs) {
+    record CompileState(List<String> imports, List<String> structs) {
         public CompileState() {
-            this(new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>());
         }
 
         public CompileState addStruct(String struct) {
             this.structs.add(struct);
+            return this;
+        }
+
+        public CompileState addImport(String imports) {
+            this.imports.add(imports);
             return this;
         }
     } *//* 
@@ -77,8 +90,10 @@
         CompileState oldState = new CompileState();
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
         CompileState newState = output.left;
+
+        String joinedImports = String.join("", newState.imports);
         String joinedStructs = String.join("", newState.structs);
-        return joinedStructs + output.right;
+        return joinedImports + joinedStructs + output.right;
     } *//* 
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
@@ -139,23 +154,14 @@
             } *//* 
         }
         return Optional.empty();
-     */ */};// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
-/* 
+     */ */};/* 
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         if (input.startsWith("package ")) {
             return new Tuple<>(state, "");
         }
         if (input.strip().startsWith("import ")) {
-            return new Tuple<>(state, "// #include <temp.h>\n");
+            return new Tuple<>(state.addImport("// #include <temp.h>\n"), "");
         }
 
         return compileClass(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
