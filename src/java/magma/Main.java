@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,9 +53,25 @@ public class Main {
 
         @Override
         public String display() {
-            return this.message + ": " + this.context + this.errors.stream()
-                    .map(CompileError::display)
+            return this.format(0);
+        }
+
+        private String format(int depth) {
+            this.errors.sort(Comparator.comparingInt(CompileError::maxDepth));
+
+            String joined = this.errors.stream()
+                    .map(error -> error.format(depth + 1))
+                    .map(display -> "\n" + "\t".repeat(depth + 1) + display)
                     .collect(Collectors.joining());
+
+            return this.message + ": " + this.context + joined;
+        }
+
+        private int maxDepth() {
+            return 1 + this.errors.stream()
+                    .mapToInt(CompileError::maxDepth)
+                    .max()
+                    .orElse(0);
         }
     }
 
@@ -277,7 +294,7 @@ public class Main {
         }
     }
 
-    public static class FoldingDivider implements Divider {
+    private static class FoldingDivider implements Divider {
         private final Folder folder;
 
         public FoldingDivider(Folder folder) {
