@@ -390,7 +390,9 @@ public class Main {
     private record NodeRule(String propertyKey, Rule childRule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
-            return this.childRule.parse(input).mapValue(node -> new Node().withNode(this.propertyKey, node));
+            return this.childRule.parse(input)
+                    .mapValue(node -> new Node().withNode(this.propertyKey, node))
+                    .mapErr(err -> new CompileError("Cannot attach child '" + this.propertyKey + "'", input, List.of(err)));
         }
     }
 
@@ -565,7 +567,12 @@ public class Main {
     private record PrefixRule(String prefix, Rule rule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
-            return this.rule.parse(input.substring(this.prefix.length()));
+            if (input.startsWith(this.prefix)) {
+                return this.rule.parse(input.substring(this.prefix.length()));
+            }
+            else {
+                return new Err<>(new CompileError("Prefix '" + this.prefix + "' not present", input));
+            }
         }
     }
 
@@ -605,12 +612,11 @@ public class Main {
     private static class ContentStartFolder implements Folder {
         @Override
         public State fold(State state, char c) {
-            State appended = state.append(c);
             if (c == '{') {
-                return appended.advance();
+                return state.advance();
             }
 
-            return appended;
+            return state.append(c);
         }
     }
 
@@ -653,6 +659,26 @@ public class Main {
                 return false;
             }
             return true;
+        }
+    }
+
+    private static class TypeSeparatorLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int depth = 0;
+            for (int i = input.length() - 1; i >= 0; i--) {
+                char c = input.charAt(i);
+                if (c == ' ' && depth == 0) {
+                    return Optional.of(i);
+                }
+                if (c == '>') {
+                    depth++;
+                }
+                if (c == '<') {
+                    depth--;
+                }
+            }
+            return Optional.empty();
         }
     }
 
@@ -751,7 +777,7 @@ public class Main {
 
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
 
-        Rule withParams = new StripRule(new SuffixRule(params, ") {"));
+        Rule withParams = new StripRule(new SuffixRule(params, ")"));
         return new InfixRule(beforeParams, "(", new OrRule(List.of(
                 new ContextRule("Without body", new StripRule(new SuffixRule(withParams, ";"))),
                 new ContextRule("With body", createContentRule(withParams, createStatementOrBlockRule()))
@@ -783,7 +809,7 @@ public class Main {
     private static OrRule createStatementRule() {
         return new OrRule(List.of(
                 createReturnRule(),
-                createInvocationRule()
+                createInvocationRule(createValueRule())
         ));
     }
 
@@ -791,23 +817,26 @@ public class Main {
         return new TypeRule("return", new StripRule(new PrefixRule("return ", new NodeRule("value", createValueRule()))));
     }
 
-    private static StripRule createInvocationRule() {
-        NodeRule caller = new NodeRule("caller", createValueRule());
-        DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule());
+    private static StripRule createInvocationRule(Rule value) {
+        NodeRule caller = new NodeRule("caller", value);
+        DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), value);
         final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
         return new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"));
     }
 
     private static Rule createValueRule() {
-        return new OrRule(List.of(
+        LazyRule valueRule = new LazyRule();
+        valueRule.set(new OrRule(List.of(
+                createInvocationRule(valueRule),
                 createSymbolRule("value")
-        ));
+        )));
+        return valueRule;
     }
 
     private static Rule createDefinitionRule() {
         NodeRule type = new NodeRule("type", createTypeRule());
         Rule beforeName = new OrRule(List.of(
-                new StripRule(new InfixRule(type, new LocatingSplitter(" ", new LastLocator()), type)),
+                new StripRule(new InfixRule(type, new LocatingSplitter(" ", new TypeSeparatorLocator()), type)),
                 type
         ));
 
