@@ -544,10 +544,7 @@ public class Main {
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
         Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
-        Rule param = new OrRule(List.of(
-                createWhitespaceRule(),
-                createDefinitionRule()
-        ));
+        Rule param = createParamRule();
 
         DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
         Rule maybeWithParams = new OrRule(List.of(
@@ -555,6 +552,13 @@ public class Main {
                 name
         ));
         return new InfixRule(createModifiersRule(), infix, new InfixRule(maybeWithParams, "{", new StripRule(new SuffixRule(childRule, "}"))));
+    }
+
+    private static OrRule createParamRule() {
+        return new OrRule(List.of(
+                createWhitespaceRule(),
+                createDefinitionRule()
+        ));
     }
 
     private static Rule createClassSegmentRule() {
@@ -574,7 +578,7 @@ public class Main {
 
     private static Rule createMethodRule() {
         Rule definition = new NodeRule("definition", createDefinitionRule());
-        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
+        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
         Rule withParams = new StripRule(new SuffixRule(params, ")"));
         DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
         return new InfixRule(definition, "(", new OrRule(List.of(
