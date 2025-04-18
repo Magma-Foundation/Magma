@@ -7,9 +7,9 @@
 // #include <temp.h>
 // #include <temp.h>
 /* private static */ struct DivideState {
-	/* private final List<String> segments */;
-	/* private StringBuilder buffer */;
-	/* private int depth */;/* 
+	/* private final List<String> */ segments;
+	/* private StringBuilder */ buffer;
+	/* private int */ depth;/* 
 
         private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -137,14 +137,14 @@
         if (c == '} *//* ') {
             return appended.exit();
         } */
-	/* return appended */;/* 
+	/* return */ appended;/* 
      */
 };
 /* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf(" */ struct ");
         if (classIndex >= 0) {
-	/* String modifiers = input.substring(0, classIndex).strip() */;
-	/* String afterKeyword = input.substring(classIndex + "class ".length()) */;/* 
+	/* String modifiers = input.substring(0, */ classIndex).strip();
+	/* String afterKeyword = input.substring(classIndex + "class */ ".length());/* 
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
@@ -159,7 +159,7 @@
                 }
             } */
 	/* }
-        return Optional.empty() */;
+        return */ Optional.empty();
 };
 /* 
 
@@ -187,12 +187,16 @@
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(withoutEnd) + ";"));
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+            int nameSeparator = withoutEnd.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String beforeName = withoutEnd.substring(0, nameSeparator);
+                String name = withoutEnd.substring(nameSeparator + " ".length());
+                return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeName) + " " + name + ";"));
+            }
         }
-        else {
-            return Optional.empty();
-        }
+
+        return Optional.empty();
     } *//* 
 
     private static String generatePlaceholder(String input) {

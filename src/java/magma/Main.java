@@ -188,12 +188,16 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(withoutEnd) + ";"));
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+            int nameSeparator = withoutEnd.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String beforeName = withoutEnd.substring(0, nameSeparator);
+                String name = withoutEnd.substring(nameSeparator + " ".length());
+                return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeName) + " " + name + ";"));
+            }
         }
-        else {
-            return Optional.empty();
-        }
+
+        return Optional.empty();
     }
 
     private static String generatePlaceholder(String input) {
