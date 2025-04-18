@@ -5,7 +5,6 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-// #include <temp.h>
 /* private static */ struct DivideState {
 	/* private final */ /* List<String> */ segments;
 	/* private */ /* StringBuilder */ buffer;
@@ -18,7 +17,7 @@
         } *//* 
 
         public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         } *//* 
 
         private DivideState exit() {
@@ -55,14 +54,67 @@
         } *//* 
      */
 };
-/* public */ struct Main {/* 
+/* private static */ struct Joiner implements Collector<String, Optional<String>> {/* @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        } *//* 
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        } *//* 
+     */
+};
+/* public static final */ struct RangeHead implements Head<Integer> {
+	/* private final */ /* int */ length;
+	/* private int counter */ /* = */ 0;/* 
+
+        public RangeHead(int length) {
+            this.length = length;
+        } *//* 
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            }
+
+            int value = this.counter;
+            this.counter++;
+            return Optional.of(value);
+        } *//* 
+     */
+};
+/* public */ struct Main {/* public interface List<T> {
+        Iterator<T> iter();
+
+        List<T> add(T element);
+    } *//* 
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    } *//* 
+
+    public interface Iterator<T> {
+        <C> C collect(Collector<T, C> collector);
+
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+    } *//* 
+
+    private interface Head<T> {
+        Optional<T> next();
+    } *//* 
 
     record Tuple<A, B>(A left, B right) {
     } *//* 
 
     record CompileState(List<String> imports, List<String> structs) {
         public CompileState() {
-            this(new ArrayList<>(), new ArrayList<>());
+            this(Lists.empty(), Lists.empty());
         }
 
         public CompileState addStruct(String struct) {
@@ -73,6 +125,31 @@
         public CompileState addImport(String imports) {
             this.imports.add(imports);
             return this;
+        }
+    } *//* 
+
+    public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Optional<R> optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (optional.isEmpty()) {
+                    return current;
+                }
+                current = optional.get();
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
         }
     } *//* 
 
@@ -94,23 +171,34 @@
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
         CompileState newState = output.left;
 
-        String joinedImports = String.join("", newState.imports);
-        String joinedStructs = String.join("", newState.structs);
+        String joinedImports = join(newState.imports);
+        String joinedStructs = join(newState.structs);
         return joinedImports + joinedStructs + output.right;
+    } *//* 
+
+    private static String join(List<String> list) {
+        return list.iter()
+                .collect(new Joiner())
+                .orElse("");
     } *//* 
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
         List<String> segments = divide(input);
 
-        Tuple<CompileState, StringBuilder> current = new Tuple<>(state, new StringBuilder());
-        for (String segment : segments) {
-            Tuple<CompileState, String> compiled = compiler.apply(current.left, segment);
-            CompileState newState = compiled.left;
-            StringBuilder newCache = current.right.append(compiled.right);
-            current = new Tuple<>(newState, newCache);
-        }
+        Tuple<CompileState, StringBuilder> fold = segments.iter().fold(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()),
+                (current, element) -> compileSegment(compiler, current, element));
 
-        return new Tuple<>(current.left, current.right.toString());
+        return new Tuple<>(fold.left, fold.right.toString());
+    } *//* 
+
+    private static Tuple<CompileState, StringBuilder> compileSegment(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, StringBuilder> current, String element) {
+        CompileState currentState = current.left;
+        StringBuilder currentCache = current.right;
+
+        Tuple<CompileState, String> compiled = compiler.apply(currentState, element);
+        CompileState newState = compiled.left;
+        StringBuilder newCache = currentCache.append(compiled.right);
+        return new Tuple<>(newState, newCache);
     } *//* 
 
     private static List<String> divide(String input) {
