@@ -362,8 +362,9 @@ public class Main {
                 return Optional.empty();
             }
 
-            char next = current.pop();
-            State withNext = current.append(next);
+            State withStart = current.append(c);
+            char next = withStart.pop();
+            State withNext = withStart.append(next);
 
             State withSlash = next == '\\' ? withNext.append(withNext.pop()) : withNext;
             return Optional.of(withSlash.append(withSlash.pop()));
@@ -555,6 +556,26 @@ public class Main {
         }
     }
 
+    private static class InvocationStartLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int depth = 0;
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (c == '(' && depth == 0) {
+                    return Optional.of(i);
+                }
+                if (c == ')') {
+                    depth++;
+                }
+                if (c == '(') {
+                    depth--;
+                }
+            }
+            return Optional.empty();
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -590,12 +611,12 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
+        return new DivideRule("children", new FoldingDivider(new StatementFolder()), createRootSegmentRule())
                 .parse(input)
                 .mapValue(Node::display);
     }
 
-    private static OrRule getValue() {
+    private static OrRule createRootSegmentRule() {
         return new OrRule(List.of(
                 createNamespacedRule(),
                 createClassRule(createClassSegmentRule())
@@ -639,7 +660,8 @@ public class Main {
                 createStructuredRule("interface ", classSegmentRule),
                 new TypeRule("record", createStructuredRule("record ", classSegmentRule)),
                 createClassRule(classSegmentRule),
-                new TypeRule("method", createMethodRule())
+                new TypeRule("method", createMethodRule()),
+                new StripRule(new SuffixRule(createDefinitionRule(), ";"))
         )));
         return classSegmentRule;
     }
@@ -672,10 +694,14 @@ public class Main {
         LazyRule statementOrBlock = new LazyRule();
         statementOrBlock.set(new OrRule(List.of(
                 createWhitespaceRule(),
-                createContentRule(new PrefixRule("if (", new SuffixRule(new NodeRule("condition", createValueRule()), ")")), statementOrBlock),
+                createIfRule(statementOrBlock),
                 new StripRule(new SuffixRule(createStatementRule(), ";"))
         )));
         return statementOrBlock;
+    }
+
+    private static TypeRule createIfRule(LazyRule statementOrBlock) {
+        return new TypeRule("if", createContentRule(new StripRule(new PrefixRule("if (", new SuffixRule(new NodeRule("condition", createValueRule()), ")"))), statementOrBlock));
     }
 
     private static OrRule createStatementRule() {
@@ -692,7 +718,7 @@ public class Main {
     private static StripRule createInvocationRule() {
         NodeRule caller = new NodeRule("caller", createValueRule());
         DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule());
-        return new StripRule(new SuffixRule(new InfixRule(caller, "(", arguments), ")"));
+        return new StripRule(new SuffixRule(new InfixRule(caller, "(", arguments, new InvocationStartLocator()), ")"));
     }
 
     private static Rule createValueRule() {
