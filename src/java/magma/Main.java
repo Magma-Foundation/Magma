@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ public class Main {
     }
 
     private interface Folder {
-        State fold(State state, char c);
+        State fold(State state);
     }
 
     private interface Error {
@@ -336,48 +337,48 @@ public class Main {
 
             State current = new State(queue);
             while (current.hasNext()) {
-                char c = current.pop();
                 State finalCurrent = current;
-                current = this.foldDoubleQuotes(finalCurrent, c)
-                        .or(() -> this.foldSingleQuotes(finalCurrent, c))
-                        .orElseGet(() -> this.folder.fold(finalCurrent, c));
+                current = this.foldDoubleQuotes(finalCurrent)
+                        .or(() -> this.foldSingleQuotes(finalCurrent))
+                        .orElseGet(() -> this.folder.fold(finalCurrent));
             }
 
             return current.advance().segments();
         }
 
-        private Optional<State> foldDoubleQuotes(State state, char c) {
-            if (c != '"') {
-                return Optional.empty();
-            }
-
-            State current = state.append(c);
-            while (current.hasNext()) {
-                char popped = current.pop();
-                current = current.append(popped);
-
-                if (popped == '\\') {
-                    current = current.append(current.pop());
-                }
-                if (popped == '"') {
-                    return Optional.of(current);
-                }
-            }
-
-            return Optional.empty();
-        }
-
-        private Optional<State> foldSingleQuotes(State current, char c) {
+        private Optional<State> foldSingleQuotes(State current) {
+            char c = current.peekChar();
             if (c != '\'') {
                 return Optional.empty();
             }
 
-            State withStart = current.append(c);
-            char next = withStart.pop();
+            State withStart = current.popAndAppend();
+            char next = withStart.popChar();
             State withNext = withStart.append(next);
 
-            State withSlash = next == '\\' ? withNext.append(withNext.pop()) : withNext;
-            return Optional.of(withSlash.append(withSlash.pop()));
+            State withSlash = next == '\\' ? withNext.popAndAppend() : withNext;
+            return Optional.of(withSlash.popAndAppend());
+        }
+
+        private Optional<State> foldDoubleQuotes(State state) {
+            if (state.peekChar() != '"') {
+                return Optional.empty();
+            }
+
+            State current1 = state.append(state.popChar());
+            while (current1.hasNext()) {
+                char popped = current1.popChar();
+                current1 = current1.append(popped);
+
+                if (popped == '\\') {
+                    current1 = current1.popAndAppend();
+                }
+                if (popped == '"') {
+                    return Optional.of(current1);
+                }
+            }
+
+            return Optional.empty();
         }
     }
 
@@ -407,18 +408,18 @@ public class Main {
 
     private static class State {
         private final List<String> segments;
-        private final LinkedList<Character> queue;
+        private final List<Character> queue;
         private StringBuilder buffer;
         private int depth;
 
-        private State(LinkedList<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
+        private State(List<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
             this.queue = queue;
         }
 
-        public State(LinkedList<Character> queue) {
+        public State(List<Character> queue) {
             this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
@@ -479,18 +480,36 @@ public class Main {
             return !this.queue.isEmpty();
         }
 
-        public char pop() {
-            return this.queue.pop();
+        public char popChar() {
+            return this.queue.removeFirst();
         }
 
-        public Character peek() {
-            return this.queue.peek();
+        public Character peekChar() {
+            return this.queue.getFirst();
+        }
+
+        private State popAndAppend() {
+            return this.append(this.popChar());
+        }
+
+        public Optional<String> peekSlice(int length) {
+            if (this.queue.size() < length) {
+                return Optional.empty();
+            }
+            return Optional.of(this.queue.subList(0, length)
+                    .stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining()));
+        }
+
+        public State popSlice(int length) {
+            List<Character> slice = this.queue.subList(length, this.queue.size());
+            return new State(slice, this.segments, this.buffer, this.depth);
         }
     }
 
     private static class StatementFolder implements Folder {
-        @Override
-        public State fold(State state, char c) {
+        private State fold0(State state, char c) {
             State appended = state.append(c);
             if (c == ';' && appended.isLevel()) {
                 return appended.advance();
@@ -506,20 +525,24 @@ public class Main {
             }
             return appended;
         }
+
+        @Override
+        public State fold(State state) {
+            return this.fold0(state, state.popChar());
+        }
     }
 
     private static class ValueFolder implements Folder {
-        @Override
-        public State fold(State state, char c) {
+        private State fold0(State state, char c) {
             if (c == ',' && state.isLevel()) {
                 return state.advance();
             }
 
             State appended = state.append(c);
             if (c == '-') {
-                Character peek = state.peek();
+                Character peek = state.peekChar();
                 if (peek == '>') {
-                    char popped = state.pop();
+                    char popped = state.popChar();
                     return state.append(popped);
                 }
             }
@@ -531,6 +554,11 @@ public class Main {
                 return appended.exit();
             }
             return appended;
+        }
+
+        @Override
+        public State fold(State state) {
+            return this.fold0(state, state.popChar());
         }
     }
 
@@ -603,13 +631,17 @@ public class Main {
     }
 
     private static class ContentStartFolder implements Folder {
-        @Override
-        public State fold(State state, char c) {
+        private State fold0(State state, char c) {
             State appended = state.append(c);
             if (c == '{') {
                 return appended.advance();
             }
             return appended;
+        }
+
+        @Override
+        public State fold(State state) {
+            return this.fold0(state, state.popChar());
         }
     }
 
@@ -696,8 +728,7 @@ public class Main {
     }
 
     private static class InvocationStartSplitter implements Folder {
-        @Override
-        public State fold(State state, char c) {
+        private State fold0(State state, char c) {
             State appended = state.append(c);
             if (c == '(' && appended.isLevel()) {
                 return appended.advance().enter();
@@ -710,6 +741,11 @@ public class Main {
                 return appended.exit();
             }
             return appended;
+        }
+
+        @Override
+        public State fold(State state) {
+            return this.fold0(state, state.popChar());
         }
     }
 
@@ -729,13 +765,15 @@ public class Main {
         }
     }
 
-    private record OperatorFolder(char operator) implements Folder {
+    private record OperatorFolder(String operator) implements Folder {
         @Override
-        public State fold(State state, char c) {
-            if (c == this.operator) {
-                return state.advance();
+        public State fold(State state) {
+            Optional<String> maybeSlice = state.peekSlice(this.operator.length());
+            if (maybeSlice.isPresent() && maybeSlice.get().equals(this.operator)) {
+                return state.popSlice(this.operator.length()).advance();
             }
 
+            char c = state.popChar();
             if (c == '(') {
                 return state.enter();
             }
@@ -907,7 +945,9 @@ public class Main {
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 new TypeRule("invocation", createInvocationRule(valueRule)),
                 createLambdaRule(valueRule, statementOrBlockRule),
-                createOperatorRule(valueRule),
+                createTernaryRule(valueRule),
+                createOperatorRule("add", "+", valueRule),
+                createOperatorRule("equals", "==", valueRule),
                 new TypeRule("data-access", createAccessRule(valueRule, ".")),
                 new TypeRule("method-access", createAccessRule(valueRule, "::")),
                 new TypeRule("number", new StripRule(new FilterRule(new StringRule("value"), new NumberRule()))),
@@ -916,10 +956,14 @@ public class Main {
         return valueRule;
     }
 
-    private static TypeRule createOperatorRule(LazyRule valueRule) {
+    private static TypeRule createTernaryRule(LazyRule valueRule) {
+        return new TypeRule("ternary", new InfixRule(new NodeRule("condition", valueRule), "?", new InfixRule(new NodeRule("ifTrue", valueRule), ":", new NodeRule("ifElse", valueRule))));
+    }
+
+    private static TypeRule createOperatorRule(String type, String operator, LazyRule valueRule) {
         NodeRule left = new NodeRule("left", valueRule);
         NodeRule right = new NodeRule("right", valueRule);
-        return new TypeRule("add", new InfixRule(left, new FoldingSplitter(new OperatorFolder('+')), right));
+        return new TypeRule(type, new InfixRule(left, new FoldingSplitter(new OperatorFolder(operator)), right));
     }
 
     private static TypeRule createLambdaRule(LazyRule valueRule, Rule statementOrBlockRule) {
