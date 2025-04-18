@@ -171,13 +171,14 @@ public class Main {
         }
     }
 
-    private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
+    private record NodeListRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
             return this.divider.divide(input)
                     .stream()
                     .reduce(new Ok<>(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
-                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children));
+                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children))
+                    .mapErr(err -> new CompileError("Failed to attach node list '" + this.propertyKey + "'", input, List.of(err)));
         }
 
         private Result<List<Node>, CompileError> foldChild(Result<List<Node>, CompileError> maybeChildren, String child) {
@@ -700,7 +701,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        return new DivideRule("children", new FoldingDivider(new StatementFolder()), createRootSegmentRule())
+        return new NodeListRule("children", new FoldingDivider(new StatementFolder()), createRootSegmentRule())
                 .parse(input)
                 .mapValue(Node::display);
     }
@@ -718,13 +719,13 @@ public class Main {
     }
 
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
-        Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
+        Rule childRule = new NodeListRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = createSymbolRule("name");
         Rule param = createParamRule();
 
-        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
+        Rule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), param);
 
-        DivideRule typeParameters = new DivideRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
+        NodeListRule typeParameters = new NodeListRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
         Rule name1 = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(name, "<", typeParameters), ">")),
                 name
@@ -775,7 +776,7 @@ public class Main {
                 createSymbolRule("name")
         ));
 
-        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
+        Rule params = new NodeListRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
 
         Rule withParams = new StripRule(new SuffixRule(params, ")"));
         return new InfixRule(beforeParams, "(", new OrRule(List.of(
@@ -786,7 +787,7 @@ public class Main {
 
     private static Rule createContentRule(Rule withParams, Rule childRule) {
         Rule child = new ContextRule("Invalid child", childRule);
-        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), child);
+        NodeListRule children = new NodeListRule("children", new FoldingDivider(new StatementFolder()), child);
         return new InfixRule(withParams, new FoldingSplitter(new ContentStartFolder()), new StripRule(new SuffixRule(children, "}")));
     }
 
@@ -823,7 +824,7 @@ public class Main {
     }
 
     private static StripRule createInvokableRule(Rule caller, Rule value) {
-        DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), value);
+        NodeListRule arguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), value);
         final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
         return new StripRule(new SuffixRule(new InfixRule(caller, new LocatingSplitter("(", invocationStartLocator), arguments), ")"));
     }
@@ -839,10 +840,18 @@ public class Main {
     }
 
     private static Rule createDefinitionRule() {
-        NodeRule type = new NodeRule("type", createTypeRule());
+        Rule type = new NodeRule("type", createTypeRule());
+        Rule modifiers = createModifiersRule();
+        Rule rule = new NodeListRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
+
+        Rule beforeType = new OrRule(List.of(
+                new StripRule(new SuffixRule(new InfixRule(modifiers, new LocatingSplitter("<", new FirstLocator()), rule), ">")),
+                modifiers
+        ));
+
         Rule beforeName = new OrRule(List.of(
-                new StripRule(new InfixRule(type, new LocatingSplitter(" ", new TypeSeparatorLocator()), type)),
-                type
+                new ContextRule("With before type", new StripRule(new InfixRule(beforeType, new LocatingSplitter(" ", new TypeSeparatorLocator()), type))),
+                new ContextRule("Without before type", type)
         ));
 
         Rule name = new StringRule("name");
@@ -860,7 +869,7 @@ public class Main {
 
     private static Rule createGenericRule(Rule typeRule) {
         Rule base = new NodeRule("base", createSymbolRule("symbol"));
-        Rule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
+        Rule arguments = new NodeListRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
         return new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"));
     }
 
@@ -868,14 +877,14 @@ public class Main {
         return new StripRule(new SymbolRule(new StringRule(propertyKey)));
     }
 
-    private static DivideRule createModifiersRule() {
-        return new DivideRule("modifiers", new DelimitedDivider(" "), createSymbolRule("value"));
+    private static NodeListRule createModifiersRule() {
+        return new NodeListRule("modifiers", new DelimitedDivider(" "), createSymbolRule("value"));
     }
 
     private static Rule createNamespacedRule() {
         Rule type = new StringRule("type");
         Rule segment = new StringRule("value");
-        Rule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
+        Rule segments = new NodeListRule("segments", new DelimitedDivider("."), segment);
         return createStatementRule(new InfixRule(type, " ", segments));
     }
 
