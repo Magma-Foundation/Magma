@@ -23,9 +23,9 @@ public class Main {
         List<String> divide(String input);
     }
 
-    private record Node(Map<String, String> strings, Map<String, java.util.List<Node>> nodeLists) {
+    private record Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
         public Node() {
-            this(new HashMap<>(), new HashMap<>());
+            this(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
 
         private static String createJSONProperty(int depth, String name, String value) {
@@ -34,12 +34,19 @@ public class Main {
         }
 
         private String format(int depth) {
-            Stream<String> stringString = this.formatStrings(depth);
-            Stream<String> stringStream = this.formatNodeLists(depth);
+            Stream<String> stringStream = this.formatStrings(depth);
+            Stream<String> nodesStream = this.formatNodes(depth);
+            Stream<String> nodeListsStream = this.formatNodeLists(depth);
 
-            String content = Stream.concat(stringString, stringStream).collect(Collectors.joining(", "));
+            String content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "));
             String indent = "\t".repeat(depth);
             return "{" + content + "\n" + indent + "}";
+        }
+
+        private Stream<String> formatNodes(int depth) {
+            return this.nodes.entrySet()
+                    .stream()
+                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)));
         }
 
         private Stream<String> formatNodeLists(int depth) {
@@ -75,12 +82,18 @@ public class Main {
 
         public Node merge(Node other) {
             this.strings.putAll(other.strings);
+            this.nodes.putAll(other.nodes);
             this.nodeLists.putAll(other.nodeLists);
             return this;
         }
 
         public String display() {
             return this.format(0);
+        }
+
+        public Node withNode(String propertyKey, Node propertyValue) {
+            this.nodes.put(propertyKey, propertyValue);
+            return this;
         }
     }
 
@@ -208,6 +221,13 @@ public class Main {
         }
     }
 
+    private record NodeRule(String propertyKey, Rule childRule) implements Rule {
+        @Override
+        public Optional<Node> parse(String input) {
+            return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -251,9 +271,20 @@ public class Main {
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
+                getE2(),
                 createContentRule()
         )));
         return classSegmentRule;
+    }
+
+    private static Rule getE2() {
+        Rule definition = new NodeRule("definition", getDefinition());
+        Rule params = new StringRule("params");
+        return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
+    }
+
+    private static Rule getDefinition() {
+        return new InfixRule(new StringRule("type"), " ", new StringRule("name"));
     }
 
     private static DivideRule createModifiersRule() {
@@ -263,7 +294,11 @@ public class Main {
     private static Rule createNamespacedRule() {
         Rule type = new StringRule("type");
         Rule segment = new StringRule("value");
-        DivideRule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
-        return new StripRule(new SuffixRule(new InfixRule(type, " ", segments), ";"));
+        Rule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
+        return createStatementRule(new InfixRule(type, " ", segments));
+    }
+
+    private static StripRule createStatementRule(Rule childRule) {
+        return new StripRule(new SuffixRule(childRule, ";"));
     }
 }
