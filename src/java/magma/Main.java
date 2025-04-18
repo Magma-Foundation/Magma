@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
@@ -315,22 +317,56 @@ public class Main {
         }
     }
 
-    private static class FoldingDivider implements Divider {
-        private final Folder folder;
-
-        public FoldingDivider(Folder folder) {
-            this.folder = folder;
-        }
-
+    private record FoldingDivider(Folder folder) implements Divider {
         @Override
         public List<String> divide(String input) {
-            State current = new State();
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
-                current = this.folder.fold(current, c);
+            LinkedList<Character> queue = IntStream.range(0, input.length())
+                    .mapToObj(input::charAt)
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            State current = new State(queue);
+            while (current.hasNext()) {
+                char c = current.pop();
+                State finalCurrent = current;
+                current = this.foldDoubleQuotes(finalCurrent, c)
+                        .or(() -> this.foldSingleQuotes(finalCurrent, c))
+                        .orElseGet(() -> this.folder.fold(finalCurrent, c));
             }
 
             return current.advance().segments();
+        }
+
+        private Optional<State> foldDoubleQuotes(State state, char c) {
+            if (c != '"') {
+                return Optional.empty();
+            }
+
+            State current = state.append(c);
+            while (current.hasNext()) {
+                char popped = current.pop();
+                current = current.append(popped);
+
+                if (popped == '\\') {
+                    current = current.append(current.pop());
+                }
+                if (popped == '"') {
+                    return Optional.of(current);
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        private Optional<State> foldSingleQuotes(State current, char c) {
+            if (c != '\'') {
+                return Optional.empty();
+            }
+
+            char next = current.pop();
+            State withNext = current.append(next);
+
+            State withSlash = next == '\\' ? withNext.append(withNext.pop()) : withNext;
+            return Optional.of(withSlash.append(withSlash.pop()));
         }
     }
 
@@ -358,17 +394,19 @@ public class Main {
 
     private static class State {
         private final List<String> segments;
+        private final LinkedList<Character> queue;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(LinkedList<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+            this.queue = queue;
         }
 
-        public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public State(LinkedList<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State enter() {
@@ -423,6 +461,14 @@ public class Main {
         public List<String> segments() {
             return this.segments;
         }
+
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        public char pop() {
+            return this.queue.pop();
+        }
     }
 
     private static class StatementFolder implements Folder {
@@ -435,10 +481,10 @@ public class Main {
             if (c == '}' && appended.isShallow()) {
                 return appended.advance().exit();
             }
-            if (c == '{') {
+            if (c == '{' || c == '(') {
                 return appended.enter();
             }
-            if (c == '}') {
+            if (c == '}' || c == ')') {
                 return appended.exit();
             }
             return appended;
