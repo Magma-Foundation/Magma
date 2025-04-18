@@ -308,7 +308,7 @@ public class Main {
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     String oldParams = withParams.substring(0, paramEnd);
-                    Tuple<CompileState, String> newParams = compileAll(outputDefinition.left, oldParams, Main::compileValueChar, Main::compileParameter, Main::mergeValues);
+                    Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, Main::compileParameter);
 
                     String oldBody = withParams.substring(paramEnd + ")".length());
                     String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
@@ -323,6 +323,10 @@ public class Main {
             });
         }
         return Optional.empty();
+    }
+
+    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
+        return compileAll(state, input, Main::compileValueChar, compiler, Main::mergeValues);
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
@@ -383,11 +387,29 @@ public class Main {
         return findTypeSeparator(beforeName).map(typeSeparator -> {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
             String type = beforeName.substring(typeSeparator + " ".length());
-            String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
-            return generateDefinition(state, outputBeforeName, name);
+            Tuple<CompileState, String> typeTuple = compileType(state, type);
+
+            String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
+            return generateDefinition(typeTuple.left, outputBeforeName, name);
         }).orElseGet(() -> {
-            return generateDefinition(state, generatePlaceholder(beforeName), name);
+            Tuple<CompileState, String> type = compileType(state, beforeName);
+            return generateDefinition(type.left, type.right, name);
         });
+    }
+
+    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(">")) {
+            int argumentsStart = stripped.indexOf("<");
+            if (argumentsStart >= 0) {
+                String base = stripped.substring(0, argumentsStart).strip();
+                String params = stripped.substring(argumentsStart + "<".length());
+                Tuple<CompileState, String> newTypes = compileValues(state, params, Main::compileType);
+                return new Tuple<>(newTypes.left, base + "<" + newTypes.right + ">");
+            }
+        }
+
+        return compileContent(state, stripped);
     }
 
     private static Optional<Integer> findTypeSeparator(String input) {
@@ -409,10 +431,10 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> generateDefinition(
             CompileState state,
-            String outputBeforeName,
+            String beforeName,
             String name
     ) {
-        String generated = outputBeforeName + " " + name;
+        String generated = beforeName + " " + name;
         return Optional.of(new Tuple<>(state, generated));
     }
 
