@@ -53,6 +53,10 @@ public class Main {
         Result<Tuple<String, String>, CompileError> split(String input);
     }
 
+    interface Filter {
+        boolean test(String input);
+    }
+
     record CompileError(String message, String context, List<CompileError> errors) implements Error {
         CompileError(String message, String context) {
             this(message, context, new ArrayList<>());
@@ -640,26 +644,15 @@ public class Main {
         }
     }
 
-    private record SymbolRule(Rule rule) implements Rule {
+    private record FilterRule(Rule rule, Filter filter) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
-            if (this.isSymbol(input)) {
+            if (this.filter.test(input)) {
                 return this.rule.parse(input);
             }
             else {
                 return new Err<>(new CompileError("Not a symbol", input));
             }
-        }
-
-        private boolean isSymbol(String input) {
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
-                if (Character.isLetter(c)) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
         }
     }
 
@@ -680,6 +673,34 @@ public class Main {
                 }
             }
             return Optional.empty();
+        }
+    }
+
+    public static class SymbolFilter implements Filter {
+        @Override
+        public boolean test(String input) {
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (Character.isLetter(c)) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static class NumberRule implements Filter {
+        @Override
+        public boolean test(String input) {
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (Character.isDigit(c)) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
         }
     }
 
@@ -834,9 +855,15 @@ public class Main {
         valueRule.set(new OrRule(List.of(
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 createInvocationRule(valueRule),
+                createDataAccessRule(valueRule),
+                new StripRule(new FilterRule(new StringRule("value"), new NumberRule())),
                 createSymbolRule("value")
         )));
         return valueRule;
+    }
+
+    private static InfixRule createDataAccessRule(LazyRule valueRule) {
+        return new InfixRule(new NodeRule("parent", valueRule), new LocatingSplitter(".", new LastLocator()), createSymbolRule("property"));
     }
 
     private static Rule createDefinitionRule() {
@@ -882,7 +909,7 @@ public class Main {
     }
 
     private static StripRule createSymbolRule(String propertyKey) {
-        return new StripRule(new SymbolRule(new StringRule(propertyKey)));
+        return new StripRule(new FilterRule(new StringRule(propertyKey), new SymbolFilter()));
     }
 
     private static NodeListRule createModifiersRule() {
