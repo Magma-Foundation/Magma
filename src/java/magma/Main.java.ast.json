@@ -140,12 +140,21 @@
 			"children" : [{
 				"definition" : {
 					"name" : "parse", 
-					"type" : "Optional<Node>"
+					"type" : {
+						"base" : {
+							"symbol" : "Optional"
+						}, 
+						"arguments" : [{
+							"symbol" : "Node"
+						}]
+					}
 				}, 
 				"params" : [{
 					"definition" : {
 						"name" : "input", 
-						"type" : "String"
+						"type" : {
+							"symbol" : "String"
+						}
 					}
 				}]
 			}, {
@@ -159,12 +168,21 @@
 			"children" : [{
 				"definition" : {
 					"name" : "divide", 
-					"type" : "List<String>"
+					"type" : {
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
+							"symbol" : "String"
+						}]
+					}
 				}, 
 				"params" : [{
 					"definition" : {
 						"name" : "input", 
-						"type" : "String"
+						"type" : {
+							"symbol" : "String"
+						}
 					}
 				}]
 			}, {
@@ -178,17 +196,23 @@
 			"children" : [{
 				"definition" : {
 					"name" : "fold", 
-					"type" : "State"
+					"type" : {
+						"symbol" : "State"
+					}
 				}, 
 				"params" : [{
 					"definition" : {
 						"name" : "state", 
-						"type" : "State"
+						"type" : {
+							"symbol" : "State"
+						}
 					}
 				}, {
 					"definition" : {
 						"name" : "char c", 
-						"type" : ""
+						"type" : {
+							"symbol" : ""
+						}
 					}
 				}]
 			}, {
@@ -569,20 +593,41 @@
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
-                getE2(),
+                createMethodRule(),
                 createContentRule()
         )));
         return classSegmentRule;
     }"
 	}, {
-		"value" : "private static Rule getE2() {
-        Rule definition = new NodeRule("definition", getDefinition());
+		"value" : "private static Rule createMethodRule() {
+        Rule definition = new NodeRule("definition", createDefinitionRule());
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
         return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
     }"
 	}, {
-		"value" : "private static Rule getDefinition() {
-        return new InfixRule(new StringRule("type"), " ", new StringRule("name"));
+		"value" : "private static Rule createDefinitionRule() {
+        Rule type = new NodeRule("type", createTypeRule());
+        Rule name = new StringRule("name");
+        return new InfixRule(type, " ", name);
+    }"
+	}, {
+		"value" : "private static Rule createTypeRule() {
+        LazyRule typeRule = new LazyRule();
+        typeRule.set(new OrRule(List.of(
+                createGenericRule(typeRule),
+                createSymbolRule()
+        )));
+        return typeRule;
+    }"
+	}, {
+		"value" : "private static Rule createGenericRule(Rule typeRule) {
+        Rule base = new NodeRule("base", createSymbolRule());
+        Rule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
+        return new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"));
+    }"
+	}, {
+		"value" : "private static StripRule createSymbolRule() {
+        return new StripRule(new StringRule("symbol"));
     }"
 	}, {
 		"value" : "private static DivideRule createModifiersRule() {

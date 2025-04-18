@@ -369,20 +369,41 @@ public class Main {
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
-                getE2(),
+                createMethodRule(),
                 createContentRule()
         )));
         return classSegmentRule;
     }
 
-    private static Rule getE2() {
-        Rule definition = new NodeRule("definition", getDefinition());
+    private static Rule createMethodRule() {
+        Rule definition = new NodeRule("definition", createDefinitionRule());
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
         return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
     }
 
-    private static Rule getDefinition() {
-        return new InfixRule(new StringRule("type"), " ", new StringRule("name"));
+    private static Rule createDefinitionRule() {
+        Rule type = new NodeRule("type", createTypeRule());
+        Rule name = new StringRule("name");
+        return new InfixRule(type, " ", name);
+    }
+
+    private static Rule createTypeRule() {
+        LazyRule typeRule = new LazyRule();
+        typeRule.set(new OrRule(List.of(
+                createGenericRule(typeRule),
+                createSymbolRule()
+        )));
+        return typeRule;
+    }
+
+    private static Rule createGenericRule(Rule typeRule) {
+        Rule base = new NodeRule("base", createSymbolRule());
+        Rule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
+        return new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"));
+    }
+
+    private static StripRule createSymbolRule() {
+        return new StripRule(new StringRule("symbol"));
     }
 
     private static DivideRule createModifiersRule() {
@@ -399,5 +420,4 @@ public class Main {
     private static StripRule createStatementRule(Rule childRule) {
         return new StripRule(new SuffixRule(childRule, ";"));
     }
-
 }
