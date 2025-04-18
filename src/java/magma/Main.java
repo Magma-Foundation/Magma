@@ -5,10 +5,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
+    private record Node(Map<String, String> strings) {
+        public Node() {
+            this(new HashMap<>());
+        }
+
+        private String format(int depth) {
+            String joined = this.strings().entrySet()
+                    .stream()
+                    .map(entry -> createStringProperty(depth + 1, entry.getKey(), entry.getValue()))
+                    .collect(Collectors.joining(", "));
+
+            return createJSONObject(depth, joined);
+        }
+
+        public Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -57,24 +78,16 @@ public class Main {
             if (prefixSegment >= 0) {
                 String left = withoutEnd.substring(0, prefixSegment);
                 String right = withoutEnd.substring(prefixSegment + " ".length());
-                return generateStrings(1, Map.of("type", left, "segments", right));
+
+                return new Node().withString("type", left).withString("segments", right).format(1);
             }
         }
 
         return toValue(stripped);
     }
 
-    private static String generateStrings(int depth, Map<String, String> strings) {
-        String joined = strings.entrySet()
-                .stream()
-                .map(entry -> createStringProperty(depth + 1, entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining(", "));
-
-        return createJSONObject(depth, joined);
-    }
-
     private static String toValue(String stripped) {
-        return generateStrings(1, Map.of("value", stripped));
+        return new Node(Map.of("value", stripped)).format(1);
     }
 
     private static String createStringProperty(int depth, String name, String content) {
