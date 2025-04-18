@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -190,29 +188,45 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        List<String> segments = divide(input);
+        return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
+    }
+
+    private static Tuple<CompileState, String> compileAll(
+            CompileState state,
+            String input,
+            BiFunction<DivideState, Character, DivideState> divider, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        List<String> segments = divide(input, divider);
 
         Tuple<CompileState, StringBuilder> fold = segments.iter().fold(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()),
-                (current, element) -> compileSegment(compiler, current, element));
+                (current, element) -> compileSegment(compiler, current, element, merger));
 
         return new Tuple<>(fold.left, fold.right.toString());
     }
 
-    private static Tuple<CompileState, StringBuilder> compileSegment(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, StringBuilder> current, String element) {
+    private static Tuple<CompileState, StringBuilder> compileSegment(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, StringBuilder> current, String element, BiFunction<StringBuilder, String, StringBuilder> merger) {
         CompileState currentState = current.left;
         StringBuilder currentCache = current.right;
 
-        Tuple<CompileState, String> compiled = compiler.apply(currentState, element);
-        CompileState newState = compiled.left;
-        StringBuilder newCache = currentCache.append(compiled.right);
+        Tuple<CompileState, String> compiledTuple = compiler.apply(currentState, element);
+        CompileState newState = compiledTuple.left;
+        String compiled = compiledTuple.right;
+
+        StringBuilder newCache = merger.apply(currentCache, compiled);
         return new Tuple<>(newState, newCache);
     }
 
-    private static List<String> divide(String input) {
+    private static StringBuilder mergeStatements(StringBuilder current, String statement) {
+        return current.append(statement);
+    }
+
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            current = foldStatementChar(current, c);
+
+            current = folder.apply(current, c);
         }
 
         return current.advance().segments;
@@ -284,7 +298,7 @@ public class Main {
                 .orElseGet(() -> compileContent(state, input));
     }
 
-    private static @NotNull Optional<? extends Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart);
@@ -292,13 +306,15 @@ public class Main {
             return compileDefinition(state, definition).flatMap(outputDefinition -> {
                 int paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
-                    String params = withParams.substring(0, paramEnd);
+                    String oldParams = withParams.substring(0, paramEnd);
+                    Tuple<CompileState, String> newParams = compileAll(outputDefinition.left, oldParams, Main::compileValueChar, Main::compileParameter, Main::mergeValues);
 
                     String oldBody = withParams.substring(paramEnd + ")".length());
                     String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
 
-                    String generated = "\n\t" + outputDefinition.right + "(" + generatePlaceholder(params) + ")" + newBody;
-                    return Optional.of(new Tuple<>(outputDefinition.left, generated));
+                    String generated = "\n\t" + outputDefinition.right + "(" + newParams.right + ")" + newBody;
+                    Tuple<CompileState, String> value = new Tuple<>(newParams.left, generated);
+                    return Optional.of(value);
                 }
                 else {
                     return Optional.empty();
@@ -306,6 +322,24 @@ public class Main {
             });
         }
         return Optional.empty();
+    }
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    }
+
+    private static DivideState compileValueChar(DivideState state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+        return state.append(c);
+    }
+
+    private static Tuple<CompileState, String> compileParameter(CompileState compileState, String s) {
+        return compileDefinition(compileState, s).orElseGet(() -> compileContent(compileState, s));
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
