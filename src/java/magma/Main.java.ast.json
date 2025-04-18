@@ -18,6 +18,24 @@
 		"segments" : [{
 			"value" : "java"
 		}, {
+			"value" : "io"
+		}, {
+			"value" : "PrintWriter"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "io"
+		}, {
+			"value" : "StringWriter"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
 			"value" : "nio"
 		}, {
 			"value" : "file"
@@ -107,6 +125,28 @@
 		}, {
 			"value" : "util"
 		}, {
+			"value" : "function"
+		}, {
+			"value" : "BiFunction"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "util"
+		}, {
+			"value" : "function"
+		}, {
+			"value" : "Function"
+		}]
+	}, {
+		"type" : "import", 
+		"segments" : [{
+			"value" : "java"
+		}, {
+			"value" : "util"
+		}, {
 			"value" : "regex"
 		}, {
 			"value" : "Pattern"
@@ -136,17 +176,28 @@
 	}, {
 		"name" : "Main", 
 		"children" : [{
+			"name" : "Result<T, X>", 
+			"children" : [{
+				"value" : "<R> Result<R, X> mapValue(Function<T, R> mapper);"
+			}, {
+				"value" : "<R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);"
+			}, {
+				"value" : "<R> R match(Function<T, R> whenOk, Function<X, R> whenErr);"
+			}, {
+				"value" : "<R> Result<T, R> mapErr(Function<X, R> mapper);"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}]
+		}, {
 			"name" : "Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "parse", 
+					"name" : "CompileError> parse", 
 					"type" : {
-						"base" : {
-							"symbol" : "Optional"
-						}, 
-						"arguments" : [{
-							"symbol" : "Node"
-						}]
+						"symbol" : "Result<Node,"
 					}
 				}, 
 				"params" : [{
@@ -161,6 +212,14 @@
 				"value" : ""
 			}], 
 			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
 				"value" : "private"
 			}]
 		}, {
@@ -228,6 +287,43 @@
 				"value" : ""
 			}, {
 				"value" : "private"
+			}]
+		}, {
+			"name" : "Error", 
+			"children" : [{
+				"value" : "String display();"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
+		}, {
+			"name" : "CompileError(String message, String context, List<CompileError> errors) implements Error", 
+			"children" : [{
+				"value" : "CompileError(String message, String context) {
+            this(message, context, new ArrayList<>());
+        }"
+			}, {
+				"value" : "@Override
+        public String display() {
+            return this.message + ": " + this.context + this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
 			}]
 		}, {
 			"name" : "Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists)", 
@@ -515,10 +611,46 @@
 				"value" : "private"
 			}]
 		}, {
+			"name" : "Ok<T, X>(T value) implements Result<T, X>", 
+			"children" : [{
+				"value" : "@Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }"
+			}, {
+				"value" : "@Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }"
+			}, {
+				"value" : "@Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }"
+			}, {
+				"value" : "@Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
+		}, {
 			"name" : "StringRule(String propertyKey) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -532,7 +664,7 @@
 					}
 				}], 
 				"children" : [{
-					"value" : "return Optional.of(new Node().withString(this.propertyKey, input));"
+					"value" : "return new Ok<>(new Node().withString(this.propertyKey, input));"
 				}, {
 					"value" : ""
 				}]
@@ -590,7 +722,7 @@
 			"name" : "DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -606,53 +738,54 @@
 				"children" : [{
 					"value" : "return this.divider.divide(input)
                     .stream()
-                    .reduce(Optional.of(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
-                    .map(children -> new Node().withNodeList(this.propertyKey(), children));"
+                    .reduce(new Ok<>(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
+                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children));"
 				}, {
 					"value" : ""
 				}]
 			}, {
-				"definition" : {
-					"name" : "Optional<List<Node>> foldChild", 
-					"type" : {
-						"symbol" : "private"
-					}
-				}, 
-				"params" : [{
-					"definition" : {
-						"name" : "maybeChildren", 
-						"type" : {
-							"base" : {
-								"symbol" : "Optional"
-							}, 
-							"arguments" : [{
-								"base" : {
-									"symbol" : "List"
-								}, 
-								"arguments" : [{
-									"symbol" : "Node"
-								}]
-							}]
-						}
-					}
-				}, {
-					"definition" : {
-						"name" : "child", 
-						"type" : {
-							"symbol" : "String"
-						}
-					}
-				}], 
-				"children" : [{
-					"value" : "return maybeChildren.flatMap(children -> this.childRule.parse(child).map(compiled -> {
+				"value" : "private Result<List<Node>, CompileError> foldChild(Result<List<Node>, CompileError> maybeChildren, String child) {
+            return maybeChildren.flatMapValue(children -> this.childRule.parse(child).mapValue(compiled -> {
                 children.add(compiled);
                 return children;
-            }"
-				}, {
-					"value" : "));"
-				}, {
-					"value" : ""
-				}]
+            }));
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
+		}, {
+			"name" : "Err<T, X>(X error) implements Result<T, X>", 
+			"children" : [{
+				"value" : "@Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }"
+			}, {
+				"value" : "@Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }"
+			}, {
+				"value" : "@Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }"
+			}, {
+				"value" : "@Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }"
 			}, {
 				"value" : ""
 			}], 
@@ -671,7 +804,7 @@
 			"name" : "InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -688,14 +821,14 @@
 					"value" : "int index = input.indexOf(this.infix);"
 				}, {
 					"value" : "if (index < 0) {
-                return Optional.empty();
+                return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
             }"
 				}, {
 					"value" : "String left = input.substring(0, index);"
 				}, {
 					"value" : "String right = input.substring(index + this.infix.length());"
 				}, {
-					"value" : "return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));"
+					"value" : "return this.leftRule.parse(left).flatMapValue(withLeft -> this.rightRule.parse(right).mapValue(withLeft::merge));"
 				}, {
 					"value" : ""
 				}]
@@ -717,7 +850,7 @@
 			"name" : "SuffixRule(Rule childRule, String suffix) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -732,7 +865,7 @@
 				}], 
 				"children" : [{
 					"value" : "if (!input.endsWith(this.suffix())) {
-                return Optional.empty();
+                return new Err<>(new CompileError("Suffix '" + this.suffix + "' not present", input));
             }"
 				}, {
 					"value" : "String slice = input.substring(0, input.length() - this.suffix().length());"
@@ -759,7 +892,7 @@
 			"name" : "StripRule(Rule childRule) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -794,8 +927,91 @@
 		}, {
 			"name" : "OrRule(List<Rule> rules) implements Rule", 
 			"children" : [{
+				"name" : "OrState", 
+				"children" : [{
+					"value" : "public OrState() {
+                this(Optional.empty(), new ArrayList<>());
+            }"
+				}, {
+					"definition" : {
+						"name" : "OrState withValue", 
+						"type" : {
+							"symbol" : "public"
+						}
+					}, 
+					"params" : [{
+						"definition" : {
+							"name" : "value", 
+							"type" : {
+								"symbol" : "Node"
+							}
+						}
+					}], 
+					"children" : [{
+						"value" : "if (this.maybeValue.isPresent()) {
+                    return this;
+                }"
+					}, {
+						"value" : "return new OrState(Optional.of(value), this.errors);"
+					}, {
+						"value" : ""
+					}]
+				}, {
+					"definition" : {
+						"name" : "OrState withError", 
+						"type" : {
+							"symbol" : "public"
+						}
+					}, 
+					"params" : [{
+						"definition" : {
+							"name" : "error", 
+							"type" : {
+								"symbol" : "CompileError"
+							}
+						}
+					}], 
+					"children" : [{
+						"value" : "this.errors.add(error);"
+					}, {
+						"value" : "return new OrState(this.maybeValue, this.errors);"
+					}, {
+						"value" : ""
+					}]
+				}, {
+					"value" : "public Result<Node, List<CompileError>> toResult() {
+                return this.maybeValue.<Result<Node, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors));
+            }"
+				}, {
+					"value" : ""
+				}], 
+				"modifiers" : [{
+					"value" : "private"
+				}], 
+				"params" : [{
+					"name" : "maybeValue", 
+					"type" : {
+						"base" : {
+							"symbol" : "Optional"
+						}, 
+						"arguments" : [{
+							"symbol" : "Node"
+						}]
+					}
+				}, {
+					"name" : "errors", 
+					"type" : {
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
+							"symbol" : "CompileError"
+						}]
+					}
+				}]
+			}, {
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -809,14 +1025,18 @@
 					}
 				}], 
 				"children" : [{
-					"value" : "for (Rule rule : this.rules()) {
-                Optional<Node> parsed = rule.parse(input);
-                if (parsed.isPresent()) {
-                    return parsed;
+					"value" : "return this.rules.stream().reduce(new OrState(), new BiFunction<OrState, Rule, OrState>() {
+                @Override
+                public OrState apply(OrState orState, Rule rule) {
+                    return rule.parse(input).match(orState::withValue, orState::withError);
                 }
             }"
 				}, {
-					"value" : "return Optional.empty();"
+					"value" : ", (_, next) -> next).toResult().mapErr(errs -> {
+                return new CompileError("No valid rule", input, errs);
+            }"
+				}, {
+					"value" : ");"
 				}, {
 					"value" : ""
 				}]
@@ -896,8 +1116,10 @@
 				"value" : "}
 
         @Override
-        public Optional<Node> parse(String input) {
-            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));"
+        public Result<Node, CompileError> parse(String input) {
+            return this.maybeChildRule
+                    .map(childRule -> childRule.parse(input))
+                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)));"
 			}, {
 				"value" : "}"
 			}]
@@ -905,7 +1127,7 @@
 			"name" : "NodeRule(String propertyKey, Rule childRule) implements Rule", 
 			"children" : [{
 				"definition" : {
-					"name" : "       public Optional<Node> parse", 
+					"name" : "       public Result<Node, CompileError> parse", 
 					"type" : {
 						"symbol" : "@Override"
 					}
@@ -919,7 +1141,7 @@
 					}
 				}], 
 				"children" : [{
-					"value" : "return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));"
+					"value" : "return this.childRule.parse(input).mapValue(node -> new Node().withNode(this.propertyKey, node));"
 				}, {
 					"value" : ""
 				}]
@@ -1173,25 +1395,60 @@
 			"value" : "static"
 		}]
 	}, {
-		"value" : "public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            String output = compile(input);
-
-            Path target = source.resolveSibling("Main.java.ast.json");
-            Files.writeString(target, output);
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+		"value" : "private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
         }
     }"
 	}, {
-		"value" : "private static String compile(String input) {
+		"value" : "private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }"
+	}, {
+		"value" : "public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new).match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
+    }"
+	}, {
+		"value" : "private static Optional<ApplicationError> runWithInput(Path source, String input) {
+        return compile(input).mapErr(ApplicationError::new).match(output -> {
+            Path target = source.resolveSibling("Main.java.ast.json");
+            return writeString(output, target)
+                    .map(ThrowableError::new)
+                    .map(ApplicationError::new);
+        }, Optional::of);
+    }"
+	}, {
+		"value" : "private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }"
+	}, {
+		"value" : "private static Optional<IOException> writeString(String output, Path target) {
+        try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }"
+	}, {
+		"value" : "private static Result<String, CompileError> compile(String input) {
         return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
                 .parse(input)
-                .map(Node::display)
-                .orElse("");
+                .mapValue(Node::display);
     }"
 	}, {
 		"value" : "private static OrRule getValue() {

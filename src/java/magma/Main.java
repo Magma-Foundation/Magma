@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,13 +12,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+    interface Result<T, X> {
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+    }
+
     private interface Rule {
-        Optional<Node> parse(String input);
+        Result<Node, CompileError> parse(String input);
     }
 
     interface Divider {
@@ -25,6 +39,23 @@ public class Main {
 
     private interface Folder {
         State fold(State state, char c);
+    }
+
+    private interface Error {
+        String display();
+    }
+
+    record CompileError(String message, String context, List<CompileError> errors) implements Error {
+        CompileError(String message, String context) {
+            this(message, context, new ArrayList<>());
+        }
+
+        @Override
+        public String display() {
+            return this.message + ": " + this.context + this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
+        }
     }
 
     private record Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
@@ -101,10 +132,32 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+    }
+
     private record StringRule(String propertyKey) implements Rule {
         @Override
-        public Optional<Node> parse(String input) {
-            return Optional.of(new Node().withString(this.propertyKey, input));
+        public Result<Node, CompileError> parse(String input) {
+            return new Ok<>(new Node().withString(this.propertyKey, input));
         }
     }
 
@@ -117,15 +170,15 @@ public class Main {
 
     private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
         @Override
-        public Optional<Node> parse(String input) {
+        public Result<Node, CompileError> parse(String input) {
             return this.divider.divide(input)
                     .stream()
-                    .reduce(Optional.of(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
-                    .map(children -> new Node().withNodeList(this.propertyKey(), children));
+                    .reduce(new Ok<>(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
+                    .mapValue(children -> new Node().withNodeList(this.propertyKey(), children));
         }
 
-        private Optional<List<Node>> foldChild(Optional<List<Node>> maybeChildren, String child) {
-            return maybeChildren.flatMap(children -> this.childRule.parse(child).map(compiled -> {
+        private Result<List<Node>, CompileError> foldChild(Result<List<Node>, CompileError> maybeChildren, String child) {
+            return maybeChildren.flatMapValue(children -> this.childRule.parse(child).mapValue(compiled -> {
                 children.add(compiled);
                 return children;
             }));
@@ -133,25 +186,47 @@ public class Main {
 
     }
 
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
+    }
+
     private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
         @Override
-        public Optional<Node> parse(String input) {
+        public Result<Node, CompileError> parse(String input) {
             int index = input.indexOf(this.infix);
             if (index < 0) {
-                return Optional.empty();
+                return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
             }
 
             String left = input.substring(0, index);
             String right = input.substring(index + this.infix.length());
-            return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));
+            return this.leftRule.parse(left).flatMapValue(withLeft -> this.rightRule.parse(right).mapValue(withLeft::merge));
         }
     }
 
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
         @Override
-        public Optional<Node> parse(String input) {
+        public Result<Node, CompileError> parse(String input) {
             if (!input.endsWith(this.suffix())) {
-                return Optional.empty();
+                return new Err<>(new CompileError("Suffix '" + this.suffix + "' not present", input));
             }
 
             String slice = input.substring(0, input.length() - this.suffix().length());
@@ -161,22 +236,44 @@ public class Main {
 
     private record StripRule(Rule childRule) implements Rule {
         @Override
-        public Optional<Node> parse(String value) {
+        public Result<Node, CompileError> parse(String value) {
             return this.childRule.parse(value.strip());
         }
     }
 
     private record OrRule(List<Rule> rules) implements Rule {
-        @Override
-        public Optional<Node> parse(String input) {
-            for (Rule rule : this.rules()) {
-                Optional<Node> parsed = rule.parse(input);
-                if (parsed.isPresent()) {
-                    return parsed;
-                }
+        private record OrState(Optional<Node> maybeValue, List<CompileError> errors) {
+            public OrState() {
+                this(Optional.empty(), new ArrayList<>());
             }
 
-            return Optional.empty();
+            public OrState withValue(Node value) {
+                if (this.maybeValue.isPresent()) {
+                    return this;
+                }
+                return new OrState(Optional.of(value), this.errors);
+            }
+
+            public OrState withError(CompileError error) {
+                this.errors.add(error);
+                return new OrState(this.maybeValue, this.errors);
+            }
+
+            public Result<Node, List<CompileError>> toResult() {
+                return this.maybeValue.<Result<Node, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors));
+            }
+        }
+
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return this.rules.stream().reduce(new OrState(), new BiFunction<OrState, Rule, OrState>() {
+                @Override
+                public OrState apply(OrState orState, Rule rule) {
+                    return rule.parse(input).match(orState::withValue, orState::withError);
+                }
+            }, (_, next) -> next).toResult().mapErr(errs -> {
+                return new CompileError("No valid rule", input, errs);
+            });
         }
     }
 
@@ -207,15 +304,17 @@ public class Main {
         }
 
         @Override
-        public Optional<Node> parse(String input) {
-            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
+        public Result<Node, CompileError> parse(String input) {
+            return this.maybeChildRule
+                    .map(childRule -> childRule.parse(input))
+                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)));
         }
     }
 
     private record NodeRule(String propertyKey, Rule childRule) implements Rule {
         @Override
-        public Optional<Node> parse(String input) {
-            return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
+        public Result<Node, CompileError> parse(String input) {
+            return this.childRule.parse(input).mapValue(node -> new Node().withNode(this.propertyKey, node));
         }
     }
 
@@ -326,37 +425,67 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            String output = compile(input);
-
-            Path target = source.resolveSibling("Main.java.ast.json");
-            Files.writeString(target, output);
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
         }
     }
 
-    private static String compile(String input) {
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }
+
+    public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new).match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Optional<ApplicationError> runWithInput(Path source, String input) {
+        return compile(input).mapErr(ApplicationError::new).match(output -> {
+            Path target = source.resolveSibling("Main.java.ast.json");
+            return writeString(output, target)
+                    .map(ThrowableError::new)
+                    .map(ApplicationError::new);
+        }, Optional::of);
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Optional<IOException> writeString(String output, Path target) {
+        try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, CompileError> compile(String input) {
         return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
                 .parse(input)
-                .map(Node::display)
-                .orElse("");
+                .mapValue(Node::display);
     }
 
     private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
-                createStructuredRule("class ", createClassSegmentRule()),
-                createContentRule()
+                createStructuredRule("class ", createClassSegmentRule())
         ));
-    }
-
-    private static StripRule createContentRule() {
-        return new StripRule(new StringRule("value"));
     }
 
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
@@ -375,8 +504,7 @@ public class Main {
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
                 createStructuredRule("record ", classSegmentRule),
-                createMethodRule(),
-                createContentRule()
+                createMethodRule()
         )));
         return classSegmentRule;
     }
@@ -394,7 +522,6 @@ public class Main {
 
     private static Rule createStatementRule() {
         return new OrRule(List.of(
-                createContentRule()
         ));
     }
 
