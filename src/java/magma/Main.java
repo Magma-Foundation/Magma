@@ -544,7 +544,12 @@ public class Main {
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
         Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
-        DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createDefinitionRule());
+        Rule param = new OrRule(List.of(
+                createWhitespaceRule(),
+                createDefinitionRule()
+        ));
+
+        DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
         Rule maybeWithParams = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
                 name
