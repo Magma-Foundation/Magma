@@ -614,6 +614,10 @@ public class Main {
     }
 
     public record LocatingSplitter(String infix, Locator locator) implements Splitter {
+        public LocatingSplitter(String infix) {
+            this(infix, new FirstLocator());
+        }
+
         @Override
         public Result<Tuple<String, String>, CompileError> split(String input) {
             return this.locator().locate(input, this.infix()).<Result<Tuple<String, String>, CompileError>>map(index -> {
@@ -909,12 +913,22 @@ public class Main {
         valueRule.set(new OrRule(List.of(
                 new TypeRule("construction", new StripRule(new PrefixRule("new ", createInvokableRule(createTypeRule(), valueRule)))),
                 new TypeRule("invocation", createInvocationRule(valueRule)),
+                createLambdaRule(valueRule),
+                createOperatorRule(valueRule),
                 new TypeRule("data-access", createAccessRule(valueRule, ".")),
                 new TypeRule("method-access", createAccessRule(valueRule, "::")),
                 new TypeRule("number", new StripRule(new FilterRule(new StringRule("value"), new NumberRule()))),
                 new TypeRule("symbol-value", createSymbolRule("value"))
         )));
         return valueRule;
+    }
+
+    private static TypeRule createOperatorRule(LazyRule valueRule) {
+        return new TypeRule("add", new InfixRule(new NodeRule("left", valueRule), "+", new NodeRule("right", valueRule)));
+    }
+
+    private static TypeRule createLambdaRule(LazyRule valueRule) {
+        return new TypeRule("lambda", new InfixRule(new StringRule("before-lambda"), new LocatingSplitter("->"), new NodeRule("child", valueRule)));
     }
 
     private static InfixRule createAccessRule(LazyRule valueRule, String infix) {
