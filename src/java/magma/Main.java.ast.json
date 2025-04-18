@@ -141,13 +141,13 @@
 		"with-end" : [{
 			"value" : "private interface Rule {
         Optional<Node> parse(String input);
-    }
-
-    interface Divider {
+    }"
+		}, {
+			"value" : "interface Divider {
         List<String> divide(String input);
-    }
-
-    private record Node(Map<String, String> strings, Map<String, java.util.List<Node>> nodeLists) {
+    }"
+		}, {
+			"value" : "private record Node(Map<String, String> strings, Map<String, java.util.List<Node>> nodeLists) {
         public Node() {
             this(new HashMap<>(), new HashMap<>());
         }
@@ -206,23 +206,23 @@
         public String display() {
             return this.format(0);
         }
-    }
-
-    private record StringRule(String propertyKey) implements Rule {
+    }"
+		}, {
+			"value" : "private record StringRule(String propertyKey) implements Rule {
         @Override
         public Optional<Node> parse(String input) {
             return Optional.of(new Node().withString(this.propertyKey, input));
         }
-    }
-
-    private record DelimitedDivider(String delimiter) implements Divider {
+    }"
+		}, {
+			"value" : "private record DelimitedDivider(String delimiter) implements Divider {
         @Override
         public List<String> divide(String input) {
             return Arrays.asList(input.split(Pattern.quote(this.delimiter)));
         }
-    }
-
-    private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
+    }"
+		}, {
+			"value" : "private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
         @Override
         public Optional<Node> parse(String input) {
             return this.divider.divide(input)
@@ -238,9 +238,9 @@
             }));
         }
 
-    }
-
-    private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
+    }"
+		}, {
+			"value" : "private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
         @Override
         public Optional<Node> parse(String input) {
             int index = input.indexOf(this.infix);
@@ -252,9 +252,9 @@
             String right = input.substring(index + this.infix.length());
             return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));
         }
-    }
-
-    private record SuffixRule(Rule childRule, String suffix) implements Rule {
+    }"
+		}, {
+			"value" : "private record SuffixRule(Rule childRule, String suffix) implements Rule {
         @Override
         public Optional<Node> parse(String input) {
             if (!input.endsWith(this.suffix())) {
@@ -264,16 +264,16 @@
             String slice = input.substring(0, input.length() - this.suffix().length());
             return this.childRule().parse(slice);
         }
-    }
-
-    private record StripRule(Rule childRule) implements Rule {
+    }"
+		}, {
+			"value" : "private record StripRule(Rule childRule) implements Rule {
         @Override
         public Optional<Node> parse(String value) {
             return this.childRule.parse(value.strip());
         }
-    }
-
-    private record OrRule(List<Rule> rules) implements Rule {
+    }"
+		}, {
+			"value" : "private record OrRule(List<Rule> rules) implements Rule {
         @Override
         public Optional<Node> parse(String input) {
             for (Rule rule : this.rules()) {
@@ -285,9 +285,9 @@
 
             return Optional.empty();
         }
-    }
-
-    public static class StatementDivider implements Divider {
+    }"
+		}, {
+			"value" : "public static class StatementDivider implements Divider {
         @Override
         public List<String> divide(String input) {
             ArrayList<String> segments = new ArrayList<String>();
@@ -300,6 +300,11 @@
                     segments.add(buffer.toString());
                     buffer = new StringBuilder();
                 }
+                else if (c == '}' && depth == 1) {
+                    segments.add(buffer.toString());
+                    buffer = new StringBuilder();
+                    depth--;
+                }
                 else {
                     if (c == '{') {
                         depth++;
@@ -311,10 +316,12 @@
             }
             segments.add(buffer.toString());
             return segments;
-        }
-    }
-
-    public static void main(String[] args) {
+        }"
+		}, {
+			"value" : ""
+		}]
+	}, {
+		"value" : "public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -326,48 +333,120 @@
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }
-
-    private static String compile(String input) {
+    }"
+	}, {
+		"value" : "private static String compile(String input) {
         return new DivideRule("children", new StatementDivider(), getValue())
                 .parse(input)
                 .map(Node::display)
                 .orElse("");
-    }
-
-    private static OrRule getValue() {
+    }"
+	}, {
+		"value" : "private static OrRule getValue() {
         return new OrRule(List.of(
                 createNamespacedRule(),
                 createClassRule(),
                 createContentRule()
         ));
-    }
-
-    private static StripRule createContentRule() {
+    }"
+	}, {
+		"value" : "private static StripRule createContentRule() {
         return new StripRule(new StringRule("value"));
-    }
-
-    private static InfixRule createClassRule() {
-        Rule childRule = new DivideRule("with-end", new StatementDivider(), createClassSegmentRule());
-        return new InfixRule(createModifiersRule(), "class ", new InfixRule(new StringRule("name"), "{", new StripRule(new SuffixRule(childRule, "}"))));
-    }
-
-    private static Rule createClassSegmentRule() {
+    }"
+	}, {
+		"name" : "", new InfixRule(new StringRule("name"), "", 
+		"modifiers" : [{
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : "private"
+		}, {
+			"value" : "static"
+		}, {
+			"value" : "InfixRule"
+		}, {
+			"value" : "createClassRule()"
+		}, {
+			"value" : "{"
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : "Rule"
+		}, {
+			"value" : "childRule"
+		}, {
+			"value" : "="
+		}, {
+			"value" : "new"
+		}, {
+			"value" : "DivideRule("with-end","
+		}, {
+			"value" : "new"
+		}, {
+			"value" : "StatementDivider(),"
+		}, {
+			"value" : "createClassSegmentRule());"
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : ""
+		}, {
+			"value" : "return"
+		}, {
+			"value" : "new"
+		}, {
+			"value" : "InfixRule(createModifiersRule(),"
+		}, {
+			"value" : """
+		}], 
+		"with-end" : [{
+			"value" : "", new StripRule(new SuffixRule(childRule, "}"))));"
+		}]
+	}, {
+		"value" : "private static Rule createClassSegmentRule() {
         return new OrRule(List.of(
                 createContentRule()
         ));
-    }
-
-    private static DivideRule createModifiersRule() {
+    }"
+	}, {
+		"value" : "private static DivideRule createModifiersRule() {
         return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("value")));
-    }
-
-    private static Rule createNamespacedRule() {
+    }"
+	}, {
+		"value" : "private static Rule createNamespacedRule() {
         Rule type = new StringRule("type");
         Rule segment = new StringRule("value");
         DivideRule segments = new DivideRule("segments", new DelimitedDivider("."), segment);
         return new StripRule(new SuffixRule(new InfixRule(type, " ", segments), ";"));
     }"
-		}]
+	}, {
+		"value" : "}"
 	}]
 }
