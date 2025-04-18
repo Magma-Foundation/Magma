@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,6 +49,10 @@ public class Main {
 
     interface Locator {
         Optional<Integer> locate(String input, String infix);
+    }
+
+    interface Splitter {
+        Result<Tuple<String, String>, CompileError> split(String input);
     }
 
     record CompileError(String message, String context, List<CompileError> errors) implements Error {
@@ -156,28 +159,6 @@ public class Main {
         }
     }
 
-    private record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Ok<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        }
-
-        @Override
-        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
-            return new Ok<>(this.value);
-        }
-    }
-
     private record StringRule(String propertyKey) implements Rule {
         @Override
         public Result<Node, CompileError> parse(String input) {
@@ -239,27 +220,54 @@ public class Main {
         }
     }
 
-    private record InfixRule(Rule leftRule, String infix, Rule rightRule, Locator locator) implements Rule {
+    record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+    }
+
+    private static final class InfixRule implements Rule {
+        private final Rule leftRule;
+        private final Rule rightRule;
+        private final Splitter splitter;
+
+        private InfixRule(Rule leftRule, Rule rightRule, Splitter splitter) {
+            this.leftRule = leftRule;
+            this.rightRule = rightRule;
+            this.splitter = splitter;
+        }
+
         private InfixRule(Rule leftRule, String infix, Rule rightRule) {
-            this(leftRule, infix, rightRule, new FirstLocator());
+            this(leftRule, rightRule, new LocatingSplitter(infix, new FirstLocator()));
         }
 
         @Override
         public Result<Node, CompileError> parse(String input) {
-            return this.locator.locate(input, this.infix)
-                    .map(index -> this.split(input, index))
-                    .orElseGet(() -> this.createErr(input));
+            return this.splitter.split(input).flatMapValue(this::getNodeCompileErrorResult);
         }
 
-        private Result<Node, CompileError> createErr(String input) {
-            return new Err<>(new CompileError("Infix '" + this.infix + "' not present", input));
+        private Result<Node, CompileError> getNodeCompileErrorResult(Tuple<String, String> tuple) {
+            return this.leftRule.parse(tuple.left).flatMapValue(withLeft -> this.rightRule.parse(tuple.right).mapValue(withLeft::merge));
         }
+    }
 
-        private Result<Node, CompileError> split(String input, Integer index) {
-            String left = input.substring(0, index);
-            String right = input.substring(index + this.infix.length());
-            return this.leftRule.parse(left).flatMapValue(withLeft -> this.rightRule.parse(right).mapValue(withLeft::merge));
-        }
+    record Tuple<A, B>(A left, B right) {
     }
 
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
@@ -306,12 +314,7 @@ public class Main {
 
         @Override
         public Result<Node, CompileError> parse(String input) {
-            return this.rules.stream().reduce(new OrState(), new BiFunction<OrState, Rule, OrState>() {
-                @Override
-                public OrState apply(OrState orState, Rule rule) {
-                    return rule.parse(input).match(orState::withValue, orState::withError);
-                }
-            }, (_, next) -> next).toResult().mapErr(errs -> {
+            return this.rules.stream().reduce(new OrState(), (orState, rule) -> rule.parse(input).match(orState::withValue, orState::withError), (_, next) -> next).toResult().mapErr(errs -> {
                 return new CompileError("No valid rule", input, errs);
             });
         }
@@ -470,6 +473,10 @@ public class Main {
         public char pop() {
             return this.queue.pop();
         }
+
+        public Character peek() {
+            return this.queue.peek();
+        }
     }
 
     private static class StatementFolder implements Folder {
@@ -500,10 +507,18 @@ public class Main {
             }
 
             State appended = state.append(c);
-            if (c == '<') {
+            if (c == '-') {
+                Character peek = state.peek();
+                if (peek == '>') {
+                    char popped = state.pop();
+                    return state.append(popped);
+                }
+            }
+
+            if (c == '<' || c == '(') {
                 return appended.enter();
             }
-            if (c == '>') {
+            if (c == '>' || c == ')') {
                 return appended.exit();
             }
             return appended;
@@ -576,6 +591,50 @@ public class Main {
         }
     }
 
+    public record LocatingSplitter(String infix, Locator locator) implements Splitter {
+        @Override
+        public Result<Tuple<String, String>, CompileError> split(String input) {
+            return this.locator().locate(input, this.infix()).<Result<Tuple<String, String>, CompileError>>map(index -> {
+                String left = input.substring(0, index);
+                String right = input.substring(index + this.infix().length());
+                return new Ok<>(new Tuple<>(left, right));
+            }).orElseGet(() -> {
+                return new Err<>(new CompileError("Infix '" + this.infix() + "' not present", input));
+            });
+        }
+    }
+
+    private static class ContentStartFolder implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            State appended = state.append(c);
+            if (c == '{') {
+                return appended.advance();
+            }
+
+            return appended;
+        }
+    }
+
+    private record FoldingSplitter(Folder folder) implements Splitter {
+        @Override
+        public Result<Tuple<String, String>, CompileError> split(String input) {
+            List<String> divided = new FoldingDivider(this.folder).divide(input);
+            if (divided.size() < 2) {
+                return new Err<>(new CompileError("No segments found", input));
+            }
+            String joined = String.join("", divided.subList(1, divided.size()));
+            return new Ok<>(new Tuple<>(divided.getFirst(), joined));
+        }
+    }
+
+    private record ContextRule(String message, Rule rule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return this.rule.parse(input).mapErr(err -> new CompileError(this.message, input, List.of(err)));
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -638,8 +697,9 @@ public class Main {
                 name
         ));
 
+        final LastLocator lastLocator = new LastLocator();
         Rule beforeContent = new OrRule(List.of(
-                new InfixRule(maybeWithParams, " implements ", createSymbolRule("super-type"), new LastLocator()),
+                new InfixRule(maybeWithParams, createSymbolRule("super-type"), new LocatingSplitter(" implements ", lastLocator)),
                 maybeWithParams
         ));
 
@@ -678,16 +738,18 @@ public class Main {
         ));
 
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
-        Rule withParams = new StripRule(new SuffixRule(params, ")"));
 
+        Rule withParams = new StripRule(new SuffixRule(params, ") {"));
         return new InfixRule(beforeParams, "(", new OrRule(List.of(
-                new StripRule(new SuffixRule(withParams, ";")),
-                createContentRule(withParams, createStatementOrBlockRule())
+                new ContextRule("Without body", new StripRule(new SuffixRule(withParams, ";"))),
+                new ContextRule("With body", createContentRule(withParams, createStatementOrBlockRule()))
         )));
     }
 
-    private static Rule createContentRule(Rule withParams, Rule statementOrBlock) {
-        return new InfixRule(withParams, "{", new StripRule(new SuffixRule(new DivideRule("children", new FoldingDivider(new StatementFolder()), statementOrBlock), "}")));
+    private static Rule createContentRule(Rule withParams, Rule childRule) {
+        Rule child = new ContextRule("Invalid child", childRule);
+        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), child);
+        return new InfixRule(withParams, new StripRule(new SuffixRule(children, "}")), new FoldingSplitter(new ContentStartFolder()));
     }
 
     private static Rule createStatementOrBlockRule() {
@@ -701,7 +763,9 @@ public class Main {
     }
 
     private static TypeRule createIfRule(LazyRule statementOrBlock) {
-        return new TypeRule("if", createContentRule(new StripRule(new PrefixRule("if (", new SuffixRule(new NodeRule("condition", createValueRule()), ")"))), statementOrBlock));
+        NodeRule condition = new NodeRule("condition", createValueRule());
+        Rule beforeContent = new StripRule(new PrefixRule("if (", new SuffixRule(condition, ") {")));
+        return new TypeRule("if", createContentRule(beforeContent, statementOrBlock));
     }
 
     private static OrRule createStatementRule() {
@@ -718,7 +782,8 @@ public class Main {
     private static StripRule createInvocationRule() {
         NodeRule caller = new NodeRule("caller", createValueRule());
         DivideRule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), createValueRule());
-        return new StripRule(new SuffixRule(new InfixRule(caller, "(", arguments, new InvocationStartLocator()), ")"));
+        final InvocationStartLocator invocationStartLocator = new InvocationStartLocator();
+        return new StripRule(new SuffixRule(new InfixRule(caller, arguments, new LocatingSplitter("(", invocationStartLocator)), ")"));
     }
 
     private static Rule createValueRule() {
@@ -730,7 +795,7 @@ public class Main {
     private static Rule createDefinitionRule() {
         Rule type = new NodeRule("type", createTypeRule());
         Rule name = new StringRule("name");
-        return new StripRule(new InfixRule(type, " ", name, new LastLocator()));
+        return new StripRule(new InfixRule(type, name, new LocatingSplitter(" ", new LastLocator())));
     }
 
     private static Rule createTypeRule() {
