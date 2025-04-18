@@ -369,6 +369,7 @@ public class Main {
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
+                createStructuredRule("record ", classSegmentRule),
                 createMethodRule(),
                 createContentRule()
         )));
@@ -384,7 +385,7 @@ public class Main {
     private static Rule createDefinitionRule() {
         Rule type = new NodeRule("type", createTypeRule());
         Rule name = new StringRule("name");
-        return new InfixRule(type, " ", name);
+        return new StripRule(new InfixRule(type, " ", name));
     }
 
     private static Rule createTypeRule() {

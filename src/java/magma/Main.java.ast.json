@@ -209,9 +209,9 @@
 					}
 				}, {
 					"definition" : {
-						"name" : "char c", 
+						"name" : "c", 
 						"type" : {
-							"symbol" : ""
+							"symbol" : "char"
 						}
 					}
 				}]
@@ -230,17 +230,18 @@
 				"value" : "private"
 			}]
 		}, {
-			"value" : "private record Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
-        public Node() {
+			"name" : "Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists)", 
+			"children" : [{
+				"value" : "public Node() {
             this(new HashMap<>(), new HashMap<>(), new HashMap<>());
-        }
-
-        private static String createJSONProperty(int depth, String name, String value) {
+        }"
+			}, {
+				"value" : "private static String createJSONProperty(int depth, String name, String value) {
             String indent = "\t".repeat(depth);
             return "\n" + indent + "\"" + name + "\" : " + value;
-        }
-
-        private String format(int depth) {
+        }"
+			}, {
+				"value" : "private String format(int depth) {
             Stream<String> stringStream = this.formatStrings(depth);
             Stream<String> nodesStream = this.formatNodes(depth);
             Stream<String> nodeListsStream = this.formatNodeLists(depth);
@@ -248,96 +249,151 @@
             String content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "));
             String indent = "\t".repeat(depth);
             return "{" + content + "\n" + indent + "}";
-        }
-
-        private Stream<String> formatNodes(int depth) {
+        }"
+			}, {
+				"value" : "private Stream<String> formatNodes(int depth) {
             return this.nodes.entrySet()
                     .stream()
                     .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)));
-        }
-
-        private Stream<String> formatNodeLists(int depth) {
+        }"
+			}, {
+				"value" : "private Stream<String> formatNodeLists(int depth) {
             return this.nodeLists.entrySet()
                     .stream()
                     .map(entry -> this.formatNodeList(depth, entry));
-        }
-
-        private String formatNodeList(int depth, Map.Entry<String, List<Node>> entry) {
+        }"
+			}, {
+				"value" : "private String formatNodeList(int depth, Map.Entry<String, List<Node>> entry) {
             String joined = entry.getValue()
                     .stream()
                     .map(node -> node.format(depth + 1))
                     .collect(Collectors.joining(", "));
 
             return createJSONProperty(depth + 1, entry.getKey(), "[" + joined + "]");
-        }
-
-        private Stream<String> formatStrings(int depth) {
+        }"
+			}, {
+				"value" : "private Stream<String> formatStrings(int depth) {
             return this.strings.entrySet()
                     .stream()
                     .map(entry -> createJSONProperty(depth + 1, entry.getKey(), "\"" + entry.getValue() + "\""));
-        }
-
-        public Node withString(String propertyKey, String propertyValue) {
+        }"
+			}, {
+				"value" : "public Node withString(String propertyKey, String propertyValue) {
             this.strings.put(propertyKey, propertyValue);
             return this;
-        }
-
-        public Node withNodeList(String propertyKey, List<Node> propertyValues) {
+        }"
+			}, {
+				"value" : "public Node withNodeList(String propertyKey, List<Node> propertyValues) {
             this.nodeLists.put(propertyKey, propertyValues);
             return this;
-        }
-
-        public Node merge(Node other) {
+        }"
+			}, {
+				"value" : "public Node merge(Node other) {
             this.strings.putAll(other.strings);
             this.nodes.putAll(other.nodes);
             this.nodeLists.putAll(other.nodeLists);
             return this;
-        }
-
-        public String display() {
+        }"
+			}, {
+				"value" : "public String display() {
             return this.format(0);
-        }
-
-        public Node withNode(String propertyKey, Node propertyValue) {
+        }"
+			}, {
+				"value" : "public Node withNode(String propertyKey, Node propertyValue) {
             this.nodes.put(propertyKey, propertyValue);
             return this;
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record StringRule(String propertyKey) implements Rule {
-        @Override
+			"name" : "StringRule(String propertyKey) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             return Optional.of(new Node().withString(this.propertyKey, input));
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record DelimitedDivider(String delimiter) implements Divider {
-        @Override
+			"name" : "DelimitedDivider(String delimiter) implements Divider", 
+			"children" : [{
+				"value" : "@Override
         public List<String> divide(String input) {
             return Arrays.asList(input.split(Pattern.quote(this.delimiter)));
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule {
-        @Override
+			"name" : "DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             return this.divider.divide(input)
                     .stream()
                     .reduce(Optional.of(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
                     .map(children -> new Node().withNodeList(this.propertyKey(), children));
-        }
-
-        private Optional<List<Node>> foldChild(Optional<List<Node>> maybeChildren, String child) {
+        }"
+			}, {
+				"value" : "private Optional<List<Node>> foldChild(Optional<List<Node>> maybeChildren, String child) {
             return maybeChildren.flatMap(children -> this.childRule.parse(child).map(compiled -> {
                 children.add(compiled);
                 return children;
             }));
-        }
-
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
-        @Override
+			"name" : "InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             int index = input.indexOf(this.infix);
             if (index < 0) {
@@ -347,11 +403,25 @@
             String left = input.substring(0, index);
             String right = input.substring(index + this.infix.length());
             return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record SuffixRule(Rule childRule, String suffix) implements Rule {
-        @Override
+			"name" : "SuffixRule(Rule childRule, String suffix) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             if (!input.endsWith(this.suffix())) {
                 return Optional.empty();
@@ -359,18 +429,46 @@
 
             String slice = input.substring(0, input.length() - this.suffix().length());
             return this.childRule().parse(slice);
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record StripRule(Rule childRule) implements Rule {
-        @Override
+			"name" : "StripRule(Rule childRule) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String value) {
             return this.childRule.parse(value.strip());
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
-			"value" : "private record OrRule(List<Rule> rules) implements Rule {
-        @Override
+			"name" : "OrRule(List<Rule> rules) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             for (Rule rule : this.rules()) {
                 Optional<Node> parsed = rule.parse(input);
@@ -380,8 +478,21 @@
             }
 
             return Optional.empty();
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
 			"value" : "public static class FoldingDivider implements Divider {
         private final Folder folder;
@@ -415,12 +526,26 @@
         }
     }"
 		}, {
-			"value" : "private record NodeRule(String propertyKey, Rule childRule) implements Rule {
-        @Override
+			"name" : "NodeRule(String propertyKey, Rule childRule) implements Rule", 
+			"children" : [{
+				"value" : "@Override
         public Optional<Node> parse(String input) {
             return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
-        }
-    }"
+        }"
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
+			}]
 		}, {
 			"value" : "private static class State {
         private final List<String> segments;
@@ -593,6 +718,7 @@
         LazyRule classSegmentRule = new LazyRule();
         classSegmentRule.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegmentRule),
+                createStructuredRule("record ", classSegmentRule),
                 createMethodRule(),
                 createContentRule()
         )));
@@ -608,7 +734,7 @@
 		"value" : "private static Rule createDefinitionRule() {
         Rule type = new NodeRule("type", createTypeRule());
         Rule name = new StringRule("name");
-        return new InfixRule(type, " ", name);
+        return new StripRule(new InfixRule(type, " ", name));
     }"
 	}, {
 		"value" : "private static Rule createTypeRule() {
