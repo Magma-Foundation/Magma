@@ -138,11 +138,16 @@
 		"children" : [{
 			"name" : "Rule", 
 			"children" : [{
-				"params" : "String input", 
 				"definition" : {
 					"name" : "parse", 
 					"type" : "Optional<Node>"
-				}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : "String"
+					}
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -152,16 +157,53 @@
 		}, {
 			"name" : "Divider", 
 			"children" : [{
-				"params" : "String input", 
 				"definition" : {
 					"name" : "divide", 
 					"type" : "List<String>"
-				}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : "String"
+					}
+				}]
 			}, {
 				"value" : ""
 			}], 
 			"modifiers" : [{
 				"value" : ""
+			}]
+		}, {
+			"name" : "Folder", 
+			"children" : [{
+				"definition" : {
+					"name" : "fold", 
+					"type" : "State"
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "state", 
+						"type" : "State"
+					}
+				}, {
+					"definition" : {
+						"name" : "char c", 
+						"type" : ""
+					}
+				}]
+			}, {
+				"value" : ""
+			}], 
+			"modifiers" : [{
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : ""
+			}, {
+				"value" : "private"
 			}]
 		}, {
 			"value" : "private record Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
@@ -233,7 +275,7 @@
         }
 
         public Node withNode(String propertyKey, Node propertyValue) {
-            nodes.put(propertyKey, propertyValue);
+            this.nodes.put(propertyKey, propertyValue);
             return this;
         }
     }"
@@ -317,35 +359,131 @@
         }
     }"
 		}, {
-			"value" : "public static class StatementDivider implements Divider {
+			"value" : "public static class FoldingDivider implements Divider {
+        private final Folder folder;
+
+        public FoldingDivider(Folder folder) {
+            this.folder = folder;
+        }
+
         @Override
         public List<String> divide(String input) {
-            ArrayList<String> segments = new ArrayList<String>();
-            StringBuilder buffer = new StringBuilder();
-            int depth = 0;
+            State current = new State();
             for (int i = 0; i < input.length(); i++) {
                 char c = input.charAt(i);
-                buffer.append(c);
-                if (c == ';' && depth == 0) {
-                    segments.add(buffer.toString());
-                    buffer = new StringBuilder();
-                }
-                else if (c == '}' && depth == 1) {
-                    segments.add(buffer.toString());
-                    buffer = new StringBuilder();
-                    depth--;
-                }
-                else {
-                    if (c == '{') {
-                        depth++;
-                    }
-                    if (c == '}') {
-                        depth--;
-                    }
-                }
+                current = this.folder.fold(current, c);
             }
-            segments.add(buffer.toString());
-            return segments;
+
+            return current.advance().segments();
+        }
+    }"
+		}, {
+			"value" : "private static class LazyRule implements Rule {
+        private Optional<Rule> maybeChildRule = Optional.empty();
+
+        public void set(Rule childRule) {
+            this.maybeChildRule = Optional.of(childRule);
+        }
+
+        @Override
+        public Optional<Node> parse(String input) {
+            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
+        }
+    }"
+		}, {
+			"value" : "private record NodeRule(String propertyKey, Rule childRule) implements Rule {
+        @Override
+        public Optional<Node> parse(String input) {
+            return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
+        }
+    }"
+		}, {
+			"value" : "private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private State enter() {
+            this.setDepth(this.getDepth() + 1);
+            return this;
+        }
+
+        private State exit() {
+            this.setDepth(this.getDepth() - 1);
+            return this;
+        }
+
+        private boolean isLevel() {
+            return this.getDepth() == 0;
+        }
+
+        private State append(char c) {
+            this.getBuffer().append(c);
+            return this;
+        }
+
+        private State advance() {
+            this.segments().add(this.getBuffer().toString());
+            this.setBuffer(new StringBuilder());
+            return this;
+        }
+
+        private boolean isShallow() {
+            return this.getDepth() == 1;
+        }
+
+        public List<String> getSegments() {
+            return this.segments;
+        }
+
+        public StringBuilder getBuffer() {
+            return this.buffer;
+        }
+
+        public void setBuffer(StringBuilder buffer) {
+            this.buffer = buffer;
+        }
+
+        public int getDepth() {
+            return this.depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        public List<String> segments() {
+            return this.segments;
+        }
+    }"
+		}, {
+			"value" : "private static class StatementFolder implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            State appended = state.append(c);
+            if (c == ';' && appended.isLevel()) {
+                return appended.advance();
+            }
+            if (c == '}' && appended.isShallow()) {
+                return appended.advance().exit();
+            }
+            if (c == '{') {
+                return appended.enter();
+            }
+            if (c == '}') {
+                return appended.exit();
+            }
+            return appended;
         }"
 		}, {
 			"value" : ""
@@ -354,21 +492,22 @@
 			"value" : "public"
 		}]
 	}, {
-		"name" : "LazyRule implements Rule", 
+		"name" : "ValueFolder implements Folder", 
 		"children" : [{
-			"params" : "", 
-			"definition" : {
-				"name" : "Optional<Rule> maybeChildRule = Optional.empty", 
-				"type" : "private"
-			}
-		}, {
-			"value" : "public void set(Rule childRule) {
-            this.maybeChildRule = Optional.of(childRule);
-        }"
-		}, {
 			"value" : "@Override
-        public Optional<Node> parse(String input) {
-            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
+        public State fold(State state, char c) {
+            if (c == ',') {
+                return state.advance();
+            }
+
+            State appended = state.append(c);
+            if (c == '<') {
+                return appended.enter();
+            }
+            if (c == '>') {
+                return appended.exit();
+            }
+            return appended;
         }"
 		}, {
 			"value" : ""
@@ -387,13 +526,6 @@
 			"value" : "static"
 		}]
 	}, {
-		"value" : "private record NodeRule(String propertyKey, Rule childRule) implements Rule {
-        @Override
-        public Optional<Node> parse(String input) {
-            return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
-        }
-    }"
-	}, {
 		"value" : "public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -409,7 +541,7 @@
     }"
 	}, {
 		"value" : "private static String compile(String input) {
-        return new DivideRule("children", new StatementDivider(), getValue())
+        return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
                 .parse(input)
                 .map(Node::display)
                 .orElse("");
@@ -428,7 +560,7 @@
     }"
 	}, {
 		"value" : "private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
-        Rule childRule = new DivideRule("children", new StatementDivider(), classSegmentRule);
+        Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
         return new InfixRule(createModifiersRule(), infix, new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }"
@@ -445,7 +577,7 @@
 	}, {
 		"value" : "private static Rule getE2() {
         Rule definition = new NodeRule("definition", getDefinition());
-        Rule params = new StringRule("params");
+        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
         return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
     }"
 	}, {

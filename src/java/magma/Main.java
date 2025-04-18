@@ -23,6 +23,10 @@ public class Main {
         List<String> divide(String input);
     }
 
+    private interface Folder {
+        State fold(State state, char c);
+    }
+
     private record Node(Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
         public Node() {
             this(new HashMap<>(), new HashMap<>(), new HashMap<>());
@@ -176,35 +180,22 @@ public class Main {
         }
     }
 
-    public static class StatementDivider implements Divider {
+    public static class FoldingDivider implements Divider {
+        private final Folder folder;
+
+        public FoldingDivider(Folder folder) {
+            this.folder = folder;
+        }
+
         @Override
         public List<String> divide(String input) {
-            ArrayList<String> segments = new ArrayList<String>();
-            StringBuilder buffer = new StringBuilder();
-            int depth = 0;
+            State current = new State();
             for (int i = 0; i < input.length(); i++) {
                 char c = input.charAt(i);
-                buffer.append(c);
-                if (c == ';' && depth == 0) {
-                    segments.add(buffer.toString());
-                    buffer = new StringBuilder();
-                }
-                else if (c == '}' && depth == 1) {
-                    segments.add(buffer.toString());
-                    buffer = new StringBuilder();
-                    depth--;
-                }
-                else {
-                    if (c == '{') {
-                        depth++;
-                    }
-                    if (c == '}') {
-                        depth--;
-                    }
-                }
+                current = this.folder.fold(current, c);
             }
-            segments.add(buffer.toString());
-            return segments;
+
+            return current.advance().segments();
         }
     }
 
@@ -228,6 +219,113 @@ public class Main {
         }
     }
 
+    private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private State enter() {
+            this.setDepth(this.getDepth() + 1);
+            return this;
+        }
+
+        private State exit() {
+            this.setDepth(this.getDepth() - 1);
+            return this;
+        }
+
+        private boolean isLevel() {
+            return this.getDepth() == 0;
+        }
+
+        private State append(char c) {
+            this.getBuffer().append(c);
+            return this;
+        }
+
+        private State advance() {
+            this.segments().add(this.getBuffer().toString());
+            this.setBuffer(new StringBuilder());
+            return this;
+        }
+
+        private boolean isShallow() {
+            return this.getDepth() == 1;
+        }
+
+        public List<String> getSegments() {
+            return this.segments;
+        }
+
+        public StringBuilder getBuffer() {
+            return this.buffer;
+        }
+
+        public void setBuffer(StringBuilder buffer) {
+            this.buffer = buffer;
+        }
+
+        public int getDepth() {
+            return this.depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        public List<String> segments() {
+            return this.segments;
+        }
+    }
+
+    private static class StatementFolder implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            State appended = state.append(c);
+            if (c == ';' && appended.isLevel()) {
+                return appended.advance();
+            }
+            if (c == '}' && appended.isShallow()) {
+                return appended.advance().exit();
+            }
+            if (c == '{') {
+                return appended.enter();
+            }
+            if (c == '}') {
+                return appended.exit();
+            }
+            return appended;
+        }
+    }
+
+    private static class ValueFolder implements Folder {
+        @Override
+        public State fold(State state, char c) {
+            if (c == ',') {
+                return state.advance();
+            }
+
+            State appended = state.append(c);
+            if (c == '<') {
+                return appended.enter();
+            }
+            if (c == '>') {
+                return appended.exit();
+            }
+            return appended;
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -243,7 +341,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return new DivideRule("children", new StatementDivider(), getValue())
+        return new DivideRule("children", new FoldingDivider(new StatementFolder()), getValue())
                 .parse(input)
                 .map(Node::display)
                 .orElse("");
@@ -262,7 +360,7 @@ public class Main {
     }
 
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
-        Rule childRule = new DivideRule("children", new StatementDivider(), classSegmentRule);
+        Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
         Rule name = new StripRule(new StringRule("name"));
         return new InfixRule(createModifiersRule(), infix, new InfixRule(name, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }
@@ -279,7 +377,7 @@ public class Main {
 
     private static Rule getE2() {
         Rule definition = new NodeRule("definition", getDefinition());
-        Rule params = new StringRule("params");
+        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
         return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
     }
 
@@ -301,4 +399,5 @@ public class Main {
     private static StripRule createStatementRule(Rule childRule) {
         return new StripRule(new SuffixRule(childRule, ";"));
     }
+
 }
