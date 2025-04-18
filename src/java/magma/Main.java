@@ -774,15 +774,17 @@ public class Main {
             }
 
             char c = state.popChar();
+            State appended = state.append(c);
+
             if (c == '(') {
-                return state.enter();
+                return appended.enter();
             }
 
             if (c == ')') {
-                return state.exit();
+                return appended.exit();
             }
 
-            return state;
+            return appended;
         }
     }
 
