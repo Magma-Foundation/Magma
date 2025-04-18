@@ -167,7 +167,7 @@ public class Main {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String inputContent = generatePlaceholder(withEnd.substring(0, withEnd.length() - "}".length()));
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 
                     String format = "%s struct %s {%s\n};\n";

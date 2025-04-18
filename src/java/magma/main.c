@@ -6,8 +6,8 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-/* /* private static */ struct DivideState {
-	/* /* private final List<String> segments */;
+/* private static */ struct DivideState {
+	/* private final List<String> segments */;
 	/* private StringBuilder buffer */;
 	/* private int depth */;/* 
 
@@ -53,7 +53,7 @@
         public List<String> segments() {
             return this.segments;
         } *//* 
-     */ */
+     */
 };
 /* public */ struct Main {/* 
 
@@ -138,29 +138,28 @@
             return appended.exit();
         } */
 	/* return appended */;/* 
-     */ */
+     */
 };
 /* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf(" */ struct ");
         if (classIndex >= 0) {
-	/* /* String modifiers = input.substring(0, classIndex).strip() */;
+	/* String modifiers = input.substring(0, classIndex).strip() */;
 	/* String afterKeyword = input.substring(classIndex + "class ".length()) */;/* 
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String inputContent = generatePlaceholder(withEnd.substring(0, withEnd.length() - "}".length()));
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 
                     String format = "%s struct %s {%s\n};\n";
                     String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
                     return Optional.of(new Tuple<>(content.left.addStruct(message), ""));
                 }
-            } *//* 
-        }
-        return Optional.empty();
-     */ */
+            } */
+	/* }
+        return Optional.empty() */;
 };
 /* 
 
