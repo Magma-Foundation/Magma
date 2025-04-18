@@ -338,8 +338,17 @@ public class Main {
         return state.append(c);
     }
 
-    private static Tuple<CompileState, String> compileParameter(CompileState compileState, String s) {
-        return compileDefinition(compileState, s).orElseGet(() -> compileContent(compileState, s));
+    private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
+        return compileWhitespace(state, element)
+                .or(() -> compileDefinition(state, element))
+                .orElseGet(() -> compileContent(state, element));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String element) {
+        if (element.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {

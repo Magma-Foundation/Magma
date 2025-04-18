@@ -6,7 +6,7 @@
 // #include <temp.h>
 // #include <temp.h>
 /* public */ struct Collector<T, C> {
-	/* C */ createInitial(/*  */);
+	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);/* 
      */
 };
@@ -17,12 +17,12 @@
      */
 };
 /* public */ struct List<T> {
-	/* Iterator<T> */ iter(/*  */);
+	/* Iterator<T> */ iter();
 	/* List<T> */ add(/* T */ element);/* 
      */
 };
 /* private */ struct Head<T> {
-	/* Optional<T> */ next(/*  */);/* 
+	/* Optional<T> */ next();/* 
      */
 };
 /* private static */ struct DivideState {
@@ -34,40 +34,40 @@
             this.buffer = buffer;
             this.depth = depth;
         } */
-	/* public */ DivideState(/*  */)/*  {
+	/* public */ DivideState()/*  {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-	/* private */ /* DivideState */ exit(/*  */)/*  {
+	/* private */ /* DivideState */ exit()/*  {
             this.depth = this.depth - 1;
             return this;
         } */
-	/* private */ /* DivideState */ enter(/*  */)/*  {
+	/* private */ /* DivideState */ enter()/*  {
             this.depth = this.depth + 1;
             return this;
         } */
-	/* private */ /* DivideState */ advance(/*  */)/*  {
+	/* private */ /* DivideState */ advance()/*  {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } */
-	/* private */ /* boolean */ isShallow(/*  */)/*  {
+	/* private */ /* boolean */ isShallow()/*  {
             return this.depth == 1;
         } */
 	/* private */ /* DivideState */ append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
-	/* private */ /* boolean */ isLevel(/*  */)/*  {
+	/* private */ /* boolean */ isLevel()/*  {
             return this.depth == 0;
         } */
-	/* public */ /* List<String> */ segments(/*  */)/*  {
+	/* public */ /* List<String> */ segments()/*  {
             return this.segments;
         } *//* 
      */
 };
 /* private static */ struct Joiner implements Collector<String, Optional<String>> {
 	/* @Override
-        public */ /* Optional<String> */ createInitial(/*  */)/*  {
+        public */ /* Optional<String> */ createInitial()/*  {
             return Optional.empty();
         } */
 	/* @Override
@@ -83,7 +83,7 @@
             this.length = length;
         } */
 	/* @Override
-        public */ /* Optional<Integer> */ next(/*  */)/*  {
+        public */ /* Optional<Integer> */ next()/*  {
             if (this.counter >= this.length) {
                 return Optional.empty();
             }
@@ -205,14 +205,14 @@
             return appended.advance();
         }
         if (c == '} */
-	/* ' */ /* && */ appended.isShallow(/*  */)/* ) {
+	/* ' */ /* && */ appended.isShallow()/* ) {
             return appended.advance().exit();
         } *//* 
         if (c == '{') {
             return appended.enter();
         }
         if (c == '} */
-	/* ') { */ /* return */ appended.exit(/*  */)/* ;
+	/* ') { */ /* return */ appended.exit()/* ;
         } */
 	/* return */ appended;/* 
      */
@@ -308,8 +308,17 @@
         return state.append(c);
     } *//* 
 
-    private static Tuple<CompileState, String> compileParameter(CompileState compileState, String s) {
-        return compileDefinition(compileState, s).orElseGet(() -> compileContent(compileState, s));
+    private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
+        return compileWhitespace(state, element)
+                .or(() -> compileDefinition(state, element))
+                .orElseGet(() -> compileContent(state, element));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String element) {
+        if (element.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
