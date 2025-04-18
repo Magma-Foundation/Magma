@@ -841,12 +841,20 @@ public class Main {
 
     private static Rule createDefinitionRule() {
         Rule type = new NodeRule("type", createTypeRule());
-        Rule modifiers = createModifiersRule();
+
+        NodeListRule modifiers = createModifiersRule();
+        Rule annotation = new StripRule(new PrefixRule("@", createSymbolRule("annotation")));
+        NodeListRule annotations = new NodeListRule("annotations", new DelimitedDivider("\n"), annotation);
+        Rule beforeTypeParams = new OrRule(List.of(
+                new InfixRule(annotations, new LocatingSplitter("\n", new LastLocator()), modifiers),
+                modifiers
+        ));
+
         Rule rule = new NodeListRule("type-parameters", new FoldingDivider(new ValueFolder()), createSymbolRule("type-parameter"));
 
         Rule beforeType = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(modifiers, new LocatingSplitter("<", new FirstLocator()), rule), ">")),
-                modifiers
+                new StripRule(new SuffixRule(new InfixRule(beforeTypeParams, new LocatingSplitter("<", new FirstLocator()), rule), ">")),
+                beforeTypeParams
         ));
 
         Rule beforeName = new OrRule(List.of(
