@@ -10,9 +10,9 @@
 	/* C */ fold(/* C */ current, /* T */ element);
 };
 /* public */ struct Iterator<T> {
-	/* <C> */ /* C */ collect(/* Collector<T */, /* C> */ collector);
-	/* <R> */ /* R */ fold(/* R */ initial, /*  BiFunction<R */, /*  T */, /* R> */ folder);
-	/* <R> */ /* Iterator<R> */ map(/* Function<T */, /* R> */ mapper);
+	/* <C> */ /* C */ collect(/* Collector<T, C> */ collector);
+	/* <R> */ /* R */ fold(/* R */ initial, /* BiFunction<R, T, R> */ folder);
+	/* <R> */ /* Iterator<R> */ map(/* Function<T, R> */ mapper);
 };
 /* public */ struct List<T> {
 	/* Iterator<T> */ iter();
@@ -88,7 +88,7 @@
         } */
 };
 /* public */ struct Main {
-	/* record */ /* Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
+	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
 	/* record */ CompileState(/* List<String> */ imports, /* List<String> */ structs)/*  {
         public CompileState() {
@@ -155,12 +155,10 @@
                 .collect(new Joiner())
                 .orElse("");
     } */
-	/* private static Tuple<CompileState, */ /* String> */ compileStatements(/* CompileState */ state, /* String */ input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ compiler)/*  {
+	/* private static */ /* Tuple<CompileState, String> */ compileStatements(/* CompileState */ state, /* String */ input, /* BiFunction<CompileState, String, Tuple<CompileState, String>> */ compiler)/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static Tuple<CompileState, */ /* String> */ compileAll(/* CompileState */ state, /* String */ input, /* 
-            BiFunction<DivideState */, /*  Character */, /* DivideState> */ divider, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ compiler, /* 
-            BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger)/*  {
+	/* private static */ /* Tuple<CompileState, String> */ compileAll(/* CompileState */ state, /* String */ input, /* BiFunction<DivideState, Character, DivideState> */ divider, /* BiFunction<CompileState, String, Tuple<CompileState, String>> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger)/*  {
         List<String> segments = divide(input, divider);
 
         Tuple<CompileState, StringBuilder> fold = segments.iter().fold(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()),
@@ -168,7 +166,7 @@
 
         return new Tuple<>(fold.left, fold.right.toString());
     } */
-	/* private static Tuple<CompileState, */ /* StringBuilder> */ compileSegment(/* BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ compiler, /*  Tuple<CompileState */, /* StringBuilder> */ current, /* String */ element, /*  BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger)/*  {
+	/* private static */ /* Tuple<CompileState, StringBuilder> */ compileSegment(/* BiFunction<CompileState, String, Tuple<CompileState, String>> */ compiler, /* Tuple<CompileState, StringBuilder> */ current, /* String */ element, /* BiFunction<StringBuilder, String, StringBuilder> */ merger)/*  {
         CompileState currentState = current.left;
         StringBuilder currentCache = current.right;
 
@@ -182,7 +180,7 @@
 	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, /* String */ statement)/*  {
         return current.append(statement);
     } */
-	/* private static */ /* List<String> */ divide(/* String */ input, /*  BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder)/*  {
+	/* private static */ /* List<String> */ divide(/* String */ input, /* BiFunction<DivideState, Character, DivideState> */ folder)/*  {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -295,10 +293,18 @@
     } *//* 
 
     private static DivideState compileValueChar(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        DivideState appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } *//* 
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
@@ -334,14 +340,31 @@
         String beforeName = withoutEnd.substring(0, nameSeparator).strip();
         String name = withoutEnd.substring(nameSeparator + " ".length());
 
-        int typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
+        return findTypeSeparator(beforeName).map(typeSeparator -> {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length());
+            String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
+            return generateDefinition(state, outputBeforeName, name);
+        }).orElseGet(() -> {
             return generateDefinition(state, generatePlaceholder(beforeName), name);
+        });
+    } *//* 
+
+    private static Optional<Integer> findTypeSeparator(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return Optional.of(i);
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
         }
-        String beforeType = beforeName.substring(0, typeSeparator).strip();
-        String type = beforeName.substring(typeSeparator + " ".length());
-        String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
-        return generateDefinition(state, outputBeforeName, name);
+        return Optional.empty();
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> generateDefinition(

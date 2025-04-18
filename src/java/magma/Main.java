@@ -333,10 +333,18 @@ public class Main {
     }
 
     private static DivideState compileValueChar(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        DivideState appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
@@ -372,14 +380,31 @@ public class Main {
         String beforeName = withoutEnd.substring(0, nameSeparator).strip();
         String name = withoutEnd.substring(nameSeparator + " ".length());
 
-        int typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
+        return findTypeSeparator(beforeName).map(typeSeparator -> {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length());
+            String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
+            return generateDefinition(state, outputBeforeName, name);
+        }).orElseGet(() -> {
             return generateDefinition(state, generatePlaceholder(beforeName), name);
+        });
+    }
+
+    private static Optional<Integer> findTypeSeparator(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return Optional.of(i);
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
         }
-        String beforeType = beforeName.substring(0, typeSeparator).strip();
-        String type = beforeName.substring(typeSeparator + " ".length());
-        String outputBeforeName = generatePlaceholder(beforeType) + " " + generatePlaceholder(type);
-        return generateDefinition(state, outputBeforeName, name);
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> generateDefinition(
