@@ -61,9 +61,10 @@ public class Main {
         }
 
         private String format(int depth) {
-            this.errors.sort(Comparator.comparingInt(CompileError::maxDepth));
+            List<CompileError> copy = new ArrayList<>(this.errors);
+            copy.sort(Comparator.comparingInt(CompileError::maxDepth));
 
-            String joined = this.errors.stream()
+            String joined = copy.stream()
                     .map(error -> error.format(depth + 1))
                     .map(display -> "\n" + "\t".repeat(depth + 1) + display)
                     .collect(Collectors.joining());
@@ -204,7 +205,6 @@ public class Main {
                 return children;
             }));
         }
-
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
@@ -494,6 +494,14 @@ public class Main {
         }
     }
 
+    private record TypeRule(String type, Rule childRule) implements Rule {
+        @Override
+        public Result<Node, CompileError> parse(String input) {
+            return this.childRule.parse(input)
+                    .mapErr(err -> new CompileError("Cannot assign type '" + this.type + "'", input, List.of(err)));
+        }
+    }
+
     public static void main(String[] args) {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
         readString(source)
@@ -543,15 +551,21 @@ public class Main {
 
     private static Rule createStructuredRule(String infix, Rule classSegmentRule) {
         Rule childRule = new DivideRule("children", new FoldingDivider(new StatementFolder()), classSegmentRule);
-        Rule name = new StripRule(new StringRule("name"));
+        Rule name = createSymbolRule("name");
         Rule param = createParamRule();
 
-        DivideRule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
+        Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), param);
         Rule maybeWithParams = new OrRule(List.of(
                 new StripRule(new SuffixRule(new InfixRule(name, "(", params), ")")),
                 name
         ));
-        return new InfixRule(createModifiersRule(), infix, new InfixRule(maybeWithParams, "{", new StripRule(new SuffixRule(childRule, "}"))));
+
+        Rule beforeContent = new OrRule(List.of(
+                new InfixRule(maybeWithParams, " implements ", createSymbolRule("super-type"), new LastLocator()),
+                maybeWithParams
+        ));
+
+        return new InfixRule(createModifiersRule(), infix, new InfixRule(beforeContent, "{", new StripRule(new SuffixRule(childRule, "}"))));
     }
 
     private static OrRule createParamRule() {
@@ -566,8 +580,8 @@ public class Main {
         classSegmentRule.set(new OrRule(List.of(
                 createWhitespaceRule(),
                 createStructuredRule("interface ", classSegmentRule),
-                createStructuredRule("record ", classSegmentRule),
-                createMethodRule()
+                new TypeRule("record", createStructuredRule("record ", classSegmentRule)),
+                new TypeRule("method", createMethodRule())
         )));
         return classSegmentRule;
     }
@@ -577,11 +591,16 @@ public class Main {
     }
 
     private static Rule createMethodRule() {
-        Rule definition = new NodeRule("definition", createDefinitionRule());
+        Rule definition = createDefinitionRule();
+        Rule beforeParams = new OrRule(List.of(
+                definition,
+                createSymbolRule("name")
+        ));
+
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), createParamRule());
         Rule withParams = new StripRule(new SuffixRule(params, ")"));
-        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
-        return new InfixRule(definition, "(", new OrRule(List.of(
+        Rule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
+        return new InfixRule(beforeParams, "(", new OrRule(List.of(
                 new StripRule(new SuffixRule(withParams, ";")),
                 new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
         )));
@@ -602,23 +621,23 @@ public class Main {
         LazyRule typeRule = new LazyRule();
         typeRule.set(new OrRule(List.of(
                 createGenericRule(typeRule),
-                createSymbolRule()
+                createSymbolRule("symbol")
         )));
         return typeRule;
     }
 
     private static Rule createGenericRule(Rule typeRule) {
-        Rule base = new NodeRule("base", createSymbolRule());
+        Rule base = new NodeRule("base", createSymbolRule("symbol"));
         Rule arguments = new DivideRule("arguments", new FoldingDivider(new ValueFolder()), typeRule);
         return new StripRule(new SuffixRule(new InfixRule(base, "<", arguments), ">"));
     }
 
-    private static StripRule createSymbolRule() {
-        return new StripRule(new StringRule("symbol"));
+    private static StripRule createSymbolRule(String propertyKey) {
+        return new StripRule(new StringRule(propertyKey));
     }
 
     private static DivideRule createModifiersRule() {
-        return new DivideRule("modifiers", new DelimitedDivider(" "), new StripRule(new StringRule("value")));
+        return new DivideRule("modifiers", new DelimitedDivider(" "), createSymbolRule("value"));
     }
 
     private static Rule createNamespacedRule() {
