@@ -291,7 +291,8 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileClass(state, input)
+        return compileWhitespace(state, input)
+                .or(() -> compileClass(state, input))
                 .or(() -> compileStructured("interface ", state, input))
                 .or(() -> compileMethod(state, input))
                 .or(() -> compileDefinitionStatement(state, input))

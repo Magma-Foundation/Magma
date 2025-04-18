@@ -7,23 +7,19 @@
 // #include <temp.h>
 /* public */ struct Collector<T, C> {
 	/* C */ createInitial();
-	/* C */ fold(/* C */ current, /* T */ element);/* 
-     */
+	/* C */ fold(/* C */ current, /* T */ element);
 };
 /* public */ struct Iterator<T> {
 	/* <C> */ /* C */ collect(/* Collector<T */, /* C> */ collector);
 	/* <R> */ /* R */ fold(/* R */ initial, /*  BiFunction<R */, /*  T */, /* R> */ folder);
-	/* <R> */ /* Iterator<R> */ map(/* Function<T */, /* R> */ mapper);/* 
-     */
+	/* <R> */ /* Iterator<R> */ map(/* Function<T */, /* R> */ mapper);
 };
 /* public */ struct List<T> {
 	/* Iterator<T> */ iter();
-	/* List<T> */ add(/* T */ element);/* 
-     */
+	/* List<T> */ add(/* T */ element);
 };
 /* private */ struct Head<T> {
-	/* Optional<T> */ next();/* 
-     */
+	/* Optional<T> */ next();
 };
 /* private static */ struct DivideState {
 	/* private final */ /* List<String> */ segments;
@@ -62,8 +58,7 @@
         } */
 	/* public */ /* List<String> */ segments()/*  {
             return this.segments;
-        } *//* 
-     */
+        } */
 };
 /* private static */ struct Joiner implements Collector<String, Optional<String>> {
 	/* @Override
@@ -73,8 +68,7 @@
 	/* @Override
         public */ /* Optional<String> */ fold(/* Optional<String> */ current, /* String */ element)/*  {
             return Optional.of(current.map(inner -> inner + element).orElse(element));
-        } *//* 
-     */
+        } */
 };
 /* public static final */ struct RangeHead implements Head<Integer> {
 	/* private final */ /* int */ length;
@@ -91,8 +85,7 @@
             int value = this.counter;
             this.counter++;
             return Optional.of(value);
-        } *//* 
-     */
+        } */
 };
 /* public */ struct Main {
 	/* record */ /* Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
@@ -214,8 +207,7 @@
         if (c == '} */
 	/* ') { */ /* return */ appended.exit()/* ;
         } */
-	/* return */ appended;/* 
-     */
+	/* return */ appended;
 };
 /* 
 
@@ -261,7 +253,8 @@
     } *//* 
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileClass(state, input)
+        return compileWhitespace(state, input)
+                .or(() -> compileClass(state, input))
                 .or(() -> compileStructured("interface ", state, input))
                 .or(() -> compileMethod(state, input))
                 .or(() -> compileDefinitionStatement(state, input))
