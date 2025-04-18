@@ -236,32 +236,117 @@
             this(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }"
 			}, {
-				"value" : "private static String createJSONProperty(int depth, String name, String value) {
-            String indent = "\t".repeat(depth);
-            return "\n" + indent + "\"" + name + "\" : " + value;
-        }"
+				"definition" : {
+					"name" : "static String createJSONProperty", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "depth", 
+						"type" : {
+							"symbol" : "int"
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "name", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "value", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "String indent = "\t".repeat(depth);"
+				}, {
+					"value" : "return "\n" + indent + "\"" + name + "\" : " + value;"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "private String format(int depth) {
-            Stream<String> stringStream = this.formatStrings(depth);
-            Stream<String> nodesStream = this.formatNodes(depth);
-            Stream<String> nodeListsStream = this.formatNodeLists(depth);
-
-            String content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "));
-            String indent = "\t".repeat(depth);
-            return "{" + content + "\n" + indent + "}";
-        }"
+				"definition" : {
+					"name" : "String format", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "depth", 
+						"type" : {
+							"symbol" : "int"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "Stream<String> stringStream = this.formatStrings(depth);"
+				}, {
+					"value" : "Stream<String> nodesStream = this.formatNodes(depth);"
+				}, {
+					"value" : "Stream<String> nodeListsStream = this.formatNodeLists(depth);"
+				}, {
+					"value" : "String content = Stream.concat(stringStream, Stream.concat(nodesStream, nodeListsStream)).collect(Collectors.joining(", "));"
+				}, {
+					"value" : "String indent = "\t".repeat(depth);"
+				}, {
+					"value" : "return "{" + content + "\n" + indent + "}"
+				}, {
+					"value" : "";"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "private Stream<String> formatNodes(int depth) {
-            return this.nodes.entrySet()
+				"definition" : {
+					"name" : "Stream<String> formatNodes", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "depth", 
+						"type" : {
+							"symbol" : "int"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.nodes.entrySet()
                     .stream()
-                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)));
-        }"
+                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), entry.getValue().format(depth + 1)));"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "private Stream<String> formatNodeLists(int depth) {
-            return this.nodeLists.entrySet()
+				"definition" : {
+					"name" : "Stream<String> formatNodeLists", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "depth", 
+						"type" : {
+							"symbol" : "int"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.nodeLists.entrySet()
                     .stream()
-                    .map(entry -> this.formatNodeList(depth, entry));
-        }"
+                    .map(entry -> this.formatNodeList(depth, entry));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : "private String formatNodeList(int depth, Map.Entry<String, List<Node>> entry) {
             String joined = entry.getValue()
@@ -272,37 +357,149 @@
             return createJSONProperty(depth + 1, entry.getKey(), "[" + joined + "]");
         }"
 			}, {
-				"value" : "private Stream<String> formatStrings(int depth) {
-            return this.strings.entrySet()
+				"definition" : {
+					"name" : "Stream<String> formatStrings", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "depth", 
+						"type" : {
+							"symbol" : "int"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.strings.entrySet()
                     .stream()
-                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), "\"" + entry.getValue() + "\""));
-        }"
+                    .map(entry -> createJSONProperty(depth + 1, entry.getKey(), "\"" + entry.getValue() + "\""));"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "public Node withString(String propertyKey, String propertyValue) {
-            this.strings.put(propertyKey, propertyValue);
-            return this;
-        }"
+				"definition" : {
+					"name" : "Node withString", 
+					"type" : {
+						"symbol" : "public"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "propertyKey", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "propertyValue", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "this.strings.put(propertyKey, propertyValue);"
+				}, {
+					"value" : "return this;"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "public Node withNodeList(String propertyKey, List<Node> propertyValues) {
-            this.nodeLists.put(propertyKey, propertyValues);
-            return this;
-        }"
+				"definition" : {
+					"name" : "Node withNodeList", 
+					"type" : {
+						"symbol" : "public"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "propertyKey", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "propertyValues", 
+						"type" : {
+							"base" : {
+								"symbol" : "List"
+							}, 
+							"arguments" : [{
+								"symbol" : "Node"
+							}]
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "this.nodeLists.put(propertyKey, propertyValues);"
+				}, {
+					"value" : "return this;"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "public Node merge(Node other) {
-            this.strings.putAll(other.strings);
-            this.nodes.putAll(other.nodes);
-            this.nodeLists.putAll(other.nodeLists);
-            return this;
-        }"
+				"definition" : {
+					"name" : "Node merge", 
+					"type" : {
+						"symbol" : "public"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "other", 
+						"type" : {
+							"symbol" : "Node"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "this.strings.putAll(other.strings);"
+				}, {
+					"value" : "this.nodes.putAll(other.nodes);"
+				}, {
+					"value" : "this.nodeLists.putAll(other.nodeLists);"
+				}, {
+					"value" : "return this;"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : "public String display() {
             return this.format(0);
         }"
 			}, {
-				"value" : "public Node withNode(String propertyKey, Node propertyValue) {
-            this.nodes.put(propertyKey, propertyValue);
-            return this;
-        }"
+				"definition" : {
+					"name" : "Node withNode", 
+					"type" : {
+						"symbol" : "public"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "propertyKey", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "propertyValue", 
+						"type" : {
+							"symbol" : "Node"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "this.nodes.put(propertyKey, propertyValue);"
+				}, {
+					"value" : "return this;"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -320,10 +517,25 @@
 		}, {
 			"name" : "StringRule(String propertyKey) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            return Optional.of(new Node().withString(this.propertyKey, input));
-        }"
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return Optional.of(new Node().withString(this.propertyKey, input));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -341,10 +553,25 @@
 		}, {
 			"name" : "DelimitedDivider(String delimiter) implements Divider", 
 			"children" : [{
-				"value" : "@Override
-        public List<String> divide(String input) {
-            return Arrays.asList(input.split(Pattern.quote(this.delimiter)));
-        }"
+				"definition" : {
+					"name" : "       public List<String> divide", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return Arrays.asList(input.split(Pattern.quote(this.delimiter)));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -362,20 +589,70 @@
 		}, {
 			"name" : "DivideRule(String propertyKey, Divider divider, Rule childRule) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            return this.divider.divide(input)
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.divider.divide(input)
                     .stream()
                     .reduce(Optional.of(new ArrayList<Node>()), this::foldChild, (_, next) -> next)
-                    .map(children -> new Node().withNodeList(this.propertyKey(), children));
-        }"
+                    .map(children -> new Node().withNodeList(this.propertyKey(), children));"
+				}, {
+					"value" : ""
+				}]
 			}, {
-				"value" : "private Optional<List<Node>> foldChild(Optional<List<Node>> maybeChildren, String child) {
-            return maybeChildren.flatMap(children -> this.childRule.parse(child).map(compiled -> {
+				"definition" : {
+					"name" : "Optional<List<Node>> foldChild", 
+					"type" : {
+						"symbol" : "private"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "maybeChildren", 
+						"type" : {
+							"base" : {
+								"symbol" : "Optional"
+							}, 
+							"arguments" : [{
+								"base" : {
+									"symbol" : "List"
+								}, 
+								"arguments" : [{
+									"symbol" : "Node"
+								}]
+							}]
+						}
+					}
+				}, {
+					"definition" : {
+						"name" : "child", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return maybeChildren.flatMap(children -> this.childRule.parse(child).map(compiled -> {
                 children.add(compiled);
                 return children;
-            }));
-        }"
+            }"
+				}, {
+					"value" : "));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -393,17 +670,35 @@
 		}, {
 			"name" : "InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            int index = input.indexOf(this.infix);
-            if (index < 0) {
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "int index = input.indexOf(this.infix);"
+				}, {
+					"value" : "if (index < 0) {
                 return Optional.empty();
-            }
-
-            String left = input.substring(0, index);
-            String right = input.substring(index + this.infix.length());
-            return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));
-        }"
+            }"
+				}, {
+					"value" : "String left = input.substring(0, index);"
+				}, {
+					"value" : "String right = input.substring(index + this.infix.length());"
+				}, {
+					"value" : "return this.leftRule.parse(left).flatMap(withLeft -> this.rightRule.parse(right).map(withLeft::merge));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -421,15 +716,31 @@
 		}, {
 			"name" : "SuffixRule(Rule childRule, String suffix) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            if (!input.endsWith(this.suffix())) {
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "if (!input.endsWith(this.suffix())) {
                 return Optional.empty();
-            }
-
-            String slice = input.substring(0, input.length() - this.suffix().length());
-            return this.childRule().parse(slice);
-        }"
+            }"
+				}, {
+					"value" : "String slice = input.substring(0, input.length() - this.suffix().length());"
+				}, {
+					"value" : "return this.childRule().parse(slice);"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -447,10 +758,25 @@
 		}, {
 			"name" : "StripRule(Rule childRule) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String value) {
-            return this.childRule.parse(value.strip());
-        }"
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "value", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.childRule.parse(value.strip());"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -468,17 +794,32 @@
 		}, {
 			"name" : "OrRule(List<Rule> rules) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            for (Rule rule : this.rules()) {
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "for (Rule rule : this.rules()) {
                 Optional<Node> parsed = rule.parse(input);
                 if (parsed.isPresent()) {
                     return parsed;
                 }
-            }
-
-            return Optional.empty();
-        }"
+            }"
+				}, {
+					"value" : "return Optional.empty();"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -494,44 +835,94 @@
 				"value" : "private"
 			}]
 		}, {
-			"value" : "public static class FoldingDivider implements Divider {
+			"definition" : {
+				"name" : "static class FoldingDivider implements Divider {
         private final Folder folder;
 
-        public FoldingDivider(Folder folder) {
-            this.folder = folder;
-        }
+        public FoldingDivider", 
+				"type" : {
+					"symbol" : "public"
+				}
+			}, 
+			"params" : [{
+				"definition" : {
+					"name" : "folder", 
+					"type" : {
+						"symbol" : "Folder"
+					}
+				}
+			}], 
+			"children" : [{
+				"value" : "this.folder = folder;"
+			}, {
+				"value" : "}
 
         @Override
         public List<String> divide(String input) {
-            State current = new State();
-            for (int i = 0; i < input.length(); i++) {
+            State current = new State();"
+			}, {
+				"value" : "for (int i = 0;"
+			}, {
+				"value" : "i < input.length();"
+			}, {
+				"value" : "i++) {
                 char c = input.charAt(i);
                 current = this.folder.fold(current, c);
-            }
-
-            return current.advance().segments();
-        }
-    }"
+            }"
+			}, {
+				"value" : "return current.advance().segments();"
+			}, {
+				"value" : "}"
+			}]
 		}, {
-			"value" : "private static class LazyRule implements Rule {
-        private Optional<Rule> maybeChildRule = Optional.empty();
-
-        public void set(Rule childRule) {
-            this.maybeChildRule = Optional.of(childRule);
-        }
+			"definition" : {
+				"name" : "static class LazyRule implements Rule {
+        private Optional<Rule> maybeChildRule = Optional.empty", 
+				"type" : {
+					"symbol" : "private"
+				}
+			}, 
+			"params" : [{
+				"definition" : {
+					"name" : "       public void set(Rule childRule", 
+					"type" : {
+						"symbol" : ");"
+					}
+				}
+			}], 
+			"children" : [{
+				"value" : "this.maybeChildRule = Optional.of(childRule);"
+			}, {
+				"value" : "}
 
         @Override
         public Optional<Node> parse(String input) {
-            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));
-        }
-    }"
+            return this.maybeChildRule.flatMap(childRule -> childRule.parse(input));"
+			}, {
+				"value" : "}"
+			}]
 		}, {
 			"name" : "NodeRule(String propertyKey, Rule childRule) implements Rule", 
 			"children" : [{
-				"value" : "@Override
-        public Optional<Node> parse(String input) {
-            return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));
-        }"
+				"definition" : {
+					"name" : "       public Optional<Node> parse", 
+					"type" : {
+						"symbol" : "@Override"
+					}
+				}, 
+				"params" : [{
+					"definition" : {
+						"name" : "input", 
+						"type" : {
+							"symbol" : "String"
+						}
+					}
+				}], 
+				"children" : [{
+					"value" : "return this.childRule.parse(input).map(node -> new Node().withNode(this.propertyKey, node));"
+				}, {
+					"value" : ""
+				}]
 			}, {
 				"value" : ""
 			}], 
@@ -547,93 +938,175 @@
 				"value" : "private"
 			}]
 		}, {
-			"value" : "private static class State {
+			"definition" : {
+				"name" : "static class State {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-        }
+        private State", 
+				"type" : {
+					"symbol" : "private"
+				}
+			}, 
+			"params" : [{
+				"definition" : {
+					"name" : "segments", 
+					"type" : {
+						"base" : {
+							"symbol" : "List"
+						}, 
+						"arguments" : [{
+							"symbol" : "String"
+						}]
+					}
+				}
+			}, {
+				"definition" : {
+					"name" : "buffer", 
+					"type" : {
+						"symbol" : "StringBuilder"
+					}
+				}
+			}, {
+				"definition" : {
+					"name" : "depth", 
+					"type" : {
+						"symbol" : "int"
+					}
+				}
+			}], 
+			"children" : [{
+				"value" : "this.segments = segments;"
+			}, {
+				"value" : "this.buffer = buffer;"
+			}, {
+				"value" : "this.depth = depth;"
+			}, {
+				"value" : "}
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
-        }
+            this(new ArrayList<>(), new StringBuilder(), 0);"
+			}, {
+				"value" : "}
 
         private State enter() {
-            this.setDepth(this.getDepth() + 1);
-            return this;
-        }
+            this.setDepth(this.getDepth() + 1);"
+			}, {
+				"value" : "return this;"
+			}, {
+				"value" : "}
 
         private State exit() {
-            this.setDepth(this.getDepth() - 1);
-            return this;
-        }
+            this.setDepth(this.getDepth() - 1);"
+			}, {
+				"value" : "return this;"
+			}, {
+				"value" : "}
 
         private boolean isLevel() {
-            return this.getDepth() == 0;
-        }
+            return this.getDepth() == 0;"
+			}, {
+				"value" : "}
 
         private State append(char c) {
-            this.getBuffer().append(c);
-            return this;
-        }
+            this.getBuffer().append(c);"
+			}, {
+				"value" : "return this;"
+			}, {
+				"value" : "}
 
         private State advance() {
-            this.segments().add(this.getBuffer().toString());
-            this.setBuffer(new StringBuilder());
-            return this;
-        }
+            this.segments().add(this.getBuffer().toString());"
+			}, {
+				"value" : "this.setBuffer(new StringBuilder());"
+			}, {
+				"value" : "return this;"
+			}, {
+				"value" : "}
 
         private boolean isShallow() {
-            return this.getDepth() == 1;
-        }
+            return this.getDepth() == 1;"
+			}, {
+				"value" : "}
 
         public List<String> getSegments() {
-            return this.segments;
-        }
+            return this.segments;"
+			}, {
+				"value" : "}
 
         public StringBuilder getBuffer() {
-            return this.buffer;
-        }
+            return this.buffer;"
+			}, {
+				"value" : "}
 
         public void setBuffer(StringBuilder buffer) {
-            this.buffer = buffer;
-        }
+            this.buffer = buffer;"
+			}, {
+				"value" : "}
 
         public int getDepth() {
-            return this.depth;
-        }
+            return this.depth;"
+			}, {
+				"value" : "}
 
         public void setDepth(int depth) {
-            this.depth = depth;
-        }
+            this.depth = depth;"
+			}, {
+				"value" : "}
 
         public List<String> segments() {
-            return this.segments;
-        }
-    }"
+            return this.segments;"
+			}, {
+				"value" : "}"
+			}]
 		}, {
-			"value" : "private static class StatementFolder implements Folder {
+			"definition" : {
+				"name" : "static class StatementFolder implements Folder {
         @Override
-        public State fold(State state, char c) {
-            State appended = state.append(c);
-            if (c == ';' && appended.isLevel()) {
+        public State fold", 
+				"type" : {
+					"symbol" : "private"
+				}
+			}, 
+			"params" : [{
+				"definition" : {
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}
+			}, {
+				"definition" : {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}
+			}], 
+			"children" : [{
+				"value" : "State appended = state.append(c);"
+			}, {
+				"value" : "if (c == ';"
+			}, {
+				"value" : "' && appended.isLevel()) {
                 return appended.advance();
-            }
-            if (c == '}' && appended.isShallow()) {
-                return appended.advance().exit();
-            }
+            }"
+			}, {
+				"value" : "if (c == '}' && appended.isShallow()) {
+                return appended.advance().exit();"
+			}, {
+				"value" : "}
             if (c == '{') {
                 return appended.enter();
-            }
-            if (c == '}') {
-                return appended.exit();
-            }
-            return appended;
-        }"
+            }"
+			}, {
+				"value" : "if (c == '}') {
+                return appended.exit();"
+			}, {
+				"value" : "}
+            return appended;"
+			}]
 		}, {
 			"value" : ""
 		}], 
@@ -643,21 +1116,46 @@
 	}, {
 		"name" : "ValueFolder implements Folder", 
 		"children" : [{
-			"value" : "@Override
-        public State fold(State state, char c) {
-            if (c == ',') {
+			"definition" : {
+				"name" : "       public State fold", 
+				"type" : {
+					"symbol" : "@Override"
+				}
+			}, 
+			"params" : [{
+				"definition" : {
+					"name" : "state", 
+					"type" : {
+						"symbol" : "State"
+					}
+				}
+			}, {
+				"definition" : {
+					"name" : "c", 
+					"type" : {
+						"symbol" : "char"
+					}
+				}
+			}], 
+			"children" : [{
+				"value" : "if (c == ',') {
                 return state.advance();
-            }
-
-            State appended = state.append(c);
-            if (c == '<') {
+            }"
+			}, {
+				"value" : "State appended = state.append(c);"
+			}, {
+				"value" : "if (c == '<') {
                 return appended.enter();
-            }
-            if (c == '>') {
+            }"
+			}, {
+				"value" : "if (c == '>') {
                 return appended.exit();
-            }
-            return appended;
-        }"
+            }"
+			}, {
+				"value" : "return appended;"
+			}, {
+				"value" : ""
+			}]
 		}, {
 			"value" : ""
 		}], 
@@ -728,7 +1226,18 @@
 		"value" : "private static Rule createMethodRule() {
         Rule definition = new NodeRule("definition", createDefinitionRule());
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
-        return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
+        Rule withParams = new StripRule(new SuffixRule(params, ")"));
+        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
+        return new InfixRule(definition, "(", new OrRule(List.of(
+                new StripRule(new SuffixRule(withParams, ";")),
+                new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
+        )));
+    }"
+	}, {
+		"value" : "private static Rule createStatementRule() {
+        return new OrRule(List.of(
+                createContentRule()
+        ));
     }"
 	}, {
 		"value" : "private static Rule createDefinitionRule() {

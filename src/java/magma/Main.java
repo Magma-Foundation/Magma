@@ -379,7 +379,18 @@ public class Main {
     private static Rule createMethodRule() {
         Rule definition = new NodeRule("definition", createDefinitionRule());
         Rule params = new DivideRule("params", new FoldingDivider(new ValueFolder()), definition);
-        return new InfixRule(definition, "(", new StripRule(new SuffixRule(params, ");")));
+        Rule withParams = new StripRule(new SuffixRule(params, ")"));
+        DivideRule children = new DivideRule("children", new FoldingDivider(new StatementFolder()), createStatementRule());
+        return new InfixRule(definition, "(", new OrRule(List.of(
+                new StripRule(new SuffixRule(withParams, ";")),
+                new InfixRule(withParams, "{", new StripRule(new SuffixRule(children, "}")))
+        )));
+    }
+
+    private static Rule createStatementRule() {
+        return new OrRule(List.of(
+                createContentRule()
+        ));
     }
 
     private static Rule createDefinitionRule() {
