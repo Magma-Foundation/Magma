@@ -52,6 +52,9 @@ public class Main {
         }
     }
 
+    private record JavaList<T>(List<T> list) {
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -147,38 +150,47 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
+        return compileMethod(input).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
         String stripped = input.strip();
         int paramStart = stripped.indexOf("(");
-        if (paramStart >= 0) {
-            String definition = stripped.substring(0, paramStart).strip();
-            int nameSeparator = definition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = definition.substring(0, nameSeparator).strip();
-                String name = definition.substring(nameSeparator + " ".length()).strip();
-
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    String beforeType = beforeName.substring(0, typeSeparator);
-                    String type = beforeName.substring(typeSeparator + " ".length());
-
-                    String withParams = stripped.substring(paramStart + "(".length());
-                    int paramEnd = withParams.indexOf(")");
-                    if (paramEnd >= 0) {
-                        String params = withParams.substring(0, paramEnd);
-                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                            String content = withBraces.substring(1, withBraces.length() - 1);
-                            Optional<String> maybeOutputType = compileType(type);
-                            if (maybeOutputType.isPresent()) {
-                                String newName = name.equals("main") ? "__main__" : name;
-                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
-                            }
-                        }
-                    }
-                }
-            }
+        if (paramStart < 0) {
+            return Optional.empty();
         }
-        return generatePlaceholder(stripped);
+        String definition = stripped.substring(0, paramStart).strip();
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeName = definition.substring(0, nameSeparator).strip();
+        String name = definition.substring(nameSeparator + " ".length()).strip();
+
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeType = beforeName.substring(0, typeSeparator);
+        String type = beforeName.substring(typeSeparator + " ".length());
+
+        String withParams = stripped.substring(paramStart + "(".length());
+        int paramEnd = withParams.indexOf(")");
+        if (paramEnd < 0) {
+            return Optional.empty();
+        }
+        String params = withParams.substring(0, paramEnd);
+        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            return Optional.empty();
+        }
+        String content = withBraces.substring(1, withBraces.length() - 1);
+        Optional<String> maybeOutputType = compileType(type);
+        if (maybeOutputType.isEmpty()) {
+            return Optional.empty();
+        }
+        String newName = name.equals("main") ? "__main__" : name;
+        return Optional.of(generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}");
     }
 
     private static Optional<String> compileType(String type) {
