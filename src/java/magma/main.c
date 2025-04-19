@@ -21,7 +21,7 @@
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
 };
-/* private */ struct Option<T> {
+/* public */ struct Option<T> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -168,9 +168,9 @@
     } */
 	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
-	/* record */ CompileState(List</* String */> imports, List</* String */> structs)/*  {
+	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> generics)/*  {
         public CompileState() {
-            this(Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty());
         }
 
         public CompileState addStruct(String struct) {
@@ -180,6 +180,11 @@
 
         public CompileState addImport(String imports) {
             this.imports.add(imports);
+            return this;
+        }
+
+        public CompileState addGeneric(Node node) {
+            this.generics.add(node);
             return this;
         }
     } */
@@ -222,7 +227,7 @@
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
         }
     } */
-	/* private */ /* record */ Node(Option</* String */> type, Map</* String */, /*  String */> strings, Map</* String */, List</* Node */>> nodeLists)/*  {
+	/* public */ /* record */ Node(Option</* String */> type, Map</* String */, /*  String */> strings, Map</* String */, List</* Node */>> nodeLists)/*  {
         public Node() {
             this(new None<String>(), new HashMap<>(), new HashMap<>());
         }
@@ -280,7 +285,13 @@
 
         String joinedImports = join(newState.imports);
         String joinedStructs = join(newState.structs);
-        return joinedImports + joinedStructs + output.right;
+        String joinedGenerics = newState.generics.iter()
+                .map(Main::generateGenericType)
+                .map(generic -> "// " + generic + "\n")
+                .collect(new Joiner())
+                .orElse("");
+
+        return joinedImports + joinedStructs + joinedGenerics + output.right;
     } */
 	/* private static */ /* String */ join(List</* String */> list)/*  {
         return list.iter()
@@ -352,6 +363,55 @@
         } */
 	/* return */ appended;
 };
+// Collector</* T */, /*  C */>
+// Iterator</* R */>
+// Iterator</* T */>
+// List</* T */>
+// Option</* R */>
+// Option</* T */>
+// Option</* T */>
+// Option</* R */>
+// Option</* R */>
+// Option</* T */>
+// List</* String */>
+// List</* String */>
+// List</* String */>
+// List</* String */>
+// List</* String */>
+// List</* Node */>
+// Head</* T */>
+// Option</* Integer */>
+// Option</* String */>
+// Map</* String */, /*  String */>
+// List</* Node */>
+// Map</* String */, List</* Node */>>
+// List</* T */>
+// List</* T */>
+// List</* T */>
+// Option</* R */>
+// Option</* T */>
+// Option</* T */>
+// Option</* R */>
+// Option</* R */>
+// List</* String */>
+// Tuple</* CompileState */, /*  String */>
+// Tuple</* CompileState */, /*  String */>
+// Tuple</* CompileState */, /*  String */>
+// Tuple</* CompileState */, /*  String */>
+// List</* String */>
+// Tuple</* CompileState */, List</* String */>>
+// Tuple</* CompileState */, /*  String */>
+// List</* String */>
+// Tuple</* CompileState */, List</* String */>>
+// Tuple</* CompileState */, /*  String */>
+// List</* String */>
+// Tuple</* CompileState */, List</* String */>>
+// List</* String */>
+// Tuple</* CompileState */, List</* String */>>
+// Tuple</* CompileState */, /*  StringBuilder */>
+// Tuple</* CompileState */, /*  String */>
+// Tuple</* CompileState */, /*  StringBuilder */>
+// List</* String */>
 /* 
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -563,7 +623,7 @@
                 .orElseGet(() -> {
                     String newTypes = mergeAll(Main::mergeValues, compiled);
                     Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                    return new Tuple<>(newState, node);
+                    return new Tuple<>(newState.addGeneric(node), node);
                 });
 
         return new Some<>(value);

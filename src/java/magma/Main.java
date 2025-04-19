@@ -33,7 +33,7 @@ public class Main {
         T get(int index);
     }
 
-    private interface Option<T> {
+    public interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
@@ -142,9 +142,9 @@ public class Main {
     record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(List<String> imports, List<String> structs) {
+    record CompileState(List<String> imports, List<String> structs, List<Node> generics) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty());
         }
 
         public CompileState addStruct(String struct) {
@@ -154,6 +154,11 @@ public class Main {
 
         public CompileState addImport(String imports) {
             this.imports.add(imports);
+            return this;
+        }
+
+        public CompileState addGeneric(Node node) {
+            this.generics.add(node);
             return this;
         }
     }
@@ -219,7 +224,7 @@ public class Main {
         }
     }
 
-    private record Node(Option<String> type, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
+    public record Node(Option<String> type, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
         public Node() {
             this(new None<String>(), new HashMap<>(), new HashMap<>());
         }
@@ -328,7 +333,13 @@ public class Main {
 
         String joinedImports = join(newState.imports);
         String joinedStructs = join(newState.structs);
-        return joinedImports + joinedStructs + output.right;
+        String joinedGenerics = newState.generics.iter()
+                .map(Main::generateGenericType)
+                .map(generic -> "// " + generic + "\n")
+                .collect(new Joiner())
+                .orElse("");
+
+        return joinedImports + joinedStructs + joinedGenerics + output.right;
     }
 
     private static String join(List<String> list) {
@@ -629,7 +640,7 @@ public class Main {
                 .orElseGet(() -> {
                     String newTypes = mergeAll(Main::mergeValues, compiled);
                     Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                    return new Tuple<>(newState, node);
+                    return new Tuple<>(newState.addGeneric(node), node);
                 });
 
         return new Some<>(value);
