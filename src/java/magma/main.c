@@ -6,6 +6,7 @@
 /* import java.util.List; */
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
+/* import java.util.function.Function; */
 /* private static Tuple<CompileState, String> compileRootSegment(CompileState methods, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
@@ -172,7 +173,9 @@
         return "<comment-start> " + replaced + " <comment-end>";
     } */
 /* } */
-/* private static  */struct DivideState {/* private final JavaList<String> segments; *//* 
+/* 
+
+    private static  */struct DivideState {/* private final JavaList<String> segments; *//* 
         private final String buffer; *//* 
         private final int depth; *//* 
 
@@ -186,7 +189,9 @@
             this(new JavaList<>(), "", 0);
         } *//* 
      */};
-/* public  */struct Main {/* 
+/* public  */struct Main {/* interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    } *//* 
 
     private record JavaList<T>(List<T> list) {
         public JavaList() {
@@ -230,6 +235,70 @@
 
         public CompileState popStructName() {
             return new CompileState(this.structs, this.methods, this.structNames.removeLast());
+        }
+    } *//* 
+
+    record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+    } *//* 
+
+    record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    } *//* 
+
+    private static Optional<IOException> run() {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        return readString(source).match(input -> runWithInput(source, input), Optional::of);
+    } *//* 
+
+    private static Optional<IOException> runWithInput(Path source, String input) {
+        Path target = source.resolveSibling("main.c");
+        String compile = compile(input);
+        return writeString(target, compile).or(Main::build);
+    } *//* 
+
+    private static Optional<IOException> build() {
+        return start().match(process -> {
+            try {
+                process.waitFor();
+                return Optional.empty();
+            } catch (InterruptedException e) {
+                return Optional.of(new IOException(e));
+            }
+        }, Optional::of);
+    } *//* 
+
+    private static Result<Process, IOException> start() {
+        try {
+            return new Ok<>(new ProcessBuilder("cmd.exe", "/c", "build.bat")
+                    .inheritIO()
+                    .start()
+            );
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    } *//* 
+
+    private static Optional<IOException> writeString(Path target, String compile) {
+        try {
+            Files.writeString(target, compile);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    } *//* 
+
+    private static Result<String, IOException> readString(Path path) {
+        try {
+            return new Ok<>(Files.readString(path));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     } *//* 
 
@@ -292,20 +361,7 @@
             return new DivideState(this.segments, this.buffer, this.depth - 1); *//* 
          */}
 /* public static */ void __main__(char** args_Main){/* 
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path output = source.resolveSibling("main.c");
-            Files.writeString(output, compile(input));
-
-            new ProcessBuilder("cmd.exe", "/c", "build.bat")
-                    .inheritIO()
-                    .start()
-                    .waitFor();
-        } *//*  catch (IOException | InterruptedException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        } *//* 
+        run().ifPresent(Throwable::printStackTrace); *//* 
      */}
 /* private static */ char* compile_Main(char* input_Main){/* 
         Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment); *//* 

@@ -8,8 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
+    interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
     private static class DivideState {
         private final JavaList<String> segments;
         private final String buffer;
@@ -95,20 +100,71 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path output = source.resolveSibling("main.c");
-            Files.writeString(output, compile(input));
+    record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+    }
 
-            new ProcessBuilder("cmd.exe", "/c", "build.bat")
+    record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    }
+
+    public static void main(String[] args) {
+        run().ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> run() {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        return readString(source).match(input -> runWithInput(source, input), Optional::of);
+    }
+
+    private static Optional<IOException> runWithInput(Path source, String input) {
+        Path target = source.resolveSibling("main.c");
+        String compile = compile(input);
+        return writeString(target, compile).or(Main::build);
+    }
+
+    private static Optional<IOException> build() {
+        return start().match(process -> {
+            try {
+                process.waitFor();
+                return Optional.empty();
+            } catch (InterruptedException e) {
+                return Optional.of(new IOException(e));
+            }
+        }, Optional::of);
+    }
+
+    private static Result<Process, IOException> start() {
+        try {
+            return new Ok<>(new ProcessBuilder("cmd.exe", "/c", "build.bat")
                     .inheritIO()
                     .start()
-                    .waitFor();
-        } catch (IOException | InterruptedException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            );
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Optional<IOException> writeString(Path target, String compile) {
+        try {
+            Files.writeString(target, compile);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path path) {
+        try {
+            return new Ok<>(Files.readString(path));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
