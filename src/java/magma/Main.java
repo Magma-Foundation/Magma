@@ -103,6 +103,21 @@ public class Main {
         if (stripped.startsWith("package ")) {
             return "";
         }
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = stripped.substring(0, classIndex);
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return generatePlaceholder(modifiers) + "struct " + name + " {" + generatePlaceholder(content) + "};\n";
+                }
+            }
+        }
+
         return generatePlaceholder(stripped) + "\n";
     }
 

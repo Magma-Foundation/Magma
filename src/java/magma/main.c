@@ -4,8 +4,7 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
-/* public class Main {
-    private static class State {
+/* public  */struct Main {/* private static class State {
         private final List<String> segments;
         private final StringBuilder buffer;
         private final int depth;
@@ -100,6 +99,21 @@
         if (stripped.startsWith("package ")) {
             return "";
         }
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = stripped.substring(0, classIndex);
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return generatePlaceholder(modifiers) + "struct " + name + " {" + generatePlaceholder(content) + "};\n";
+                }
+            }
+        }
+
         return generatePlaceholder(stripped) + "\n";
     }
 
@@ -110,7 +124,7 @@
 
         return "<comment-start> " + replaced + " <comment-end>";
     }
-} */
+ */};
 int main(){
 	return 0;
 }
