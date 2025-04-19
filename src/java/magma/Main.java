@@ -641,24 +641,39 @@ public class Main {
             Node type = value.right;
 
             if (type.is("functional")) {
-                return new Some<>(new Tuple<CompileState, String>(withType, generateFunctional(type.withString("name", name))));
+                Node node = type.withString("name", name);
+                return generateDefinition(node).map(result -> new Tuple<>(withType, result));
             }
 
             Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
             Node node = new Node("definition").withString("before-name", outputBeforeName).withString("name", name);
-            return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generateDefinition(node)));
+            return generateDefinition(node).map(result -> new Tuple<>(typeTuple.left, result));
         }).orElseGet(() -> {
             Tuple<CompileState, Node> value = parseType(state, beforeName);
             CompileState withType = value.left;
             Node type = value.right;
             if (type.is("functional")) {
-                return new Some<>(new Tuple<CompileState, String>(withType, generateFunctional(type.withString("name", name))));
+                Node node = type.withString("name", name);
+                return generateDefinition(node).map(result -> new Tuple<>(withType, result));
             }
+
             Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
             Node node = new Node("definition").withString("before-name", generated.right).withString("name", name);
-            return new Some<>(new Tuple<CompileState, String>(generated.left, generateDefinition(node)));
+            return generateDefinition(node).map(result -> new Tuple<>(generated.left, result));
         });
+    }
+
+    private static Option<String> generateDefinition(Node node) {
+        if (node.is("definition")) {
+            return new Some<>(generateSimpleDefinition(node));
+        }
+        else if (node.is("functional")) {
+            return new Some<>(generateFunctional(node));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Tuple<CompileState, Node> parseType(CompileState state, String input) {
@@ -796,7 +811,7 @@ public class Main {
         return new None<>();
     }
 
-    private static String generateDefinition(Node node) {
+    private static String generateSimpleDefinition(Node node) {
         return node.findString("before-name").orElse("") + " " + node.findString("name").orElse("");
     }
 
