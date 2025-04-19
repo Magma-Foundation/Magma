@@ -65,17 +65,21 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(JavaList<String> structs, JavaList<String> methods) {
+    record CompileState(JavaList<String> structs, JavaList<String> methods, Optional<String> structName) {
         public CompileState() {
-            this(new JavaList<>(), new JavaList<>());
+            this(new JavaList<>(), new JavaList<>(), Optional.empty());
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.structs, this.methods.add(method));
+            return new CompileState(this.structs, this.methods.add(method), this.structName);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.add(struct), this.methods);
+            return new CompileState(this.structs.add(struct), this.methods, this.structName);
+        }
+
+        public CompileState withStructName(String structName) {
+            return new CompileState(this.structs, this.methods, Optional.of(structName));
         }
     }
 
@@ -163,7 +167,7 @@ public class Main {
     }
 
 
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState methods, String input) {
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex < 0) {
             return Optional.empty();
@@ -180,10 +184,10 @@ public class Main {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<CompileState, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
         if (!isSymbol(name)) {
             return Optional.empty();
         }
+        Tuple<CompileState, String> outputContent = compileStatements(state.withStructName(name), inputContent, Main::compileClassSegment);
         String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
         return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
     }
@@ -201,10 +205,10 @@ public class Main {
         return true;
     }
 
-    private static Tuple<CompileState, String> compileClassSegment(CompileState methods, String input) {
-        return compileClass(methods, input)
-                .or(() -> compileMethod(methods, input))
-                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(input)));
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+        return compileClass(state, input)
+                .or(() -> compileMethod(state, input))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
@@ -243,7 +247,15 @@ public class Main {
         if (maybeOutputType.isEmpty()) {
             return Optional.empty();
         }
-        String newName = name.equals("main") ? "__main__" : name;
+
+        String newName;
+        if (name.equals("main")) {
+            newName = "__main__";
+        }
+        else {
+            newName = name + "_" + state.structName.orElse("");
+        }
+
         String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
         return Optional.of(new Tuple<>(state.addMethod(generated), ""));
     }
