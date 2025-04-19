@@ -40,7 +40,7 @@
         return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
     } */
 /* private static boolean isSymbol(String input) {
-        if (input.equals("private") || input.equals("record")) {
+        if (input.equals("private") || input.equals("record") || input.equals("public")) {
             return false;
         }
 
@@ -163,6 +163,10 @@
             this.buffer = buffer;
             this.depth = depth;
         } *//* 
+
+        public DivideState() {
+            this(new JavaList<>(), new StringBuilder(), 0);
+        } *//* 
      */};
 /* public  */struct Main {/* 
 
@@ -239,9 +243,6 @@
         } *//* 
         return appended; *//* 
      */};
-struct public DivideState_DivideState(/*  */){/* 
-            this(new JavaList<>(), new StringBuilder(), 0);
-         */}
 /* private */ int isShallow_DivideState(/*  */){/* 
             return this.depth == 1;
          */}
