@@ -200,7 +200,7 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        if (input.equals("private") || input.equals("record")) {
+        if (input.equals("private") || input.equals("record") || input.equals("public")) {
             return false;
         }
 
