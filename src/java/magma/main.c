@@ -110,9 +110,10 @@
         if (stripped.startsWith("package ")) {
             return "";
         }
-        int classIndex = stripped.indexOf(" */struct ");
-        if (classIndex >= 0) {/* String modifiers = stripped.substring(0, classIndex); *//* 
-            String afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = stripped.substring(0, classIndex);
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
@@ -120,13 +121,23 @@
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     String outputContent = compileStatements(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                    if (isSymbol(name)) {
+                        return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                    }
                 }
-            } *//* 
+            }
         }
 
         return generatePlaceholder(stripped) + "\n";
-     */};
+    } */
+/* private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            if (!Character.isLetter(input.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    } */
 /* private static String compileClassSegment(String input) {
         return generatePlaceholder(input);
     } */

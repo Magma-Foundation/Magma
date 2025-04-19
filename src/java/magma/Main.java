@@ -126,12 +126,23 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     String outputContent = compileStatements(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                    if (isSymbol(name)) {
+                        return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                    }
                 }
             }
         }
 
         return generatePlaceholder(stripped) + "\n";
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            if (!Character.isLetter(input.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String compileClassSegment(String input) {
