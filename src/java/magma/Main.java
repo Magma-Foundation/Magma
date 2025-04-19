@@ -103,7 +103,11 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+        private Joiner() {
+            this("");
+        }
+
         @Override
         public Optional<String> createInitial() {
             return Optional.empty();
@@ -111,7 +115,7 @@ public class Main {
 
         @Override
         public Optional<String> fold(Optional<String> current, String element) {
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
+            return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -437,7 +441,7 @@ public class Main {
                     String first = newValues.get(0);
                     String second = newValues.get(1);
                     String returns = newValues.get(2);
-                    return new Tuple<>(newState, returns + "(*)(" + first + ", " + second + ")");
+                    return new Tuple<>(newState, generateFunctionalType(returns, Lists.of(first, second)));
                 }
 
                 String newTypes = mergeAll(Main::mergeValues, compiled);
@@ -447,6 +451,14 @@ public class Main {
         }
 
         return compileContent(state, stripped);
+    }
+
+    private static String generateFunctionalType(String returns, List<String> arguments) {
+        String joined = arguments.iter()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return returns + "(*)(" + joined + ")";
     }
 
     private static Optional<Integer> findTypeSeparator(String input) {

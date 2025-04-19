@@ -61,16 +61,6 @@
             return this.segments;
         } */
 };
-/* private static */ struct Joiner implements Collector<String, Optional<String>> {
-	/* @Override
-        public */ Optional</* String */> createInitial()/*  {
-            return Optional.empty();
-        } */
-	/* @Override
-        public */ Optional</* String */> fold(Optional</* String */> current, /* String */ element)/*  {
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
-        } */
-};
 /* public static final */ struct RangeHead implements Head<Integer> {
 	/* private final */ /* int */ length;
 	/* private int counter */ /* = */ 0;
@@ -104,6 +94,21 @@
         public CompileState addImport(String imports) {
             this.imports.add(imports);
             return this;
+        }
+    } */
+	/* private */ /* record */ Joiner(/* String */ delimiter)/*  implements Collector<String, Optional<String>> {
+        private Joiner() {
+            this("");
+        }
+
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
 	/* public */ /* record */ HeadedIterator<T>(Head</* T */> head)/*  implements Iterator<T> {
@@ -388,7 +393,7 @@
                     String first = newValues.get(0);
                     String second = newValues.get(1);
                     String returns = newValues.get(2);
-                    return new Tuple<>(newState, returns + "(*)(" + first + ", " + second + ")");
+                    return new Tuple<>(newState, generateFunctionalType(returns, first, second));
                 }
 
                 String newTypes = mergeAll(Main::mergeValues, compiled);
@@ -398,6 +403,15 @@
         }
 
         return compileContent(state, stripped);
+    } *//* 
+
+    private static String generateFunctionalType(String returns, String first, String second) {
+        String joined = Lists.of(first, second)
+                .iter()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return returns + "(*)(" + joined + ")";
     } *//* 
 
     private static Optional<Integer> findTypeSeparator(String input) {
