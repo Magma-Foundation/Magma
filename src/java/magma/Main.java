@@ -569,23 +569,22 @@ public class Main {
         String callerString = withoutEnd.substring(0, paramStart).strip();
         String argumentsString = withoutEnd.substring(paramStart + "(".length()).strip();
 
-        Tuple<CompileState, Node> parsed1 = parseValue(state, callerString);
-        Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(caller));
-        Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(compiledCaller.left, argumentsString, Main::parseValue);
+        Tuple<CompileState, Node> oldCallerTuple = parseValue(state, callerString);
+        Node oldCaller = oldCallerTuple.right;
 
-        Node oldCaller = parsed1.right;
+        Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(oldCallerTuple.left, argumentsString, Main::parseValue);
         JavaList<Node> oldArguments = argumentsTuple.right;
 
-        String newCaller;
+        Node newCaller;
         JavaList<Node> newArguments;
         if (oldCaller.is("access")) {
             String parent = oldCaller.findString("parent").orElse("");
             newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
-            newCaller = compiledCaller.right;
+            newCaller = oldCaller;
         }
         else {
             newArguments = oldArguments;
-            newCaller = compiledCaller.right;
+            newCaller = oldCaller;
         }
 
         Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
@@ -593,8 +592,9 @@ public class Main {
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
         String arguments = compiledArguments.right;
 
+        String generatedCaller = generateValue(newCaller);
         Node node = new Node("invocation")
-                .withString("caller", newCaller)
+                .withString("caller", generatedCaller)
                 .withString("arguments", arguments);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
