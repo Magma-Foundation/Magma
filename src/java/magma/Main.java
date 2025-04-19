@@ -328,7 +328,8 @@ public class Main {
     }
 
     private static String compile(String input) {
-        Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
+        CompileState methods = new CompileState();
+        Tuple<CompileState, String> compiled = generateStatements(parseStatements(methods, input, parseDefault(Main::compileRootSegment)), Main::generateDefault);
         CompileState newState = compiled.left;
         String output = compiled.right;
         String joinedStructs = String.join("", newState.structs.list);
@@ -338,13 +339,19 @@ public class Main {
         return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
-    private static Tuple<CompileState, String> compileStatements(
-            CompileState methods,
-            String input,
-            BiFunction<CompileState, String, Tuple<CompileState, String>> compiler
-    ) {
-        Tuple<CompileState, JavaList<Node>> tuple = parseAll(methods, input, Main::foldStatementChar, (state, element) -> new Tuple<>(state, parseDefault(element)));
-        return mergeAll(tuple.left, tuple.right, Main::generateDefault, Main::mergeStatements);
+    private static Tuple<CompileState, String> generateStatements(Tuple<CompileState, JavaList<Node>> tuple, Function<Node, String> generator) {
+        return mergeAll(tuple.left, tuple.right, generator, Main::mergeStatements);
+    }
+
+    private static Tuple<CompileState, JavaList<Node>> parseStatements(CompileState methods, String input, BiFunction<CompileState, String, Tuple<CompileState, Node>> parser) {
+        return parseAll(methods, input, Main::foldStatementChar, parser);
+    }
+
+    private static BiFunction<CompileState, String, Tuple<CompileState, Node>> parseDefault(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
+        return (state, s) -> {
+            Tuple<CompileState, String> compiled = compiler.apply(state, s);
+            return new Tuple<>(compiled.left, parseDefault(compiled.right));
+        };
     }
 
     private static Tuple<CompileState, JavaList<Node>> parseAll(
@@ -444,7 +451,8 @@ public class Main {
         if (!isSymbol(name)) {
             return Option.empty();
         }
-        Tuple<CompileState, String> outputContent = compileStatements(state.pushStructName(name), inputContent, Main::compileClassSegment);
+        CompileState methods = state.pushStructName(name);
+        Tuple<CompileState, String> outputContent = generateStatements(parseStatements(methods, inputContent, parseDefault(Main::compileClassSegment)), Main::generateDefault);
         String generated = generatePlaceholder(parseDefault(modifiers)) + "struct " + name + " {" + outputContent.right + "};\n";
         return Option.of(new Tuple<>(outputContent.left
                 .popStructName().addStruct(generated), ""));
@@ -483,7 +491,8 @@ public class Main {
                 return Option.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> paramTuple = compileValues(outputDefinition.left, oldParameters, Main::compileParameter);
+            Tuple<CompileState, JavaList<Node>> tuple = parseValues(outputDefinition.left, oldParameters, parseDefault(Main::compileParameter));
+            Tuple<CompileState, String> paramTuple = generateValues(tuple, Main::generateDefault);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Option.empty();
@@ -492,16 +501,19 @@ public class Main {
             CompileState paramState = paramTuple.left;
             String paramOutput = paramTuple.right;
 
-            Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
+            Tuple<CompileState, String> outputContent = generateStatements(parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock)), Main::generateDefault);
             String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Option.of(new Tuple<>(compileState, ""));
         });
     }
 
-    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        Tuple<CompileState, JavaList<Node>> tuple = parseAll(state, input, Main::foldValueChar, (state1, element) -> new Tuple<>(state1, parseDefault(element)));
-        return mergeAll(tuple.left, tuple.right, Main::generateDefault, Main::mergeValues);
+    private static Tuple<CompileState, String> generateValues(Tuple<CompileState, JavaList<Node>> tuple, Function<Node, String> generator) {
+        return mergeAll(tuple.left, tuple.right, generator, Main::mergeValues);
+    }
+
+    private static Tuple<CompileState, JavaList<Node>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, Node>> parser) {
+        return parseAll(state, input, Main::foldValueChar, parser);
     }
 
     private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
@@ -552,10 +564,11 @@ public class Main {
 
         Tuple<CompileState, Node> parsed1 = parseValue(state, caller);
         Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(parsed1.right));
-        Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, (state1, input1) -> {
+        Tuple<CompileState, JavaList<Node>> tuple = parseValues(compiledCaller.left, arguments, parseDefault((state1, input1) -> {
             Tuple<CompileState, Node> parsed = parseValue(state1, input1);
             return new Tuple<>(parsed.left, generateValue(parsed.right));
-        });
+        }));
+        Tuple<CompileState, String> compiledArguments = generateValues(tuple, Main::generateDefault);
 
         Node node = new Node("invocation")
                 .withString("caller", compiledCaller.right)
