@@ -4,6 +4,7 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
+/* import java.util.function.Function; */
 /* public  */struct Main {/* private static class State {
         private final List<String> segments;
         private final StringBuilder buffer;
@@ -17,6 +18,14 @@
 
         public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private boolean isShallow() {
+            return this.depth == 1;
+        }
+
+        private boolean isLevel() {
+            return this.depth == 0;
         }
 
         private State append(char c) {
@@ -36,7 +45,7 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
-    }
+    } *//* 
 
     public static void main(String[] args) {
         try {
@@ -53,22 +62,22 @@
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }
+    } *//* 
 
     private static String compile(String input) {
-        return compileSegments(input) + "int main(){\n\treturn 0;\n}\n";
-    }
+        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}\n";
+    } *//* 
 
-    private static String compileSegments(String input) {
+    private static String compileStatements(String input, Function<String, String> compiler) {
         List<String> segments = divide(input, new State());
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
-    }
+    } *//* 
 
     private static List<String> divide(String input, State state) {
         State current = state;
@@ -78,53 +87,57 @@
         }
 
         return current.advance().segments;
-    }
+    } *//* 
 
     private static State foldStatementChar(State current, char c) {
         State appended = current.append(c);
-        if (c == ';' && appended.depth == 0) {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '} *//* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* 
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '} *//* ') {
             return appended.exit();
-        }
-        return appended;
-    }
-
-    private static String compileRootSegment(String input) {
+        } *//* 
+        return appended; *//* 
+     */};
+/* private static String compileRootSegment(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
             return "";
         }
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            String modifiers = stripped.substring(0, classIndex);
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
+        int classIndex = stripped.indexOf(" */struct ");
+        if (classIndex >= 0) {/* String modifiers = stripped.substring(0, classIndex); *//* 
+            String afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
             int contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return generatePlaceholder(modifiers) + "struct " + name + " {" + generatePlaceholder(content) + "};\n";
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
                 }
-            }
+            } *//* 
         }
 
         return generatePlaceholder(stripped) + "\n";
-    }
-
-    private static String generatePlaceholder(String input) {
+     */};
+/* private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
+    } */
+/* private static String generatePlaceholder(String input) {
         String replaced = input
                 .replace("<comment-start>", "<comment-start>")
                 .replace("<comment-end>", "<comment-end>");
 
         return "<comment-start> " + replaced + " <comment-end>";
-    }
- */};
+    } */
+/* } */
 int main(){
 	return 0;
 }
