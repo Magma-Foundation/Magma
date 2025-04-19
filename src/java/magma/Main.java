@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -365,7 +364,7 @@ public class Main {
         }
 
         return compileClass(methods, stripped)
-                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(stripped) + "\n"));
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(wrapDefault(stripped)) + "\n"));
     }
 
     private static Option<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
@@ -389,7 +388,7 @@ public class Main {
             return Option.empty();
         }
         Tuple<CompileState, String> outputContent = compileStatements(state.pushStructName(name), inputContent, Main::compileClassSegment);
-        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
+        String generated = generatePlaceholder(wrapDefault(modifiers)) + "struct " + name + " {" + outputContent.right + "};\n";
         return Option.of(new Tuple<>(outputContent.left
                 .popStructName().addStruct(generated), ""));
     }
@@ -410,7 +409,7 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
                 .or(() -> compileMethod(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .orElseGet(() -> getCompileStateStringTuple(state, input));
     }
 
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
@@ -455,13 +454,13 @@ public class Main {
             return new Tuple<>(compiled.left, "\n\t" + compiled.right + ";");
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return getCompileStateStringTuple(state, stripped);
     }
 
     private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
         return parseInvocation(input, state)
                 .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .orElseGet(() -> getCompileStateStringTuple(state, input));
     }
 
     private static Option<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
@@ -513,28 +512,45 @@ public class Main {
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
         return parseInvocation(input, state)
                 .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
-                .or(() -> compileDataAccess(state, input))
-                .or(() -> compileSymbol(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .or(() -> parseDataAccess(state, input).map(tuple -> new Tuple<>(tuple.left, generateAccess(tuple.right))))
+                .or(() -> parseSymbol(state, input).map(tuple -> new Tuple<>(tuple.left, generateSymbol(tuple.right))))
+                .orElseGet(() -> getCompileStateStringTuple(state, input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+    private static Tuple<CompileState, String> getCompileStateStringTuple(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(wrapDefault(input)));
+    }
+
+    private static Option<Tuple<CompileState, Node>> parseSymbol(CompileState state, String input) {
         if (isSymbol(input.strip())) {
-            return Option.of(new Tuple<>(state, input.strip()));
+            return Option.of(new Tuple<>(state, wrapDefault(input.strip())));
         }
         return Option.empty();
     }
 
-    private static Option<Tuple<CompileState, String>> compileDataAccess(CompileState state, String input) {
-        int propertySeparator = input.lastIndexOf(".");
-        if (propertySeparator >= 0) {
-            String parent = input.substring(0, propertySeparator);
-            String property = input.substring(propertySeparator + ".".length());
+    private static String generateSymbol(Node node) {
+        return node.findString("value").orElse("");
+    }
 
-            Tuple<CompileState, String> compiled = compileValue(state, parent);
-            return Option.of(new Tuple<>(compiled.left, compiled.right + "." + property));
+    private static Option<Tuple<CompileState, Node>> parseDataAccess(CompileState state, String input) {
+        int propertySeparator = input.lastIndexOf(".");
+        if (propertySeparator < 0) {
+            return Option.empty();
         }
-        return Option.empty();
+        String parent = input.substring(0, propertySeparator);
+        String property = input.substring(propertySeparator + ".".length());
+
+        Tuple<CompileState, String> compiled = compileValue(state, parent);
+        return Option.of(new Tuple<>(compiled.left, new Node()
+                .withString("parent", compiled.right)
+                .withString("property", property)));
+    }
+
+    private static String generateAccess(Node node) {
+        String parent0 = node.findString("parent").orElse("");
+        String property0 = node.findString("property").orElse("");
+
+        return parent0 + "." + property0;
     }
 
     private static String mergeValues(String cache, String element) {
@@ -552,7 +568,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
-        return compileDefinition(state, element).orElseGet(() -> new Tuple<>(state, generatePlaceholder(element)));
+        return compileDefinition(state, element).orElseGet(() -> getCompileStateStringTuple(state, element));
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
@@ -575,9 +591,9 @@ public class Main {
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator);
             String type = beforeName.substring(typeSeparator + " ".length());
-            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(type));
+            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(wrapDefault(type)));
 
-            String compiled = generatePlaceholder(beforeType) + " " + outputType;
+            String compiled = generatePlaceholder(wrapDefault(beforeType)) + " " + outputType;
             return new Some<>(new Tuple<>(state, compiled + " " + newName));
         }
         else {
@@ -616,11 +632,16 @@ public class Main {
         return Option.empty();
     }
 
-    private static String generatePlaceholder(String input) {
-        String replaced = input
+    private static String generatePlaceholder(Node node) {
+        String replaced = node.findString("value")
+                .orElse("")
                 .replace("/*", "<comment-start>")
                 .replace("*/", "<comment-end>");
 
         return "/* " + replaced + " */";
+    }
+
+    private static Node wrapDefault(String input) {
+        return new Node().withString("value", input);
     }
 }
