@@ -7,16 +7,12 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-// List</* String */>
-// List</* Node */>
 // Tuple</* CompileState */, /*  String */>
-// Option<Tuple</* CompileState */, /*  String */>>
 // Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)>
-// Head</* T */>
-// Option</* String */>
 // Map</* String */, /*  String */>
 // Map</* String */, List</* Node */>>
 // Tuple</* CompileState */, List</* String */>>
+// Tuple</* T */, List</* T */>>
 /* private static */ struct DivideState {
 	/* private final */ List</* String */> segments;
 	/* private */ /* StringBuilder */ buffer;
@@ -95,31 +91,37 @@
     } */
 	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
-	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> generics, Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)> expandables)/*  {
+	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> expansions, Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)> expandables)/*  {
         public CompileState() {
             this(Lists.empty(), Lists.empty(), Lists.empty(), new HashMap<>());
         }
 
         public CompileState addStruct(String struct) {
-            this.structs.add(struct);
-            return this;
+            return new CompileState(this.imports, this.structs.add(struct), this.expansions, this.expandables);
         }
 
         public CompileState addImport(String imports) {
-            this.imports.add(imports);
-            return this;
+            return new CompileState(this.imports.add(imports), this.structs, this.expansions, this.expandables);
         }
 
         public CompileState addGeneric(Node node) {
-            if (!this.generics.contains(node)) {
-                this.generics.add(node);
+            if (!this.expansions.contains(node)) {
+                return new CompileState(this.imports, this.structs, this.expansions.add(node), this.expandables);
             }
+            
             return this;
         }
 
         public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
-            this.expandables.put(name, mapper);
-            return this;
+            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> copy = this.expandables;
+            copy.put(name, mapper);
+            return new CompileState(this.imports, this.structs, this.expansions, copy);
+        }
+
+        public Option<Tuple<Node, CompileState>> popExpansion() {
+            return this.expansions.removeFirst().map(tuple -> {
+                return new Tuple<>(tuple.left, new CompileState(this.imports, this.structs, tuple.right, this.expandables));
+            });
         }
     } */
 	/* private */ /* record */ Joiner(/* String */ delimiter)/*  implements Collector<String, Option<String>> {
@@ -215,17 +217,53 @@
 	/* private static */ /* String */ compile(/* String */ input)/*  {
         CompileState oldState = new CompileState();
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
-        CompileState newState = output.left;
 
-        String joinedImports = join(newState.imports);
-        String joinedStructs = join(newState.structs);
-        String joinedGenerics = newState.generics.iter()
+        CompileState currentState = output.left;
+        StringBuilder buffered = new StringBuilder();
+        List<Node> visited = Lists.empty();
+
+        while (!currentState.expansions.isEmpty()) {
+            Option<Tuple<Node, CompileState>> option = currentState.popExpansion();
+            if (option.isEmpty()) {
+                break;
+            }
+
+            Tuple<Node, CompileState> entry = option.orElse(null);
+            Node expansion = entry.left;
+
+            CompileState withoutExpansion = entry.right;
+            currentState = withoutExpansion;
+            if (!visited.contains(expansion)) {
+                System.out.println(generateType(expansion));
+                Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
+                currentState = tuple.left;
+                buffered.append(tuple.right);
+                visited = visited.add(expansion);
+            }
+        }
+
+        CompileState newState1 = currentState;
+        String joinedImports = join(newState1.imports);
+        String joinedStructs = join(newState1.structs);
+        String joinedGenerics = newState1.expansions.iter()
                 .map(Main::generateGenericType)
                 .map(generic -> "// " + generic + "\n")
                 .collect(new Joiner())
                 .orElse("");
 
-        return joinedImports + joinedGenerics + joinedStructs + output.right;
+        return joinedImports + joinedGenerics + buffered + joinedStructs + buffered;
+    } */
+	/* private static */ Tuple</* CompileState */, /*  String */> expand(/* Node */ expansion, /* CompileState */ state)/*  {
+        String base = expansion.findString("base").orElse("");
+        List<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
+
+        Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
+        if (expandables.containsKey(base)) {
+            return expandables.get(base).apply(arguments).orElse(new Tuple<>(state, ""));
+        }
+        else {
+            return new Tuple<>(state, "// " + generateGenericType(expansion) + "\n");
+        }
     } */
 	/* private static */ /* String */ join(List</* String */> list)/*  {
         return list.iter()
@@ -286,326 +324,95 @@
         } */
 	/* return */ appended;
 };
-/* 
-
-    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        if (input.startsWith("package ")) {
-            return new Tuple<>(state, "");
-        }
-        if (input.strip().startsWith("import ")) {
-            return new Tuple<>(state.addImport("// #include <temp.h>\n"), "");
-        }
-
-        return compileClass(state, input).orElseGet(() -> compileContent(state, input));
-    } *//* 
-
-    private static Tuple<CompileState, String> compileContent(CompileState state, String input) {
-        return new Tuple<>(state, generatePlaceholder(input));
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileStructured("class ", state, input);
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileStructured(String infix, CompileState state, String input) {
-        int classIndex = input.indexOf(infix);
-        if (classIndex < 0) {
-            return new None<>();
-        }
-
-        String modifiers = input.substring(0, classIndex).strip();
-        String afterKeyword = input.substring(classIndex + infix.length());
-        int contentStart = afterKeyword.indexOf("{");
-        if (contentStart < 0) {
-            return new None<>();
-        }
-        String beforeContent = afterKeyword.substring(0, contentStart).strip();
-        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return new None<>();
-        }
-
-        int typeParamStart = beforeContent.indexOf("<");
-        if (typeParamStart >= 0) {
-            String name = beforeContent.substring(0, beforeContent.indexOf("<"));
-            CompileState state1 = state.addExpandable(name, arguments -> {
-                return getTupleSome(state, withEnd, modifiers, name);
-            });
-            return new Some<>(new Tuple<>(state1, ""));
-        }
-        else {
-            return getTupleSome(state, withEnd, modifiers, beforeContent);
-        }
-    }
-
-    private static Some<Tuple<CompileState, String>> getTupleSome(CompileState state, String withEnd, String modifiers, String name) {
-        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
-
-        String format = "%s struct %s {%s\n};\n";
-        String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
-        return new Some<>(new Tuple<CompileState, String>(content.left.addStruct(message), ""));
-    } *//* 
-
-    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileWhitespace(state, input)
-                .or(() -> compileClass(state, input))
-                .or(() -> compileStructured("interface ", state, input))
-                .or(() -> compileMethod(state, input))
-                .or(() -> compileDefinitionStatement(state, input))
-                .orElseGet(() -> compileContent(state, input));
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String definition = input.substring(0, paramStart);
-            String withParams = input.substring(paramStart + "(".length());
-            return compileDefinition(state, definition).flatMap(outputDefinition -> {
-                int paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    String oldParams = withParams.substring(0, paramEnd);
-                    Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, Main::compileParameter);
-
-                    String oldBody = withParams.substring(paramEnd + ")".length());
-                    String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
-
-                    String generated = "\n\t" + outputDefinition.right + "(" + newParams.right + ")" + newBody;
-                    Tuple<CompileState, String> value = new Tuple<>(newParams.left, generated);
-                    return new Some<>(value);
-                }
-                else {
-                    return new None<>();
-                }
-            });
-        }
-        return new None<>();
-    } *//* 
-
-    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        return compileAll(state, input, Main::compileValueChar, compiler, Main::mergeValues);
-    } *//* 
-
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
-        if (cache.isEmpty()) {
-            return cache.append(element);
-        }
-        return cache.append(", ").append(element);
-    } *//* 
-
-    private static DivideState compileValueChar(DivideState state, char c) {
-        if (c == ',' && state.isLevel()) {
-            return state.advance();
-        }
-
-        DivideState appended = state.append(c);
-        if (c == '<') {
-            return appended.enter();
-        }
-        if (c == '>') {
-            return appended.exit();
-        }
-        return appended;
-    } *//* 
-
-    private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
-        return compileWhitespace(state, element)
-                .or(() -> compileDefinition(state, element))
-                .orElseGet(() -> compileContent(state, element));
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String element) {
-        if (element.isBlank()) {
-            return new Some<>(new Tuple<CompileState, String>(state, ""));
-        }
-        return new None<>();
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
-        String stripped = input.strip();
-        if (!stripped.endsWith(";")) {
-            return new None<>();
-        }
-        String inputDefinition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(state, inputDefinition).map(outputDefinition -> {
-            return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + ";");
-        });
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String definition) {
-        String withoutEnd = definition.strip();
-        int nameSeparator = withoutEnd.lastIndexOf(" ");
-        if (nameSeparator < 0) {
-            return new None<>();
-        }
-        String beforeName = withoutEnd.substring(0, nameSeparator).strip();
-        String name = withoutEnd.substring(nameSeparator + " ".length());
-
-        return findTypeSeparator(beforeName).map(typeSeparator -> {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String typeString = beforeName.substring(typeSeparator + " ".length());
-
-            Tuple<CompileState, Node> value = parseType(state, typeString);
-            CompileState withType = value.left;
-            Node type = value.right;
-
-            if (type.is("functional")) {
-                return new Some<>(new Tuple<CompileState, String>(withType, generateFunctional(type.withString("name", name))));
-            }
-
-            Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
-            String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
-            return generateDefinition(typeTuple.left, outputBeforeName, name);
-        }).orElseGet(() -> {
-            Tuple<CompileState, Node> value = parseType(state, beforeName);
-            CompileState withType = value.left;
-            Node type = value.right;
-            if (type.is("functional")) {
-                return new Some<>(new Tuple<CompileState, String>(withType, generateFunctional(type.withString("name", name))));
-            }
-            Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
-            return generateDefinition(generated.left, generated.right, name);
-        });
-    } *//* 
-
-    private static Tuple<CompileState, Node> parseType(CompileState state, String input) {
-        return parseGenericType(state, input)
-                .or(() -> parsePrimitiveType(state, input))
-                .orElseGet(() -> parseContent(state, input));
-    } *//* 
-
-    private static Option<Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
-        if (input.strip().equals("int")) {
-            return new Some<>(new Tuple<CompileState, Node>(state, new Node("primitive").withString("value", "int")));
-        }
-        else {
-            return new None<>();
-        }
-    } *//* 
-
-    private static Tuple<CompileState, Node> parseContent(CompileState state, String input) {
-        return new Tuple<>(state, new Node("content").withString("value", generatePlaceholder(input)));
-    } *//* 
-
-    private static Option<Tuple<CompileState, Node>> parseGenericType(CompileState state, String input) {
-        String stripped = input.strip();
-        if (!stripped.endsWith(">")) {
-            return new None<>();
-        }
-
-        String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-        int argumentsStart = withoutEnd.indexOf("<");
-        if (argumentsStart < 0) {
-            return new None<>();
-        }
-
-        String base = withoutEnd.substring(0, argumentsStart).strip();
-        String params = withoutEnd.substring(argumentsStart + "<".length());
-        Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, (state1, input1) -> {
-            Tuple<CompileState, Node> value = parseType(state1, input1);
-            return new Tuple<>(value.left, generateType(value.right).orElse(""));
-        });
-
-        CompileState newState = compiled.left;
-        List<String> newValues = compiled.right;
-
-        Tuple<CompileState, Node> value = modifyToFunctionalType("BiFunction", base, newState, () -> Lists.of(newValues.get(0), newValues.get(1)), () -> newValues.get(2))
-                .or(() -> modifyToFunctionalType("Function", base, newState, () -> Lists.of(newValues.get(0)), () -> newValues.get(1)))
-                .or(() -> modifyToFunctionalType("Supplier", base, newState, Lists::empty, () -> newValues.get(0)))
-                .orElseGet(() -> {
-                    String newTypes = mergeAll(Main::mergeValues, compiled);
-                    Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                    CompileState withGeneric = newState.addGeneric(node);
-                    return new Tuple<>(withGeneric, node);
-                });
-
-        return new Some<>(value);
-    } *//* 
-
-    private static Option<Tuple<CompileState, Node>> modifyToFunctionalType(String expectedBase, String actualBase, CompileState state, Supplier<List<String>> arguments, Supplier<String> returns) {
-        if (!actualBase.equals(expectedBase)) {
-            return new None<>();
-        }
-
-        final List<Node> argumentNodes = arguments.get().iter()
-                .map(argument -> new Node().withString("argument", argument))
-                .collect(new ListCollector<>());
-
-        Node node = new Node("functional")
-                .withString("returns", returns.get())
-                .withNodeList("arguments", argumentNodes);
-
-        return new Some<>(new Tuple<CompileState, Node>(state, node));
-    } *//* 
-
-    private static Option<String> generateType(Node node) {
-        String generated;
-        if (node.is("functional")) {
-            generated = generateFunctional(node);
-        }
-        else if (node.is("generic")) {
-            generated = generateGenericType(node);
-        }
-        else if (node.is("primitive")) {
-            generated = node.findString("value").orElse("");
-        }
-        else {
-            generated = generateContent(node);
-        }
-        return new Some<>(generated);
-    } *//* 
-
-    private static String generateContent(Node node) {
-        return node.findString("value").orElse("");
-    } *//* 
-
-    private static String generateGenericType(Node node) {
-        String base = node.findString("base").orElse("");
-        String arguments = node.findString("arguments").orElse("");
-        return base + "<" + arguments + ">";
-    } *//* 
-
-    private static String generateFunctional(Node node) {
-        String arguments = node.findNodeList("arguments")
-                .orElse(Lists.empty())
-                .iter()
-                .map(argument -> argument.findString("argument").orElse(""))
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        String returns = node.findString("returns").orElse("");
-        String name = node.findString("name").orElse("");
-        return "%s(*%s)(%s)".formatted(returns, name, arguments);
-    } *//* 
-
-    private static Option<Integer> findTypeSeparator(String input) {
-        int depth = 0;
-        for (int i = input.length() - 1; i >= 0; i--) {
-            char c = input.charAt(i);
-            if (c == ' ' && depth == 0) {
-                return new Some<>(i);
-            }
-            if (c == '>') {
-                depth++;
-            }
-            if (c == '<') {
-                depth--;
-            }
-        }
-        return new None<>();
-    } *//* 
-
-    private static Option<Tuple<CompileState, String>> generateDefinition(
-            CompileState state,
-            String beforeName,
-            String name
-    ) {
-        String generated = beforeName + " " + name;
-        return new Some<>(new Tuple<CompileState, String>(state, generated));
-    } *//* 
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    } *//* 
-}
- */
+/* public */ struct List {
+	Iterator</* T */> iter();
+	List</* T */> add(/* T */ element);
+	/* T */ get(int index);
+	/* boolean */ contains(/* T */ element);
+	/* boolean */ isEmpty();
+	Option<Tuple</* T */, List</* T */>>> removeFirst();
+};
+/* public */ struct List {
+	Iterator</* T */> iter();
+	List</* T */> add(/* T */ element);
+	/* T */ get(int index);
+	/* boolean */ contains(/* T */ element);
+	/* boolean */ isEmpty();
+	Option<Tuple</* T */, List</* T */>>> removeFirst();
+};
+/* public */ struct Option {
+	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* T */ orElse(/* T */ other);
+	/* boolean */ isEmpty();
+	/* boolean */ isPresent();
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
+	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+};
+/* private */ struct Head {
+	Option</* T */> next();
+};
+/* public */ struct Option {
+	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* T */ orElse(/* T */ other);
+	/* boolean */ isEmpty();
+	/* boolean */ isPresent();
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
+	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+};
+/* public */ struct Iterator {
+	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
+	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
+	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
+};
+/* public */ struct List {
+	Iterator</* T */> iter();
+	List</* T */> add(/* T */ element);
+	/* T */ get(int index);
+	/* boolean */ contains(/* T */ element);
+	/* boolean */ isEmpty();
+	Option<Tuple</* T */, List</* T */>>> removeFirst();
+};
+/* public */ struct Option {
+	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* T */ orElse(/* T */ other);
+	/* boolean */ isEmpty();
+	/* boolean */ isPresent();
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
+	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+};
+/* public */ struct Option {
+	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* T */ orElse(/* T */ other);
+	/* boolean */ isEmpty();
+	/* boolean */ isPresent();
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
+	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+};
+/* public */ struct Option {
+	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* T */ orElse(/* T */ other);
+	/* boolean */ isEmpty();
+	/* boolean */ isPresent();
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
+	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+};
+/* public */ struct Collector {
+	/* C */ createInitial();
+	/* C */ fold(/* C */ current, /* T */ element);
+};
+/* public */ struct Iterator {
+	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
+	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
+	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
+};
+// Tuple</* CompileState */, /*  String */>
+// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)>
+// Map</* String */, /*  String */>
+// Map</* String */, List</* Node */>>
+// Tuple</* CompileState */, List</* String */>>
+// Tuple</* T */, List</* T */>>

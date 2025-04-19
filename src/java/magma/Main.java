@@ -33,6 +33,10 @@ public class Main {
         T get(int index);
 
         boolean contains(T element);
+
+        boolean isEmpty();
+
+        Option<Tuple<T, List<T>>> removeFirst();
     }
 
     public interface Option<T> {
@@ -147,7 +151,7 @@ public class Main {
     record CompileState(
             List<String> imports,
             List<String> structs,
-            List<Node> generics,
+            List<Node> expansions,
             Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables
     ) {
         public CompileState() {
@@ -155,25 +159,31 @@ public class Main {
         }
 
         public CompileState addStruct(String struct) {
-            this.structs.add(struct);
-            return this;
+            return new CompileState(this.imports, this.structs.add(struct), this.expansions, this.expandables);
         }
 
         public CompileState addImport(String imports) {
-            this.imports.add(imports);
-            return this;
+            return new CompileState(this.imports.add(imports), this.structs, this.expansions, this.expandables);
         }
 
         public CompileState addGeneric(Node node) {
-            if (!this.generics.contains(node)) {
-                this.generics.add(node);
+            if (this.expansions.contains(node)) {
+                return this;
             }
-            return this;
+
+            return new CompileState(this.imports, this.structs, this.expansions.add(node), this.expandables);
         }
 
         public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
-            this.expandables.put(name, mapper);
-            return this;
+            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> copy = this.expandables;
+            copy.put(name, mapper);
+            return new CompileState(this.imports, this.structs, this.expansions, copy);
+        }
+
+        public Option<Tuple<Node, CompileState>> popExpansion() {
+            return this.expansions.removeFirst().map(tuple -> {
+                return new Tuple<>(tuple.left, new CompileState(this.imports, this.structs, tuple.right, this.expandables));
+            });
         }
     }
 
@@ -343,17 +353,54 @@ public class Main {
     private static String compile(String input) {
         CompileState oldState = new CompileState();
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
-        CompileState newState = output.left;
 
-        String joinedImports = join(newState.imports);
-        String joinedStructs = join(newState.structs);
-        String joinedGenerics = newState.generics.iter()
+        CompileState currentState = output.left;
+        StringBuilder buffered = new StringBuilder();
+        List<Node> visited = Lists.empty();
+
+        while (!currentState.expansions.isEmpty()) {
+            Option<Tuple<Node, CompileState>> option = currentState.popExpansion();
+            if (option.isEmpty()) {
+                break;
+            }
+
+            Tuple<Node, CompileState> entry = option.orElse(null);
+            Node expansion = entry.left;
+
+            CompileState withoutExpansion = entry.right;
+            currentState = withoutExpansion;
+            if (!visited.contains(expansion)) {
+                System.out.println(generateType(expansion));
+                Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
+                currentState = tuple.left;
+                buffered.append(tuple.right);
+                visited = visited.add(expansion);
+            }
+        }
+
+        CompileState newState1 = currentState;
+        String joinedImports = join(newState1.imports);
+        String joinedStructs = join(newState1.structs);
+        String joinedGenerics = newState1.expansions.iter()
                 .map(Main::generateGenericType)
                 .map(generic -> "// " + generic + "\n")
                 .collect(new Joiner())
                 .orElse("");
 
-        return joinedImports + joinedGenerics + joinedStructs + output.right;
+        return joinedImports + joinedGenerics + buffered + joinedStructs + buffered;
+    }
+
+    private static Tuple<CompileState, String> expand(Node expansion, CompileState state) {
+        String base = expansion.findString("base").orElse("");
+        List<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
+
+        Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
+        if (expandables.containsKey(base)) {
+            return expandables.get(base).apply(arguments).orElse(new Tuple<>(state, ""));
+        }
+        else {
+            return new Tuple<>(state, "// " + generateGenericType(expansion) + "\n");
+        }
     }
 
     private static String join(List<String> list) {

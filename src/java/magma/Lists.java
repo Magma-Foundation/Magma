@@ -2,6 +2,7 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class Lists {
     private record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
@@ -29,6 +30,22 @@ class Lists {
         @Override
         public boolean contains(T element) {
             return this.list.contains(element);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.list.isEmpty();
+        }
+
+        @Override
+        public Main.Option<Main.Tuple<T, Main.List<T>>> removeFirst() {
+            if (this.list.isEmpty()) {
+                return new Main.None<>();
+            }
+
+            T first = this.list.getFirst();
+            List<T> slice = this.list.subList(1, this.list.size());
+            return new Main.Some<>(new Main.Tuple<>(first, new JavaList<>(slice)));
         }
     }
 
