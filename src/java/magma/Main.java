@@ -555,7 +555,7 @@ public class Main {
         }
         String definition = input.substring(0, paramStart);
         String withParams = input.substring(paramStart + "(".length());
-        return compileDefinition(state, definition).flatMap(outputDefinition -> {
+        return parseDefinition(state, definition).flatMap(outputDefinition -> {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd < 0) {
                 return new None<>();
@@ -567,9 +567,10 @@ public class Main {
             String oldBody = withParams.substring(paramEnd + ")".length());
             String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
 
-            String generated = "\n\t" + outputDefinition.right + "(" + newParams.right + ")" + newBody;
-            Tuple<CompileState, String> value = new Tuple<>(newParams.left, generated);
-            return new Some<>(value);
+            return generateDefinition(outputDefinition.right).map(generated0 -> {
+                String generated = "\n\t" + generated0 + "(" + newParams.right + ")" + newBody;
+                return new Tuple<>(newParams.left, generated);
+            });
         });
     }
 
@@ -601,7 +602,11 @@ public class Main {
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
         return compileWhitespace(state, element)
-                .or(() -> compileDefinition(state, element))
+                .or(() -> parseDefinition(state, element).flatMap(result -> {
+                    return generateDefinition(result.right).map(inner -> {
+                        return new Tuple<>(result.left, inner);
+                    });
+                }))
                 .orElseGet(() -> compileContent(state, element));
     }
 
@@ -618,16 +623,12 @@ public class Main {
             return new None<>();
         }
         String inputDefinition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(state, inputDefinition).map(outputDefinition -> {
-            return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + ";");
-        });
-    }
-
-    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String definition) {
-        return parseDefinition(state, definition).flatMap(result -> {
+        return parseDefinition(state, inputDefinition).flatMap(result -> {
             return generateDefinition(result.right).map(inner -> {
                 return new Tuple<>(result.left, inner);
             });
+        }).map(outputDefinition -> {
+            return new Tuple<>(outputDefinition.left, "\n\t" + outputDefinition.right + ";");
         });
     }
 
