@@ -26,8 +26,8 @@
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
 	/* boolean */ isPresent();
-	/* T */ orElseGet(Supplier</* T */> other);
-	Option</* T */> or(Supplier<Option</* T */>> other);
+	/* T */ orElseGet(/* T */(*other)());
+	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
 /* private */ struct Head<T> {
@@ -117,11 +117,11 @@
             return false;
         } */
 	/* @Override
-        public */ /* T */ orElseGet(Supplier</* T */> other)/*  {
+        public */ /* T */ orElseGet(/* T */(*other)())/*  {
             return other.get();
         } */
 	/* @Override
-        public */ Option</* T */> or(Supplier<Option</* T */>> other)/*  {
+        public */ Option</* T */> or(Option</* T */>(*other)())/*  {
             return other.get();
         } */
 	/* @Override
@@ -559,6 +559,7 @@
 
         Tuple<CompileState, Node> value = modifyToFunctionalType("BiFunction", base, newState, () -> Lists.of(newValues.get(0), newValues.get(1)), () -> newValues.get(2))
                 .or(() -> modifyToFunctionalType("Function", base, newState, () -> Lists.of(newValues.get(0)), () -> newValues.get(1)))
+                .or(() -> modifyToFunctionalType("Supplier", base, newState, Lists::empty, () -> newValues.get(0)))
                 .orElseGet(() -> {
                     String newTypes = mergeAll(Main::mergeValues, compiled);
                     Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
