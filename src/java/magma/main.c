@@ -198,11 +198,10 @@
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator);
             String type = beforeName.substring(typeSeparator + " ".length());
+            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(type));
 
-            return compileType(type).map(outputType -> {
-                String compiled = generatePlaceholder(beforeType) + " " + outputType;
-                return new Tuple<>(state, compiled + " " + newName);
-            });
+            String compiled = generatePlaceholder(beforeType) + " " + outputType;
+            return new Some<>(new Tuple<>(state, compiled + " " + newName));
         }
         else {
             return compileType(beforeName).map(compiled -> {
@@ -266,27 +265,6 @@
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     } *//* 
 
-
-    interface Option<T> {
-        static <T> Option<T> of(T value) {
-            return new Some<>(value);
-        }
-
-        static <T> Option<T> empty() {
-            return new None<>();
-        }
-
-        void ifPresent(Consumer<T> ifPresent);
-
-        Option<T> or(Supplier<Option<T>> other);
-
-        T orElseGet(Supplier<T> other);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        <R> Option<R> map(Function<T, R> mapper);
-    } *//* 
-
     interface Error {
         String display();
     } *//* 
@@ -316,29 +294,6 @@
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
         }
-    } *//* 
-
-    private record JavaList<T>(List<T> list) {
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        public JavaList<T> addLast(T element) {
-            ArrayList<T> copy = new ArrayList<>(this.list);
-            copy.add(element);
-            return new JavaList<>(copy);
-        }
-
-        public JavaList<T> removeLast() {
-            return new JavaList<>(this.list.subList(0, this.list.size() - 1));
-        }
-
-        public T last() {
-            return this.list.getLast();
-        }
-    } *//* 
-
-    private record Tuple<A, B>(A left, B right) {
     } *//* 
 
     record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
@@ -384,89 +339,6 @@
             this.throwable.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }
-    } *//* 
-
-    private static Option<Error> run() {
-        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        return readString(source)
-                .match(input -> runWithInput(source, input), Option::of)
-                .map(ThrowableError::new);
-    } *//* 
-
-    private static Option<IOException> runWithInput(Path source, String input) {
-        Path target = source.resolveSibling("main.c");
-        String compile = compile(input);
-        return writeString(target, compile).or(Main::build);
-    } *//* 
-
-    private static Option<IOException> build() {
-        return start().match(process -> {
-            try {
-                process.waitFor();
-                return Option.empty();
-            } catch (InterruptedException e) {
-                return Option.of(new IOException(e));
-            }
-        }, Option::of);
-    } *//* 
-
-    private static Result<Process, IOException> start() {
-        try {
-            return new Ok<>(new ProcessBuilder("cmd.exe", "/c", "build.bat")
-                    .inheritIO()
-                    .start()
-            );
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
-    } *//* 
-
-    private static Option<IOException> writeString(Path target, String compile) {
-        try {
-            Files.writeString(target, compile);
-            return Option.empty();
-        } catch (IOException e) {
-            return Option.of(e);
-        }
-    } *//* 
-
-    private static Result<String, IOException> readString(Path path) {
-        try {
-            return new Ok<>(Files.readString(path));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
-    } *//* 
-
-    private static Tuple<CompileState, String> compileStatements(
-            CompileState methods,
-            String input,
-            BiFunction<CompileState, String, Tuple<CompileState, String>> compiler
-    ) {
-        return compileAll(methods, input, Main::foldStatementChar, compiler, Main::mergeStatements);
-    } *//* 
-
-    private static Tuple<CompileState, String> compileAll(CompileState methods, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, BiFunction<String, String, String> merger) {
-        List<String> segments = divide(input, folder);
-        CompileState current = methods;
-        String output = "";
-        for (String segment : segments) {
-            Tuple<CompileState, String> compiled = compiler.apply(current, segment);
-            current = compiled.left;
-            output = merger.apply(output, compiled.right);
-        }
-
-        return new Tuple<>(current, output);
-    } *//* 
-
-    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        DivideState current = new DivideState();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = folder.apply(current, c);
-        }
-
-        return current.advance().segments.list;
     } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* 
@@ -478,6 +350,25 @@
         } *//* 
         return appended; *//* 
      */};
+/* interface Option<T> {
+        static <T> */ /* Option<T> */ of_Main(struct T value_Main){
+	/* return new Some<> */(value);
+	/* }
+
+        static <T> Option<T> empty() {
+            return new None<> */();
+	/* }
+
+        void ifPresent(Consumer<T> ifPresent);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        T orElseGet(Supplier<T> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        <R> Option<R> map */(/* Function<T */, /*  R> mapper */);
+}
 /* private */ int isShallow_DivideState(/*  */){
 	/* return this.depth == 1 */;/*  */
 }
@@ -495,6 +386,20 @@
 }
 /* private */ struct DivideState exit_DivideState(/*  */){
 	/* return new DivideState */(this.segments, this.buffer, this.depth - 1);/*  */
+}
+/* private */ /* record */ JavaList<T>_Main(/* List<T> list */){/* public JavaList() {
+            this(new ArrayList<>());
+        } *//* public JavaList<T> addLast(T element) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        } *//* public JavaList<T> removeLast() {
+            return new JavaList<>(this.list.subList(0, this.list.size() - 1));
+        } *//* public T last() {
+            return this.list.getLast();
+        } *//*  */
+}
+/* private record */ /* Tuple<A, */ B>_Main(struct A left_Main, struct B right_Main){/*  */
 }
 /* static class None<T> implements Option<T> {
         @Override
@@ -523,6 +428,47 @@
 /* public static */ void __main__(char** args_Main){
 	run().ifPresent(/* error -> System */.err.println(error.display()));/*  */
 }
+/* private static */ /* Option<Error> */ run_Main(/*  */){
+	/* Path source = Paths */.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
+	/* return readString */(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Option::of */).map(/* ThrowableError::new */);/*  */
+}
+/* private static */ /* Option<IOException> */ runWithInput_Main(struct Path source_Main, char* input_Main){
+	/* Path target = source */.resolveSibling(/* "main */.c");
+	/* String compile = compile */(input);
+	/* return writeString */(target, compile).or(/* Main::build */);/*  */
+}
+/* private static */ /* Option<IOException> */ build_Main(/*  */){/* return start().match(process -> {
+            try {
+                process.waitFor();
+                return Option.empty();
+            } catch (InterruptedException e) {
+                return Option.of(new IOException(e));
+            }
+        } */
+	/* , Option::of) */;/*  */
+}
+/* private static Result<Process, */ /* IOException> */ start_Main(/*  */){/* try {
+            return new Ok<>(new ProcessBuilder("cmd.exe", "/c", "build.bat")
+                    .inheritIO()
+                    .start()
+            );
+        } *//* catch (IOException e) {
+            return new Err<>(e);
+        } *//*  */
+}
+/* private static */ /* Option<IOException> */ writeString_Main(struct Path target_Main, char* compile_Main){/* try {
+            Files.writeString(target, compile);
+            return Option.empty();
+        } *//* catch (IOException e) {
+            return Option.of(e);
+        } *//*  */
+}
+/* private static Result<String, */ /* IOException> */ readString_Main(struct Path path_Main){/* try {
+            return new Ok<>(Files.readString(path));
+        } *//* catch (IOException e) {
+            return new Err<>(e);
+        } *//*  */
+}
 /* private static */ char* compile_Main(char* input_Main){
 	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState */(), input, /*  Main::compileRootSegment */);
 	/* CompileState newState = compiled.left */;
@@ -531,6 +477,30 @@
 	/* String joinedMethods = String */.join(/* "" */, newState.methods.list);
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
+}
+/* private static Tuple<CompileState, */ /* String> */ compileStatements_Main(struct CompileState methods_Main, char* input_Main, /* 
+            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  String>> compiler
+     */){
+	/* return compileAll */(methods, input, /*  Main::foldStatementChar */, compiler, /*  Main::mergeStatements */);/*  */
+}
+/* private static Tuple<CompileState, */ /* String> */ compileAll_Main(struct CompileState methods_Main, char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  String>> compiler */, /*  BiFunction<String */, /*  String */, /*  String> merger */){
+	/* List<String> segments = divide */(input, folder);
+	/* CompileState current = methods */;
+	/* String output = "" */;/* for (String segment : segments) {
+            Tuple<CompileState, String> compiled = compiler.apply(current, segment);
+            current = compiled.left;
+            output = merger.apply(output, compiled.right);
+        } */
+	/* return new Tuple<> */(current, output);/*  */
+}
+/* private static */ /* List<String> */ divide_Main(char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */){
+	/* DivideState current = new DivideState */();
+	/* for (int i = 0 */;
+	/* i < input */.length();/* i++) {
+            char c = input.charAt(i);
+            current = folder.apply(current, c);
+        } */
+	/* return current.advance().segments.list */;/*  */
 }
 /* private static */ char* mergeStatements_Main(char* buffer_Main, char* element_Main){
 	/* return buffer + element */;/*  */

@@ -525,11 +525,10 @@ public class Main {
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator);
             String type = beforeName.substring(typeSeparator + " ".length());
+            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(type));
 
-            return compileType(type).map(outputType -> {
-                String compiled = generatePlaceholder(beforeType) + " " + outputType;
-                return new Tuple<>(state, compiled + " " + newName);
-            });
+            String compiled = generatePlaceholder(beforeType) + " " + outputType;
+            return new Some<>(new Tuple<>(state, compiled + " " + newName));
         }
         else {
             return compileType(beforeName).map(compiled -> {
