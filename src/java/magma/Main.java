@@ -218,12 +218,30 @@ public class Main {
             return Optional.empty();
         }
         String definition = stripped.substring(0, paramStart).strip();
-        int nameSeparator = definition.lastIndexOf(" ");
+        return compileDefinition(state, definition).flatMap(outputDefinition -> {
+            String withParams = stripped.substring(paramStart + "(".length());
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) {
+                return Optional.empty();
+            }
+            String params = withParams.substring(0, paramEnd);
+            String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                return Optional.empty();
+            }
+            String content = withBraces.substring(1, withBraces.length() - 1);
+            String generated = outputDefinition.right + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
+            return Optional.of(new Tuple<>(outputDefinition.left.addMethod(generated), ""));
+        });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        int nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return Optional.empty();
         }
-        String beforeName = definition.substring(0, nameSeparator).strip();
-        String name = definition.substring(nameSeparator + " ".length()).strip();
+        String beforeName = input.substring(0, nameSeparator).strip();
+        String name = input.substring(nameSeparator + " ".length()).strip();
 
         int typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
@@ -231,18 +249,6 @@ public class Main {
         }
         String beforeType = beforeName.substring(0, typeSeparator);
         String type = beforeName.substring(typeSeparator + " ".length());
-
-        String withParams = stripped.substring(paramStart + "(".length());
-        int paramEnd = withParams.indexOf(")");
-        if (paramEnd < 0) {
-            return Optional.empty();
-        }
-        String params = withParams.substring(0, paramEnd);
-        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-            return Optional.empty();
-        }
-        String content = withBraces.substring(1, withBraces.length() - 1);
         Optional<String> maybeOutputType = compileType(type);
         if (maybeOutputType.isEmpty()) {
             return Optional.empty();
@@ -255,9 +261,8 @@ public class Main {
         else {
             newName = name + "_" + state.structName.orElse("");
         }
-
-        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
-        return Optional.of(new Tuple<>(state.addMethod(generated), ""));
+        String outputDefinition = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName;
+        return Optional.of(new Tuple<>(state, outputDefinition));
     }
 
     private static Optional<String> compileType(String type) {
