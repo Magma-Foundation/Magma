@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -38,6 +40,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         <R> Option<R> map(Function<T, R> mapper);
+
+        T orElse(T other);
     }
 
     interface Error {
@@ -68,6 +72,11 @@ public class Main {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
         }
     }
 
@@ -194,6 +203,11 @@ public class Main {
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
         }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
     }
 
     record ThrowableError(Throwable throwable) implements Error {
@@ -202,6 +216,26 @@ public class Main {
             StringWriter writer = new StringWriter();
             this.throwable.printStackTrace(new PrintWriter(writer));
             return writer.toString();
+        }
+    }
+
+    record Node(Map<String, String> strings) {
+        public Node() {
+            this(new HashMap<>());
+        }
+
+        public Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String> findString(String propertyKey) {
+            if (this.strings.containsKey(propertyKey)) {
+                return new Some<>(this.strings.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -334,7 +368,6 @@ public class Main {
                 .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(stripped) + "\n"));
     }
 
-
     private static Option<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex < 0) {
@@ -461,8 +494,19 @@ public class Main {
         Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
         Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
 
-        String generated = compiledCaller.right + "(" + compiledArguments.right + ")";
+        Node node = new Node()
+                .withString("caller", compiledCaller.right)
+                .withString("arguments", compiledArguments.right);
+
+        String generated = generateInvocation(node);
         return Optional.of(new Tuple<>(compiledArguments.left, generated));
+    }
+
+    private static String generateInvocation(Node node) {
+        String caller = node.findString("caller").orElse("");
+        String arguments = node.findString("arguments").orElse("");
+
+        return caller + "(" + arguments + ")";
     }
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
