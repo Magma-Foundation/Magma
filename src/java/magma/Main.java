@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
@@ -167,13 +168,24 @@ public class Main {
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                             String content = withBraces.substring(1, withBraces.length() - 1);
-                            return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                            Optional<String> maybeOutputType = compileType(type);
+                            if (maybeOutputType.isPresent()) {
+                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                            }
                         }
                     }
                 }
             }
         }
         return generatePlaceholder(stripped);
+    }
+
+    private static Optional<String> compileType(String type) {
+        String stripped = type.strip();
+        if (stripped.equals("private")) {
+            return Optional.empty();
+        }
+        return Optional.of(stripped);
     }
 
     private static String generatePlaceholder(String input) {

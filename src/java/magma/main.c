@@ -4,13 +4,14 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
+/* import java.util.Optional; */
 /* import java.util.function.Function; */
 /* public  */struct Main {/* private static class State {
         private final List<String> segments;
         private final StringBuilder buffer;
         private final int depth;
 
-        */ private State(/* List<String> segments, StringBuilder buffer, int depth */){/* 
+        private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -45,7 +46,7 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
-     */}/* public static */ void main(/* String[] args */){/* 
+    } *//* public static */ void main(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -147,13 +148,23 @@
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                             String content = withBraces.substring(1, withBraces.length() - 1);
-                            return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                            Optional<String> maybeOutputType = compileType(type);
+                            if (maybeOutputType.isPresent()) {
+                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                            }
                         }
                     }
                 }
             }
         }
         return generatePlaceholder(stripped);
+    } */
+/* private static Optional<String> compileType(String type) {
+        String stripped = type.strip();
+        if (stripped.equals("private")) {
+            return Optional.empty();
+        }
+        return Optional.of(stripped);
     } */
 /* private static String generatePlaceholder(String input) {
         String replaced = input
