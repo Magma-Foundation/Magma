@@ -89,7 +89,18 @@
             CompileState paramState = paramTuple.left;
             String paramOutput = paramTuple.right;
 
-            Tuple<CompileState, String> outputContent = generateStatements(parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock)), Main::generateDefault);
+            Tuple<CompileState, JavaList<Node>> statementsTuple = parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock));
+            CompileState statementsState = statementsTuple.left;
+            JavaList<Node> statements = statementsTuple.right;
+            List<Node> others = statementsState.statements
+                    .list
+                    .stream()
+                    .map(statement -> new Node().withString("value", statement))
+                    .toList();
+
+            Tuple<CompileState, JavaList<Node>> tuple1 = new Tuple<>(statementsState.clearStatements(), new JavaList<>(others).addAllLast(statements));
+
+            Tuple<CompileState, String> outputContent = generateStatements(tuple1, Main::generateDefault);
             String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Option.of(new Tuple<>(compileState, ""));
@@ -149,21 +160,27 @@
         Node oldCaller = oldCallerTuple.right;
 
         Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(oldCallerTuple.left, argumentsString, Main::parseValue);
-        JavaList<Node> oldArguments = argumentsTuple.right;
 
+
+        CompileState left;
         Node newCaller;
         JavaList<Node> newArguments;
         if (oldCaller.is("access")) {
             String parent = oldCaller.findString("parent").orElse("");
-            newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
-            newCaller = oldCaller;
+            Node element = new Node("symbol").withString("value", "temp");
+
+            left = argumentsTuple.left.addStatement("\n\tauto temp = " + parent + ";");
+            JavaList<Node> oldArguments = argumentsTuple.right;
+            newArguments = oldArguments.addFirst(element);
+            newCaller = element;
         }
         else {
-            newArguments = oldArguments;
+            left = argumentsTuple.left;
+            newArguments = argumentsTuple.right;
             newCaller = oldCaller;
         }
 
-        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
+        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(left, newArguments);
 
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
         String arguments = compiledArguments.right;
@@ -389,25 +406,37 @@
         }
     } *//* 
 
-    record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
+    record CompileState(
+            JavaList<String> structs,
+            JavaList<String> methods,
+            JavaList<String> structNames,
+            JavaList<String> statements) {
         public CompileState() {
-            this(new JavaList<>(), new JavaList<>(), new JavaList<>());
+            this(new JavaList<>(), new JavaList<>(), new JavaList<>(), new JavaList<>());
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.structs, this.methods.addLast(method), this.structNames);
+            return new CompileState(this.structs, this.methods.addLast(method), this.structNames, this.statements);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.methods, this.structNames);
+            return new CompileState(this.structs.addLast(struct), this.methods, this.structNames, this.statements);
         }
 
         public CompileState pushStructName(String structName) {
-            return new CompileState(this.structs, this.methods, this.structNames.addLast(structName));
+            return new CompileState(this.structs, this.methods, this.structNames.addLast(structName), this.statements);
         }
 
         public CompileState popStructName() {
-            return new CompileState(this.structs, this.methods, this.structNames.removeLast());
+            return new CompileState(this.structs, this.methods, this.structNames.removeLast(), this.statements);
+        }
+
+        public CompileState addStatement(String statement) {
+            return new CompileState(this.structs, this.methods, this.structNames, this.statements.addFirst(statement));
+        }
+
+        public CompileState clearStatements() {
+            return new CompileState(this.structs, this.methods, this.structNames, new JavaList<>());
         }
     } *//* 
 
@@ -506,7 +535,8 @@
 	/* return new DivideState */(this.segments, this.buffer + c, this.depth);/*  */
 }
 /* private */ struct DivideState advance_DivideState(/*  */){
-	/* return new DivideState */(this.segments.addLast(this.segments, this.buffer), /*  "" */, this.depth);/*  */
+	auto temp = this.segments;
+	/* return new DivideState */(temp(temp, this.buffer), /*  "" */, this.depth);/*  */
 }
 /* private */ struct DivideState enter_DivideState(/*  */){
 	/* return new DivideState */(this.segments, this.buffer, this.depth + 1);/*  */
@@ -529,6 +559,10 @@
             copy.add(element);
             copy.addAll(this.list);
             return new JavaList<>(copy);
+        } *//* public JavaList<T> addAllLast(JavaList<T> others) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.addAll(others.list);
+            return new JavaList<>(copy);
         } *//*  */
 }
 /* private record */ /* Tuple<A, */ B>_Main(struct A left_Main, struct B right_Main){/*  */
@@ -536,24 +570,18 @@
 /* static class None<T> implements Option<T> {
         @Override
         public */ void ifPresent_Main(/* Consumer<T> ifPresent */){
-	/* }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other */.get(/* }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other */, );
-	/* }
+	auto temp = /* }
 
         @Override
         public T orElseGet(Supplier<T> other) {
-            return other */.get(/* }
+            return other */;
+	auto temp = /* }
 
         @Override
-        public T orElseGet(Supplier<T> other) {
-            return other */, );
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other */;
+	temp(temp, );
+	temp(temp, );
 	/* }
 
         @Override
@@ -581,16 +609,24 @@
             return false */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	run().ifPresent(run(), /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
+	auto temp = run();
+	auto temp = /* error -> System */.err;
+	auto temp = error;
+	temp(temp, temp(temp, temp(temp, )));/*  */
 }
 /* private static */ /* Option<Error> */ run_Main(/*  */){
-	/* Path source = Paths */.get(/* Path source = Paths */, /* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
-	/* return readString */(source).match(/* return readString */(source), /* input -> runWithInput(source */, /*  input) */, /*  Option::of */).map(/* return readString */(source).match(/* return readString */(source), /* input -> runWithInput(source */, /*  input) */, /*  Option::of */), /* ThrowableError::new */);/*  */
+	auto temp = temp(temp, /* input -> runWithInput(source */, /*  input) */, /*  Option::of */);
+	auto temp = /* return readString */(source);
+	auto temp = /* Path source = Paths */;
+	temp(temp, /* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
+	temp(temp, /* ThrowableError::new */);/*  */
 }
 /* private static */ /* Option<IOException> */ runWithInput_Main(struct Path source_Main, char* input_Main){
-	/* Path target = source */.resolveSibling(/* Path target = source */, /* "main */.c");
+	auto temp = /* return writeString */(target, compile);
+	auto temp = /* Path target = source */;
+	temp(temp, /* "main */.c");
 	/* String compile = compile */(input);
-	/* return writeString */(target, compile).or(/* return writeString */(target, compile), /* Main::build */);/*  */
+	temp(temp, /* Main::build */);/*  */
 }
 /* private static */ /* Option<IOException> */ build_Main(/*  */){/* return start().match(process -> {
             try {
@@ -625,12 +661,14 @@
         } *//*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
+	auto temp = /* String joinedMethods = String */;
+	auto temp = /* String joinedStructs = String */;
 	/* CompileState methods = new CompileState */();
 	/* Tuple<CompileState, String> compiled = generateStatements */(/* parseStatements(methods */, input, /*  parseDefault(Main::compileRootSegment)) */, /*  Main::generateDefault */);
 	/* CompileState newState = compiled.left */;
 	/* String output = compiled.right */;
-	/* String joinedStructs = String */.join(/* String joinedStructs = String */, /* "" */, newState.structs.list);
-	/* String joinedMethods = String */.join(/* String joinedMethods = String */, /* "" */, newState.methods.list);
+	temp(temp, /* "" */, newState.structs.list);
+	temp(temp, /* "" */, newState.methods.list);
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
 }
@@ -670,12 +708,15 @@
 	/* return new Tuple<> */(current, output);/*  */
 }
 /* private static */ char* generateDefault_Main(struct Node element_Main){
-	/* return element */.findString(/* return element */, /* "value" */).orElse(/* return element */.findString(/* return element */, /* "value" */), /* "" */);/*  */
+	auto temp = temp(temp, /* "value" */);
+	auto temp = /* return element */;
+	temp(temp, /* "" */);/*  */
 }
 /* private static */ /* List<String> */ divide_Main(char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */){
+	auto temp = /* i < input */;
 	/* DivideState current = new DivideState */();
 	/* for (int i = 0 */;
-	/* i < input */.length(/* i < input */, );/* i++) {
+	temp(temp, );/* i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
@@ -685,7 +726,8 @@
 	/* return buffer + element */;/*  */
 }
 /* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){
-	/* DivideState appended = current */.append(/* DivideState appended = current */, c);
+	auto temp = /* DivideState appended = current */;
+	temp(temp, c);
 	/* if (c == ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */

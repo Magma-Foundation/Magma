@@ -159,30 +159,48 @@ public class Main {
             copy.addAll(this.list);
             return new JavaList<>(copy);
         }
+
+        public JavaList<T> addAllLast(JavaList<T> others) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.addAll(others.list);
+            return new JavaList<>(copy);
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
+    record CompileState(
+            JavaList<String> structs,
+            JavaList<String> methods,
+            JavaList<String> structNames,
+            JavaList<String> statements) {
         public CompileState() {
-            this(new JavaList<>(), new JavaList<>(), new JavaList<>());
+            this(new JavaList<>(), new JavaList<>(), new JavaList<>(), new JavaList<>());
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.structs, this.methods.addLast(method), this.structNames);
+            return new CompileState(this.structs, this.methods.addLast(method), this.structNames, this.statements);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.methods, this.structNames);
+            return new CompileState(this.structs.addLast(struct), this.methods, this.structNames, this.statements);
         }
 
         public CompileState pushStructName(String structName) {
-            return new CompileState(this.structs, this.methods, this.structNames.addLast(structName));
+            return new CompileState(this.structs, this.methods, this.structNames.addLast(structName), this.statements);
         }
 
         public CompileState popStructName() {
-            return new CompileState(this.structs, this.methods, this.structNames.removeLast());
+            return new CompileState(this.structs, this.methods, this.structNames.removeLast(), this.statements);
+        }
+
+        public CompileState addStatement(String statement) {
+            return new CompileState(this.structs, this.methods, this.structNames, this.statements.addFirst(statement));
+        }
+
+        public CompileState clearStatements() {
+            return new CompileState(this.structs, this.methods, this.structNames, new JavaList<>());
         }
     }
 
@@ -508,7 +526,18 @@ public class Main {
             CompileState paramState = paramTuple.left;
             String paramOutput = paramTuple.right;
 
-            Tuple<CompileState, String> outputContent = generateStatements(parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock)), Main::generateDefault);
+            Tuple<CompileState, JavaList<Node>> statementsTuple = parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock));
+            CompileState statementsState = statementsTuple.left;
+            JavaList<Node> statements = statementsTuple.right;
+            List<Node> others = statementsState.statements
+                    .list
+                    .stream()
+                    .map(statement -> new Node().withString("value", statement))
+                    .toList();
+
+            Tuple<CompileState, JavaList<Node>> tuple1 = new Tuple<>(statementsState.clearStatements(), new JavaList<>(others).addAllLast(statements));
+
+            Tuple<CompileState, String> outputContent = generateStatements(tuple1, Main::generateDefault);
             String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Option.of(new Tuple<>(compileState, ""));
@@ -573,21 +602,27 @@ public class Main {
         Node oldCaller = oldCallerTuple.right;
 
         Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(oldCallerTuple.left, argumentsString, Main::parseValue);
-        JavaList<Node> oldArguments = argumentsTuple.right;
 
+
+        CompileState left;
         Node newCaller;
         JavaList<Node> newArguments;
         if (oldCaller.is("access")) {
             String parent = oldCaller.findString("parent").orElse("");
-            newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
-            newCaller = oldCaller;
+            Node element = new Node("symbol").withString("value", "temp");
+
+            left = argumentsTuple.left.addStatement("\n\tauto temp = " + parent + ";");
+            JavaList<Node> oldArguments = argumentsTuple.right;
+            newArguments = oldArguments.addFirst(element);
+            newCaller = element;
         }
         else {
-            newArguments = oldArguments;
+            left = argumentsTuple.left;
+            newArguments = argumentsTuple.right;
             newCaller = oldCaller;
         }
 
-        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
+        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(left, newArguments);
 
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
         String arguments = compiledArguments.right;
