@@ -12,17 +12,17 @@ import java.util.function.BiFunction;
 public class Main {
     private static class DivideState {
         private final JavaList<String> segments;
-        private final StringBuilder buffer;
+        private final String buffer;
         private final int depth;
 
-        private DivideState(JavaList<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(JavaList<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public DivideState() {
-            this(new JavaList<>(), new StringBuilder(), 0);
+            this(new JavaList<>(), "", 0);
         }
 
         private boolean isShallow() {
@@ -34,11 +34,11 @@ public class Main {
         }
 
         private DivideState append(char c) {
-            return new DivideState(this.segments, this.buffer.append(c), this.depth);
+            return new DivideState(this.segments, this.buffer + c, this.depth);
         }
 
         private DivideState advance() {
-            return new DivideState(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
+            return new DivideState(this.segments.add(this.buffer), "", this.depth);
         }
 
         private DivideState enter() {
@@ -119,17 +119,17 @@ public class Main {
         return compileAll(methods, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     }
 
-    private static Tuple<CompileState, String> compileAll(CompileState methods, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Tuple<CompileState, String> compileAll(CompileState methods, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, BiFunction<String, String, String> merger) {
         List<String> segments = divide(input, folder);
         CompileState current = methods;
-        StringBuilder output = new StringBuilder();
+        String output = "";
         for (String segment : segments) {
             Tuple<CompileState, String> compiled = compiler.apply(current, segment);
             current = compiled.left;
             output = merger.apply(output, compiled.right);
         }
 
-        return new Tuple<>(current, output.toString());
+        return new Tuple<>(current, output);
     }
 
     private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -142,8 +142,8 @@ public class Main {
         return current.advance().segments.list;
     }
 
-    private static StringBuilder mergeStatements(StringBuilder buffer, String element) {
-        return buffer.append(element);
+    private static String mergeStatements(String buffer, String element) {
+        return buffer + element;
     }
 
     private static DivideState foldStatementChar(DivideState current, char c) {
@@ -243,11 +243,11 @@ public class Main {
         });
     }
 
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return element;
         }
-        return cache.append(", ").append(element);
+        return cache + ", " + element;
     }
 
     private static DivideState foldValueChar(DivideState state, Character c) {
