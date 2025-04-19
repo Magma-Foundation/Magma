@@ -646,7 +646,8 @@ public class Main {
 
             Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
-            return generateDefinition(typeTuple.left, outputBeforeName, name);
+            Node node = new Node("definition").withString("before-name", outputBeforeName).withString("name", name);
+            return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generateDefinition(node)));
         }).orElseGet(() -> {
             Tuple<CompileState, Node> value = parseType(state, beforeName);
             CompileState withType = value.left;
@@ -655,7 +656,8 @@ public class Main {
                 return new Some<>(new Tuple<CompileState, String>(withType, generateFunctional(type.withString("name", name))));
             }
             Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
-            return generateDefinition(generated.left, generated.right, name);
+            Node node = new Node("definition").withString("before-name", generated.right).withString("name", name);
+            return new Some<>(new Tuple<CompileState, String>(generated.left, generateDefinition(node)));
         });
     }
 
@@ -794,13 +796,8 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> generateDefinition(
-            CompileState state,
-            String beforeName,
-            String name
-    ) {
-        String generated = beforeName + " " + name;
-        return new Some<>(new Tuple<CompileState, String>(state, generated));
+    private static String generateDefinition(Node node) {
+        return node.findString("before-name").orElse("") + " " + node.findString("name").orElse("");
     }
 
     private static String generatePlaceholder(String input) {
