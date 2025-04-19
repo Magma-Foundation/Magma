@@ -161,6 +161,10 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.equals("private") || input.equals("record")) {
+            return false;
+        }
+
         for (int i = 0; i < input.length(); i++) {
             if (!Character.isLetter(input.charAt(i))) {
                 return false;
@@ -211,16 +215,16 @@ public class Main {
             return Optional.empty();
         }
         String newName = name.equals("main") ? "__main__" : name;
-        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
         return Optional.of(new Tuple<>(methods.add(generated), ""));
     }
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
-        if (stripped.equals("private")) {
-            return Optional.empty();
+        if (isSymbol(type)) {
+            return Optional.of(stripped);
         }
-        return Optional.of(stripped);
+        return Optional.empty();
     }
 
     private static String generatePlaceholder(String input) {

@@ -44,6 +44,49 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
+    } *//* 
+
+    private record JavaList<T>(List<T> list) {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        public JavaList<T> add(T element) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        }
+    } *//* 
+
+    private record Tuple<A, B>(A left, B right) {
+    } *//* 
+
+    private static Tuple<JavaList<String>, String> compileStatements(
+            JavaList<String> methods,
+            String input,
+            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> compiler
+    ) {
+        List<String> segments = divide(input, new State()).list;
+
+        JavaList<String> current = methods;
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            Tuple<JavaList<String>, String> compiled = compiler.apply(current, segment);
+            current = compiled.left;
+            output.append(compiled.right);
+        }
+
+        return new Tuple<>(current, output.toString());
+    } *//* 
+
+    private static JavaList<String> divide(String input, State state) {
+        State current = state;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            current = foldStatementChar(current, c);
+        }
+
+        return current.advance().segments;
     } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* 
@@ -82,6 +125,10 @@
         return new Tuple<>(methods, generatePlaceholder(stripped) + "\n");
     } */
 /* private static boolean isSymbol(String input) {
+        if (input.equals("private") || input.equals("record")) {
+            return false;
+        }
+
         for (int i = 0; i < input.length(); i++) {
             if (!Character.isLetter(input.charAt(i))) {
                 return false;
@@ -130,15 +177,15 @@
             return Optional.empty();
         }
         String newName = name.equals("main") ? "__main__" : name;
-        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
         return Optional.of(new Tuple<>(methods.add(generated), ""));
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
-        if (stripped.equals("private")) {
-            return Optional.empty();
+        if (isSymbol(type)) {
+            return Optional.of(stripped);
         }
-        return Optional.of(stripped);
+        return Optional.empty();
     } */
 /* private static String generatePlaceholder(String input) {
         String replaced = input
@@ -148,18 +195,7 @@
         return "<comment-start> " + replaced + " <comment-end>";
     } */
 /* } */
-/* private */ record JavaList<T>(/* List<T> list */){/* 
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        public JavaList<T> add(T element) {
-            ArrayList<T> copy = new ArrayList<>(this.list);
-            copy.add(element);
-            return new JavaList<>(copy);
-        }
-     */}/* private record */ Tuple<A, B>(/* A left, B right */){/* 
-     */}/* public static */ void __main__(/* String[] args */){/* 
+/* public static */ void __main__(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -174,39 +210,18 @@
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-     */}/* private static */ String compile(/* String input */){/* 
+     */}
+/* private static */ String compile(/* String input */){/* 
         Tuple<JavaList<String>, String> compiled = compileStatements(new JavaList<>(), input, Main::compileRootSegment);
         String joined = compiled.right + String.join("", compiled.left.list);
         return joined + "int main(){\n\treturn 0;\n}\n";
-     */}/* private static Tuple<JavaList<String>, */ String> compileStatements(/* 
-            JavaList<String> methods,
-            String input,
-            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> compiler
-     */){/* 
-        List<String> segments = divide(input, new State()).list;
-
-        JavaList<String> current = methods;
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            Tuple<JavaList<String>, String> compiled = compiler.apply(current, segment);
-            current = compiled.left;
-            output.append(compiled.right);
-        }
-
-        return new Tuple<>(current, output.toString());
-     */}/* private static */ JavaList<String> divide(/* String input, State state */){/* 
-        State current = state;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = foldStatementChar(current, c);
-        }
-
-        return current.advance().segments;
-     */}/* private static */ State foldStatementChar(/* State current, char c */){/* 
+     */}
+/* private static */ State foldStatementChar(/* State current, char c */){/* 
         State appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == ' */}int main(){
+        if (c == ' */}
+int main(){
 	return 0;
 }
