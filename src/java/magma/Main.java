@@ -10,18 +10,18 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class Main {
-    private static class State {
+    private static class DivideState {
         private final JavaList<String> segments;
         private final StringBuilder buffer;
         private final int depth;
 
-        private State(JavaList<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(JavaList<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State() {
+        public DivideState() {
             this(new JavaList<>(), new StringBuilder(), 0);
         }
 
@@ -33,20 +33,20 @@ public class Main {
             return this.depth == 0;
         }
 
-        private State append(char c) {
-            return new State(this.segments, this.buffer.append(c), this.depth);
+        private DivideState append(char c) {
+            return new DivideState(this.segments, this.buffer.append(c), this.depth);
         }
 
-        private State advance() {
-            return new State(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
+        private DivideState advance() {
+            return new DivideState(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
         }
 
-        private State enter() {
-            return new State(this.segments, this.buffer, this.depth + 1);
+        private DivideState enter() {
+            return new DivideState(this.segments, this.buffer, this.depth + 1);
         }
 
-        private State exit() {
-            return new State(this.segments, this.buffer, this.depth - 1);
+        private DivideState exit() {
+            return new DivideState(this.segments, this.buffer, this.depth - 1);
         }
     }
 
@@ -63,6 +63,20 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    record CompileState(JavaList<String> structs, JavaList<String> methods) {
+        public CompileState() {
+            this(new JavaList<>(), new JavaList<>());
+        }
+
+        public CompileState addMethod(String method) {
+            return new CompileState(this.structs, this.methods.add(method));
+        }
+
+        public CompileState addStruct(String struct) {
+            return new CompileState(this.structs.add(struct), this.methods);
+        }
     }
 
     public static void main(String[] args) {
@@ -83,22 +97,27 @@ public class Main {
     }
 
     private static String compile(String input) {
-        Tuple<JavaList<String>, String> compiled = compileStatements(new JavaList<>(), input, Main::compileRootSegment);
-        String joined = compiled.right + String.join("", compiled.left.list);
+        Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
+        CompileState newState = compiled.left;
+        String output = compiled.right;
+        String joinedStructs = String.join("", newState.structs.list);
+        String joinedMethods = String.join("", newState.methods.list);
+        String joined = output + joinedStructs + joinedMethods;
+
         return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
-    private static Tuple<JavaList<String>, String> compileStatements(
-            JavaList<String> methods,
+    private static Tuple<CompileState, String> compileStatements(
+            CompileState methods,
             String input,
-            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> compiler
+            BiFunction<CompileState, String, Tuple<CompileState, String>> compiler
     ) {
-        List<String> segments = divide(input, new State()).list;
+        List<String> segments = divide(input, new DivideState()).list;
 
-        JavaList<String> current = methods;
+        CompileState current = methods;
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            Tuple<JavaList<String>, String> compiled = compiler.apply(current, segment);
+            Tuple<CompileState, String> compiled = compiler.apply(current, segment);
             current = compiled.left;
             output.append(compiled.right);
         }
@@ -106,8 +125,8 @@ public class Main {
         return new Tuple<>(current, output.toString());
     }
 
-    private static JavaList<String> divide(String input, State state) {
-        State current = state;
+    private static JavaList<String> divide(String input, DivideState state) {
+        DivideState current = state;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = foldStatementChar(current, c);
@@ -116,8 +135,8 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static State foldStatementChar(State current, char c) {
-        State appended = current.append(c);
+    private static DivideState foldStatementChar(DivideState current, char c) {
+        DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
@@ -133,7 +152,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> methods, String input) {
+    private static Tuple<CompileState, String> compileRootSegment(CompileState methods, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
             return new Tuple<>(methods, "");
@@ -143,7 +162,8 @@ public class Main {
                 .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(stripped) + "\n"));
     }
 
-    private static Optional<Tuple<JavaList<String>, String>> compileClass(JavaList<String> methods, String input) {
+
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState methods, String input) {
         int classIndex = input.indexOf("class ");
         if (classIndex < 0) {
             return Optional.empty();
@@ -160,12 +180,12 @@ public class Main {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        Tuple<JavaList<String>, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
+        Tuple<CompileState, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
         if (!isSymbol(name)) {
             return Optional.empty();
         }
         String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
-        return Optional.of(new Tuple<>(outputContent.left, generated));
+        return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
     }
 
     private static boolean isSymbol(String input) {
@@ -181,13 +201,13 @@ public class Main {
         return true;
     }
 
-    private static Tuple<JavaList<String>, String> compileClassSegment(JavaList<String> methods, String input) {
+    private static Tuple<CompileState, String> compileClassSegment(CompileState methods, String input) {
         return compileClass(methods, input)
                 .or(() -> compileMethod(methods, input))
                 .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<JavaList<String>, String>> compileMethod(JavaList<String> methods, String input) {
+    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         String stripped = input.strip();
         int paramStart = stripped.indexOf("(");
         if (paramStart < 0) {
@@ -225,7 +245,7 @@ public class Main {
         }
         String newName = name.equals("main") ? "__main__" : name;
         String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
-        return Optional.of(new Tuple<>(methods.add(generated), ""));
+        return Optional.of(new Tuple<>(state.addMethod(generated), ""));
     }
 
     private static Optional<String> compileType(String type) {
