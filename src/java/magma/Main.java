@@ -98,17 +98,17 @@ public class Main {
 
     private static class DivideState {
         private final List<String> segments;
-        private StringBuilder buffer;
+        private String buffer;
         private int depth;
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public DivideState() {
-            this(Lists.empty(), new StringBuilder(), 0);
+            this(Lists.empty(), "", 0);
         }
 
         private DivideState exit() {
@@ -122,8 +122,8 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments().add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments().add(this.buffer);
+            this.buffer = "";
             return this;
         }
 
@@ -132,7 +132,7 @@ public class Main {
         }
 
         private DivideState append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         }
 
@@ -355,7 +355,7 @@ public class Main {
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
 
         CompileState currentState = output.left;
-        StringBuilder buffered = new StringBuilder();
+        String buffered = "";
         List<Node> visited = Lists.empty();
 
         while (!currentState.expansions.isEmpty()) {
@@ -372,7 +372,7 @@ public class Main {
             if (!visited.contains(expansion)) {
                 Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
                 currentState = tuple.left;
-                buffered.append(tuple.right);
+                buffered = buffered + tuple.right;
                 visited = visited.add(expansion);
             }
         }
@@ -414,7 +414,7 @@ public class Main {
             CompileState state,
             String input,
             BiFunction<DivideState, Character, DivideState> divider, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
+            BiFunction<String, String, String> merger
     ) {
         Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
         return new Tuple<>(compiled.left, mergeAll(merger, compiled));
@@ -441,12 +441,12 @@ public class Main {
         return new Tuple<>(newState, currentCache.add(compiled));
     }
 
-    private static String mergeAll(BiFunction<StringBuilder, String, StringBuilder> merger, Tuple<CompileState, List<String>> fold) {
-        return fold.right.iter().fold(new StringBuilder(), merger).toString();
+    private static String mergeAll(BiFunction<String, String, String> merger, Tuple<CompileState, List<String>> fold) {
+        return fold.right.iter().fold("", merger);
     }
 
-    private static StringBuilder mergeStatements(StringBuilder current, String statement) {
-        return current.append(statement);
+    private static String mergeStatements(String current, String statement) {
+        return current + statement;
     }
 
     private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -578,11 +578,11 @@ public class Main {
         return compileAll(state, input, Main::compileValueChar, compiler, Main::mergeValues);
     }
 
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return element;
         }
-        return cache.append(", ").append(element);
+        return cache + ", " + element;
     }
 
     private static DivideState compileValueChar(DivideState state, char c) {

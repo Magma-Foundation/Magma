@@ -9,15 +9,15 @@
 // #include <temp.h>
 /* private static */ struct DivideState {
 	/* private final */ List<char*> segments;
-	/* private */ /* StringBuilder */ buffer;
+	/* private */ char* buffer;
 	/* private */ int depth;
-	/* private */ DivideState(List<char*> segments, /* StringBuilder */ buffer, int depth)/*  {
+	/* private */ DivideState(List<char*> segments, char* buffer, int depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
 	/* public */ DivideState()/*  {
-            this(Lists.empty(), new StringBuilder(), 0);
+            this(Lists.empty(), "", 0);
         } */
 	/* private */ /* DivideState */ exit()/*  {
             this.depth = this.depth - 1;
@@ -28,15 +28,15 @@
             return this;
         } */
 	/* private */ /* DivideState */ advance()/*  {
-            this.segments().add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments().add(this.buffer);
+            this.buffer = "";
             return this;
         } */
 	/* private */ int isShallow()/*  {
             return this.depth == 1;
         } */
 	/* private */ /* DivideState */ append(/* char */ c)/*  {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         } */
 	/* private */ int isLevel()/*  {
@@ -64,7 +64,7 @@
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
 
         CompileState currentState = output.left;
-        StringBuilder buffered = new StringBuilder();
+        String buffered = "";
         List<Node> visited = Lists.empty();
 
         while (!currentState.expansions.isEmpty()) {
@@ -81,7 +81,7 @@
             if (!visited.contains(expansion)) {
                 Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
                 currentState = tuple.left;
-                buffered.append(tuple.right);
+                buffered = buffered + tuple.right;
                 visited = visited.add(expansion);
             }
         }
@@ -115,7 +115,7 @@
 	/* private static */ Tuple</* CompileState */, char*> compileStatements(/* CompileState */ state, char* input, Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*))/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static */ Tuple</* CompileState */, char*> compileAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), /*  StringBuilder */(*merger)(/* StringBuilder */, char*))/*  {
+	/* private static */ Tuple</* CompileState */, char*> compileAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), char*(*merger)(char*, char*))/*  {
         Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
         return new Tuple<>(compiled.left, mergeAll(merger, compiled));
     } */
@@ -133,11 +133,11 @@
 
         return new Tuple<>(newState, currentCache.add(compiled));
     } */
-	/* private static */ char* mergeAll(/*  StringBuilder */(*merger)(/* StringBuilder */, char*), Tuple</* CompileState */, List<char*>> fold)/*  {
-        return fold.right.iter().fold(new StringBuilder(), merger).toString();
+	/* private static */ char* mergeAll(char*(*merger)(char*, char*), Tuple</* CompileState */, List<char*>> fold)/*  {
+        return fold.right.iter().fold("", merger);
     } */
-	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, char* statement)/*  {
-        return current.append(statement);
+	/* private static */ char* mergeStatements(char* current, char* statement)/*  {
+        return current + statement;
     } */
 	/* private static */ List<char*> divide(char* input, /*  DivideState */(*folder)(/* DivideState */, /*  Character */))/*  {
         DivideState current = new DivideState();
