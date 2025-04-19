@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
@@ -41,6 +42,10 @@ public class Main {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
+
+        Option<T> filter(Predicate<T> filter);
+
+        boolean isPresent();
     }
 
     interface Error {
@@ -76,6 +81,16 @@ public class Main {
         @Override
         public T orElse(T other) {
             return this.value;
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> filter) {
+            return filter.test(this.value) ? this : new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
         }
     }
 
@@ -207,6 +222,16 @@ public class Main {
         public T orElse(T other) {
             return other;
         }
+
+        @Override
+        public Option<T> filter(Predicate<T> filter) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
     }
 
     record ThrowableError(Throwable throwable) implements Error {
@@ -218,9 +243,13 @@ public class Main {
         }
     }
 
-    record Node(Map<String, String> strings) {
+    record Node(Option<String> maybeType, Map<String, String> strings) {
         public Node() {
-            this(new HashMap<>());
+            this(Option.empty(), new HashMap<>());
+        }
+
+        public Node(String type) {
+            this(Option.of(type), new HashMap<>());
         }
 
         public Node withString(String propertyKey, String propertyValue) {
@@ -235,6 +264,10 @@ public class Main {
             else {
                 return new None<>();
             }
+        }
+
+        public boolean is(String type) {
+            return this.maybeType.filter(inner -> inner.equals(type)).isPresent();
         }
     }
 
@@ -459,7 +492,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
         return parseInvocation(input, state)
-                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right).orElse("")))
                 .orElseGet(() -> getCompileStateStringTuple(state, input));
     }
 
@@ -495,26 +528,40 @@ public class Main {
         Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
         Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
 
-        Node node = new Node()
+        Node node = new Node("invocation")
                 .withString("caller", compiledCaller.right)
                 .withString("arguments", compiledArguments.right);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
     }
 
-    private static String generateInvocation(Node node) {
+    private static Option<String> generateInvocation(Node node) {
+        if (!node.is("invocation")) {
+            return Option.empty();
+        }
+
         String caller = node.findString("caller").orElse("");
         String arguments = node.findString("arguments").orElse("");
-
-        return caller + "(" + arguments + ")";
+        return Option.of(caller + "(" + arguments + ")");
     }
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        Tuple<CompileState, Node> parsed = parseValue(state, input);
+        return new Tuple<>(parsed.left, generateValue(parsed.right));
+    }
+
+    private static String generateValue(Node node) {
+        return generateInvocation(node)
+                .or(() -> generateAccess(node))
+                .or(() -> generateSymbol(node))
+                .orElseGet(() -> generatePlaceholder(node));
+    }
+
+    private static Tuple<CompileState, Node> parseValue(CompileState state, String input) {
         return parseInvocation(input, state)
-                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
-                .or(() -> parseDataAccess(state, input).map(tuple -> new Tuple<>(tuple.left, generateAccess(tuple.right))))
-                .or(() -> parseSymbol(state, input).map(tuple -> new Tuple<>(tuple.left, generateSymbol(tuple.right))))
-                .orElseGet(() -> getCompileStateStringTuple(state, input));
+                .or(() -> parseDataAccess(state, input))
+                .or(() -> parseSymbol(state, input))
+                .orElseGet(() -> new Tuple<>(state, wrapDefault(input)));
     }
 
     private static Tuple<CompileState, String> getCompileStateStringTuple(CompileState state, String input) {
@@ -523,13 +570,18 @@ public class Main {
 
     private static Option<Tuple<CompileState, Node>> parseSymbol(CompileState state, String input) {
         if (isSymbol(input.strip())) {
-            return Option.of(new Tuple<>(state, wrapDefault(input.strip())));
+            return Option.of(new Tuple<>(state, new Node("symbol").withString("value", input.strip())));
         }
         return Option.empty();
     }
 
-    private static String generateSymbol(Node node) {
-        return node.findString("value").orElse("");
+    private static Option<String> generateSymbol(Node node) {
+        if (node.is("symbol")) {
+            return node.findString("value");
+        }
+        else {
+            return Option.empty();
+        }
     }
 
     private static Option<Tuple<CompileState, Node>> parseDataAccess(CompileState state, String input) {
@@ -541,16 +593,20 @@ public class Main {
         String property = input.substring(propertySeparator + ".".length());
 
         Tuple<CompileState, String> compiled = compileValue(state, parent);
-        return Option.of(new Tuple<>(compiled.left, new Node()
+        return Option.of(new Tuple<>(compiled.left, new Node("access")
                 .withString("parent", compiled.right)
                 .withString("property", property)));
     }
 
-    private static String generateAccess(Node node) {
+    private static Option<String> generateAccess(Node node) {
+        if (!node.is("access")) {
+            return Option.empty();
+        }
+
         String parent0 = node.findString("parent").orElse("");
         String property0 = node.findString("property").orElse("");
 
-        return parent0 + "." + property0;
+        return Option.of(parent0 + "." + property0);
     }
 
     private static String mergeValues(String cache, String element) {

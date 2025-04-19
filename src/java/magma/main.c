@@ -8,10 +8,10 @@
 /* import java.util.HashMap; */
 /* import java.util.List; */
 /* import java.util.Map; */
-/* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Consumer; */
 /* import java.util.function.Function; */
+/* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /* private static Tuple<CompileState, String> compileRootSegment(CompileState methods, String input) {
         String stripped = input.strip();
@@ -20,7 +20,7 @@
         }
 
         return compileClass(methods, stripped)
-                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(stripped) + "\n"));
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(wrapDefault(stripped)) + "\n"));
     } */
 /* private static Option<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf("class ");
@@ -43,7 +43,7 @@
             return Option.empty();
         }
         Tuple<CompileState, String> outputContent = compileStatements(state.pushStructName(name), inputContent, Main::compileClassSegment);
-        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
+        String generated = generatePlaceholder(wrapDefault(modifiers)) + "struct " + name + " {" + outputContent.right + "};\n";
         return Option.of(new Tuple<>(outputContent.left
                 .popStructName().addStruct(generated), ""));
     } */
@@ -62,7 +62,7 @@
 /* private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
                 .or(() -> compileMethod(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .orElseGet(() -> getCompileStateStringTuple(state, input));
     } */
 /* private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         String stripped = input.strip();
@@ -104,12 +104,12 @@
             return new Tuple<>(compiled.left, "\n\t" + compiled.right + ";");
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return getCompileStateStringTuple(state, stripped);
     } */
 /* private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
         return parseInvocation(input, state)
-                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right).orElse("")))
+                .orElseGet(() -> getCompileStateStringTuple(state, input));
     } */
 /* private static Option<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
         String stripped = input.strip();
@@ -143,41 +143,76 @@
         Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
         Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
 
-        Node node = new Node()
+        Node node = new Node("invocation")
                 .withString("caller", compiledCaller.right)
                 .withString("arguments", compiledArguments.right);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
     } */
-/* private static String generateInvocation(Node node) {
+/* private static Option<String> generateInvocation(Node node) {
+        if (!node.is("invocation")) {
+            return Option.empty();
+        }
+
         String caller = node.findString("caller").orElse("");
         String arguments = node.findString("arguments").orElse("");
-
-        return caller + "(" + arguments + ")";
+        return Option.of(caller + "(" + arguments + ")");
     } */
 /* private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        Tuple<CompileState, Node> parsed = parseValue(state, input);
+        return new Tuple<>(parsed.left, generateValue(parsed.right));
+    } */
+/* private static String generateValue(Node node) {
+        return generateInvocation(node)
+                .or(() -> generateAccess(node))
+                .or(() -> generateSymbol(node))
+                .orElseGet(() -> generatePlaceholder(node));
+    } */
+/* private static Tuple<CompileState, Node> parseValue(CompileState state, String input) {
         return parseInvocation(input, state)
-                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
-                .or(() -> compileDataAccess(state, input))
-                .or(() -> compileSymbol(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .or(() -> parseDataAccess(state, input))
+                .or(() -> parseSymbol(state, input))
+                .orElseGet(() -> new Tuple<>(state, wrapDefault(input)));
     } */
-/* private static Option<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+/* private static Tuple<CompileState, String> getCompileStateStringTuple(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(wrapDefault(input)));
+    } */
+/* private static Option<Tuple<CompileState, Node>> parseSymbol(CompileState state, String input) {
         if (isSymbol(input.strip())) {
-            return Option.of(new Tuple<>(state, input.strip()));
+            return Option.of(new Tuple<>(state, new Node("symbol").withString("value", input.strip())));
         }
         return Option.empty();
     } */
-/* private static Option<Tuple<CompileState, String>> compileDataAccess(CompileState state, String input) {
-        int propertySeparator = input.lastIndexOf(".");
-        if (propertySeparator >= 0) {
-            String parent = input.substring(0, propertySeparator);
-            String property = input.substring(propertySeparator + ".".length());
-
-            Tuple<CompileState, String> compiled = compileValue(state, parent);
-            return Option.of(new Tuple<>(compiled.left, compiled.right + "." + property));
+/* private static Option<String> generateSymbol(Node node) {
+        if (node.is("symbol")) {
+            return node.findString("value");
         }
-        return Option.empty();
+        else {
+            return Option.empty();
+        }
+    } */
+/* private static Option<Tuple<CompileState, Node>> parseDataAccess(CompileState state, String input) {
+        int propertySeparator = input.lastIndexOf(".");
+        if (propertySeparator < 0) {
+            return Option.empty();
+        }
+        String parent = input.substring(0, propertySeparator);
+        String property = input.substring(propertySeparator + ".".length());
+
+        Tuple<CompileState, String> compiled = compileValue(state, parent);
+        return Option.of(new Tuple<>(compiled.left, new Node("access")
+                .withString("parent", compiled.right)
+                .withString("property", property)));
+    } */
+/* private static Option<String> generateAccess(Node node) {
+        if (!node.is("access")) {
+            return Option.empty();
+        }
+
+        String parent0 = node.findString("parent").orElse("");
+        String property0 = node.findString("property").orElse("");
+
+        return Option.of(parent0 + "." + property0);
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -192,7 +227,7 @@
         return state.append(c);
     } */
 /* private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
-        return compileDefinition(state, element).orElseGet(() -> new Tuple<>(state, generatePlaceholder(element)));
+        return compileDefinition(state, element).orElseGet(() -> getCompileStateStringTuple(state, element));
     } */
 /* private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         String stripped = input.strip();
@@ -214,9 +249,9 @@
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator);
             String type = beforeName.substring(typeSeparator + " ".length());
-            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(type));
+            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(wrapDefault(type)));
 
-            String compiled = generatePlaceholder(beforeType) + " " + outputType;
+            String compiled = generatePlaceholder(wrapDefault(beforeType)) + " " + outputType;
             return new Some<>(new Tuple<>(state, compiled + " " + newName));
         }
         else {
@@ -253,12 +288,16 @@
         }
         return Option.empty();
     } */
-/* private static String generatePlaceholder(String input) {
-        String replaced = input
+/* private static String generatePlaceholder(Node node) {
+        String replaced = node.findString("value")
+                .orElse("")
                 .replace("<comment-start>", "<comment-start>")
                 .replace("<comment-end>", "<comment-end>");
 
         return "<comment-start> " + replaced + " <comment-end>";
+    } */
+/* private static Node wrapDefault(String input) {
+        return new Node().withString("value", input);
     } */
 /* } */
 /* 
@@ -315,6 +354,16 @@
         public T orElse(T other) {
             return this.value;
         }
+
+        @Override
+        public Option<T> filter(Predicate<T> filter) {
+            return filter.test(this.value) ? this : new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
     } *//* 
 
     record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
@@ -362,9 +411,13 @@
         }
     } *//* 
 
-    record Node(Map<String, String> strings) {
+    record Node(Option<String> maybeType, Map<String, String> strings) {
         public Node() {
-            this(new HashMap<>());
+            this(Option.empty(), new HashMap<>());
+        }
+
+        public Node(String type) {
+            this(Option.of(type), new HashMap<>());
         }
 
         public Node withString(String propertyKey, String propertyValue) {
@@ -379,6 +432,10 @@
             else {
                 return new None<>();
             }
+        }
+
+        public boolean is(String type) {
+            return this.maybeType.filter(inner -> inner.equals(type)).isPresent();
         }
     } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
@@ -410,7 +467,11 @@
 
         <R> Option<R> map(Function<T, R> mapper);
 
-        T orElse */(/* T other */);
+        T orElse(T other);
+
+        Option<T> filter(Predicate<T> filter);
+
+        boolean isPresent */();
 }
 /* private */ int isShallow_DivideState(/*  */){
 	/* return this.depth == 1 */;/*  */
@@ -471,7 +532,17 @@
 
         @Override
         public T orElse(T other) {
-            return other */;/* } */
+            return other */;
+	/* }
+
+        @Override
+        public Option<T> filter(Predicate<T> filter) {
+            return new None<> */();
+	/* }
+
+        @Override
+        public boolean isPresent() {
+            return false */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
 	run().ifPresent(/* error -> System */.err.println(error.display()));/*  */
