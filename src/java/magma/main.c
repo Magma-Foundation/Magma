@@ -102,7 +102,23 @@
         String stripped = input.strip();
         if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int paramStart = withoutEnd.indexOf("(");
+
+            int paramStart = -1;
+            int depth = 0;
+            for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+                char c = withoutEnd.charAt(i);
+                if (c == '(' && depth == 0) {
+                    paramStart = i;
+                    break;
+                }
+                if (c == ')') {
+                    depth++;
+                }
+                if (c == '(') {
+                    depth--;
+                }
+            }
+
             if (paramStart >= 0) {
                 String caller = withoutEnd.substring(0, paramStart).strip();
                 String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
@@ -450,26 +466,26 @@
 	/* }
 
         @Override
-        public Option<T> or */(/* Supplier<Option<T>> other) {
-            return other.get( */);
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get */(/*  */);
 	/* }
 
         @Override
-        public T orElseGet */(/* Supplier<T> other) {
-            return other.get( */);
+        public T orElseGet(Supplier<T> other) {
+            return other.get */(/*  */);
 	/* }
 
         @Override
-        public <R> Option<R> flatMap */(/* Function<T, Option<R>> mapper) {
-            return new None<>( */);
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<> */(/*  */);
 	/* }
 
         @Override
-        public <R> Option<R> map */(/* Function<T, R> mapper) {
-            return new None<>( */);/* } */
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<> */(/*  */);/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	/* run */(/* ).ifPresent(error -> System.err.println(error.display()) */);/*  */
+	/* run().ifPresent */(/* error -> System.err.println(error.display()) */);/*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
 	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState(), input, Main::compileRootSegment */);

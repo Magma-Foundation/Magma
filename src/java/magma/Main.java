@@ -422,7 +422,23 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int paramStart = withoutEnd.indexOf("(");
+
+            int paramStart = -1;
+            int depth = 0;
+            for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+                char c = withoutEnd.charAt(i);
+                if (c == '(' && depth == 0) {
+                    paramStart = i;
+                    break;
+                }
+                if (c == ')') {
+                    depth++;
+                }
+                if (c == '(') {
+                    depth--;
+                }
+            }
+
             if (paramStart >= 0) {
                 String caller = withoutEnd.substring(0, paramStart).strip();
                 String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
