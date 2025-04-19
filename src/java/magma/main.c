@@ -20,7 +20,7 @@
         }
 
         return compileClass(methods, stripped)
-                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(wrapDefault(stripped)) + "\n"));
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(parseDefault(stripped)) + "\n"));
     } */
 /* private static Option<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         int classIndex = input.indexOf("class ");
@@ -42,8 +42,9 @@
         if (!isSymbol(name)) {
             return Option.empty();
         }
-        Tuple<CompileState, String> outputContent = compileStatements(state.pushStructName(name), inputContent, Main::compileClassSegment);
-        String generated = generatePlaceholder(wrapDefault(modifiers)) + "struct " + name + " {" + outputContent.right + "};\n";
+        CompileState methods = state.pushStructName(name);
+        Tuple<CompileState, String> outputContent = generateStatements(parseStatements(methods, inputContent, parseDefault(Main::compileClassSegment)), Main::generateDefault);
+        String generated = generatePlaceholder(parseDefault(modifiers)) + "struct " + name + " {" + outputContent.right + "};\n";
         return Option.of(new Tuple<>(outputContent.left
                 .popStructName().addStruct(generated), ""));
     } */
@@ -78,7 +79,8 @@
                 return Option.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> paramTuple = compileValues(outputDefinition.left, oldParameters, Main::compileParameter);
+            Tuple<CompileState, JavaList<Node>> tuple = parseValues(outputDefinition.left, oldParameters, parseDefault(Main::compileParameter));
+            Tuple<CompileState, String> paramTuple = generateValues(tuple, Main::generateDefault);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Option.empty();
@@ -87,14 +89,17 @@
             CompileState paramState = paramTuple.left;
             String paramOutput = paramTuple.right;
 
-            Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
+            Tuple<CompileState, String> outputContent = generateStatements(parseStatements(paramState, inputContent, parseDefault(Main::compileStatementOrBlock)), Main::generateDefault);
             String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Option.of(new Tuple<>(compileState, ""));
         });
     } */
-/* private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        return compileAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+/* private static Tuple<CompileState, String> generateValues(Tuple<CompileState, JavaList<Node>> tuple, Function<Node, String> generator) {
+        return mergeAll(tuple.left, tuple.right, generator, Main::mergeValues);
+    } */
+/* private static Tuple<CompileState, JavaList<Node>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, Node>> parser) {
+        return parseAll(state, input, Main::foldValueChar, parser);
     } */
 /* private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
         String stripped = input.strip();
@@ -140,8 +145,14 @@
         String caller = withoutEnd.substring(0, paramStart).strip();
         String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
 
-        Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
-        Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
+        Tuple<CompileState, Node> parsed1 = parseValue(state, caller);
+        Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(parsed1.right));
+        Tuple<CompileState, JavaList<Node>> tuple = parseValues(compiledCaller.left, arguments, parseDefault((state1, input1) -> {
+            Tuple<CompileState, Node> parsed = parseValue(state1, input1);
+            return new Tuple<>(parsed.left, generateValue(parsed.right));
+        }));
+        
+        Tuple<CompileState, String> compiledArguments = generateValues(tuple, Main::generateDefault);
 
         Node node = new Node("invocation")
                 .withString("caller", compiledCaller.right)
@@ -158,10 +169,6 @@
         String arguments = node.findString("arguments").orElse("");
         return Option.of(caller + "(" + arguments + ")");
     } */
-/* private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
-        Tuple<CompileState, Node> parsed = parseValue(state, input);
-        return new Tuple<>(parsed.left, generateValue(parsed.right));
-    } */
 /* private static String generateValue(Node node) {
         return generateInvocation(node)
                 .or(() -> generateAccess(node))
@@ -172,10 +179,10 @@
         return parseInvocation(input, state)
                 .or(() -> parseDataAccess(state, input))
                 .or(() -> parseSymbol(state, input))
-                .orElseGet(() -> new Tuple<>(state, wrapDefault(input)));
+                .orElseGet(() -> new Tuple<>(state, parseDefault(input)));
     } */
 /* private static Tuple<CompileState, String> getCompileStateStringTuple(CompileState state, String input) {
-        return new Tuple<>(state, generatePlaceholder(wrapDefault(input)));
+        return new Tuple<>(state, generatePlaceholder(parseDefault(input)));
     } */
 /* private static Option<Tuple<CompileState, Node>> parseSymbol(CompileState state, String input) {
         if (isSymbol(input.strip())) {
@@ -199,7 +206,8 @@
         String parent = input.substring(0, propertySeparator);
         String property = input.substring(propertySeparator + ".".length());
 
-        Tuple<CompileState, String> compiled = compileValue(state, parent);
+        Tuple<CompileState, Node> parsed = parseValue(state, parent);
+        Tuple<CompileState, String> compiled = new Tuple<>(parsed.left, generateValue(parsed.right));
         return Option.of(new Tuple<>(compiled.left, new Node("access")
                 .withString("parent", compiled.right)
                 .withString("property", property)));
@@ -249,9 +257,9 @@
         if (typeSeparator >= 0) {
             String beforeType = beforeName.substring(0, typeSeparator);
             String type = beforeName.substring(typeSeparator + " ".length());
-            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(wrapDefault(type)));
+            String outputType = compileType(type).orElseGet(() -> generatePlaceholder(parseDefault(type)));
 
-            String compiled = generatePlaceholder(wrapDefault(beforeType)) + " " + outputType;
+            String compiled = generatePlaceholder(parseDefault(beforeType)) + " " + outputType;
             return new Some<>(new Tuple<>(state, compiled + " " + newName));
         }
         else {
@@ -296,7 +304,7 @@
 
         return "<comment-start> " + replaced + " <comment-end>";
     } */
-/* private static Node wrapDefault(String input) {
+/* private static Node parseDefault(String input) {
         return new Node().withString("value", input);
     } */
 /* } */
@@ -589,7 +597,8 @@
         } *//*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
-	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState */(), input, /*  Main::compileRootSegment */);
+	/* CompileState methods = new CompileState */();
+	/* Tuple<CompileState, String> compiled = generateStatements */(/* parseStatements(methods */, input, /*  parseDefault(Main::compileRootSegment)) */, /*  Main::generateDefault */);
 	/* CompileState newState = compiled.left */;
 	/* String output = compiled.right */;
 	/* String joinedStructs = String */.join(/* "" */, newState.structs.list);
@@ -597,20 +606,43 @@
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
 }
-/* private static Tuple<CompileState, */ /* String> */ compileStatements_Main(struct CompileState methods_Main, char* input_Main, /* 
-            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  String>> compiler
-     */){
-	/* return compileAll */(methods, input, /*  Main::foldStatementChar */, compiler, /*  Main::mergeStatements */);/*  */
+/* private static Tuple<CompileState, */ /* String> */ generateStatements_Main(/* Tuple<CompileState */, /*  JavaList<Node>> tuple */, /*  Function<Node */, /*  String> generator */){
+	/* return mergeAll */(tuple.left, tuple.right, generator, /*  Main::mergeStatements */);/*  */
 }
-/* private static Tuple<CompileState, */ /* String> */ compileAll_Main(struct CompileState methods_Main, char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  String>> compiler */, /*  BiFunction<String */, /*  String */, /*  String> merger */){
+/* private static Tuple<CompileState, */ /* JavaList<Node>> */ parseStatements_Main(struct CompileState methods_Main, char* input_Main, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  Node>> parser */){
+	/* return parseAll */(methods, input, /*  Main::foldStatementChar */, parser);/*  */
+}
+/* private static BiFunction<CompileState, String, Tuple<CompileState, */ /* Node>> */ parseDefault_Main(/* BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  String>> compiler */){/* return (state, s) -> {
+            Tuple<CompileState, String> compiled = compiler.apply(state, s);
+            return new Tuple<>(compiled.left, parseDefault(compiled.right));
+        } */
+	/*  */;/*  */
+}
+/* private static Tuple<CompileState, */ /* JavaList<Node>> */ parseAll_Main(struct CompileState methods_Main, char* input_Main, /* 
+            BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */, /* 
+            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /*  Node>> parser
+     */){
 	/* List<String> segments = divide */(input, folder);
 	/* CompileState current = methods */;
-	/* String output = "" */;/* for (String segment : segments) {
-            Tuple<CompileState, String> compiled = compiler.apply(current, segment);
-            current = compiled.left;
-            output = merger.apply(output, compiled.right);
+	/* JavaList<Node> compiled = new JavaList<Node> */();/* for (String segment : segments) {
+            Tuple<CompileState, Node> compiledSegment = parser.apply(current, segment);
+            current = compiledSegment.left;
+            compiled = compiled.addLast(compiledSegment.right);
+        } */
+	/* return new Tuple<> */(current, compiled);/*  */
+}
+/* private static Tuple<CompileState, */ /* String> */ mergeAll_Main(struct CompileState current_Main, /* 
+            JavaList<Node> compiled */, /* 
+            Function<Node */, /*  String> generator */, /* 
+            BiFunction<String */, /*  String */, /*  String> merger
+     */){
+	/* String output = "" */;/* for (Node element : compiled.list) {
+            output = merger.apply(output, generator.apply(element));
         } */
 	/* return new Tuple<> */(current, output);/*  */
+}
+/* private static */ char* generateDefault_Main(struct Node element_Main){
+	/* return element */.findString(/* "value" */).orElse(/* "" */);/*  */
 }
 /* private static */ /* List<String> */ divide_Main(char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */){
 	/* DivideState current = new DivideState */();

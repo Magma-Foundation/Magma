@@ -568,6 +568,7 @@ public class Main {
             Tuple<CompileState, Node> parsed = parseValue(state1, input1);
             return new Tuple<>(parsed.left, generateValue(parsed.right));
         }));
+
         Tuple<CompileState, String> compiledArguments = generateValues(tuple, Main::generateDefault);
 
         Node node = new Node("invocation")
