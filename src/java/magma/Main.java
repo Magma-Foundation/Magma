@@ -245,15 +245,24 @@ public class Main {
                 return Optional.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> newParameters = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
+            Tuple<CompileState, String> paramTuple = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Optional.empty();
             }
-            String content = withBraces.substring(1, withBraces.length() - 1);
-            String generated = outputDefinition.right + "(" + newParameters.right + "){" + generatePlaceholder(content) + "}\n";
-            return Optional.of(new Tuple<>(newParameters.left.addMethod(generated), ""));
+            String inputContent = withBraces.substring(1, withBraces.length() - 1);
+            CompileState paramState = paramTuple.left;
+            String paramOutput = paramTuple.right;
+
+            Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
+            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "}\n";
+            CompileState compileState = outputContent.left.addMethod(generated);
+            return Optional.of(new Tuple<>(compileState, ""));
         });
+    }
+
+    private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static String mergeValues(String cache, String element) {

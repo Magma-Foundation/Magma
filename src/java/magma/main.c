@@ -71,15 +71,23 @@
                 return Optional.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> newParameters = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
+            Tuple<CompileState, String> paramTuple = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Optional.empty();
             }
-            String content = withBraces.substring(1, withBraces.length() - 1);
-            String generated = outputDefinition.right + "(" + newParameters.right + "){" + generatePlaceholder(content) + "}\n";
-            return Optional.of(new Tuple<>(newParameters.left.addMethod(generated), ""));
+            String inputContent = withBraces.substring(1, withBraces.length() - 1);
+            CompileState paramState = paramTuple.left;
+            String paramOutput = paramTuple.right;
+
+            Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
+            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "}\n";
+            CompileState compileState = outputContent.left.addMethod(generated);
+            return Optional.of(new Tuple<>(compileState, ""));
         });
+    } */
+/* private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(input));
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -266,22 +274,22 @@
         return appended; *//* 
      */};
 /* private */ int isShallow_DivideState(/*  */){/* 
-            return this.depth == 1;
+            return this.depth == 1; *//* 
          */}
 /* private */ int isLevel_DivideState(/*  */){/* 
-            return this.depth == 0;
+            return this.depth == 0; *//* 
          */}
 /* private */ struct DivideState append_DivideState(char c_DivideState){/* 
-            return new DivideState(this.segments, this.buffer + c, this.depth);
+            return new DivideState(this.segments, this.buffer + c, this.depth); *//* 
          */}
 /* private */ struct DivideState advance_DivideState(/*  */){/* 
-            return new DivideState(this.segments.addLast(this.buffer), "", this.depth);
+            return new DivideState(this.segments.addLast(this.buffer), "", this.depth); *//* 
          */}
 /* private */ struct DivideState enter_DivideState(/*  */){/* 
-            return new DivideState(this.segments, this.buffer, this.depth + 1);
+            return new DivideState(this.segments, this.buffer, this.depth + 1); *//* 
          */}
 /* private */ struct DivideState exit_DivideState(/*  */){/* 
-            return new DivideState(this.segments, this.buffer, this.depth - 1);
+            return new DivideState(this.segments, this.buffer, this.depth - 1); *//* 
          */}
 /* public static */ void __main__(char** args_Main){/* 
         try {
@@ -294,29 +302,29 @@
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException | InterruptedException e) {
+        } *//*  catch (IOException | InterruptedException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        }
+        } *//* 
      */}
 /* private static */ char* compile_Main(char* input_Main){/* 
-        Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
-        CompileState newState = compiled.left;
-        String output = compiled.right;
-        String joinedStructs = String.join("", newState.structs.list);
-        String joinedMethods = String.join("", newState.methods.list);
-        String joined = output + joinedStructs + joinedMethods;
+        Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment); *//* 
+        CompileState newState = compiled.left; *//* 
+        String output = compiled.right; *//* 
+        String joinedStructs = String.join("", newState.structs.list); *//* 
+        String joinedMethods = String.join("", newState.methods.list); *//* 
+        String joined = output + joinedStructs + joinedMethods; *//* 
 
-        return joined + "int main(){\n\treturn 0;\n}\n";
+        return joined + "int main(){\n\treturn 0;\n} *//* \n"; *//* 
      */}
 /* private static */ char* mergeStatements_Main(char* buffer_Main, char* element_Main){/* 
-        return buffer + element;
+        return buffer + element; *//* 
      */}
 /* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){/* 
-        DivideState appended = current.append(c);
-        if (c == ';' && appended.isLevel()) {
+        DivideState appended = current.append(c); *//* 
+        if (c == '; *//* ' && appended.isLevel()) {
             return appended.advance();
-        }
+        } *//* 
         if (c == ' */}
 int main(){
 	return 0;
