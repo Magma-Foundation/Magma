@@ -667,12 +667,16 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
-        if (input.strip().equals("int")) {
-            return new Some<>(new Tuple<CompileState, Node>(state, new Node("primitive").withString("value", "int")));
+        return mapPrimitiveType(input).map(result -> new Tuple<>(state, new Node("primitive").withString("value", result)));
+    }
+
+    private static Option<String> mapPrimitiveType(String input) {
+        String stripped = input.strip();
+        if (stripped.equals("int") || stripped.equals("Integer") || stripped.equals("boolean") || stripped.equals("Boolean")) {
+            return new Some<>("int");
         }
-        else {
-            return new None<>();
-        }
+
+        return new None<>();
     }
 
     private static Tuple<CompileState, Node> parseContent(CompileState state, String input) {

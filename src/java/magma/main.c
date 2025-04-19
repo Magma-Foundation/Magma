@@ -32,14 +32,14 @@
             this.buffer = new StringBuilder();
             return this;
         } */
-	/* private */ /* boolean */ isShallow()/*  {
+	/* private */ int isShallow()/*  {
             return this.depth == 1;
         } */
 	/* private */ /* DivideState */ append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
-	/* private */ /* boolean */ isLevel()/*  {
+	/* private */ int isLevel()/*  {
             return this.depth == 0;
         } */
 	/* public */ List</* String */> segments()/*  {
@@ -170,8 +170,8 @@
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
-	/* boolean */ contains(/* T */ element);
-	/* boolean */ isEmpty();
+	int contains(/* T */ element);
+	int isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
 /*  */ struct Tuple</* CompileState */, /*  String */> {
@@ -187,8 +187,8 @@
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
-	/* boolean */ contains(/* T */ element);
-	/* boolean */ isEmpty();
+	int contains(/* T */ element);
+	int isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
 /*  */ struct Tuple</* T */, List</* T */>> {
@@ -196,8 +196,8 @@
 /* public */ struct Option<Tuple</* T */, List</* T */>>> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
-	/* boolean */ isEmpty();
-	/* boolean */ isPresent();
+	int isEmpty();
+	int isPresent();
 	/* T */ orElseGet(/* T */(*other)());
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
@@ -214,8 +214,8 @@
 /* public */ struct Option</* R */> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
-	/* boolean */ isEmpty();
-	/* boolean */ isPresent();
+	int isEmpty();
+	int isPresent();
 	/* T */ orElseGet(/* T */(*other)());
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
@@ -223,8 +223,8 @@
 /* public */ struct Option</* T */> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
-	/* boolean */ isEmpty();
-	/* boolean */ isPresent();
+	int isEmpty();
+	int isPresent();
 	/* T */ orElseGet(/* T */(*other)());
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
