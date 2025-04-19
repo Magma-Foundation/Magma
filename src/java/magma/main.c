@@ -145,28 +145,32 @@
         String callerString = withoutEnd.substring(0, paramStart).strip();
         String argumentsString = withoutEnd.substring(paramStart + "(".length()).strip();
 
-        Tuple<CompileState, Node> parsed1 = parseValue(state, callerString);
-        Node caller = parsed1.right;
+        Tuple<CompileState, Node> oldCallerTuple = parseValue(state, callerString);
+        Node oldCaller = oldCallerTuple.right;
 
-        Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(caller));
-
-        Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(compiledCaller.left, argumentsString, Main::parseValue);
+        Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(oldCallerTuple.left, argumentsString, Main::parseValue);
         JavaList<Node> oldArguments = argumentsTuple.right;
+
+        Node newCaller;
         JavaList<Node> newArguments;
-        if (caller.is("access")) {
-            String parent = caller.findString("parent").orElse("");
+        if (oldCaller.is("access")) {
+            String parent = oldCaller.findString("parent").orElse("");
             newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
+            newCaller = oldCaller;
         }
         else {
             newArguments = oldArguments;
+            newCaller = oldCaller;
         }
 
         Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
+
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
         String arguments = compiledArguments.right;
 
+        String generatedCaller = generateValue(newCaller);
         Node node = new Node("invocation")
-                .withString("caller", compiledCaller.right)
+                .withString("caller", generatedCaller)
                 .withString("arguments", arguments);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
@@ -577,8 +581,7 @@
             return false */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
-    auto temp = run();
-	temp.ifPresent(temp, /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
+	run().ifPresent(run(), /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
 }
 /* private static */ /* Option<Error> */ run_Main(/*  */){
 	/* Path source = Paths */.get(/* Path source = Paths */, /* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
