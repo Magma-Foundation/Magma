@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +11,7 @@ public class Main {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
             Path output = source.resolveSibling("main.c");
-            Files.writeString(output, input);
+            Files.writeString(output, compile(input));
 
             new ProcessBuilder("cmd.exe", "/c", "build.bat")
                     .inheritIO()
@@ -22,4 +22,19 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    private static String compile(String input) {
+        return generatePlaceholder(input) + "int main(){\n\treturn 0;\n}\n";
+    }
+
+    private static String generatePlaceholder(String input) {
+        String replaced = input
+                .replace("<comment-start>", "<comment-start>")
+                .replace("<comment-end>", "<comment-end>");
+
+        return "<comment-start> " + replaced + " <comment-end>";
+    }
+}
+ */int main(){
+	return 0;
 }
