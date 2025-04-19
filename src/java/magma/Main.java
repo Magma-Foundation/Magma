@@ -550,28 +550,27 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String definition = input.substring(0, paramStart);
-            String withParams = input.substring(paramStart + "(".length());
-            return compileDefinition(state, definition).flatMap(outputDefinition -> {
-                int paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    String oldParams = withParams.substring(0, paramEnd);
-                    Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, Main::compileParameter);
-
-                    String oldBody = withParams.substring(paramEnd + ")".length());
-                    String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
-
-                    String generated = "\n\t" + outputDefinition.right + "(" + newParams.right + ")" + newBody;
-                    Tuple<CompileState, String> value = new Tuple<>(newParams.left, generated);
-                    return new Some<>(value);
-                }
-                else {
-                    return new None<>();
-                }
-            });
+        if (paramStart < 0) {
+            return new None<>();
         }
-        return new None<>();
+        String definition = input.substring(0, paramStart);
+        String withParams = input.substring(paramStart + "(".length());
+        return compileDefinition(state, definition).flatMap(outputDefinition -> {
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) {
+                return new None<>();
+            }
+
+            String oldParams = withParams.substring(0, paramEnd);
+            Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, Main::compileParameter);
+
+            String oldBody = withParams.substring(paramEnd + ")".length());
+            String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
+
+            String generated = "\n\t" + outputDefinition.right + "(" + newParams.right + ")" + newBody;
+            Tuple<CompileState, String> value = new Tuple<>(newParams.left, generated);
+            return new Some<>(value);
+        });
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
