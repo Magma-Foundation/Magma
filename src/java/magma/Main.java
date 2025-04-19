@@ -459,10 +459,12 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
-        return compileInvocation(input, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return parseInvocation(input, state)
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileInvocation(String input, CompileState state) {
+    private static Optional<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return Optional.empty();
@@ -498,8 +500,7 @@ public class Main {
                 .withString("caller", compiledCaller.right)
                 .withString("arguments", compiledArguments.right);
 
-        String generated = generateInvocation(node);
-        return Optional.of(new Tuple<>(compiledArguments.left, generated));
+        return Optional.of(new Tuple<>(compiledArguments.left, node));
     }
 
     private static String generateInvocation(Node node) {
@@ -510,7 +511,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
-        Optional<Tuple<CompileState, String>> maybeInvocation = compileInvocation(input, state);
+        Optional<Tuple<CompileState, String>> maybeInvocation = parseInvocation(input, state).map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)));
         if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         }
