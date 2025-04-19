@@ -413,9 +413,23 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String substring = stripped.substring(0, stripped.length() - ";".length());
-            return new Tuple<>(state, "\n\t" + generatePlaceholder(substring) + ";");
+            return new Tuple<>(state, "\n\t" + compileStatementValue(substring) + ";");
         }
         return new Tuple<>(state, generatePlaceholder(stripped));
+    }
+
+    private static String compileStatementValue(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int paramStart = withoutEnd.indexOf("(");
+            if (paramStart >= 0) {
+                String caller = withoutEnd.substring(0, paramStart).strip();
+                String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
+                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+            }
+        }
+        return generatePlaceholder(stripped);
     }
 
     private static String mergeValues(String cache, String element) {
