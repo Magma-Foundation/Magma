@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
     public interface Collector<T, C> {
@@ -502,38 +503,51 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Node>> parseGenericType(CompileState state, String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(">")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-            int argumentsStart = withoutEnd.indexOf("<");
-            if (argumentsStart >= 0) {
-                String base = withoutEnd.substring(0, argumentsStart).strip();
-                String params = withoutEnd.substring(argumentsStart + "<".length());
-                Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, (state1, input1) -> {
-                    Tuple<CompileState, Node> value = parseType(state1, input1);
-                    return new Tuple<>(value.left, generateType(value.right).orElse(""));
+        if (!stripped.endsWith(">")) {
+            return Optional.empty();
+        }
+
+        String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+        int argumentsStart = withoutEnd.indexOf("<");
+        if (argumentsStart < 0) {
+            return Optional.empty();
+        }
+
+        String base = withoutEnd.substring(0, argumentsStart).strip();
+        String params = withoutEnd.substring(argumentsStart + "<".length());
+        Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, (state1, input1) -> {
+            Tuple<CompileState, Node> value = parseType(state1, input1);
+            return new Tuple<>(value.left, generateType(value.right).orElse(""));
+        });
+
+        CompileState newState = compiled.left;
+        List<String> newValues = compiled.right;
+
+        Tuple<CompileState, Node> value = modifyToFunctionalType("BiFunction", base, newState, () -> Lists.of(newValues.get(0), newValues.get(1)), () -> newValues.get(2))
+                .or(() -> modifyToFunctionalType("Function", base, newState, () -> Lists.of(newValues.get(0)), () -> newValues.get(1)))
+                .orElseGet(() -> {
+                    String newTypes = mergeAll(Main::mergeValues, compiled);
+                    Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
+                    return new Tuple<>(newState, node);
                 });
 
-                CompileState newState = compiled.left;
-                List<String> newValues = compiled.right;
+        return Optional.of(value);
+    }
 
-                if (base.equals("BiFunction")) {
-                    String first = newValues.get(0);
-                    String second = newValues.get(1);
-                    String returns = newValues.get(2);
-                    final List<Node> argument1 = Lists.of(first, second).iter()
-                            .map(argument -> new Node().withString("argument", argument))
-                            .collect(new ListCollector<>());
-
-                    Node node = new Node("functional").withString("returns", returns).withNodeList("arguments", argument1);
-                    return Optional.of(new Tuple<>(newState, node));
-                }
-
-                String newTypes = mergeAll(Main::mergeValues, compiled);
-                Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                return Optional.of(new Tuple<>(newState, node));
-            }
+    private static Optional<Tuple<CompileState, Node>> modifyToFunctionalType(String expectedBase, String actualBase, CompileState state, Supplier<List<String>> arguments, Supplier<String> returns) {
+        if (!actualBase.equals(expectedBase)) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        final List<Node> argumentNodes = arguments.get().iter()
+                .map(argument -> new Node().withString("argument", argument))
+                .collect(new ListCollector<>());
+
+        Node node = new Node("functional")
+                .withString("returns", returns.get())
+                .withNodeList("arguments", argumentNodes);
+
+        return Optional.of(new Tuple<>(state, node));
     }
 
     private static Optional<String> generateType(Node node) {
