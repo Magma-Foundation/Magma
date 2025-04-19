@@ -7,48 +7,16 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-// Collector</* T */, /*  C */>
-// Iterator</* R */>
-// Iterator</* T */>
-// List</* T */>
-// Option</* R */>
-// Option</* T */>
 // List</* String */>
 // List</* Node */>
+// Tuple</* CompileState */, /*  String */>
+// Option<Tuple</* CompileState */, /*  String */>>
+// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)>
 // Head</* T */>
-// Option</* Integer */>
 // Option</* String */>
 // Map</* String */, /*  String */>
 // Map</* String */, List</* Node */>>
-// Tuple</* CompileState */, /*  String */>
 // Tuple</* CompileState */, List</* String */>>
-/* public */ struct Collector {
-	/* C */ createInitial();
-	/* C */ fold(/* C */ current, /* T */ element);
-};
-/* public */ struct Iterator {
-	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
-	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
-	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
-};
-/* public */ struct List {
-	Iterator</* T */> iter();
-	List</* T */> add(/* T */ element);
-	/* T */ get(int index);
-	/* boolean */ contains(/* T */ element);
-};
-/* public */ struct Option {
-	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
-	/* T */ orElse(/* T */ other);
-	/* boolean */ isEmpty();
-	/* boolean */ isPresent();
-	/* T */ orElseGet(/* T */(*other)());
-	Option</* T */> or(Option</* T */>(*other)());
-	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
-};
-/* private */ struct Head {
-	Option</* T */> next();
-};
 /* private static */ struct DivideState {
 	/* private final */ List</* String */> segments;
 	/* private */ /* StringBuilder */ buffer;
@@ -86,63 +54,6 @@
         } */
 	/* public */ List</* String */> segments()/*  {
             return this.segments;
-        } */
-};
-/* public static final */ struct RangeHead implements Head {
-	/* private final */ int length;
-	/* private int counter */ /* = */ 0;
-	/* public */ RangeHead(int length)/*  {
-            this.length = length;
-        } */
-	/* @Override
-        public */ Option</* Integer */> next()/*  {
-            if (this.counter >= this.length) {
-                return new None<>();
-            }
-
-            int value = this.counter;
-            this.counter++;
-            return new Some<>(value);
-        } */
-};
-/* private static */ struct ListCollector {
-	/* @Override
-        public */ List</* T */> createInitial()/*  {
-            return Lists.empty();
-        } */
-	/* @Override
-        public */ List</* T */> fold(List</* T */> current, /* T */ element)/*  {
-            return current.add(element);
-        } */
-};
-/* static */ struct None {
-	/* @Override
-        public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/*  {
-            return new None<>();
-        } */
-	/* @Override
-        public */ /* T */ orElse(/* T */ other)/*  {
-            return other;
-        } */
-	/* @Override
-        public */ /* boolean */ isEmpty()/*  {
-            return true;
-        } */
-	/* @Override
-        public */ /* boolean */ isPresent()/*  {
-            return false;
-        } */
-	/* @Override
-        public */ /* T */ orElseGet(/* T */(*other)())/*  {
-            return other.get();
-        } */
-	/* @Override
-        public */ Option</* T */> or(Option</* T */>(*other)())/*  {
-            return other.get();
-        } */
-	/* @Override
-        public <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/*  {
-            return new None<>();
         } */
 };
 /* public */ struct Main {
@@ -184,9 +95,9 @@
     } */
 	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
-	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> generics)/*  {
+	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> generics, Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)> expandables)/*  {
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), new HashMap<>());
         }
 
         public CompileState addStruct(String struct) {
@@ -203,6 +114,11 @@
             if (!this.generics.contains(node)) {
                 this.generics.add(node);
             }
+            return this;
+        }
+
+        public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
+            this.expandables.put(name, mapper);
             return this;
         }
     } */
@@ -404,16 +320,25 @@
             return new None<>();
         }
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
-
-        int typeParamStart = beforeContent.indexOf("<");
-        String name = typeParamStart >= 0
-                ? beforeContent.substring(0, beforeContent.indexOf("<"))
-                : beforeContent;
-
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return new None<>();
         }
+
+        int typeParamStart = beforeContent.indexOf("<");
+        if (typeParamStart >= 0) {
+            String name = beforeContent.substring(0, beforeContent.indexOf("<"));
+            CompileState state1 = state.addExpandable(name, arguments -> {
+                return getTupleSome(state, withEnd, modifiers, name);
+            });
+            return new Some<>(new Tuple<>(state1, ""));
+        }
+        else {
+            return getTupleSome(state, withEnd, modifiers, beforeContent);
+        }
+    }
+
+    private static Some<Tuple<CompileState, String>> getTupleSome(CompileState state, String withEnd, String modifiers, String name) {
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 

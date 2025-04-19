@@ -144,9 +144,14 @@ public class Main {
     record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(List<String> imports, List<String> structs, List<Node> generics) {
+    record CompileState(
+            List<String> imports,
+            List<String> structs,
+            List<Node> generics,
+            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables
+    ) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), new HashMap<>());
         }
 
         public CompileState addStruct(String struct) {
@@ -163,6 +168,11 @@ public class Main {
             if (!this.generics.contains(node)) {
                 this.generics.add(node);
             }
+            return this;
+        }
+
+        public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
+            this.expandables.put(name, mapper);
             return this;
         }
     }
@@ -455,16 +465,25 @@ public class Main {
             return new None<>();
         }
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
-
-        int typeParamStart = beforeContent.indexOf("<");
-        String name = typeParamStart >= 0
-                ? beforeContent.substring(0, beforeContent.indexOf("<"))
-                : beforeContent;
-
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return new None<>();
         }
+
+        int typeParamStart = beforeContent.indexOf("<");
+        if (typeParamStart >= 0) {
+            String name = beforeContent.substring(0, beforeContent.indexOf("<"));
+            CompileState state1 = state.addExpandable(name, arguments -> {
+                return getTupleSome(state, withEnd, modifiers, name);
+            });
+            return new Some<>(new Tuple<>(state1, ""));
+        }
+        else {
+            return getTupleSome(state, withEnd, modifiers, beforeContent);
+        }
+    }
+
+    private static Some<Tuple<CompileState, String>> getTupleSome(CompileState state, String withEnd, String modifiers, String name) {
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 
