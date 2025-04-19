@@ -5,20 +5,20 @@
 /* import java.util.ArrayList; */
 /* import java.util.List; */
 /* import java.util.Optional; */
-/* import java.util.function.Function; */
+/* import java.util.function.BiFunction; */
 /* public  */struct Main {/* private static class State {
-        private final List<String> segments;
+        private final JavaList<String> segments;
         private final StringBuilder buffer;
         private final int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(JavaList<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(new JavaList<>(), new StringBuilder(), 0);
         }
 
         private boolean isShallow() {
@@ -34,9 +34,7 @@
         }
 
         private State advance() {
-            List<String> copy = new ArrayList<>(this.segments);
-            copy.add(this.buffer.toString());
-            return new State(copy, new StringBuilder(), this.depth);
+            return new State(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
         }
 
         private State enter() {
@@ -46,57 +44,21 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
-    } *//* public static */ void __main__(/* String[] args */){/* 
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path output = source.resolveSibling("main.c");
-            Files.writeString(output, compile(input));
-
-            new ProcessBuilder("cmd.exe", "/c", "build.bat")
-                    .inheritIO()
-                    .start()
-                    .waitFor();
-        } catch (IOException | InterruptedException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-     */}/* private static */ String compile(/* String input */){/* 
-        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}\n";
-     */}/* private static */ String compileStatements(/* String input, Function<String, String> compiler */){/* 
-        List<String> segments = divide(input, new State());
-
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            output.append(compiler.apply(segment));
-        }
-
-        return output.toString();
-     */}/* private static */ List<String> divide(/* String input, State state */){/* 
-        State current = state;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = foldStatementChar(current, c);
-        }
-
-        return current.advance().segments;
-     */}/* private static */ State foldStatementChar(/* State current, char c */){/* 
-        State appended = current.append(c);
-        if (c == ';' && appended.isLevel()) {
-            return appended.advance();
-        }
-        if (c == ' */}/* ' && appended.isShallow()) {
+    } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
-        } *//* if (c == '{') {
+        } *//* 
+        if (c == '{') {
             return appended.enter();
         }
         if (c == '} *//* ') {
             return appended.exit();
-        } *//* return appended; *//*  */};
-/* private static String compileRootSegment(String input) {
+        } *//* 
+        return appended; *//* 
+     */};
+/* private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> methods, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
-            return "";
+            return new Tuple<>(methods, "");
         }
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
@@ -108,15 +70,16 @@
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    Tuple<JavaList<String>, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
                     if (isSymbol(name)) {
-                        return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
+                        return new Tuple<>(outputContent.left, generated);
                     }
                 }
             }
         }
 
-        return generatePlaceholder(stripped) + "\n";
+        return new Tuple<>(methods, generatePlaceholder(stripped) + "\n");
     } */
 /* private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
@@ -126,39 +89,49 @@
         }
         return true;
     } */
-/* private static String compileClassSegment(String input) {
+/* private static Tuple<JavaList<String>, String> compileClassSegment(JavaList<String> methods, String input) {
+        return compileMethod(methods, input)
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(input)));
+    } */
+/* private static Optional<Tuple<JavaList<String>, String>> compileMethod(JavaList<String> methods, String input) {
         String stripped = input.strip();
         int paramStart = stripped.indexOf("(");
-        if (paramStart >= 0) {
-            String definition = stripped.substring(0, paramStart).strip();
-            int nameSeparator = definition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = definition.substring(0, nameSeparator).strip();
-                String name = definition.substring(nameSeparator + " ".length()).strip();
-
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    String beforeType = beforeName.substring(0, typeSeparator);
-                    String type = beforeName.substring(typeSeparator + " ".length());
-
-                    String withParams = stripped.substring(paramStart + "(".length());
-                    int paramEnd = withParams.indexOf(")");
-                    if (paramEnd >= 0) {
-                        String params = withParams.substring(0, paramEnd);
-                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                            String content = withBraces.substring(1, withBraces.length() - 1);
-                            Optional<String> maybeOutputType = compileType(type);
-                            if (maybeOutputType.isPresent()) {
-                                String newName = name.equals("main") ? "__main__" : name;
-                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
-                            }
-                        }
-                    }
-                }
-            }
+        if (paramStart < 0) {
+            return Optional.empty();
         }
-        return generatePlaceholder(stripped);
+        String definition = stripped.substring(0, paramStart).strip();
+        int nameSeparator = definition.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeName = definition.substring(0, nameSeparator).strip();
+        String name = definition.substring(nameSeparator + " ".length()).strip();
+
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return Optional.empty();
+        }
+        String beforeType = beforeName.substring(0, typeSeparator);
+        String type = beforeName.substring(typeSeparator + " ".length());
+
+        String withParams = stripped.substring(paramStart + "(".length());
+        int paramEnd = withParams.indexOf(")");
+        if (paramEnd < 0) {
+            return Optional.empty();
+        }
+        String params = withParams.substring(0, paramEnd);
+        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            return Optional.empty();
+        }
+        String content = withBraces.substring(1, withBraces.length() - 1);
+        Optional<String> maybeOutputType = compileType(type);
+        if (maybeOutputType.isEmpty()) {
+            return Optional.empty();
+        }
+        String newName = name.equals("main") ? "__main__" : name;
+        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+        return Optional.of(new Tuple<>(methods.add(generated), ""));
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
@@ -175,6 +148,65 @@
         return "<comment-start> " + replaced + " <comment-end>";
     } */
 /* } */
-int main(){
+/* private */ record JavaList<T>(/* List<T> list */){/* 
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        public JavaList<T> add(T element) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        }
+     */}/* private record */ Tuple<A, B>(/* A left, B right */){/* 
+     */}/* public static */ void __main__(/* String[] args */){/* 
+        try {
+            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+            String input = Files.readString(source);
+            Path output = source.resolveSibling("main.c");
+            Files.writeString(output, compile(input));
+
+            new ProcessBuilder("cmd.exe", "/c", "build.bat")
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (IOException | InterruptedException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+     */}/* private static */ String compile(/* String input */){/* 
+        Tuple<JavaList<String>, String> compiled = compileStatements(new JavaList<>(), input, Main::compileRootSegment);
+        String joined = compiled.right + String.join("", compiled.left.list);
+        return joined + "int main(){\n\treturn 0;\n}\n";
+     */}/* private static Tuple<JavaList<String>, */ String> compileStatements(/* 
+            JavaList<String> methods,
+            String input,
+            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> compiler
+     */){/* 
+        List<String> segments = divide(input, new State()).list;
+
+        JavaList<String> current = methods;
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            Tuple<JavaList<String>, String> compiled = compiler.apply(current, segment);
+            current = compiled.left;
+            output.append(compiled.right);
+        }
+
+        return new Tuple<>(current, output.toString());
+     */}/* private static */ JavaList<String> divide(/* String input, State state */){/* 
+        State current = state;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            current = foldStatementChar(current, c);
+        }
+
+        return current.advance().segments;
+     */}/* private static */ State foldStatementChar(/* State current, char c */){/* 
+        State appended = current.append(c);
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
+        if (c == ' */}int main(){
 	return 0;
 }

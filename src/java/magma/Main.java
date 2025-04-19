@@ -7,22 +7,22 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class Main {
     private static class State {
-        private final List<String> segments;
+        private final JavaList<String> segments;
         private final StringBuilder buffer;
         private final int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(JavaList<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(new JavaList<>(), new StringBuilder(), 0);
         }
 
         private boolean isShallow() {
@@ -38,9 +38,7 @@ public class Main {
         }
 
         private State advance() {
-            List<String> copy = new ArrayList<>(this.segments);
-            copy.add(this.buffer.toString());
-            return new State(copy, new StringBuilder(), this.depth);
+            return new State(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
         }
 
         private State enter() {
@@ -53,6 +51,18 @@ public class Main {
     }
 
     private record JavaList<T>(List<T> list) {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        public JavaList<T> add(T element) {
+            ArrayList<T> copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
     }
 
     public static void main(String[] args) {
@@ -73,21 +83,30 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}\n";
+        Tuple<JavaList<String>, String> compiled = compileStatements(new JavaList<>(), input, Main::compileRootSegment);
+        String joined = compiled.right + String.join("", compiled.left.list);
+        return joined + "int main(){\n\treturn 0;\n}\n";
     }
 
-    private static String compileStatements(String input, Function<String, String> compiler) {
-        List<String> segments = divide(input, new State());
+    private static Tuple<JavaList<String>, String> compileStatements(
+            JavaList<String> methods,
+            String input,
+            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> compiler
+    ) {
+        List<String> segments = divide(input, new State()).list;
 
+        JavaList<String> current = methods;
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compiler.apply(segment));
+            Tuple<JavaList<String>, String> compiled = compiler.apply(current, segment);
+            current = compiled.left;
+            output.append(compiled.right);
         }
 
-        return output.toString();
+        return new Tuple<>(current, output.toString());
     }
 
-    private static List<String> divide(String input, State state) {
+    private static JavaList<String> divide(String input, State state) {
         State current = state;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -114,10 +133,10 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) {
+    private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> methods, String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ")) {
-            return "";
+            return new Tuple<>(methods, "");
         }
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
@@ -129,15 +148,16 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    Tuple<JavaList<String>, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
                     if (isSymbol(name)) {
-                        return generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent + "};\n";
+                        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
+                        return new Tuple<>(outputContent.left, generated);
                     }
                 }
             }
         }
 
-        return generatePlaceholder(stripped) + "\n";
+        return new Tuple<>(methods, generatePlaceholder(stripped) + "\n");
     }
 
     private static boolean isSymbol(String input) {
@@ -149,11 +169,12 @@ public class Main {
         return true;
     }
 
-    private static String compileClassSegment(String input) {
-        return compileMethod(input).orElseGet(() -> generatePlaceholder(input));
+    private static Tuple<JavaList<String>, String> compileClassSegment(JavaList<String> methods, String input) {
+        return compileMethod(methods, input)
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(input)));
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<Tuple<JavaList<String>, String>> compileMethod(JavaList<String> methods, String input) {
         String stripped = input.strip();
         int paramStart = stripped.indexOf("(");
         if (paramStart < 0) {
@@ -190,7 +211,8 @@ public class Main {
             return Optional.empty();
         }
         String newName = name.equals("main") ? "__main__" : name;
-        return Optional.of(generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}");
+        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+        return Optional.of(new Tuple<>(methods.add(generated), ""));
     }
 
     private static Optional<String> compileType(String type) {
