@@ -10,7 +10,7 @@
         private final StringBuilder buffer;
         private final int depth;
 
-        */ private State(/* List<String> segments, StringBuilder buffer, int depth) {
+        */ private State(/* List<String> segments, StringBuilder buffer, int depth */){/* 
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -45,7 +45,7 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
-    } *//* public static */ void main(/* String[] args) {
+     */}/* public static */ void main(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -60,9 +60,9 @@
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    } *//* private static */ String compile(/* String input) {
+     */}/* private static */ String compile(/* String input */){/* 
         return compileStatements(input, Main::compileRootSegment) + "int main(){\n\treturn 0;\n}\n";
-    } *//* private static */ String compileStatements(/* String input, Function<String, String> compiler) {
+     */}/* private static */ String compileStatements(/* String input, Function<String, String> compiler */){/* 
         List<String> segments = divide(input, new State());
 
         StringBuilder output = new StringBuilder();
@@ -71,7 +71,7 @@
         }
 
         return output.toString();
-    } *//* private static */ List<String> divide(/* String input, State state) {
+     */}/* private static */ List<String> divide(/* String input, State state */){/* 
         State current = state;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -79,18 +79,18 @@
         }
 
         return current.advance().segments;
-    } *//* private static */ State foldStatementChar(/* State current, char c) {
+     */}/* private static */ State foldStatementChar(/* State current, char c */){/* 
         State appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} *//* ' */ && appended.isShallow(/* )) {
+        if (c == ' */}/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* if (c == '{') {
             return appended.enter();
         }
         if (c == '} *//* ') {
-            */ return appended.exit(/* );
+            return appended.exit();
         } *//* return appended; *//*  */};
 /* private static String compileRootSegment(String input) {
         String stripped = input.strip();
@@ -140,8 +140,16 @@
                     String beforeType = beforeName.substring(0, typeSeparator);
                     String type = beforeName.substring(typeSeparator + " ".length());
 
-                    String right = stripped.substring(paramStart + "(".length());
-                    return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(right);
+                    String withParams = stripped.substring(paramStart + "(".length());
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd >= 0) {
+                        String params = withParams.substring(0, paramEnd);
+                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            String content = withBraces.substring(1, withBraces.length() - 1);
+                            return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                        }
+                    }
                 }
             }
         }

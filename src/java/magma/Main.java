@@ -160,8 +160,16 @@ public class Main {
                     String beforeType = beforeName.substring(0, typeSeparator);
                     String type = beforeName.substring(typeSeparator + " ".length());
 
-                    String right = stripped.substring(paramStart + "(".length());
-                    return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(right);
+                    String withParams = stripped.substring(paramStart + "(".length());
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd >= 0) {
+                        String params = withParams.substring(0, paramEnd);
+                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            String content = withBraces.substring(1, withBraces.length() - 1);
+                            return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                        }
+                    }
                 }
             }
         }
