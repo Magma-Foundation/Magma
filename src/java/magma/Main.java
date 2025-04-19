@@ -542,6 +542,7 @@ public class Main {
         return compileWhitespace(state, input)
                 .or(() -> compileClass(state, input))
                 .or(() -> compileStructured("interface ", state, input))
+                .or(() -> compileStructured("record ", state, input))
                 .or(() -> compileMethod(state, input))
                 .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> compileContent(state, input));
