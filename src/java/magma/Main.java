@@ -608,38 +608,39 @@ public class Main {
 
         Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(oldCallerTuple.left, argumentsString, Main::parseValue);
 
-
-        CompileState left;
-        Node newCaller;
-        JavaList<Node> newArguments;
-        if (oldCaller.is("access")) {
-            CompileState left1 = argumentsTuple.left;
-            Tuple<String, CompileState> local = left1.createName("local");
-            String name = local.left;
-
-            String parent = oldCaller.findString("parent").orElse("");
-            Node element = new Node("symbol").withString("value", name);
-
-            left = local.right.addStatement("\n\tauto " + name + " = " + parent + ";");
-            JavaList<Node> oldArguments = argumentsTuple.right;
-            newArguments = oldArguments.addFirst(element);
-            newCaller = element;
-        }
-        else {
-            left = argumentsTuple.left;
-            newArguments = argumentsTuple.right;
-            newCaller = oldCaller;
+        if (!oldCaller.is("access")) {
+            return modifyInvocation(argumentsTuple.left, oldCaller, argumentsTuple.right);
         }
 
-        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(left, newArguments);
+        CompileState left1 = argumentsTuple.left;
+        Tuple<String, CompileState> local = left1.createName("local");
+        String name = local.left;
 
+        String parent = oldCaller.findString("parent").orElse("");
+
+        Node element = new Node("symbol").withString("value", name);
+        CompileState left = local.right.addStatement("\n\tauto " + name + " = " + parent + ";");
+
+        JavaList<Node> oldArguments = argumentsTuple.right;
+        JavaList<Node> newArguments = oldArguments.addFirst(element);
+        Node newCaller = oldCaller.withString("parent", name);
+
+        return modifyInvocation(left, newCaller, newArguments);
+    }
+
+    private static Option<Tuple<CompileState, Node>> modifyInvocation(
+            CompileState state,
+            Node caller,
+            JavaList<Node> arguments
+    ) {
+        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(state, arguments);
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
-        String arguments = compiledArguments.right;
+        String argumentsString = compiledArguments.right;
 
-        String generatedCaller = generateValue(newCaller);
+        String generatedCaller = generateValue(caller);
         Node node = new Node("invocation")
                 .withString("caller", generatedCaller)
-                .withString("arguments", arguments);
+                .withString("arguments", argumentsString);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
     }
