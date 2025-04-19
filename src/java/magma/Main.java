@@ -44,10 +44,18 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(generatePlaceholder(segment));
+            output.append(compileRootSegment(segment));
         }
 
         return output.toString();
+    }
+
+    private static String compileRootSegment(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+        return generatePlaceholder(stripped) + "\n";
     }
 
     private static String generatePlaceholder(String input) {
