@@ -142,21 +142,32 @@
         if (paramStart < 0) {
             return Option.empty();
         }
-        String caller = withoutEnd.substring(0, paramStart).strip();
-        String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
+        String callerString = withoutEnd.substring(0, paramStart).strip();
+        String argumentsString = withoutEnd.substring(paramStart + "(".length()).strip();
 
-        Tuple<CompileState, Node> parsed1 = parseValue(state, caller);
-        Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(parsed1.right));
-        Tuple<CompileState, JavaList<Node>> tuple = parseValues(compiledCaller.left, arguments, parseDefault((state1, input1) -> {
-            Tuple<CompileState, Node> parsed = parseValue(state1, input1);
-            return new Tuple<>(parsed.left, generateValue(parsed.right));
-        }));
-        
-        Tuple<CompileState, String> compiledArguments = generateValues(tuple, Main::generateDefault);
+        Tuple<CompileState, Node> parsed1 = parseValue(state, callerString);
+        Node caller = parsed1.right;
+
+        Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(caller));
+
+        Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(compiledCaller.left, argumentsString, Main::parseValue);
+        JavaList<Node> oldArguments = argumentsTuple.right;
+        JavaList<Node> newArguments;
+        if (caller.is("access")) {
+            String parent = caller.findString("parent").orElse("");
+            newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
+        }
+        else {
+            newArguments = oldArguments;
+        }
+
+        Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
+        Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
+        String arguments = compiledArguments.right;
 
         Node node = new Node("invocation")
                 .withString("caller", compiledCaller.right)
-                .withString("arguments", compiledArguments.right);
+                .withString("arguments", arguments);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
     } */
@@ -491,7 +502,7 @@
 	/* return new DivideState */(this.segments, this.buffer + c, this.depth);/*  */
 }
 /* private */ struct DivideState advance_DivideState(/*  */){
-	/* return new DivideState */(this.segments.addLast(this.buffer), /*  "" */, this.depth);/*  */
+	/* return new DivideState */(this.segments.addLast(this.segments, this.buffer), /*  "" */, this.depth);/*  */
 }
 /* private */ struct DivideState enter_DivideState(/*  */){
 	/* return new DivideState */(this.segments, this.buffer, this.depth + 1);/*  */
@@ -509,6 +520,11 @@
             return new JavaList<>(this.list.subList(0, this.list.size() - 1));
         } *//* public T last() {
             return this.list.getLast();
+        } *//* public JavaList<T> addFirst(T element) {
+            ArrayList<T> copy = new ArrayList<>();
+            copy.add(element);
+            copy.addAll(this.list);
+            return new JavaList<>(copy);
         } *//*  */
 }
 /* private record */ /* Tuple<A, */ B>_Main(struct A left_Main, struct B right_Main){/*  */
@@ -520,12 +536,20 @@
 
         @Override
         public Option<T> or(Supplier<Option<T>> other) {
-            return other */.get();
+            return other */.get(/* }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other */, );
 	/* }
 
         @Override
         public T orElseGet(Supplier<T> other) {
-            return other */.get();
+            return other */.get(/* }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other */, );
 	/* }
 
         @Override
@@ -553,16 +577,16 @@
             return false */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	run().ifPresent(/* error -> System */.err.println(error.display()));/*  */
+	run().ifPresent(run(), /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
 }
 /* private static */ /* Option<Error> */ run_Main(/*  */){
-	/* Path source = Paths */.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
-	/* return readString */(source).match(/* input -> runWithInput(source */, /*  input) */, /*  Option::of */).map(/* ThrowableError::new */);/*  */
+	/* Path source = Paths */.get(/* Path source = Paths */, /* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");
+	/* return readString */(source).match(/* return readString */(source), /* input -> runWithInput(source */, /*  input) */, /*  Option::of */).map(/* return readString */(source).match(/* return readString */(source), /* input -> runWithInput(source */, /*  input) */, /*  Option::of */), /* ThrowableError::new */);/*  */
 }
 /* private static */ /* Option<IOException> */ runWithInput_Main(struct Path source_Main, char* input_Main){
-	/* Path target = source */.resolveSibling(/* "main */.c");
+	/* Path target = source */.resolveSibling(/* Path target = source */, /* "main */.c");
 	/* String compile = compile */(input);
-	/* return writeString */(target, compile).or(/* Main::build */);/*  */
+	/* return writeString */(target, compile).or(/* return writeString */(target, compile), /* Main::build */);/*  */
 }
 /* private static */ /* Option<IOException> */ build_Main(/*  */){/* return start().match(process -> {
             try {
@@ -601,8 +625,8 @@
 	/* Tuple<CompileState, String> compiled = generateStatements */(/* parseStatements(methods */, input, /*  parseDefault(Main::compileRootSegment)) */, /*  Main::generateDefault */);
 	/* CompileState newState = compiled.left */;
 	/* String output = compiled.right */;
-	/* String joinedStructs = String */.join(/* "" */, newState.structs.list);
-	/* String joinedMethods = String */.join(/* "" */, newState.methods.list);
+	/* String joinedStructs = String */.join(/* String joinedStructs = String */, /* "" */, newState.structs.list);
+	/* String joinedMethods = String */.join(/* String joinedMethods = String */, /* "" */, newState.methods.list);
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
 }
@@ -642,12 +666,12 @@
 	/* return new Tuple<> */(current, output);/*  */
 }
 /* private static */ char* generateDefault_Main(struct Node element_Main){
-	/* return element */.findString(/* "value" */).orElse(/* "" */);/*  */
+	/* return element */.findString(/* return element */, /* "value" */).orElse(/* return element */.findString(/* return element */, /* "value" */), /* "" */);/*  */
 }
 /* private static */ /* List<String> */ divide_Main(char* input_Main, /*  BiFunction<DivideState */, /*  Character */, /*  DivideState> folder */){
 	/* DivideState current = new DivideState */();
 	/* for (int i = 0 */;
-	/* i < input */.length();/* i++) {
+	/* i < input */.length(/* i < input */, );/* i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
@@ -657,7 +681,7 @@
 	/* return buffer + element */;/*  */
 }
 /* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){
-	/* DivideState appended = current */.append(c);
+	/* DivideState appended = current */.append(/* DivideState appended = current */, c);
 	/* if (c == ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */
