@@ -38,7 +38,7 @@ public class Main {
         }
 
         private DivideState advance() {
-            return new DivideState(this.segments.add(this.buffer), "", this.depth);
+            return new DivideState(this.segments.addLast(this.buffer), "", this.depth);
         }
 
         private DivideState enter() {
@@ -55,31 +55,43 @@ public class Main {
             this(new ArrayList<>());
         }
 
-        public JavaList<T> add(T element) {
+        public JavaList<T> addLast(T element) {
             ArrayList<T> copy = new ArrayList<>(this.list);
             copy.add(element);
             return new JavaList<>(copy);
+        }
+
+        public JavaList<T> removeLast() {
+            return new JavaList<>(this.list.subList(0, this.list.size() - 1));
+        }
+
+        public T last() {
+            return this.list.getLast();
         }
     }
 
     private record Tuple<A, B>(A left, B right) {
     }
 
-    record CompileState(JavaList<String> structs, JavaList<String> methods, Optional<String> structName) {
+    record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
         public CompileState() {
-            this(new JavaList<>(), new JavaList<>(), Optional.empty());
+            this(new JavaList<>(), new JavaList<>(), new JavaList<>());
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.structs, this.methods.add(method), this.structName);
+            return new CompileState(this.structs, this.methods.addLast(method), this.structNames);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.add(struct), this.methods, this.structName);
+            return new CompileState(this.structs.addLast(struct), this.methods, this.structNames);
         }
 
-        public CompileState withStructName(String structName) {
-            return new CompileState(this.structs, this.methods, Optional.of(structName));
+        public CompileState pushStructName(String structName) {
+            return new CompileState(this.structs, this.methods, this.structNames.addLast(structName));
+        }
+
+        public CompileState popStructName() {
+            return new CompileState(this.structs, this.methods, this.structNames.removeLast());
         }
     }
 
@@ -194,9 +206,10 @@ public class Main {
         if (!isSymbol(name)) {
             return Optional.empty();
         }
-        Tuple<CompileState, String> outputContent = compileStatements(state.withStructName(name), inputContent, Main::compileClassSegment);
+        Tuple<CompileState, String> outputContent = compileStatements(state.pushStructName(name), inputContent, Main::compileClassSegment);
         String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
-        return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
+        return Optional.of(new Tuple<>(outputContent.left
+                .popStructName().addStruct(generated), ""));
     }
 
     private static boolean isSymbol(String input) {
@@ -274,7 +287,7 @@ public class Main {
             newName = "__main__";
         }
         else {
-            newName = name + "_" + state.structName.orElse("");
+            newName = name + "_" + state.structNames.last();
         }
 
         int typeSeparator = beforeName.lastIndexOf(" ");
