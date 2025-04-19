@@ -6,45 +6,21 @@
 /* import java.util.List; */
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
-/* public  */struct Main {/* private static class State {
-        private final JavaList<String> segments;
-        private final StringBuilder buffer;
-        private final int depth;
+/* public  */struct Main {/* private static  */struct State {/* private final JavaList<String> segments; *//* 
+        private final StringBuilder buffer; *//* 
+        private final int depth; *//* 
 
         private State(JavaList<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        }
+        } *//* 
 
         public State() {
             this(new JavaList<>(), new StringBuilder(), 0);
-        }
-
-        private boolean isShallow() {
-            return this.depth == 1;
-        }
-
-        private boolean isLevel() {
-            return this.depth == 0;
-        }
-
-        private State append(char c) {
-            return new State(this.segments, this.buffer.append(c), this.depth);
-        }
-
-        private State advance() {
-            return new State(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
-        }
-
-        private State enter() {
-            return new State(this.segments, this.buffer, this.depth + 1);
-        }
-
-        private State exit() {
-            return new State(this.segments, this.buffer, this.depth - 1);
-        }
-    } *//* 
+        } *//* 
+     */};
+/* 
 
     private record JavaList<T>(List<T> list) {
         public JavaList() {
@@ -103,26 +79,33 @@
         if (stripped.startsWith("package ")) {
             return new Tuple<>(methods, "");
         }
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            String modifiers = stripped.substring(0, classIndex);
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<JavaList<String>, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
-                    if (isSymbol(name)) {
-                        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
-                        return new Tuple<>(outputContent.left, generated);
-                    }
-                }
-            }
-        }
 
-        return new Tuple<>(methods, generatePlaceholder(stripped) + "\n");
+        return compileClass(methods, stripped)
+                .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(stripped) + "\n"));
+    } */
+/* private static Optional<Tuple<JavaList<String>, String>> compileClass(JavaList<String> methods, String stripped) {
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex < 0) {
+            return Optional.empty();
+        }
+        String modifiers = stripped.substring(0, classIndex);
+        String afterKeyword = stripped.substring(classIndex + "class ".length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        String name = afterKeyword.substring(0, contentStart).strip();
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        Tuple<JavaList<String>, String> outputContent = compileStatements(methods, inputContent, Main::compileClassSegment);
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+        String generated = generatePlaceholder(modifiers) + "struct " + name + " {" + outputContent.right + "};\n";
+        return Optional.of(new Tuple<>(outputContent.left, generated));
     } */
 /* private static boolean isSymbol(String input) {
         if (input.equals("private") || input.equals("record")) {
@@ -137,7 +120,8 @@
         return true;
     } */
 /* private static Tuple<JavaList<String>, String> compileClassSegment(JavaList<String> methods, String input) {
-        return compileMethod(methods, input)
+        return compileClass(methods, input)
+                .or(() -> compileMethod(methods, input))
                 .orElseGet(() -> new Tuple<>(methods, generatePlaceholder(input)));
     } */
 /* private static Optional<Tuple<JavaList<String>, String>> compileMethod(JavaList<String> methods, String input) {
@@ -198,6 +182,24 @@
         return "<comment-start> " + replaced + " <comment-end>";
     } */
 /* } */
+/* private */ boolean isShallow(/*  */){/* 
+            return this.depth == 1;
+         */}
+/* private */ boolean isLevel(/*  */){/* 
+            return this.depth == 0;
+         */}
+/* private */ State append(/* char c */){/* 
+            return new State(this.segments, this.buffer.append(c), this.depth);
+         */}
+/* private */ State advance(/*  */){/* 
+            return new State(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
+         */}
+/* private */ State enter(/*  */){/* 
+            return new State(this.segments, this.buffer, this.depth + 1);
+         */}
+/* private */ State exit(/*  */){/* 
+            return new State(this.segments, this.buffer, this.depth - 1);
+         */}
 /* public static */ void __main__(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
