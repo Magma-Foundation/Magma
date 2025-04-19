@@ -7,8 +7,6 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
-// #include <temp.h>
-// #include <temp.h>
 /* public */ struct Collector<T, C> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
@@ -22,6 +20,89 @@
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
+};
+/* private interface Optional<T> { */ struct None<T> implements Optional<T> {
+	/* @Override
+            public <R> */ Optional</* R */> map(/*  R */(*mapper)(/* T */))/*  {
+                return new None<>();
+            } */
+	/* @Override
+            public */ /* T */ orElse(/* T */ other)/*  {
+                return other;
+            } */
+	/* @Override
+            public */ /* boolean */ isEmpty()/*  {
+                return true;
+            } */
+	/* @Override
+            public */ /* boolean */ isPresent()/*  {
+                return false;
+            } */
+	/* @Override
+            public */ /* T */ orElseGet(Supplier</* T */> other)/*  {
+                return other.get();
+            } */
+	/* @Override
+            public */ Optional</* T */> or(Supplier<Optional</* T */>> other)/*  {
+                return other.get();
+            } */
+	/* @Override
+            public <R> */ Optional</* R */> flatMap(Optional</* R */>(*mapper)(/* T */))/*  {
+                return new None<>();
+            } */
+	/* } */ /* record */ Some<T>(/* T */ value)/*  implements Optional<T> {
+            @Override
+            public <R> Optional<R> map(Function<T, R> mapper) {
+                return new Some<>(mapper.apply(this.value));
+            } */
+	/* @Override
+            public */ /* T */ orElse(/* T */ other)/*  {
+                return this.value;
+            } */
+	/* @Override
+            public */ /* boolean */ isEmpty()/*  {
+                return false;
+            } */
+	/* @Override
+            public */ /* boolean */ isPresent()/*  {
+                return true;
+            } */
+	/* @Override
+            public */ /* T */ orElseGet(Supplier</* T */> other)/*  {
+                return this.value;
+            } */
+	/* @Override
+            public */ Optional</* T */> or(Supplier<Optional</* T */>> other)/*  {
+                return this;
+            } */
+	/* @Override
+            public <R> */ Optional</* R */> flatMap(Optional</* R */>(*mapper)(/* T */))/*  {
+                return mapper.apply(this.value);
+            } */
+	/* }
+
+        static <T> */ Optional</* T */> empty()/*  {
+            return new None<>(); */
+	/* }
+
+        static <T> */ Optional</* T */> of(/* T */ value)/*  {
+            return new Some<>(value); */
+	/* }
+
+        <R> */ Optional</* R */> map(/*  R */(*mapper)(/* T */))/* ;
+
+        T orElse(T other);
+
+        boolean isEmpty();
+
+        boolean isPresent();
+
+        T orElseGet(Supplier<T> other);
+
+        Optional<T> or(Supplier<Optional<T>> other);
+
+        <R> Optional<R> flatMap(Function<T, Optional<R>> mapper);
+     */
 };
 /* private */ struct Head<T> {
 	Optional</* T */> next();
@@ -140,7 +221,7 @@
                 if (optional.isEmpty()) {
                     return current;
                 }
-                current = optional.get();
+                current = optional.orElse(null);
             }
         }
 
@@ -185,7 +266,7 @@
         }
 
         public boolean is(String type) {
-            return this.type.isPresent() && this.type.get().equals(type);
+            return this.type.isPresent() && this.type.orElse(null).equals(type);
         }
     } */
 	/* public static */ /* void */ main(/* String[] */ args)/*  {
@@ -449,7 +530,7 @@
                 .orElseGet(() -> parseContent(state, input));
     } *//* 
 
-    private static @NotNull Optional<? extends Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
         if (input.strip().equals("int")) {
             return Optional.of(new Tuple<>(state, new Node("primitive").withString("value", "int")));
         }
