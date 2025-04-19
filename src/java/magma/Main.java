@@ -31,6 +31,8 @@ public class Main {
         List<T> add(T element);
 
         T get(int index);
+
+        boolean contains(T element);
     }
 
     public interface Option<T> {
@@ -158,7 +160,9 @@ public class Main {
         }
 
         public CompileState addGeneric(Node node) {
-            this.generics.add(node);
+            if (!this.generics.contains(node)) {
+                this.generics.add(node);
+            }
             return this;
         }
     }
@@ -640,7 +644,8 @@ public class Main {
                 .orElseGet(() -> {
                     String newTypes = mergeAll(Main::mergeValues, compiled);
                     Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                    return new Tuple<>(newState.addGeneric(node), node);
+                    CompileState withGeneric = newState.addGeneric(node);
+                    return new Tuple<>(withGeneric, node);
                 });
 
         return new Some<>(value);

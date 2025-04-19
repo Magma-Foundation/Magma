@@ -20,6 +20,7 @@
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
+	/* boolean */ contains(/* T */ element);
 };
 /* public */ struct Option<T> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
@@ -184,7 +185,9 @@
         }
 
         public CompileState addGeneric(Node node) {
-            this.generics.add(node);
+            if (!this.generics.contains(node)) {
+                this.generics.add(node);
+            }
             return this;
         }
     } */
@@ -369,49 +372,16 @@
 // List</* T */>
 // Option</* R */>
 // Option</* T */>
-// Option</* T */>
-// Option</* R */>
-// Option</* R */>
-// Option</* T */>
-// List</* String */>
-// List</* String */>
-// List</* String */>
-// List</* String */>
 // List</* String */>
 // List</* Node */>
 // Head</* T */>
 // Option</* Integer */>
 // Option</* String */>
 // Map</* String */, /*  String */>
-// List</* Node */>
 // Map</* String */, List</* Node */>>
-// List</* T */>
-// List</* T */>
-// List</* T */>
-// Option</* R */>
-// Option</* T */>
-// Option</* T */>
-// Option</* R */>
-// Option</* R */>
-// List</* String */>
 // Tuple</* CompileState */, /*  String */>
-// Tuple</* CompileState */, /*  String */>
-// Tuple</* CompileState */, /*  String */>
-// Tuple</* CompileState */, /*  String */>
-// List</* String */>
-// Tuple</* CompileState */, List</* String */>>
-// Tuple</* CompileState */, /*  String */>
-// List</* String */>
-// Tuple</* CompileState */, List</* String */>>
-// Tuple</* CompileState */, /*  String */>
-// List</* String */>
-// Tuple</* CompileState */, List</* String */>>
-// List</* String */>
 // Tuple</* CompileState */, List</* String */>>
 // Tuple</* CompileState */, /*  StringBuilder */>
-// Tuple</* CompileState */, /*  String */>
-// Tuple</* CompileState */, /*  StringBuilder */>
-// List</* String */>
 /* 
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -623,7 +593,8 @@
                 .orElseGet(() -> {
                     String newTypes = mergeAll(Main::mergeValues, compiled);
                     Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
-                    return new Tuple<>(newState.addGeneric(node), node);
+                    CompileState withGeneric = newState.addGeneric(node);
+                    return new Tuple<>(withGeneric, node);
                 });
 
         return new Some<>(value);
