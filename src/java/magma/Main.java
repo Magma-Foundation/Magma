@@ -624,6 +624,14 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String definition) {
+        return parseDefinition(state, definition).flatMap(result -> {
+            return generateDefinition(result.right).map(inner -> {
+                return new Tuple<>(result.left, inner);
+            });
+        });
+    }
+
+    private static Option<Tuple<CompileState, Node>> parseDefinition(CompileState state, String definition) {
         String withoutEnd = definition.strip();
         int nameSeparator = withoutEnd.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -642,25 +650,25 @@ public class Main {
 
             if (type.is("functional")) {
                 Node node = type.withString("name", name);
-                return generateDefinition(node).map(result -> new Tuple<>(withType, result));
+                return new Some<>(new Tuple<>(withType, node));
             }
 
             Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
             Node node = new Node("definition").withString("before-name", outputBeforeName).withString("name", name);
-            return generateDefinition(node).map(result -> new Tuple<>(typeTuple.left, result));
+            return new Some<>(new Tuple<>(typeTuple.left, node));
         }).orElseGet(() -> {
             Tuple<CompileState, Node> value = parseType(state, beforeName);
             CompileState withType = value.left;
             Node type = value.right;
             if (type.is("functional")) {
                 Node node = type.withString("name", name);
-                return generateDefinition(node).map(result -> new Tuple<>(withType, result));
+                return new Some<>(new Tuple<>(withType, node));
             }
 
             Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
             Node node = new Node("definition").withString("before-name", generated.right).withString("name", name);
-            return generateDefinition(node).map(result -> new Tuple<>(generated.left, result));
+            return new Some<>(new Tuple<>(generated.left, node));
         });
     }
 
