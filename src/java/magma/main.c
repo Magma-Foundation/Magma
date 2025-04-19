@@ -13,7 +13,7 @@
 };
 /* public */ struct Iterator<T> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
-	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*)(/* R */, /*  T */) folder);
+	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
 	/* <R> */ Iterator</* R */> map(Function</* T */, /*  R */> mapper);
 };
 /* public */ struct List<T> {
@@ -212,18 +212,18 @@
                 .collect(new Joiner())
                 .orElse("");
     } */
-	/* private static */ Tuple</* CompileState */, /*  String */> compileStatements(/* CompileState */ state, /* String */ input, Tuple</* CompileState */, /*  String */>(*)(/* CompileState */, /*  String */) compiler)/*  {
+	/* private static */ Tuple</* CompileState */, /*  String */> compileStatements(/* CompileState */ state, /* String */ input, Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */))/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static */ Tuple</* CompileState */, /*  String */> compileAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*)(/* DivideState */, /*  Character */) divider, Tuple</* CompileState */, /*  String */>(*)(/* CompileState */, /*  String */) compiler, /*  StringBuilder */(*)(/* StringBuilder */, /*  String */) merger)/*  {
+	/* private static */ Tuple</* CompileState */, /*  String */> compileAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), /*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */))/*  {
         Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
         return new Tuple<>(compiled.left, mergeAll(merger, compiled));
     } */
-	/* private static */ Tuple</* CompileState */, List</* String */>> parseAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*)(/* DivideState */, /*  Character */) divider, Tuple</* CompileState */, /*  String */>(*)(/* CompileState */, /*  String */) compiler)/*  {
+	/* private static */ Tuple</* CompileState */, List</* String */>> parseAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */))/*  {
         return divide(input, divider).iter().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()),
                 (current, element) -> parseElement(compiler, current, element));
     } */
-	/* private static */ Tuple</* CompileState */, List</* String */>> parseElement(Tuple</* CompileState */, /*  String */>(*)(/* CompileState */, /*  String */) compiler, Tuple</* CompileState */, List</* String */>> current, /* String */ element)/*  {
+	/* private static */ Tuple</* CompileState */, List</* String */>> parseElement(Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), Tuple</* CompileState */, List</* String */>> current, /* String */ element)/*  {
         CompileState currentState = current.left;
         List<String> currentCache = current.right;
 
@@ -233,10 +233,10 @@
 
         return new Tuple<>(newState, currentCache.add(compiled));
     } */
-	/* private static */ /* String */ mergeAll(/*  StringBuilder */(*)(/* StringBuilder */, /*  String */) merger, Tuple</* CompileState */, List</* String */>> fold)/*  {
+	/* private static */ /* String */ mergeAll(/*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */), Tuple</* CompileState */, List</* String */>> fold)/*  {
         return fold.right.iter().fold(new StringBuilder(), merger).toString();
     } */
-	/* private static */ Tuple</* CompileState */, /*  StringBuilder */> compileSegment(Tuple</* CompileState */, /*  String */>(*)(/* CompileState */, /*  String */) compiler, Tuple</* CompileState */, /*  StringBuilder */> current, /* String */ element, /*  StringBuilder */(*)(/* StringBuilder */, /*  String */) merger)/*  {
+	/* private static */ Tuple</* CompileState */, /*  StringBuilder */> compileSegment(Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), Tuple</* CompileState */, /*  StringBuilder */> current, /* String */ element, /*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */))/*  {
         CompileState currentState = current.left;
         StringBuilder currentCache = current.right;
 
@@ -250,7 +250,7 @@
 	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, /* String */ statement)/*  {
         return current.append(statement);
     } */
-	/* private static */ List</* String */> divide(/* String */ input, /*  DivideState */(*)(/* DivideState */, /*  Character */) folder)/*  {
+	/* private static */ List</* String */> divide(/* String */ input, /*  DivideState */(*folder)(/* DivideState */, /*  Character */))/*  {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -416,16 +416,28 @@
 
         return findTypeSeparator(beforeName).map(typeSeparator -> {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length());
-            Tuple<CompileState, Node> value = parseType(state, type);
-            Tuple<CompileState, String> typeTuple = new Tuple<>(value.left, generateType(value.right).orElse(""));
+            String typeString = beforeName.substring(typeSeparator + " ".length());
 
+            Tuple<CompileState, Node> value = parseType(state, typeString);
+            CompileState withType = value.left;
+            Node type = value.right;
+
+            if (type.is("functional")) {
+                return Optional.of(new Tuple<>(withType, generateFunctional(type.withString("name", name))));
+            }
+
+            Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
             return generateDefinition(typeTuple.left, outputBeforeName, name);
         }).orElseGet(() -> {
             Tuple<CompileState, Node> value = parseType(state, beforeName);
-            Tuple<CompileState, String> type = new Tuple<>(value.left, generateType(value.right).orElse(""));
-            return generateDefinition(type.left, type.right, name);
+            CompileState withType = value.left;
+            Node type = value.right;
+            if (type.is("functional")) {
+                return Optional.of(new Tuple<>(withType, generateFunctional(type.withString("name", name))));
+            }
+            Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
+            return generateDefinition(generated.left, generated.right, name);
         });
     } *//* 
 
@@ -476,7 +488,7 @@
     private static Optional<String> generateType(Node node) {
         String generated;
         if (node.is("functional")) {
-            generated = generateFunctionalType(node);
+            generated = generateFunctional(node);
         }
         else if (node.is("generic")) {
             generated = generateGenericType(node);
@@ -497,7 +509,7 @@
         return base + "<" + arguments + ">";
     } *//* 
 
-    private static String generateFunctionalType(Node node) {
+    private static String generateFunctional(Node node) {
         String arguments = node.findNodeList("arguments")
                 .orElse(Lists.empty())
                 .iter()
@@ -506,7 +518,8 @@
                 .orElse("");
 
         String returns = node.findString("returns").orElse("");
-        return returns + "(*)(" + arguments + ")";
+        String name = node.findString("name").orElse("");
+        return "%s(*%s)(%s)".formatted(returns, name, arguments);
     } *//* 
 
     private static Optional<Integer> findTypeSeparator(String input) {

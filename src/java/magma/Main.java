@@ -467,16 +467,28 @@ public class Main {
 
         return findTypeSeparator(beforeName).map(typeSeparator -> {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length());
-            Tuple<CompileState, Node> value = parseType(state, type);
-            Tuple<CompileState, String> typeTuple = new Tuple<>(value.left, generateType(value.right).orElse(""));
+            String typeString = beforeName.substring(typeSeparator + " ".length());
 
+            Tuple<CompileState, Node> value = parseType(state, typeString);
+            CompileState withType = value.left;
+            Node type = value.right;
+
+            if (type.is("functional")) {
+                return Optional.of(new Tuple<>(withType, generateFunctional(type.withString("name", name))));
+            }
+
+            Tuple<CompileState, String> typeTuple = new Tuple<>(withType, generateType(type).orElse(""));
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
             return generateDefinition(typeTuple.left, outputBeforeName, name);
         }).orElseGet(() -> {
             Tuple<CompileState, Node> value = parseType(state, beforeName);
-            Tuple<CompileState, String> type = new Tuple<>(value.left, generateType(value.right).orElse(""));
-            return generateDefinition(type.left, type.right, name);
+            CompileState withType = value.left;
+            Node type = value.right;
+            if (type.is("functional")) {
+                return Optional.of(new Tuple<>(withType, generateFunctional(type.withString("name", name))));
+            }
+            Tuple<CompileState, String> generated = new Tuple<>(withType, generateType(type).orElse(""));
+            return generateDefinition(generated.left, generated.right, name);
         });
     }
 
@@ -527,7 +539,7 @@ public class Main {
     private static Optional<String> generateType(Node node) {
         String generated;
         if (node.is("functional")) {
-            generated = generateFunctionalType(node);
+            generated = generateFunctional(node);
         }
         else if (node.is("generic")) {
             generated = generateGenericType(node);
@@ -548,7 +560,7 @@ public class Main {
         return base + "<" + arguments + ">";
     }
 
-    private static String generateFunctionalType(Node node) {
+    private static String generateFunctional(Node node) {
         String arguments = node.findNodeList("arguments")
                 .orElse(Lists.empty())
                 .iter()
@@ -557,7 +569,8 @@ public class Main {
                 .orElse("");
 
         String returns = node.findString("returns").orElse("");
-        return returns + "(*)(" + arguments + ")";
+        String name = node.findString("name").orElse("");
+        return "%s(*%s)(%s)".formatted(returns, name, arguments);
     }
 
     private static Optional<Integer> findTypeSeparator(String input) {
