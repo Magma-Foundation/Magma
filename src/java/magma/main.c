@@ -22,23 +22,22 @@
 // Map</* String */, List</* Node */>>
 // Tuple</* CompileState */, /*  String */>
 // Tuple</* CompileState */, List</* String */>>
-// Tuple</* CompileState */, /*  StringBuilder */>
-/* public */ struct Collector<T, C> {
+/* public */ struct Collector {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
 };
-/* public */ struct Iterator<T> {
+/* public */ struct Iterator {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
 	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
 	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
 };
-/* public */ struct List<T> {
+/* public */ struct List {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
 	/* boolean */ contains(/* T */ element);
 };
-/* public */ struct Option<T> {
+/* public */ struct Option {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -47,7 +46,7 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* private */ struct Head<T> {
+/* private */ struct Head {
 	Option</* T */> next();
 };
 /* private static */ struct DivideState {
@@ -89,7 +88,7 @@
             return this.segments;
         } */
 };
-/* public static final */ struct RangeHead implements Head<Integer> {
+/* public static final */ struct RangeHead implements Head {
 	/* private final */ int length;
 	/* private int counter */ /* = */ 0;
 	/* public */ RangeHead(int length)/*  {
@@ -106,7 +105,7 @@
             return new Some<>(value);
         } */
 };
-/* private static */ struct ListCollector<T> implements Collector<T, List<T>> {
+/* private static */ struct ListCollector {
 	/* @Override
         public */ List</* T */> createInitial()/*  {
             return Lists.empty();
@@ -116,7 +115,7 @@
             return current.add(element);
         } */
 };
-/* static */ struct None<T> implements Option<T> {
+/* static */ struct None {
 	/* @Override
         public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/*  {
             return new None<>();
@@ -341,17 +340,6 @@
 	/* private static */ /* String */ mergeAll(/*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */), Tuple</* CompileState */, List</* String */>> fold)/*  {
         return fold.right.iter().fold(new StringBuilder(), merger).toString();
     } */
-	/* private static */ Tuple</* CompileState */, /*  StringBuilder */> compileSegment(Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), Tuple</* CompileState */, /*  StringBuilder */> current, /* String */ element, /*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */))/*  {
-        CompileState currentState = current.left;
-        StringBuilder currentCache = current.right;
-
-        Tuple<CompileState, String> compiledTuple = compiler.apply(currentState, element);
-        CompileState newState = compiledTuple.left;
-        String compiled = compiledTuple.right;
-
-        StringBuilder newCache = merger.apply(currentCache, compiled);
-        return new Tuple<>(newState, newCache);
-    } */
 	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, /* String */ statement)/*  {
         return current.append(statement);
     } */
@@ -405,24 +393,33 @@
 
     private static Option<Tuple<CompileState, String>> compileStructured(String infix, CompileState state, String input) {
         int classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex).strip();
-            String afterKeyword = input.substring(classIndex + infix.length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
-
-                    String format = "%s struct %s {%s\n};\n";
-                    String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
-                    return new Some<>(new Tuple<CompileState, String>(content.left.addStruct(message), ""));
-                }
-            }
+        if (classIndex < 0) {
+            return new None<>();
         }
-        return new None<>();
+
+        String modifiers = input.substring(0, classIndex).strip();
+        String afterKeyword = input.substring(classIndex + infix.length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        int typeParamStart = beforeContent.indexOf("<");
+        String name = typeParamStart >= 0
+                ? beforeContent.substring(0, beforeContent.indexOf("<"))
+                : beforeContent;
+
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return new None<>();
+        }
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
+
+        String format = "%s struct %s {%s\n};\n";
+        String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
+        return new Some<>(new Tuple<CompileState, String>(content.left.addStruct(message), ""));
     } *//* 
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {

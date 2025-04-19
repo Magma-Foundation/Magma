@@ -444,24 +444,33 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileStructured(String infix, CompileState state, String input) {
         int classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            String modifiers = input.substring(0, classIndex).strip();
-            String afterKeyword = input.substring(classIndex + infix.length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
-
-                    String format = "%s struct %s {%s\n};\n";
-                    String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
-                    return new Some<>(new Tuple<CompileState, String>(content.left.addStruct(message), ""));
-                }
-            }
+        if (classIndex < 0) {
+            return new None<>();
         }
-        return new None<>();
+
+        String modifiers = input.substring(0, classIndex).strip();
+        String afterKeyword = input.substring(classIndex + infix.length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        int typeParamStart = beforeContent.indexOf("<");
+        String name = typeParamStart >= 0
+                ? beforeContent.substring(0, beforeContent.indexOf("<"))
+                : beforeContent;
+
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return new None<>();
+        }
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
+
+        String format = "%s struct %s {%s\n};\n";
+        String message = format.formatted(generatePlaceholder(modifiers), name, content.right);
+        return new Some<>(new Tuple<CompileState, String>(content.left.addStruct(message), ""));
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
