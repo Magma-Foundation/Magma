@@ -442,10 +442,22 @@ public class Main {
             if (paramStart >= 0) {
                 String caller = withoutEnd.substring(0, paramStart).strip();
                 String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
-                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+                return compileValue(caller) + "(" + generatePlaceholder(arguments) + ")";
             }
         }
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileValue(String input) {
+        int propertySeparator = input.lastIndexOf(".");
+        if (propertySeparator >= 0) {
+            String parent = input.substring(0, propertySeparator);
+            String property = input.substring(propertySeparator + ".".length());
+
+            return compileValue(parent) + "." + property;
+        }
+
+        return generatePlaceholder(input);
     }
 
     private static String mergeValues(String cache, String element) {

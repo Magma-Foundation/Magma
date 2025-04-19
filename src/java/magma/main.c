@@ -122,10 +122,21 @@
             if (paramStart >= 0) {
                 String caller = withoutEnd.substring(0, paramStart).strip();
                 String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
-                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+                return compileValue(caller) + "(" + generatePlaceholder(arguments) + ")";
             }
         }
         return generatePlaceholder(stripped);
+    } */
+/* private static String compileValue(String input) {
+        int propertySeparator = input.lastIndexOf(".");
+        if (propertySeparator >= 0) {
+            String parent = input.substring(0, propertySeparator);
+            String property = input.substring(propertySeparator + ".".length());
+
+            return compileValue(parent) + "." + property;
+        }
+
+        return generatePlaceholder(input);
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -467,12 +478,12 @@
 
         @Override
         public Option<T> or(Supplier<Option<T>> other) {
-            return other.get */(/*  */);
+            return other */.get(/*  */);
 	/* }
 
         @Override
         public T orElseGet(Supplier<T> other) {
-            return other.get */(/*  */);
+            return other */.get(/*  */);
 	/* }
 
         @Override
@@ -485,14 +496,14 @@
             return new None<> */(/*  */);/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	/* run().ifPresent */(/* error -> System.err.println(error.display()) */);/*  */
+	/* run() */.ifPresent(/* error -> System.err.println(error.display()) */);/*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
 	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState(), input, Main::compileRootSegment */);
 	/* CompileState newState = compiled.left */;
 	/* String output = compiled.right */;
-	/* String joinedStructs = String.join */(/* "", newState.structs.list */);
-	/* String joinedMethods = String.join */(/* "", newState.methods.list */);
+	/* String joinedStructs = String */.join(/* "", newState.structs.list */);
+	/* String joinedMethods = String */.join(/* "", newState.methods.list */);
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
 }
@@ -500,7 +511,7 @@
 	/* return buffer + element */;/*  */
 }
 /* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){
-	/* DivideState appended = current.append */(/* c */);
+	/* DivideState appended = current */.append(/* c */);
 	/* if (c == ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */
