@@ -8,6 +8,7 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
+// #include <temp.h>
 /* public */ struct Collector<T, C> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
@@ -20,7 +21,7 @@
 /* public */ struct List<T> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
-	/* T */ get(/* int */ index);
+	/* T */ get(int index);
 };
 /* private */ struct Head<T> {
 	Optional</* T */> next();
@@ -28,8 +29,8 @@
 /* private static */ struct DivideState {
 	/* private final */ List</* String */> segments;
 	/* private */ /* StringBuilder */ buffer;
-	/* private */ /* int */ depth;
-	/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
+	/* private */ int depth;
+	/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, int depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -65,9 +66,9 @@
         } */
 };
 /* public static final */ struct RangeHead implements Head<Integer> {
-	/* private final */ /* int */ length;
+	/* private final */ int length;
 	/* private int counter */ /* = */ 0;
-	/* public */ RangeHead(/* int */ length)/*  {
+	/* public */ RangeHead(int length)/*  {
             this.length = length;
         } */
 	/* @Override
@@ -443,7 +444,18 @@
     } *//* 
 
     private static Tuple<CompileState, Node> parseType(CompileState state, String input) {
-        return parseGenericType(state, input).orElseGet(() -> parseContent(state, input));
+        return parseGenericType(state, input)
+                .or(() -> parsePrimitiveType(state, input))
+                .orElseGet(() -> parseContent(state, input));
+    } *//* 
+
+    private static @NotNull Optional<? extends Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
+        if (input.strip().equals("int")) {
+            return Optional.of(new Tuple<>(state, new Node("primitive").withString("value", "int")));
+        }
+        else {
+            return Optional.empty();
+        }
     } *//* 
 
     private static Tuple<CompileState, Node> parseContent(CompileState state, String input) {
@@ -506,6 +518,9 @@
         }
         else if (node.is("generic")) {
             generated = generateGenericType(node);
+        }
+        else if (node.is("primitive")) {
+            generated = node.findString("value").orElse("");
         }
         else {
             generated = generateContent(node);

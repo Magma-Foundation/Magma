@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -494,7 +496,18 @@ public class Main {
     }
 
     private static Tuple<CompileState, Node> parseType(CompileState state, String input) {
-        return parseGenericType(state, input).orElseGet(() -> parseContent(state, input));
+        return parseGenericType(state, input)
+                .or(() -> parsePrimitiveType(state, input))
+                .orElseGet(() -> parseContent(state, input));
+    }
+
+    private static @NotNull Optional<? extends Tuple<CompileState, Node>> parsePrimitiveType(CompileState state, String input) {
+        if (input.strip().equals("int")) {
+            return Optional.of(new Tuple<>(state, new Node("primitive").withString("value", "int")));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Tuple<CompileState, Node> parseContent(CompileState state, String input) {
@@ -557,6 +570,9 @@ public class Main {
         }
         else if (node.is("generic")) {
             generated = generateGenericType(node);
+        }
+        else if (node.is("primitive")) {
+            generated = node.findString("value").orElse("");
         }
         else {
             generated = generateContent(node);
