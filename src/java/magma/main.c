@@ -6,6 +6,7 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
+/* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Consumer; */
 /* import java.util.function.Function; */
@@ -99,35 +100,44 @@
         return new Tuple<>(state, generatePlaceholder(stripped));
     } */
 /* private static String compileStatementValue(String input) {
+        return compileInvocation(input).orElseGet(() -> generatePlaceholder(input));
+    } */
+/* private static Optional<String> compileInvocation(String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(")")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        if (!stripped.endsWith(")")) {
+            return Optional.empty();
+        }
+        String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
-            int paramStart = -1;
-            int depth = 0;
-            for (int i = withoutEnd.length() - 1; i >= 0; i--) {
-                char c = withoutEnd.charAt(i);
-                if (c == '(' && depth == 0) {
-                    paramStart = i;
-                    break;
-                }
-                if (c == ')') {
-                    depth++;
-                }
-                if (c == '(') {
-                    depth--;
-                }
+        int paramStart = -1;
+        int depth = 0;
+        for (int i = withoutEnd.length() - 1; i >= 0; i--) {
+            char c = withoutEnd.charAt(i);
+            if (c == '(' && depth == 0) {
+                paramStart = i;
+                break;
             }
-
-            if (paramStart >= 0) {
-                String caller = withoutEnd.substring(0, paramStart).strip();
-                String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
-                return compileValue(caller) + "(" + generatePlaceholder(arguments) + ")";
+            if (c == ')') {
+                depth++;
+            }
+            if (c == '(') {
+                depth--;
             }
         }
-        return generatePlaceholder(stripped);
+
+        if (paramStart < 0) {
+            return Optional.empty();
+        }
+        String caller = withoutEnd.substring(0, paramStart).strip();
+        String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
+        return Optional.of(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
     } */
 /* private static String compileValue(String input) {
+        Optional<String> maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation.get();
+        }
+
         int propertySeparator = input.lastIndexOf(".");
         if (propertySeparator >= 0) {
             String parent = input.substring(0, propertySeparator);
@@ -496,7 +506,7 @@
             return new None<> */(/*  */);/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	/* run() */.ifPresent(/* error -> System.err.println(error.display()) */);/*  */
+	/* run */(/*  */).ifPresent(/* error -> System.err.println(error.display()) */);/*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
 	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState(), input, Main::compileRootSegment */);
