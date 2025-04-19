@@ -146,7 +146,26 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        String stripped = input.strip();
+        int paramStart = stripped.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = stripped.substring(0, paramStart).strip();
+            int nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String beforeName = definition.substring(0, nameSeparator).strip();
+                String name = definition.substring(nameSeparator + " ".length()).strip();
+
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                if (typeSeparator >= 0) {
+                    String beforeType = beforeName.substring(0, typeSeparator);
+                    String type = beforeName.substring(typeSeparator + " ".length());
+
+                    String right = stripped.substring(paramStart + "(".length());
+                    return generatePlaceholder(beforeType) + " " + type + " " + name + "(" + generatePlaceholder(right);
+                }
+            }
+        }
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String input) {
