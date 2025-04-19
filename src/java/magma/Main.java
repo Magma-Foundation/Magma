@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +37,10 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         <R> Option<R> map(Function<T, R> mapper);
+    }
+
+    interface Error {
+        String display();
     }
 
     record Some<T>(T value) implements Option<T> {
@@ -189,13 +195,24 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        run().ifPresent(Throwable::printStackTrace);
+    record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
     }
 
-    private static Option<IOException> run() {
+    public static void main(String[] args) {
+        run().ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Option<Error> run() {
         Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        return readString(source).match(input -> runWithInput(source, input), Option::of);
+        return readString(source)
+                .match(input -> runWithInput(source, input), Option::of)
+                .map(ThrowableError::new);
     }
 
     private static Option<IOException> runWithInput(Path source, String input) {
