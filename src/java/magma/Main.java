@@ -391,18 +391,6 @@ public class Main {
         return fold.right.iter().fold(new StringBuilder(), merger).toString();
     }
 
-    private static Tuple<CompileState, StringBuilder> compileSegment(BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, Tuple<CompileState, StringBuilder> current, String element, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        CompileState currentState = current.left;
-        StringBuilder currentCache = current.right;
-
-        Tuple<CompileState, String> compiledTuple = compiler.apply(currentState, element);
-        CompileState newState = compiledTuple.left;
-        String compiled = compiledTuple.right;
-
-        StringBuilder newCache = merger.apply(currentCache, compiled);
-        return new Tuple<>(newState, newCache);
-    }
-
     private static StringBuilder mergeStatements(StringBuilder current, String statement) {
         return current.append(statement);
     }
