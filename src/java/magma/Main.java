@@ -394,7 +394,7 @@ public class Main {
                 return Option.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> paramTuple = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
+            Tuple<CompileState, String> paramTuple = compileValues(outputDefinition.left, oldParameters, Main::compileParameter);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Option.empty();
@@ -410,20 +410,26 @@ public class Main {
         });
     }
 
+    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
+        return compileAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+    }
+
     private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String substring = stripped.substring(0, stripped.length() - ";".length());
-            return new Tuple<>(state, "\n\t" + compileStatementValue(substring) + ";");
+            Tuple<CompileState, String> compiled = compileStatementValue(state, substring);
+            return new Tuple<>(compiled.left, "\n\t" + compiled.right + ";");
         }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static String compileStatementValue(String input) {
-        return compileInvocation(input).orElseGet(() -> generatePlaceholder(input));
+    private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
+        return compileInvocation(input, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<String> compileInvocation(String input) {
+    private static Optional<Tuple<CompileState, String>> compileInvocation(String input, CompileState state) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return Optional.empty();
@@ -451,11 +457,16 @@ public class Main {
         }
         String caller = withoutEnd.substring(0, paramStart).strip();
         String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
-        return Optional.of(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
+
+        Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
+        Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
+
+        String generated = compiledCaller.right + "(" + compiledArguments.right + ")";
+        return Optional.of(new Tuple<>(compiledArguments.left, generated));
     }
 
-    private static String compileValue(String input) {
-        Optional<String> maybeInvocation = compileInvocation(input);
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        Optional<Tuple<CompileState, String>> maybeInvocation = compileInvocation(input, state);
         if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         }
@@ -465,14 +476,15 @@ public class Main {
             String parent = input.substring(0, propertySeparator);
             String property = input.substring(propertySeparator + ".".length());
 
-            return compileValue(parent) + "." + property;
+            Tuple<CompileState, String> compiled = compileValue(state, parent);
+            return new Tuple<>(compiled.left, compiled.right + "." + property);
         }
 
         if (isSymbol(input.strip())) {
-            return input.strip();
+            return new Tuple<>(state, input.strip());
         }
 
-        return generatePlaceholder(input);
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static String mergeValues(String cache, String element) {
@@ -489,8 +501,8 @@ public class Main {
         return state.append(c);
     }
 
-    private static Tuple<CompileState, String> compileParameter(CompileState state, String s) {
-        return compileDefinition(state, s).orElseGet(() -> new Tuple<>(state, generatePlaceholder(s)));
+    private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
+        return compileDefinition(state, element).orElseGet(() -> new Tuple<>(state, generatePlaceholder(element)));
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {

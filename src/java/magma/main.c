@@ -76,7 +76,7 @@
                 return Option.empty();
             }
             String oldParameters = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> paramTuple = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
+            Tuple<CompileState, String> paramTuple = compileValues(outputDefinition.left, oldParameters, Main::compileParameter);
             String withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
                 return Option.empty();
@@ -91,18 +91,23 @@
             return Option.of(new Tuple<>(compileState, ""));
         });
     } */
+/* private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
+        return compileAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+    } */
 /* private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String substring = stripped.substring(0, stripped.length() - ";".length());
-            return new Tuple<>(state, "\n\t" + compileStatementValue(substring) + ";");
+            Tuple<CompileState, String> compiled = compileStatementValue(state, substring);
+            return new Tuple<>(compiled.left, "\n\t" + compiled.right + ";");
         }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     } */
-/* private static String compileStatementValue(String input) {
-        return compileInvocation(input).orElseGet(() -> generatePlaceholder(input));
+/* private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
+        return compileInvocation(input, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     } */
-/* private static Optional<String> compileInvocation(String input) {
+/* private static Optional<Tuple<CompileState, String>> compileInvocation(String input, CompileState state) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return Optional.empty();
@@ -130,10 +135,15 @@
         }
         String caller = withoutEnd.substring(0, paramStart).strip();
         String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
-        return Optional.of(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
+
+        Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
+        Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
+
+        String generated = compiledCaller.right + "(" + compiledArguments.right + ")";
+        return Optional.of(new Tuple<>(compiledArguments.left, generated));
     } */
-/* private static String compileValue(String input) {
-        Optional<String> maybeInvocation = compileInvocation(input);
+/* private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        Optional<Tuple<CompileState, String>> maybeInvocation = compileInvocation(input, state);
         if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         }
@@ -143,14 +153,15 @@
             String parent = input.substring(0, propertySeparator);
             String property = input.substring(propertySeparator + ".".length());
 
-            return compileValue(parent) + "." + property;
+            Tuple<CompileState, String> compiled = compileValue(state, parent);
+            return new Tuple<>(compiled.left, compiled.right + "." + property);
         }
 
         if (isSymbol(input.strip())) {
-            return input.strip();
+            return new Tuple<>(state, input.strip());
         }
 
-        return generatePlaceholder(input);
+        return new Tuple<>(state, generatePlaceholder(input));
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -164,8 +175,8 @@
         }
         return state.append(c);
     } */
-/* private static Tuple<CompileState, String> compileParameter(CompileState state, String s) {
-        return compileDefinition(state, s).orElseGet(() -> new Tuple<>(state, generatePlaceholder(s)));
+/* private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
+        return compileDefinition(state, element).orElseGet(() -> new Tuple<>(state, generatePlaceholder(element)));
     } */
 /* private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         String stripped = input.strip();
@@ -474,16 +485,16 @@
 	/* return this.depth == 0 */;/*  */
 }
 /* private */ struct DivideState append_DivideState(char c_DivideState){
-	/* return new DivideState */(/* this.segments, this.buffer + c, this.depth */);/*  */
+	/* return new DivideState */(this.segments, this.buffer + c, this.depth);/*  */
 }
 /* private */ struct DivideState advance_DivideState(/*  */){
-	/* return new DivideState */(/* this.segments.addLast(this.buffer), "", this.depth */);/*  */
+	/* return new DivideState */(this.segments.addLast(this.buffer), /*  "" */, this.depth);/*  */
 }
 /* private */ struct DivideState enter_DivideState(/*  */){
-	/* return new DivideState */(/* this.segments, this.buffer, this.depth + 1 */);/*  */
+	/* return new DivideState */(this.segments, this.buffer, this.depth + 1);/*  */
 }
 /* private */ struct DivideState exit_DivideState(/*  */){
-	/* return new DivideState */(/* this.segments, this.buffer, this.depth - 1 */);/*  */
+	/* return new DivideState */(this.segments, this.buffer, this.depth - 1);/*  */
 }
 /* static class None<T> implements Option<T> {
         @Override
@@ -492,32 +503,32 @@
 
         @Override
         public Option<T> or(Supplier<Option<T>> other) {
-            return other */.get(/*  */);
+            return other */.get();
 	/* }
 
         @Override
         public T orElseGet(Supplier<T> other) {
-            return other */.get(/*  */);
+            return other */.get();
 	/* }
 
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<> */(/*  */);
+            return new None<> */();
 	/* }
 
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<> */(/*  */);/* } */
+            return new None<> */();/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	run(/*  */).ifPresent(/* error -> System.err.println(error.display()) */);/*  */
+	run().ifPresent(/* error -> System */.err.println(error.display()));/*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
-	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState(), input, Main::compileRootSegment */);
+	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState */(), input, /*  Main::compileRootSegment */);
 	/* CompileState newState = compiled.left */;
 	/* String output = compiled.right */;
-	/* String joinedStructs = String */.join(/* "", newState.structs.list */);
-	/* String joinedMethods = String */.join(/* "", newState.methods.list */);
+	/* String joinedStructs = String */.join(/* "" */, newState.structs.list);
+	/* String joinedMethods = String */.join(/* "" */, newState.methods.list);
 	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
 	/* \n" */;/*  */
 }
@@ -525,7 +536,7 @@
 	/* return buffer + element */;/*  */
 }
 /* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){
-	/* DivideState appended = current */.append(/* c */);
+	/* DivideState appended = current */.append(c);
 	/* if (c == ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */
