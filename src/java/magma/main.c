@@ -182,6 +182,9 @@
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (type.equals("String")) {
+            return Optional.of("char*");
+        }
         if (isSymbol(type)) {
             return Optional.of(stripped);
         }
@@ -211,7 +214,7 @@
             e.printStackTrace();
         }
      */}
-/* private static */ String compile(/* String input */){/* 
+/* private static */ char* compile(/* String input */){/* 
         Tuple<JavaList<String>, String> compiled = compileStatements(new JavaList<>(), input, Main::compileRootSegment);
         String joined = compiled.right + String.join("", compiled.left.list);
         return joined + "int main(){\n\treturn 0;\n}\n";

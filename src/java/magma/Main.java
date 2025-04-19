@@ -221,6 +221,9 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (type.equals("String")) {
+            return Optional.of("char*");
+        }
         if (isSymbol(type)) {
             return Optional.of(stripped);
         }
