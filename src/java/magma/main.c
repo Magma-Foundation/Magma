@@ -5,7 +5,9 @@
 /* import java.nio.file.Path; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
+/* import java.util.HashMap; */
 /* import java.util.List; */
+/* import java.util.Map; */
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Consumer; */
@@ -105,12 +107,14 @@
         return new Tuple<>(state, generatePlaceholder(stripped));
     } */
 /* private static Tuple<CompileState, String> compileStatementValue(CompileState state, String input) {
-        return compileInvocation(input, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return parseInvocation(input, state)
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     } */
-/* private static Optional<Tuple<CompileState, String>> compileInvocation(String input, CompileState state) {
+/* private static Option<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
-            return Optional.empty();
+            return Option.empty();
         }
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -131,7 +135,7 @@
         }
 
         if (paramStart < 0) {
-            return Optional.empty();
+            return Option.empty();
         }
         String caller = withoutEnd.substring(0, paramStart).strip();
         String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
@@ -139,29 +143,41 @@
         Tuple<CompileState, String> compiledCaller = compileValue(state, caller);
         Tuple<CompileState, String> compiledArguments = compileValues(compiledCaller.left, arguments, Main::compileValue);
 
-        String generated = compiledCaller.right + "(" + compiledArguments.right + ")";
-        return Optional.of(new Tuple<>(compiledArguments.left, generated));
+        Node node = new Node()
+                .withString("caller", compiledCaller.right)
+                .withString("arguments", compiledArguments.right);
+
+        return Option.of(new Tuple<>(compiledArguments.left, node));
+    } */
+/* private static String generateInvocation(Node node) {
+        String caller = node.findString("caller").orElse("");
+        String arguments = node.findString("arguments").orElse("");
+
+        return caller + "(" + arguments + ")";
     } */
 /* private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
-        Optional<Tuple<CompileState, String>> maybeInvocation = compileInvocation(input, state);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation.get();
+        return parseInvocation(input, state)
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
+                .or(() -> compileDataAccess(state, input))
+                .or(() -> compileSymbol(state, input))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    } */
+/* private static Option<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+        if (isSymbol(input.strip())) {
+            return Option.of(new Tuple<>(state, input.strip()));
         }
-
+        return Option.empty();
+    } */
+/* private static Option<Tuple<CompileState, String>> compileDataAccess(CompileState state, String input) {
         int propertySeparator = input.lastIndexOf(".");
         if (propertySeparator >= 0) {
             String parent = input.substring(0, propertySeparator);
             String property = input.substring(propertySeparator + ".".length());
 
             Tuple<CompileState, String> compiled = compileValue(state, parent);
-            return new Tuple<>(compiled.left, compiled.right + "." + property);
+            return Option.of(new Tuple<>(compiled.left, compiled.right + "." + property));
         }
-
-        if (isSymbol(input.strip())) {
-            return new Tuple<>(state, input.strip());
-        }
-
-        return new Tuple<>(state, generatePlaceholder(input));
+        return Option.empty();
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -294,6 +310,11 @@
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
         }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
     } *//* 
 
     record CompileState(JavaList<String> structs, JavaList<String> methods, JavaList<String> structNames) {
@@ -339,6 +360,26 @@
             this.throwable.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }
+    } *//* 
+
+    record Node(Map<String, String> strings) {
+        public Node() {
+            this(new HashMap<>());
+        }
+
+        public Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Option<String> findString(String propertyKey) {
+            if (this.strings.containsKey(propertyKey)) {
+                return new Some<>(this.strings.get(propertyKey));
+            }
+            else {
+                return new None<>();
+            }
+        }
     } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* 
@@ -367,7 +408,9 @@
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
-        <R> Option<R> map */(/* Function<T */, /*  R> mapper */);
+        <R> Option<R> map(Function<T, R> mapper);
+
+        T orElse */(/* T other */);
 }
 /* private */ int isShallow_DivideState(/*  */){
 	/* return this.depth == 1 */;/*  */
@@ -423,7 +466,12 @@
 
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<> */();/* } */
+            return new None<> */();
+	/* }
+
+        @Override
+        public T orElse(T other) {
+            return other */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
 	run().ifPresent(/* error -> System */.err.println(error.display()));/*  */

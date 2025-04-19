@@ -464,10 +464,10 @@ public class Main {
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
+    private static Option<Tuple<CompileState, Node>> parseInvocation(String input, CompileState state) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
-            return Optional.empty();
+            return Option.empty();
         }
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -488,7 +488,7 @@ public class Main {
         }
 
         if (paramStart < 0) {
-            return Optional.empty();
+            return Option.empty();
         }
         String caller = withoutEnd.substring(0, paramStart).strip();
         String arguments = withoutEnd.substring(paramStart + "(".length()).strip();
@@ -500,7 +500,7 @@ public class Main {
                 .withString("caller", compiledCaller.right)
                 .withString("arguments", compiledArguments.right);
 
-        return Optional.of(new Tuple<>(compiledArguments.left, node));
+        return Option.of(new Tuple<>(compiledArguments.left, node));
     }
 
     private static String generateInvocation(Node node) {
@@ -511,25 +511,30 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
-        Optional<Tuple<CompileState, String>> maybeInvocation = parseInvocation(input, state).map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)));
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation.get();
-        }
+        return parseInvocation(input, state)
+                .map(tuple -> new Tuple<>(tuple.left, generateInvocation(tuple.right)))
+                .or(() -> compileDataAccess(state, input))
+                .or(() -> compileSymbol(state, input))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
 
+    private static Option<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+        if (isSymbol(input.strip())) {
+            return Option.of(new Tuple<>(state, input.strip()));
+        }
+        return Option.empty();
+    }
+
+    private static Option<Tuple<CompileState, String>> compileDataAccess(CompileState state, String input) {
         int propertySeparator = input.lastIndexOf(".");
         if (propertySeparator >= 0) {
             String parent = input.substring(0, propertySeparator);
             String property = input.substring(propertySeparator + ".".length());
 
             Tuple<CompileState, String> compiled = compileValue(state, parent);
-            return new Tuple<>(compiled.left, compiled.right + "." + property);
+            return Option.of(new Tuple<>(compiled.left, compiled.right + "." + property));
         }
-
-        if (isSymbol(input.strip())) {
-            return new Tuple<>(state, input.strip());
-        }
-
-        return new Tuple<>(state, generatePlaceholder(input));
+        return Option.empty();
     }
 
     private static String mergeValues(String cache, String element) {
