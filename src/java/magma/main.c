@@ -82,13 +82,18 @@
             String paramOutput = paramTuple.right;
 
             Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
-            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "}\n";
+            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Optional.of(new Tuple<>(compileState, ""));
         });
     } */
 /* private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
-        return new Tuple<>(state, generatePlaceholder(input));
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String substring = stripped.substring(0, stripped.length() - ";".length());
+            return new Tuple<>(state, "\n\t" + generatePlaceholder(substring) + ";");
+        }
+        return new Tuple<>(state, generatePlaceholder(stripped));
     } */
 /* private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
@@ -342,46 +347,45 @@
         } *//* 
         return appended; *//* 
      */};
-/* private */ int isShallow_DivideState(/*  */){/* 
-            return this.depth == 1; *//* 
-         */}
-/* private */ int isLevel_DivideState(/*  */){/* 
-            return this.depth == 0; *//* 
-         */}
-/* private */ struct DivideState append_DivideState(char c_DivideState){/* 
-            return new DivideState(this.segments, this.buffer + c, this.depth); *//* 
-         */}
-/* private */ struct DivideState advance_DivideState(/*  */){/* 
-            return new DivideState(this.segments.addLast(this.buffer), "", this.depth); *//* 
-         */}
-/* private */ struct DivideState enter_DivideState(/*  */){/* 
-            return new DivideState(this.segments, this.buffer, this.depth + 1); *//* 
-         */}
-/* private */ struct DivideState exit_DivideState(/*  */){/* 
-            return new DivideState(this.segments, this.buffer, this.depth - 1); *//* 
-         */}
-/* public static */ void __main__(char** args_Main){/* 
-        run().ifPresent(Throwable::printStackTrace); *//* 
-     */}
-/* private static */ char* compile_Main(char* input_Main){/* 
-        Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment); *//* 
-        CompileState newState = compiled.left; *//* 
-        String output = compiled.right; *//* 
-        String joinedStructs = String.join("", newState.structs.list); *//* 
-        String joinedMethods = String.join("", newState.methods.list); *//* 
-        String joined = output + joinedStructs + joinedMethods; *//* 
-
-        return joined + "int main(){\n\treturn 0;\n} *//* \n"; *//* 
-     */}
-/* private static */ char* mergeStatements_Main(char* buffer_Main, char* element_Main){/* 
-        return buffer + element; *//* 
-     */}
-/* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){/* 
-        DivideState appended = current.append(c); *//* 
-        if (c == '; *//* ' && appended.isLevel()) {
+/* private */ int isShallow_DivideState(/*  */){
+	/* return this.depth == 1 */;/*  */
+}
+/* private */ int isLevel_DivideState(/*  */){
+	/* return this.depth == 0 */;/*  */
+}
+/* private */ struct DivideState append_DivideState(char c_DivideState){
+	/* return new DivideState(this.segments, this.buffer + c, this.depth) */;/*  */
+}
+/* private */ struct DivideState advance_DivideState(/*  */){
+	/* return new DivideState(this.segments.addLast(this.buffer), "", this.depth) */;/*  */
+}
+/* private */ struct DivideState enter_DivideState(/*  */){
+	/* return new DivideState(this.segments, this.buffer, this.depth + 1) */;/*  */
+}
+/* private */ struct DivideState exit_DivideState(/*  */){
+	/* return new DivideState(this.segments, this.buffer, this.depth - 1) */;/*  */
+}
+/* public static */ void __main__(char** args_Main){
+	/* run().ifPresent(Throwable::printStackTrace) */;/*  */
+}
+/* private static */ char* compile_Main(char* input_Main){
+	/* Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment) */;
+	/* CompileState newState = compiled.left */;
+	/* String output = compiled.right */;
+	/* String joinedStructs = String.join("", newState.structs.list) */;
+	/* String joinedMethods = String.join("", newState.methods.list) */;
+	/* String joined = output + joinedStructs + joinedMethods */;/* return joined + "int main(){\n\treturn 0;\n} */
+	/* \n" */;/*  */
+}
+/* private static */ char* mergeStatements_Main(char* buffer_Main, char* element_Main){
+	/* return buffer + element */;/*  */
+}
+/* private static */ struct DivideState foldStatementChar_Main(struct DivideState current_Main, char c_Main){
+	/* DivideState appended = current.append(c) */;
+	/* if (c == ' */;/* ' && appended.isLevel()) {
             return appended.advance();
-        } *//* 
-        if (c == ' */}
+        } *//* if (c == ' */
+}
 int main(){
 	return 0;
 }

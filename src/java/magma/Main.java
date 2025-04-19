@@ -311,14 +311,19 @@ public class Main {
             String paramOutput = paramTuple.right;
 
             Tuple<CompileState, String> outputContent = compileStatements(paramState, inputContent, Main::compileStatementOrBlock);
-            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "}\n";
+            String generated = outputDefinition.right + "(" + paramOutput + "){" + outputContent.right + "\n}\n";
             CompileState compileState = outputContent.left.addMethod(generated);
             return Optional.of(new Tuple<>(compileState, ""));
         });
     }
 
     private static Tuple<CompileState, String> compileStatementOrBlock(CompileState state, String input) {
-        return new Tuple<>(state, generatePlaceholder(input));
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String substring = stripped.substring(0, stripped.length() - ";".length());
+            return new Tuple<>(state, "\n\t" + generatePlaceholder(substring) + ";");
+        }
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
     private static String mergeValues(String cache, String element) {
