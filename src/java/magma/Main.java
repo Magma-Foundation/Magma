@@ -676,6 +676,10 @@ public class Main {
             return new Some<>("int");
         }
 
+        if (stripped.equals("String")) {
+            return new Some<>("char*");
+        }
+
         return new None<>();
     }
 

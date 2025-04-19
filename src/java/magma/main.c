@@ -8,10 +8,10 @@
 // #include <temp.h>
 // #include <temp.h>
 /* private static */ struct DivideState {
-	/* private final */ List</* String */> segments;
+	/* private final */ List<char*> segments;
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ int depth;
-	/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, int depth)/*  {
+	/* private */ DivideState(List<char*> segments, /* StringBuilder */ buffer, int depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -42,7 +42,7 @@
 	/* private */ int isLevel()/*  {
             return this.depth == 0;
         } */
-	/* public */ List</* String */> segments()/*  {
+	/* public */ List<char*> segments()/*  {
             return this.segments;
         } */
 };
@@ -59,7 +59,7 @@
             e.printStackTrace();
         }
     } */
-	/* private static */ /* String */ compile(/* String */ input)/*  {
+	/* private static */ char* compile(char* input)/*  {
         CompileState oldState = new CompileState();
         Tuple<CompileState, String> output = compileStatements(oldState, input, Main::compileRootSegment);
 
@@ -97,7 +97,7 @@
 
         return joinedImports + joinedGenerics + buffered + joinedStructs + buffered;
     } */
-	/* private static */ Tuple</* CompileState */, /*  String */> expand(/* Node */ expansion, /* CompileState */ state)/*  {
+	/* private static */ Tuple</* CompileState */, char*> expand(/* Node */ expansion, /* CompileState */ state)/*  {
         String base = expansion.findString("base").orElse("");
         Map<String, Function<Node, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
         if (expandables.containsKey(base)) {
@@ -107,23 +107,23 @@
             return new Tuple<>(state, "// " + generateGenericType(expansion) + "\n");
         }
     } */
-	/* private static */ /* String */ join(List</* String */> list)/*  {
+	/* private static */ char* join(List<char*> list)/*  {
         return list.iter()
                 .collect(new Joiner())
                 .orElse("");
     } */
-	/* private static */ Tuple</* CompileState */, /*  String */> compileStatements(/* CompileState */ state, /* String */ input, Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */))/*  {
+	/* private static */ Tuple</* CompileState */, char*> compileStatements(/* CompileState */ state, char* input, Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*))/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static */ Tuple</* CompileState */, /*  String */> compileAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), /*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */))/*  {
+	/* private static */ Tuple</* CompileState */, char*> compileAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), /*  StringBuilder */(*merger)(/* StringBuilder */, char*))/*  {
         Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
         return new Tuple<>(compiled.left, mergeAll(merger, compiled));
     } */
-	/* private static */ Tuple</* CompileState */, List</* String */>> parseAll(/* CompileState */ state, /* String */ input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */))/*  {
+	/* private static */ Tuple</* CompileState */, List<char*>> parseAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*))/*  {
         return divide(input, divider).iter().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()),
                 (current, element) -> parseElement(compiler, current, element));
     } */
-	/* private static */ Tuple</* CompileState */, List</* String */>> parseElement(Tuple</* CompileState */, /*  String */>(*compiler)(/* CompileState */, /*  String */), Tuple</* CompileState */, List</* String */>> current, /* String */ element)/*  {
+	/* private static */ Tuple</* CompileState */, List<char*>> parseElement(Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), Tuple</* CompileState */, List<char*>> current, char* element)/*  {
         CompileState currentState = current.left;
         List<String> currentCache = current.right;
 
@@ -133,13 +133,13 @@
 
         return new Tuple<>(newState, currentCache.add(compiled));
     } */
-	/* private static */ /* String */ mergeAll(/*  StringBuilder */(*merger)(/* StringBuilder */, /*  String */), Tuple</* CompileState */, List</* String */>> fold)/*  {
+	/* private static */ char* mergeAll(/*  StringBuilder */(*merger)(/* StringBuilder */, char*), Tuple</* CompileState */, List<char*>> fold)/*  {
         return fold.right.iter().fold(new StringBuilder(), merger).toString();
     } */
-	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, /* String */ statement)/*  {
+	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, char* statement)/*  {
         return current.append(statement);
     } */
-	/* private static */ List</* String */> divide(/* String */ input, /*  DivideState */(*folder)(/* DivideState */, /*  Character */))/*  {
+	/* private static */ List<char*> divide(char* input, /*  DivideState */(*folder)(/* DivideState */, /*  Character */))/*  {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -166,7 +166,7 @@
         } */
 	/* return */ appended;
 };
-/* public */ struct List</* String */> {
+/* public */ struct List<char*> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
@@ -174,9 +174,9 @@
 	int isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
-/*  */ struct Tuple</* CompileState */, /*  String */> {
+/*  */ struct Tuple</* CompileState */, char*> {
 };
-/*  */ struct Tuple</* CompileState */, List</* String */>> {
+/*  */ struct Tuple</* CompileState */, List<char*>> {
 };
 /* public */ struct Iterator</* T */> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
