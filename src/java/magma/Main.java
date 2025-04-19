@@ -250,11 +250,20 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (type.equals("boolean")) {
+            return Optional.of("int");
+        }
+
+        if (type.equals("void")) {
+            return Optional.of("void");
+        }
+
         if (type.equals("String")) {
             return Optional.of("char*");
         }
+
         if (isSymbol(type)) {
-            return Optional.of(stripped);
+            return Optional.of("struct " + stripped);
         }
         return Optional.empty();
     }

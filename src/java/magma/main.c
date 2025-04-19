@@ -98,11 +98,20 @@
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (type.equals("boolean")) {
+            return Optional.of("int");
+        }
+
+        if (type.equals("void")) {
+            return Optional.of("void");
+        }
+
         if (type.equals("String")) {
             return Optional.of("char*");
         }
+
         if (isSymbol(type)) {
-            return Optional.of(stripped);
+            return Optional.of("struct " + stripped);
         }
         return Optional.empty();
     } */
@@ -196,22 +205,22 @@
         } *//* 
         return appended; *//* 
      */};
-/* private */ boolean isShallow(/*  */){/* 
+/* private */ int isShallow(/*  */){/* 
             return this.depth == 1;
          */}
-/* private */ boolean isLevel(/*  */){/* 
+/* private */ int isLevel(/*  */){/* 
             return this.depth == 0;
          */}
-/* private */ DivideState append(/* char c */){/* 
+/* private */ struct DivideState append(/* char c */){/* 
             return new DivideState(this.segments, this.buffer.append(c), this.depth);
          */}
-/* private */ DivideState advance(/*  */){/* 
+/* private */ struct DivideState advance(/*  */){/* 
             return new DivideState(this.segments.add(this.buffer.toString()), new StringBuilder(), this.depth);
          */}
-/* private */ DivideState enter(/*  */){/* 
+/* private */ struct DivideState enter(/*  */){/* 
             return new DivideState(this.segments, this.buffer, this.depth + 1);
          */}
-/* private */ DivideState exit(/*  */){/* 
+/* private */ struct DivideState exit(/*  */){/* 
             return new DivideState(this.segments, this.buffer, this.depth - 1);
          */}
 /* public static */ void __main__(/* String[] args */){/* 
@@ -237,10 +246,10 @@
         String joinedStructs = String.join("", newState.structs.list);
         String joinedMethods = String.join("", newState.methods.list);
         String joined = output + joinedStructs + joinedMethods;
-        
+
         return joined + "int main(){\n\treturn 0;\n}\n";
      */}
-/* private static */ DivideState foldStatementChar(/* DivideState current, char c */){/* 
+/* private static */ struct DivideState foldStatementChar(/* DivideState current, char c */){/* 
         DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
