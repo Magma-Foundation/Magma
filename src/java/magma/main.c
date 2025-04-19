@@ -577,7 +577,8 @@
             return false */;/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	run().ifPresent(run(), /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
+    auto temp = run();
+	temp.ifPresent(temp, /* error -> System */.err.println(/* error -> System */.err, error.display(error, )));/*  */
 }
 /* private static */ /* Option<Error> */ run_Main(/*  */){
 	/* Path source = Paths */.get(/* Path source = Paths */, /* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main */.java");

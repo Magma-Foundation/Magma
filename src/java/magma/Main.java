@@ -570,27 +570,31 @@ public class Main {
         String argumentsString = withoutEnd.substring(paramStart + "(".length()).strip();
 
         Tuple<CompileState, Node> parsed1 = parseValue(state, callerString);
-        Node caller = parsed1.right;
-
         Tuple<CompileState, String> compiledCaller = new Tuple<>(parsed1.left, generateValue(caller));
-
         Tuple<CompileState, JavaList<Node>> argumentsTuple = parseValues(compiledCaller.left, argumentsString, Main::parseValue);
+
+        Node oldCaller = parsed1.right;
         JavaList<Node> oldArguments = argumentsTuple.right;
+
+        String newCaller;
         JavaList<Node> newArguments;
-        if (caller.is("access")) {
-            String parent = caller.findString("parent").orElse("");
+        if (oldCaller.is("access")) {
+            String parent = oldCaller.findString("parent").orElse("");
             newArguments = oldArguments.addFirst(new Node("symbol").withString("value", parent));
+            newCaller = compiledCaller.right;
         }
         else {
             newArguments = oldArguments;
+            newCaller = compiledCaller.right;
         }
 
         Tuple<CompileState, JavaList<Node>> withNewArguments = new Tuple<>(argumentsTuple.left, newArguments);
+
         Tuple<CompileState, String> compiledArguments = generateValues(withNewArguments, Main::generateValue);
         String arguments = compiledArguments.right;
 
         Node node = new Node("invocation")
-                .withString("caller", compiledCaller.right)
+                .withString("caller", newCaller)
                 .withString("arguments", arguments);
 
         return Option.of(new Tuple<>(compiledArguments.left, node));
