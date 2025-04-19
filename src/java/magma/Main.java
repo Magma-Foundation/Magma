@@ -343,7 +343,7 @@ public class Main {
                 .collect(new Joiner())
                 .orElse("");
 
-        return joinedImports + joinedStructs + joinedGenerics + output.right;
+        return joinedImports + joinedGenerics + joinedStructs + output.right;
     }
 
     private static String join(List<String> list) {
