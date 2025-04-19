@@ -166,9 +166,13 @@ public class Main {
         }
     }
 
-    private record Node(Map<String, String> strings, Map<String, List<Node>> nodeLists) {
+    private record Node(Optional<String> type, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
         public Node() {
-            this(new HashMap<>(), new HashMap<>());
+            this(Optional.empty(), new HashMap<>(), new HashMap<>());
+        }
+
+        public Node(String type) {
+            this(Optional.of(type), new HashMap<>(), new HashMap<>());
         }
 
         public Node withString(String propertyKey, String propertyValue) {
@@ -195,6 +199,10 @@ public class Main {
             else {
                 return Optional.empty();
             }
+        }
+
+        public boolean is(String type) {
+            return this.type.isPresent() && this.type.get().equals(type);
         }
     }
 
@@ -460,17 +468,27 @@ public class Main {
         return findTypeSeparator(beforeName).map(typeSeparator -> {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
             String type = beforeName.substring(typeSeparator + " ".length());
-            Tuple<CompileState, String> typeTuple = compileType(state, type);
+            Tuple<CompileState, Node> value = parseType(state, type);
+            Tuple<CompileState, String> typeTuple = new Tuple<>(value.left, generateType(value.right).orElse(""));
 
             String outputBeforeName = generatePlaceholder(beforeType) + " " + typeTuple.right;
             return generateDefinition(typeTuple.left, outputBeforeName, name);
         }).orElseGet(() -> {
-            Tuple<CompileState, String> type = compileType(state, beforeName);
+            Tuple<CompileState, Node> value = parseType(state, beforeName);
+            Tuple<CompileState, String> type = new Tuple<>(value.left, generateType(value.right).orElse(""));
             return generateDefinition(type.left, type.right, name);
         });
     }
 
-    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+    private static Tuple<CompileState, Node> parseType(CompileState state, String input) {
+        return parseGenericType(state, input).orElseGet(() -> parseContent(state, input));
+    }
+
+    private static Tuple<CompileState, Node> parseContent(CompileState state, String input) {
+        return new Tuple<>(state, new Node("content").withString("value", generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, Node>> parseGenericType(CompileState state, String input) {
         String stripped = input.strip();
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
@@ -478,7 +496,10 @@ public class Main {
             if (argumentsStart >= 0) {
                 String base = withoutEnd.substring(0, argumentsStart).strip();
                 String params = withoutEnd.substring(argumentsStart + "<".length());
-                Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, Main::compileType);
+                Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, (state1, input1) -> {
+                    Tuple<CompileState, Node> value = parseType(state1, input1);
+                    return new Tuple<>(value.left, generateType(value.right).orElse(""));
+                });
 
                 CompileState newState = compiled.left;
                 List<String> newValues = compiled.right;
@@ -490,17 +511,41 @@ public class Main {
                     final List<Node> argument1 = Lists.of(first, second).iter()
                             .map(argument -> new Node().withString("argument", argument))
                             .collect(new ListCollector<>());
-                    return new Tuple<>(newState, generateFunctionalType(new Node().withString("returns", returns)
-                            .withNodeList("arguments", argument1)));
+
+                    Node node = new Node("functional").withString("returns", returns).withNodeList("arguments", argument1);
+                    return Optional.of(new Tuple<>(newState, node));
                 }
 
                 String newTypes = mergeAll(Main::mergeValues, compiled);
-                String generated = base + "<" + newTypes + ">";
-                return new Tuple<>(newState, generated);
+                Node node = new Node("generic").withString("base", base).withString("arguments", newTypes);
+                return Optional.of(new Tuple<>(newState, node));
             }
         }
+        return Optional.empty();
+    }
 
-        return compileContent(state, stripped);
+    private static Optional<String> generateType(Node node) {
+        String generated;
+        if (node.is("functional")) {
+            generated = generateFunctionalType(node);
+        }
+        else if (node.is("generic")) {
+            generated = generateGenericType(node);
+        }
+        else {
+            generated = generateContent(node);
+        }
+        return Optional.of(generated);
+    }
+
+    private static String generateContent(Node node) {
+        return node.findString("value").orElse("");
+    }
+
+    private static String generateGenericType(Node node) {
+        String base = node.findString("base").orElse("");
+        String arguments = node.findString("arguments").orElse("");
+        return base + "<" + arguments + ">";
     }
 
     private static String generateFunctionalType(Node node) {
