@@ -309,6 +309,11 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()))
+                    .map(result -> result + "*");
+        }
+
         if (type.equals("boolean")) {
             return Optional.of("int");
         }

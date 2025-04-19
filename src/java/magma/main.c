@@ -130,6 +130,11 @@
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()))
+                    .map(result -> result + "*");
+        }
+
         if (type.equals("boolean")) {
             return Optional.of("int");
         }
@@ -278,7 +283,7 @@
 /* private */ struct DivideState exit_DivideState(/*  */){/* 
             return new DivideState(this.segments, this.buffer, this.depth - 1);
          */}
-/* public static */ void __main__(/* String[] args */){/* 
+/* public static */ void __main__(char** args_Main){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
