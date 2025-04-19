@@ -112,18 +112,18 @@
                 .collect(new Joiner())
                 .orElse("");
     } */
-	/* private static */ Tuple</* CompileState */, char*> compileStatements(/* CompileState */ state, char* input, Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*))/*  {
+	/* private static */ Tuple</* CompileState */, char*> compileStatements(/* CompileState */ state, char* input, )/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static */ Tuple</* CompileState */, char*> compileAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), char*(*merger)(char*, char*))/*  {
+	/* private static */ Tuple</* CompileState */, char*> compileAll(/* CompileState */ state, char* input, , , )/*  {
         Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
         return new Tuple<>(compiled.left, mergeAll(merger, compiled));
     } */
-	/* private static */ Tuple</* CompileState */, List<char*>> parseAll(/* CompileState */ state, char* input, /*  DivideState */(*divider)(/* DivideState */, /*  Character */), Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*))/*  {
+	/* private static */ Tuple</* CompileState */, List<char*>> parseAll(/* CompileState */ state, char* input, , )/*  {
         return divide(input, divider).iter().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()),
                 (current, element) -> parseElement(compiler, current, element));
     } */
-	/* private static */ Tuple</* CompileState */, List<char*>> parseElement(Tuple</* CompileState */, char*>(*compiler)(/* CompileState */, char*), Tuple</* CompileState */, List<char*>> current, char* element)/*  {
+	/* private static */ Tuple</* CompileState */, List<char*>> parseElement(Tuple</* CompileState */, List<char*>> current, char* element)/*  {
         CompileState currentState = current.left;
         List<String> currentCache = current.right;
 
@@ -133,13 +133,13 @@
 
         return new Tuple<>(newState, currentCache.add(compiled));
     } */
-	/* private static */ char* mergeAll(char*(*merger)(char*, char*), Tuple</* CompileState */, List<char*>> fold)/*  {
+	/* private static */ char* mergeAll(Tuple</* CompileState */, List<char*>> fold)/*  {
         return fold.right.iter().fold("", merger);
     } */
 	/* private static */ char* mergeStatements(char* current, char* statement)/*  {
         return current + statement;
     } */
-	/* private static */ List<char*> divide(char* input, /*  DivideState */(*folder)(/* DivideState */, /*  Character */))/*  {
+	/* private static */ List<char*> divide(char* input, )/*  {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -180,8 +180,8 @@
 };
 /* public */ struct Iterator</* T */> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
-	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
-	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
+	/* <R> */ /* R */ fold(/* R */ initial, );
+	/* <R> */ Iterator</* R */> map();
 };
 /* public */ struct List</* T */> {
 	Iterator</* T */> iter();
@@ -194,13 +194,13 @@
 /*  */ struct Tuple</* T */, List</* T */>> {
 };
 /* public */ struct Option<Tuple</* T */, List</* T */>>> {
-	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* <R> */ Option</* R */> map();
 	/* T */ orElse(/* T */ other);
 	int isEmpty();
 	int isPresent();
-	/* T */ orElseGet(/* T */(*other)());
-	Option</* T */> or(Option</* T */>(*other)());
-	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+	/* T */ orElseGet();
+	Option</* T */> or();
+	/* <R> */ Option</* R */> flatMap();
 };
 /* public */ struct Collector</* T */, /*  C */> {
 	/* C */ createInitial();
@@ -208,24 +208,24 @@
 };
 /* public */ struct Iterator</* R */> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
-	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
-	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
+	/* <R> */ /* R */ fold(/* R */ initial, );
+	/* <R> */ Iterator</* R */> map();
 };
 /* public */ struct Option</* R */> {
-	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* <R> */ Option</* R */> map();
 	/* T */ orElse(/* T */ other);
 	int isEmpty();
 	int isPresent();
-	/* T */ orElseGet(/* T */(*other)());
-	Option</* T */> or(Option</* T */>(*other)());
-	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+	/* T */ orElseGet();
+	Option</* T */> or();
+	/* <R> */ Option</* R */> flatMap();
 };
 /* public */ struct Option</* T */> {
-	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
+	/* <R> */ Option</* R */> map();
 	/* T */ orElse(/* T */ other);
 	int isEmpty();
 	int isPresent();
-	/* T */ orElseGet(/* T */(*other)());
-	Option</* T */> or(Option</* T */>(*other)());
-	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
+	/* T */ orElseGet();
+	Option</* T */> or();
+	/* <R> */ Option</* R */> flatMap();
 };

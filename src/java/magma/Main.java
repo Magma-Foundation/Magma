@@ -539,7 +539,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileWhitespace(state, input)
+        return parseWhitespace(state, input).map(Main::generateWhitespace)
                 .or(() -> compileClass(state, input))
                 .or(() -> compileStructured("interface ", state, input))
                 .or(() -> compileStructured("record ", state, input))
@@ -562,7 +562,9 @@ public class Main {
             }
 
             String oldParams = withParams.substring(0, paramEnd);
-            Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, Main::compileParameter);
+            Tuple<CompileState, String> newParams = compileValues(outputDefinition.left, oldParams, (state1, element) -> generateParameter(parseParameter(state1, element))
+                    .map(generated -> new Tuple<>(state1, generated))
+                    .orElse(new Tuple<>(state1, "")));
 
             String oldBody = withParams.substring(paramEnd + ")".length());
             String newBody = oldBody.equals(";") ? ";" : generatePlaceholder(oldBody);
@@ -600,19 +602,33 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, String> compileParameter(CompileState state, String element) {
-        return compileWhitespace(state, element)
-                .or(() -> parseDefinition(state, element).flatMap(result -> {
-                    return generateDefinition(result.right).map(inner -> {
-                        return new Tuple<>(result.left, inner);
-                    });
-                }))
-                .orElseGet(() -> compileContent(state, element));
+    private static Option<String> generateParameter(Tuple<CompileState, Node> parsed) {
+        Node node = parsed.right;
+        if (node.is("definition")) {
+            return generateDefinition(node);
+        }
+        if (node.is("whitespace")) {
+            return new Some<>("");
+        }
+        return node.findString("value");
     }
 
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String element) {
+    private static Tuple<CompileState, Node> parseParameter(CompileState state, String element) {
+        return parseWhitespace(state, element)
+                .or(() -> parseDefinition(state, element))
+                .orElseGet(() -> {
+                    Tuple<CompileState, String> tuple = compileContent(state, element);
+                    return new Tuple<>(tuple.left, new Node("content").withString("value", tuple.right));
+                });
+    }
+
+    private static Tuple<CompileState, String> generateWhitespace(Tuple<CompileState, Node> result) {
+        return new Tuple<>(result.left, "");
+    }
+
+    private static Option<Tuple<CompileState, Node>> parseWhitespace(CompileState state, String element) {
         if (element.isBlank()) {
-            return new Some<>(new Tuple<CompileState, String>(state, ""));
+            return new Some<>(new Tuple<CompileState, Node>(state, new Node("whitespace")));
         }
         return new None<>();
     }
