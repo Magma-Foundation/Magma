@@ -63,36 +63,46 @@
             return Optional.empty();
         }
         String definition = stripped.substring(0, paramStart).strip();
-        int nameSeparator = definition.lastIndexOf(" ");
+        return compileDefinition(state, definition).flatMap(outputDefinition -> {
+            String withParams = stripped.substring(paramStart + "(".length());
+            int paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) {
+                return Optional.empty();
+            }
+            String oldParameters = withParams.substring(0, paramEnd);
+            Tuple<CompileState, String> newParameters = compileAll(outputDefinition.left, oldParameters, Main::foldValueChar, Main::compileParameter, Main::mergeValues);
+            String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                return Optional.empty();
+            }
+            String content = withBraces.substring(1, withBraces.length() - 1);
+            String generated = outputDefinition.right + "(" + newParameters.right + "){" + generatePlaceholder(content) + "}\n";
+            return Optional.of(new Tuple<>(newParameters.left.addMethod(generated), ""));
+        });
+    } */
+/* private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    } */
+/* private static DivideState foldValueChar(DivideState state, Character c) {
+        if (c == ',') {
+            return state.advance();
+        }
+        return state.append(c);
+    } */
+/* private static Tuple<CompileState, String> compileParameter(CompileState state, String s) {
+        return compileDefinition(state, s).orElseGet(() -> new Tuple<>(state, generatePlaceholder(s)));
+    } */
+/* private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        String stripped = input.strip();
+        int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return Optional.empty();
         }
-        String beforeName = definition.substring(0, nameSeparator).strip();
-        String name = definition.substring(nameSeparator + " ".length()).strip();
-
-        int typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
-            return Optional.empty();
-        }
-        String beforeType = beforeName.substring(0, typeSeparator);
-        String type = beforeName.substring(typeSeparator + " ".length());
-
-        String withParams = stripped.substring(paramStart + "(".length());
-        int paramEnd = withParams.indexOf(")");
-        if (paramEnd < 0) {
-            return Optional.empty();
-        }
-        String params = withParams.substring(0, paramEnd);
-        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-            return Optional.empty();
-        }
-        String content = withBraces.substring(1, withBraces.length() - 1);
-        Optional<String> maybeOutputType = compileType(type);
-        if (maybeOutputType.isEmpty()) {
-            return Optional.empty();
-        }
-
+        String beforeName = stripped.substring(0, nameSeparator).strip();
+        String name = stripped.substring(nameSeparator + " ".length()).strip();
         String newName;
         if (name.equals("main")) {
             newName = "__main__";
@@ -101,8 +111,21 @@
             newName = name + "_" + state.structName.orElse("");
         }
 
-        String generated = generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}\n";
-        return Optional.of(new Tuple<>(state.addMethod(generated), ""));
+        int typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            String beforeType = beforeName.substring(0, typeSeparator);
+            String type = beforeName.substring(typeSeparator + " ".length());
+
+            return compileType(type).map(outputType -> {
+                String compiled = generatePlaceholder(beforeType) + " " + outputType;
+                return new Tuple<>(state, compiled + " " + newName);
+            });
+        }
+        else {
+            return compileType(beforeName).map(compiled -> {
+                return new Tuple<>(state, compiled + " " + newName);
+            });
+        }
     } */
 /* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
@@ -139,10 +162,6 @@
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        } *//* 
-
-        public DivideState() {
-            this(new JavaList<>(), new StringBuilder(), 0);
         } *//* 
      */};
 /* public  */struct Main {/* 
@@ -185,27 +204,30 @@
             String input,
             BiFunction<CompileState, String, Tuple<CompileState, String>> compiler
     ) {
-        List<String> segments = divide(input, new DivideState()).list;
+        return compileAll(methods, input, Main::foldStatementChar, compiler, Main::mergeStatements);
+    } *//* 
 
+    private static Tuple<CompileState, String> compileAll(CompileState methods, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        List<String> segments = divide(input, folder);
         CompileState current = methods;
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
             Tuple<CompileState, String> compiled = compiler.apply(current, segment);
             current = compiled.left;
-            output.append(compiled.right);
+            output = merger.apply(output, compiled.right);
         }
 
         return new Tuple<>(current, output.toString());
     } *//* 
 
-    private static JavaList<String> divide(String input, DivideState state) {
-        DivideState current = state;
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+        DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            current = foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
 
-        return current.advance().segments;
+        return current.advance().segments.list;
     } *//* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* 
@@ -217,13 +239,16 @@
         } *//* 
         return appended; *//* 
      */};
+struct public DivideState_DivideState(/*  */){/* 
+            this(new JavaList<>(), new StringBuilder(), 0);
+         */}
 /* private */ int isShallow_DivideState(/*  */){/* 
             return this.depth == 1;
          */}
 /* private */ int isLevel_DivideState(/*  */){/* 
             return this.depth == 0;
          */}
-/* private */ struct DivideState append_DivideState(/* char c */){/* 
+/* private */ struct DivideState append_DivideState(struct char c_DivideState){/* 
             return new DivideState(this.segments, this.buffer.append(c), this.depth);
          */}
 /* private */ struct DivideState advance_DivideState(/*  */){/* 
@@ -251,7 +276,7 @@
             e.printStackTrace();
         }
      */}
-/* private static */ char* compile_DivideState(/* String input */){/* 
+/* private static */ char* compile_DivideState(char* input_DivideState){/* 
         Tuple<CompileState, String> compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         CompileState newState = compiled.left;
         String output = compiled.right;
@@ -261,7 +286,10 @@
 
         return joined + "int main(){\n\treturn 0;\n}\n";
      */}
-/* private static */ struct DivideState foldStatementChar_DivideState(/* DivideState current, char c */){/* 
+/* private static */ struct StringBuilder mergeStatements_DivideState(struct StringBuilder buffer_DivideState, char* element_DivideState){/* 
+        return buffer.append(element);
+     */}
+/* private static */ struct DivideState foldStatementChar_DivideState(struct DivideState current_DivideState, struct char c_DivideState){/* 
         DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
