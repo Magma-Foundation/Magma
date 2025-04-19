@@ -46,7 +46,7 @@
         private State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
         }
-    } *//* public static */ void main(/* String[] args */){/* 
+    } *//* public static */ void __main__(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -150,7 +150,8 @@
                             String content = withBraces.substring(1, withBraces.length() - 1);
                             Optional<String> maybeOutputType = compileType(type);
                             if (maybeOutputType.isPresent()) {
-                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                                String newName = name.equals("main") ? "__main__" : name;
+                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
                             }
                         }
                     }

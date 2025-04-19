@@ -170,7 +170,8 @@ public class Main {
                             String content = withBraces.substring(1, withBraces.length() - 1);
                             Optional<String> maybeOutputType = compileType(type);
                             if (maybeOutputType.isPresent()) {
-                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + name + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                                String newName = name.equals("main") ? "__main__" : name;
+                                return generatePlaceholder(beforeType) + " " + maybeOutputType.get() + " " + newName + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
                             }
                         }
                     }
