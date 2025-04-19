@@ -146,6 +146,10 @@
             return compileValue(parent) + "." + property;
         }
 
+        if (isSymbol(input.strip())) {
+            return input.strip();
+        }
+
         return generatePlaceholder(input);
     } */
 /* private static String mergeValues(String cache, String element) {
@@ -506,7 +510,7 @@
             return new None<> */(/*  */);/* } */
 }
 /* public static */ void __main__(char** args_Main){
-	/* run */(/*  */).ifPresent(/* error -> System.err.println(error.display()) */);/*  */
+	run(/*  */).ifPresent(/* error -> System.err.println(error.display()) */);/*  */
 }
 /* private static */ char* compile_Main(char* input_Main){
 	/* Tuple<CompileState, String> compiled = compileStatements */(/* new CompileState(), input, Main::compileRootSegment */);

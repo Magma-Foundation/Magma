@@ -468,6 +468,10 @@ public class Main {
             return compileValue(parent) + "." + property;
         }
 
+        if (isSymbol(input.strip())) {
+            return input.strip();
+        }
+
         return generatePlaceholder(input);
     }
 
