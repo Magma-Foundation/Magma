@@ -8,7 +8,7 @@
 // #include <temp.h>
 // #include <temp.h>
 // Tuple</* CompileState */, /*  String */>
-// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)>
+// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(/* Node */)>
 // Map</* String */, /*  String */>
 // Map</* String */, List</* Node */>>
 // Tuple</* CompileState */, List</* String */>>
@@ -91,7 +91,7 @@
     } */
 	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
-	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> expansions, Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)> expandables)/*  {
+	/* record */ CompileState(List</* String */> imports, List</* String */> structs, List</* Node */> expansions, Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(/* Node */)> expandables)/*  {
         public CompileState() {
             this(Lists.empty(), Lists.empty(), Lists.empty(), new HashMap<>());
         }
@@ -105,15 +105,15 @@
         }
 
         public CompileState addGeneric(Node node) {
-            if (!this.expansions.contains(node)) {
-                return new CompileState(this.imports, this.structs, this.expansions.add(node), this.expandables);
+            if (this.expansions.contains(node)) {
+                return this;
             }
-            
-            return this;
+
+            return new CompileState(this.imports, this.structs, this.expansions.add(node), this.expandables);
         }
 
-        public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
-            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> copy = this.expandables;
+        public CompileState addExpandable(String name, Function<Node, Option<Tuple<CompileState, String>>> mapper) {
+            Map<String, Function<Node, Option<Tuple<CompileState, String>>>> copy = this.expandables;
             copy.put(name, mapper);
             return new CompileState(this.imports, this.structs, this.expansions, copy);
         }
@@ -234,7 +234,6 @@
             CompileState withoutExpansion = entry.right;
             currentState = withoutExpansion;
             if (!visited.contains(expansion)) {
-                System.out.println(generateType(expansion));
                 Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
                 currentState = tuple.left;
                 buffered.append(tuple.right);
@@ -255,11 +254,9 @@
     } */
 	/* private static */ Tuple</* CompileState */, /*  String */> expand(/* Node */ expansion, /* CompileState */ state)/*  {
         String base = expansion.findString("base").orElse("");
-        List<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
-
-        Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
+        Map<String, Function<Node, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
         if (expandables.containsKey(base)) {
-            return expandables.get(base).apply(arguments).orElse(new Tuple<>(state, ""));
+            return expandables.get(base).apply(expansion).orElse(new Tuple<>(state, ""));
         }
         else {
             return new Tuple<>(state, "// " + generateGenericType(expansion) + "\n");
@@ -324,7 +321,7 @@
         } */
 	/* return */ appended;
 };
-/* public */ struct List {
+/* public */ struct List</* String */> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
@@ -332,7 +329,7 @@
 	/* boolean */ isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
-/* public */ struct List {
+/* public */ struct List</* Node */> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
@@ -340,7 +337,7 @@
 	/* boolean */ isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
-/* public */ struct Option {
+/* public */ struct Option<Tuple</* CompileState */, /*  String */>> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -349,10 +346,10 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* private */ struct Head {
+/* private */ struct Head</* T */> {
 	Option</* T */> next();
 };
-/* public */ struct Option {
+/* public */ struct Option</* String */> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -361,12 +358,12 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* public */ struct Iterator {
+/* public */ struct Iterator</* T */> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
 	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
 	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
 };
-/* public */ struct List {
+/* public */ struct List</* T */> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
 	/* T */ get(int index);
@@ -374,7 +371,7 @@
 	/* boolean */ isEmpty();
 	Option<Tuple</* T */, List</* T */>>> removeFirst();
 };
-/* public */ struct Option {
+/* public */ struct Option<Tuple</* T */, List</* T */>>> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -383,7 +380,7 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* public */ struct Option {
+/* public */ struct Option</* R */> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -392,7 +389,7 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* public */ struct Option {
+/* public */ struct Option</* T */> {
 	/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
 	/* T */ orElse(/* T */ other);
 	/* boolean */ isEmpty();
@@ -401,17 +398,17 @@
 	Option</* T */> or(Option</* T */>(*other)());
 	/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
 };
-/* public */ struct Collector {
+/* public */ struct Collector</* T */, /*  C */> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
 };
-/* public */ struct Iterator {
+/* public */ struct Iterator</* R */> {
 	/* <C> */ /* C */ collect(Collector</* T */, /*  C */> collector);
 	/* <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */));
 	/* <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */));
 };
 // Tuple</* CompileState */, /*  String */>
-// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(List</* Node */>)>
+// Map</* String */, Option<Tuple</* CompileState */, /*  String */>>(*)(/* Node */)>
 // Map</* String */, /*  String */>
 // Map</* String */, List</* Node */>>
 // Tuple</* CompileState */, List</* String */>>

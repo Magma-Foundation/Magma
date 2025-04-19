@@ -152,7 +152,7 @@ public class Main {
             List<String> imports,
             List<String> structs,
             List<Node> expansions,
-            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables
+            Map<String, Function<Node, Option<Tuple<CompileState, String>>>> expandables
     ) {
         public CompileState() {
             this(Lists.empty(), Lists.empty(), Lists.empty(), new HashMap<>());
@@ -174,8 +174,8 @@ public class Main {
             return new CompileState(this.imports, this.structs, this.expansions.add(node), this.expandables);
         }
 
-        public CompileState addExpandable(String name, Function<List<Node>, Option<Tuple<CompileState, String>>> mapper) {
-            Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> copy = this.expandables;
+        public CompileState addExpandable(String name, Function<Node, Option<Tuple<CompileState, String>>> mapper) {
+            Map<String, Function<Node, Option<Tuple<CompileState, String>>>> copy = this.expandables;
             copy.put(name, mapper);
             return new CompileState(this.imports, this.structs, this.expansions, copy);
         }
@@ -370,7 +370,6 @@ public class Main {
             CompileState withoutExpansion = entry.right;
             currentState = withoutExpansion;
             if (!visited.contains(expansion)) {
-                System.out.println(generateType(expansion));
                 Tuple<CompileState, String> tuple = expand(expansion, withoutExpansion);
                 currentState = tuple.left;
                 buffered.append(tuple.right);
@@ -392,11 +391,9 @@ public class Main {
 
     private static Tuple<CompileState, String> expand(Node expansion, CompileState state) {
         String base = expansion.findString("base").orElse("");
-        List<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
-
-        Map<String, Function<List<Node>, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
+        Map<String, Function<Node, Option<Tuple<CompileState, String>>>> expandables = state.expandables;
         if (expandables.containsKey(base)) {
-            return expandables.get(base).apply(arguments).orElse(new Tuple<>(state, ""));
+            return expandables.get(base).apply(expansion).orElse(new Tuple<>(state, ""));
         }
         else {
             return new Tuple<>(state, "// " + generateGenericType(expansion) + "\n");
@@ -520,17 +517,19 @@ public class Main {
         int typeParamStart = beforeContent.indexOf("<");
         if (typeParamStart >= 0) {
             String name = beforeContent.substring(0, beforeContent.indexOf("<"));
-            CompileState state1 = state.addExpandable(name, arguments -> {
-                return getTupleSome(state, withEnd, modifiers, name);
+            CompileState state1 = state.addExpandable(name, expansion -> {
+                String joined = generateGenericType(expansion);
+                List<Node> arguments = expansion.findNodeList("arguments").orElse(Lists.empty());
+                return assembleStruct(state, withEnd, modifiers, joined, arguments);
             });
             return new Some<>(new Tuple<>(state1, ""));
         }
         else {
-            return getTupleSome(state, withEnd, modifiers, beforeContent);
+            return assembleStruct(state, withEnd, modifiers, beforeContent, Lists.empty());
         }
     }
 
-    private static Some<Tuple<CompileState, String>> getTupleSome(CompileState state, String withEnd, String modifiers, String name) {
+    private static Some<Tuple<CompileState, String>> assembleStruct(CompileState state, String withEnd, String modifiers, String name, List<Node> arguments) {
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         Tuple<CompileState, String> content = compileStatements(state, inputContent, Main::compileClassSegment);
 
