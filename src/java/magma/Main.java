@@ -300,6 +300,10 @@ public class Main {
             return Optional.of("int");
         }
 
+        if (type.equals("char")) {
+            return Optional.of("char");
+        }
+
         if (type.equals("void")) {
             return Optional.of("void");
         }

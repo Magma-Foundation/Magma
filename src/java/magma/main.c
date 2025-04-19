@@ -133,6 +133,10 @@
             return Optional.of("int");
         }
 
+        if (type.equals("char")) {
+            return Optional.of("char");
+        }
+
         if (type.equals("void")) {
             return Optional.of("void");
         }
@@ -249,7 +253,7 @@
 /* private */ int isLevel_DivideState(/*  */){/* 
             return this.depth == 0;
          */}
-/* private */ struct DivideState append_DivideState(struct char c_DivideState){/* 
+/* private */ struct DivideState append_DivideState(char c_DivideState){/* 
             return new DivideState(this.segments, this.buffer.append(c), this.depth);
          */}
 /* private */ struct DivideState advance_DivideState(/*  */){/* 
@@ -290,7 +294,7 @@
 /* private static */ struct StringBuilder mergeStatements_DivideState(struct StringBuilder buffer_DivideState, char* element_DivideState){/* 
         return buffer.append(element);
      */}
-/* private static */ struct DivideState foldStatementChar_DivideState(struct DivideState current_DivideState, struct char c_DivideState){/* 
+/* private static */ struct DivideState foldStatementChar_DivideState(struct DivideState current_DivideState, char c_DivideState){/* 
         DivideState appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
