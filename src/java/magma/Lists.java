@@ -19,6 +19,11 @@ class Lists {
             this.list.add(element);
             return this;
         }
+
+        @Override
+        public T get(int index) {
+            return this.list.get(index);
+        }
     }
 
     public static <T> Main.List<T> empty() {

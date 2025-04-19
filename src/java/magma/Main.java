@@ -27,6 +27,8 @@ public class Main {
         Iterator<T> iter();
 
         List<T> add(T element);
+
+        T get(int index);
     }
 
     private interface Head<T> {
@@ -426,8 +428,21 @@ public class Main {
             if (argumentsStart >= 0) {
                 String base = withoutEnd.substring(0, argumentsStart).strip();
                 String params = withoutEnd.substring(argumentsStart + "<".length());
-                Tuple<CompileState, String> newTypes = compileAll(state, params, Main::compileValueChar, Main::compileType, Main::mergeValues);
-                return new Tuple<>(newTypes.left, base + "<" + newTypes.right + ">");
+                Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, Main::compileType);
+
+                CompileState newState = compiled.left;
+                List<String> newValues = compiled.right;
+
+                if (base.equals("BiFunction")) {
+                    String first = newValues.get(0);
+                    String second = newValues.get(1);
+                    String returns = newValues.get(2);
+                    return new Tuple<>(newState, returns + "(*)(" + first + ", " + second + ")");
+                }
+
+                String newTypes = mergeAll(Main::mergeValues, compiled);
+                String generated = base + "<" + newTypes + ">";
+                return new Tuple<>(newState, generated);
             }
         }
 

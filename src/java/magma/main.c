@@ -11,12 +11,13 @@
 };
 /* public */ struct Iterator<T> {
 	/* <C> */ /* C */ collect(Collector</* T */, /* C */> collector);
-	/* <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /* T */, /* R */> folder);
+	/* <R> */ /* R */ fold(/* R */ initial, /* R */(*)(/* R */, /* T */) folder);
 	/* <R> */ Iterator</* R */> map(Function</* T */, /* R */> mapper);
 };
 /* public */ struct List<T> {
 	Iterator</* T */> iter();
 	List</* T */> add(/* T */ element);
+	/* T */ get(/* int */ index);
 };
 /* private */ struct Head<T> {
 	Optional</* T */> next();
@@ -155,18 +156,31 @@
                 .collect(new Joiner())
                 .orElse("");
     } */
-	/* private static */ Tuple</* CompileState */, /* String */> compileStatements(/* CompileState */ state, /* String */ input, BiFunction</* CompileState */, /* String */, Tuple</* CompileState */, /* String */>> compiler)/*  {
+	/* private static */ Tuple</* CompileState */, /* String */> compileStatements(/* CompileState */ state, /* String */ input, Tuple</* CompileState */, /* String */>(*)(/* CompileState */, /* String */) compiler)/*  {
         return compileAll(state, input, Main::foldStatementChar, compiler, Main::mergeStatements);
     } */
-	/* private static */ Tuple</* CompileState */, /* String */> compileAll(/* CompileState */ state, /* String */ input, BiFunction</* DivideState */, /* Character */, /* DivideState */> divider, BiFunction</* CompileState */, /* String */, Tuple</* CompileState */, /* String */>> compiler, BiFunction</* StringBuilder */, /* String */, /* StringBuilder */> merger)/*  {
-        List<String> segments = divide(input, divider);
-
-        Tuple<CompileState, StringBuilder> fold = segments.iter().fold(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()),
-                (current, element) -> compileSegment(compiler, current, element, merger));
-
-        return new Tuple<>(fold.left, fold.right.toString());
+	/* private static */ Tuple</* CompileState */, /* String */> compileAll(/* CompileState */ state, /* String */ input, /* DivideState */(*)(/* DivideState */, /* Character */) divider, Tuple</* CompileState */, /* String */>(*)(/* CompileState */, /* String */) compiler, /* StringBuilder */(*)(/* StringBuilder */, /* String */) merger)/*  {
+        Tuple<CompileState, List<String>> compiled = parseAll(state, input, divider, compiler);
+        return new Tuple<>(compiled.left, mergeAll(merger, compiled));
     } */
-	/* private static */ Tuple</* CompileState */, /* StringBuilder */> compileSegment(BiFunction</* CompileState */, /* String */, Tuple</* CompileState */, /* String */>> compiler, Tuple</* CompileState */, /* StringBuilder */> current, /* String */ element, BiFunction</* StringBuilder */, /* String */, /* StringBuilder */> merger)/*  {
+	/* private static */ Tuple</* CompileState */, List</* String */>> parseAll(/* CompileState */ state, /* String */ input, /* DivideState */(*)(/* DivideState */, /* Character */) divider, Tuple</* CompileState */, /* String */>(*)(/* CompileState */, /* String */) compiler)/*  {
+        return divide(input, divider).iter().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()),
+                (current, element) -> parseElement(compiler, current, element));
+    } */
+	/* private static */ Tuple</* CompileState */, List</* String */>> parseElement(Tuple</* CompileState */, /* String */>(*)(/* CompileState */, /* String */) compiler, Tuple</* CompileState */, List</* String */>> current, /* String */ element)/*  {
+        CompileState currentState = current.left;
+        List<String> currentCache = current.right;
+
+        Tuple<CompileState, String> compiledTuple = compiler.apply(currentState, element);
+        CompileState newState = compiledTuple.left;
+        String compiled = compiledTuple.right;
+
+        return new Tuple<>(newState, currentCache.add(compiled));
+    } */
+	/* private static */ /* String */ mergeAll(/* StringBuilder */(*)(/* StringBuilder */, /* String */) merger, Tuple</* CompileState */, List</* String */>> fold)/*  {
+        return fold.right.iter().fold(new StringBuilder(), merger).toString();
+    } */
+	/* private static */ Tuple</* CompileState */, /* StringBuilder */> compileSegment(Tuple</* CompileState */, /* String */>(*)(/* CompileState */, /* String */) compiler, Tuple</* CompileState */, /* StringBuilder */> current, /* String */ element, /* StringBuilder */(*)(/* StringBuilder */, /* String */) merger)/*  {
         CompileState currentState = current.left;
         StringBuilder currentCache = current.right;
 
@@ -180,7 +194,7 @@
 	/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ current, /* String */ statement)/*  {
         return current.append(statement);
     } */
-	/* private static */ List</* String */> divide(/* String */ input, BiFunction</* DivideState */, /* Character */, /* DivideState */> folder)/*  {
+	/* private static */ List</* String */> divide(/* String */ input, /* DivideState */(*)(/* DivideState */, /* Character */) folder)/*  {
         DivideState current = new DivideState();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -365,8 +379,21 @@
             if (argumentsStart >= 0) {
                 String base = withoutEnd.substring(0, argumentsStart).strip();
                 String params = withoutEnd.substring(argumentsStart + "<".length());
-                Tuple<CompileState, String> newTypes = compileValues(state, params, Main::compileType);
-                return new Tuple<>(newTypes.left, base + "<" + newTypes.right + ">");
+                Tuple<CompileState, List<String>> compiled = parseAll(state, params, Main::compileValueChar, Main::compileType);
+
+                CompileState newState = compiled.left;
+                List<String> newValues = compiled.right;
+
+                if (base.equals("BiFunction")) {
+                    String first = newValues.get(0);
+                    String second = newValues.get(1);
+                    String returns = newValues.get(2);
+                    return new Tuple<>(newState, returns + "(*)(" + first + ", " + second + ")");
+                }
+
+                String newTypes = mergeAll(Main::mergeValues, compiled);
+                String generated = base + "<" + newTypes + ">";
+                return new Tuple<>(newState, generated);
             }
         }
 
