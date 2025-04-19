@@ -5,6 +5,8 @@
 // #include <temp.h>
 // #include <temp.h>
 // #include <temp.h>
+// #include <temp.h>
+// #include <temp.h>
 /* public */ struct Collector<T, C> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
@@ -78,6 +80,16 @@
             return Optional.of(value);
         } */
 };
+/* private static */ struct ListCollector<T> implements Collector<T, List<T>> {
+	/* @Override
+        public */ List</* T */> createInitial()/*  {
+            return Lists.empty();
+        } */
+	/* @Override
+        public */ List</* T */> fold(List</* T */> current, /* T */ element)/*  {
+            return current.add(element);
+        } */
+};
 /* public */ struct Main {
 	/* record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
@@ -133,6 +145,37 @@
         @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+    } */
+	/* private */ /* record */ Node(Map</* String */, /* String */> strings, Map</* String */, List</* Node */>> nodeLists)/*  {
+        public Node() {
+            this(new HashMap<>(), new HashMap<>());
+        }
+
+        public Node withString(String propertyKey, String propertyValue) {
+            this.strings.put(propertyKey, propertyValue);
+            return this;
+        }
+
+        public Node withNodeList(String propertyKey, List<Node> propertyValues) {
+            this.nodeLists.put(propertyKey, propertyValues);
+            return this;
+        }
+
+        public Optional<List<Node>> findNodeList(String propertyKey) {
+            if (this.nodeLists.containsKey(propertyKey)) {
+                return Optional.of(this.nodeLists.get(propertyKey));
+            }
+            return Optional.empty();
+        }
+
+        public Optional<String> findString(String propertyKey) {
+            if (this.strings.containsKey(propertyKey)) {
+                return Optional.of(this.strings.get(propertyKey));
+            }
+            else {
+                return Optional.empty();
+            }
         }
     } */
 	/* public static */ /* void */ main(/* String[] */ args)/*  {
@@ -393,7 +436,11 @@
                     String first = newValues.get(0);
                     String second = newValues.get(1);
                     String returns = newValues.get(2);
-                    return new Tuple<>(newState, generateFunctionalType(returns, first, second));
+                    final List<Node> argument1 = Lists.of(first, second).iter()
+                            .map(argument -> new Node().withString("argument", argument))
+                            .collect(new ListCollector<>());
+                    return new Tuple<>(newState, generateFunctionalType(new Node().withString("returns", returns)
+                            .withNodeList("arguments", argument1)));
                 }
 
                 String newTypes = mergeAll(Main::mergeValues, compiled);
@@ -405,13 +452,16 @@
         return compileContent(state, stripped);
     } *//* 
 
-    private static String generateFunctionalType(String returns, String first, String second) {
-        String joined = Lists.of(first, second)
+    private static String generateFunctionalType(Node node) {
+        String arguments = node.findNodeList("arguments")
+                .orElse(Lists.empty())
                 .iter()
+                .map(argument -> argument.findString("argument").orElse(""))
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return returns + "(*)(" + joined + ")";
+        String returns = node.findString("returns").orElse("");
+        return returns + "(*)(" + arguments + ")";
     } *//* 
 
     private static Optional<Integer> findTypeSeparator(String input) {
