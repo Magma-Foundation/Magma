@@ -614,14 +614,9 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isDigit(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .allMatch(Character::isDigit);
     }
 
     private static String compileTypeOrPlaceholder(String type) {
@@ -662,8 +657,8 @@ public class Main {
         String beforeName = input.substring(0, nameSeparator).strip();
         String name = input.substring(nameSeparator + " ".length()).strip();
         return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+            String beforeType = typeSeparator.left.strip();
+            String inputType = typeSeparator.right.strip();
             return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
                 String withBeforeType = modifiers + " " + outputType;
                 return Optional.of(withBeforeType + " " + name);
@@ -671,21 +666,45 @@ public class Main {
         }).or(() -> compileType(beforeName).map(type -> type + " " + name));
     }
 
-    private static Optional<Integer> findTypeSeparator(String input) {
-        int depth = 0;
-        for (int i = input.length() - 1; i >= 0; i--) {
-            char c = input.charAt(i);
-            if (c == ' ' && depth == 0) {
-                return Optional.of(i);
+    private static Optional<Tuple<String, String>> findTypeSeparator(String input) {
+        State state = new State(IntStream.range(0, input.length())
+                .map(index -> input.length() - index - 1)
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new)));
+
+        while (state.hasNext()) {
+            char next = state.pop();
+
+            if (next == ' ' && state.isLevel()) {
+                String reversedType = state.advance()
+                        .segments
+                        .getFirst();
+
+                String reversedBeforeType = state.queue.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining());
+
+                String type = reverse(reversedType);
+                String beforeType = reverse(reversedBeforeType);
+
+                return Optional.of(new Tuple<>(beforeType, type));
             }
-            if (c == '>') {
-                depth++;
+            State appended = state.append(next);
+            if (next == '>') {
+                state = appended.advance();
             }
-            if (c == '<') {
-                depth--;
+            if (next == '<') {
+                state = appended.exit();
             }
         }
+
         return Optional.empty();
+    }
+
+    private static String reverse(String reversedType) {
+        return new StringBuffer(reversedType)
+                .reverse()
+                .toString();
     }
 
     private static Optional<String> compileType(String type) {
