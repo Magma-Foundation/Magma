@@ -572,8 +572,8 @@ public class Main {
 			Optional<State> maybeValue = tuple.findValue();
 			if (maybeValue.isPresent()) {
 				State state1 = maybeValue.get();
-				String reversedType = /* state1 */.advance().segments.getFirst();
-				String reversedBeforeType = /* state1 */.queue.stream().map(String::valueOf).collect(Collectors.joining());
+				String reversedType = state1.advance().segments.getFirst();
+				String reversedBeforeType = state1.queue.stream().map(String::valueOf).collect(Collectors.joining());
 				String type = reverse(reversedType);
 				String beforeType = reverse(reversedBeforeType);
 				return Optional.of(new Tuple<>(beforeType, type));
@@ -635,7 +635,7 @@ public class Main {
 	private static boolean isTextChar(Tuple<Integer, Character> tuple){
 		int index = tuple.left;
 		char c = tuple.right;
-		boolean maybeDigit = index == 0 && Character.isDigit(c);
+		boolean maybeDigit = index != 0 && Character.isDigit(c);
 		return Character.isLetter(c) || maybeDigit;
 	}
 	private static StringBuilder mergeValues(StringBuilder cache, String element){

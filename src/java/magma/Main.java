@@ -828,7 +828,7 @@ public class Main {
     private static boolean isTextChar(Tuple<Integer, Character> tuple) {
         int index = tuple.left;
         char c = tuple.right;
-        boolean maybeDigit = index == 0 && Character.isDigit(c);
+        boolean maybeDigit = index != 0 && Character.isDigit(c);
         return Character.isLetter(c) || maybeDigit;
     }
 
