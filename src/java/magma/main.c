@@ -140,10 +140,10 @@ public class Main {
 		if (c == '}' && appended.isShallow()) {
 			return appended.advance().exit();
 		}
-		if (c == '{') {
+		if (c == '{' || c == '(') {
 			return appended.enter();
 		}
-		if (c == '}') {
+		if (c == '}' || c == ')') {
 			return appended.exit();
 		}
 		return appended;
@@ -159,12 +159,11 @@ public class Main {
 		int classIndex = stripped.indexOf("class ");
 		if (classIndex < 0) {
 			return Optional.empty();
-		}/* 
-
-        return compileModifiers(stripped.substring(0, classIndex)).flatMap(modifiers -> {
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
+		}
+		return compileModifiers(stripped.substring(0, classIndex)).flatMap(modifiers -> /* {
+            String afterKeyword = stripped */.substring(classIndex + "class ".length());
             return compileClassWithModifiers(modifiers, afterKeyword, depth);
-        } *//* ); */
+        });
 	}
 	private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth){
 		int contentStart = afterKeyword.indexOf("{");
@@ -235,16 +234,15 @@ public class Main {
 		if (!stripped.endsWith("}")) {
 			return Optional.empty();
 		}
-		String withoutEnd = stripped.substring(0, stripped.length() - "}".length());/* 
-        return findContentStart(withoutEnd).flatMap(contentStart -> {
-            String beforeContent = withoutEnd.substring(0, contentStart).strip();
+		String withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+		return findContentStart(withoutEnd).flatMap(contentStart -> /* {
+            String beforeContent = withoutEnd */.substring(0, contentStart).strip();
             String inputContent = withoutEnd.substring(contentStart + "{".length());
-            String outputContent = compileStatements(inputContent, depth + 1);
+            String outputContent = compileStatements(inputContent, depth + /* 1);
 
-            String indent = "\n" + "\t".repeat(depth);
-            return compileBeforeBlock(beforeContent)
-                    .map(value -> indent + value + " {" + outputContent + indent + "}");
-        } *//* ); */
+            String indent = "\n" */ + "\t".repeat(depth);
+            return compileBeforeBlock(beforeContent).map(value -> indent + value + " {" + outputContent + indent + /* "}");
+        } */);
 	}
 	private static Optional<Integer> findContentStart(String input){
 		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple < /* >(index, input */.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
@@ -312,7 +310,8 @@ public class Main {
 			return Optional.of("throw " + compileValue(slice));
 		}
 		if (stripped.startsWith("return ")) {
-			return Optional.of("return " + compileValue(stripped.substring("return ".length())));
+			String slice = stripped.substring("return ".length());
+			return Optional.of("return " + compileValue(slice));
 		}
 		int valueSeparator = stripped.indexOf("=");
 		if (/* valueSeparator >= 0 */) {
@@ -328,18 +327,17 @@ public class Main {
 		if (!stripped.endsWith(")")) {
 			return Optional.empty();
 		}
-		String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());/* 
-        return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
+		String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
+		return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
             String caller = withoutArgumentsEnd.substring(0, argumentsStart);
             String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
             String outputArguments = compileValues(inputArguments);
-            return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
-        } *//* ); */
+            return Optional.of(compileValue(caller) + "(" + outputArguments + /* ")");
+        } */);
 	}
 	private static Optional<Integer> findArgumentsStart(String input){
-		int depth = 0;
-		/* for (int i */ = input.length() - 1;
-		i > = 0;/*  i--) {
+		int depth = 0;/* 
+        for (int i = input.length() - 1; i >= 0; i--) {
             char c = input.charAt(i);
             if (c == '(' && depth == 0) {
                 return Optional.of(i);
@@ -441,9 +439,8 @@ public class Main {
 		String property = stripped.substring(index + separator.length());
 		return Optional.of(compileValue(parent) + separator + property);
 	}
-	private static boolean isNumber(String input){
-		/* for (int i */ = 0;
-		i < input.length();/*  i++) {
+	private static boolean isNumber(String input){/* 
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isDigit(c)) {
                 continue;
@@ -459,10 +456,10 @@ public class Main {
 		int nameSeparator = beforeParams.lastIndexOf(" ");
 		if (/* nameSeparator >= 0 */) {
 			String beforeName = beforeParams.substring(0, nameSeparator).strip();
-			String name = beforeParams.substring(nameSeparator + " ".length()).strip();/* 
-            return compileModifiers(beforeName).flatMap(modifiers -> {
-                return Optional.of(modifiers + " " + name);
-            } *//* ); */
+			String name = beforeParams.substring(nameSeparator + " ".length()).strip();
+			return compileModifiers(beforeName).flatMap(modifiers -> /* {
+                return Optional */.of(modifiers + " " + /* name);
+            } */);
 		}
 		if (isSymbol(beforeParams)) {
 			return Optional.of(beforeParams);
@@ -483,21 +480,19 @@ public class Main {
 			return Optional.empty();
 		}
 		String beforeName = input.substring(0, nameSeparator).strip();
-		String name = input.substring(nameSeparator + " ".length()).strip();/* 
-        return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
+		String name = input.substring(nameSeparator + " ".length()).strip();
+		return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
             String beforeType = beforeName.substring(0, typeSeparator).strip();
             String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
             return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
-                String withBeforeType = modifiers + " " + outputType;
-                return Optional.of(withBeforeType + " " + name);
+                String withBeforeType = modifiers + " " + /* outputType;
+                return Optional */.of(withBeforeType + " " + /* name);
             }));
-        } */
-		/* ) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
+        }) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
 	}
 	private static Optional<Integer> findTypeSeparator(String input){
-		int depth = 0;
-		/* for (int i */ = input.length() - 1;
-		i > = 0;/*  i--) {
+		int depth = 0;/* 
+        for (int i = input.length() - 1; i >= 0; i--) {
             char c = input.charAt(i);
             if (c == ' ' && depth == 0) {
                 return Optional.of(i);
@@ -540,9 +535,8 @@ public class Main {
 		}
 		return isText(input);
 	}
-	private static boolean isText(String input){
-		/* for (int i */ = 0;
-		i < input.length();/*  i++) {
+	private static boolean isText(String input){/* 
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
@@ -567,10 +561,10 @@ public class Main {
 				return state.append(state.pop());
 			}
 		}
-		if (c == '<' || c == '(') {
+		if (c == '<' || c == '(' || c == '{') {
 			return appended.enter();
 		}
-		if (c == '>' || c == ')') {
+		if (c == '>' || c == ')' || c == '}') {
 			return appended.exit();
 		}
 		return appended;

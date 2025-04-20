@@ -180,10 +180,10 @@ public class Main {
         if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
         }
-        if (c == '{') {
+        if (c == '{' || c == '(') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '}' || c == ')') {
             return appended.exit();
         }
         return appended;
@@ -407,7 +407,8 @@ public class Main {
         }
 
         if (stripped.startsWith("return ")) {
-            return Optional.of("return " + compileValue(stripped.substring("return ".length())));
+            String slice = stripped.substring("return ".length());
+            return Optional.of("return " + compileValue(slice));
         }
 
         int valueSeparator = stripped.indexOf("=");
@@ -706,10 +707,10 @@ public class Main {
             }
         }
 
-        if (c == '<' || c == '(') {
+        if (c == '<' || c == '(' || c == '{') {
             return appended.enter();
         }
-        if (c == '>' || c == ')') {
+        if (c == '>' || c == ')' || c == '}') {
             return appended.exit();
         }
         return appended;
