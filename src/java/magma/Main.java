@@ -208,7 +208,13 @@ public class Main {
                     String outputParams = compileValues(params, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + ")" + generatePlaceholder(withBraces));
+                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                        String content = withBraces.substring(1, withBraces.length() - 1);
+                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + generatePlaceholder(content) + "}");
+                    }
+                    else {
+                        return Optional.empty();
+                    }
                 });
     }
 
