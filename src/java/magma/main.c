@@ -184,10 +184,10 @@ public class Main {
 		List<String> modifiers = Arrays.stream(input.strip().split(" ")).map(String::strip).toList();
 		if (modifiers.stream().allMatch(Main::isText)) {
 			return Optional.of(String.join(" ", modifiers));
-		}/* 
-        else {
-            return Optional.empty();
-        } */
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	private static String compileClassSegment(String input, int depth){
 		return compileWhitespace(input).or(() -> compileClass(input, depth)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, depth)).orElseGet(() -> generatePlaceholder(input));
@@ -214,10 +214,10 @@ public class Main {
             String outputContent = compileStatements(inputContent, depth + 1);
             String indent = "\n" + "\t".repeat(depth);
             return Optional.of(indent + definition + "(" + outputParams + "){" + outputContent + indent + "}");
-        } *//* 
-        else {
-            return Optional.empty();
         } */
+		else {
+			return Optional.empty();
+		}
 	}
 	private static String compileStatements(String inputContent, int depth){
 		return compileStatementValues(inputContent, input -> compileStatementOrBlock(input, depth));
@@ -265,6 +265,9 @@ public class Main {
 		String stripped = input.strip();
 		if (stripped.equals("try")) {
 			return Optional.of("try");
+		}
+		if (stripped.equals("else")) {
+			return Optional.of("else");
 		}
 		return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition).or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value, depth)))).or(() -> compileBeforeBlockWithQuantity(stripped, "if", value -> Optional.of(compileValue(value, depth)))).or(() -> compileBeforeBlockWithQuantity(stripped, "for", quantity -> compileEnhancedForQuantity(quantity, depth)));
 	}
@@ -443,10 +446,10 @@ public class Main {
 			String left = input.substring(0, index);
 			String right = input.substring(index + operator.length());
 			return Optional.of(compileValue(left, depth) + " " + operator + " " + compileValue(right, depth));
-		}/* 
-        else {
-            return Optional.empty();
-        } */
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	private static Optional<String> compileAccess(String stripped, String separator, int depth){
 		int index = stripped.lastIndexOf(separator);

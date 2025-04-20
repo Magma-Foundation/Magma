@@ -349,6 +349,9 @@ public class Main {
         if (stripped.equals("try")) {
             return Optional.of("try");
         }
+        if (stripped.equals("else")) {
+            return Optional.of("else");
+        }
 
         return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
                 .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value, depth))))
