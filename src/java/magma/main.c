@@ -62,6 +62,8 @@ public class Main {
 			return this.queue.peek();
 		}
 	}
+	private record Tuple<A, B>(A left, B right){
+	}
 	public static void main(String[] args){
 		try {
 			Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -133,10 +135,10 @@ public class Main {
 		}
 		if (c == '}' && appended.isShallow()) {
 			return appended.advance().exit();
-		}/* 
-        if (c == '{') {
-            return appended.enter();
-        } */
+		}
+		if (c == '{') {
+			return appended.enter();
+		}
 		if (c == '}') {
 			return appended.exit();
 		}
@@ -207,15 +209,35 @@ public class Main {
 	}
 	private static @NotNull Optional</* ? extends String */> compileBlock(String input, int depth){
 		String stripped = input.strip();
-		if (stripped.endsWith("}")) {
-			String withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-			int contentStart = withoutEnd.indexOf("{");
-			if (/* contentStart >= 0 */) {
-				String beforeContent = withoutEnd.substring(0, contentStart).strip();
-				String inputContent = withoutEnd.substring(/* contentStart + "{" */.length());
-				String outputContent = compileStatements(inputContent, /* depth + 1 */);
-				String indent = "\n" + "\t".repeat(depth);
-				return compileBeforeBlock(beforeContent).map(value -> /* indent + value + " {" + outputContent + indent + "}" */);
+		if (!stripped.endsWith("}")) {
+			return Optional.empty();
+		}
+		String withoutEnd = stripped.substring(0, stripped.length() - "}".length());/* 
+        return findContentStart(withoutEnd).flatMap(contentStart -> {
+            String beforeContent = withoutEnd.substring(0, contentStart).strip();
+            String inputContent = withoutEnd.substring(contentStart + "{".length());
+            String outputContent = compileStatements(inputContent, depth + 1);
+
+            String indent = "\n" + "\t".repeat(depth);
+            return compileBeforeBlock(beforeContent)
+                    .map(value -> indent + value + " {" + outputContent + indent + "}");
+        } *//* ); */
+	}
+	private static Optional<Integer> findContentStart(String input){
+		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple<>(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
+		while (!queue.isEmpty()) {
+			Tuple<Integer, Character> tuple = queue.pop();
+			int i = tuple.left;
+			char c = tuple.right;
+			if (c == '\'') {
+				if (queue.pop().right == '\\') {
+					queue.pop();
+				}
+				queue.pop();/* 
+                continue; */
+			}
+			if (c == '{') {
+				return Optional.of(i);
 			}
 		}
 		return Optional.empty();
