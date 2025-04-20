@@ -22,18 +22,18 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			/* this */(/* new ArrayList<>(), new StringBuilder(), 0 */);
+			this(/* new ArrayList<>() */, /* new StringBuilder() */, /* 0 */);
 		}
 		private State enter(){
-			/* this.setDepth */(/* this.getDepth() + 1 */);/* 
+			this.setDepth(this.getDepth() + 1);/* 
             return this; */
 		}
 		private State append(char c){
-			/* this.getBuffer */(/* ).append(c */);/* 
+			this.getBuffer(/* ) */.append(c);/* 
             return this; */
 		}
 		private State exit(){
-			/* this.setDepth */(/* this.getDepth() - 1 */);/* 
+			this.setDepth(this.getDepth() - 1);/* 
             return this; */
 		}
 		private boolean isShallow(){
@@ -43,8 +43,8 @@ public class Main {
 			/* return this */.getDepth() = /* = 0 */;
 		}
 		private State advance(){
-			/* this.segments */(/* ).add(this.getBuffer().toString() */);
-			/* this.setBuffer */(/* new StringBuilder() */);/* 
+			this.segments(/* ) */.add(this.getBuffer().toString());
+			this.setBuffer(/* new StringBuilder() */);/* 
             return this; */
 		}
 		public List<String> getSegments(){/* 
@@ -77,15 +77,15 @@ public class Main {
         } */
 		}
 		private static String compile(String input){
-			/* return compileStatements */(/* input, Main::compileRootSegment */);
+			/* return compileStatements */(input, /* Main::compileRootSegment */);
 		}
 		private static String compileStatements(String input,  Function<String, /*  String> compiler */){
-			/* return compileAll */(/* input, Main::foldStatementChar, compiler, Main::mergeStatements */);
+			/* return compileAll */(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 		}
 		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
 			/* State current */ = /* new State() */;
 			/* for (int i */ = /* 0 */;
-			/* i < input.length */(/*  */);/*  i++) {
+			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
@@ -95,10 +95,10 @@ public class Main {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
         } */
-			/* return output.toString */(/*  */);
+			/* return output */.toString();
 		}
 		private static StringBuilder mergeStatements(StringBuilder output, String compiled){
-			/* return output.append */(/* compiled */);
+			/* return output */.append(compiled);
 		}
 		private static State foldStatementChar(State state, char c){
 			/* State appended */ = state.append(c);
@@ -110,7 +110,7 @@ public class Main {
             return appended.advance().exit();
         } */
 		if(/* c == '{' */){
-			/* return appended.enter */(/*  */);/* 
+			/* return appended */.enter();/* 
         }
         if (c == ' */
 		}/* ') {
@@ -198,8 +198,9 @@ public class Main {
             int argumentsStart = withoutArgumentsEnd.indexOf("(");
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-                String arguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                return Optional.of(generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")");
+                String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+                String outputArguments = compileValues(inputArguments, Main::compileValue);
+                return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
             }
         }
         return Optional.empty();

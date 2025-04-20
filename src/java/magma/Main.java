@@ -255,8 +255,9 @@ public class Main {
             int argumentsStart = withoutArgumentsEnd.indexOf("(");
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-                String arguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                return Optional.of(generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")");
+                String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+                String outputArguments = compileValues(inputArguments, Main::compileValue);
+                return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
             }
         }
         return Optional.empty();
