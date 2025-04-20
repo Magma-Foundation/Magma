@@ -630,7 +630,13 @@ public class Main {
 		return isText(input);
 	}
 	private static boolean isText(String input){
-		return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isLetter);
+		return IntStream.range(0, input.length()).mapToObj(index -> new Tuple<>(index, input.charAt(index))).allMatch(Main::isTextChar);
+	}
+	private static boolean isTextChar(Tuple<Integer, Character> tuple){
+		int index = tuple.left;
+		char c = tuple.right;
+		boolean maybeDigit = index == 0 && Character.isDigit(c);
+		return Character.isLetter(c) || maybeDigit;
 	}
 	private static StringBuilder mergeValues(StringBuilder cache, String element){
 		if (cache.isEmpty()) {
