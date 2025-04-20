@@ -524,11 +524,18 @@ public class Main {
     }
 
     private static State foldValueChar(State state, Character c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
 
-        return state.append(c);
+        State appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String generatePlaceholder(String input) {

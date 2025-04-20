@@ -73,10 +73,13 @@ public class Main {
 	private static String compile(String input){
 			return compileStatementValues(input, Main::compileRootSegment);
 	}
-	private static String compileStatementValues(String input,  Function<String, /*  String> compiler */){
+	private static String compileStatementValues(String input, /*  Function<String, String> compiler */){
 			return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
 	}
-	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
+	private static String compileAll(String input, /* 
+            BiFunction<State, Character, State> folder */, /* 
+            Function<String, String> compiler */, /* 
+            BiFunction<StringBuilder, String, StringBuilder> merger */){
 			LinkedList<Character> queue = IntStream.range(0, input.length(/* )) */.mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new));
 			State current = new State(queue);/* 
         while (current.hasNext()) {
@@ -371,9 +374,13 @@ public class Main {
         } *//* return cache.append(", ").append(element); *//* }
 
     private static State foldValueChar(State state, Character c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
-        } *//* return state.append(c); *//* }
+        } *//* State appended = state.append(c); *//* if (c == '<') {
+            return appended.enter();
+        } *//* if (c == '>') {
+            return appended.exit();
+        } *//* return appended; *//* }
 
     private static String generatePlaceholder(String input) {
         String replaced = input
