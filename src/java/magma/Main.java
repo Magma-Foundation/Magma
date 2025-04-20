@@ -267,7 +267,7 @@ public class Main {
                 String outputContent = compileStatements(inputContent, depth + 1);
 
                 String indent = "\n" + "\t".repeat(depth);
-                return compileBeforeContent(beforeContent)
+                return compileBeforeBlock(beforeContent)
                         .map(value -> indent + value + " {" + outputContent + indent + "}");
             }
         }
@@ -275,20 +275,32 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileBeforeContent(String input) {
-        if (input.equals("try")) {
+    private static Optional<String> compileBeforeBlock(String input) {
+        String stripped = input.strip();
+        if (stripped.equals("try")) {
             return Optional.of("try");
         }
 
-        if (input.startsWith("catch (")) {
-            String withoutPrefix = input.substring("catch (".length()).strip();
-            if (withoutPrefix.endsWith(")")) {
-                String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-                return compileDefinition(inputDefinition).map(outputDefinition -> "catch (" + outputDefinition + ")");
-            }
+        return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))));
+    }
+
+    private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition) {
+        String stripped = input.strip();
+        String prefix = " (";
+
+        if (!stripped.startsWith(keyword + prefix)) {
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        String withoutPrefix = stripped.substring((keyword + prefix).length()).strip();
+        if (!withoutPrefix.endsWith(")")) {
+            return Optional.empty();
+        }
+
+        String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+        return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + ")");
+
     }
 
     private static Optional<String> compileStatement(String input, int depth) {

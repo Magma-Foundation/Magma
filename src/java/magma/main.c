@@ -78,13 +78,12 @@ public class Main {
 	}
 	private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler, BiFunction<StringBuilder, String, StringBuilder> merger){
 		LinkedList<Character> queue = IntStream.range(0, input.length()).mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new));
-		State current = new State(queue);/* 
-        while (current.hasNext()) {
-            char c = current.pop();
-            State finalCurrent = current;
-            current = foldDoubleQuotes(finalCurrent, c)
-                    .orElseGet(() -> folder.apply(finalCurrent, c));
-        } */
+		State current = new State(queue);
+		while (current.hasNext()) {
+			char c = current.pop();
+			State finalCurrent = current;
+			current = foldDoubleQuotes(finalCurrent, c).orElseGet(/* () -> folder */.apply(finalCurrent, c));
+		}
 		List<String> segments = current.advance().segments;
 		StringBuilder output = new StringBuilder();/* 
         for (String segment : segments) {
@@ -207,21 +206,23 @@ public class Main {
                 String outputContent = compileStatements(inputContent, depth + 1);
 
                 String indent = "\n" + "\t".repeat(depth);
-                return compileBeforeContent(beforeContent)
+                return compileBeforeBlock(beforeContent)
                         .map(value -> indent + value + " {" + outputContent + indent + "}");
             }
         } *//* return Optional.empty(); *//* }
 
-    private static Optional<String> compileBeforeContent(String input) {
-        if (input.equals("try")) {
+    private static Optional<String> compileBeforeBlock(String input) {
+        String stripped = input.strip(); *//* if (stripped.equals("try")) {
             return Optional.of("try");
-        } *//* if (input.startsWith("catch (")) {
-            String withoutPrefix = input.substring("catch (".length()).strip();
-            if (withoutPrefix.endsWith(")")) {
-                String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-                return compileDefinition(inputDefinition).map(outputDefinition -> "catch (" + outputDefinition + ")");
-            }
-        } *//* return Optional.empty(); *//* }
+        } *//* return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value)))); *//* }
+
+    private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition) {
+        String stripped = input.strip(); *//* String prefix = " ("; *//* if (!stripped.startsWith(keyword + prefix)) {
+            return Optional.empty();
+        } *//* String withoutPrefix = stripped.substring((keyword + prefix).length()).strip(); *//* if (!withoutPrefix.endsWith(")")) {
+            return Optional.empty();
+        } *//* String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length()); *//* return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + ")"); *//* }
 
     private static Optional<String> compileStatement(String input, int depth) {
         String stripped = input.strip(); *//* if (!stripped.endsWith(";")) {
@@ -347,9 +348,7 @@ public class Main {
                 }
                 String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
                 return Optional.of(withBeforeType + " " + name);
-            }).or(() -> {
-                return compileType(beforeName).map(type -> type + " " + name);
-            });
+            }).or(() -> compileType(beforeName).map(type -> type + " " + name));
         } *//* return Optional.empty(); *//* }
 
     private static Optional<Integer> findTypeSeparator(String input) {
