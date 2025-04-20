@@ -8,26 +8,31 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static class State {
         private final List<String> segments;
+        private final Deque<Character> queue;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(Deque<Character> queue, List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+            this.queue = queue;
         }
 
-        public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public State(Deque<Character> queue) {
+            this(queue, new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State enter() {
@@ -58,6 +63,14 @@ public class Main {
             this.buffer = new StringBuilder();
             return this;
         }
+
+        public boolean hasNext() {
+            return !this.queue.isEmpty();
+        }
+
+        public char pop() {
+            return this.queue.pop();
+        }
     }
 
     public static void main(String[] args) {
@@ -85,11 +98,18 @@ public class Main {
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        State current = new State();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = folder.apply(current, c);
+        LinkedList<Character> queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        State current = new State(queue);
+        while (current.hasNext()) {
+            char c = current.pop();
+            State finalCurrent = current;
+            current = foldDoubleQuotes(finalCurrent, c)
+                    .orElseGet(() -> folder.apply(finalCurrent, c));
         }
+
         List<String> segments = current.advance().segments;
 
         StringBuilder output = new StringBuilder();
@@ -98,6 +118,26 @@ public class Main {
             output = merger.apply(output, compiled);
         }
         return output.toString();
+    }
+
+    private static Optional<State> foldDoubleQuotes(State state, char c) {
+        if (c != '"') {
+            return Optional.empty();
+        }
+
+        State appended = state.append(c);
+        while (appended.hasNext()) {
+            char next = appended.pop();
+            appended = appended.append(next);
+
+            if (next == '\\') {
+                appended = appended.append(appended.pop());
+            }
+            if (next == '"') {
+                break;
+            }
+        }
+        return Optional.of(appended);
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
@@ -289,6 +329,9 @@ public class Main {
 
     private static String compileValue(String input) {
         String stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        }
 
         if (stripped.startsWith("new ")) {
             String withoutPrefix = stripped.substring("new ".length()).strip();
