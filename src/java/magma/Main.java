@@ -218,16 +218,21 @@ public class Main {
         return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";");
     }
 
-    private static Optional<String> compileStatementValue(String withoutEnd) {
-        int valueSeparator = withoutEnd.indexOf("=");
+    private static Optional<String> compileStatementValue(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            return Optional.of("return " + compileValue(stripped.substring("return ".length())));
+        }
+
+        int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            String destination = withoutEnd.substring(0, valueSeparator).strip();
-            String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+            String destination = stripped.substring(0, valueSeparator).strip();
+            String source = stripped.substring(valueSeparator + "=".length()).strip();
             return Optional.of(compileValue(destination) + " = " + compileValue(source));
         }
 
-        if (withoutEnd.endsWith(")")) {
-            String withoutArgumentsEnd = withoutEnd.substring(0, withoutEnd.length() - ")".length());
+        if (stripped.endsWith(")")) {
+            String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentsStart = withoutArgumentsEnd.indexOf("(");
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);

@@ -25,27 +25,27 @@ public class Main {
 			this(new ArrayList<>(), new StringBuilder(), 0);
 		}
 		private State enter(){
-			this.depth = this.depth + 1;/* 
-            return this; */
+			this.depth = this.depth + 1;
+			return this;
 		}
 		private State append(char c){
-			this.buffer.append(c);/* 
-            return this; */
+			this.buffer.append(c);
+			return this;
 		}
 		private State exit(){
-			this.depth = this.depth - 1;/* 
-            return this; */
+			this.depth = this.depth - 1;
+			return this;
 		}
 		private boolean isShallow(){
-			/* return this */.depth = /* = 1 */;
+			return this.depth == 1;
 		}
 		private boolean isLevel(){
-			/* return this */.depth = /* = 0 */;
+			return this.depth == 0;
 		}
 		private State advance(){
 			this.segments.add(this.buffer.toString());
-			this.buffer = new StringBuilder();/* 
-            return this; */
+			this.buffer = new StringBuilder();
+			return this;
 		}/* 
      */}
 		public static void main(/* String[] args */){/* 
@@ -59,10 +59,10 @@ public class Main {
         } */
 		}
 		private static String compile(String input){
-			/* return compileStatements */(input, /* Main::compileRootSegment */);
+			return /* compileStatements(input, Main::compileRootSegment) */;
 		}
 		private static String compileStatements(String input,  Function<String, /*  String> compiler */){
-			/* return compileAll */(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
+			return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 		}
 		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
 			/* State current */ = new State();
@@ -77,10 +77,10 @@ public class Main {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
         } */
-			/* return output */.toString();
+			return output.toString();
 		}
 		private static StringBuilder mergeStatements(StringBuilder output, String compiled){
-			/* return output */.append(compiled);
+			return output.append(compiled);
 		}
 		private static State foldStatementChar(State state, char c){
 			/* State appended */ = state.append(c);
@@ -92,7 +92,7 @@ public class Main {
             return appended.advance().exit();
         } */
 		if(/* c == '{' */){
-			/* return appended */.enter();/* 
+			return appended.enter();/* 
         }
         if (c == ' */
 		}/* ') {
@@ -167,16 +167,21 @@ public class Main {
 
         String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
         return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";");
-    } *//* private static Optional<String> compileStatementValue(String withoutEnd) {
-        int valueSeparator = withoutEnd.indexOf("=");
+    } *//* private static Optional<String> compileStatementValue(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            return Optional.of("return " + compileValue(stripped.substring("return ".length())));
+        }
+
+        int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            String destination = withoutEnd.substring(0, valueSeparator).strip();
-            String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+            String destination = stripped.substring(0, valueSeparator).strip();
+            String source = stripped.substring(valueSeparator + "=".length()).strip();
             return Optional.of(compileValue(destination) + " = " + compileValue(source));
         }
 
-        if (withoutEnd.endsWith(")")) {
-            String withoutArgumentsEnd = withoutEnd.substring(0, withoutEnd.length() - ")".length());
+        if (stripped.endsWith(")")) {
+            String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentsStart = withoutArgumentsEnd.indexOf("(");
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);
