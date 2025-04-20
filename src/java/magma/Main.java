@@ -331,15 +331,30 @@ public class Main {
         }
 
         String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
-        int argumentsStart = withoutArgumentsEnd.indexOf("(");
-        if (argumentsStart < 0) {
-            return Optional.empty();
+        return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
+            String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+            String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+            String outputArguments = compileValues(inputArguments);
+            return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
+        });
+    }
+
+    private static Optional<Integer> findArgumentsStart(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == '(' && depth == 0) {
+                return Optional.of(i);
+            }
+            if (c == ')') {
+                depth++;
+            }
+            if (c == '(') {
+                depth--;
+            }
         }
 
-        String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-        String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-        String outputArguments = compileValues(inputArguments);
-        return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
+        return Optional.empty();
     }
 
     private static String compileValues(String inputArguments) {
@@ -466,9 +481,7 @@ public class Main {
                 }
                 String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
                 return Optional.of(withBeforeType + " " + name);
-            }).or(() -> {
-                return compileType(beforeName).map(type -> type + " " + name);
-            });
+            }).or(() -> compileType(beforeName).map(type -> type + " " + name));
         }
         return Optional.empty();
     }

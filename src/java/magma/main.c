@@ -77,7 +77,7 @@ public class Main {
 		return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
 	}
 	private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler, BiFunction<StringBuilder, String, StringBuilder> merger){
-		LinkedList<Character> queue = IntStream.range(0, input.length(/* )) */.mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new));
+		LinkedList<Character> queue = IntStream.range(0, input.length()).mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new));
 		State current = new State(queue);/* 
         while (current.hasNext()) {
             char c = current.pop();
@@ -135,8 +135,8 @@ public class Main {
         int classIndex = stripped.indexOf("class "); */if (classIndex >= 0) {            String modifiers = compileModifiers(stripped.substring(0, classIndex));            String afterKeyword = stripped.substring(classIndex + " class ".length());
             int contentStart = afterKeyword.indexOf(" {
 	"); if(/* contentStart >= 0 */){
-		String className = afterKeyword.substring(0, /* contentStart) */.strip();
-		String withEnd = afterKeyword.substring(/* contentStart + "{" */.length(/* ) */).strip();/* 
+		String className = afterKeyword.substring(0, contentStart).strip();
+		String withEnd = afterKeyword.substring(/* contentStart + "{" */.length()).strip();/* 
                 if (withEnd.endsWith(" */
 	}
 	")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
@@ -245,9 +245,26 @@ public class Main {
     private static Optional<String> compileInvocation(String input) {
         String stripped = input.strip(); *//* if (!stripped.endsWith(")")) {
             return Optional.empty();
-        } *//* String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length()); *//* int argumentsStart = withoutArgumentsEnd.indexOf("("); *//* if (argumentsStart < 0) {
-            return Optional.empty();
-        } *//* String caller = withoutArgumentsEnd.substring(0, argumentsStart); *//* String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length()); *//* String outputArguments = compileValues(inputArguments); *//* return Optional.of(compileValue(caller) + "(" + outputArguments + ")"); *//* }
+        } *//* String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length()); *//* return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
+            String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+            String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+            String outputArguments = compileValues(inputArguments);
+            return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
+        } *//* ); *//* }
+
+    private static Optional<Integer> findArgumentsStart(String input) {
+        int depth = 0; *//* for (int i = input.length() - 1; *//* i >= 0; *//* i--) {
+            char c = input.charAt(i);
+            if (c == '(' && depth == 0) {
+                return Optional.of(i);
+            }
+            if (c == ')') {
+                depth++;
+            }
+            if (c == '(') {
+                depth--;
+            }
+        } *//* return Optional.empty(); *//* }
 
     private static String compileValues(String inputArguments) {
         return compileValueSegments(inputArguments, Main::compileValue); *//* }
