@@ -142,9 +142,7 @@ public class Main {
     private static Optional<String> compileClass(String stripped, int depth) {
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
-            String modifiers = Arrays.stream(stripped.substring(0, classIndex).strip().split(" "))
-                    .map(String::strip)
-                    .collect(Collectors.joining(" "));
+            String modifiers = compileModifiers(stripped.substring(0, classIndex));
 
             String afterKeyword = stripped.substring(classIndex + "class ".length());
             int contentStart = afterKeyword.indexOf("{");
@@ -161,6 +159,12 @@ public class Main {
             }
         }
         return Optional.empty();
+    }
+
+    private static String compileModifiers(String input) {
+        return Arrays.stream(input.strip().split(" "))
+                .map(String::strip)
+                .collect(Collectors.joining(" "));
     }
 
     private static String compileClassSegment(String input, int depth) {
@@ -181,7 +185,7 @@ public class Main {
                 if (typeSeparator >= 0) {
                     String beforeType = beforeName.substring(0, typeSeparator).strip();
                     String type = beforeName.substring(typeSeparator + " ".length()).strip();
-                    return Optional.of("\n\t\t" + generatePlaceholder(beforeType) + " " + compileType(type) + " " + name + ";");
+                    return Optional.of("\n\t\t" + compileModifiers(beforeType) + " " + compileType(type) + " " + name + ";");
                 }
             }
         }
