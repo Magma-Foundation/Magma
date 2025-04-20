@@ -295,10 +295,11 @@ public class Main {
 	private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition){
 		String stripped = input.strip();
 		String prefix = " (";
-		if (!stripped.startsWith(keyword + prefix)) {
+		String assembled = keyword + prefix;
+		if (!stripped.startsWith(assembled)) {
 			return Optional.empty();
 		}
-		String withoutPrefix = stripped.substring((keyword + /* prefix) */.length()).strip();
+		String withoutPrefix = stripped.substring(assembled.length()).strip();
 		if (!withoutPrefix.endsWith(")")) {
 			return Optional.empty();
 		}
@@ -330,7 +331,7 @@ public class Main {
 			return Optional.of("return " + compileValue(slice, depth));
 		}
 		int valueSeparator = stripped.indexOf("=");
-		if (/* valueSeparator >= 0 */) {
+		if (valueSeparator >= 0) {
 			String inputDestination = stripped.substring(0, valueSeparator).strip();
 			String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination, depth));
 			String source = stripped.substring(valueSeparator + "=".length()).strip();
@@ -389,7 +390,7 @@ public class Main {
 			if (withoutPrefix.endsWith(")")) {
 				String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
 				int argumentStart = withoutSuffix.indexOf("(");
-				if (/* argumentStart >= 0 */) {
+				if (argumentStart >= 0) {
 					String type = withoutSuffix.substring(0, argumentStart).strip();
 					String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
 					return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")";
@@ -404,6 +405,9 @@ public class Main {
 		if (maybeLambda.isPresent()) {
 			return maybeLambda.get();
 		}
+		if (stripped.startsWith("(") && stripped.endsWith(")")) {
+			return "(" + compileValue(stripped.substring(1, stripped.length() - 1), depth) + ")";
+		}
 		if (isSymbol(stripped)) {
 			return stripped;
 		}
@@ -414,7 +418,8 @@ public class Main {
                 .or(() -> compileOperator(stripped, " == ", depth))
                 .or(() -> compileOperator(stripped, " && ", depth))
                 .or(() -> compileOperator(stripped, " + ", depth))
-                .or(() -> compileOperator(stripped, " < /* ", depth)) */.or(() -> compileAccess(stripped, ".", depth)).or(() -> compileAccess(stripped, "::", depth)).orElseGet(() -> generatePlaceholder(stripped));
+                .or(() -> compileOperator(stripped, " < ", depth))
+                .or(() -> compileOperator(stripped, " >= /* ", depth)) */.or(() -> compileAccess(stripped, ".", depth)).or(() -> compileAccess(stripped, "::", depth)).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileLambda(int depth, String stripped){
 		int arrowIndex = stripped.indexOf("->");
@@ -457,7 +462,7 @@ public class Main {
 	}
 	private static Optional<String> compileOperator(String input, String operator, int depth){
 		int index = input.indexOf(operator);
-		if (/* index >= 0 */) {
+		if (index >= 0) {
 			String left = input.substring(0, index);
 			String right = input.substring(index + operator.length());
 			return Optional.of(compileValue(left, depth) + " " + operator + " " + compileValue(right, depth));
@@ -490,7 +495,7 @@ public class Main {
 	}
 	private static Optional<String> compileConstructorHeader(String beforeParams){
 		int nameSeparator = beforeParams.lastIndexOf(" ");
-		if (/* nameSeparator >= 0 */) {
+		if (nameSeparator >= 0) {
 			String beforeName = beforeParams.substring(0, nameSeparator).strip();
 			String name = beforeParams.substring(nameSeparator + " ".length()).strip();
 			return compileModifiers(beforeName).flatMap(modifiers -> {
@@ -550,7 +555,7 @@ public class Main {
 		if (stripped.endsWith(">")) {
 			String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
 			int paramStart = withoutEnd.indexOf("<");
-			if (/* paramStart >= 0 */) {
+			if (paramStart >= 0) {
 				String base = withoutEnd.substring(0, paramStart).strip();
 				String oldArguments = withoutEnd.substring(paramStart + " < ".length());
 				String newArguments = compileValueSegments(oldArguments, Main::compileTypeOrPlaceholder);

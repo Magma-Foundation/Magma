@@ -386,11 +386,12 @@ public class Main {
         String stripped = input.strip();
         String prefix = " (";
 
-        if (!stripped.startsWith(keyword + prefix)) {
+        String assembled = keyword + prefix;
+        if (!stripped.startsWith(assembled)) {
             return Optional.empty();
         }
 
-        String withoutPrefix = stripped.substring((keyword + prefix).length()).strip();
+        String withoutPrefix = stripped.substring(assembled.length()).strip();
         if (!withoutPrefix.endsWith(")")) {
             return Optional.empty();
         }
@@ -519,6 +520,10 @@ public class Main {
             return maybeLambda.get();
         }
 
+        if (stripped.startsWith("(") && stripped.endsWith(")")) {
+            return "(" + compileValue(stripped.substring(1, stripped.length() - 1), depth) + ")";
+        }
+
         if (isSymbol(stripped)) {
             return stripped;
         }
@@ -534,6 +539,7 @@ public class Main {
                 .or(() -> compileOperator(stripped, "&&", depth))
                 .or(() -> compileOperator(stripped, "+", depth))
                 .or(() -> compileOperator(stripped, "<", depth))
+                .or(() -> compileOperator(stripped, ">=", depth))
                 .or(() -> compileAccess(stripped, ".", depth))
                 .or(() -> compileAccess(stripped, "::", depth))
                 .orElseGet(() -> generatePlaceholder(stripped));
