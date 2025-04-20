@@ -192,7 +192,7 @@ public class Main {
 	private static String compileClassSegment(String input, int depth){
 		return compileWhitespace(input).or(() -> compileClass(input, depth)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, depth)).orElseGet(() -> generatePlaceholder(input));
 	}
-	private static @NotNull Optional</* ? extends String */> compileMethod(String input, int depth){
+	private static Optional<String> compileMethod(String input, int depth){
 		int paramStart = input.indexOf("(");
 		if (paramStart < 0) {
 			return Optional.empty();
@@ -228,7 +228,7 @@ public class Main {
 	private static String compileStatementOrBlock(String input, int depth){
 		return compileWhitespace(input).or(() -> compileStatement(input, depth)).or(() -> compileBlock(input, depth)).orElseGet(() -> generatePlaceholder(input));
 	}
-	private static @NotNull Optional</* ? extends String */> compileBlock(String input, int depth){
+	private static Optional<String> compileBlock(String input, int depth){
 		String stripped = input.strip();
 		if (!stripped.endsWith("}")) {
 			return Optional.empty();
@@ -487,7 +487,7 @@ public class Main {
 		}
 		return Optional.empty();
 	}
-	private static @NotNull Optional</* ? extends String */> compileDefinitionStatement(String input){
+	private static Optional<String> compileDefinitionStatement(String input){
 		String stripped = input.strip();
 		if (!stripped.endsWith(";")) {
 			return Optional.empty();
