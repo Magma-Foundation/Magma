@@ -85,7 +85,7 @@ public class Main {
 		while (current.hasNext()) {
 			char c = current.pop();
 			State finalCurrent = current;
-			current = foldSingleQuotes(finalCurrent, c).or(() -> foldDoubleQuotes(finalCurrent, c)).orElseGet(() -> folder.apply(finalCurrent, c));
+			current = foldDoubleQuotes(finalCurrent, c).or(() -> foldSingleQuotes(finalCurrent, c)).orElseGet(() -> folder.apply(finalCurrent, c));
 		}
 		List<String> segments = current.advance().segments;
 		StringBuilder output = new StringBuilder();
@@ -96,7 +96,7 @@ public class Main {
 		return output.toString();
 	}
 	private static Optional<State> foldSingleQuotes(State state, char c){
-		if (c != /* '\'' */) {
+		if (c != '\'') {
 			return Optional.empty();
 		}
 		State appended = state.append(c);
@@ -108,7 +108,7 @@ public class Main {
 		return Optional.of(withEscaped.append(withEscaped.pop()));
 	}
 	private static Optional<State> foldDoubleQuotes(State state, char c){
-		if (c != /* '"' */) {
+		if (c != '\"') {
 			return Optional.empty();
 		}
 		State appended = state.append(c);
@@ -118,7 +118,7 @@ public class Main {
 			if (/* next == '\\' */) {
 				appended = appended.append(appended.pop());
 			}
-			if (/* next == '"' */) {/* 
+			if (/* next == '\"' */) {/* 
                 break; */
 			}
 		}
@@ -318,6 +318,9 @@ public class Main {
 	private static String compileValue(String input){
 		String stripped = input.strip();
 		if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+			return stripped;
+		}
+		if (stripped.startsWith("'") && stripped.endsWith("'")) {
 			return stripped;
 		}
 		if (stripped.startsWith("new ")) {

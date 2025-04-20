@@ -110,8 +110,8 @@ public class Main {
         while (current.hasNext()) {
             char c = current.pop();
             State finalCurrent = current;
-            current = foldSingleQuotes(finalCurrent, c)
-                    .or(() -> foldDoubleQuotes(finalCurrent, c))
+            current = foldDoubleQuotes(finalCurrent, c)
+                    .or(() -> foldSingleQuotes(finalCurrent, c))
                     .orElseGet(() -> folder.apply(finalCurrent, c));
         }
 
@@ -143,7 +143,7 @@ public class Main {
     }
 
     private static Optional<State> foldDoubleQuotes(State state, char c) {
-        if (c != '"') {
+        if (c != '\"') {
             return Optional.empty();
         }
 
@@ -155,7 +155,7 @@ public class Main {
             if (next == '\\') {
                 appended = appended.append(appended.pop());
             }
-            if (next == '"') {
+            if (next == '\"') {
                 break;
             }
         }
@@ -418,6 +418,10 @@ public class Main {
     private static String compileValue(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        }
+
+        if (stripped.startsWith("'") && stripped.endsWith("'")) {
             return stripped;
         }
 
