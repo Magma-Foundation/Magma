@@ -22,7 +22,7 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			this(/* new ArrayList<> */(), /* new StringBuilder */(), 0);
+			this(new ArrayList<>(), new StringBuilder(), 0);
 		}
 		private State enter(){
 			this.depth = this.depth + 1;
@@ -44,7 +44,7 @@ public class Main {
 		}
 		private State advance(){
 			this.segments.add(this.buffer.toString());
-			this.buffer = /* new StringBuilder */();
+			this.buffer = new StringBuilder();
 			return this;
 		}
 	}
@@ -65,14 +65,14 @@ public class Main {
 			return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 	}
 	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
-			State current = /* new State */();
+			State current = new State();
 			/* for (int i */ = 0;
 			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 			List<String> segments = current.advance().segments;
-			StringBuilder output = /* new StringBuilder */();/* 
+			StringBuilder output = new StringBuilder();/* 
         for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
@@ -226,11 +226,6 @@ public class Main {
     } *//* private static String compileValue(String input) {
         String stripped = input.strip();
 
-        Optional<String> maybeInvocation = compileInvocation(input);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation.get();
-        }
-
         if (stripped.startsWith("new ")) {
             String withoutPrefix = stripped.substring("new ".length()).strip();
             if (withoutPrefix.endsWith(")")) {
@@ -242,6 +237,11 @@ public class Main {
                     return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments) + ")";
                 }
             }
+        }
+
+        Optional<String> maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation.get();
         }
 
         int separator = stripped.lastIndexOf(".");

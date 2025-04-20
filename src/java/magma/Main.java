@@ -290,11 +290,6 @@ public class Main {
     private static String compileValue(String input) {
         String stripped = input.strip();
 
-        Optional<String> maybeInvocation = compileInvocation(input);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation.get();
-        }
-
         if (stripped.startsWith("new ")) {
             String withoutPrefix = stripped.substring("new ".length()).strip();
             if (withoutPrefix.endsWith(")")) {
@@ -306,6 +301,11 @@ public class Main {
                     return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments) + ")";
                 }
             }
+        }
+
+        Optional<String> maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation.get();
         }
 
         int separator = stripped.lastIndexOf(".");
