@@ -350,6 +350,10 @@ public class Main {
 
     private static Optional<String> compileStatementValue(String input) {
         String stripped = input.strip();
+        if (stripped.endsWith("break")) {
+            return Optional.of("break");
+        }
+
         if (stripped.startsWith("throw ")) {
             String slice = stripped.substring("throw ".length());
             return Optional.of("throw " + compileValue(slice));
