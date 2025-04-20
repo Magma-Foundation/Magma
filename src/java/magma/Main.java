@@ -191,16 +191,25 @@ public class Main {
 
     private static @NotNull Optional<? extends String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            String beforeParams = input.substring(0, paramStart).strip();
-            return compileDefinition(beforeParams)
-                    .or(() -> compileConstructorHeader(beforeParams))
-                    .flatMap(outputDefinition -> {
-                        String withParams = input.substring(paramStart + "(".length()).strip();
-                        return Optional.of("\n\t\t" + outputDefinition + "(" + generatePlaceholder(withParams));
-                    });
+        if (paramStart < 0) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        String beforeParams = input.substring(0, paramStart).strip();
+        return compileDefinition(beforeParams)
+                .or(() -> compileConstructorHeader(beforeParams))
+                .flatMap(outputDefinition -> {
+                    String withParams = input.substring(paramStart + "(".length()).strip();
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd < 0) {
+                        return Optional.empty();
+                    }
+
+                    String params = withParams.substring(0, paramEnd).strip();
+                    String outputParams = compileValues(params, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
+
+                    String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                    return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + ")" + generatePlaceholder(withBraces));
+                });
     }
 
     private static Optional<String> compileConstructorHeader(String beforeParams) {
@@ -255,7 +264,7 @@ public class Main {
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
                 String oldArguments = withoutEnd.substring(paramStart + "<".length());
-                String newArguments = compileAll(oldArguments, Main::foldValueChar, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)), Main::mergeValues);
+                String newArguments = compileValues(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
                 return Optional.of(base + "<" + newArguments + ">");
             }
         }
@@ -265,6 +274,10 @@ public class Main {
         }
 
         return Optional.empty();
+    }
+
+    private static String compileValues(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static boolean isSymbol(String input) {
