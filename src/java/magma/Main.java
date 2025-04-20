@@ -312,7 +312,7 @@ public class Main {
             String outputContent = compileStatements(inputContent, depth + 1);
 
             String indent = "\n" + "\t".repeat(depth);
-            return compileBeforeBlock(beforeContent)
+            return compileBeforeBlock(beforeContent, depth)
                     .map(value -> indent + value + " {" + outputContent + indent + "}");
         });
     }
@@ -344,19 +344,19 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileBeforeBlock(String input) {
+    private static Optional<String> compileBeforeBlock(String input, int depth) {
         String stripped = input.strip();
         if (stripped.equals("try")) {
             return Optional.of("try");
         }
 
         return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
-                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))))
-                .or(() -> compileBeforeBlockWithQuantity(stripped, "if", value -> Optional.of(compileValue(value))))
-                .or(() -> compileBeforeBlockWithQuantity(stripped, "for", Main::compileEnhancedForQuantity));
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value, depth))))
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "if", value -> Optional.of(compileValue(value, depth))))
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "for", quantity -> compileEnhancedForQuantity(quantity, depth)));
     }
 
-    private static Optional<String> compileEnhancedForQuantity(String quantity) {
+    private static Optional<String> compileEnhancedForQuantity(String quantity, int depth) {
         int separator = quantity.indexOf(":");
         if (separator < 0) {
             return Optional.empty();
@@ -364,7 +364,7 @@ public class Main {
 
         String inputDefinition = quantity.substring(0, separator);
         String value = quantity.substring(separator + ":".length());
-        return compileDefinition(inputDefinition).map(outputDefinition -> outputDefinition + " : " + compileValue(value));
+        return compileDefinition(inputDefinition).map(outputDefinition -> outputDefinition + " : " + compileValue(value, depth));
     }
 
     private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition) {
@@ -392,10 +392,10 @@ public class Main {
         }
 
         String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return compileStatementValue(withoutEnd).map(destination -> "\n" + "\t".repeat(depth) + destination + ";");
+        return compileStatementValue(withoutEnd, depth).map(destination -> "\n" + "\t".repeat(depth) + destination + ";");
     }
 
-    private static Optional<String> compileStatementValue(String input) {
+    private static Optional<String> compileStatementValue(String input, int depth) {
         String stripped = input.strip();
         if (stripped.endsWith("break")) {
             return Optional.of("break");
@@ -403,27 +403,27 @@ public class Main {
 
         if (stripped.startsWith("throw ")) {
             String slice = stripped.substring("throw ".length());
-            return Optional.of("throw " + compileValue(slice));
+            return Optional.of("throw " + compileValue(slice, depth));
         }
 
         if (stripped.startsWith("return ")) {
             String slice = stripped.substring("return ".length());
-            return Optional.of("return " + compileValue(slice));
+            return Optional.of("return " + compileValue(slice, depth));
         }
 
         int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
             String inputDestination = stripped.substring(0, valueSeparator).strip();
-            String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination));
+            String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination, depth));
 
             String source = stripped.substring(valueSeparator + "=".length()).strip();
-            return Optional.of(outputDestination + " = " + compileValue(source));
+            return Optional.of(outputDestination + " = " + compileValue(source, depth));
         }
 
-        return compileInvocation(stripped);
+        return compileInvocation(stripped, depth);
     }
 
-    private static Optional<String> compileInvocation(String input) {
+    private static Optional<String> compileInvocation(String input, int depth) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return Optional.empty();
@@ -433,8 +433,8 @@ public class Main {
         return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
             String caller = withoutArgumentsEnd.substring(0, argumentsStart);
             String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-            String outputArguments = compileValues(inputArguments);
-            return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
+            String outputArguments = compileValues(inputArguments, depth);
+            return Optional.of(compileValue(caller, depth) + "(" + outputArguments + ")");
         });
     }
 
@@ -456,8 +456,8 @@ public class Main {
         return Optional.empty();
     }
 
-    private static String compileValues(String inputArguments) {
-        return compileValueSegments(inputArguments, Main::compileValue);
+    private static String compileValues(String inputArguments, int depth) {
+        return compileValueSegments(inputArguments, input -> compileValue(input, depth));
     }
 
     private static Optional<String> compileWhitespace(String input) {
@@ -467,7 +467,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static String compileValue(String input) {
+    private static String compileValue(String input, int depth) {
         String stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return stripped;
@@ -485,23 +485,19 @@ public class Main {
                 if (argumentStart >= 0) {
                     String type = withoutSuffix.substring(0, argumentStart).strip();
                     String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
-                    return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments) + ")";
+                    return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")";
                 }
             }
         }
 
         if (stripped.startsWith("!")) {
             String slice = stripped.substring(1);
-            return "!" + compileValue(slice);
+            return "!" + compileValue(slice, depth);
         }
 
-        int arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            String beforeArrow = stripped.substring(0, arrowIndex).strip();
-            String afterArrow = stripped.substring(arrowIndex + "->".length());
-            if (beforeArrow.equals("()") || isSymbol(beforeArrow)) {
-                return beforeArrow + " -> " + compileValue(afterArrow);
-            }
+        Optional<String> maybeLambda = compileLambda(depth, stripped);
+        if (maybeLambda.isPresent()) {
+            return maybeLambda.get();
         }
 
         if (isSymbol(stripped)) {
@@ -512,19 +508,46 @@ public class Main {
             return stripped;
         }
 
-        return compileInvocation(stripped)
-                .or(() -> compileTernary(stripped))
-                .or(() -> compileOperator(stripped, "!="))
-                .or(() -> compileOperator(stripped, "=="))
-                .or(() -> compileOperator(stripped, "&&"))
-                .or(() -> compileOperator(stripped, "+"))
-                .or(() -> compileOperator(stripped, "<"))
-                .or(() -> compileAccess(stripped, "."))
-                .or(() -> compileAccess(stripped, "::"))
+        return compileInvocation(stripped, depth)
+                .or(() -> compileTernary(stripped, depth))
+                .or(() -> compileOperator(stripped, "!=", depth))
+                .or(() -> compileOperator(stripped, "==", depth))
+                .or(() -> compileOperator(stripped, "&&", depth))
+                .or(() -> compileOperator(stripped, "+", depth))
+                .or(() -> compileOperator(stripped, "<", depth))
+                .or(() -> compileAccess(stripped, ".", depth))
+                .or(() -> compileAccess(stripped, "::", depth))
                 .orElseGet(() -> generatePlaceholder(stripped));
     }
 
-    private static Optional<String> compileTernary(String stripped) {
+    private static Optional<String> compileLambda(int depth, String stripped) {
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex < 0) {
+            return Optional.empty();
+        }
+        String beforeArrow = stripped.substring(0, arrowIndex).strip();
+        String afterArrow = stripped.substring(arrowIndex + "->".length());
+        if (!beforeArrow.equals("()") && !isSymbol(beforeArrow)) {
+            return Optional.empty();
+        }
+        String lambdaValue = compileLambdaValue(depth, afterArrow);
+        return Optional.of(beforeArrow + " -> " + lambdaValue);
+    }
+
+    private static String compileLambdaValue(int depth, String afterArrow) {
+        String input = afterArrow.strip();
+        if (!input.startsWith("{") || !input.endsWith("}")) {
+            return compileValue(input, depth);
+        }
+
+        String content = input.substring(1, input.length() - 1);
+        String outputContent = compileStatements(content, depth + 1);
+        return "{" + outputContent + "\n" +
+                "\t".repeat(depth) +
+                "}";
+    }
+
+    private static Optional<String> compileTernary(String stripped, int depth) {
         int conditionIndex = stripped.indexOf("?");
         if (conditionIndex < 0) {
             return Optional.empty();
@@ -539,22 +562,22 @@ public class Main {
         String left = afterCondition.substring(0, actionSeparator + ":".length());
         String right = afterCondition.substring(actionSeparator + ":".length());
 
-        return Optional.of(compileValue(condition) + " ? " + compileValue(left) + " : " + compileValue(right));
+        return Optional.of(compileValue(condition, depth) + " ? " + compileValue(left, depth) + " : " + compileValue(right, depth));
     }
 
-    private static Optional<String> compileOperator(String input, String operator) {
+    private static Optional<String> compileOperator(String input, String operator, int depth) {
         int index = input.indexOf(operator);
         if (index >= 0) {
             String left = input.substring(0, index);
             String right = input.substring(index + operator.length());
-            return Optional.of(compileValue(left) + " " + operator + " " + compileValue(right));
+            return Optional.of(compileValue(left, depth) + " " + operator + " " + compileValue(right, depth));
         }
         else {
             return Optional.empty();
         }
     }
 
-    private static Optional<String> compileAccess(String stripped, String separator) {
+    private static Optional<String> compileAccess(String stripped, String separator, int depth) {
         int index = stripped.lastIndexOf(separator);
         if (index < 0) {
             return Optional.empty();
@@ -562,7 +585,7 @@ public class Main {
 
         String parent = stripped.substring(0, index);
         String property = stripped.substring(index + separator.length());
-        return Optional.of(compileValue(parent) + separator + property);
+        return Optional.of(compileValue(parent, depth) + separator + property);
     }
 
     private static boolean isNumber(String input) {
