@@ -82,7 +82,8 @@ public class Main {
 		while (current.hasNext()) {
 			char c = current.pop();
 			State finalCurrent = current;
-			current = foldDoubleQuotes(finalCurrent, c).orElseGet(/* () -> folder */.apply(finalCurrent, c));
+			current = /* foldDoubleQuotes(finalCurrent, c)
+                    .orElseGet(() */ -> /*  folder.apply(finalCurrent, c)) */;
 		}
 		List<String> segments = current.advance().segments;
 		StringBuilder output = new StringBuilder();/* 
@@ -292,6 +293,10 @@ public class Main {
         } *//* if (stripped.startsWith("!")) {
             String slice = stripped.substring(1);
             return "!" + compileValue(slice);
+        } *//* int arrowIndex = stripped.indexOf("->".toString()); *//* if(arrowIndex >= 0) {
+            String beforeArrow = stripped.substring(0, arrowIndex).strip();
+            String afterArrow = stripped.substring(arrowIndex + "->".length());
+            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
         } *//* Optional<String> maybeInvocation = compileInvocation(stripped); *//* if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         } *//* Optional<String> dataAccess = compileAccess(stripped, "."); *//* if (dataAccess.isPresent()) {

@@ -404,6 +404,13 @@ public class Main {
             return "!" + compileValue(slice);
         }
 
+        int arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            String beforeArrow = stripped.substring(0, arrowIndex).strip();
+            String afterArrow = stripped.substring(arrowIndex + "->".length());
+            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+        }
+
         Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
