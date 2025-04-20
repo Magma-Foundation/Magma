@@ -13,11 +13,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-public class Main {/* interface Result<T, X> {
-        Optional<T> findValue();
-
-        Optional<X> findError();
-    } */
+public class Main {
+	interface Result<T, X> {
+		Optional<T> findValue();
+		Optional<X> findError();
+	}
 	private static class State {
 		private final List<String> segments;
 		private final Deque<Character> queue;
@@ -67,34 +67,29 @@ public class Main {/* interface Result<T, X> {
 			}
 			return this.queue.peek();
 		}
-	}/* 
-
-    private record Tuple<A, B>(A left, B right) {
-    } *//* 
-
-    record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public Optional<T> findValue() {
-            return Optional.of(this.value);
-        }
-
-        @Override
-        public Optional<X> findError() {
-            return Optional.empty();
-        }
-    } *//* 
-
-    record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public Optional<T> findValue() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<X> findError() {
-            return Optional.of(this.error);
-        }
-    } */
+	}
+	private record Tuple<A, B>(A left, B right) {
+	}
+	record Ok<T, X>(T value) implements Result<T, X> {
+		@Override
+        public Optional<T> findValue(){
+			return Optional.of(this.value);
+		}
+		@Override
+        public Optional<X> findError(){
+			return Optional.empty();
+		}
+	}
+	record Err<T, X>(X error) implements Result<T, X> {
+		@Override
+        public Optional<T> findValue(){
+			return Optional.empty();
+		}
+		@Override
+        public Optional<X> findError(){
+			return Optional.of(this.error);
+		}
+	}
 	public static void main(String[] args){
 		try {
 			Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -182,16 +177,19 @@ public class Main {/* interface Result<T, X> {
 		return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileClass(String stripped, int depth){
-		int classIndex = stripped.indexOf("class ");
+		return compileStructured(stripped, "class ", depth);
+	}
+	private static Optional<String> compileStructured(String stripped, String infix, int depth){
+		int classIndex = stripped.indexOf(infix);
 		if (classIndex < 0) {
 			return Optional.empty();
 		}
 		return compileModifiers(stripped.substring(0, classIndex)).flatMap(modifiers -> {
-			String afterKeyword = stripped.substring(classIndex + "class ".length());
-			return compileClassWithModifiers(modifiers, afterKeyword, depth);
+			String afterKeyword = stripped.substring(classIndex + infix.length());
+			return compileClassWithModifiers(modifiers, afterKeyword, depth, infix);
 		});
 	}
-	private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth){
+	private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth, String infix){
 		int contentStart = afterKeyword.indexOf("{");
 		if (contentStart < 0) {
 			return Optional.empty();
@@ -205,7 +203,8 @@ public class Main {/* interface Result<T, X> {
 		String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));
 		String beforeNode = depth == 0 ? "" : "\n\t";
 		String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
-		return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + afterChildren + "}");
+		String modifierString = modifiers.isEmpty() ? "" : modifiers + " ";
+		return Optional.of(beforeNode + modifierString + infix + className + " {" + outputContent + afterChildren + "}");
 	}
 	private static Optional<String> compileModifiers(String input){
 		List<String> modifiers = Arrays.stream(input.strip().split(" ")).map(String::strip).toList();
@@ -217,7 +216,7 @@ public class Main {/* interface Result<T, X> {
 		}
 	}
 	private static String compileClassSegment(String input, int depth){
-		return compileWhitespace(input).or(() -> compileClass(input, depth)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, depth)).orElseGet(() -> generatePlaceholder(input));
+		return compileWhitespace(input).or(() -> compileClass(input, depth)).or(() -> compileStructured(input, "interface ", depth)).or(() -> compileStructured(input, "record ", depth)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, depth)).orElseGet(() -> generatePlaceholder(input));
 	}
 	private static Optional<String> compileMethod(String input, int depth){
 		int paramStart = input.indexOf("(");

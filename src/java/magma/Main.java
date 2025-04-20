@@ -227,18 +227,22 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped, int depth) {
-        int classIndex = stripped.indexOf("class ");
+        return compileStructured(stripped, "class ", depth);
+    }
+
+    private static Optional<String> compileStructured(String stripped, String infix, int depth) {
+        int classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return Optional.empty();
         }
 
         return compileModifiers(stripped.substring(0, classIndex)).flatMap(modifiers -> {
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
-            return compileClassWithModifiers(modifiers, afterKeyword, depth);
+            String afterKeyword = stripped.substring(classIndex + infix.length());
+            return compileClassWithModifiers(modifiers, afterKeyword, depth, infix);
         });
     }
 
-    private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth) {
+    private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth, String infix) {
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
@@ -253,7 +257,9 @@ public class Main {
 
         String beforeNode = depth == 0 ? "" : "\n\t";
         String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
-        return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + afterChildren + "}");
+        String modifierString = modifiers.isEmpty() ? "" : modifiers + " ";
+
+        return Optional.of(beforeNode + modifierString + infix + className + " {" + outputContent + afterChildren + "}");
     }
 
     private static Optional<String> compileModifiers(String input) {
@@ -272,6 +278,8 @@ public class Main {
     private static String compileClassSegment(String input, int depth) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input, depth))
+                .or(() -> compileStructured(input, "interface ", depth))
+                .or(() -> compileStructured(input, "record ", depth))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
