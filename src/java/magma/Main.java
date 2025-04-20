@@ -171,9 +171,14 @@ public class Main {
 
     private static @NotNull Optional<? extends String> compileDefinition(String input) {
         String stripped = input.strip();
-        if(stripped.endsWith(";")) {
-            String substring = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t\t" + generatePlaceholder(substring) + ";");
+        if (stripped.endsWith(";")) {
+            String slice = stripped.substring(0, stripped.length() - ";".length()).strip();
+            int nameSeparator = slice.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String beforeName = slice.substring(0, nameSeparator).strip();
+                String name = slice.substring(nameSeparator + " ".length()).strip();
+                return Optional.of("\n\t\t" + generatePlaceholder(beforeName) + " " + name + ";");
+            }
         }
         return Optional.empty();
     }
