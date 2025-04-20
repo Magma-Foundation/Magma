@@ -110,7 +110,8 @@ public class Main {
         while (current.hasNext()) {
             char c = current.pop();
             State finalCurrent = current;
-            current = foldDoubleQuotes(finalCurrent, c)
+            current = foldSingleQuotes(finalCurrent, c)
+                    .or(() -> foldDoubleQuotes(finalCurrent, c))
                     .orElseGet(() -> folder.apply(finalCurrent, c));
         }
 
@@ -122,6 +123,23 @@ public class Main {
             output = merger.apply(output, compiled);
         }
         return output.toString();
+    }
+
+    private static Optional<State> foldSingleQuotes(State state, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        State appended = state.append(c);
+
+        char maybeSlash = state.pop();
+        State withMaybeSlash = appended.append(maybeSlash);
+
+        State withEscaped = maybeSlash == '\\'
+                ? withMaybeSlash.append(withMaybeSlash.pop())
+                : withMaybeSlash;
+
+        return Optional.of(withEscaped.append(withEscaped.pop()));
     }
 
     private static Optional<State> foldDoubleQuotes(State state, char c) {
