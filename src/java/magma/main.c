@@ -102,9 +102,8 @@ public class Main {
 		State appended = state.append(c);
 		char maybeSlash = state.pop();
 		State withMaybeSlash = appended.append(maybeSlash);
-		State withEscaped = /* maybeSlash == '\\'
-                ? withMaybeSlash */.append(withMaybeSlash.pop())
-                : withMaybeSlash;
+		State withEscaped = /* maybeSlash == '\\' */ ? withMaybeSlash.append(withMaybeSlash.pop())
+                : : withMaybeSlash;
 		return Optional.of(withEscaped.append(withEscaped.pop()));
 	}
 	private static Optional<State> foldDoubleQuotes(State state, char c){
@@ -353,7 +352,22 @@ public class Main {
 		if (isNumber(stripped)) {
 			return stripped;
 		}
-		return compileInvocation(stripped).or(() -> compileOperator(stripped)).or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped)).or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+	}
+	private static Optional<String> compileTernary(String stripped){
+		int conditionIndex = stripped.indexOf("?");
+		if (/* conditionIndex < 0 */) {
+			return Optional.empty();
+		}
+		String condition = stripped.substring(0, conditionIndex);
+		String afterCondition = stripped.substring(/* conditionIndex + "?" */.length());
+		int actionSeparator = afterCondition.indexOf(':');
+		if (/* actionSeparator < 0 */) {
+			return Optional.empty();
+		}
+		String left = afterCondition.substring(0, /* actionSeparator + ":" */.length());
+		String right = afterCondition.substring(/* actionSeparator + ":" */.length());
+		return Optional.of(/* compileValue(condition) + " */ ? /* " + compileValue(left) + " : */ : /* " + compileValue */(right));
 	}
 	private static Optional<String> compileOperator(String stripped){
 		int index = stripped.indexOf("!=");
