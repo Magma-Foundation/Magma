@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 public class Main {
@@ -96,18 +97,32 @@ public class Main {
     } *//* 
 
     private static String compileStatements(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
+    } *//* 
+
+    private static String compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
         State current = new State();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            current = foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
         List<String> segments = current.advance().segments;
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compiler.apply(segment));
+            String compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
         }
         return output.toString();
+    } *//* 
+
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
     } *//* 
 
     private static State foldStatementChar(State state, char c) {
@@ -171,12 +186,24 @@ public class Main {
             int paramStart = withoutEnd.indexOf("<");
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
-                String arguments = withoutEnd.substring(paramStart + "<".length());
-                return base + "<" + generatePlaceholder(arguments) + ">";
+                String oldArguments = withoutEnd.substring(paramStart + "<".length());
+                String newArguments = compileAll(oldArguments, Main::foldValueChar, Main::compileType, Main::mergeValues);
+                return base + "<" + newArguments + ">";
             }
         }
 
         return generatePlaceholder(stripped);
+    } *//* private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    } *//* private static State foldValueChar(State state, Character c) {
+        if (c == ',') {
+            return state.advance();
+        }
+
+        return state.append(c);
     } *//* private static String generatePlaceholder(String input) {
         String replaced = input
                 .replace("<content-start>", "<content-start>")
