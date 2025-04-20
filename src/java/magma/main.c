@@ -71,13 +71,13 @@ public class Main {
 		}
 	}
 	private static String compile(String input){
-			return compileStatementValues(input, /* Main::compileRootSegment */);
+			return compileStatementValues(input, Main::compileRootSegment);
 	}
 	private static String compileStatementValues(String input,  Function<String, /*  String> compiler */){
-			return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
+			return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
 	}
 	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
-			LinkedList<Character> queue = IntStream.range(0, input.length(/* )) */.mapToObj(/* input::charAt */).collect(Collectors.toCollection(LinkedList::new));
+			LinkedList<Character> queue = IntStream.range(0, input.length(/* )) */.mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new));
 			State current = new State(queue);/* 
         while (current.hasNext()) {
             char c = current.pop();
@@ -275,15 +275,20 @@ public class Main {
             return "!" + compileValue(slice);
         } *//* Optional<String> maybeInvocation = compileInvocation(stripped); *//* if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
-        } *//* int separator = stripped.lastIndexOf("."); *//* if (separator >= 0) {
-            String parent = stripped.substring(0, separator);
-            String property = stripped.substring(separator + 1);
-            return compileValue(parent) + "." + property;
+        } *//* Optional<String> dataAccess = compileAccess(stripped, "."); *//* if (dataAccess.isPresent()) {
+            return dataAccess.get();
+        } *//* Optional<String> methodAccess = compileAccess(stripped, "::"); *//* if (methodAccess.isPresent()) {
+            return methodAccess.get();
         } *//* if (isSymbol(stripped)) {
             return stripped;
         } *//* if (isNumber(stripped)) {
             return stripped;
         } *//* return generatePlaceholder(stripped); *//* }
+
+    private static Optional<String> compileAccess(String stripped, String separator) {
+        int index = stripped.lastIndexOf(separator); *//* if (index < 0) {
+            return Optional.empty();
+        } *//* String parent = stripped.substring(0, index); *//* String property = stripped.substring(index + separator.length()); *//* return Optional.of(compileValue(parent) + separator + property); *//* }
 
     private static boolean isNumber(String input) {
         for (int i = 0; *//* i < input.length(); *//* i++) {

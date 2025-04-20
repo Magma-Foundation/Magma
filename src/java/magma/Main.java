@@ -381,11 +381,14 @@ public class Main {
             return maybeInvocation.get();
         }
 
-        int separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            String parent = stripped.substring(0, separator);
-            String property = stripped.substring(separator + 1);
-            return compileValue(parent) + "." + property;
+        Optional<String> dataAccess = compileAccess(stripped, ".");
+        if (dataAccess.isPresent()) {
+            return dataAccess.get();
+        }
+
+        Optional<String> methodAccess = compileAccess(stripped, "::");
+        if (methodAccess.isPresent()) {
+            return methodAccess.get();
         }
 
         if (isSymbol(stripped)) {
@@ -397,6 +400,17 @@ public class Main {
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static Optional<String> compileAccess(String stripped, String separator) {
+        int index = stripped.lastIndexOf(separator);
+        if (index < 0) {
+            return Optional.empty();
+        }
+
+        String parent = stripped.substring(0, index);
+        String property = stripped.substring(index + separator.length());
+        return Optional.of(compileValue(parent) + separator + property);
     }
 
     private static boolean isNumber(String input) {
