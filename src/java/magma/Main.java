@@ -184,24 +184,43 @@ public class Main {
 
     private static String compileClassSegment(String input, int depth) {
         return compileClass(input, depth)
-                .or(() -> compileDefinition(input))
+                .or(() -> compileDefinitionStatement(input))
+                .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static @NotNull Optional<? extends String> compileDefinition(String input) {
+    private static @NotNull Optional<? extends String> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String inputDefinition = input.substring(0, paramStart).strip();
+            return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                String withParams = input.substring(paramStart + "(".length()).strip();
+                return Optional.of("\n\t\t" + outputDefinition + "(" + generatePlaceholder(withParams));
+            });
+        }
+        return Optional.empty();
+    }
+
+    private static @NotNull Optional<? extends String> compileDefinitionStatement(String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            String slice = stripped.substring(0, stripped.length() - ";".length()).strip();
-            int nameSeparator = slice.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = slice.substring(0, nameSeparator).strip();
-                String name = slice.substring(nameSeparator + " ".length()).strip();
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    String beforeType = beforeName.substring(0, typeSeparator).strip();
-                    String type = beforeName.substring(typeSeparator + " ".length()).strip();
-                    return Optional.of("\n\t\t" + compileModifiers(beforeType) + " " + compileType(type) + " " + name + ";");
-                }
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
+        }
+
+        String slice = stripped.substring(0, stripped.length() - ";".length()).strip();
+        return compileDefinition(slice).flatMap(definition -> Optional.of("\n\t\t" + definition + ";"));
+    }
+
+    private static Optional<String> compileDefinition(String input) {
+        int nameSeparator = input.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            String beforeName = input.substring(0, nameSeparator).strip();
+            String name = input.substring(nameSeparator + " ".length()).strip();
+            int typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                String beforeType = beforeName.substring(0, typeSeparator).strip();
+                String type = beforeName.substring(typeSeparator + " ".length()).strip();
+                return Optional.of(compileModifiers(beforeType) + " " + compileType(type) + " " + name);
             }
         }
         return Optional.empty();

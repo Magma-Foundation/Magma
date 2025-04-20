@@ -25,63 +25,50 @@ public class Main {
 
         public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        } *//* 
-
-        private State enter() {
+        } */
+		private State enter(/* ) {
             this.setDepth(this.getDepth() + 1);
             return this;
-        } *//* 
-
-        private State append(char c) {
+        } */
+		private State append(/* char c) {
             this.getBuffer().append(c);
             return this;
-        } *//* 
-
-        private State exit() {
+        } */
+		private State exit(/* ) {
             this.setDepth(this.getDepth() - 1);
             return this;
-        } *//* 
-
-        private boolean isShallow() {
+        } */
+		private boolean isShallow(/* ) {
             return this.getDepth() == 1;
-        } *//* 
-
-        private boolean isLevel() {
+        } */
+		private boolean isLevel(/* ) {
             return this.getDepth() == 0;
-        } *//* 
-
-        private State advance() {
+        } */
+		private State advance(/* ) {
             this.segments().add(this.getBuffer().toString());
             this.setBuffer(new StringBuilder());
             return this;
-        } *//* 
-
-        public List<String> getSegments() {
+        } */
+		public List<String> getSegments(/* ) {
             return this.segments;
-        } *//* 
-
-        public StringBuilder getBuffer() {
+        } */
+		public StringBuilder getBuffer(/* ) {
             return this.buffer;
-        } *//* 
-
-        public void setBuffer(StringBuilder buffer) {
+        } */
+		public void setBuffer(/* StringBuilder buffer) {
             this.buffer = buffer;
-        } *//* 
-
-        public int getDepth() {
+        } */
+		public int getDepth(/* ) {
             return this.depth;
-        } *//* 
-
-        public void setDepth(int depth) {
+        } */
+		public void setDepth(/* int depth) {
             this.depth = depth;
-        } *//* 
-
-        public List<String> segments() {
+        } */
+		public List<String> segments(/* ) {
             return this.segments;
         } *//* 
-     */}/* 
-
-    public static void main(String[] args) {
+     */}
+		public static void main(/* String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -90,18 +77,14 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    } *//* 
-
-    private static String compile(String input) {
+    } */
+		private static String compile(/* String input) {
         return compileStatements(input, Main::compileRootSegment);
-    } *//* 
-
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    } */
+		private static String compileStatements(/* String input, Function<String, String> compiler) {
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
-    } *//* 
-
-    private static String compileAll(
-            String input,
+    } */
+		private static String compileAll(/* String input,
             BiFunction<State, Character, State> folder,
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
@@ -119,25 +102,24 @@ public class Main {
             output = merger.apply(output, compiled);
         }
         return output.toString();
-    } *//* 
-
-    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+    } */
+		private static StringBuilder mergeStatements(/* StringBuilder output, String compiled) {
         return output.append(compiled);
-    } *//* 
-
-    private static State foldStatementChar(State state, char c) {
+    } */
+		private static State foldStatementChar(/* State state, char c) {
         State appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} *//* ' && appended.isShallow()) {
+        if (c == '} */
+		' /* && */ appended.isShallow(/* )) {
             return appended.advance().exit();
         } *//* 
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '} *//* ') {
-            return appended.exit();
+        if (c == '} */
+		') { return appended.exit(/* );
         } *//* 
         return appended; *//* 
      */}/* private static String compileRootSegment(String segment) {
@@ -160,22 +142,37 @@ public class Main {
                 .collect(Collectors.joining(" "));
     } *//* private static String compileClassSegment(String input, int depth) {
         return compileClass(input, depth)
-                .or(() -> compileDefinition(input))
+                .or(() -> compileDefinitionStatement(input))
+                .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input));
-    } *//* private static @NotNull Optional<? extends String> compileDefinition(String input) {
+    } *//* private static @NotNull Optional<? extends String> compileMethod(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String inputDefinition = input.substring(0, paramStart).strip();
+            return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                String withParams = input.substring(paramStart + "(".length()).strip();
+                return Optional.of("\n\t\t" + outputDefinition + "(" + generatePlaceholder(withParams));
+            });
+        }
+        return Optional.empty();
+    } *//* private static @NotNull Optional<? extends String> compileDefinitionStatement(String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            String slice = stripped.substring(0, stripped.length() - ";".length()).strip();
-            int nameSeparator = slice.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                String beforeName = slice.substring(0, nameSeparator).strip();
-                String name = slice.substring(nameSeparator + " ".length()).strip();
-                int typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    String beforeType = beforeName.substring(0, typeSeparator).strip();
-                    String type = beforeName.substring(typeSeparator + " ".length()).strip();
-                    return Optional.of("\n\t\t" + compileModifiers(beforeType) + " " + compileType(type) + " " + name + ";");
-                }
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
+        }
+
+        String slice = stripped.substring(0, stripped.length() - ";".length()).strip();
+        return compileDefinition(slice).flatMap(definition -> Optional.of("\n\t\t" + definition + ";"));
+    } *//* private static Optional<String> compileDefinition(String input) {
+        int nameSeparator = input.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            String beforeName = input.substring(0, nameSeparator).strip();
+            String name = input.substring(nameSeparator + " ".length()).strip();
+            int typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                String beforeType = beforeName.substring(0, typeSeparator).strip();
+                String type = beforeName.substring(typeSeparator + " ".length()).strip();
+                return Optional.of(compileModifiers(beforeType) + " " + compileType(type) + " " + name);
             }
         }
         return Optional.empty();
