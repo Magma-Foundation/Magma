@@ -13,7 +13,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-public class Main {
+public class Main {/* interface Result<T, X> {
+        Optional<T> findValue();
+
+        Optional<X> findError();
+    } */
 	private static class State {
 		private final List<String> segments;
 		private final Deque<Character> queue;
@@ -66,6 +70,30 @@ public class Main {
 	}/* 
 
     private record Tuple<A, B>(A left, B right) {
+    } *//* 
+
+    record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public Optional<T> findValue() {
+            return Optional.of(this.value);
+        }
+
+        @Override
+        public Optional<X> findError() {
+            return Optional.empty();
+        }
+    } *//* 
+
+    record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public Optional<T> findValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<X> findError() {
+            return Optional.of(this.error);
+        }
     } */
 	public static void main(String[] args){
 		try {
@@ -345,28 +373,25 @@ public class Main {
 			return Optional.empty();
 		}
 		String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
-		return findArgumentsStart(withoutArgumentsEnd).flatMap(argumentsStart -> {
-            String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-            String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-            String outputArguments = compileValues(inputArguments, /* depth);
-            return Optional */.of(compileValue(caller, depth) + "(" + outputArguments + /* ")");
-        } */);
+		return split(withoutArgumentsEnd, Main::findArgumentsStart).flatMap(argumentsStart -> {
+			String caller = argumentsStart.left;
+			String inputArguments = argumentsStart.right;
+			String outputArguments = compileValues(inputArguments, depth);
+			return Optional.of(compileValue(caller, depth) + "(" + outputArguments + ")");
+		});
 	}
-	private static Optional<Integer> findArgumentsStart(String input){
-		int depth = 0;/* 
-        for (int i = input.length() - 1; i >= 0; i--) {
-            char c = input.charAt(i);
-            if (c == '(' && depth == 0) {
-                return Optional.of(i);
-            }
-            if (c == ')') {
-                depth++;
-            }
-            if (c == '(') {
-                depth--;
-            }
-        } */
-		return Optional.empty();
+	private static Main.Result<State, State> findArgumentsStart(State state, Character next){
+		if (next == '(' && state.isLevel()) {
+			return new Ok<>(state);
+		}
+		State appended = state.append(next);
+		if (next == ')') {
+			return new Err<>(appended.enter());
+		}
+		if (next == '(') {
+			return new Err<>(appended.exit());
+		}
+		return new Err<>(appended);
 	}
 	private static String compileValues(String inputArguments, int depth){
 		return compileValueSegments(inputArguments, input -> compileValue(input, depth));
@@ -515,7 +540,7 @@ public class Main {
 		}
 		String beforeName = input.substring(0, nameSeparator).strip();
 		String name = input.substring(nameSeparator + " ".length()).strip();
-		return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
+		return split(beforeName, Main::findTypeSeparator).flatMap(typeSeparator -> {
             String beforeType = typeSeparator.left.strip();
             String inputType = typeSeparator.right.strip();
             return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
@@ -524,26 +549,36 @@ public class Main {
             }));
         }) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
 	}
-	private static Optional<Tuple<String, String>> findTypeSeparator(String input){
+	private static Optional<Tuple<String, String>> split(String input, BiFunction<State, Character, Result<State, State>> finder){
 		State state = new State(IntStream.range(0, input.length()).map(index -> input.length() - index - 1).mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new)));
 		while (state.hasNext()) {
 			char next = state.pop();
-			if (next == ' ' && state.isLevel()) {
-				String reversedType = state.advance().segments.getFirst();
-				String reversedBeforeType = state.queue.stream().map(String::valueOf).collect(Collectors.joining());
+			Result<State, State> tuple = finder.apply(state, next);
+			Optional<State> maybeValue = tuple.findValue();
+			if (maybeValue.isPresent()) {
+				State state1 = maybeValue.get();
+				String reversedType = /* state1 */.advance().segments.getFirst();
+				String reversedBeforeType = /* state1 */.queue.stream().map(String::valueOf).collect(Collectors.joining());
 				String type = reverse(reversedType);
 				String beforeType = reverse(reversedBeforeType);
 				return Optional.of(new Tuple<>(beforeType, type));
 			}
-			State appended = state.append(next);
-			if (next == '>') {
-				state = appended.advance();
-			}
-			if (next == '<') {
-				state = appended.exit();
-			}
+			state = tuple.findError().orElse(state);
 		}
 		return Optional.empty();
+	}
+	private static Result<State, State> findTypeSeparator(State state, char next){
+		if (next == ' ' && state.isLevel()) {
+			return new Ok<>(state);
+		}
+		State appended = state.append(next);
+		if (next == '>') {
+			return new Err<>(appended.enter());
+		}
+		if (next == '<') {
+			return new Err<>(appended.exit());
+		}
+		return new Err<>(appended);
 	}
 	private static String reverse(String reversedType){
 		return new StringBuffer(/* reversedType) */.reverse().toString();
@@ -577,15 +612,8 @@ public class Main {
 		}
 		return isText(input);
 	}
-	private static boolean isText(String input){/* 
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        } */
-		return true;
+	private static boolean isText(String input){
+		return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isLetter);
 	}
 	private static StringBuilder mergeValues(StringBuilder cache, String element){
 		if (cache.isEmpty()) {
