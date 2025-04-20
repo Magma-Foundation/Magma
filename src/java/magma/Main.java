@@ -586,14 +586,12 @@ public class Main {
         }
 
         String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-        int argumentStart = withoutSuffix.indexOf("(");
-        if (argumentStart < 0) {
-            return Optional.empty();
-        }
-
-        String type = withoutSuffix.substring(0, argumentStart).strip();
-        String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
-        return Optional.of("new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")");
+        return split(withoutSuffix, Main::findArgumentsStart).flatMap(tuple -> {
+            return compileType(tuple.left).flatMap(outputType -> {
+                String outputArguments = compileValues(tuple.right, depth);
+                return Optional.of("new " + outputType + "(" + outputArguments + ")");
+            });
+        });
     }
 
     private static Optional<String> compileLambda(int depth, String stripped) {

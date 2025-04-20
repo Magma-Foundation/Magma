@@ -409,17 +409,9 @@ public class Main {
 		if (stripped.startsWith("'") && stripped.endsWith("'")) {
 			return stripped;
 		}
-		if (stripped.startsWith("new ")) {
-			String withoutPrefix = stripped.substring("new ".length()).strip();
-			if (withoutPrefix.endsWith(")")) {
-				String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-				int argumentStart = withoutSuffix.indexOf("(");
-				if (argumentStart >= 0) {
-					String type = withoutSuffix.substring(0, argumentStart).strip();
-					String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
-					return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")";
-				}
-			}
+		Optional<String> maybeConstruction = compileConstruction(stripped, depth);
+		if (maybeConstruction.isPresent()) {
+			return maybeConstruction.get();
 		}
 		if (stripped.startsWith("!")) {
 			String slice = stripped.substring(1);
@@ -439,6 +431,23 @@ public class Main {
 			return stripped;
 		}
 		return compileAccess(stripped, ".", depth).or(() -> compileAccess(stripped, "::", depth)).or(() -> compileInvocation(stripped, depth)).or(() -> compileTernary(stripped, depth)).or(() -> compileOperator(stripped, "!=", depth)).or(() -> compileOperator(stripped, "==", depth)).or(() -> compileOperator(stripped, "&&", depth)).or(() -> compileOperator(stripped, "||", depth)).or(() -> compileOperator(stripped, ">=", depth)).or(() -> compileOperator(stripped, "+", depth)).or(() -> compileOperator(stripped, "-", depth)).or(() -> compileOperator(stripped, "<", depth)).orElseGet(() -> generatePlaceholder(stripped));
+	}
+	private static Optional<String> compileConstruction(String input, int depth){
+		String stripped = input.strip();
+		if (!stripped.startsWith("new ")) {
+			return Optional.empty();
+		}
+		String withoutPrefix = stripped.substring("new ".length()).strip();
+		if (!withoutPrefix.endsWith(")")) {
+			return Optional.empty();
+		}
+		String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+		return split(withoutSuffix, Main::findArgumentsStart).flatMap(tuple -> {
+			return compileType(tuple.left).flatMap(outputType -> {
+				String outputArguments = compileValues(tuple.right, depth);
+				return Optional.of("new " + outputType + "(" + outputArguments + ")");
+			});
+		});
 	}
 	private static Optional<String> compileLambda(int depth, String stripped){
 		int arrowIndex = stripped.indexOf("->");
@@ -596,9 +605,7 @@ public class Main {
 		return new Err<>(appended);
 	}
 	private static String reverse(String reversedType){
-		return new StringBuffer(/* reversedType)
-                .reverse()
-                .toString( */);
+		return new StringBuffer(reversedType).reverse().toString();
 	}
 	private static Optional<String> compileType(String type){
 		String stripped = type.strip();
