@@ -220,7 +220,22 @@ public class Main {
             }
         }
 
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {

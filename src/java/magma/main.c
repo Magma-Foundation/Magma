@@ -13,9 +13,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 public class Main {
 	private static class State {
-		private final List</* String */> segments;
-		private /* StringBuilder */ buffer;
-		private /* int */ depth;/* 
+		private final List<String> segments;
+		private StringBuilder buffer;
+		private int depth;/* 
 
         private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -154,7 +154,7 @@ public class Main {
 	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + "}");
                 }
              */}
-		} /* return */ Optional.empty();}/* private static String compileModifiers(String input) {
+		} return Optional.empty();}/* private static String compileModifiers(String input) {
         return Arrays.stream(input.strip().split(" "))
                 .map(String::strip)
                 .collect(Collectors.joining(" "));
@@ -192,7 +192,20 @@ public class Main {
             }
         }
 
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(stripped);
+    } *//* private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     } *//* private static StringBuilder mergeValues(StringBuilder cache, String element) {
         if (cache.isEmpty()) {
             return cache.append(element);
