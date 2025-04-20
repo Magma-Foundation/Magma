@@ -174,7 +174,7 @@ public class Main {
 		if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
 			return stripped + "\n";
 		}
-		return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
+		return compileWhitespace(segment).or(() -> compileClass(stripped, 0)).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileClass(String stripped, int depth){
 		return compileStructured(stripped, "class ", depth);
@@ -672,4 +672,4 @@ public class Main {
 	private static String generatePlaceholder(String input){
 		String replaced = input.replace("/*", "<content-start>").replace("*/", "<content-end>");
 		return "/* " + replaced + " */";
-	}}/*  */
+	}}

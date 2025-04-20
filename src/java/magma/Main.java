@@ -223,7 +223,9 @@ public class Main {
             return stripped + "\n";
         }
 
-        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
+        return compileWhitespace(segment)
+                .or(() -> compileClass(stripped, 0))
+                .orElseGet(() -> generatePlaceholder(stripped));
     }
 
     private static Optional<String> compileClass(String stripped, int depth) {
