@@ -177,10 +177,19 @@ public class Main {
             if (nameSeparator >= 0) {
                 String beforeName = slice.substring(0, nameSeparator).strip();
                 String name = slice.substring(nameSeparator + " ".length()).strip();
-                return Optional.of("\n\t\t" + generatePlaceholder(beforeName) + " " + name + ";");
+                int typeSeparator = beforeName.lastIndexOf(" ");
+                if (typeSeparator >= 0) {
+                    String beforeType = beforeName.substring(0, typeSeparator).strip();
+                    String type = beforeName.substring(typeSeparator + " ".length()).strip();
+                    return Optional.of("\n\t\t" + generatePlaceholder(beforeType) + " " + compileType(type) + " " + name + ";");
+                }
             }
         }
         return Optional.empty();
+    }
+
+    private static String compileType(String type) {
+        return generatePlaceholder(type);
     }
 
     private static String generatePlaceholder(String input) {
