@@ -371,7 +371,12 @@ public class Main {
             }
         }
 
-        Optional<String> maybeInvocation = compileInvocation(input);
+        if (stripped.startsWith("!")) {
+            String slice = stripped.substring(1);
+            return "!" + compileValue(slice);
+        }
+
+        Optional<String> maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         }

@@ -53,7 +53,7 @@ public class Main {
 			return this;
 		}
 		public boolean hasNext(){
-			return /* !this */.queue.isEmpty();
+			return !this.queue.isEmpty();
 		}
 		public char pop(){
 			return this.queue.pop();
@@ -270,7 +270,10 @@ public class Main {
                     return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments) + ")";
                 }
             }
-        } *//* Optional<String> maybeInvocation = compileInvocation(input); *//* if (maybeInvocation.isPresent()) {
+        } *//* if (stripped.startsWith("!")) {
+            String slice = stripped.substring(1);
+            return "!" + compileValue(slice);
+        } *//* Optional<String> maybeInvocation = compileInvocation(stripped); *//* if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         } *//* int separator = stripped.lastIndexOf("."); *//* if (separator >= 0) {
             String parent = stripped.substring(0, separator);
