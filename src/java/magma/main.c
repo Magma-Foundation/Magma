@@ -22,7 +22,7 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			this(new ArrayList<>(), new StringBuilder(), /* 0 */);
+			this(new ArrayList<>(), new StringBuilder(), 0);
 		}
 		private State enter(){
 			this.depth = this.depth + 1;/* 
@@ -66,7 +66,7 @@ public class Main {
 		}
 		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
 			/* State current */ = new State();
-			/* for (int i */ = /* 0 */;
+			/* for (int i */ = 0;
 			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
@@ -220,7 +220,20 @@ public class Main {
             return stripped;
         }
 
+        if (isNumber(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(stripped);
+    } *//* private static boolean isNumber(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     } *//* private static String compileTypeOrPlaceholder(String type) {
         return compileType(type).orElseGet(() -> generatePlaceholder(type));
     } *//* private static Optional<String> compileConstructorHeader(String beforeParams) {
