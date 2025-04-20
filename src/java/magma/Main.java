@@ -134,10 +134,10 @@ public class Main {
             return stripped + "\n";
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Optional<String> compileClass(String stripped, int depth) {
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
             String modifiers = Arrays.stream(stripped.substring(0, classIndex).strip().split(" "))
@@ -151,16 +151,18 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
-                    return Optional.of(modifiers + " class " + className + " {" + outputContent + "}");
+                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, 1));
+
+                    String beforeNode = depth == 0 ? "" : "\n\t";
+                    return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + "}");
                 }
             }
         }
         return Optional.empty();
     }
 
-    private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+    private static String compileClassSegment(String input, int depth) {
+        return compileClass(input, depth).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String input) {
