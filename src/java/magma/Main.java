@@ -353,6 +353,11 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()))
+                    .map(inner -> inner + "[]");
+        }
+
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             int paramStart = withoutEnd.indexOf("<");

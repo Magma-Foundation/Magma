@@ -48,7 +48,7 @@ public class Main {
 			return this;
 		}
 	}
-	public static void main(/* String[] args */){/* 
+	public static void main(String[] args){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -283,6 +283,11 @@ public class Main {
         return Optional.empty();
     } *//* private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length()))
+                    .map(inner -> inner + "[]");
+        }
+
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             int paramStart = withoutEnd.indexOf("<");
