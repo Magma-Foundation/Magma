@@ -16,12 +16,12 @@ public class Main {
 		private final List<String> segments;
 		private StringBuilder buffer;
 		private int depth;
-		private State(/* List<String> segments, StringBuilder buffer, int depth) {
+		/* private */ State(/* List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-		public State(/* ) {
+		/* public */ State(/* ) {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
 		private State enter(/* ) {
@@ -196,6 +196,10 @@ public class Main {
 
         return generatePlaceholder(stripped);
     } *//* private static boolean isSymbol(String input) {
+        if (input.equals("private") || input.equals("public")) {
+            return false;
+        }
+
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
