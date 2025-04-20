@@ -4,7 +4,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-/* public */ class /* Main {
+import java.util.Arrays;
+import java.util.stream.Collectors;
+public class /* Main {
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -53,9 +55,12 @@ import java.util.ArrayList;
 
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
-            String modifiers = stripped.substring(0, classIndex).strip();
+            String modifiers = Arrays.stream(stripped.substring(0, classIndex).strip().split(" "))
+                    .map(String::strip)
+                    .collect(Collectors.joining(" "));
+
             String afterKeyword = stripped.substring(classIndex + "class ".length());
-            return generatePlaceholder(modifiers) + " class " + generatePlaceholder(afterKeyword);
+            return modifiers + " class " + generatePlaceholder(afterKeyword);
         }
 
         return generatePlaceholder(stripped);
