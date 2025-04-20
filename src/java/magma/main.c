@@ -22,48 +22,30 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			this(new /* ArrayList<> */(), new StringBuilder(), /* 0 */);
+			this(new ArrayList<>(), new StringBuilder(), /* 0 */);
 		}
 		private State enter(){
-			this.setDepth(this.getDepth() + 1);/* 
+			this.depth = this.depth + 1;/* 
             return this; */
 		}
 		private State append(char c){
-			this.getBuffer(/* ) */.append(c);/* 
+			this.buffer.append(c);/* 
             return this; */
 		}
 		private State exit(){
-			this.setDepth(this.getDepth() - 1);/* 
+			this.depth = this.depth - 1;/* 
             return this; */
 		}
 		private boolean isShallow(){
-			/* return this */.getDepth() = /* = 1 */;
+			/* return this */.depth = /* = 1 */;
 		}
 		private boolean isLevel(){
-			/* return this */.getDepth() = /* = 0 */;
+			/* return this */.depth = /* = 0 */;
 		}
 		private State advance(){
-			this.segments(/* ) */.add(this.getBuffer().toString());
-			this.setBuffer(new StringBuilder());/* 
+			this.segments.add(this.buffer.toString());
+			this.buffer = new StringBuilder();/* 
             return this; */
-		}
-		public List<String> getSegments(){/* 
-            return this.segments; */
-		}
-		public StringBuilder getBuffer(){/* 
-            return this.buffer; */
-		}
-		public void setBuffer(StringBuilder buffer){
-			this.buffer = buffer;
-		}
-		public int getDepth(){/* 
-            return this.depth; */
-		}
-		public void setDepth(int depth){
-			this.depth = depth;
-		}
-		public List<String> segments(){/* 
-            return this.segments; */
 		}/* 
      */}
 		public static void main(/* String[] args */){/* 
@@ -128,15 +110,15 @@ public class Main {
         if (classIndex >= 0) {/* String modifiers = compileModifiers(stripped.substring(0, classIndex)); *//* 
 
             String afterKeyword = stripped.substring(classIndex + "class ".length()); */
-	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + "}");
+	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);                    String beforeNode = depth == 0 ? "" : "\n\t";                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + "}");
                 }
              */}
 		} return Optional.empty();}/* private static String compileModifiers(String input) {
         return Arrays.stream(input.strip().split(" "))
                 .map(String::strip)
                 .collect(Collectors.joining(" "));
-    } *//* private static String compileClassSegment(String input, int depth) {
-        return compileClass(input, depth)
+    } *//* private static String compileClassSegment(String input) {
+        return compileClass(input, 1)
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input));
@@ -156,7 +138,7 @@ public class Main {
                     }
 
                     String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValueSegments(params, param -> compileParam(param));
+                    String outputParams = compileValueSegments(params, Main::compileParam);
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -222,7 +204,7 @@ public class Main {
                 if (argumentStart >= 0) {
                     String type = withoutSuffix.substring(0, argumentStart).strip();
                     String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
-                    return "new " + compileValue(type) + "(" + compileValues(arguments) + ")";
+                    return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments) + ")";
                 }
             }
         }
@@ -239,6 +221,8 @@ public class Main {
         }
 
         return generatePlaceholder(stripped);
+    } *//* private static String compileTypeOrPlaceholder(String type) {
+        return compileType(type).orElseGet(() -> generatePlaceholder(type));
     } *//* private static Optional<String> compileConstructorHeader(String beforeParams) {
         int nameSeparator = beforeParams.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -285,7 +269,7 @@ public class Main {
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
                 String oldArguments = withoutEnd.substring(paramStart + "<".length());
-                String newArguments = compileValueSegments(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
+                String newArguments = compileValueSegments(oldArguments, Main::compileTypeOrPlaceholder);
                 return Optional.of(base + "<" + newArguments + ">");
             }
         }
