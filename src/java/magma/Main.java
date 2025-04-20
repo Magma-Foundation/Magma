@@ -235,7 +235,20 @@ public class Main {
     }
 
     private static String compileValue(String input) {
-        return generatePlaceholder(input.strip());
+        String stripped = input.strip();
+
+        int separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            String parent = stripped.substring(0, separator);
+            String property = stripped.substring(separator + 1);
+            return compileValue(parent) + "." + property;
+        }
+
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static Optional<String> compileConstructorHeader(String beforeParams) {

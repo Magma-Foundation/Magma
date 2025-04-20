@@ -17,25 +17,25 @@ public class Main {
 		private StringBuilder buffer;
 		private int depth;
 		private State(List<String> segments, StringBuilder buffer, int depth){
-			/* this.segments */ = /* segments */;
-			/* this.buffer */ = /* buffer */;
-			/* this.depth */ = /* depth */;/*  */}
+			this.segments = segments;
+			this.buffer = buffer;
+			this.depth = depth;/*  */}
 		public State(/*  */){/* this(new ArrayList<>(), new StringBuilder(), 0); *//*  */}
 		private State enter(/*  */){/* this.setDepth(this.getDepth() + 1); *//* return this; *//*  */}
 		private State append(char c){/* this.getBuffer().append(c); *//* return this; *//*  */}
 		private State exit(/*  */){/* this.setDepth(this.getDepth() - 1); *//* return this; *//*  */}
 		private boolean isShallow(/*  */){
-			/* return this.getDepth() */ = /* = 1 */;/*  */}
+			/* return this */.getDepth() = /* = 1 */;/*  */}
 		private boolean isLevel(/*  */){
-			/* return this.getDepth() */ = /* = 0 */;/*  */}
+			/* return this */.getDepth() = /* = 0 */;/*  */}
 		private State advance(/*  */){/* this.segments().add(this.getBuffer().toString()); *//* this.setBuffer(new StringBuilder()); *//* return this; *//*  */}
 		public List<String> getSegments(/*  */){/* return this.segments; *//*  */}
 		public StringBuilder getBuffer(/*  */){/* return this.buffer; *//*  */}
 		public void setBuffer(StringBuilder buffer){
-			/* this.buffer */ = /* buffer */;/*  */}
+			this.buffer = buffer;/*  */}
 		public int getDepth(/*  */){/* return this.depth; *//*  */}
 		public void setDepth(int depth){
-			/* this.depth */ = /* depth */;/*  */}
+			this.depth = depth;/*  */}
 		public List<String> segments(/*  */){/* return this.segments; *//*  */}/* 
      */}
 		public static void main(/* String[] args */){/* try {
@@ -54,14 +54,14 @@ public class Main {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
-			/* List<String> segments */ = /* current.advance().segments */;
+			/* List<String> segments */ = current.advance().segments;
 			/* StringBuilder output */ = /* new StringBuilder() */;/* for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
         } *//* return output.toString(); *//*  */}
 		private static StringBuilder mergeStatements(StringBuilder output, String compiled){/* return output.append(compiled); *//*  */}
 		private static State foldStatementChar(State state, char c){
-			/* State appended */ = /* state.append(c) */;
+			/* State appended */ = state.append(c);
 			/* if (c */ = /* = ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */}/* ' && appended.isShallow()) {
@@ -137,7 +137,20 @@ public class Main {
 
         return generatePlaceholder(stripped);
     } *//* private static String compileValue(String input) {
-        return generatePlaceholder(input.strip());
+        String stripped = input.strip();
+
+        int separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            String parent = stripped.substring(0, separator);
+            String property = stripped.substring(separator + 1);
+            return compileValue(parent) + "." + property;
+        }
+
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     } *//* private static Optional<String> compileConstructorHeader(String beforeParams) {
         int nameSeparator = beforeParams.lastIndexOf(" ");
         if (nameSeparator >= 0) {
