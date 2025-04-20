@@ -21,13 +21,20 @@ public class Main {
 			this.buffer = buffer;
 			this.depth = depth;
 		}
-		public State(){/* this(new ArrayList<>(), new StringBuilder(), 0); */
+		public State(){
+			/* this */(/* new ArrayList<>(), new StringBuilder(), 0 */);
 		}
-		private State enter(){/* this.setDepth(this.getDepth() + 1); *//* return this; */
+		private State enter(){
+			/* this.setDepth */(/* this.getDepth() + 1 */);/* 
+            return this; */
 		}
-		private State append(char c){/* this.getBuffer().append(c); *//* return this; */
+		private State append(char c){
+			/* this.getBuffer */(/* ).append(c */);/* 
+            return this; */
 		}
-		private State exit(){/* this.setDepth(this.getDepth() - 1); *//* return this; */
+		private State exit(){
+			/* this.setDepth */(/* this.getDepth() - 1 */);/* 
+            return this; */
 		}
 		private boolean isShallow(){
 			/* return this */.getDepth() = /* = 1 */;
@@ -35,59 +42,76 @@ public class Main {
 		private boolean isLevel(){
 			/* return this */.getDepth() = /* = 0 */;
 		}
-		private State advance(){/* this.segments().add(this.getBuffer().toString()); *//* this.setBuffer(new StringBuilder()); *//* return this; */
+		private State advance(){
+			/* this.segments */(/* ).add(this.getBuffer().toString() */);
+			/* this.setBuffer */(/* new StringBuilder() */);/* 
+            return this; */
 		}
-		public List<String> getSegments(){/* return this.segments; */
+		public List<String> getSegments(){/* 
+            return this.segments; */
 		}
-		public StringBuilder getBuffer(){/* return this.buffer; */
+		public StringBuilder getBuffer(){/* 
+            return this.buffer; */
 		}
 		public void setBuffer(StringBuilder buffer){
 			this.buffer = buffer;
 		}
-		public int getDepth(){/* return this.depth; */
+		public int getDepth(){/* 
+            return this.depth; */
 		}
 		public void setDepth(int depth){
 			this.depth = depth;
 		}
-		public List<String> segments(){/* return this.segments; */
+		public List<String> segments(){/* 
+            return this.segments; */
 		}/* 
      */}
-		public static void main(/* String[] args */){/* try {
+		public static void main(/* String[] args */){/* 
+        try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
             Path target = source.resolveSibling("main.c");
             Files.writeString(target, compile(input));
-        } *//* catch (IOException e) {
+        } *//*  catch (IOException e) {
             throw new RuntimeException(e);
         } */
 		}
-		private static String compile(String input){/* return compileStatements(input, Main::compileRootSegment); */
+		private static String compile(String input){
+			/* return compileStatements */(/* input, Main::compileRootSegment */);
 		}
-		private static String compileStatements(String input,  Function<String, /*  String> compiler */){/* return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements); */
+		private static String compileStatements(String input,  Function<String, /*  String> compiler */){
+			/* return compileAll */(/* input, Main::foldStatementChar, compiler, Main::mergeStatements */);
 		}
 		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
 			/* State current */ = /* new State() */;
-			/* for (int i */ = /* 0 */;/* i < input.length(); *//* i++) {
+			/* for (int i */ = /* 0 */;
+			/* i < input.length */(/*  */);/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 			/* List<String> segments */ = current.advance().segments;
-			/* StringBuilder output */ = /* new StringBuilder() */;/* for (String segment : segments) {
+			/* StringBuilder output */ = /* new StringBuilder() */;/* 
+        for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
-        } *//* return output.toString(); */
+        } */
+			/* return output.toString */(/*  */);
 		}
-		private static StringBuilder mergeStatements(StringBuilder output, String compiled){/* return output.append(compiled); */
+		private static StringBuilder mergeStatements(StringBuilder output, String compiled){
+			/* return output.append */(/* compiled */);
 		}
 		private static State foldStatementChar(State state, char c){
 			/* State appended */ = state.append(c);
 			/* if (c */ = /* = ' */;/* ' && appended.isLevel()) {
             return appended.advance();
-        } *//* if (c == ' */
+        } *//* 
+        if (c == ' */
 		}/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } */
-		if(/* c == '{' */){/* return appended.enter(); *//* }
+		if(/* c == '{' */){
+			/* return appended.enter */(/*  */);/* 
+        }
         if (c == ' */
 		}/* ') {
             return appended.exit();
@@ -149,22 +173,36 @@ public class Main {
                 .or(() -> compileDefinition(param))
                 .orElseGet(() -> generatePlaceholder(param));
     } *//* private static String compileStatementOrBlock(String input) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isPresent()) {
-            return maybeWhitespace.get();
+        return compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .orElseGet(() -> generatePlaceholder(input));
+
+    } *//* private static Optional<String> compileStatement(String input) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
         }
 
-        if (input.strip().endsWith(";")) {
-            String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
-            int valueSeparator = withoutEnd.indexOf("=");
-            if (valueSeparator >= 0) {
-                String destination = withoutEnd.substring(0, valueSeparator).strip();
-                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
-                return "\n\t\t\t" + compileValue(destination) + " = " + compileValue(source) + ";";
+        String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";");
+    } *//* private static Optional<String> compileStatementValue(String withoutEnd) {
+        int valueSeparator = withoutEnd.indexOf("=");
+        if (valueSeparator >= 0) {
+            String destination = withoutEnd.substring(0, valueSeparator).strip();
+            String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+        }
+
+        if (withoutEnd.endsWith(")")) {
+            String withoutArgumentsEnd = withoutEnd.substring(0, withoutEnd.length() - ")".length());
+            int argumentsStart = withoutArgumentsEnd.indexOf("(");
+            if (argumentsStart >= 0) {
+                String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+                String arguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+                return Optional.of(generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")");
             }
         }
-
-        return generatePlaceholder(input.strip());
+        return Optional.empty();
     } *//* private static Optional<String> compileWhitespace(String input) {
         if (input.isBlank()) {
             return Optional.of("");

@@ -226,22 +226,40 @@ public class Main {
     }
 
     private static String compileStatementOrBlock(String input) {
-        Optional<String> maybeWhitespace = compileWhitespace(input);
-        if (maybeWhitespace.isPresent()) {
-            return maybeWhitespace.get();
+        return compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .orElseGet(() -> generatePlaceholder(input));
+
+    }
+
+    private static Optional<String> compileStatement(String input) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
         }
 
-        if (input.strip().endsWith(";")) {
-            String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
-            int valueSeparator = withoutEnd.indexOf("=");
-            if (valueSeparator >= 0) {
-                String destination = withoutEnd.substring(0, valueSeparator).strip();
-                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
-                return "\n\t\t\t" + compileValue(destination) + " = " + compileValue(source) + ";";
+        String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";");
+    }
+
+    private static Optional<String> compileStatementValue(String withoutEnd) {
+        int valueSeparator = withoutEnd.indexOf("=");
+        if (valueSeparator >= 0) {
+            String destination = withoutEnd.substring(0, valueSeparator).strip();
+            String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+        }
+
+        if (withoutEnd.endsWith(")")) {
+            String withoutArgumentsEnd = withoutEnd.substring(0, withoutEnd.length() - ")".length());
+            int argumentsStart = withoutArgumentsEnd.indexOf("(");
+            if (argumentsStart >= 0) {
+                String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+                String arguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+                return Optional.of(generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")");
             }
         }
-
-        return generatePlaceholder(input.strip());
+        return Optional.empty();
     }
 
     private static Optional<String> compileWhitespace(String input) {
