@@ -217,11 +217,14 @@ public class Main {
             String beforeName = input.substring(0, nameSeparator).strip();
             String name = input.substring(nameSeparator + " ".length()).strip();
             int typeSeparator = beforeName.lastIndexOf(" ");
-            if (typeSeparator >= 0) {
-                String beforeType = beforeName.substring(0, typeSeparator).strip();
-                String type = beforeName.substring(typeSeparator + " ".length()).strip();
-                return Optional.of(compileModifiers(beforeType) + " " + compileType(type) + " " + name);
+            if (typeSeparator < 0) {
+                return Optional.of(compileType(beforeName) + " " + name);
             }
+
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length()).strip();
+            String withBeforeType = compileModifiers(beforeType) + " " + compileType(type);
+            return Optional.of(withBeforeType + " " + name);
         }
         return Optional.empty();
     }

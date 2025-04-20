@@ -15,15 +15,13 @@ public class Main {
 	private static class State {
 		private final List<String> segments;
 		private StringBuilder buffer;
-		private int depth;/* 
-
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+		private int depth;
+		private State(/* List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        } *//* 
-
-        public State() {
+        } */
+		public State(/* ) {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
 		private State enter(/* ) {
@@ -120,8 +118,8 @@ public class Main {
         }
         if (c == '} */
 		') { return appended.exit(/* );
-        } *//* 
-        return appended; *//* 
+        } */
+		return appended;/* 
      */}/* private static String compileRootSegment(String segment) {
         String stripped = segment.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -169,11 +167,14 @@ public class Main {
             String beforeName = input.substring(0, nameSeparator).strip();
             String name = input.substring(nameSeparator + " ".length()).strip();
             int typeSeparator = beforeName.lastIndexOf(" ");
-            if (typeSeparator >= 0) {
-                String beforeType = beforeName.substring(0, typeSeparator).strip();
-                String type = beforeName.substring(typeSeparator + " ".length()).strip();
-                return Optional.of(compileModifiers(beforeType) + " " + compileType(type) + " " + name);
+            if (typeSeparator < 0) {
+                return Optional.of(compileType(beforeName) + " " + name);
             }
+
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String type = beforeName.substring(typeSeparator + " ".length()).strip();
+            String withBeforeType = compileModifiers(beforeType) + " " + compileType(type);
+            return Optional.of(withBeforeType + " " + name);
         }
         return Optional.empty();
     } *//* private static String compileType(String type) {
