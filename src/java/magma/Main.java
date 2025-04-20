@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -21,6 +22,10 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
@@ -30,6 +35,11 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             }
             else {
                 if (c == '{') {
@@ -44,7 +54,7 @@ public class Main {
 
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
         return output.toString();
     }
@@ -67,13 +77,18 @@ public class Main {
                 String className = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return modifiers + " class " + className + " {" + generatePlaceholder(content) + "}";
+                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    return modifiers + " class " + className + " {" + outputContent + "}";
                 }
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String input) {
