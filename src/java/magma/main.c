@@ -22,7 +22,7 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			this(/* new ArrayList<>() */, /* new StringBuilder() */, /* 0 */);
+			this(new /* ArrayList<> */(), new StringBuilder(), /* 0 */);
 		}
 		private State enter(){
 			this.setDepth(this.getDepth() + 1);/* 
@@ -44,7 +44,7 @@ public class Main {
 		}
 		private State advance(){
 			this.segments(/* ) */.add(this.getBuffer().toString());
-			this.setBuffer(/* new StringBuilder() */);/* 
+			this.setBuffer(new StringBuilder());/* 
             return this; */
 		}
 		public List<String> getSegments(){/* 
@@ -83,14 +83,14 @@ public class Main {
 			/* return compileAll */(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 		}
 		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
-			/* State current */ = /* new State() */;
+			/* State current */ = new State();
 			/* for (int i */ = /* 0 */;
 			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 			/* List<String> segments */ = current.advance().segments;
-			/* StringBuilder output */ = /* new StringBuilder() */;/* 
+			/* StringBuilder output */ = new StringBuilder();/* 
         for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
@@ -156,7 +156,7 @@ public class Main {
                     }
 
                     String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValues(params, param -> compileParam(param));
+                    String outputParams = compileValueSegments(params, param -> compileParam(param));
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -199,11 +199,13 @@ public class Main {
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);
                 String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                String outputArguments = compileValues(inputArguments, Main::compileValue);
+                String outputArguments = compileValues(inputArguments);
                 return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
             }
         }
         return Optional.empty();
+    } *//* private static String compileValues(String inputArguments) {
+        return compileValueSegments(inputArguments, Main::compileValue);
     } *//* private static Optional<String> compileWhitespace(String input) {
         if (input.isBlank()) {
             return Optional.of("");
@@ -211,6 +213,19 @@ public class Main {
         return Optional.empty();
     } *//* private static String compileValue(String input) {
         String stripped = input.strip();
+
+        if (stripped.startsWith("new ")) {
+            String withoutPrefix = stripped.substring("new ".length()).strip();
+            if (withoutPrefix.endsWith(")")) {
+                String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+                int argumentStart = withoutSuffix.indexOf("(");
+                if (argumentStart >= 0) {
+                    String type = withoutSuffix.substring(0, argumentStart).strip();
+                    String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
+                    return "new " + compileValue(type) + "(" + compileValues(arguments) + ")";
+                }
+            }
+        }
 
         int separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
@@ -270,7 +285,7 @@ public class Main {
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
                 String oldArguments = withoutEnd.substring(paramStart + "<".length());
-                String newArguments = compileValues(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
+                String newArguments = compileValueSegments(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
                 return Optional.of(base + "<" + newArguments + ">");
             }
         }
@@ -280,7 +295,7 @@ public class Main {
         }
 
         return Optional.empty();
-    } *//* private static String compileValues(String input, Function<String, String> compiler) {
+    } *//* private static String compileValueSegments(String input, Function<String, String> compiler) {
         return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues);
     } *//* private static boolean isSymbol(String input) {
         if (input.equals("private") || input.equals("public")) {

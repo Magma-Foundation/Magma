@@ -205,7 +205,7 @@ public class Main {
                     }
 
                     String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValues(params, param -> compileParam(param));
+                    String outputParams = compileValueSegments(params, param -> compileParam(param));
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -256,11 +256,15 @@ public class Main {
             if (argumentsStart >= 0) {
                 String caller = withoutArgumentsEnd.substring(0, argumentsStart);
                 String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                String outputArguments = compileValues(inputArguments, Main::compileValue);
+                String outputArguments = compileValues(inputArguments);
                 return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
             }
         }
         return Optional.empty();
+    }
+
+    private static String compileValues(String inputArguments) {
+        return compileValueSegments(inputArguments, Main::compileValue);
     }
 
     private static Optional<String> compileWhitespace(String input) {
@@ -272,6 +276,19 @@ public class Main {
 
     private static String compileValue(String input) {
         String stripped = input.strip();
+
+        if (stripped.startsWith("new ")) {
+            String withoutPrefix = stripped.substring("new ".length()).strip();
+            if (withoutPrefix.endsWith(")")) {
+                String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+                int argumentStart = withoutSuffix.indexOf("(");
+                if (argumentStart >= 0) {
+                    String type = withoutSuffix.substring(0, argumentStart).strip();
+                    String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
+                    return "new " + compileValue(type) + "(" + compileValues(arguments) + ")";
+                }
+            }
+        }
 
         int separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
@@ -339,7 +356,7 @@ public class Main {
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
                 String oldArguments = withoutEnd.substring(paramStart + "<".length());
-                String newArguments = compileValues(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
+                String newArguments = compileValueSegments(oldArguments, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)));
                 return Optional.of(base + "<" + newArguments + ">");
             }
         }
@@ -351,7 +368,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static String compileValues(String input, Function<String, String> compiler) {
+    private static String compileValueSegments(String input, Function<String, String> compiler) {
         return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
