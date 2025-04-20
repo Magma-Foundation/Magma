@@ -559,7 +559,7 @@ public class Main {
         if (actionSeparator < 0) {
             return Optional.empty();
         }
-        String left = afterCondition.substring(0, actionSeparator + ":".length());
+        String left = afterCondition.substring(0, actionSeparator);
         String right = afterCondition.substring(actionSeparator + ":".length());
 
         return Optional.of(compileValue(condition, depth) + " ? " + compileValue(left, depth) + " : " + compileValue(right, depth));

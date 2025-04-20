@@ -108,8 +108,7 @@ public class Main {
 		State appended = state.append(c);
 		char maybeSlash = state.pop();
 		State withMaybeSlash = appended.append(maybeSlash);
-		State withEscaped = maybeSlash == '\\' ? withMaybeSlash.append(withMaybeSlash.pop())
-                : : withMaybeSlash;
+		State withEscaped = maybeSlash == '\\' ? withMaybeSlash.append(withMaybeSlash.pop()) : withMaybeSlash;
 		return Optional.of(withEscaped.append(withEscaped.pop()));
 	}
 	private static Optional<State> foldDoubleQuotes(State state, char c){
@@ -177,8 +176,8 @@ public class Main {
 		}
 		String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
 		String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));
-		String beforeNode = depth == 0 ? /* "" : */ : "\n\t";
-		String afterChildren = depth == 0 ? /* "" : */ : "\n" + "\t".repeat(depth);
+		String beforeNode = depth == 0 ? "" : "\n\t";
+		String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
 		return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + afterChildren + "}");
 	}
 	private static Optional<String> compileModifiers(String input){
@@ -434,9 +433,9 @@ public class Main {
 		if (actionSeparator < 0) {
 			return Optional.empty();
 		}
-		String left = afterCondition.substring(0, actionSeparator + ":".length());
+		String left = afterCondition.substring(0, actionSeparator);
 		String right = afterCondition.substring(actionSeparator + ":".length());
-		return Optional.of(compileValue(condition, depth) + " ? " + compileValue(left, depth) + /* " : */ : " + compileValue(right, depth));
+		return Optional.of(compileValue(condition, depth) + " ? " + compileValue(left, depth) + " : " + compileValue(right, depth));
 	}
 	private static Optional<String> compileOperator(String input, String operator, int depth){
 		int index = input.indexOf(operator);
