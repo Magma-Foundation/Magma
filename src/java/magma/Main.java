@@ -145,7 +145,8 @@ public class Main {
                     String outputContent = compileStatements(inputContent, Main::compileClassSegment);
 
                     String beforeNode = depth == 0 ? "" : "\n\t";
-                    return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + "}");
+                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
+                    return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + afterChildren + "}");
                 }
             }
         }
@@ -159,7 +160,8 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input, 1)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, 1))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input));

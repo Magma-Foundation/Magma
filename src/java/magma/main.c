@@ -46,8 +46,8 @@ public class Main {
 			this.segments.add(this.buffer.toString());
 			this.buffer = new StringBuilder();
 			return this;
-		}/* 
-     */}
+		}
+	}
 		public static void main(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -98,8 +98,7 @@ public class Main {
 		}/* ') {
             return appended.exit();
         } */
-		return appended;/* 
-     */}/* private static String compileRootSegment(String segment) {
+		return appended;}/* private static String compileRootSegment(String segment) {
         String stripped = segment.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return stripped + "\n";
@@ -110,15 +109,17 @@ public class Main {
         if (classIndex >= 0) {/* String modifiers = compileModifiers(stripped.substring(0, classIndex)); *//* 
 
             String afterKeyword = stripped.substring(classIndex + "class ".length()); */
-	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);                    String beforeNode = depth == 0 ? "" : "\n\t";                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + "}");
+	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
                 }
-             */}
+             */
+	}
 		} return Optional.empty();}/* private static String compileModifiers(String input) {
         return Arrays.stream(input.strip().split(" "))
                 .map(String::strip)
                 .collect(Collectors.joining(" "));
     } *//* private static String compileClassSegment(String input) {
-        return compileClass(input, 1)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, 1))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> generatePlaceholder(input));
