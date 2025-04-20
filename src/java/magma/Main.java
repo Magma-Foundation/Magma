@@ -192,11 +192,26 @@ public class Main {
     private static @NotNull Optional<? extends String> compileMethod(String input) {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
-            String inputDefinition = input.substring(0, paramStart).strip();
-            return compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-                String withParams = input.substring(paramStart + "(".length()).strip();
-                return Optional.of("\n\t\t" + outputDefinition + "(" + generatePlaceholder(withParams));
-            });
+            String beforeParams = input.substring(0, paramStart).strip();
+            return compileDefinition(beforeParams)
+                    .or(() -> compileConstructorHeader(beforeParams))
+                    .flatMap(outputDefinition -> {
+                        String withParams = input.substring(paramStart + "(".length()).strip();
+                        return Optional.of("\n\t\t" + outputDefinition + "(" + generatePlaceholder(withParams));
+                    });
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileConstructorHeader(String beforeParams) {
+        int nameSeparator = beforeParams.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            String beforeName = beforeParams.substring(0, nameSeparator).strip();
+            String name = beforeParams.substring(nameSeparator + " ".length()).strip();
+            return Optional.of(compileModifiers(beforeName) + " " + name);
+        }
+        if (isSymbol(beforeParams)) {
+            return Optional.of(beforeParams);
         }
         return Optional.empty();
     }
@@ -218,18 +233,21 @@ public class Main {
             String name = input.substring(nameSeparator + " ".length()).strip();
             int typeSeparator = beforeName.lastIndexOf(" ");
             if (typeSeparator < 0) {
-                return Optional.of(compileType(beforeName) + " " + name);
+                return compileType(beforeName).map(type -> type + " " + name);
             }
 
             String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String type = beforeName.substring(typeSeparator + " ".length()).strip();
-            String withBeforeType = compileModifiers(beforeType) + " " + compileType(type);
-            return Optional.of(withBeforeType + " " + name);
+            String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+            Optional<String> maybeOutputType = compileType(inputType);
+            if (maybeOutputType.isPresent()) {
+                String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
+                return Optional.of(withBeforeType + " " + name);
+            }
         }
         return Optional.empty();
     }
 
-    private static String compileType(String type) {
+    private static Optional<String> compileType(String type) {
         String stripped = type.strip();
         if (stripped.endsWith(">")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
@@ -237,16 +255,16 @@ public class Main {
             if (paramStart >= 0) {
                 String base = withoutEnd.substring(0, paramStart).strip();
                 String oldArguments = withoutEnd.substring(paramStart + "<".length());
-                String newArguments = compileAll(oldArguments, Main::foldValueChar, Main::compileType, Main::mergeValues);
-                return base + "<" + newArguments + ">";
+                String newArguments = compileAll(oldArguments, Main::foldValueChar, type1 -> compileType(type1).orElseGet(() -> generatePlaceholder(type1)), Main::mergeValues);
+                return Optional.of(base + "<" + newArguments + ">");
             }
         }
 
         if (isSymbol(stripped)) {
-            return stripped;
+            return Optional.of(stripped);
         }
 
-        return generatePlaceholder(stripped);
+        return Optional.empty();
     }
 
     private static boolean isSymbol(String input) {
