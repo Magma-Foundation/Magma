@@ -193,7 +193,18 @@ public class Main {
     }
 
     private static String compileType(String type) {
-        return generatePlaceholder(type);
+        String stripped = type.strip();
+        if (stripped.endsWith(">")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            int paramStart = withoutEnd.indexOf("<");
+            if (paramStart >= 0) {
+                String base = withoutEnd.substring(0, paramStart).strip();
+                String arguments = withoutEnd.substring(paramStart + "<".length());
+                return base + "<" + generatePlaceholder(arguments) + ">";
+            }
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String input) {
