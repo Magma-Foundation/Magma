@@ -142,7 +142,7 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);
+                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, depth + 1));
 
                     String beforeNode = depth == 0 ? "" : "\n\t";
                     String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
@@ -159,15 +159,15 @@ public class Main {
                 .collect(Collectors.joining(" "));
     }
 
-    private static String compileClassSegment(String input) {
+    private static String compileClassSegment(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileClass(input, 1))
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileDefinitionStatement(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static @NotNull Optional<? extends String> compileMethod(String input) {
+    private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return Optional.empty();
@@ -189,7 +189,8 @@ public class Main {
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
                         String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
-                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + outputContent + "\n\t\t}");
+                        String indent = "\n" + "\t".repeat(depth);
+                        return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
                     }
                     else {
                         return Optional.empty();

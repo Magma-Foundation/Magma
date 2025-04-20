@@ -48,7 +48,7 @@ public class Main {
 			return this;
 		}
 	}
-		public static void main(/* String[] args */){/* 
+	public static void main(/* String[] args */){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -57,14 +57,14 @@ public class Main {
         } *//*  catch (IOException e) {
             throw new RuntimeException(e);
         } */
-		}
-		private static String compile(String input){
+	}
+	private static String compile(String input){
 			return /* compileStatements(input, Main::compileRootSegment) */;
-		}
-		private static String compileStatements(String input,  Function<String, /*  String> compiler */){
+	}
+	private static String compileStatements(String input,  Function<String, /*  String> compiler */){
 			return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
-		}
-		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
+	}
+	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
 			/* State current */ = new State();
 			/* for (int i */ = 0;
 			/* i < input */.length();/*  i++) {
@@ -78,24 +78,24 @@ public class Main {
             output = merger.apply(output, compiled);
         } */
 			return output.toString();
-		}
-		private static StringBuilder mergeStatements(StringBuilder output, String compiled){
+	}
+	private static StringBuilder mergeStatements(StringBuilder output, String compiled){
 			return output.append(compiled);
-		}
-		private static State foldStatementChar(State state, char c){
+	}
+	private static State foldStatementChar(State state, char c){
 			/* State appended */ = state.append(c);
 			/* if (c */ = /* = ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* 
         if (c == ' */
-		}/* ' && appended.isShallow()) {
+	}/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } */
-		if(/* c == '{' */){
+	if(/* c == '{' */){
 			return appended.enter();/* 
         }
         if (c == ' */
-		}/* ') {
+	}/* ') {
             return appended.exit();
         } */
 		return appended;}/* private static String compileRootSegment(String segment) {
@@ -109,7 +109,7 @@ public class Main {
         if (classIndex >= 0) {/* String modifiers = compileModifiers(stripped.substring(0, classIndex)); *//* 
 
             String afterKeyword = stripped.substring(classIndex + "class ".length()); */
-	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, Main::compileClassSegment);                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
+	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, depth + 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
                 }
              */
 	}
@@ -117,13 +117,13 @@ public class Main {
         return Arrays.stream(input.strip().split(" "))
                 .map(String::strip)
                 .collect(Collectors.joining(" "));
-    } *//* private static String compileClassSegment(String input) {
+    } *//* private static String compileClassSegment(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileClass(input, 1))
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileDefinitionStatement(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
-    } *//* private static @NotNull Optional<? extends String> compileMethod(String input) {
+    } *//* private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return Optional.empty();
@@ -145,7 +145,8 @@ public class Main {
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
                         String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
-                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + outputContent + "\n\t\t}");
+                        String indent = "\n" + "\t".repeat(depth);
+                        return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
                     }
                     else {
                         return Optional.empty();
