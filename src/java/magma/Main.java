@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -333,6 +331,20 @@ public class Main {
                 }
 
                 queue.pop();
+                continue;
+            }
+
+            if (c == '\"') {
+                while (!queue.isEmpty()) {
+                    Tuple<Integer, Character> nextTuple = queue.pop();
+                    Character next = nextTuple.right;
+                    if (next == '\\') {
+                        queue.pop();
+                    }
+                    if (next == '"') {
+                        break;
+                    }
+                }
                 continue;
             }
 

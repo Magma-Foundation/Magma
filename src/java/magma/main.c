@@ -1,5 +1,4 @@
 package magma;
-import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -208,13 +207,13 @@ public class Main {
 		}
 		String params = withParams.substring(0, paramEnd).strip();
 		String outputParams = compileValueSegments(params, Main::compileParam);
-		String withBraces = withParams.substring(paramEnd + ")".length()).strip();/* 
-        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-            String inputContent = withBraces.substring(1, withBraces.length() - 1);
-            String outputContent = compileStatements(inputContent, depth + 1);
-            String indent = "\n" + "\t".repeat(depth);
-            return Optional.of(indent + definition + "(" + outputParams + "){" + outputContent + indent + "}");
-        } */
+		String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+		if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+			String inputContent = withBraces.substring(1, withBraces.length() - 1);
+			String outputContent = compileStatements(inputContent, depth + 1);
+			String indent = "\n" + "\t".repeat(depth);
+			return Optional.of(indent + definition + "(" + outputParams + "){" + outputContent + indent + "}");
+		}
 		else {
 			return Optional.empty();
 		}
@@ -253,6 +252,19 @@ public class Main {
 					queue.pop();
 				}
 				queue.pop();/* 
+                continue; */
+			}
+			if (c == '\"') {
+				while (!queue.isEmpty()) {
+					Tuple<Integer, Character> nextTuple = queue.pop();
+					Character next = nextTuple.right;
+					if (next == '\\') {
+						queue.pop();
+					}
+					if (next == '"') {
+						break;
+					}
+				}/* 
                 continue; */
 			}
 			if (c == '{') {
@@ -415,10 +427,10 @@ public class Main {
 		return Optional.of(beforeArrow + " -> " + lambdaValue);
 	}
 	private static String compileLambdaValue(int depth, String afterArrow){
-		String input = afterArrow.strip();/* 
-        if (!input.startsWith("{") || !input.endsWith("}")) {
-            return compileValue(input, depth);
-        } */
+		String input = afterArrow.strip();
+		if (!input.startsWith("{") || !input.endsWith("}")) {
+			return compileValue(input, depth);
+		}
 		String content = input.substring(1, input.length() - 1);
 		String outputContent = compileStatements(content, depth + 1);
 		return "{" + outputContent + "\n" +
