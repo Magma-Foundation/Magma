@@ -65,9 +65,10 @@ public class Main {
 			String input = Files.readString(source);
 			Path target = source.resolveSibling("main.c");
 			Files.writeString(target, compile(input));
-		}/*  catch (IOException e) {
-            throw new RuntimeException(e);
-        } */
+		}
+		catch (IOException e){
+			/* throw new RuntimeException */(e);
+		}
 	}
 	private static String compile(String input){
 			return compileStatementValues(input, /* Main::compileRootSegment */);
@@ -193,16 +194,31 @@ public class Main {
     private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input))
-                .or(() -> compileTry(input))
+                .or(() -> compileBlock(input))
                 .orElseGet(() -> generatePlaceholder(input)); *//* }
 
-    private static @NotNull Optional<? extends String> compileTry(String input) {
-        String stripped = input.strip(); *//* if (stripped.startsWith("try ")) {
-            String withoutKeyword = stripped.substring("try ".length()).strip();
-            if (withoutKeyword.startsWith("{") && withoutKeyword.endsWith("}")) {
-                String inputContent = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+    private static @NotNull Optional<? extends String> compileBlock(String input) {
+        String stripped = input.strip(); *//* if (stripped.endsWith("}")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            int contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                String beforeContent = withoutEnd.substring(0, contentStart).strip();
+                String inputContent = withoutEnd.substring(contentStart + "{".length());
                 String outputContent = compileStatements(inputContent);
-                return Optional.of("\n\t\ttry {" + outputContent + "\n\t\t}");
+
+                return compileBeforeContent(beforeContent)
+                        .map(value -> "\n\t\t" + value + "{" + outputContent + "\n\t\t}");
+            }
+        } *//* return Optional.empty(); *//* }
+
+    private static Optional<String> compileBeforeContent(String input) {
+        if (input.equals("try")) {
+            return Optional.of("try ");
+        } *//* if (input.startsWith("catch (")) {
+            String withoutPrefix = input.substring("catch (".length()).strip();
+            if (withoutPrefix.endsWith(")")) {
+                String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+                return compileDefinition(inputDefinition).map(outputDefinition -> "catch (" + outputDefinition + ")");
             }
         } *//* return Optional.empty(); *//* }
 
