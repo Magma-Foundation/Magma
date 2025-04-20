@@ -468,6 +468,7 @@ public class Main {
                 .or(() -> compileTernary(stripped))
                 .or(() -> compileOperator(stripped, "!="))
                 .or(() -> compileOperator(stripped, "=="))
+                .or(() -> compileOperator(stripped, "&&"))
                 .or(() -> compileAccess(stripped, "."))
                 .or(() -> compileAccess(stripped, "::"))
                 .orElseGet(() -> generatePlaceholder(stripped));

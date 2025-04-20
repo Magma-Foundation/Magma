@@ -128,10 +128,10 @@ public class Main {
 	}
 	private static State foldStatementChar(State state, char c){
 		State appended = state.append(c);
-		if (c == /* ';' && appended */.isLevel()) {
+		if (c == ';' && appended.isLevel()) {
 			return appended.advance();
 		}
-		if (c == /* '}' && appended */.isShallow()) {
+		if (c == '}' && appended.isShallow()) {
 			return appended.advance().exit();
 		}/* 
         if (c == '{') {
@@ -356,7 +356,8 @@ public class Main {
 			return stripped;
 		}
 		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped, " != "))
-                .or(() -> compileOperator(stripped, " == /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+                .or(() -> compileOperator(stripped, " == "))
+                .or(() -> compileOperator(stripped, " && /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileTernary(String stripped){
 		int conditionIndex = stripped.indexOf("?");
@@ -507,7 +508,7 @@ public class Main {
 		return cache.append(", ").append(element);
 	}
 	private static State foldValueChar(State state, Character c){
-		if (c == /* ',' && state */.isLevel()) {
+		if (c == ',' && state.isLevel()) {
 			return state.advance();
 		}
 		State appended = state.append(c);
