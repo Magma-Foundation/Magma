@@ -88,11 +88,11 @@ public class Main {
 			current = foldDoubleQuotes(finalCurrent, c).orElseGet(() -> folder.apply(finalCurrent, c));
 		}
 		List<String> segments = current.advance().segments;
-		StringBuilder output = new StringBuilder();/* 
-        for (String segment : segments) {
-            String compiled = compiler.apply(segment);
-            output = merger.apply(output, compiled);
-        } */
+		StringBuilder output = new StringBuilder();
+		for (String segment  : segments) {
+			String compiled = compiler.apply(segment);
+			output = merger.apply(output, compiled);
+		}
 		return output.toString();
 	}
 	private static Optional<State> foldDoubleQuotes(State state, char c){/* 
@@ -218,7 +218,13 @@ public class Main {
         String stripped = input.strip(); *//* if (stripped.equals("try")) {
             return Optional.of("try");
         } *//* return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
-                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value)))); *//* }
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))))
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "for", Main::compileEnhancedForQuantity)); *//* }
+
+    private static Optional<String> compileEnhancedForQuantity(String quantity) {
+        int separator = quantity.indexOf(":"); *//* if (separator < 0) {
+            return Optional.empty();
+        } *//* String inputDefinition = quantity.substring(0, separator); *//* String value = quantity.substring(separator + ":".length()); *//* return compileDefinition(inputDefinition).map(outputDefinition -> outputDefinition + " : " + compileValue(value)); *//* }
 
     private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition) {
         String stripped = input.strip(); *//* String prefix = " ("; *//* if (!stripped.startsWith(keyword + prefix)) {

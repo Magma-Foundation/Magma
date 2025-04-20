@@ -286,7 +286,19 @@ public class Main {
         }
 
         return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
-                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))));
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))))
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "for", Main::compileEnhancedForQuantity));
+    }
+
+    private static Optional<String> compileEnhancedForQuantity(String quantity) {
+        int separator = quantity.indexOf(":");
+        if (separator < 0) {
+            return Optional.empty();
+        }
+
+        String inputDefinition = quantity.substring(0, separator);
+        String value = quantity.substring(separator + ":".length());
+        return compileDefinition(inputDefinition).map(outputDefinition -> outputDefinition + " : " + compileValue(value));
     }
 
     private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition) {
