@@ -448,21 +448,6 @@ public class Main {
             }
         }
 
-        Optional<String> maybeInvocation = compileInvocation(stripped);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation.get();
-        }
-
-        Optional<String> dataAccess = compileAccess(stripped, ".");
-        if (dataAccess.isPresent()) {
-            return dataAccess.get();
-        }
-
-        Optional<String> methodAccess = compileAccess(stripped, "::");
-        if (methodAccess.isPresent()) {
-            return methodAccess.get();
-        }
-
         if (isSymbol(stripped)) {
             return stripped;
         }
@@ -471,7 +456,10 @@ public class Main {
             return stripped;
         }
 
-        return generatePlaceholder(stripped);
+        return compileInvocation(stripped)
+                .or(() -> compileAccess(stripped, "."))
+                .or(() -> compileAccess(stripped, "::"))
+                .orElseGet(() -> generatePlaceholder(stripped));
     }
 
     private static Optional<String> compileAccess(String stripped, String separator) {
