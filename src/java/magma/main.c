@@ -66,8 +66,8 @@ public class Main {
 			Path target = source.resolveSibling("main.c");
 			Files.writeString(target, compile(input));
 		}
-		catch (IOException e){
-			/* throw new RuntimeException */(e);
+		catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	private static String compile(String input){
@@ -207,13 +207,13 @@ public class Main {
                 String outputContent = compileStatements(inputContent);
 
                 return compileBeforeContent(beforeContent)
-                        .map(value -> "\n\t\t" + value + "{" + outputContent + "\n\t\t}");
+                        .map(value -> "\n\t\t" + value + " {" + outputContent + "\n\t\t}");
             }
         } *//* return Optional.empty(); *//* }
 
     private static Optional<String> compileBeforeContent(String input) {
         if (input.equals("try")) {
-            return Optional.of("try ");
+            return Optional.of("try");
         } *//* if (input.startsWith("catch (")) {
             String withoutPrefix = input.substring("catch (".length()).strip();
             if (withoutPrefix.endsWith(")")) {
@@ -228,7 +228,10 @@ public class Main {
         } *//* String withoutEnd = stripped.substring(0, stripped.length() - ";".length()); *//* return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";"); *//* }
 
     private static Optional<String> compileStatementValue(String input) {
-        String stripped = input.strip(); *//* if (stripped.startsWith("return ")) {
+        String stripped = input.strip(); *//* if (stripped.startsWith("throw ")) {
+            String slice = stripped.substring("throw ".length());
+            return Optional.of("throw " + compileValue(slice));
+        } *//* if (stripped.startsWith("return ")) {
             return Optional.of("return " + compileValue(stripped.substring("return ".length())));
         } *//* int valueSeparator = stripped.indexOf("="); *//* if (valueSeparator >= 0) {
             String inputDestination = stripped.substring(0, valueSeparator).strip();
