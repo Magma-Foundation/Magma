@@ -209,13 +209,18 @@ public class Main {
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                        String content = withBraces.substring(1, withBraces.length() - 1);
-                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + generatePlaceholder(content) + "}");
+                        String inputContent = withBraces.substring(1, withBraces.length() - 1);
+                        String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
+                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + outputContent + "}");
                     }
                     else {
                         return Optional.empty();
                     }
                 });
+    }
+
+    private static String compileStatementOrBlock(String input) {
+        return generatePlaceholder(input.strip());
     }
 
     private static Optional<String> compileConstructorHeader(String beforeParams) {
