@@ -211,7 +211,7 @@ public class Main {
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
                         String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
-                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + outputContent + "}");
+                        return Optional.of("\n\t\t" + outputDefinition + "(" + outputParams + "){" + outputContent + "\n\t\t}");
                     }
                     else {
                         return Optional.empty();
@@ -221,6 +221,10 @@ public class Main {
 
     private static String compileStatementOrBlock(String input) {
         String stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return "";
+        }
+
         if (stripped.endsWith(";")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             int valueSeparator = withoutEnd.indexOf("=");
