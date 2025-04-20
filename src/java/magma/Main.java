@@ -220,6 +220,21 @@ public class Main {
     }
 
     private static String compileStatementOrBlock(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            int valueSeparator = withoutEnd.indexOf("=");
+            if (valueSeparator >= 0) {
+                String destination = withoutEnd.substring(0, valueSeparator).strip();
+                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+                return "\n\t\t\t" + compileValue(destination) + " = " + compileValue(source) + ";";
+            }
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String compileValue(String input) {
         return generatePlaceholder(input.strip());
     }
 

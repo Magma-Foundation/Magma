@@ -16,19 +16,26 @@ public class Main {
 		private final List<String> segments;
 		private StringBuilder buffer;
 		private int depth;
-		private State(List<String> segments, StringBuilder buffer, int depth){/* this.segments = segments; *//* this.buffer = buffer; *//* this.depth = depth; *//*  */}
+		private State(List<String> segments, StringBuilder buffer, int depth){
+			/* this.segments */ = /* segments */;
+			/* this.buffer */ = /* buffer */;
+			/* this.depth */ = /* depth */;/*  */}
 		public State(/*  */){/* this(new ArrayList<>(), new StringBuilder(), 0); *//*  */}
 		private State enter(/*  */){/* this.setDepth(this.getDepth() + 1); *//* return this; *//*  */}
 		private State append(char c){/* this.getBuffer().append(c); *//* return this; *//*  */}
 		private State exit(/*  */){/* this.setDepth(this.getDepth() - 1); *//* return this; *//*  */}
-		private boolean isShallow(/*  */){/* return this.getDepth() == 1; *//*  */}
-		private boolean isLevel(/*  */){/* return this.getDepth() == 0; *//*  */}
+		private boolean isShallow(/*  */){
+			/* return this.getDepth() */ = /* = 1 */;/*  */}
+		private boolean isLevel(/*  */){
+			/* return this.getDepth() */ = /* = 0 */;/*  */}
 		private State advance(/*  */){/* this.segments().add(this.getBuffer().toString()); *//* this.setBuffer(new StringBuilder()); *//* return this; *//*  */}
 		public List<String> getSegments(/*  */){/* return this.segments; *//*  */}
 		public StringBuilder getBuffer(/*  */){/* return this.buffer; *//*  */}
-		public void setBuffer(StringBuilder buffer){/* this.buffer = buffer; *//*  */}
+		public void setBuffer(StringBuilder buffer){
+			/* this.buffer */ = /* buffer */;/*  */}
 		public int getDepth(/*  */){/* return this.depth; *//*  */}
-		public void setDepth(int depth){/* this.depth = depth; *//*  */}
+		public void setDepth(int depth){
+			/* this.depth */ = /* depth */;/*  */}
 		public List<String> segments(/*  */){/* return this.segments; *//*  */}/* 
      */}
 		public static void main(/* String[] args */){/* try {
@@ -41,15 +48,21 @@ public class Main {
         } *//*  */}
 		private static String compile(String input){/* return compileStatements(input, Main::compileRootSegment); *//*  */}
 		private static String compileStatements(String input,  Function<String, /*  String> compiler */){/* return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements); *//*  */}
-		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){/* State current = new State(); *//* for (int i = 0; *//* i < input.length(); *//* i++) {
+		private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
+			/* State current */ = /* new State() */;
+			/* for (int i */ = /* 0 */;/* i < input.length(); *//* i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
-        } *//* List<String> segments = current.advance().segments; *//* StringBuilder output = new StringBuilder(); *//* for (String segment : segments) {
+        } */
+			/* List<String> segments */ = /* current.advance().segments */;
+			/* StringBuilder output */ = /* new StringBuilder() */;/* for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
         } *//* return output.toString(); *//*  */}
 		private static StringBuilder mergeStatements(StringBuilder output, String compiled){/* return output.append(compiled); *//*  */}
-		private static State foldStatementChar(State state, char c){/* State appended = state.append(c); *//* if (c == '; *//* ' && appended.isLevel()) {
+		private static State foldStatementChar(State state, char c){
+			/* State appended */ = /* state.append(c) */;
+			/* if (c */ = /* = ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' */}/* ' && appended.isShallow()) {
             return appended.advance().exit();
@@ -111,6 +124,19 @@ public class Main {
                     }
                 });
     } *//* private static String compileStatementOrBlock(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            int valueSeparator = withoutEnd.indexOf("=");
+            if (valueSeparator >= 0) {
+                String destination = withoutEnd.substring(0, valueSeparator).strip();
+                String source = withoutEnd.substring(valueSeparator + "=".length()).strip();
+                return "\n\t\t\t" + compileValue(destination) + " = " + compileValue(source) + ";";
+            }
+        }
+
+        return generatePlaceholder(stripped);
+    } *//* private static String compileValue(String input) {
         return generatePlaceholder(input.strip());
     } *//* private static Optional<String> compileConstructorHeader(String beforeParams) {
         int nameSeparator = beforeParams.lastIndexOf(" ");
