@@ -102,7 +102,7 @@ public class Main {
 		State appended = state.append(c);
 		char maybeSlash = state.pop();
 		State withMaybeSlash = appended.append(maybeSlash);
-		State withEscaped = /* maybeSlash == '\\' */ ? withMaybeSlash.append(withMaybeSlash.pop())
+		State withEscaped = maybeSlash == '\\' ? withMaybeSlash.append(withMaybeSlash.pop())
                 : : withMaybeSlash;
 		return Optional.of(withEscaped.append(withEscaped.pop()));
 	}
@@ -114,10 +114,10 @@ public class Main {
 		while (appended.hasNext()) {
 			char next = appended.pop();
 			appended = appended.append(next);
-			if (/* next == '\\' */) {
+			if (next == '\\') {
 				appended = appended.append(appended.pop());
 			}
-			if (/* next == '\"' */) {/* 
+			if (next == '\"') {/* 
                 break; */
 			}
 		}
@@ -128,16 +128,16 @@ public class Main {
 	}
 	private static State foldStatementChar(State state, char c){
 		State appended = state.append(c);
-		if (/* c == ';' && appended */.isLevel()) {
+		if (c == /* ';' && appended */.isLevel()) {
 			return appended.advance();
 		}
-		if (/* c == '}' && appended */.isShallow()) {
+		if (c == /* '}' && appended */.isShallow()) {
 			return appended.advance().exit();
 		}/* 
         if (c == '{') {
             return appended.enter();
         } */
-		if (/* c == '}' */) {
+		if (c == '}') {
 			return appended.exit();
 		}
 		return appended;
@@ -352,7 +352,8 @@ public class Main {
 		if (isNumber(stripped)) {
 			return stripped;
 		}
-		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped)).or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped, " != "))
+                .or(() -> compileOperator(stripped, " == /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileTernary(String stripped){
 		int conditionIndex = stripped.indexOf("?");
@@ -369,12 +370,12 @@ public class Main {
 		String right = afterCondition.substring(/* actionSeparator + ":" */.length());
 		return Optional.of(/* compileValue(condition) + " */ ? /* " + compileValue(left) + " : */ : /* " + compileValue */(right));
 	}
-	private static Optional<String> compileOperator(String stripped){
-		int index = stripped.indexOf("!=");
+	private static Optional<String> compileOperator(String input, String operator){
+		int index = input.indexOf(operator);
 		if (/* index >= 0 */) {
-			String left = stripped.substring(0, index);
-			String right = stripped.substring(/* index + " */ != ".length());
-			return Optional.of(/* compileValue(left) + " */ != /* " + compileValue */(right));
+			String left = input.substring(0, index);
+			String right = input.substring(/* index + operator */.length());
+			return Optional.of(/* compileValue(left) + " " + operator + " " + compileValue */(right));
 		}/* 
         else {
             return Optional.empty();
@@ -503,19 +504,19 @@ public class Main {
 		return cache.append(", ").append(element);
 	}
 	private static State foldValueChar(State state, Character c){
-		if (/* c == ',' && state */.isLevel()) {
+		if (c == /* ',' && state */.isLevel()) {
 			return state.advance();
 		}
 		State appended = state.append(c);
-		if (/* c == '-' */) {
+		if (c == '-') {
 			if (state.peek() == '>') {
 				return state.append(state.pop());
 			}
 		}
-		if (/* c == '<' || c == '(' */) {
+		if (c == '<' || c == '(') {
 			return appended.enter();
 		}
-		if (/* c == '>' || c == ')' */) {
+		if (c == '>' || c == ')') {
 			return appended.exit();
 		}
 		return appended;

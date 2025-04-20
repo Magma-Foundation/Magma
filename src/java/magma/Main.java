@@ -462,7 +462,8 @@ public class Main {
 
         return compileInvocation(stripped)
                 .or(() -> compileTernary(stripped))
-                .or(() -> compileOperator(stripped))
+                .or(() -> compileOperator(stripped, "!="))
+                .or(() -> compileOperator(stripped, "=="))
                 .or(() -> compileAccess(stripped, "."))
                 .or(() -> compileAccess(stripped, "::"))
                 .orElseGet(() -> generatePlaceholder(stripped));
@@ -486,12 +487,12 @@ public class Main {
         return Optional.of(compileValue(condition) + " ? " + compileValue(left) + " : " + compileValue(right));
     }
 
-    private static Optional<String> compileOperator(String stripped) {
-        int index = stripped.indexOf("!=");
+    private static Optional<String> compileOperator(String input, String operator) {
+        int index = input.indexOf(operator);
         if (index >= 0) {
-            String left = stripped.substring(0, index);
-            String right = stripped.substring(index + "!=".length());
-            return Optional.of(compileValue(left) + " != " + compileValue(right));
+            String left = input.substring(0, index);
+            String right = input.substring(index + operator.length());
+            return Optional.of(compileValue(left) + " " + operator + " " + compileValue(right));
         }
         else {
             return Optional.empty();
