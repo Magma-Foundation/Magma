@@ -50,9 +50,9 @@ public class Main {
 	}
 	public static void main(String[] args){
 		try {
-			/* Path source */ = Paths.get(".", "src", "java", "magma", "Main.java");
-			/* String input */ = Files.readString(source);
-			/* Path target */ = source.resolveSibling("main.c");
+			Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+			String input = Files.readString(source);
+			Path target = source.resolveSibling("main.c");
 			Files.writeString(target, /* compile(input) */);
 		}/*  catch (IOException e) {
             throw new RuntimeException(e);
@@ -65,14 +65,14 @@ public class Main {
 			return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 	}
 	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
-			/* State current */ = new State();
+			State current = new State();
 			/* for (int i */ = 0;
 			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
-			/* List<String> segments */ = current.advance().segments;
-			/* StringBuilder output */ = new StringBuilder();/* 
+			List<String> segments = current.advance().segments;
+			StringBuilder output = new StringBuilder();/* 
         for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
@@ -83,8 +83,8 @@ public class Main {
 			return output.append(compiled);
 	}
 	private static State foldStatementChar(State state, char c){
-			/* State appended */ = state.append(c);
-			/* if (c */ = /* = ' */;/* ' && appended.isLevel()) {
+			State appended = state.append(c);
+			if (c = /* = ' */;/* ' && appended.isLevel()) {
             return appended.advance();
         } *//* 
         if (c == ' */
@@ -192,9 +192,11 @@ public class Main {
 
         int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            String destination = stripped.substring(0, valueSeparator).strip();
+            String inputDestination = stripped.substring(0, valueSeparator).strip();
+            String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination));
+
             String source = stripped.substring(valueSeparator + "=".length()).strip();
-            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+            return Optional.of(outputDestination + " = " + compileValue(source));
         }
 
         if (stripped.endsWith(")")) {

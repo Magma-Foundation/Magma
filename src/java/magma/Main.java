@@ -248,9 +248,11 @@ public class Main {
 
         int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            String destination = stripped.substring(0, valueSeparator).strip();
+            String inputDestination = stripped.substring(0, valueSeparator).strip();
+            String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination));
+
             String source = stripped.substring(valueSeparator + "=".length()).strip();
-            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+            return Optional.of(outputDestination + " = " + compileValue(source));
         }
 
         if (stripped.endsWith(")")) {
