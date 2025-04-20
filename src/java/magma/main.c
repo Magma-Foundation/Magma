@@ -48,20 +48,20 @@ public class Main {
 			return this;
 		}
 	}
-	public static void main(String[] args){/* 
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
-        } *//*  catch (IOException e) {
+	public static void main(String[] args){
+		try {
+			/* Path source */ = Paths.get(".", "src", "java", "magma", "Main.java");
+			/* String input */ = Files.readString(source);
+			/* Path target */ = source.resolveSibling("main.c");
+			Files.writeString(target, /* compile(input) */);
+		}/*  catch (IOException e) {
             throw new RuntimeException(e);
         } */
 	}
 	private static String compile(String input){
-			return /* compileStatements(input, Main::compileRootSegment) */;
+			return /* compileStatementValues(input, Main::compileRootSegment) */;
 	}
-	private static String compileStatements(String input,  Function<String, /*  String> compiler */){
+	private static String compileStatementValues(String input,  Function<String, /*  String> compiler */){
 			return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 	}
 	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
@@ -109,7 +109,7 @@ public class Main {
         if (classIndex >= 0) {/* String modifiers = compileModifiers(stripped.substring(0, classIndex)); *//* 
 
             String afterKeyword = stripped.substring(classIndex + "class ".length()); */
-	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, depth + 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
+	int contentStart = afterKeyword.indexOf("{");            if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
                 }
              */
 	}
@@ -144,7 +144,7 @@ public class Main {
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
-                        String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
+                        String outputContent = compileStatements(inputContent);
                         String indent = "\n" + "\t".repeat(depth);
                         return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
                     }
@@ -152,6 +152,8 @@ public class Main {
                         return Optional.empty();
                     }
                 });
+    } *//* private static String compileStatements(String inputContent) {
+        return compileStatementValues(inputContent, Main::compileStatementOrBlock);
     } *//* private static String compileParam(String param) {
         return compileWhitespace(param)
                 .or(() -> compileDefinition(param))
@@ -159,8 +161,21 @@ public class Main {
     } *//* private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input))
+                .or(() -> compileTry(input))
                 .orElseGet(() -> generatePlaceholder(input));
 
+    } *//* private static @NotNull Optional<? extends String> compileTry(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("try ")) {
+            String withoutKeyword = stripped.substring("try ".length()).strip();
+            if (withoutKeyword.startsWith("{") && withoutKeyword.endsWith("}")) {
+                String inputContent = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+                String outputContent = compileStatements(inputContent);
+                return Optional.of("\n\t\ttry {" + outputContent + "\n\t\t}");
+            }
+        }
+
+        return Optional.empty();
     } *//* private static Optional<String> compileStatement(String input) {
         String stripped = input.strip();
         if (!stripped.endsWith(";")) {

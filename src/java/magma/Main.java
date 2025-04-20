@@ -72,10 +72,10 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        return compileStatementValues(input, Main::compileRootSegment);
     }
 
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    private static String compileStatementValues(String input, Function<String, String> compiler) {
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
     }
 
@@ -142,7 +142,7 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileStatements(inputContent, input -> compileClassSegment(input, depth + 1));
+                    String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));
 
                     String beforeNode = depth == 0 ? "" : "\n\t";
                     String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);
@@ -188,7 +188,7 @@ public class Main {
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
-                        String outputContent = compileStatements(inputContent, Main::compileStatementOrBlock);
+                        String outputContent = compileStatements(inputContent);
                         String indent = "\n" + "\t".repeat(depth);
                         return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
                     }
@@ -196,6 +196,10 @@ public class Main {
                         return Optional.empty();
                     }
                 });
+    }
+
+    private static String compileStatements(String inputContent) {
+        return compileStatementValues(inputContent, Main::compileStatementOrBlock);
     }
 
     private static String compileParam(String param) {
@@ -207,8 +211,23 @@ public class Main {
     private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input))
+                .or(() -> compileTry(input))
                 .orElseGet(() -> generatePlaceholder(input));
 
+    }
+
+    private static @NotNull Optional<? extends String> compileTry(String input) {
+        String stripped = input.strip();
+        if (stripped.startsWith("try ")) {
+            String withoutKeyword = stripped.substring("try ".length()).strip();
+            if (withoutKeyword.startsWith("{") && withoutKeyword.endsWith("}")) {
+                String inputContent = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+                String outputContent = compileStatements(inputContent);
+                return Optional.of("\n\t\ttry {" + outputContent + "\n\t\t}");
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileStatement(String input) {
