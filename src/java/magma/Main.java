@@ -457,9 +457,22 @@ public class Main {
         }
 
         return compileInvocation(stripped)
+                .or(() -> compileOperator(stripped))
                 .or(() -> compileAccess(stripped, "."))
                 .or(() -> compileAccess(stripped, "::"))
                 .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileOperator(String stripped) {
+        int index = stripped.indexOf("!=");
+        if (index >= 0) {
+            String left = stripped.substring(0, index);
+            String right = stripped.substring(index + "!=".length());
+            return Optional.of(compileValue(left) + " != " + compileValue(right));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileAccess(String stripped, String separator) {

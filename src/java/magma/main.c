@@ -96,7 +96,7 @@ public class Main {
 		return output.toString();
 	}
 	private static Optional<State> foldSingleQuotes(State state, char c){
-		if (/* c != '\'' */) {
+		if (c != /* '\'' */) {
 			return Optional.empty();
 		}
 		State appended = state.append(c);
@@ -108,7 +108,7 @@ public class Main {
 		return Optional.of(withEscaped.append(withEscaped.pop()));
 	}
 	private static Optional<State> foldDoubleQuotes(State state, char c){
-		if (/* c != '"' */) {
+		if (c != /* '"' */) {
 			return Optional.empty();
 		}
 		State appended = state.append(c);
@@ -344,25 +344,24 @@ public class Main {
 				return /* beforeArrow + " -> " + compileValue */(afterArrow);
 			}
 		}
-		Optional<String> maybeInvocation = compileInvocation(stripped);
-		if (maybeInvocation.isPresent()) {
-			return maybeInvocation.get();
-		}
-		Optional<String> dataAccess = compileAccess(stripped, ".");
-		if (dataAccess.isPresent()) {
-			return dataAccess.get();
-		}
-		Optional<String> methodAccess = compileAccess(stripped, "::");
-		if (methodAccess.isPresent()) {
-			return methodAccess.get();
-		}
 		if (isSymbol(stripped)) {
 			return stripped;
 		}
 		if (isNumber(stripped)) {
 			return stripped;
 		}
-		return generatePlaceholder(stripped);
+		return compileInvocation(stripped).or(() -> compileOperator(stripped)).or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+	}
+	private static Optional<String> compileOperator(String stripped){
+		int index = stripped.indexOf("!=");
+		if (/* index >= 0 */) {
+			String left = stripped.substring(0, index);
+			String right = stripped.substring(/* index + " */ != ".length());
+			return Optional.of(/* compileValue(left) + " */ != /* " + compileValue */(right));
+		}/* 
+        else {
+            return Optional.empty();
+        } */
 	}
 	private static Optional<String> compileAccess(String stripped, String separator){
 		int index = stripped.lastIndexOf(separator);
