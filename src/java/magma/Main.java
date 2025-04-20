@@ -205,7 +205,7 @@ public class Main {
                     }
 
                     String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValues(params, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
+                    String outputParams = compileValues(params, param -> compileParam(param));
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -219,14 +219,20 @@ public class Main {
                 });
     }
 
+    private static String compileParam(String param) {
+        return compileWhitespace(param)
+                .or(() -> compileDefinition(param))
+                .orElseGet(() -> generatePlaceholder(param));
+    }
+
     private static String compileStatementOrBlock(String input) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return "";
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) {
+            return maybeWhitespace.get();
         }
 
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        if (input.strip().endsWith(";")) {
+            String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
             int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
                 String destination = withoutEnd.substring(0, valueSeparator).strip();
@@ -235,7 +241,14 @@ public class Main {
             }
         }
 
-        return generatePlaceholder(stripped);
+        return generatePlaceholder(input.strip());
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     }
 
     private static String compileValue(String input) {

@@ -21,35 +21,35 @@ public class Main {
 			this.buffer = buffer;
 			this.depth = depth;
 		}
-		public State(/*  */){/* this(new ArrayList<>(), new StringBuilder(), 0); */
+		public State(){/* this(new ArrayList<>(), new StringBuilder(), 0); */
 		}
-		private State enter(/*  */){/* this.setDepth(this.getDepth() + 1); *//* return this; */
+		private State enter(){/* this.setDepth(this.getDepth() + 1); *//* return this; */
 		}
 		private State append(char c){/* this.getBuffer().append(c); *//* return this; */
 		}
-		private State exit(/*  */){/* this.setDepth(this.getDepth() - 1); *//* return this; */
+		private State exit(){/* this.setDepth(this.getDepth() - 1); *//* return this; */
 		}
-		private boolean isShallow(/*  */){
+		private boolean isShallow(){
 			/* return this */.getDepth() = /* = 1 */;
 		}
-		private boolean isLevel(/*  */){
+		private boolean isLevel(){
 			/* return this */.getDepth() = /* = 0 */;
 		}
-		private State advance(/*  */){/* this.segments().add(this.getBuffer().toString()); *//* this.setBuffer(new StringBuilder()); *//* return this; */
+		private State advance(){/* this.segments().add(this.getBuffer().toString()); *//* this.setBuffer(new StringBuilder()); *//* return this; */
 		}
-		public List<String> getSegments(/*  */){/* return this.segments; */
+		public List<String> getSegments(){/* return this.segments; */
 		}
-		public StringBuilder getBuffer(/*  */){/* return this.buffer; */
+		public StringBuilder getBuffer(){/* return this.buffer; */
 		}
 		public void setBuffer(StringBuilder buffer){
 			this.buffer = buffer;
 		}
-		public int getDepth(/*  */){/* return this.depth; */
+		public int getDepth(){/* return this.depth; */
 		}
 		public void setDepth(int depth){
 			this.depth = depth;
 		}
-		public List<String> segments(/*  */){/* return this.segments; */
+		public List<String> segments(){/* return this.segments; */
 		}/* 
      */}
 		public static void main(/* String[] args */){/* try {
@@ -132,7 +132,7 @@ public class Main {
                     }
 
                     String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValues(params, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
+                    String outputParams = compileValues(params, param -> compileParam(param));
 
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -144,14 +144,18 @@ public class Main {
                         return Optional.empty();
                     }
                 });
+    } *//* private static String compileParam(String param) {
+        return compileWhitespace(param)
+                .or(() -> compileDefinition(param))
+                .orElseGet(() -> generatePlaceholder(param));
     } *//* private static String compileStatementOrBlock(String input) {
-        String stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return "";
+        Optional<String> maybeWhitespace = compileWhitespace(input);
+        if (maybeWhitespace.isPresent()) {
+            return maybeWhitespace.get();
         }
 
-        if (stripped.endsWith(";")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        if (input.strip().endsWith(";")) {
+            String withoutEnd = input.strip().substring(0, input.strip().length() - ";".length());
             int valueSeparator = withoutEnd.indexOf("=");
             if (valueSeparator >= 0) {
                 String destination = withoutEnd.substring(0, valueSeparator).strip();
@@ -160,7 +164,12 @@ public class Main {
             }
         }
 
-        return generatePlaceholder(stripped);
+        return generatePlaceholder(input.strip());
+    } *//* private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     } *//* private static String compileValue(String input) {
         String stripped = input.strip();
 
