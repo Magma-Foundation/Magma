@@ -567,16 +567,18 @@ public class Main {
             return stripped;
         }
 
-        return compileInvocation(stripped, depth)
+        return compileAccess(stripped, ".", depth)
+                .or(() -> compileAccess(stripped, "::", depth))
+                .or(() -> compileInvocation(stripped, depth))
                 .or(() -> compileTernary(stripped, depth))
                 .or(() -> compileOperator(stripped, "!=", depth))
                 .or(() -> compileOperator(stripped, "==", depth))
                 .or(() -> compileOperator(stripped, "&&", depth))
-                .or(() -> compileOperator(stripped, "+", depth))
-                .or(() -> compileOperator(stripped, "<", depth))
+                .or(() -> compileOperator(stripped, "||", depth))
                 .or(() -> compileOperator(stripped, ">=", depth))
-                .or(() -> compileAccess(stripped, ".", depth))
-                .or(() -> compileAccess(stripped, "::", depth))
+                .or(() -> compileOperator(stripped, "+", depth))
+                .or(() -> compileOperator(stripped, "-", depth))
+                .or(() -> compileOperator(stripped, "<", depth))
                 .orElseGet(() -> generatePlaceholder(stripped));
     }
 
@@ -645,7 +647,12 @@ public class Main {
 
         String parent = stripped.substring(0, index);
         String property = stripped.substring(index + separator.length());
-        return Optional.of(compileValue(parent, depth) + separator + property);
+        if (isSymbol(property)) {
+            return Optional.of(compileValue(parent, depth) + separator + property);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static boolean isNumber(String input) {
@@ -708,9 +715,28 @@ public class Main {
                 .collect(Collectors.toCollection(LinkedList::new)));
 
         while (state.hasNext()) {
-            char next = state.pop();
+            char c = state.pop();
+            if (c == '"') {
+                State appended = state.append(c);
 
-            Result<State, State> tuple = finder.apply(state, next);
+                State current = appended;
+                while (current.hasNext()) {
+                    char next = current.pop();
+                    current = current.append(next);
+
+                    if (current.peek() == '\\') {
+                        current = current.append(current.pop());
+                    }
+
+                    if (next == '"') {
+                        break;
+                    }
+                }
+                state = current;
+                continue;
+            }
+
+            Result<State, State> tuple = finder.apply(state, c);
             Optional<State> maybeValue = tuple.findValue();
             if (maybeValue.isPresent()) {
                 State state1 = maybeValue.get();

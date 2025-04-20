@@ -269,7 +269,7 @@ public class Main {
 		});
 	}
 	private static Optional<Integer> findContentStart(String input){
-		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple < /* >(index, input */.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
+		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple<>(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
 		while (!queue.isEmpty()) {
 			Tuple<Integer, Character> tuple = queue.pop();
 			int i = tuple.left;
@@ -331,7 +331,7 @@ public class Main {
 			return Optional.empty();
 		}
 		String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-		return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + /* ")") */;
+		return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + ")");
 	}
 	private static Optional<String> compileStatement(String input, int depth){
 		String stripped = input.strip();
@@ -438,12 +438,7 @@ public class Main {
 		if (isNumber(stripped)) {
 			return stripped;
 		}
-		return compileInvocation(stripped, depth).or(() -> compileTernary(stripped, depth)).or(() -> compileOperator(stripped, " != ", depth))
-                .or(() -> compileOperator(stripped, " == ", depth))
-                .or(() -> compileOperator(stripped, " && ", depth))
-                .or(() -> compileOperator(stripped, " + ", depth))
-                .or(() -> compileOperator(stripped, " < ", depth))
-                .or(() -> compileOperator(stripped, " >= /* ", depth)) */.or(() -> compileAccess(stripped, ".", depth)).or(() -> compileAccess(stripped, "::", depth)).orElseGet(() -> generatePlaceholder(stripped));
+		return compileAccess(stripped, ".", depth).or(() -> compileAccess(stripped, "::", depth)).or(() -> compileInvocation(stripped, depth)).or(() -> compileTernary(stripped, depth)).or(() -> compileOperator(stripped, "!=", depth)).or(() -> compileOperator(stripped, "==", depth)).or(() -> compileOperator(stripped, "&&", depth)).or(() -> compileOperator(stripped, "||", depth)).or(() -> compileOperator(stripped, ">=", depth)).or(() -> compileOperator(stripped, "+", depth)).or(() -> compileOperator(stripped, "-", depth)).or(() -> compileOperator(stripped, "<", depth)).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileLambda(int depth, String stripped){
 		int arrowIndex = stripped.indexOf("->");
@@ -502,7 +497,12 @@ public class Main {
 		}
 		String parent = stripped.substring(0, index);
 		String property = stripped.substring(index + separator.length());
-		return Optional.of(compileValue(parent, depth) + separator + property);
+		if (isSymbol(property)) {
+			return Optional.of(compileValue(parent, depth) + separator + property);
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	private static boolean isNumber(String input){
 		return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isDigit);
@@ -540,19 +540,35 @@ public class Main {
 		String beforeName = input.substring(0, nameSeparator).strip();
 		String name = input.substring(nameSeparator + " ".length()).strip();
 		return split(beforeName, Main::findTypeSeparator).flatMap(typeSeparator -> {
-            String beforeType = typeSeparator.left.strip();
-            String inputType = typeSeparator.right.strip();
-            return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
-                String withBeforeType = modifiers + " " + /* outputType;
-                return Optional */.of(withBeforeType + " " + /* name);
-            }));
-        }) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
+			String beforeType = typeSeparator.left.strip();
+			String inputType = typeSeparator.right.strip();
+			return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
+				String withBeforeType = modifiers + " " + outputType;
+				return Optional.of(withBeforeType + " " + name);
+			}));
+		}).or(() -> compileType(beforeName).map(type -> type + " " + name));
 	}
 	private static Optional<Tuple<String, String>> split(String input, BiFunction<State, Character, Result<State, State>> finder){
 		State state = new State(IntStream.range(0, input.length()).map(index -> input.length() - index - 1).mapToObj(input::charAt).collect(Collectors.toCollection(LinkedList::new)));
 		while (state.hasNext()) {
-			char next = state.pop();
-			Result<State, State> tuple = finder.apply(state, next);
+			char c = state.pop();
+			if (c == '"') {
+				State appended = state.append(c);
+				State current = appended;
+				while (current.hasNext()) {
+					char next = current.pop();
+					current = current.append(next);
+					if (current.peek() == '\\') {
+						current = current.append(current.pop());
+					}
+					if (next == '"') {
+						break;
+					}
+				}
+				state = current;
+				continue;
+			}
+			Result<State, State> tuple = finder.apply(state, c);
 			Optional<State> maybeValue = tuple.findValue();
 			if (maybeValue.isPresent()) {
 				State state1 = maybeValue.get();
@@ -580,7 +596,9 @@ public class Main {
 		return new Err<>(appended);
 	}
 	private static String reverse(String reversedType){
-		return new StringBuffer(/* reversedType) */.reverse().toString();
+		return new StringBuffer(/* reversedType)
+                .reverse()
+                .toString( */);
 	}
 	private static Optional<String> compileType(String type){
 		String stripped = type.strip();
@@ -592,7 +610,7 @@ public class Main {
 			int paramStart = withoutEnd.indexOf("<");
 			if (paramStart >= 0) {
 				String base = withoutEnd.substring(0, paramStart).strip();
-				String oldArguments = withoutEnd.substring(paramStart + " < ".length());
+				String oldArguments = withoutEnd.substring(paramStart + "<".length());
 				String newArguments = compileValueSegments(oldArguments, Main::compileTypeOrPlaceholder);
 				return Optional.of(base + "<" + newArguments + ">");
 			}
@@ -639,6 +657,6 @@ public class Main {
 		return appended;
 	}
 	private static String generatePlaceholder(String input){
-		String replaced = input.replace("/*", " < /* content-start>") */.replace("*/", "<content-end>");
+		String replaced = input.replace("/*", "<content-start>").replace("*/", "<content-end>");
 		return "/* " + replaced + " */";
 	}}/*  */
