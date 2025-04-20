@@ -53,6 +53,13 @@ public class Main {
             return stripped + "\n";
         }
 
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = stripped.substring(0, classIndex).strip();
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            return generatePlaceholder(modifiers) + " class " + generatePlaceholder(afterKeyword);
+        }
+
         return generatePlaceholder(stripped);
     }
 
