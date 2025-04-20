@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -133,6 +134,10 @@ public class Main {
             return stripped + "\n";
         }
 
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped) {
         int classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
             String modifiers = Arrays.stream(stripped.substring(0, classIndex).strip().split(" "))
@@ -147,16 +152,15 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     String outputContent = compileStatements(inputContent, Main::compileClassSegment);
-                    return modifiers + " class " + className + " {" + outputContent + "}";
+                    return Optional.of(modifiers + " class " + className + " {" + outputContent + "}");
                 }
             }
         }
-
-        return generatePlaceholder(stripped);
+        return Optional.empty();
     }
 
     private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String input) {
