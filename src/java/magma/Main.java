@@ -305,6 +305,7 @@ public class Main {
 
         return compileBeforeBlockWithQuantity(stripped, "catch", Main::compileDefinition)
                 .or(() -> compileBeforeBlockWithQuantity(stripped, "while", value -> Optional.of(compileValue(value))))
+                .or(() -> compileBeforeBlockWithQuantity(stripped, "if", value -> Optional.of(compileValue(value))))
                 .or(() -> compileBeforeBlockWithQuantity(stripped, "for", Main::compileEnhancedForQuantity));
     }
 
