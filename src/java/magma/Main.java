@@ -416,6 +416,10 @@ public class Main {
             return Optional.of("break");
         }
 
+        if (stripped.equals("continue")) {
+            return Optional.of("continue");
+        }
+
         if (stripped.startsWith("throw ")) {
             String slice = stripped.substring("throw ".length());
             return Optional.of("throw " + compileValue(slice, depth));

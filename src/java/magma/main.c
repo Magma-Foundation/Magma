@@ -251,8 +251,8 @@ public class Main {
 				if (queue.pop().right == '\\') {
 					queue.pop();
 				}
-				queue.pop();/* 
-                continue; */
+				queue.pop();
+				continue;
 			}
 			if (c == '\"') {
 				while (!queue.isEmpty()) {
@@ -264,8 +264,8 @@ public class Main {
 					if (next == '"') {
 						break;
 					}
-				}/* 
-                continue; */
+				}
+				continue;
 			}
 			if (c == '{') {
 				return Optional.of(i);
@@ -317,6 +317,9 @@ public class Main {
 		String stripped = input.strip();
 		if (stripped.endsWith("break")) {
 			return Optional.of("break");
+		}
+		if (stripped.equals("continue")) {
+			return Optional.of("continue");
 		}
 		if (stripped.startsWith("throw ")) {
 			String slice = stripped.substring("throw ".length());
