@@ -250,7 +250,7 @@ public class Main {
 
     private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input))
+                .or(() -> compileStatement(input, 3))
                 .or(() -> compileBlock(input))
                 .orElseGet(() -> generatePlaceholder(input));
 
@@ -290,14 +290,14 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileStatement(String input) {
+    private static Optional<String> compileStatement(String input, int depth) {
         String stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
         String withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return compileStatementValue(withoutEnd).map(destination -> "\n\t\t\t" + destination + ";");
+        return compileStatementValue(withoutEnd).map(destination -> "\n" + "\t".repeat(depth) + destination + ";");
     }
 
     private static Optional<String> compileStatementValue(String input) {
@@ -456,17 +456,34 @@ public class Main {
         if (nameSeparator >= 0) {
             String beforeName = input.substring(0, nameSeparator).strip();
             String name = input.substring(nameSeparator + " ".length()).strip();
-            int typeSeparator = beforeName.lastIndexOf(" ");
-            if (typeSeparator < 0) {
-                return compileType(beforeName).map(type -> type + " " + name);
-            }
-
-            String beforeType = beforeName.substring(0, typeSeparator).strip();
-            String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-            Optional<String> maybeOutputType = compileType(inputType);
-            if (maybeOutputType.isPresent()) {
+            return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
+                String beforeType = beforeName.substring(0, typeSeparator).strip();
+                String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+                Optional<String> maybeOutputType = compileType(inputType);
+                if (maybeOutputType.isEmpty()) {
+                    return Optional.empty();
+                }
                 String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
                 return Optional.of(withBeforeType + " " + name);
+            }).or(() -> {
+                return compileType(beforeName).map(type -> type + " " + name);
+            });
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Integer> findTypeSeparator(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return Optional.of(i);
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
             }
         }
         return Optional.empty();
