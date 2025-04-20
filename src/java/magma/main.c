@@ -59,11 +59,15 @@ public class Main {
 			return this.queue.pop();
 		}
 		public char peek(){
+			if (this.queue.isEmpty()) {
+				return '\'';
+			}
 			return this.queue.peek();
 		}
-	}
-	private record Tuple<A, B>(A left, B right){
-	}
+	}/* 
+
+    private record Tuple<A, B>(A left, B right) {
+    } */
 	public static void main(String[] args){
 		try {
 			Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -151,52 +155,71 @@ public class Main {
 		}
 		return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
 	}
-	private static Optional<String> compileClass(String stripped, int depth) {        int classIndex = stripped.indexOf(" class ");
-        if (classIndex >= 0) {/* String modifiers = compileModifiers(stripped.substring(0, classIndex)); *//* 
+	private static Optional<String> compileClass(String stripped, int depth){
+		int classIndex = stripped.indexOf("class ");
+		if (classIndex < 0) {
+			return Optional.empty();
+		}/* 
 
-            String afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
-            int contentStart = afterKeyword.indexOf("{"); */
-	if (contentStart >= 0) {                String className = afterKeyword.substring(0, contentStart).strip();                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();                if (withEnd.endsWith("}")) {                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());                    String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));                    String beforeNode = depth == 0 ? "" : "\n\t";                    String afterChildren = depth == 0 ? "" : "\n" + "\t".repeat(depth);                    return Optional.of(beforeNode + modifiers + " class " + className + " {/* " + outputContent + afterChildren + "}");
-                }
-             */
-		}
-		} return Optional.empty();
+        return compileModifiers(stripped.substring(0, classIndex)).flatMap(modifiers -> {
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            return compileClassWithModifiers(modifiers, afterKeyword, depth);
+        } *//* ); */
 	}
-	private static String compileModifiers(String input){
-		return Arrays.stream(input.strip().split(" ")).map(String::strip).collect(Collectors.joining(" "));
+	private static Optional<String> compileClassWithModifiers(String modifiers, String afterKeyword, int depth){
+		int contentStart = afterKeyword.indexOf("{");
+		if (contentStart < 0) {
+			return Optional.empty();
+		}
+		String className = afterKeyword.substring(0, contentStart).strip();
+		String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+		if (!withEnd.endsWith("}")) {
+			return Optional.empty();
+		}
+		String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+		String outputContent = compileStatementValues(inputContent, input -> compileClassSegment(input, depth + 1));
+		String beforeNode = depth == 0 ? /* "" : */ : "\n\t";
+		String afterChildren = depth == 0 ? /* "" : */ : "\n" + "\t".repeat(depth);
+		return Optional.of(beforeNode + modifiers + " class " + className + " {" + outputContent + afterChildren + "}");
+	}
+	private static Optional<String> compileModifiers(String input){
+		List<String> modifiers = Arrays.stream(input.strip().split(" ")).map(String::strip).toList();
+		if (modifiers.stream().allMatch(Main::isText)) {
+			return Optional.of(String.join(" ", modifiers));
+		}/* 
+        else {
+            return Optional.empty();
+        } */
 	}
 	private static String compileClassSegment(String input, int depth){
 		return compileWhitespace(input).or(() -> compileClass(input, depth)).or(() -> compileDefinitionStatement(input)).or(() -> compileMethod(input, depth)).orElseGet(() -> generatePlaceholder(input));
 	}
 	private static @NotNull Optional</* ? extends String */> compileMethod(String input, int depth){
 		int paramStart = input.indexOf("(");
-		if (/* paramStart < 0 */) {
+		if (paramStart < 0) {
 			return Optional.empty();
 		}
-		String beforeParams = input.substring(0, paramStart).strip();/* 
-        return compileDefinition(beforeParams)
-                .or(() -> compileConstructorHeader(beforeParams))
-                .flatMap(outputDefinition -> {
-                    String withParams = input.substring(paramStart + "(".length()).strip();
-                    int paramEnd = withParams.indexOf(")");
-                    if (paramEnd < 0) {
-                        return Optional.empty();
-                    }
-
-                    String params = withParams.substring(0, paramEnd).strip();
-                    String outputParams = compileValueSegments(params, Main::compileParam);
-
-                    String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                        String inputContent = withBraces.substring(1, withBraces.length() - 1);
-                        String outputContent = compileStatements(inputContent, depth + 1);
-                        String indent = "\n" + "\t".repeat(depth);
-                        return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
-                    }
-                    else {
-                        return Optional.empty();
-                    }
-                } *//* ); */
+		String beforeParams = input.substring(0, paramStart).strip();
+		String withParams = input.substring(paramStart + "(".length());
+		return compileDefinition(beforeParams).or(() -> compileConstructorHeader(beforeParams)).flatMap(outputDefinition -> assembleMethod(outputDefinition, withParams.strip(), depth));
+	}
+	private static Optional<String> assembleMethod(String definition, String withParams, int depth){
+		int paramEnd = withParams.indexOf(")");
+		if (paramEnd < 0) {
+			return Optional.empty();
+		}
+		String params = withParams.substring(0, paramEnd).strip();
+		String outputParams = compileValueSegments(params, Main::compileParam);
+		String withBraces = withParams.substring(paramEnd + ")".length()).strip();/* 
+        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+            String inputContent = withBraces.substring(1, withBraces.length() - 1);
+            String outputContent = compileStatements(inputContent, depth + 1);
+            String indent = "\n" + "\t".repeat(depth);
+            return Optional.of(indent + definition + "(" + outputParams + "){" + outputContent + indent + "}");
+        } *//* 
+        else {
+            return Optional.empty();
+        } */
 	}
 	private static String compileStatements(String inputContent, int depth){
 		return compileStatementValues(inputContent, input -> compileStatementOrBlock(input, depth));
@@ -224,7 +247,7 @@ public class Main {
         } *//* ); */
 	}
 	private static Optional<Integer> findContentStart(String input){
-		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple<>(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
+		LinkedList<Tuple<Integer, Character>> queue = IntStream.range(0, input.length()).mapToObj(index -> new Tuple < /* >(index, input */.charAt(index))).collect(Collectors.toCollection(LinkedList::new));
 		while (!queue.isEmpty()) {
 			Tuple<Integer, Character> tuple = queue.pop();
 			int i = tuple.left;
@@ -251,7 +274,7 @@ public class Main {
 	}
 	private static Optional<String> compileEnhancedForQuantity(String quantity){
 		int separator = quantity.indexOf(":");
-		if (/* separator < 0 */) {
+		if (separator < 0) {
 			return Optional.empty();
 		}
 		String inputDefinition = quantity.substring(0, separator);
@@ -380,17 +403,18 @@ public class Main {
 		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped, " != "))
                 .or(() -> compileOperator(stripped, " == "))
                 .or(() -> compileOperator(stripped, " && "))
-                .or(() -> compileOperator(stripped, " + /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+                .or(() -> compileOperator(stripped, " + "))
+                .or(() -> compileOperator(stripped, " < /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileTernary(String stripped){
 		int conditionIndex = stripped.indexOf("?");
-		if (/* conditionIndex < 0 */) {
+		if (conditionIndex < 0) {
 			return Optional.empty();
 		}
 		String condition = stripped.substring(0, conditionIndex);
 		String afterCondition = stripped.substring(conditionIndex + "?".length());
 		int actionSeparator = afterCondition.indexOf(':');
-		if (/* actionSeparator < 0 */) {
+		if (actionSeparator < 0) {
 			return Optional.empty();
 		}
 		String left = afterCondition.substring(0, actionSeparator + ":".length());
@@ -410,7 +434,7 @@ public class Main {
 	}
 	private static Optional<String> compileAccess(String stripped, String separator){
 		int index = stripped.lastIndexOf(separator);
-		if (/* index < 0 */) {
+		if (index < 0) {
 			return Optional.empty();
 		}
 		String parent = stripped.substring(0, index);
@@ -419,7 +443,7 @@ public class Main {
 	}
 	private static boolean isNumber(String input){
 		/* for (int i */ = 0;
-		/* i < input */.length();/*  i++) {
+		i < input.length();/*  i++) {
             char c = input.charAt(i);
             if (Character.isDigit(c)) {
                 continue;
@@ -435,8 +459,10 @@ public class Main {
 		int nameSeparator = beforeParams.lastIndexOf(" ");
 		if (/* nameSeparator >= 0 */) {
 			String beforeName = beforeParams.substring(0, nameSeparator).strip();
-			String name = beforeParams.substring(nameSeparator + " ".length()).strip();
-			return Optional.of(compileModifiers(beforeName) + " " + name);
+			String name = beforeParams.substring(nameSeparator + " ".length()).strip();/* 
+            return compileModifiers(beforeName).flatMap(modifiers -> {
+                return Optional.of(modifiers + " " + name);
+            } *//* ); */
 		}
 		if (isSymbol(beforeParams)) {
 			return Optional.of(beforeParams);
@@ -453,22 +479,20 @@ public class Main {
 	}
 	private static Optional<String> compileDefinition(String input){
 		int nameSeparator = input.lastIndexOf(" ");
-		if (/* nameSeparator >= 0 */) {
-			String beforeName = input.substring(0, nameSeparator).strip();
-			String name = input.substring(nameSeparator + " ".length()).strip();/* 
-            return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
-                String beforeType = beforeName.substring(0, typeSeparator).strip();
-                String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-                Optional<String> maybeOutputType = compileType(inputType);
-                if (maybeOutputType.isEmpty()) {
-                    return Optional.empty();
-                }
-                String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
-                return Optional.of(withBeforeType + " " + name);
-            } */
-			/* ) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
+		if (nameSeparator < 0) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		String beforeName = input.substring(0, nameSeparator).strip();
+		String name = input.substring(nameSeparator + " ".length()).strip();/* 
+        return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
+            String beforeType = beforeName.substring(0, typeSeparator).strip();
+            String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+            return compileType(inputType).flatMap(outputType -> compileModifiers(beforeType).flatMap(modifiers -> {
+                String withBeforeType = modifiers + " " + outputType;
+                return Optional.of(withBeforeType + " " + name);
+            }));
+        } */
+		/* ) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
 	}
 	private static Optional<Integer> findTypeSeparator(String input){
 		int depth = 0;
@@ -497,7 +521,7 @@ public class Main {
 			int paramStart = withoutEnd.indexOf("<");
 			if (/* paramStart >= 0 */) {
 				String base = withoutEnd.substring(0, paramStart).strip();
-				String oldArguments = withoutEnd.substring(paramStart + "<".length());
+				String oldArguments = withoutEnd.substring(paramStart + " < ".length());
 				String newArguments = compileValueSegments(oldArguments, Main::compileTypeOrPlaceholder);
 				return Optional.of(base + "<" + newArguments + ">");
 			}
@@ -514,8 +538,11 @@ public class Main {
 		if (input.equals("private") || input.equals("public")) {
 			return false;
 		}
+		return isText(input);
+	}
+	private static boolean isText(String input){
 		/* for (int i */ = 0;
-		/* i < input */.length();/*  i++) {
+		i < input.length();/*  i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
@@ -549,6 +576,6 @@ public class Main {
 		return appended;
 	}
 	private static String generatePlaceholder(String input){
-		String replaced = input.replace("/*", "<content-start>").replace("*/", "<content-end>");
+		String replaced = input.replace("/*", " < /* content-start>") */.replace("*/", "<content-end>");
 		return "/* " + replaced + " */";
 	}}/*  */
