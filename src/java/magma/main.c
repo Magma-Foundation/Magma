@@ -6,8 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-public class /* Main {
-    public static void main(String[] args) {
+public class Main {/* public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -60,7 +59,15 @@ public class /* Main {
                     .collect(Collectors.joining(" "));
 
             String afterKeyword = stripped.substring(classIndex + "class ".length());
-            return modifiers + " class " + generatePlaceholder(afterKeyword);
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String className = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return modifiers + " class " + className + " {" + generatePlaceholder(content) + "}";
+                }
+            }
         }
 
         return generatePlaceholder(stripped);
@@ -73,4 +80,4 @@ public class /* Main {
 
         return "<content-start> " + replaced + " <content-end>";
     }
-} */
+ */}
