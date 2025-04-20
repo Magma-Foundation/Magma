@@ -255,17 +255,25 @@ public class Main {
             return Optional.of(outputDestination + " = " + compileValue(source));
         }
 
-        if (stripped.endsWith(")")) {
-            String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argumentsStart = withoutArgumentsEnd.indexOf("(");
-            if (argumentsStart >= 0) {
-                String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-                String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                String outputArguments = compileValues(inputArguments);
-                return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
-            }
+        return compileInvocation(stripped);
+    }
+
+    private static Optional<String> compileInvocation(String input) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(")")) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
+        int argumentsStart = withoutArgumentsEnd.indexOf("(");
+        if (argumentsStart < 0) {
+            return Optional.empty();
+        }
+
+        String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+        String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+        String outputArguments = compileValues(inputArguments);
+        return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
     }
 
     private static String compileValues(String inputArguments) {
@@ -281,6 +289,11 @@ public class Main {
 
     private static String compileValue(String input) {
         String stripped = input.strip();
+
+        Optional<String> maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation.get();
+        }
 
         if (stripped.startsWith("new ")) {
             String withoutPrefix = stripped.substring("new ".length()).strip();

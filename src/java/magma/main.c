@@ -22,7 +22,7 @@ public class Main {
 			this.depth = depth;
 		}
 		public State(){
-			this(new ArrayList<>(), new StringBuilder(), 0);
+			this(/* new ArrayList<> */(), /* new StringBuilder */(), 0);
 		}
 		private State enter(){
 			this.depth = this.depth + 1;
@@ -44,35 +44,35 @@ public class Main {
 		}
 		private State advance(){
 			this.segments.add(this.buffer.toString());
-			this.buffer = new StringBuilder();
+			this.buffer = /* new StringBuilder */();
 			return this;
 		}
 	}
 	public static void main(String[] args){
 		try {
-			Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+			Path source = Paths.get(/* " */.", /* "src" */, /* "java" */, /* "magma" */, /* "Main */.java");
 			String input = Files.readString(source);
-			Path target = source.resolveSibling("main.c");
-			Files.writeString(target, /* compile(input) */);
+			Path target = source.resolveSibling(/* "main */.c");
+			Files.writeString(target, compile(input));
 		}/*  catch (IOException e) {
             throw new RuntimeException(e);
         } */
 	}
 	private static String compile(String input){
-			return /* compileStatementValues(input, Main::compileRootSegment) */;
+			return compileStatementValues(input, /* Main::compileRootSegment */);
 	}
 	private static String compileStatementValues(String input,  Function<String, /*  String> compiler */){
-			return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
+			return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 	}
 	private static String compileAll(String input,  BiFunction<State,  Character, /*  State> folder */,  Function<String, /*  String> compiler */,  BiFunction<StringBuilder,  String, /*  StringBuilder> merger */){
-			State current = new State();
+			State current = /* new State */();
 			/* for (int i */ = 0;
 			/* i < input */.length();/*  i++) {
             char c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 			List<String> segments = current.advance().segments;
-			StringBuilder output = new StringBuilder();/* 
+			StringBuilder output = /* new StringBuilder */();/* 
         for (String segment : segments) {
             String compiled = compiler.apply(segment);
             output = merger.apply(output, compiled);
@@ -199,17 +199,23 @@ public class Main {
             return Optional.of(outputDestination + " = " + compileValue(source));
         }
 
-        if (stripped.endsWith(")")) {
-            String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argumentsStart = withoutArgumentsEnd.indexOf("(");
-            if (argumentsStart >= 0) {
-                String caller = withoutArgumentsEnd.substring(0, argumentsStart);
-                String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
-                String outputArguments = compileValues(inputArguments);
-                return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
-            }
+        return compileInvocation(stripped);
+    } *//* private static Optional<String> compileInvocation(String input) {
+        String stripped = input.strip();
+        if (!stripped.endsWith(")")) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        String withoutArgumentsEnd = stripped.substring(0, stripped.length() - ")".length());
+        int argumentsStart = withoutArgumentsEnd.indexOf("(");
+        if (argumentsStart < 0) {
+            return Optional.empty();
+        }
+
+        String caller = withoutArgumentsEnd.substring(0, argumentsStart);
+        String inputArguments = withoutArgumentsEnd.substring(argumentsStart + "(".length());
+        String outputArguments = compileValues(inputArguments);
+        return Optional.of(compileValue(caller) + "(" + outputArguments + ")");
     } *//* private static String compileValues(String inputArguments) {
         return compileValueSegments(inputArguments, Main::compileValue);
     } *//* private static Optional<String> compileWhitespace(String input) {
@@ -219,6 +225,11 @@ public class Main {
         return Optional.empty();
     } *//* private static String compileValue(String input) {
         String stripped = input.strip();
+
+        Optional<String> maybeInvocation = compileInvocation(input);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation.get();
+        }
 
         if (stripped.startsWith("new ")) {
             String withoutPrefix = stripped.substring("new ".length()).strip();
