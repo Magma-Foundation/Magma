@@ -497,6 +497,7 @@ public class Main {
                 .or(() -> compileOperator(stripped, "!="))
                 .or(() -> compileOperator(stripped, "=="))
                 .or(() -> compileOperator(stripped, "&&"))
+                .or(() -> compileOperator(stripped, "+"))
                 .or(() -> compileAccess(stripped, "."))
                 .or(() -> compileAccess(stripped, "::"))
                 .orElseGet(() -> generatePlaceholder(stripped));

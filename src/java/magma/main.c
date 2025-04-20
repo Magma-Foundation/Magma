@@ -147,7 +147,7 @@ public class Main {
 	private static String compileRootSegment(String segment){
 		String stripped = segment.strip();
 		if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-			return /* stripped + "\n" */;
+			return stripped + "\n";
 		}
 		return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
 	}
@@ -255,21 +255,21 @@ public class Main {
 			return Optional.empty();
 		}
 		String inputDefinition = quantity.substring(0, separator);
-		String value = quantity.substring(/* separator + ":" */.length());
-		return compileDefinition(inputDefinition).map(outputDefinition -> /* outputDefinition + " : " + compileValue */(value));
+		String value = quantity.substring(separator + ":".length());
+		return compileDefinition(inputDefinition).map(outputDefinition -> outputDefinition + " : " + compileValue(value));
 	}
 	private static Optional<String> compileBeforeBlockWithQuantity(String input, String keyword, Function<String, Optional<String>> compileDefinition){
 		String stripped = input.strip();
 		String prefix = " (";
-		if (!stripped.startsWith(/* keyword + prefix */)) {
+		if (!stripped.startsWith(keyword + prefix)) {
 			return Optional.empty();
 		}
-		String withoutPrefix = stripped.substring((/* keyword + prefix */).length()).strip();
+		String withoutPrefix = stripped.substring((keyword + /* prefix) */.length()).strip();
 		if (!withoutPrefix.endsWith(")")) {
 			return Optional.empty();
 		}
 		String inputDefinition = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-		return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + ")");
+		return compileDefinition.apply(inputDefinition).map(outputDefinition -> keyword + prefix + outputDefinition + /* ")") */;
 	}
 	private static Optional<String> compileStatement(String input, int depth){
 		String stripped = input.strip();
@@ -286,17 +286,17 @@ public class Main {
 		}
 		if (stripped.startsWith("throw ")) {
 			String slice = stripped.substring("throw ".length());
-			return Optional.of(/* "throw " + compileValue */(slice));
+			return Optional.of("throw " + compileValue(slice));
 		}
 		if (stripped.startsWith("return ")) {
-			return Optional.of(/* "return " + compileValue */(stripped.substring("return ".length())));
+			return Optional.of("return " + compileValue(stripped.substring("return ".length())));
 		}
 		int valueSeparator = stripped.indexOf("=");
 		if (/* valueSeparator >= 0 */) {
 			String inputDestination = stripped.substring(0, valueSeparator).strip();
 			String outputDestination = compileDefinition(inputDestination).orElseGet(() -> compileValue(inputDestination));
-			String source = stripped.substring(/* valueSeparator + "=" */.length()).strip();
-			return Optional.of(/* outputDestination + " = " + compileValue */(source));
+			String source = stripped.substring(valueSeparator + "=".length()).strip();
+			return Optional.of(outputDestination + " = " + compileValue(source));
 		}
 		return compileInvocation(stripped);
 	}
@@ -361,14 +361,14 @@ public class Main {
 		}
 		if (stripped.startsWith("!")) {
 			String slice = stripped.substring(1);
-			return /* "!" + compileValue */(slice);
+			return "!" + compileValue(slice);
 		}
 		int arrowIndex = stripped.indexOf("->");
 		if (/* arrowIndex >= 0 */) {
 			String beforeArrow = stripped.substring(0, arrowIndex).strip();
-			String afterArrow = stripped.substring(/* arrowIndex + "->" */.length());
+			String afterArrow = stripped.substring(arrowIndex + "->".length());
 			if (beforeArrow.equals("()") || isSymbol(beforeArrow)) {
-				return /* beforeArrow + " -> " + compileValue */(afterArrow);
+				return beforeArrow + " -> " + compileValue(afterArrow);
 			}
 		}
 		if (isSymbol(stripped)) {
@@ -379,7 +379,8 @@ public class Main {
 		}
 		return compileInvocation(stripped).or(() -> compileTernary(stripped)).or(() -> compileOperator(stripped, " != "))
                 .or(() -> compileOperator(stripped, " == "))
-                .or(() -> compileOperator(stripped, " && /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
+                .or(() -> compileOperator(stripped, " && "))
+                .or(() -> compileOperator(stripped, " + /* ")) */.or(() -> compileAccess(stripped, ".")).or(() -> compileAccess(stripped, "::")).orElseGet(() -> generatePlaceholder(stripped));
 	}
 	private static Optional<String> compileTernary(String stripped){
 		int conditionIndex = stripped.indexOf("?");
@@ -387,21 +388,21 @@ public class Main {
 			return Optional.empty();
 		}
 		String condition = stripped.substring(0, conditionIndex);
-		String afterCondition = stripped.substring(/* conditionIndex + "?" */.length());
+		String afterCondition = stripped.substring(conditionIndex + "?".length());
 		int actionSeparator = afterCondition.indexOf(':');
 		if (/* actionSeparator < 0 */) {
 			return Optional.empty();
 		}
-		String left = afterCondition.substring(0, /* actionSeparator + ":" */.length());
-		String right = afterCondition.substring(/* actionSeparator + ":" */.length());
-		return Optional.of(/* compileValue(condition) + " */ ? /* " + compileValue(left) + " : */ : /* " + compileValue */(right));
+		String left = afterCondition.substring(0, actionSeparator + ":".length());
+		String right = afterCondition.substring(actionSeparator + ":".length());
+		return Optional.of(compileValue(condition) + " ? " + compileValue(left) + /* " : */ : " + compileValue(right));
 	}
 	private static Optional<String> compileOperator(String input, String operator){
 		int index = input.indexOf(operator);
 		if (/* index >= 0 */) {
 			String left = input.substring(0, index);
-			String right = input.substring(/* index + operator */.length());
-			return Optional.of(/* compileValue(left) + " " + operator + " " + compileValue */(right));
+			String right = input.substring(index + operator.length());
+			return Optional.of(compileValue(left) + " " + operator + " " + compileValue(right));
 		}/* 
         else {
             return Optional.empty();
@@ -413,8 +414,8 @@ public class Main {
 			return Optional.empty();
 		}
 		String parent = stripped.substring(0, index);
-		String property = stripped.substring(/* index + separator */.length());
-		return Optional.of(/* compileValue(parent) + separator + property */);
+		String property = stripped.substring(index + separator.length());
+		return Optional.of(compileValue(parent) + separator + property);
 	}
 	private static boolean isNumber(String input){
 		/* for (int i */ = 0;
@@ -434,8 +435,8 @@ public class Main {
 		int nameSeparator = beforeParams.lastIndexOf(" ");
 		if (/* nameSeparator >= 0 */) {
 			String beforeName = beforeParams.substring(0, nameSeparator).strip();
-			String name = beforeParams.substring(/* nameSeparator + " " */.length()).strip();
-			return Optional.of(/* compileModifiers(beforeName) + " " + name */);
+			String name = beforeParams.substring(nameSeparator + " ".length()).strip();
+			return Optional.of(compileModifiers(beforeName) + " " + name);
 		}
 		if (isSymbol(beforeParams)) {
 			return Optional.of(beforeParams);
@@ -454,7 +455,7 @@ public class Main {
 		int nameSeparator = input.lastIndexOf(" ");
 		if (/* nameSeparator >= 0 */) {
 			String beforeName = input.substring(0, nameSeparator).strip();
-			String name = input.substring(/* nameSeparator + " " */.length()).strip();/* 
+			String name = input.substring(nameSeparator + " ".length()).strip();/* 
             return findTypeSeparator(beforeName).flatMap(typeSeparator -> {
                 String beforeType = beforeName.substring(0, typeSeparator).strip();
                 String inputType = beforeName.substring(typeSeparator + " ".length()).strip();
@@ -465,7 +466,7 @@ public class Main {
                 String withBeforeType = compileModifiers(beforeType) + " " + maybeOutputType.get();
                 return Optional.of(withBeforeType + " " + name);
             } */
-			/* ) */.or(() -> compileType(beforeName).map(type -> /* type + " " + name */));
+			/* ) */.or(() -> compileType(beforeName).map(type -> type + " " + name));
 		}
 		return Optional.empty();
 	}
@@ -489,16 +490,16 @@ public class Main {
 	private static Optional<String> compileType(String type){
 		String stripped = type.strip();
 		if (stripped.endsWith("[]")) {
-			return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(inner -> /* inner + "[]" */);
+			return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(inner -> inner + "[]");
 		}
 		if (stripped.endsWith(">")) {
 			String withoutEnd = stripped.substring(0, stripped.length() - ">".length());
 			int paramStart = withoutEnd.indexOf("<");
 			if (/* paramStart >= 0 */) {
 				String base = withoutEnd.substring(0, paramStart).strip();
-				String oldArguments = withoutEnd.substring(/* paramStart + "<" */.length());
+				String oldArguments = withoutEnd.substring(paramStart + "<".length());
 				String newArguments = compileValueSegments(oldArguments, Main::compileTypeOrPlaceholder);
-				return Optional.of(/* base + "<" + newArguments + ">" */);
+				return Optional.of(base + "<" + newArguments + ">");
 			}
 		}
 		if (isSymbol(stripped)) {
