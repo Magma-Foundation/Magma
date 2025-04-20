@@ -58,6 +58,9 @@ public class Main {
 		public char pop(){
 			return this.queue.pop();
 		}
+		public char peek(){
+			return this.queue.peek();
+		}
 	}
 	public static void main(String[] args){
 		try {
@@ -82,8 +85,7 @@ public class Main {
 		while (current.hasNext()) {
 			char c = current.pop();
 			State finalCurrent = current;
-			current = /* foldDoubleQuotes(finalCurrent, c)
-                    .orElseGet(() */ -> /*  folder.apply(finalCurrent, c)) */;
+			current = foldDoubleQuotes(finalCurrent, c).orElseGet(() -> folder.apply(finalCurrent, c));
 		}
 		List<String> segments = current.advance().segments;
 		StringBuilder output = new StringBuilder();/* 
@@ -293,10 +295,12 @@ public class Main {
         } *//* if (stripped.startsWith("!")) {
             String slice = stripped.substring(1);
             return "!" + compileValue(slice);
-        } *//* int arrowIndex = stripped.indexOf("->".toString()); *//* if(arrowIndex >= 0) {
+        } *//* int arrowIndex = stripped.indexOf("->"); *//* if (arrowIndex >= 0) {
             String beforeArrow = stripped.substring(0, arrowIndex).strip();
             String afterArrow = stripped.substring(arrowIndex + "->".length());
-            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+            if (beforeArrow.equals("()") || isSymbol(beforeArrow)) {
+                return beforeArrow + " -> " + compileValue(afterArrow);
+            }
         } *//* Optional<String> maybeInvocation = compileInvocation(stripped); *//* if (maybeInvocation.isPresent()) {
             return maybeInvocation.get();
         } *//* Optional<String> dataAccess = compileAccess(stripped, "."); *//* if (dataAccess.isPresent()) {
@@ -409,9 +413,13 @@ public class Main {
     private static State foldValueChar(State state, Character c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
-        } *//* State appended = state.append(c); *//* if (c == '<') {
+        } *//* State appended = state.append(c); *//* if (c == '-') {
+            if (state.peek() == '>') {
+                return state.append(state.pop());
+            }
+        } *//* if (c == '<' || c == '(') {
             return appended.enter();
-        } *//* if (c == '>') {
+        } *//* if (c == '>' || c == ')') {
             return appended.exit();
         } *//* return appended; *//* }
 

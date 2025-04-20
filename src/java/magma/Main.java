@@ -71,6 +71,10 @@ public class Main {
         public char pop() {
             return this.queue.pop();
         }
+
+        public char peek() {
+            return this.queue.peek();
+        }
     }
 
     public static void main(String[] args) {
@@ -408,7 +412,9 @@ public class Main {
         if (arrowIndex >= 0) {
             String beforeArrow = stripped.substring(0, arrowIndex).strip();
             String afterArrow = stripped.substring(arrowIndex + "->".length());
-            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+            if (beforeArrow.equals("()") || isSymbol(beforeArrow)) {
+                return beforeArrow + " -> " + compileValue(afterArrow);
+            }
         }
 
         Optional<String> maybeInvocation = compileInvocation(stripped);
@@ -579,10 +585,16 @@ public class Main {
         }
 
         State appended = state.append(c);
-        if (c == '<') {
+        if (c == '-') {
+            if (state.peek() == '>') {
+                return state.append(state.pop());
+            }
+        }
+
+        if (c == '<' || c == '(') {
             return appended.enter();
         }
-        if (c == '>') {
+        if (c == '>' || c == ')') {
             return appended.exit();
         }
         return appended;
