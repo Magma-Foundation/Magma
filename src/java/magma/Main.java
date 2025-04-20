@@ -532,17 +532,9 @@ public class Main {
             return stripped;
         }
 
-        if (stripped.startsWith("new ")) {
-            String withoutPrefix = stripped.substring("new ".length()).strip();
-            if (withoutPrefix.endsWith(")")) {
-                String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-                int argumentStart = withoutSuffix.indexOf("(");
-                if (argumentStart >= 0) {
-                    String type = withoutSuffix.substring(0, argumentStart).strip();
-                    String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
-                    return "new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")";
-                }
-            }
+        Optional<String> maybeConstruction = compileConstruction(stripped, depth);
+        if (maybeConstruction.isPresent()) {
+            return maybeConstruction.get();
         }
 
         if (stripped.startsWith("!")) {
@@ -580,6 +572,28 @@ public class Main {
                 .or(() -> compileOperator(stripped, "-", depth))
                 .or(() -> compileOperator(stripped, "<", depth))
                 .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileConstruction(String input, int depth) {
+        String stripped = input.strip();
+        if (!stripped.startsWith("new ")) {
+            return Optional.empty();
+        }
+
+        String withoutPrefix = stripped.substring("new ".length()).strip();
+        if (!withoutPrefix.endsWith(")")) {
+            return Optional.empty();
+        }
+
+        String withoutSuffix = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+        int argumentStart = withoutSuffix.indexOf("(");
+        if (argumentStart < 0) {
+            return Optional.empty();
+        }
+
+        String type = withoutSuffix.substring(0, argumentStart).strip();
+        String arguments = withoutSuffix.substring(argumentStart + "(".length()).strip();
+        return Optional.of("new " + compileTypeOrPlaceholder(type) + "(" + compileValues(arguments, depth) + ")");
     }
 
     private static Optional<String> compileLambda(int depth, String stripped) {
