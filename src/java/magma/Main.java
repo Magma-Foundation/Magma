@@ -228,7 +228,7 @@ public class Main {
                     String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         String inputContent = withBraces.substring(1, withBraces.length() - 1);
-                        String outputContent = compileStatements(inputContent);
+                        String outputContent = compileStatements(inputContent, depth + 1);
                         String indent = "\n" + "\t".repeat(depth);
                         return Optional.of(indent + outputDefinition + "(" + outputParams + "){" + outputContent + indent + "}");
                     }
@@ -238,8 +238,8 @@ public class Main {
                 });
     }
 
-    private static String compileStatements(String inputContent) {
-        return compileStatementValues(inputContent, Main::compileStatementOrBlock);
+    private static String compileStatements(String inputContent, int depth) {
+        return compileStatementValues(inputContent, input -> compileStatementOrBlock(input, depth));
     }
 
     private static String compileParam(String param) {
@@ -248,15 +248,15 @@ public class Main {
                 .orElseGet(() -> generatePlaceholder(param));
     }
 
-    private static String compileStatementOrBlock(String input) {
+    private static String compileStatementOrBlock(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input, 3))
-                .or(() -> compileBlock(input))
+                .or(() -> compileStatement(input, depth))
+                .or(() -> compileBlock(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
 
     }
 
-    private static @NotNull Optional<? extends String> compileBlock(String input) {
+    private static @NotNull Optional<? extends String> compileBlock(String input, int depth) {
         String stripped = input.strip();
         if (stripped.endsWith("}")) {
             String withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -264,10 +264,11 @@ public class Main {
             if (contentStart >= 0) {
                 String beforeContent = withoutEnd.substring(0, contentStart).strip();
                 String inputContent = withoutEnd.substring(contentStart + "{".length());
-                String outputContent = compileStatements(inputContent);
+                String outputContent = compileStatements(inputContent, depth + 1);
 
+                String indent = "\n" + "\t".repeat(depth);
                 return compileBeforeContent(beforeContent)
-                        .map(value -> "\n\t\t" + value + " {" + outputContent + "\n\t\t}");
+                        .map(value -> indent + value + " {" + outputContent + indent + "}");
             }
         }
 
