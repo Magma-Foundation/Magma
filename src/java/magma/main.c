@@ -8,48 +8,118 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 /* public class Main {
-    private static class State {
-        private final List<String> segments;*//* private StringBuilder buffer;*//* private State(List<String> segments, StringBuilder buffer) {
-            this.segments = segments;*//* this.buffer = buffer;*//* }
+    private interface DivideState {
+        DivideState advance();
 
-        public State() {
-            this(new ArrayList<>(), new StringBuilder());*//* }
+        DivideState append(char c);
 
-        private State advance() {
-            this.segments.add(this.buffer.toString());*//* this.buffer = new StringBuilder();*//* return this;*//* }
+        Stream<String> stream();
 
-        private State append(char c) {
-            this.buffer.append(c);*//* return this;*//* }
+        boolean isLevel();
 
-        private Stream<String> stream() {
-            return this.segments.stream();*//* }
+        DivideState enter();
+
+        DivideState exit();
+    }
+
+    private static class MutableDivideState implements DivideState {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private MutableDivideState(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        public MutableDivideState() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        @Override
+        public DivideState advance() {
+            this.segments.add(this.buffer.toString());
+            this.buffer = new StringBuilder();
+            return this;
+        }
+
+        @Override
+        public DivideState append(char c) {
+            this.buffer.append(c);
+            return this;
+        }
+
+        @Override
+        public Stream<String> stream() {
+            return this.segments.stream();
+        }
+
+        @Override
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        @Override
+        public DivideState enter() {
+            this.depth++;
+            return this;
+        }
+
+        @Override
+        public DivideState exit() {
+            this.depth--;
+            return this;
+        }
     }
 
     public static void main(String[] args) {
         try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");*//* String input = Files.readString(source);*//* Path target = source.resolveSibling("main.c");*//* Files.writeString(target, compile(input));*//* } catch (IOException e) {
+            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+            String input = Files.readString(source);
+            Path target = source.resolveSibling("main.c");
+            Files.writeString(target, compile(input));
+        } catch (IOException e) {
             //noinspection CallToPrintStackTrace
-            e.printStackTrace();*//* }
+            e.printStackTrace();
+        }
     }
 
     private static String compile(String input) {
-        return divide(input, new State())
+        return divide(input, new MutableDivideState())
                 .map(Main::compileRootSegment)
-                .collect(Collectors.joining());*//* }
+                .collect(Collectors.joining());
+    }
 
-    private static Stream<String> divide(String input, State state) {
-        State current = state;*//* for (int i = 0;*//* i < input.length();*//* i++) {
-            char c = input.charAt(i);*//* current = foldStatementChar(current, c);*//* }
+    private static Stream<String> divide(String input, DivideState state) {
+        DivideState current = state;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            current = foldStatementChar(current, c);
+        }
 
-        return current.advance().stream();*//* }
+        return current.advance().stream();
+    }
 
-    private static State foldStatementChar(State state, char c) {
-        State appended = state.append(c);*//* if (c == ';*//* ') {
-            return appended.advance();*//* }
-        return appended;*//* }
+    private static DivideState foldStatementChar(DivideState state, char c) {
+        DivideState appended = state.append(c);
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
+        if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '}') {
+            return appended.exit();
+        }
+        return appended;
+    }
 
     private static String compileRootSegment(String input) {
-        String stripped = input.strip();*//* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return stripped + "\n";*//* }
-        return "/* " + stripped + "*/";*//* }
+        String stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return stripped + "\n";
+        }
+        return "/* " + stripped + "*/";
+    }
 }*/

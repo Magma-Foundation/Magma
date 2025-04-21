@@ -16,19 +16,27 @@ public class Main {
         DivideState append(char c);
 
         Stream<String> stream();
+
+        boolean isLevel();
+
+        DivideState enter();
+
+        DivideState exit();
     }
 
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
+        private int depth;
 
-        private MutableDivideState(List<String> segments, StringBuilder buffer) {
+        private MutableDivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
         public MutableDivideState() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         @Override
@@ -47,6 +55,23 @@ public class Main {
         @Override
         public Stream<String> stream() {
             return this.segments.stream();
+        }
+
+        @Override
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        @Override
+        public DivideState enter() {
+            this.depth++;
+            return this;
+        }
+
+        @Override
+        public DivideState exit() {
+            this.depth--;
+            return this;
         }
     }
 
@@ -80,8 +105,14 @@ public class Main {
 
     private static DivideState foldStatementChar(DivideState state, char c) {
         DivideState appended = state.append(c);
-        if (c == ';') {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '}') {
+            return appended.exit();
         }
         return appended;
     }
