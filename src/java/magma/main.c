@@ -128,7 +128,10 @@ import java.util.stream.Stream;
             if (contentStart >= 0) {
                 String name = afterKeyword.substring(0, contentStart).strip();
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                return generatePlaceholder(modifiers) + "class " + name + " {" + generatePlaceholder(withEnd);
+                if (withEnd.endsWith("}")) {
+                    String content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return generatePlaceholder(modifiers) + "class " + name + " {" + generatePlaceholder(content) + "}";
+                }
             }
         }
 
@@ -138,4 +141,4 @@ import java.util.stream.Stream;
     private static String generatePlaceholder(String stripped) {
         return "/*" + stripped + "*/";
     }
-}*/
+*/}
