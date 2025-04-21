@@ -178,6 +178,19 @@ public class Main {
         }
     }
 
+    private static class LazyRule implements Rule {
+        private Optional<Rule> childRule = Optional.empty();
+
+        public void set(Rule childRule) {
+            this.childRule = Optional.of(childRule);
+        }
+
+        @Override
+        public Optional<String> compile(String input) {
+            return this.childRule.flatMap(internal -> internal.compile(input));
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -242,18 +255,20 @@ public class Main {
     }
 
     private static Rule createClassRule() {
-        return createStructuredRule("class ");
+        return createStructuredRule("class ", createClassSegmentRule());
     }
 
-    private static Rule createStructuredRule(String infix) {
+    private static Rule createStructuredRule(String infix, Rule classSegment) {
         return new PrefixRule(infix, new InfixRule(new StringRule(), "{",
-                new SuffixRule(new DivideRule(createClassSegmentRule()), "}")));
+                new SuffixRule(new DivideRule(classSegment), "}")));
     }
 
-    private static OrRule createClassSegmentRule() {
-        return new OrRule(List.of(
-                createStructuredRule("interface "),
+    private static Rule createClassSegmentRule() {
+        LazyRule classSegment = new LazyRule();
+        classSegment.set(new OrRule(List.of(
+                createStructuredRule("interface ", classSegment),
                 new ContentRule()
-        ));
+        )));
+        return classSegment;
     }
 }
