@@ -29,6 +29,9 @@ public class Main {
         boolean isShallow();
     }
 
+    interface Rule extends Function<String, Optional<String>> {
+    }
+
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -145,7 +148,7 @@ public class Main {
         return compilePrefix(input, infix, afterKeyword -> compileSuffix(afterKeyword, Main::compileContent, ";"));
     }
 
-    private static Optional<String> compileSuffix(String input, Function<String, Optional<String>> childRule, String suffix) {
+    private static Optional<String> compileSuffix(String input, Rule childRule, String suffix) {
         return compileInfix(input, childRule, suffix, Main::locateLast, Main::compileContent);
     }
 
@@ -156,7 +159,7 @@ public class Main {
                 : Optional.of(index);
     }
 
-    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> childRule) {
+    private static Optional<String> compilePrefix(String input, String prefix, Rule childRule) {
         return compileFirstInfix(input, Main::compileContent, prefix, childRule);
     }
 
@@ -181,19 +184,19 @@ public class Main {
 
     private static Optional<String> compileFirstInfix(
             String input,
-            Function<String, Optional<String>> leftRule,
+            Rule leftRule,
             String infix,
-            Function<String, Optional<String>> rightRule
+            Rule rightRule
     ) {
         return compileInfix(input, leftRule, infix, Main::locateFirst, rightRule);
     }
 
     private static Optional<String> compileInfix(
             String input,
-            Function<String, Optional<String>> leftRule,
+            Rule leftRule,
             String infix,
             BiFunction<String, String, Optional<Integer>> locator,
-            Function<String, Optional<String>> rightRule
+            Rule rightRule
     ) {
         return locator.apply(input, infix).flatMap(index -> {
             String left = input.substring(0, index);

@@ -160,8 +160,8 @@ public */class Main {/*
         return compileFirstInfix(input, Main::compileContent, prefix, childRule);
     }*//*
 
-    private static Optional<String> compileClass(String stripped) {
-        return compileStructured("class ", stripped);
+    private static Optional<String> compileClass(String input) {
+        return compileStructured("class ", input);
     }*//*
 
     private static Optional<String> compileStructured(String input, String infix) {
