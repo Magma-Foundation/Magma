@@ -76,6 +76,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        return "/* " + input + "*/";
+        String stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return stripped + "\n";
+        }
+        return "/* " + stripped + "*/";
     }
 }
