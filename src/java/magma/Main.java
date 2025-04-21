@@ -164,6 +164,20 @@ public class Main {
         }
     }
 
+    private record OrRule(List<Rule> rules) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            for (Rule rule : this.rules()) {
+                Optional<String> compiled = rule.compile(input);
+                if (compiled.isPresent()) {
+                    return compiled;
+                }
+            }
+
+            return Optional.empty();
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -177,7 +191,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return new DivideRule(Main::compileRootSegment).compile(input).orElse("");
+        return new DivideRule(createRootSegmentRule()).compile(input).orElse("");
     }
 
     private static Stream<String> divide(String input, DivideState state) {
@@ -207,11 +221,13 @@ public class Main {
         return appended;
     }
 
-    private static Optional<String> compileRootSegment(String input) {
-        return createNamespaceRule("package ").compile(input)
-                .or(() -> createNamespaceRule("import ").compile(input))
-                .or(() -> createClassRule().compile(input))
-                .or(() -> new ContentRule().compile(input));
+    private static OrRule createRootSegmentRule() {
+        return new OrRule(List.of(
+                createNamespaceRule("package "),
+                createNamespaceRule("import "),
+                createClassRule(),
+                new ContentRule()
+        ));
     }
 
     private static Rule createNamespaceRule(String infix) {
@@ -231,11 +247,13 @@ public class Main {
 
     private static Rule createStructuredRule(String infix) {
         return new PrefixRule(infix, new InfixRule(new StringRule(), "{",
-                new SuffixRule(content -> new DivideRule(Main::compileClassSegment).compile(content), "}")));
+                new SuffixRule(new DivideRule(createClassSegmentRule()), "}")));
     }
 
-    private static Optional<String> compileClassSegment(String input) {
-        return createStructuredRule("interface ").compile(input)
-                .or(() -> new ContentRule().compile(input));
+    private static OrRule createClassSegmentRule() {
+        return new OrRule(List.of(
+                createStructuredRule("interface "),
+                new ContentRule()
+        ));
     }
 }
