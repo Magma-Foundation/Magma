@@ -7,6 +7,7 @@ import /*java.nio.file.Paths*/;
 import /*java.util.ArrayList*/;
 import /*java.util.List*/;
 import /*java.util.Optional*/;
+import /*java.util.function.BiFunction*/;
 import /*java.util.function.Function*/;
 import /*java.util.stream.Collectors*/;
 import /*java.util.stream.Stream*/;/*
@@ -134,74 +135,87 @@ public */class Main {/*
     */}/*
 
     private static String compileRootSegment(String input) {
-        return createNamespacedRuled(input, "package ")
+        return createNamespacedRuled(input, "*/package /*")
                 .or(() -> createNamespacedRuled(input, "import "))
                 .or(() -> compileClass(input))
-                .orElseGet(() -> generatePlaceholder(input));
+                .orElseGet(() -> generatePlaceholder(input))*/;/*
     }*//*
 
     private static Optional<String> createNamespacedRuled(String input, String infix) {
-        return compileInfix(input, Main::compileContent, infix, afterKeyword -> compileSuffix(afterKeyword, ";", Main::compileContent));
+        return compilePrefix(input, infix, afterKeyword -> compileSuffix(afterKeyword, Main::compileContent, ";"));
+    }*//*
+
+    private static Optional<String> compileSuffix(String input, Function<String, Optional<String>> childRule, String suffix) {
+        return compileInfix(input, childRule, suffix, Main::locateLast, Main::compileContent);
+    }*//*
+
+    private static Optional<Integer> locateLast(String input, String infix) {
+        int index = input.lastIndexOf(infix);
+        return index == -1
+                ? Optional.empty()
+                : Optional.of(index);
+    }*//*
+
+    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> childRule) {
+        return compileFirstInfix(input, Main::compileContent, prefix, childRule);
     }*//*
 
     private static Optional<String> compileClass(String stripped) {
-        return compileStructured(stripped, "class ");
+        return compileStructured("class ", stripped);
     }*//*
 
-    private static Optional<String> compileStructured(String stripped, String infix) {
-        return compileInfix(stripped, Main::compileContent, infix, afterKeyword -> {
-            return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
-                return compileSuffix(withEnd, "}", content -> {
+    private static Optional<String> compileStructured(String input, String infix) {
+        return compilePrefix(infix, input, afterKeyword -> {
+            return compileFirstInfix(afterKeyword, Main::compileString, "{", withEnd -> {
+                return compileSuffix(withEnd, content -> {
                     return Optional.of(compileStatements(content, Main::compileClassSegment));
-                });
+                }, "}");
             });
         });
     }*//*
 
     private static String compileClassSegment(String input) {
-        return compileStructured(input, "interface ")
+        return compileStructured("interface ", input)
                 .orElseGet(() -> generatePlaceholder(input));
+    }*//*
+
+    private static Optional<String> compileFirstInfix(
+            String input,
+            Function<String, Optional<String>> leftRule,
+            String infix,
+            Function<String, Optional<String>> rightRule
+    ) {
+        return compileInfix(input, leftRule, infix, Main::locateFirst, rightRule);
     }*//*
 
     private static Optional<String> compileInfix(
             String input,
             Function<String, Optional<String>> leftRule,
             String infix,
+            BiFunction<String, String, Optional<Integer>> locator,
             Function<String, Optional<String>> rightRule
     ) {
-        int contentStart = input.indexOf(infix);
-        if (contentStart < 0) {
-            return Optional.empty();
-        }
+        return locator.apply(input, infix).flatMap(index -> {
+            String left = input.substring(0, index);
+            String right = input.substring(index + infix.length());
 
-        String left = input.substring(0, contentStart);
-        String right = input.substring(contentStart + infix.length());
-
-        return leftRule.apply(left).flatMap(compiledLeft -> {
-            return rightRule.apply(right).map(compiledRight -> {
-                return compiledLeft + infix + compiledRight;
+            return leftRule.apply(left).flatMap(compiledLeft -> {
+                return rightRule.apply(right).map(compiledRight -> {
+                    return compiledLeft + infix + compiledRight;
+                });
             });
         });
     }*//*
 
+    private static Optional<Integer> locateFirst(String input, String infix) {
+        int index = input.indexOf(infix);
+        return index == -1
+                ? Optional.empty()
+                : Optional.of(index);
+    }*//*
+
     private static Optional<String> compileString(String name) {
         return Optional.of(name);
-    }*//*
-
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        String slice = input.substring(0, input.length() - suffix.length());
-        return childRule.apply(slice).map(inner -> inner + suffix);
-    }*//*
-
-    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> childRule) {
-        if (!input.startsWith(prefix)) {
-            return Optional.empty();
-        }
-        String slice = input.substring(prefix.length());
-        return childRule.apply(slice).map(inner -> prefix + inner);
     }*//*
 
     private static Optional<String> compileContent(String content) {
