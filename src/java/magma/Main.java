@@ -134,14 +134,14 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        return compileStripped(input, stripped -> compilePrefix(stripped, "package ", Main::compileContent))
-                .or(() -> compileStripped(input, stripped -> compilePrefix(stripped, "import ", Main::compileContent)))
+        return createNamespacedRuled(input, "package ")
+                .or(() -> createNamespacedRuled(input, "import "))
                 .or(() -> compileClass(input))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> mapper) {
-        return mapper.apply(input.strip());
+    private static Optional<String> createNamespacedRuled(String input, String infix) {
+        return compileInfix(input, Main::compileContent, infix, afterKeyword -> compileSuffix(afterKeyword, ";", Main::compileContent));
     }
 
     private static Optional<String> compileClass(String stripped) {
@@ -196,8 +196,8 @@ public class Main {
         return childRule.apply(slice).map(inner -> inner + suffix);
     }
 
-    private static Optional<String> compilePrefix(String prefix, String input, Function<String, Optional<String>> childRule) {
-        if (!input.endsWith(prefix)) {
+    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> childRule) {
+        if (!input.startsWith(prefix)) {
             return Optional.empty();
         }
         String slice = input.substring(prefix.length());
@@ -205,7 +205,8 @@ public class Main {
     }
 
     private static Optional<String> compileContent(String content) {
-        return Optional.of(generatePlaceholder(content));
+        String generated = content.isBlank() ? content : generatePlaceholder(content);
+        return Optional.of(generated);
     }
 
     private static String generatePlaceholder(String stripped) {
