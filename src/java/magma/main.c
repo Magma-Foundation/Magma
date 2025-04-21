@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-/*public */class /*Main {
-    private interface DivideState {
+/*public */class Main {/*private interface DivideState {
         DivideState advance();
 
         DivideState append(char c);
@@ -125,7 +124,12 @@ import java.util.stream.Stream;
         if (classIndex >= 0) {
             String modifiers = stripped.substring(0, classIndex);
             String afterKeyword = stripped.substring(classIndex + "class ".length());
-            return generatePlaceholder(modifiers) + "class " + generatePlaceholder(afterKeyword);
+            int contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                String name = afterKeyword.substring(0, contentStart).strip();
+                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                return generatePlaceholder(modifiers) + "class " + name + " {" + generatePlaceholder(withEnd);
+            }
         }
 
         return generatePlaceholder(stripped);
