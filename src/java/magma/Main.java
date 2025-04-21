@@ -134,12 +134,14 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return stripped + "\n";
-        }
+        return compileStripped(input, stripped -> compilePrefix(stripped, "package ", Main::compileContent))
+                .or(() -> compileStripped(input, stripped -> compilePrefix(stripped, "import ", Main::compileContent)))
+                .or(() -> compileClass(input))
+                .orElseGet(() -> generatePlaceholder(input));
+    }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> mapper) {
+        return mapper.apply(input.strip());
     }
 
     private static Optional<String> compileClass(String stripped) {
@@ -190,8 +192,16 @@ public class Main {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
-        String content = input.substring(0, input.length() - suffix.length());
-        return childRule.apply(content).map(inner -> inner + suffix);
+        String slice = input.substring(0, input.length() - suffix.length());
+        return childRule.apply(slice).map(inner -> inner + suffix);
+    }
+
+    private static Optional<String> compilePrefix(String prefix, String input, Function<String, Optional<String>> childRule) {
+        if (!input.endsWith(prefix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(prefix.length());
+        return childRule.apply(slice).map(inner -> prefix + inner);
     }
 
     private static Optional<String> compileContent(String content) {

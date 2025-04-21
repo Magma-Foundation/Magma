@@ -1,15 +1,17 @@
-package magma;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-/*public */class Main {/*
+/*package magma;*//*
+
+import java.io.IOException;*//*
+import java.nio.file.Files;*//*
+import java.nio.file.Path;*//*
+import java.nio.file.Paths;*//*
+import java.util.ArrayList;*//*
+import java.util.List;*//*
+import java.util.Optional;*//*
+import java.util.function.Function;*//*
+import java.util.stream.Collectors;*//*
+import java.util.stream.Stream;*//*
+
+public */class Main {/*
     private */interface DivideState {/*
         DivideState advance();*//*
 
@@ -129,16 +131,24 @@ import java.util.stream.Stream;
             return appended.exit();
         }*//*
         return appended;*//*
-    */}/*private static String compileRootSegment(String input) {
-        String stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return stripped + "\n";
-        }
+    */}/*
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
-    }*//*private static Optional<String> compileClass(String stripped) {
+    private static String compileRootSegment(String input) {
+        return compileStripped(input, stripped -> compilePrefix(stripped, "package ", Main::compileContent))
+                .or(() -> compileStripped(input, stripped -> compilePrefix(stripped, "import ", Main::compileContent)))
+                .or(() -> compileClass(input))
+                .orElseGet(() -> generatePlaceholder(input));
+    }*//*
+
+    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> mapper) {
+        return mapper.apply(input.strip());
+    }*//*
+
+    private static Optional<String> compileClass(String stripped) {
         return compileStructured(stripped, "class ");
-    }*//*private static Optional<String> compileStructured(String stripped, String infix) {
+    }*//*
+
+    private static Optional<String> compileStructured(String stripped, String infix) {
         return compileInfix(stripped, Main::compileContent, infix, afterKeyword -> {
             return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
                 return compileSuffix(withEnd, "}", content -> {
@@ -146,10 +156,14 @@ import java.util.stream.Stream;
                 });
             });
         });
-    }*//*private static String compileClassSegment(String input) {
+    }*//*
+
+    private static String compileClassSegment(String input) {
         return compileStructured(input, "interface ")
                 .orElseGet(() -> generatePlaceholder(input));
-    }*//*private static Optional<String> compileInfix(
+    }*//*
+
+    private static Optional<String> compileInfix(
             String input,
             Function<String, Optional<String>> leftRule,
             String infix,
@@ -168,16 +182,33 @@ import java.util.stream.Stream;
                 return compiledLeft + infix + compiledRight;
             });
         });
-    }*//*private static Optional<String> compileString(String name) {
+    }*//*
+
+    private static Optional<String> compileString(String name) {
         return Optional.of(name);
-    }*//*private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
+    }*//*
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
-        String content = input.substring(0, input.length() - suffix.length());
-        return childRule.apply(content).map(inner -> inner + suffix);
-    }*//*private static Optional<String> compileContent(String content) {
+        String slice = input.substring(0, input.length() - suffix.length());
+        return childRule.apply(slice).map(inner -> inner + suffix);
+    }*//*
+
+    private static Optional<String> compilePrefix(String prefix, String input, Function<String, Optional<String>> childRule) {
+        if (!input.endsWith(prefix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(prefix.length());
+        return childRule.apply(slice).map(inner -> prefix + inner);
+    }*//*
+
+    private static Optional<String> compileContent(String content) {
         return Optional.of(generatePlaceholder(content));
-    }*//*private static String generatePlaceholder(String stripped) {
+    }*//*
+
+    private static String generatePlaceholder(String stripped) {
         return "/*" + stripped + "*/";
-    }*//*}*/
+    }*//*
+}*/
