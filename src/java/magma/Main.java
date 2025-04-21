@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -128,23 +129,48 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped) {
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex < 0) {
-            return Optional.empty();
-        }
-        String modifiers = stripped.substring(0, classIndex);
-        String afterKeyword = stripped.substring(classIndex + "class ".length());
-        int contentStart = afterKeyword.indexOf("{");
+        return compileInfix(stripped, Main::compileContent, "class ", afterKeyword -> {
+            return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
+                return compileSuffix(withEnd, "}", Main::compileContent);
+            });
+        });
+    }
+
+    private static Optional<String> compileInfix(
+            String input,
+            Function<String, Optional<String>> leftRule,
+            String infix,
+            Function<String, Optional<String>> rightRule
+    ) {
+        int contentStart = input.indexOf(infix);
         if (contentStart < 0) {
             return Optional.empty();
         }
-        String name = afterKeyword.substring(0, contentStart).strip();
-        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
+
+        String left = input.substring(0, contentStart);
+        String right = input.substring(contentStart + infix.length());
+
+        return leftRule.apply(left).flatMap(compiledLeft -> {
+            return rightRule.apply(right).map(compiledRight -> {
+                return compiledLeft + infix + compiledRight;
+            });
+        });
+    }
+
+    private static Optional<String> compileString(String name) {
+        return Optional.of(name);
+    }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
+        if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
-        String content = withEnd.substring(0, withEnd.length() - "}".length());
-        return Optional.of(generatePlaceholder(modifiers) + "class " + name + " {" + generatePlaceholder(content) + "}");
+        String content = input.substring(0, input.length() - suffix.length());
+        return childRule.apply(content).map(inner -> inner + suffix);
+    }
+
+    private static Optional<String> compileContent(String content) {
+        return Optional.of(generatePlaceholder(content));
     }
 
     private static String generatePlaceholder(String stripped) {
