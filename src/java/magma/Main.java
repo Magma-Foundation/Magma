@@ -143,7 +143,11 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, Main::compileContent, "class ", afterKeyword -> {
+        return compileStructured(stripped, "class ");
+    }
+
+    private static Optional<String> compileStructured(String stripped, String infix) {
+        return compileInfix(stripped, Main::compileContent, infix, afterKeyword -> {
             return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
                 return compileSuffix(withEnd, "}", content -> {
                     return Optional.of(compileStatements(content, Main::compileClassSegment));
@@ -153,7 +157,8 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        return compileStructured(input, "interface ")
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileInfix(

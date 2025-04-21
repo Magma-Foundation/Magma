@@ -10,21 +10,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 /*public */class Main {/*
-    private interface DivideState {
-        DivideState advance();
+    private */interface DivideState {/*
+        DivideState advance();*//*
 
-        DivideState append(char c);
+        DivideState append(char c);*//*
 
-        Stream<String> stream();
+        Stream<String> stream();*//*
 
-        boolean isLevel();
+        boolean isLevel();*//*
 
-        DivideState enter();
+        DivideState enter();*//*
 
-        DivideState exit();
+        DivideState exit();*//*
 
-        boolean isShallow();
-    }*//*
+        boolean isShallow();*//*
+    */}/*
 
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
@@ -137,15 +137,18 @@ import java.util.stream.Stream;
 
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
     }*//*private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, Main::compileContent, "*/class ", afterKeyword -> {/*
+        return compileStructured(stripped, "class ");
+    }*//*private static Optional<String> compileStructured(String stripped, String infix) {
+        return compileInfix(stripped, Main::compileContent, infix, afterKeyword -> {
             return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
                 return compileSuffix(withEnd, "}", content -> {
                     return Optional.of(compileStatements(content, Main::compileClassSegment));
                 });
-            }*//*);*//*
+            });
         });
-    */}/*private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+    }*//*private static String compileClassSegment(String input) {
+        return compileStructured(input, "interface ")
+                .orElseGet(() -> generatePlaceholder(input));
     }*//*private static Optional<String> compileInfix(
             String input,
             Function<String, Optional<String>> leftRule,
