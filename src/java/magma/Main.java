@@ -248,7 +248,7 @@ public class Main {
         return new OrRule(List.of(
                 createNamespaceRule("package "),
                 createNamespaceRule("import "),
-                createClassRule(),
+                createClassRule(createClassSegmentRule()),
                 new ContentRule()
         ));
     }
@@ -257,15 +257,8 @@ public class Main {
         return new PrefixRule(infix, new SuffixRule(new ContentRule(), ";"));
     }
 
-    private static Optional<Integer> locateLast(String input, String infix) {
-        int index = input.lastIndexOf(infix);
-        return index == -1
-                ? Optional.empty()
-                : Optional.of(index);
-    }
-
-    private static Rule createClassRule() {
-        return createStructuredRule("class ", createClassSegmentRule());
+    private static Rule createClassRule(Rule classSegment) {
+        return createStructuredRule("class ", classSegment);
     }
 
     private static Rule createStructuredRule(String infix, Rule classSegment) {
@@ -276,7 +269,9 @@ public class Main {
     private static Rule createClassSegmentRule() {
         LazyRule classSegment = new LazyRule();
         classSegment.set(new OrRule(List.of(
+                createClassRule(classSegment),
                 createStructuredRule("interface ", classSegment),
+                createStructuredRule("record ", classSegment),
                 createMethodRule(),
                 new ContentRule()
         )));
