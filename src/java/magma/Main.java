@@ -122,6 +122,18 @@ public class Main {
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return stripped + "\n";
         }
-        return "/* " + stripped + "*/";
+
+        int classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            String modifiers = stripped.substring(0, classIndex);
+            String afterKeyword = stripped.substring(classIndex + "class ".length());
+            return generatePlaceholder(modifiers) + "class " + generatePlaceholder(afterKeyword);
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String generatePlaceholder(String stripped) {
+        return "/*" + stripped + "*/";
     }
 }
