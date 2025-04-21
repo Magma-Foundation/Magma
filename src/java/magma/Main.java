@@ -7,9 +7,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
@@ -29,7 +26,12 @@ public class Main {
         boolean isShallow();
     }
 
-    interface Rule extends Function<String, Optional<String>> {
+    interface Rule {
+        Optional<String> compile(String input);
+    }
+
+    private interface Locator {
+        Optional<Integer> locate(String input, String infix);
     }
 
     private static class MutableDivideState implements DivideState {
@@ -88,6 +90,80 @@ public class Main {
         }
     }
 
+    private record InfixRule(
+            Rule leftRule,
+            String infix,
+            Locator locator,
+            Rule rightRule
+    ) implements Rule {
+        private InfixRule(Rule leftRule, String infix, Rule rightRule) {
+            this(leftRule, infix, new FirstLocator(), rightRule);
+        }
+
+        @Override
+        public Optional<String> compile(
+                String input) {
+            return this.locator().locate(input, this.infix()).flatMap(index -> {
+                String left = input.substring(0, index);
+                String right = input.substring(index + this.infix().length());
+
+                return this.leftRule().compile(left).flatMap(compiledLeft -> {
+                    return this.rightRule().compile(right).map(compiledRight -> {
+                        return compiledLeft + this.infix() + compiledRight;
+                    });
+                });
+            });
+        }
+    }
+
+    public static class FirstLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int index = input.indexOf(infix);
+            return index == -1
+                    ? Optional.empty()
+                    : Optional.of(index);
+        }
+    }
+
+    private record PrefixRule(String prefix, Rule childRule) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            return new InfixRule(new ContentRule(), this.prefix(), this.childRule()).compile(input);
+        }
+    }
+
+    private record SuffixRule(Rule childRule, String suffix) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            return new InfixRule(this.childRule(), this.suffix(), Main::locateLast, new ContentRule()).compile(input);
+        }
+    }
+
+    public static class ContentRule implements Rule {
+        @Override
+        public Optional<String> compile(String content) {
+            String generated = content.isBlank() ? content : "/*" + content + "*/";
+            return Optional.of(generated);
+        }
+    }
+
+    public static class StringRule implements Rule {
+        @Override
+        public Optional<String> compile(String name) {
+            return Optional.of(name);
+        }
+    }
+
+    private record DivideRule(Rule rule) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            return divide(input, new MutableDivideState()).reduce(Optional.of(""),
+                    (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule().compile(element).map(compiled -> current + compiled)),
+                    (_, next) -> next);
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -101,13 +177,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment);
-    }
-
-    private static String compileStatements(String input, Function<String, String> compiler) {
-        return divide(input, new MutableDivideState())
-                .map(compiler)
-                .collect(Collectors.joining());
+        return new DivideRule(Main::compileRootSegment).compile(input).orElse("");
     }
 
     private static Stream<String> divide(String input, DivideState state) {
@@ -137,19 +207,15 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) {
-        return createNamespacedRuled(input, "package ")
-                .or(() -> createNamespacedRuled(input, "import "))
-                .or(() -> compileClass(input))
-                .orElseGet(() -> generatePlaceholder(input));
+    private static Optional<String> compileRootSegment(String input) {
+        return createNamespaceRule("package ").compile(input)
+                .or(() -> createNamespaceRule("import ").compile(input))
+                .or(() -> createClassRule().compile(input))
+                .or(() -> new ContentRule().compile(input));
     }
 
-    private static Optional<String> createNamespacedRuled(String input, String infix) {
-        return compilePrefix(input, infix, afterKeyword -> compileSuffix(afterKeyword, Main::compileContent, ";"));
-    }
-
-    private static Optional<String> compileSuffix(String input, Rule childRule, String suffix) {
-        return compileInfix(input, childRule, suffix, Main::locateLast, Main::compileContent);
+    private static Rule createNamespaceRule(String infix) {
+        return new PrefixRule(infix, new SuffixRule(new ContentRule(), ";"));
     }
 
     private static Optional<Integer> locateLast(String input, String infix) {
@@ -159,74 +225,17 @@ public class Main {
                 : Optional.of(index);
     }
 
-    private static Optional<String> compilePrefix(String input, String prefix, Rule childRule) {
-        return compileFirstInfix(input, Main::compileContent, prefix, childRule);
+    private static Rule createClassRule() {
+        return createStructuredRule("class ");
     }
 
-    private static Optional<String> compileClass(String input) {
-        return compileStructured("class ", input);
+    private static Rule createStructuredRule(String infix) {
+        return new PrefixRule(infix, new InfixRule(new StringRule(), "{",
+                new SuffixRule(content -> new DivideRule(Main::compileClassSegment).compile(content), "}")));
     }
 
-    private static Optional<String> compileStructured(String input, String infix) {
-        return compilePrefix(infix, input, afterKeyword -> {
-            return compileFirstInfix(afterKeyword, Main::compileString, "{", withEnd -> {
-                return compileSuffix(withEnd, content -> {
-                    return Optional.of(compileStatements(content, Main::compileClassSegment));
-                }, "}");
-            });
-        });
-    }
-
-    private static String compileClassSegment(String input) {
-        return compileStructured("interface ", input)
-                .orElseGet(() -> generatePlaceholder(input));
-    }
-
-    private static Optional<String> compileFirstInfix(
-            String input,
-            Rule leftRule,
-            String infix,
-            Rule rightRule
-    ) {
-        return compileInfix(input, leftRule, infix, Main::locateFirst, rightRule);
-    }
-
-    private static Optional<String> compileInfix(
-            String input,
-            Rule leftRule,
-            String infix,
-            BiFunction<String, String, Optional<Integer>> locator,
-            Rule rightRule
-    ) {
-        return locator.apply(input, infix).flatMap(index -> {
-            String left = input.substring(0, index);
-            String right = input.substring(index + infix.length());
-
-            return leftRule.apply(left).flatMap(compiledLeft -> {
-                return rightRule.apply(right).map(compiledRight -> {
-                    return compiledLeft + infix + compiledRight;
-                });
-            });
-        });
-    }
-
-    private static Optional<Integer> locateFirst(String input, String infix) {
-        int index = input.indexOf(infix);
-        return index == -1
-                ? Optional.empty()
-                : Optional.of(index);
-    }
-
-    private static Optional<String> compileString(String name) {
-        return Optional.of(name);
-    }
-
-    private static Optional<String> compileContent(String content) {
-        String generated = content.isBlank() ? content : generatePlaceholder(content);
-        return Optional.of(generated);
-    }
-
-    private static String generatePlaceholder(String stripped) {
-        return "/*" + stripped + "*/";
+    private static Optional<String> compileClassSegment(String input) {
+        return createStructuredRule("interface ").compile(input)
+                .or(() -> new ContentRule().compile(input));
     }
 }
