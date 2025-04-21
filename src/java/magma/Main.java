@@ -24,6 +24,8 @@ public class Main {
         DivideState enter();
 
         DivideState exit();
+
+        boolean isShallow();
     }
 
     private static class MutableDivideState implements DivideState {
@@ -75,6 +77,11 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        @Override
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     public static void main(String[] args) {
@@ -90,8 +97,12 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         return divide(input, new MutableDivideState())
-                .map(Main::compileRootSegment)
+                .map(compiler)
                 .collect(Collectors.joining());
     }
 
@@ -109,6 +120,9 @@ public class Main {
         DivideState appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
         }
         if (c == '{') {
             return appended.enter();
@@ -131,9 +145,15 @@ public class Main {
     private static Optional<String> compileClass(String stripped) {
         return compileInfix(stripped, Main::compileContent, "class ", afterKeyword -> {
             return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
-                return compileSuffix(withEnd, "}", Main::compileContent);
+                return compileSuffix(withEnd, "}", content -> {
+                    return Optional.of(compileStatements(content, Main::compileClassSegment));
+                });
             });
         });
+    }
+
+    private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
     }
 
     private static Optional<String> compileInfix(

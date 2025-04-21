@@ -22,7 +22,9 @@ import java.util.stream.Stream;
         DivideState enter();
 
         DivideState exit();
-    }
+
+        boolean isShallow();
+    }*//*
 
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
@@ -73,7 +75,12 @@ import java.util.stream.Stream;
             this.depth--;
             return this;
         }
-    }
+
+        @Override
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    }*//*
 
     public static void main(String[] args) {
         try {
@@ -85,13 +92,17 @@ import java.util.stream.Stream;
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }
+    }*//*
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }*//*
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         return divide(input, new MutableDivideState())
-                .map(Main::compileRootSegment)
+                .map(compiler)
                 .collect(Collectors.joining());
-    }
+    }*//*
 
     private static Stream<String> divide(String input, DivideState state) {
         DivideState current = state;
@@ -101,40 +112,46 @@ import java.util.stream.Stream;
         }
 
         return current.advance().stream();
-    }
+    }*//*
 
     private static DivideState foldStatementChar(DivideState state, char c) {
         DivideState appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}*//*' && appended.isShallow()) {
+            return appended.advance().exit();
+        }*//*
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '}*//*') {
             return appended.exit();
-        }
-        return appended;
-    }
-
-    private static String compileRootSegment(String input) {
+        }*//*
+        return appended;*//*
+    */}/*private static String compileRootSegment(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return stripped + "\n";
         }
 
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
-    }
-
-    private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, Main::compileContent, "class ", afterKeyword -> {
-            return compileInfix(afterKeyword, Main::compileString, "{", withEnd1 -> {
-                return compileSuffix(withEnd1, "}", Main::compileContent);
-            });
+    }*//*private static Optional<String> compileClass(String stripped) {
+        return compileInfix(stripped, Main::compileContent, "*/class ", afterKeyword -> {/*
+            return compileInfix(afterKeyword, Main::compileString, "{", withEnd -> {
+                return compileSuffix(withEnd, "}", content -> {
+                    return Optional.of(compileStatements(content, Main::compileClassSegment));
+                });
+            }*//*);*//*
         });
-    }
-
-    private static Optional<String> compileInfix(String input, Function<String, Optional<String>> leftRule, String infix, Function<String, Optional<String>> rightRule) {
+    */}/*private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
+    }*//*private static Optional<String> compileInfix(
+            String input,
+            Function<String, Optional<String>> leftRule,
+            String infix,
+            Function<String, Optional<String>> rightRule
+    ) {
         int contentStart = input.indexOf(infix);
         if (contentStart < 0) {
             return Optional.empty();
@@ -148,25 +165,16 @@ import java.util.stream.Stream;
                 return compiledLeft + infix + compiledRight;
             });
         });
-    }
-
-    private static Optional<String> compileString(String name) {
+    }*//*private static Optional<String> compileString(String name) {
         return Optional.of(name);
-    }
-
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
+    }*//*private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> childRule) {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
         String content = input.substring(0, input.length() - suffix.length());
         return childRule.apply(content).map(inner -> inner + suffix);
-    }
-
-    private static Optional<String> compileContent(String content) {
+    }*//*private static Optional<String> compileContent(String content) {
         return Optional.of(generatePlaceholder(content));
-    }
-
-    private static String generatePlaceholder(String stripped) {
+    }*//*private static String generatePlaceholder(String stripped) {
         return "/*" + stripped + "*/";
-    }
-*/}
+    }*//*}*/
