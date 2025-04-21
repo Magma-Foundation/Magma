@@ -11,7 +11,7 @@ public class Main {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
             Path target = source.resolveSibling("main.c");
-            Files.writeString(target, "/* " + target + "*/");
+            Files.writeString(target, "/* " + input + "*/");
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
