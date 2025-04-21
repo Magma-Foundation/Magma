@@ -11,27 +11,27 @@ import /*java.util.stream.Stream*/;/*
 
 public */class Main {/*
     private */interface DivideState {/*
-        DivideState advance();*//*
+        DivideState*/ advance();/*
 
-        DivideState append(char c);*//*
+        DivideState*/ append(/*char c*/);/*
 
-        Stream<String> stream();*//*
+        Stream<String>*/ stream();/*
 
-        boolean isLevel();*//*
+        boolean*/ isLevel();/*
 
-        DivideState enter();*//*
+        DivideState*/ enter();/*
 
-        DivideState exit();*//*
+        DivideState*/ exit();/*
 
-        boolean isShallow();*/
+        boolean*/ isShallow();
     }
 
     interface Rule {/*
-        Optional<String> compile(String input);*/
+        Optional<String>*/ compile(/*String input*/);
     }/*
 
     private */interface Locator {/*
-        Optional<Integer> locate(String input, String infix);*/
+        Optional<Integer>*/ locate(/*String input, String infix*/);
     }/*
 
     private static class MutableDivideState implements DivideState {
@@ -39,7 +39,7 @@ public */class Main {/*
         private StringBuilder buffer;
         private int depth;
 
-        private MutableDivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private*/ MutableDivideState(/*List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -85,12 +85,12 @@ public */class Main {/*
         }
 
         @Override
-        public boolean isShallow() {
-            return this.depth == 1;
+        public boolean isShallow(*/)/* {
+            return this.depth == 1*/;/*
         }
     }*//*
 
-    private record InfixRule(
+    private record*/ InfixRule(/*
             Rule leftRule,
             String infix,
             Locator locator,
@@ -112,59 +112,59 @@ public */class Main {/*
                         return compiledLeft + this.infix() + compiledRight;
                     });
                 });
-            });
+            }*/);/*
         }
     }*//*
 
     public static class FirstLocator implements Locator {
         @Override
-        public Optional<Integer> locate(String input, String infix) {
+        public Optional<Integer>*/ locate(/*String input, String infix) {
             int index = input.indexOf(infix);
             return index == -1
                     ? Optional.empty()
-                    : Optional.of(index);
+                    : Optional.of(index*/);/*
         }
     }*//*
 
-    private record PrefixRule(String prefix, Rule childRule) implements Rule {
+    private record*/ PrefixRule(/*String prefix, Rule childRule) implements Rule {
         @Override
         public Optional<String> compile(String input) {
-            return new InfixRule(new ContentRule(), this.prefix(), this.childRule()).compile(input);
+            return new InfixRule(new ContentRule(), this.prefix(), this.childRule()).compile(input*/);/*
         }
     }*//*
 
-    private record SuffixRule(Rule childRule, String suffix) implements Rule {
+    private record*/ SuffixRule(/*Rule childRule, String suffix) implements Rule {
         @Override
         public Optional<String> compile(String input) {
-            return new InfixRule(this.childRule(), this.suffix(), Main::locateLast, new ContentRule()).compile(input);
+            return new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new ContentRule()).compile(input*/);/*
         }
     }*//*
 
     public static class ContentRule implements Rule {
         @Override
-        public Optional<String> compile(String content) {
+        public Optional<String>*/ compile(/*String content) {
             String generated = content.isBlank() ? content : "/*" + content + "*/";
-            return Optional.of(generated);
+            return Optional.of(generated*/);/*
         }
     }*//*
 
     public static class StringRule implements Rule {
         @Override
-        public Optional<String> compile(String name) {
-            return Optional.of(name);
+        public Optional<String>*/ compile(/*String name) {
+            return Optional.of(name*/);/*
         }
     }*//*
 
-    private record DivideRule(Rule rule) implements Rule {
+    private record*/ DivideRule(/*Rule rule) implements Rule {
         @Override
         public Optional<String> compile(String input) {
             return divide(input, new MutableDivideState()).reduce(Optional.of(""),
                     (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule().compile(element).map(compiled -> current + compiled)),
-                    (_, next) -> next);
+                    (_, next) -> next*/);/*
         }
     }*//*
 
-    private record OrRule(List<Rule> rules) implements Rule {
+    private record*/ OrRule(/*List<Rule> rules) implements Rule {
         @Override
         public Optional<String> compile(String input) {
             for (Rule rule : this.rules()) {
@@ -174,12 +174,12 @@ public */class Main {/*
                 }
             }
 
-            return Optional.empty();
+            return Optional.empty(*/);/*
         }
     }*//*
 
     private static class LazyRule implements Rule {
-        private Optional<Rule> childRule = Optional.empty();
+        private Optional<Rule> childRule =*/ Optional.empty(/*);
 
         public void set(Rule childRule) {
             this.childRule = Optional.of(childRule);
@@ -187,11 +187,21 @@ public */class Main {/*
 
         @Override
         public Optional<String> compile(String input) {
-            return this.childRule.flatMap(internal -> internal.compile(input));
+            return this.childRule.flatMap(internal -> internal.compile(input)*/);/*
         }
     }*//*
 
-    public static void main(String[] args) {
+    private static class LastLocator implements Locator {
+        @Override
+        public Optional<Integer>*/ locate(/*String input, String infix) {
+            int index = input.lastIndexOf(infix);
+            return index == -1
+                    ? Optional.empty()
+                    : Optional.of(index*/);/*
+        }
+    }*//*
+
+    public static void*/ main(/*String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -199,37 +209,37 @@ public */class Main {/*
             Files.writeString(target, compile(input));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            e.printStackTrace(*/);/*
         }
     }*//*
 
-    private static String compile(String input) {
-        return new DivideRule(createRootSegmentRule()).compile(input).orElse("");
+    private static String*/ compile(/*String input) {
+        return new DivideRule(createRootSegmentRule()).compile(input).orElse(""*/);/*
     }*//*
 
-    private static Stream<String> divide(String input, DivideState state) {
+    private static Stream<String>*/ divide(/*String input, DivideState state) {
         DivideState current = state;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = foldStatementChar(current, c);
         }
 
-        return current.advance().stream();
+        return current.advance().stream(*/);/*
     }*//*
 
-    private static DivideState foldStatementChar(DivideState state, char c) {
+    private static DivideState*/ foldStatementChar(/*DivideState state, char c) {
         DivideState appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
-            return appended.advance();
+            return appended.advance(*/);/*
         }
-        if (c == '}*//*' && appended.isShallow()) {
-            return appended.advance().exit();
+        if (c == '}*//*' &&*/ appended.isShallow(/*)) {
+            return appended.advance().exit(*/);/*
         }*//*
-        if (c == '{') {
-            return appended.enter();
+        if*/ (/*c == '{') {
+            return appended.enter(*/);/*
         }
         if (c == '}*//*') {
-            return appended.exit();
+            return*/ appended.exit();/*
         }*//*
         return appended;*/
     }/*
@@ -267,8 +277,17 @@ public */class Main {/*
         LazyRule classSegment = new LazyRule();
         classSegment.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegment),
+                createMethodRule(),
                 new ContentRule()
         )));
         return classSegment;
+    }*//*
+
+    private static SuffixRule createMethodRule() {
+        return new SuffixRule(new InfixRule(createDefinitionRule(), "(", new SuffixRule(new ContentRule(), ")")), ";");
+    }*//*
+
+    private static InfixRule createDefinitionRule() {
+        return new InfixRule(new ContentRule(), " ", new LastLocator(), new StringRule());
     }*//*
 }*/

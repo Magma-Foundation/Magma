@@ -136,7 +136,7 @@ public class Main {
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
         @Override
         public Optional<String> compile(String input) {
-            return new InfixRule(this.childRule(), this.suffix(), Main::locateLast, new ContentRule()).compile(input);
+            return new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new ContentRule()).compile(input);
         }
     }
 
@@ -188,6 +188,16 @@ public class Main {
         @Override
         public Optional<String> compile(String input) {
             return this.childRule.flatMap(internal -> internal.compile(input));
+        }
+    }
+
+    private static class LastLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            int index = input.lastIndexOf(infix);
+            return index == -1
+                    ? Optional.empty()
+                    : Optional.of(index);
         }
     }
 
@@ -267,8 +277,17 @@ public class Main {
         LazyRule classSegment = new LazyRule();
         classSegment.set(new OrRule(List.of(
                 createStructuredRule("interface ", classSegment),
+                createMethodRule(),
                 new ContentRule()
         )));
         return classSegment;
+    }
+
+    private static SuffixRule createMethodRule() {
+        return new SuffixRule(new InfixRule(createDefinitionRule(), "(", new SuffixRule(new ContentRule(), ")")), ";");
+    }
+
+    private static InfixRule createDefinitionRule() {
+        return new InfixRule(new ContentRule(), " ", new LastLocator(), new StringRule());
     }
 }
