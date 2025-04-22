@@ -181,8 +181,20 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
                 .or(() -> compileMethod(input))
+                .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileInitialization(String input) {
+        int valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            return compileDefinition(input.substring(0, valueSeparator))
+                    .map(value -> "\n\t" + value + ";");
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileWhitespace(String input) {

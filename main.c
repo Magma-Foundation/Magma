@@ -13,10 +13,9 @@ struct State {
 	char* buffer;
 	int depth;
 }
-struct Main {/* 
-
-    public static final List<String> structs = new ArrayList<>(); *//* 
-    private static final List<String> methods = new ArrayList<>(); */
+struct Main {
+	/* List<String> */ structs;
+	/* List<String> */ methods;
 }
 /* private */ State(/* List<String> */ segments, char* buffer, int depth){/* 
             this.segments = segments; *//* 
@@ -147,8 +146,18 @@ struct Main {/*
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
                 .or(() -> compileMethod(input))
+                .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input)); *//* 
+     */}/* Optional<String> */ compileInitialization(char* input){/* 
+        int valueSeparator = input.indexOf("="); *//* 
+        if (valueSeparator >= 0) {
+            return compileDefinition(input.substring(0, valueSeparator))
+                    .map(value -> "\n\t" + value + ";");
+        } *//* 
+        else {
+            return Optional.empty();
+        } *//* 
      */}/* Optional<String> */ compileWhitespace(char* input){/* 
         if (input.isBlank()) {
             return Optional.of("");
