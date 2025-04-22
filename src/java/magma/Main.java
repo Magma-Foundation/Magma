@@ -308,7 +308,7 @@ public class Main {
             public OrState withError(CompileError error) {
                 ArrayList<CompileError> copy = new ArrayList<>(this.errors);
                 copy.add(error);
-                return new OrState(this.maybeValue, this.errors);
+                return new OrState(this.maybeValue, copy);
             }
 
             public Result<String, List<CompileError>> toResult() {
