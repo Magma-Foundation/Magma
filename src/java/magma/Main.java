@@ -52,6 +52,7 @@ public class Main {
         }
     }
 
+    public static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -73,8 +74,9 @@ public class Main {
 
     private static String compile(String input) {
         String output = compileAllStatements(input, Main::compileRootSegment);
+        String joinedStructs = String.join("", structs);
         String joinedMethods = String.join("", methods);
-        return output + joinedMethods;
+        return output + joinedStructs + joinedMethods;
     }
 
     private static String compileAllStatements(String input, Function<String, String> compileRootSegment) {
@@ -171,7 +173,9 @@ public class Main {
         if (!isSymbol(name)) {
             return Optional.empty();
         }
-        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n");
+        String generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+        structs.add(generated);
+        return Optional.of("");
     }
 
     private static String compileClassSegment(String input) {

@@ -8,15 +8,16 @@ import java.util.ArrayList; *//*
 import java.util.List; *//* 
 import java.util.Optional; *//* 
 import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//* 
-
-public  */struct Main {/* private static  */struct State {/* private final List<String> segments; *//* 
+import java.util.function.Function; *//* private static  */struct State {/* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
      */
 }
 /* 
 
+public  */struct Main {/* 
+
+    public static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> methods = new ArrayList<>(); *//* 
  */
 }
@@ -56,8 +57,9 @@ public  */struct Main {/* private static  */struct State {/* private final List<
         } *//* 
      */}/* String */ compile(/* String */ input){/* 
         String output = compileAllStatements(input, Main::compileRootSegment); *//* 
+        String joinedStructs = String.join("", structs); *//* 
         String joinedMethods = String.join("", methods); *//* 
-        return output + joinedMethods; *//* 
+        return output + joinedStructs + joinedMethods; *//* 
      */}/* String */ compileAllStatements(/* String */ input, /*  Function<String */, /* String> */ compileRootSegment){/* 
         return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements); *//* 
      */}/* String */ compileAll(/* String */ input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compileRootSegment, /*  BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger){/* 
@@ -142,7 +144,9 @@ public  */struct Main {/* private static  */struct State {/* private final List<
         if (!isSymbol(name)) {
             return Optional.empty();
         } *//* 
-        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n} *//* \n"); *//* 
+        String generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n} *//* \n"; *//* 
+        structs.add(generated); *//* 
+        return Optional.of(""); *//* 
      */}/* String */ compileClassSegment(/* String */ input){/* 
         return compileClass(input)
                 .or(() -> compileMethod(input))
