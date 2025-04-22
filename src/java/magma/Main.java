@@ -1,16 +1,25 @@
 package magma;
 
-import magma.jvm.Files;
+import magma.jvm.IO;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class Main {
+    public interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    public interface IOError {
+        String display();
+    }
+
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -48,22 +57,31 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
-
-            new ProcessBuilder("clang.exe", "./src/java/magma/main.c", "-o", "main.exe")
-                    .inheritIO()
-                    .start()
-                    .waitFor();
-        } catch (IOException | InterruptedException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+    public record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
         }
+    }
+
+    public record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    }
+
+    public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        IO.readString(source)
+                .match(input -> runWithInput(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Optional<IOError> runWithInput(Path source, String input) {
+        Path target = source.resolveSibling("main.c");
+        return IO.writeString(target, compile(input))
+                .or(() -> IO.execute(List.of("clang.exe", target.toString(), "-o", "main.exe")));
     }
 
     private static String compile(String input) {
