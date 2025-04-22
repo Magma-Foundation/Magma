@@ -125,14 +125,21 @@ public class Main {
                         String params = withParams.substring(0, paramEnd).strip();
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                        String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withBraces);
-                        methods.add(generated);
-                        return "";
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            String content = withBraces.substring(1, withBraces.length() - 1);
+                            String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + compileAll(content, Main::compileStatementOrBlock);
+                            methods.add(generated);
+                            return "";
+                        }
                     }
                 }
             }
         }
 
+        return generatePlaceholder(input);
+    }
+
+    private static String compileStatementOrBlock(String input) {
         return generatePlaceholder(input);
     }
 

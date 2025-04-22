@@ -12,7 +12,7 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
  */
 }
 /* 
- *//* public static void */ main(/* String[] args */)/* {
+ *//* public static void */ main(/* String[] args */)/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -24,18 +24,18 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException | InterruptedException e) {
+        } *//*  catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
-        }
-    } *//* private static String */ compile(/* String input */)/* {
-        String output = compileAll(input, Main::compileRootSegment);
-        String joinedMethods = String.join("", methods);
-        return output + joinedMethods;
-    } *//* private static String */ compileAll(/* String input, Function<String, String> compileRootSegment */)/* {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
+        } *//* 
+     *//* private static String */ compile(/* String input */)/* 
+        String output = compileAll(input, Main::compileRootSegment); *//* 
+        String joinedMethods = String.join("", methods); *//* 
+        return output + joinedMethods; *//* 
+     *//* private static String */ compileAll(/* String input, Function<String, String> compileRootSegment */)/* 
+        ArrayList<String> segments = new ArrayList<>(); *//* 
+        StringBuilder buffer = new StringBuilder(); *//* 
+        int depth = 0; *//* 
+        for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
             if (c == '\'') {
                 buffer.append(c);
@@ -73,17 +73,17 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                     depth--;
                 }
             }
-        }
-        segments.add(buffer.toString());
+        } *//* 
+        segments.add(buffer.toString()); *//* 
 
-        StringBuilder output = new StringBuilder();
+        StringBuilder output = new StringBuilder(); *//* 
         for (String segment : segments) {
             output.append(compileRootSegment.apply(segment));
-        }
+        } *//* 
 
-        return output.toString();
-    } *//* private static String */ compileRootSegment(/* String input */)/* {
-        int classIndex = input.indexOf("class ");
+        return output.toString(); *//* 
+     *//* private static String */ compileRootSegment(/* String input */)/* 
+        int classIndex = input.indexOf("class "); *//* 
         if (classIndex >= 0) {
             String beforeKeyword = input.substring(0, classIndex);
             String afterKeyword = input.substring(classIndex + "class ".length());
@@ -99,10 +99,10 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                     }
                 }
             }
-        }
-        return generatePlaceholder(input);
-    } *//* private static String */ compileClassSegment(/* String input */)/* {
-        int paramStart = input.indexOf("(");
+        } *//* 
+        return generatePlaceholder(input); *//* 
+     *//* private static String */ compileClassSegment(/* String input */)/* 
+        int paramStart = input.indexOf("("); *//* 
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
             int nameSeparator = definition.lastIndexOf(" ");
@@ -118,24 +118,29 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                         String params = withParams.substring(0, paramEnd).strip();
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                        String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withBraces);
-                        methods.add(generated);
-                        return "";
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            String content = withBraces.substring(1, withBraces.length() - 1);
+                            String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + compileAll(content, Main::compileStatementOrBlock);
+                            methods.add(generated);
+                            return "";
+                        }
                     }
                 }
             }
-        }
+        } *//* 
 
-        return generatePlaceholder(input);
-    } *//* private static boolean */ isSymbol(/* String input */)/* {
-        for (int i = 0; i < input.length(); i++) {
+        return generatePlaceholder(input); *//* 
+     *//* private static String */ compileStatementOrBlock(/* String input */)/* 
+        return generatePlaceholder(input); *//* 
+     *//* private static boolean */ isSymbol(/* String input */)/* 
+        for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
             }
             return false;
-        }
-        return true;
-    } *//* private static String */ generatePlaceholder(/* String input */)/* {
-        return "/* " + input + " */";
-    } */
+        } *//* 
+        return true; *//* 
+     *//* private static String */ generatePlaceholder(/* String input */)/* 
+        return "/* " + input + " */"; *//* 
+     */
