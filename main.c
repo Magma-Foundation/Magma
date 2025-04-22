@@ -5,9 +5,12 @@ import java.nio.file.Files; *//*
 import java.nio.file.Path; *//* 
 import java.nio.file.Paths; *//* 
 import java.util.ArrayList; *//* 
+import java.util.List; *//* 
 import java.util.function.Function; *//* 
 
-public  */struct Main {/* public static void main(String[] args) {
+public  */struct Main {
+}
+/* private static final List<String> methods = new ArrayList<> */(/* ); *//* public static void main */(/* String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -25,7 +28,9 @@ public  */struct Main {/* public static void main(String[] args) {
     }
 
     private static String compile(String input) {
-        return compileAll(input, Main::compileRootSegment);
+        String output = compileAll(input, Main::compileRootSegment);
+        String joinedMethods = String.join("", methods);
+        return output + joinedMethods;
     }
 
     private static String compileAll(String input, Function<String, String> compileRootSegment) {
@@ -78,6 +83,15 @@ public  */struct Main {/* public static void main(String[] args) {
     }
 
     private static String compileClassSegment(String input) {
+        int paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            String definition = input.substring(0, paramStart).strip();
+            String withParams = input.substring(paramStart + "(".length());
+            String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(withParams);
+            methods.add(generated);
+            return "";
+        }
+
         return generatePlaceholder(input);
     }
 
@@ -85,4 +99,3 @@ public  */struct Main {/* public static void main(String[] args) {
         return "/* " + input + " */";
     }
  */
-}
