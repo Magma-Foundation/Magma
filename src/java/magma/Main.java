@@ -283,6 +283,6 @@ public class Main {
     }
 
     private static InfixRule createDefinitionRule() {
-        return new InfixRule(new ContentRule(), " ", new LastLocator(), new StringRule());
+        return new InfixRule(new StringRule(), " ", new LastLocator(), new StringRule());
     }
 }
