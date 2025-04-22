@@ -1,15 +1,14 @@
 package magma;
 
-import magma.jvm.IO;
+import magma.jvm.StandardLibrary;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Main {
     public interface Result<T, X> {
@@ -18,6 +17,12 @@ public class Main {
 
     public interface IOError {
         String display();
+    }
+
+    public interface Path {
+        Stream<String> stream();
+
+        Path resolveSibling(String sibling);
     }
 
     private static class State {
@@ -72,16 +77,16 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-        IO.readString(source)
+        Path source = StandardLibrary.getPath(".", "src", "java", "magma", "Main.java");
+        StandardLibrary.readString(source)
                 .match(input -> runWithInput(source, input), Optional::of)
                 .ifPresent(error -> System.err.println(error.display()));
     }
 
     private static Optional<IOError> runWithInput(Path source, String input) {
         Path target = source.resolveSibling("main.c");
-        return IO.writeString(target, compile(input))
-                .or(() -> IO.execute(List.of("clang.exe", target.toString(), "-o", "main.exe")));
+        return StandardLibrary.writeString(target, compile(input))
+                .or(() -> StandardLibrary.execute(List.of("clang.exe", target.toString(), "-o", "main.exe")));
     }
 
     private static String compile(String input) {
