@@ -173,7 +173,7 @@ public class Main {
         if (!isSymbol(name)) {
             return Optional.empty();
         }
-        String generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+        String generated = "struct " + name + " {" + outputContent + "\n}\n";
         structs.add(generated);
         return Optional.of("");
     }

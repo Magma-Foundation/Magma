@@ -8,14 +8,12 @@
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
-/* private static  */struct State {/* private final List<String> segments; *//* 
+struct State {/* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
      */
 }
-/* 
-
-public  */struct Main {/* 
+struct Main {/* 
 
     public static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> methods = new ArrayList<>(); *//* 
@@ -144,7 +142,7 @@ public  */struct Main {/*
         if (!isSymbol(name)) {
             return Optional.empty();
         } *//* 
-        String generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n} *//* \n"; *//* 
+        String generated = "struct " + name + " {" + outputContent + "\n} *//* \n"; *//* 
         structs.add(generated); *//* 
         return Optional.of(""); *//* 
      */}/* String */ compileClassSegment(/* String */ input){/* 
