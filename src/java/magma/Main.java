@@ -186,16 +186,26 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        int classIndex = input.indexOf("class ");
+        return compileStructured(input, "class ");
+    }
+
+    private static Optional<String> compileStructured(String input, String infix) {
+        int classIndex = input.indexOf(infix);
         if (classIndex < 0) {
             return Optional.empty();
         }
-        String afterKeyword = input.substring(classIndex + "class ".length());
+        String afterKeyword = input.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
         }
-        String name = afterKeyword.substring(0, contentStart).strip();
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        int paramStart = beforeContent.indexOf("(");
+        String name = paramStart >= 0
+                ? beforeContent.substring(0, paramStart).strip()
+                : beforeContent;
+
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
@@ -214,6 +224,8 @@ public class Main {
     private static Optional<String> compileClassSegment(String input, String structName) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
+                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))

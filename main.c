@@ -10,19 +10,18 @@
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
+struct Node {
+}
 struct State {
 	List<char*> segments;
 	char* buffer;
 	int depth;
 }
-struct Main {/* interface Node {
-    } *//* 
-
-    record Definition(List<String> modifiers, String value) implements Node {
-    } *//* 
-
-    record ConstructorHeader(String value) implements Node {
-    } */
+struct Definition {
+}
+struct ConstructorHeader {
+}
+struct Main {
 	List<char*> structs;
 	List<char*> methods;
 }
@@ -165,16 +164,25 @@ Optional<char*> compileRootSegment(char* input){
                 .or(() -> Optional.of(generatePlaceholder(input.strip()) + "\n")) */;
 }
 Optional<char*> compileClass(char* input){
-	/* int classIndex */ = /* input.indexOf("class ") */;
+	return /* compileStructured(input, "class ") */;
+}
+Optional<char*> compileStructured(char* input, char* infix){
+	/* int classIndex */ = /* input.indexOf(infix) */;
 	/* if (classIndex < 0) {
             return Optional.empty();
         } */
-	/* String afterKeyword */ = /* input.substring(classIndex + "class ".length()) */;
+	/* String afterKeyword */ = /* input.substring(classIndex + infix.length()) */;
 	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
         }
-        String name = afterKeyword.substring(0, contentStart).strip();
+        String beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        int paramStart = beforeContent.indexOf("(");
+        String name = paramStart >= 0
+                ? beforeContent.substring(0, paramStart).strip()
+                : beforeContent;
+
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
@@ -194,6 +202,8 @@ Optional<char*> compileClass(char* input){
 Optional<char*> compileClassSegment(char* input, char* structName){
 	return /* compileWhitespace(input)
                 .or(() -> compileClass(input))
+                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
