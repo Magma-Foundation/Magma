@@ -37,6 +37,10 @@ public class Main {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
 
         <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
     }
 
     private interface Rule {
@@ -70,6 +74,16 @@ public class Main {
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Ok<>(this.value);
         }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
@@ -86,6 +100,16 @@ public class Main {
         @Override
         public <R> Result<T, R> mapErr(Function<X, R> mapper) {
             return new Err<>(mapper.apply(this.error));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
         }
     }
 
@@ -261,18 +285,13 @@ public class Main {
             return current.advance().stream();
         }
 
-        private Optional<String> compileToOptional(String input) {
-            return divide(new MutableDivideState(), input, this.folder)
-                    .reduce(Optional.of(""),
-                            (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule.compile(element).findValue().map(compiled -> current + compiled)),
-                            (_, next) -> next);
-        }
-
         @Override
         public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            return divide(new MutableDivideState(), input, this.folder)
+                    .<Result<String, CompileError>>reduce(new Ok<>(""),
+                            (maybeCurrent, element) -> maybeCurrent.flatMapValue(
+                                    current -> this.rule.compile(element).mapValue(compiled -> current + compiled)),
+                            (_, next) -> next);
         }
     }
 
