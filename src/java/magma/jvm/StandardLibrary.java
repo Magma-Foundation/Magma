@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class StandardLibrary {
     public record ExceptionalIOError(Exception error) implements IOError {
@@ -28,21 +27,18 @@ public class StandardLibrary {
 
     private record JVMPath(Path path) implements Main.Path {
         public static Path unwrap(Main.Path path) {
-            List<String> list = path.stream().toList();
-            Path current = Paths.get(list.getFirst());
-            for (String child : list) {
-                current = current.resolve(child);
-            }
-            return current;
+            return path.iter()
+                    .foldWithMapper(Paths::get, Path::resolve)
+                    .orElse(Paths.get("."));
         }
 
         @Override
-        public Stream<String> stream() {
+        public Main.Iterator<String> iter() {
             ArrayList<String> segments = new ArrayList<>();
             for (int i = 0; i < this.path.getNameCount(); i++) {
                 segments.add(this.path.getName(i).toString());
             }
-            return segments.stream();
+            return new JavaList<>(segments).iter();
         }
 
         @Override
@@ -129,7 +125,7 @@ public class StandardLibrary {
     }
 
     public static <T> List<T> unwrap(Main.List<T> list) {
-        return list.iter().<List<T>>fold(new ArrayList<>(), (ts, t) -> {
+        return list.iter().<List<T>>foldWithInitial(new ArrayList<>(), (ts, t) -> {
             ts.add(t);
             return ts;
         });

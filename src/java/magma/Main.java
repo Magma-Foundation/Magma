@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class Main {
     public interface Option<T> {
@@ -40,11 +39,13 @@ public class Main {
     }
 
     public interface Iterator<T> {
-        <R> R fold(R initial, BiFunction<R, T, R> folder);
+        <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
 
         <R> Iterator<R> map(Function<T, R> mapper);
 
         <C> C collect(Collector<T, C> collector);
+
+        <R> Option<R> foldWithMapper(Function<T, R> initial, BiFunction<R, T, R> mapper);
     }
 
     public interface Collector<T, C> {
@@ -62,7 +63,7 @@ public class Main {
     }
 
     public interface Path {
-        Stream<String> stream();
+        Iterator<String> iter();
 
         Path resolveSibling(String sibling);
 
@@ -134,7 +135,7 @@ public class Main {
 
     public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
         @Override
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+        public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
             R current = initial;
             while (true) {
                 R finalCurrent = current;
@@ -155,7 +156,12 @@ public class Main {
 
         @Override
         public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
+            return this.foldWithInitial(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <R> Option<R> foldWithMapper(Function<T, R> initial, BiFunction<R, T, R> mapper) {
+            return this.head.next().map(initial).map(first -> this.foldWithInitial(first, mapper));
         }
     }
 
@@ -256,7 +262,7 @@ public class Main {
     public static void main(String[] args) {
         Path source = StandardLibrary.getPath(".", "src", "java", "magma", "Main.java");
         StandardLibrary.readString(source)
-                .match(input -> runWithInput(source, input), value -> new Some<>(value))
+                .match(input -> runWithInput(source, input), Some::new)
                 .ifPresent(error -> System.err.println(error.display()));
     }
 
