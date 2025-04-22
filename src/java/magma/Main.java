@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -26,8 +27,12 @@ public class Main {
         boolean isShallow();
     }
 
-    interface Rule {
-        Optional<String> compile(String input);
+    private interface Result<T, X> {
+        Optional<T> findValue();
+    }
+
+    private interface Rule {
+        Result<String, CompileError> compile(String input);
     }
 
     private interface Locator {
@@ -36,6 +41,26 @@ public class Main {
 
     private interface Folder {
         DivideState fold(DivideState state, char c);
+    }
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public Optional<T> findValue() {
+            return Optional.of(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public Optional<T> findValue() {
+            return Optional.empty();
+        }
+    }
+
+    private record CompileError(String message, String context, List<CompileError> errors) {
+        public CompileError(String message, String context) {
+            this(message, context, Collections.emptyList());
+        }
     }
 
     private static class MutableDivideState implements DivideState {
@@ -104,19 +129,25 @@ public class Main {
             this(leftRule, infix, new FirstLocator(), rightRule);
         }
 
-        @Override
-        public Optional<String> compile(
+        private Optional<String> compileToOptional(
                 String input) {
             return this.locator().locate(input, this.infix()).flatMap(index -> {
                 String left = input.substring(0, index);
                 String right = input.substring(index + this.infix().length());
 
-                return this.leftRule().compile(left).flatMap(compiledLeft -> {
-                    return this.rightRule().compile(right).map(compiledRight -> {
+                return this.leftRule().compile(left).findValue().flatMap(compiledLeft -> {
+                    return this.rightRule().compile(right).findValue().map(compiledRight -> {
                         return compiledLeft + this.infix() + compiledRight;
                     });
                 });
             });
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
@@ -131,31 +162,57 @@ public class Main {
     }
 
     private record PrefixRule(String prefix, Rule childRule) implements Rule {
+        private Optional<String> compileToOptional(String input) {
+            Rule rule = new InfixRule(new ContentRule(), this.prefix(), this.childRule());
+            return rule.compile(input).findValue();
+        }
+
         @Override
-        public Optional<String> compile(String input) {
-            return new InfixRule(new ContentRule(), this.prefix(), this.childRule()).compile(input);
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
+        private Optional<String> compileToOptional(String input) {
+            Rule rule = new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new ContentRule());
+            return rule.compile(input).findValue();
+        }
+
         @Override
-        public Optional<String> compile(String input) {
-            return new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new ContentRule()).compile(input);
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
     public static class ContentRule implements Rule {
-        @Override
-        public Optional<String> compile(String content) {
+        private Optional<String> compileToOptional(String content) {
             String generated = content.isBlank() ? content : "/*" + content + "*/";
             return Optional.of(generated);
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
     public static class StringRule implements Rule {
-        @Override
-        public Optional<String> compile(String name) {
+        private Optional<String> compileToOptional(String name) {
             return Optional.of(name);
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
@@ -170,26 +227,38 @@ public class Main {
             return current.advance().stream();
         }
 
-        @Override
-        public Optional<String> compile(String input) {
+        private Optional<String> compileToOptional(String input) {
             return divide(new MutableDivideState(), input, this.folder)
                     .reduce(Optional.of(""),
-                            (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule.compile(element).map(compiled -> current + compiled)),
+                            (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule.compile(element).findValue().map(compiled -> current + compiled)),
                             (_, next) -> next);
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
     private record OrRule(List<Rule> rules) implements Rule {
-        @Override
-        public Optional<String> compile(String input) {
+        private Optional<String> compileToOptional(String input) {
             for (Rule rule : this.rules()) {
-                Optional<String> compiled = rule.compile(input);
+                Optional<String> compiled = rule.compile(input).findValue();
                 if (compiled.isPresent()) {
                     return compiled;
                 }
             }
 
             return Optional.empty();
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
@@ -200,9 +269,15 @@ public class Main {
             this.childRule = Optional.of(childRule);
         }
 
+        private Optional<String> compileToOptional(String input) {
+            return this.childRule.flatMap(internal -> internal.compile(input).findValue());
+        }
+
         @Override
-        public Optional<String> compile(String input) {
-            return this.childRule.flatMap(internal -> internal.compile(input));
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
@@ -248,14 +323,20 @@ public class Main {
     }
 
     private static class BlankRule implements Rule {
-        @Override
-        public Optional<String> compile(String input) {
+        private Optional<String> compileToOptional(String input) {
             if (input.isBlank()) {
                 return Optional.of("");
             }
             else {
                 return Optional.empty();
             }
+        }
+
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.compileToOptional(input)
+                    .<Result<String, CompileError>>map(Ok::new)
+                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
         }
     }
 
@@ -272,7 +353,8 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return Statements(createRootSegmentRule()).compile(input).orElse("");
+        Rule rule = Statements(createRootSegmentRule());
+        return rule.compile(input).findValue().orElse("");
     }
 
     private static OrRule createRootSegmentRule() {
