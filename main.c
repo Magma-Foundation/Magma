@@ -25,7 +25,7 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	return this;
 }
 struct State createInitial(){
-	return new_State(new_ArrayList<>(), "", /* 0 */);
+	return new_State(new_ArrayList<>(), "", 0);
 }
 struct boolean isLevel(){
 	return this.depth == 0;
@@ -82,7 +82,7 @@ Optional<char*> compileAll(char* input, /*
 }
 Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, Optional</* String> */> compiler){
 	/* State state */ = State.createInitial();
-	/* for (int i */ = /* 0 */;
+	/* for (int i */ = 0;
 	/* i < input.length() */;
 	/* i++) {
             char c = input.charAt(i);
@@ -412,13 +412,28 @@ char* compileValue(char* input){
             String property = stripped.substring(lastSeparator + ".".length());
             return compileValue(parent) + "." + property;
         } */
+	/* if (isNumber(stripped)) {
+            return stripped;
+        } */
 	/* if (isSymbol(stripped)) {
             return stripped;
         } */
 	return /* generatePlaceholder(stripped) */;
 }
+struct boolean isNumber(char* input){
+	/* for (int i */ = 0;
+	/* i < input.length() */;
+	/* i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        } */
+	return true;
+}
 struct boolean isSymbol(char* input){
-	/* for (int i */ = /* 0 */;
+	/* for (int i */ = 0;
 	/* i < input.length() */;
 	/* i++) {
             char c = input.charAt(i);
