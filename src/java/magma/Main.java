@@ -146,28 +146,38 @@ public class Main {
             return "";
         }
 
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+
+    }
+
+    private static Optional<String> compileClass(String input) {
         int classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            String beforeKeyword = input.substring(0, classIndex);
-            String afterKeyword = input.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileAllStatements(inputContent, Main::compileClassSegment);
-                    if (isSymbol(name)) {
-                        return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
-                    }
-                }
-            }
+        if (classIndex < 0) {
+            return Optional.empty();
         }
-        return generatePlaceholder(input);
+        String beforeKeyword = input.substring(0, classIndex);
+        String afterKeyword = input.substring(classIndex + "class ".length());
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        String name = afterKeyword.substring(0, contentStart).strip();
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+        String outputContent = compileAllStatements(inputContent, Main::compileClassSegment);
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n");
     }
 
     private static String compileClassSegment(String input) {
-        return compileMethod(input).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(input)
+                .or(() -> compileMethod(input))
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileMethod(String input) {

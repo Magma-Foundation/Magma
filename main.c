@@ -10,7 +10,12 @@ import java.util.Optional; *//*
 import java.util.function.BiFunction; *//* 
 import java.util.function.Function; *//* 
 
-public  */struct Main {/* 
+public  */struct Main {/* private static  */struct State {/* private final List<String> segments; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; *//* 
+     */
+}
+/* 
 
     private static final List<String> methods = new ArrayList<>(); *//* 
  */
@@ -19,37 +24,22 @@ public  */struct Main {/*
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; *//* 
-        }
-
-        public State() {
+         */}/* public */ State(/*  */){/* 
             this(new ArrayList<>(), new StringBuilder(), 0); *//* 
-        }
-
-        private boolean isLevel() {
+         */}/* boolean */ isLevel(/*  */){/* 
             return this.depth == 0; *//* 
-        }
-
-        private boolean isShallow() {
+         */}/* boolean */ isShallow(/*  */){/* 
             return this.depth == 1; *//* 
-        }
-
-        private void advance() {
+         */}void advance(/*  */){/* 
             this.segments.add(this.buffer.toString()); *//* 
             this.buffer = new StringBuilder(); *//* 
-        }
-
-        private void exit() {
+         */}void exit(/*  */){/* 
             this.depth = this.depth - 1; *//* 
-        }
-
-        private void enter() {
+         */}void enter(/*  */){/* 
             this.depth = this.depth + 1; *//* 
-        }
-
-        private void append(char c) {
+         */}void append(/* char */ c){/* 
             this.buffer.append(c); *//* 
-        }
-     */}void __main__(/* String[] */ args){/* 
+         */}void __main__(/* String[] */ args){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -129,26 +119,34 @@ public  */struct Main {/*
             return "";
         } *//* 
 
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input)); *//* 
+
+     */}/* Optional<String> */ compileClass(/* String */ input){/* 
         int classIndex = input.indexOf("class "); *//* 
-        if (classIndex >= 0) {
-            String beforeKeyword = input.substring(0, classIndex);
-            String afterKeyword = input.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileAllStatements(inputContent, Main::compileClassSegment);
-                    if (isSymbol(name)) {
-                        return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
-                    }
-                }
-            }
+        if (classIndex < 0) {
+            return Optional.empty();
         } *//* 
-        return generatePlaceholder(input); *//* 
+        String beforeKeyword = input.substring(0, classIndex); *//* 
+        String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
+        int contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        String name = afterKeyword.substring(0, contentStart).strip();
+        String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        String inputContent = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
+        String outputContent = compileAllStatements(inputContent, Main::compileClassSegment); *//* 
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        } *//* 
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n} *//* \n"); *//* 
      */}/* String */ compileClassSegment(/* String */ input){/* 
-        return compileMethod(input).orElseGet(() -> generatePlaceholder(input)); *//* 
+        return compileClass(input)
+                .or(() -> compileMethod(input))
+                .orElseGet(() -> generatePlaceholder(input)); *//* 
      */}/* Optional<String> */ compileMethod(/* String */ input){/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) {
