@@ -6,6 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     private record State(List<String> segments, StringBuilder buffer, int depth) {
@@ -80,26 +83,45 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        String stripped = input.strip();
-        int classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            String afterKeyword = stripped.substring(classIndex + "class ".length());
-            int contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                String name = afterKeyword.substring(0, contentStart).strip();
-                String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    String content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return "struct " + name + " {" +
-                            generatePlaceholder(content) +
-                            "\n};\n";
-                }
-            }
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
+
+    }
+
+    private static Optional<String> compileClass(String input) {
+        return compileInfix(input, "class ", (modifiers, afterKeyword) ->
+                compileInfix(afterKeyword, "{", (left, withEnd) ->
+                        compileStripped(withEnd, withEnd2 ->
+                                compileSuffix(withEnd2, "}", s ->
+                                        compileStripped(left, s1 -> {
+                                            return Optional.of(generatePlaceholder(modifiers) + "struct " + s1 + " {" +
+                                                    generatePlaceholder(s) +
+                                                    "\n};\n");
+                                        })))));
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        int index = input.indexOf(infix);
+        if (index < 0) {
+            return Optional.empty();
         }
-        return generatePlaceholder(stripped);
+        String left = input.substring(0, index);
+        String right = input.substring(index + infix.length());
+        return mapper.apply(left, right);
+    }
+
+    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> mapper) {
+        return mapper.apply(input.strip());
+    }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(slice);
     }
 
     private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */\n";
+        return "/* " + stripped + " */";
     }
 }
