@@ -1,10 +1,12 @@
 package magma;
 
+import magma.jvm.Files;
+
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -94,9 +96,20 @@ public class Main {
             String right = stripped.substring("import ".length()).strip();
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                String[] separator = left.split(Pattern.quote("."));
-                String joined = String.join("/", separator);
-                return "#include \"%s\"\n".formatted(joined);
+                List<String> oldSegments = Arrays.asList(left.split(Pattern.quote(".")));
+
+                List<String> newSegments = new ArrayList<>();
+                if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(List.of("magma", "jvm"))) {
+                    List<String> after = oldSegments.subList(2, oldSegments.size());
+                    newSegments.addAll(List.of("magma", "windows"));
+                    newSegments.addAll(after);
+                }
+                else {
+                    newSegments.addAll(oldSegments);
+                }
+
+                String joined = String.join("/", newSegments);
+                return "#include \"../%s.h\"\n".formatted(joined);
             }
         }
 
