@@ -71,6 +71,10 @@ public class Main {
         String asString();
     }
 
+    interface Rule {
+        Optional<String> compile(String input);
+    }
+
     public static class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -260,6 +264,36 @@ public class Main {
         }
     }
 
+    private record SuffixRule(Rule compiler, String suffix) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            if (!input.endsWith(this.suffix())) {
+                return Optional.empty();
+            }
+            String slice = input.substring(0, input.length() - this.suffix().length());
+            return this.compiler().compile(slice);
+        }
+    }
+
+    private record StripRule(Rule compiler) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            return this.compiler().compile(input.strip());
+        }
+    }
+
+    private record PrefixRule(String prefix, Rule compiler) implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            if (!input.startsWith(this.prefix())) {
+                return Optional.empty();
+            }
+
+            String slice = input.substring(this.prefix().length());
+            return this.compiler().compile(slice);
+        }
+    }
+
     public static void main(String[] args) {
         Path source = StandardLibrary.getPath(".", "src", "java", "magma", "Main.java");
         StandardLibrary.readString(source)
@@ -315,7 +349,7 @@ public class Main {
             return "";
         }
 
-        Optional<String> maybeImport = compilePrefix(stripped, "import ", substring1 -> compileStripped(substring1, right1 -> compileSuffix(right1, ";", Main::compileImportSegments)));
+        Optional<String> maybeImport = createImportRule().compile(stripped);
         if (maybeImport.isPresent()) {
             return maybeImport.get();
         }
@@ -326,29 +360,8 @@ public class Main {
         return stripped;
     }
 
-    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> compiler) {
-        if (!input.startsWith(prefix)) {
-            return Optional.empty();
-        }
-
-        String slice = input.substring(prefix.length());
-        return compiler.apply(slice);
-    }
-
-    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> compiler) {
-        return compiler.apply(input.strip());
-    }
-
-    private static Optional<String> compileSuffix(
-            String input,
-            String suffix,
-            Function<String, Optional<String>> mapper
-    ) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        String slice = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(slice);
+    private static Rule createImportRule() {
+        return new PrefixRule("import ", substring1 -> new StripRule(new SuffixRule(Main::compileImportSegments, ";")::compile).compile(substring1));
     }
 
     private static Optional<String> compileImportSegments(String left) {
