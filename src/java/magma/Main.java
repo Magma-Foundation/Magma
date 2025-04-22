@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
@@ -29,6 +33,10 @@ public class Main {
 
     private interface Result<T, X> {
         Optional<T> findValue();
+
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
     private interface Rule {
@@ -43,10 +51,24 @@ public class Main {
         DivideState fold(DivideState state, char c);
     }
 
+    private interface Error {
+        String display();
+    }
+
     private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public Optional<T> findValue() {
             return Optional.of(this.value);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
         }
     }
 
@@ -55,11 +77,37 @@ public class Main {
         public Optional<T> findValue() {
             return Optional.empty();
         }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
     }
 
-    private record CompileError(String message, String context, List<CompileError> errors) {
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            StringWriter writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
         public CompileError(String message, String context) {
             this(message, context, Collections.emptyList());
+        }
+
+        @Override
+        public String display() {
+            return this.message + ": " + this.context + this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
         }
     }
 
@@ -326,21 +374,50 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-            Path target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
         }
     }
 
-    private static String compile(String input) {
-        Rule rule = Statements(createRootSegmentRule());
-        return rule.compile(input).findValue().orElse("");
+    public static void main(String[] args) {
+        Path source = Paths.get(".", "src", "java", "magma", "Main.java");
+        readString(source)
+                .mapErr(ThrowableError::new)
+                .mapErr(ApplicationError::new)
+                .match(input -> runWithSource(source, input), Optional::of)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Optional<ApplicationError> runWithSource(Path source, String input) {
+        Path target = source.resolveSibling("main.c");
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> {
+                    return writeString(target, output).map(ThrowableError::new).map(ApplicationError::new);
+                }, Optional::of);
+    }
+
+    private static Optional<IOException> writeString(Path target, String output) {
+        try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Result<String, CompileError> compile(String input) {
+        return Statements(createRootSegmentRule()).compile(input);
     }
 
     private static OrRule createRootSegmentRule() {
