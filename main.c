@@ -1,9 +1,10 @@
-/* package magma;
+/* package magma; *//* 
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException; *//* 
+import java.nio.file.Files; *//* 
+import java.nio.file.Path; *//* 
+import java.nio.file.Paths; *//* 
+import java.util.ArrayList; *//* 
 
 public class Main {
     public static void main(String[] args) {
@@ -12,17 +13,49 @@ public class Main {
             String input = Files.readString(source);
 
             Path target = Paths.get(".", "main.c");
-            Files.writeString(target, "/* " + input + " */");
+            Files.writeString(target, compile(input));
 
             new ProcessBuilder("clang", "-o", "main.exe", "main.c")
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String compile(String input) {
+        ArrayList<String> segments = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
+        int depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            buffer.append(c);
+            if (c == ';' && depth == 0) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else {
+                if (c == '{') {
+                    depth++;
+                }
+                if (c == '}') {
+                    depth--;
+                }
+            }
+        }
+        segments.add(buffer.toString());
+
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            output.append(compileRootSegment(segment));
+        }
+
+        return output.toString();
+    }
+
+    private static String compileRootSegment(String input) {
+        return "/* " + input + " */";
     }
 }
  */
