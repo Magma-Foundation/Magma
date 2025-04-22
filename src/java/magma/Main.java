@@ -458,6 +458,7 @@ public class Main {
     private static Rule createClassSegmentRule() {
         LazyRule classSegment = new LazyRule();
         classSegment.set(new OrRule(List.of(
+                new BlankRule(),
                 createClassRule(classSegment),
                 createStructuredRule("interface ", classSegment),
                 createStructuredRule("record ", classSegment),
