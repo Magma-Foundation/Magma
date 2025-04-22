@@ -306,6 +306,10 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         String stripped = input.strip();
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+
         if (stripped.startsWith("import ")) {
             String right = stripped.substring("import ".length()).strip();
             if (right.endsWith(";")) {
