@@ -2,15 +2,30 @@ package magma;
 
 import magma.jvm.StandardLibrary;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
+    public interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        T get();
+
+        boolean isPresent();
+
+        T orElse(T other);
+
+        void ifPresent(Consumer<T> consumer);
+
+        Option<T> or(Supplier<Option<T>> other);
+    }
+
     interface Head<T> {
-        Optional<T> next();
+        Option<T> next();
     }
 
     public interface List<T> {
@@ -55,13 +70,76 @@ public class Main {
         String asString();
     }
 
+    public static class None<T> implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public T get() {
+            return null;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+    }
+
+    public record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T get() {
+            return this.value;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+    }
+
     public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             R current = initial;
             while (true) {
                 R finalCurrent = current;
-                Optional<R> maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                Option<R> maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isPresent()) {
                     current = maybeNext.get();
                 }
@@ -133,7 +211,7 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Optional<String>> {
+    private static class Joiner implements Collector<String, Option<String>> {
         private final String delimiter;
 
         public Joiner(String delimiter) {
@@ -145,13 +223,13 @@ public class Main {
         }
 
         @Override
-        public Optional<String> createInitial() {
-            return Optional.empty();
+        public Option<String> createInitial() {
+            return new None<>();
         }
 
         @Override
-        public Optional<String> fold(Optional<String> current, String element) {
-            return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -164,14 +242,14 @@ public class Main {
         }
 
         @Override
-        public Optional<Integer> next() {
+        public Option<Integer> next() {
             if (this.counter < this.length) {
                 int value = this.counter;
                 this.counter++;
-                return Optional.of(value);
+                return new Some<>(value);
             }
             else {
-                return Optional.empty();
+                return new None<>();
             }
         }
     }
@@ -179,11 +257,11 @@ public class Main {
     public static void main(String[] args) {
         Path source = StandardLibrary.getPath(".", "src", "java", "magma", "Main.java");
         StandardLibrary.readString(source)
-                .match(input -> runWithInput(source, input), Optional::of)
+                .match(input -> runWithInput(source, input), value -> new Some<>(value))
                 .ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Optional<IOError> runWithInput(Path source, String input) {
+    private static Option<IOError> runWithInput(Path source, String input) {
         Path target = source.resolveSibling("main.c");
         return StandardLibrary.writeString(target, compile(input))
                 .or(() -> StandardLibrary.execute(StandardLibrary.of("clang.exe", target.asString(), "-o", "main.exe")));

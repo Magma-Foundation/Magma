@@ -1,6 +1,10 @@
 package magma.jvm;
 
 import magma.Main;
+import magma.Main.IOError;
+import magma.Main.None;
+import magma.Main.Option;
+import magma.Main.Some;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,11 +14,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class StandardLibrary {
-    public record ExceptionalIOError(Exception error) implements Main.IOError {
+    public record ExceptionalIOError(Exception error) implements IOError {
         @Override
         public String display() {
             StringWriter writer = new StringWriter();
@@ -84,7 +87,7 @@ public class StandardLibrary {
         }
     }
 
-    public static Main.Result<String, Main.IOError> readString(Main.Path path) {
+    public static Main.Result<String, IOError> readString(Main.Path path) {
         try {
             return new Main.Ok<>(java.nio.file.Files.readString(JVMPath.unwrap(path)));
         } catch (IOException e) {
@@ -92,24 +95,24 @@ public class StandardLibrary {
         }
     }
 
-    public static Optional<Main.IOError> writeString(Main.Path path, String output) {
+    public static Option<IOError> writeString(Main.Path path, String output) {
         try {
             java.nio.file.Files.writeString(JVMPath.unwrap(path), output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(new ExceptionalIOError(e));
+            return new Some<>(new ExceptionalIOError(e));
         }
     }
 
-    public static Optional<Main.IOError> execute(Main.List<String> command) {
+    public static Option<IOError> execute(Main.List<String> command) {
         try {
             new ProcessBuilder(unwrap(command))
                     .inheritIO()
                     .start()
                     .waitFor();
-            return Optional.empty();
+            return new None<>();
         } catch (InterruptedException | IOException e) {
-            return Optional.of(new ExceptionalIOError(e));
+            return new Some<>(new ExceptionalIOError(e));
         }
     }
 
