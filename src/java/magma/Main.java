@@ -2,6 +2,7 @@ package magma;
 
 import magma.jvm.StandardLibrary;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -315,27 +316,11 @@ public class Main {
         }
 
         if (stripped.startsWith("import ")) {
-            String right = stripped.substring("import ".length()).strip();
-            if (right.endsWith(";")) {
-                String left = right.substring(0, right.length() - ";".length());
-
-                List<String> oldSegments = divide(left, Main::foldDelimited);
-                List<String> newSegments = StandardLibrary.empty();
-                if (oldSegments.size() >= 3 && oldSegments.subList(0, 3).equals(StandardLibrary.of("java", "util", "function"))) {
-                    return "";
-                }
-
-                if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(StandardLibrary.of("magma", "jvm"))) {
-                    List<String> after = oldSegments.subList(2, oldSegments.size());
-                    newSegments.addAll(StandardLibrary.of("magma", "windows"));
-                    newSegments.addAll(after);
-                }
-                else {
-                    newSegments.addAll(oldSegments);
-                }
-
-                String joined = newSegments.iter().collect(new Joiner("/")).orElse("");
-                return "#include \"../%s.h\"\n".formatted(joined);
+            String substring = stripped.substring("import ".length());
+            String right = substring.strip();
+            Optional<String> left = compileSuffix(right, ";", Main::compileImportSegments);
+            if (left.isPresent()) {
+                return left.get();
             }
         }
 
@@ -343,6 +328,39 @@ public class Main {
             return "struct Temp {\n};\n";
         }
         return stripped;
+    }
+
+    private static Optional<String> compileSuffix(
+            String input,
+            String suffix,
+            Function<String, Optional<String>> mapper
+    ) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        String slice = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(slice);
+    }
+
+    private static Optional<String> compileImportSegments(String left) {
+        List<String> oldSegments = divide(left, Main::foldDelimited);
+        List<String> newSegments = StandardLibrary.empty();
+        if (oldSegments.size() >= 3 && oldSegments.subList(0, 3).equals(StandardLibrary.of("java", "util", "function"))) {
+            return Optional.of("");
+        }
+
+        if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(StandardLibrary.of("magma", "jvm"))) {
+            List<String> after = oldSegments.subList(2, oldSegments.size());
+            newSegments.addAll(StandardLibrary.of("magma", "windows"));
+            newSegments.addAll(after);
+        }
+        else {
+            newSegments.addAll(oldSegments);
+        }
+
+        String joined = newSegments.iter().collect(new Joiner("/")).orElse("");
+        String result = "#include \"../%s.h\"\n".formatted(joined);
+        return Optional.of(result);
     }
 
     private static State foldDelimited(State state, Character c) {
