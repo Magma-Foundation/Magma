@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Main {
     private record State(List<String> segments, StringBuilder buffer) {
-        public State() {
-            this(new ArrayList<>(), new StringBuilder());
+        public static State createEmpty() {
+            return new State(new ArrayList<>(), new StringBuilder());
         }
 
         private State advance() {
@@ -39,7 +39,7 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        State current = new State();
+        State current = State.createEmpty();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             current = foldStatementChar(current, c);
