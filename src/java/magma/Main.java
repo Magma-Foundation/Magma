@@ -201,25 +201,18 @@ public class Main {
             this(leftRule, infix, new FirstLocator(), rightRule);
         }
 
-        private Optional<String> compileToOptional(
-                String input) {
-            return this.locator().locate(input, this.infix()).flatMap(index -> {
+        @Override
+        public Result<String, CompileError> compile(String input) {
+            return this.locator().locate(input, this.infix()).map(index -> {
                 String left = input.substring(0, index);
                 String right = input.substring(index + this.infix().length());
 
-                return this.leftRule().compile(left).findValue().flatMap(compiledLeft -> {
-                    return this.rightRule().compile(right).findValue().map(compiledRight -> {
+                return this.leftRule().compile(left).flatMapValue(compiledLeft -> {
+                    return this.rightRule().compile(right).mapValue(compiledRight -> {
                         return compiledLeft + this.infix() + compiledRight;
                     });
                 });
-            });
-        }
-
-        @Override
-        public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            }).orElseGet(() -> new Err<>(new CompileError("Infix '" + this.infix + "' not present", input)));
         }
     }
 
@@ -234,30 +227,16 @@ public class Main {
     }
 
     private record PrefixRule(String prefix, Rule childRule) implements Rule {
-        private Optional<String> compileToOptional(String input) {
-            Rule rule = new InfixRule(new StringRule(), this.prefix(), this.childRule());
-            return rule.compile(input).findValue();
-        }
-
         @Override
         public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            return new InfixRule(new StringRule(), this.prefix(), this.childRule()).compile(input);
         }
     }
 
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
-        private Optional<String> compileToOptional(String input) {
-            Rule rule = new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new StringRule());
-            return rule.compile(input).findValue();
-        }
-
         @Override
         public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            return new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new StringRule()).compile(input);
         }
     }
 
@@ -339,15 +318,10 @@ public class Main {
             this.childRule = Optional.of(childRule);
         }
 
-        private Optional<String> compileToOptional(String input) {
-            return this.childRule.flatMap(internal -> internal.compile(input).findValue());
-        }
-
         @Override
         public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            return this.childRule.map(internal -> internal.compile(input))
+                    .orElseGet(() -> new Err<>(new CompileError("Child not set", input)));
         }
     }
 
