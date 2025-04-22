@@ -148,7 +148,7 @@ public class Main {
             return "";
         }
 
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
 
     }
 

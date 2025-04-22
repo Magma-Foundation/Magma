@@ -1,14 +1,14 @@
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Path; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.ArrayList; *//* 
-import java.util.List; *//* 
-import java.util.Optional; *//* 
-import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//* private static  */struct State {/* private final List<String> segments; *//* 
+/* package magma; */
+/* import java.io.IOException; */
+/* import java.nio.file.Files; */
+/* import java.nio.file.Path; */
+/* import java.nio.file.Paths; */
+/* import java.util.ArrayList; */
+/* import java.util.List; */
+/* import java.util.Optional; */
+/* import java.util.function.BiFunction; */
+/* import java.util.function.Function; */
+/* private static  */struct State {/* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
      */
@@ -121,7 +121,7 @@ public  */struct Main {/*
             return "";
         } *//* 
 
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input)); *//* 
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n"); *//* 
 
      */}/* Optional<String> */ compileClass(/* String */ input){/* 
         int classIndex = input.indexOf("class "); *//* 
