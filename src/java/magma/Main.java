@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
@@ -268,26 +267,35 @@ public class Main {
     }
 
     private static String compile(String input) {
-        State state = new State();
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            state.append(c);
-            if (c == ';' && state.isLevel()) {
-                state.advance();
-            }
-            if (c == '{') {
-                state.enter();
-            }
-            if (c == '}') {
-                state.exit();
-            }
-        }
-        state.advance();
-
-        return state.segments.iter()
+        return divide(input, Main::fold)
+                .iter()
                 .map(Main::compileRootSegment)
                 .collect(new Joiner())
                 .orElse("");
+    }
+
+    private static List<String> divide(String input, BiFunction<State, Character, State> folder) {
+        State current = new State();
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            current = folder.apply(current, c);
+        }
+        current.advance();
+        return current.segments;
+    }
+
+    private static State fold(State state, char c) {
+        state.append(c);
+        if (c == ';' && state.isLevel()) {
+            state.advance();
+        }
+        if (c == '{') {
+            state.enter();
+        }
+        if (c == '}') {
+            state.exit();
+        }
+        return state;
     }
 
     private static String compileRootSegment(String input) {
@@ -296,8 +304,8 @@ public class Main {
             String right = stripped.substring("import ".length()).strip();
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                List<String> oldSegments = StandardLibrary.of(left.split(Pattern.quote(".")));
 
+                List<String> oldSegments = divide(left, Main::foldDelimited);
                 List<String> newSegments = StandardLibrary.empty();
                 if (oldSegments.size() >= 3 && oldSegments.subList(0, 3).equals(StandardLibrary.of("java", "util", "function"))) {
                     return "";
@@ -321,5 +329,14 @@ public class Main {
             return "struct Temp {\n};\n";
         }
         return stripped;
+    }
+
+    private static State foldDelimited(State state, Character c) {
+        if (c == '.') {
+            state.advance();
+            return state;
+        }
+        state.append(c);
+        return state;
     }
 }
