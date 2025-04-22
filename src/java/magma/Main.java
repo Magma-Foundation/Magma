@@ -444,6 +444,10 @@ public class Main {
 
     private static String compileValue(String input) {
         String stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        }
+
         if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentStart = withoutEnd.indexOf("(");

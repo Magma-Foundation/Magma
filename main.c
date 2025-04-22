@@ -25,7 +25,7 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	return this;
 }
 struct State createInitial(){
-	return new_State(new_ArrayList<>(), /* "" */, /* 0 */);
+	return new_State(new_ArrayList<>(), "", /* 0 */);
 }
 struct boolean isLevel(){
 	return this.depth == 0;
@@ -35,7 +35,7 @@ struct boolean isShallow(){
 }
 void advance(){
 	/* this.segments.add(this.buffer) */;
-	this.buffer = /* "" */;
+	this.buffer = "";
 }
 void exit(){
 	this.depth = this.depth - 1;
@@ -121,7 +121,7 @@ Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Charact
 	return maybeOutput;
 }
 char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, List<char*> output){
-	/* String cache */ = /* "" */;
+	/* String cache */ = "";
 	/* for (String element : output) {
             cache = merger.apply(cache, element);
         } */
@@ -213,7 +213,7 @@ Optional<char*> compileDefinitionStatement(char* input){
         } */
 }
 char* formatStatement(char* inner){
-	return /* "\n\t" + inner + " */;
+	return "\n\t" + inner + ";
 	/* " */;
 }
 Optional<char*> compileMethod(char* input, char* structName){
@@ -388,6 +388,9 @@ Optional<char*> compileStatementValue(char* input){
 }
 char* compileValue(char* input){
 	/* String stripped */ = input.strip();
+	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        } */
 	/* if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentStart = withoutEnd.indexOf("(");
@@ -427,5 +430,5 @@ struct boolean isSymbol(char* input){
 	return true;
 }
 char* generatePlaceholder(char* input){
-	return /* "/* " + input + " */" */;
+	return "/* " + input + " */";
 }
