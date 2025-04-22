@@ -24,10 +24,8 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	this.depth = depth;
 	return this;
 }
-struct State new_State(){
-	struct State this;
-	/* this(new ArrayList<>(), "", 0) */;
-	return this;
+/* State */ createInitial(){
+	/* return new State(new ArrayList<>(), "", 0) */;
 }
 /* boolean */ isLevel(){
 	/* return this */.depth = /* = 0 */;
@@ -84,7 +82,7 @@ Optional<char*> compileAll(char* input, /*
                 .map(output -> generateAll(merger, output)) */;
 }
 Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, Optional</* String> */> compiler){
-	/* State state */ = /* new State() */;
+	/* State state */ = State.createInitial();
 	/* for (int i */ = /* 0 */;
 	/* i < input.length() */;
 	/* i++) {

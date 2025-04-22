@@ -22,8 +22,8 @@ public class Main {
             this.depth = depth;
         }
 
-        public State() {
-            this(new ArrayList<>(), "", 0);
+        public static State createInitial() {
+            return new State(new ArrayList<>(), "", 0);
         }
 
         private boolean isLevel() {
@@ -97,7 +97,7 @@ public class Main {
     }
 
     private static Optional<List<String>> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, Optional<String>> compiler) {
-        State state = new State();
+        State state = State.createInitial();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (c == '\'') {
