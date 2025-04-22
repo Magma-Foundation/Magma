@@ -233,7 +233,7 @@ public class Main {
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     String content = withBraces.substring(1, withBraces.length() - 1);
                     String outputContent = compileAllStatements(content, Main::compileStatementOrBlock);
-                    String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "}";
+                    String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
                     methods.add(generated);
                     return Optional.of("");
                 }
@@ -322,7 +322,7 @@ public class Main {
     }
 
     private static String compileStatementOrBlock(String input) {
-        return generatePlaceholder(input);
+        return compileWhitespace(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
     private static boolean isSymbol(String input) {
