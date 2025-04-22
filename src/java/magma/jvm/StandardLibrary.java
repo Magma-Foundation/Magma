@@ -45,6 +45,11 @@ public class StandardLibrary {
         public Main.Path resolveSibling(String sibling) {
             return new JVMPath(this.path.resolveSibling(sibling));
         }
+
+        @Override
+        public String asString() {
+            return path.toString();
+        }
     }
 
     public static Main.Result<String, Main.IOError> readString(Main.Path path) {

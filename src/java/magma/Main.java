@@ -23,6 +23,8 @@ public class Main {
         Stream<String> stream();
 
         Path resolveSibling(String sibling);
+
+        String asString();
     }
 
     private static class State {
@@ -86,7 +88,7 @@ public class Main {
     private static Optional<IOError> runWithInput(Path source, String input) {
         Path target = source.resolveSibling("main.c");
         return StandardLibrary.writeString(target, compile(input))
-                .or(() -> StandardLibrary.execute(List.of("clang.exe", target.toString(), "-o", "main.exe")));
+                .or(() -> StandardLibrary.execute(List.of("clang.exe", target.asString(), "-o", "main.exe")));
     }
 
     private static String compile(String input) {
