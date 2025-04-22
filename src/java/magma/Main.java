@@ -10,6 +10,47 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
+    private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        private boolean isShallow() {
+            return this.depth == 1;
+        }
+
+        private void advance() {
+            this.segments.add(this.buffer.toString());
+            this.buffer = new StringBuilder();
+        }
+
+        private void exit() {
+            this.depth = this.depth - 1;
+        }
+
+        private void enter() {
+            this.depth = this.depth + 1;
+        }
+
+        private void append(char c) {
+            this.buffer.append(c);
+        }
+    }
+
     private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -36,56 +77,55 @@ public class Main {
     }
 
     private static String compileAll(String input, Function<String, String> compileRootSegment) {
-        ArrayList<String> segments = new ArrayList<>();
-        StringBuilder buffer = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (c == '\'') {
-                buffer.append(c);
-
-                i++;
-                char c1 = input.charAt(i);
-                buffer.append(c1);
-
-                if (c1 == '\\') {
-                    i++;
-                    buffer.append(input.charAt(i));
-                }
-
-                i++;
-                buffer.append(input.charAt(i));
-
-                continue;
-            }
-
-            buffer.append(c);
-            if (c == ';' && depth == 0) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-            }
-            else if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            }
-            else {
-                if (c == '{') {
-                    depth++;
-                }
-                if (c == '}') {
-                    depth--;
-                }
-            }
-        }
-        segments.add(buffer.toString());
-
+        List<String> segments = extracted(input, new State());
         StringBuilder output = new StringBuilder();
         for (String segment : segments) {
             output.append(compileRootSegment.apply(segment));
         }
 
         return output.toString();
+    }
+
+    private static List<String> extracted(String input, State state) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c == '\'') {
+                state.append(c);
+
+                i++;
+                char c1 = input.charAt(i);
+                state.append(c1);
+
+                if (c1 == '\\') {
+                    i++;
+                    state.append(input.charAt(i));
+                }
+
+                i++;
+                state.append(input.charAt(i));
+
+                continue;
+            }
+
+            state.append(c);
+            if (c == ';' && state.isLevel()) {
+                state.advance();
+            }
+            else if (c == '}' && state.isShallow()) {
+                state.advance();
+                state.exit();
+            }
+            else {
+                if (c == '{') {
+                    state.enter();
+                }
+                if (c == '}') {
+                    state.exit();
+                }
+            }
+        }
+        state.advance();
+        return state.segments;
     }
 
     private static String compileRootSegment(String input) {
