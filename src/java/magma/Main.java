@@ -321,11 +321,16 @@ public class Main {
     private static State foldValueChar(State state, char c) {
         if (c == ',') {
             state.advance();
-        }
-        else {
-            state.append(c);
+            return state;
         }
 
+        state.append(c);
+        if (c == '(') {
+            state.enter();
+        }
+        else if (c == ')') {
+            state.exit();
+        }
         return state;
     }
 
@@ -439,6 +444,22 @@ public class Main {
 
     private static String compileValue(String input) {
         String stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int argumentStart = withoutEnd.indexOf("(");
+            if (argumentStart >= 0) {
+                String caller = withoutEnd.substring(0, argumentStart).strip();
+                String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
+                if (caller.startsWith("new ")) {
+                    String type = caller.substring("new ".length()).strip();
+                    Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
+                    if (maybeNewArguments.isPresent()) {
+                        return "new_" + type + "(" + maybeNewArguments.get() + ")";
+                    }
+                }
+            }
+        }
+
         int lastSeparator = stripped.lastIndexOf(".");
         if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);

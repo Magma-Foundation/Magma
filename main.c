@@ -25,7 +25,7 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	return this;
 }
 struct State createInitial(){
-	return /* new State(new ArrayList<>(), "", 0) */;
+	return new_State(new_ArrayList<>(), /* "" */, /* 0 */);
 }
 struct boolean isLevel(){
 	return this.depth == 0;
@@ -286,9 +286,14 @@ Optional<char*> compileAllValues(char* inputParams, /*  Function<String */, Opti
 struct State foldValueChar(struct State state, struct char c){
 	/* if (c == ',') {
             state.advance();
+            return state;
         } */
-	/* else {
-            state.append(c);
+	/* state.append(c) */;
+	/* if (c == '(') {
+            state.enter();
+        } */
+	/* else if (c == ')') {
+            state.exit();
         } */
 	return state;
 }
@@ -383,6 +388,21 @@ Optional<char*> compileStatementValue(char* input){
 }
 char* compileValue(char* input){
 	/* String stripped */ = input.strip();
+	/* if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int argumentStart = withoutEnd.indexOf("(");
+            if (argumentStart >= 0) {
+                String caller = withoutEnd.substring(0, argumentStart).strip();
+                String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
+                if (caller.startsWith("new ")) {
+                    String type = caller.substring("new ".length()).strip();
+                    Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
+                    if (maybeNewArguments.isPresent()) {
+                        return "new_" + type + "(" + maybeNewArguments.get() + ")";
+                    }
+                }
+            }
+        } */
 	/* int lastSeparator */ = stripped.lastIndexOf(".");
 	/* if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
