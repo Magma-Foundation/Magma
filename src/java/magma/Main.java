@@ -13,17 +13,17 @@ import java.util.function.Function;
 public class Main {
     private static class State {
         private final List<String> segments;
-        private StringBuilder buffer;
+        private String buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private State(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(new ArrayList<>(), "", 0);
         }
 
         private boolean isLevel() {
@@ -35,8 +35,8 @@ public class Main {
         }
 
         private void advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments.add(this.buffer);
+            this.buffer = "";
         }
 
         private void exit() {
@@ -48,7 +48,7 @@ public class Main {
         }
 
         private void append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
         }
     }
 
@@ -83,7 +83,7 @@ public class Main {
         return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements);
     }
 
-    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compileRootSegment, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compileRootSegment, BiFunction<String, String, String> merger) {
         State state = new State();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -110,17 +110,17 @@ public class Main {
         state.advance();
 
         List<String> segments = state.segments;
-        StringBuilder output = new StringBuilder();
+        String output = "";
         for (String segment : segments) {
             String compiled = compileRootSegment.apply(segment);
             output = merger.apply(output, compiled);
         }
 
-        return output.toString();
+        return output;
     }
 
-    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
-        return output.append(compiled);
+    private static String mergeStatements(String output, String compiled) {
+        return output + compiled;
     }
 
     private static State foldStatementChar(State state, char c) {
@@ -157,7 +157,6 @@ public class Main {
         if (classIndex < 0) {
             return Optional.empty();
         }
-        String beforeKeyword = input.substring(0, classIndex);
         String afterKeyword = input.substring(classIndex + "class ".length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
@@ -242,11 +241,11 @@ public class Main {
         return state;
     }
 
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return element;
         }
-        return cache.append(", ").append(element);
+        return cache + ", " + element;
     }
 
     private static Optional<String> compileDefinition(String input) {

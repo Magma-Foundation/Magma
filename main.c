@@ -10,7 +10,7 @@
 /* import java.util.function.Function; */
 struct State {
 	/* List<String> */ segments;
-	/* StringBuilder */ buffer;
+	/* String */ buffer;
 	/* int */ depth;
 }
 struct Main {/* 
@@ -18,25 +18,25 @@ struct Main {/*
     public static final List<String> structs = new ArrayList<>(); *//* 
     private static final List<String> methods = new ArrayList<>(); */
 }
-/* private */ State(/* List<String> */ segments, /* StringBuilder */ buffer, /* int */ depth){/* 
+/* private */ State(/* List<String> */ segments, /* String */ buffer, /* int */ depth){/* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; *//* 
          */}/* public */ State(/*  */){/* 
-            this(new ArrayList<>(), new StringBuilder(), 0); *//* 
+            this(new ArrayList<>(), "", 0); *//* 
          */}/* boolean */ isLevel(/*  */){/* 
             return this.depth == 0; *//* 
          */}/* boolean */ isShallow(/*  */){/* 
             return this.depth == 1; *//* 
          */}void advance(/*  */){/* 
-            this.segments.add(this.buffer.toString()); *//* 
-            this.buffer = new StringBuilder(); *//* 
+            this.segments.add(this.buffer); *//* 
+            this.buffer = ""; *//* 
          */}void exit(/*  */){/* 
             this.depth = this.depth - 1; *//* 
          */}void enter(/*  */){/* 
             this.depth = this.depth + 1; *//* 
          */}void append(/* char */ c){/* 
-            this.buffer.append(c); *//* 
+            this.buffer = this.buffer + c; *//* 
          */}void __main__(/* String[] */ args){/* 
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -59,7 +59,7 @@ struct Main {/*
         return output + joinedStructs + joinedMethods; *//* 
      */}/* String */ compileAllStatements(/* String */ input, /*  Function<String */, /* String> */ compileRootSegment){/* 
         return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements); *//* 
-     */}/* String */ compileAll(/* String */ input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compileRootSegment, /*  BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger){/* 
+     */}/* String */ compileAll(/* String */ input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compileRootSegment, /*  BiFunction<String */, /*  String */, /* String> */ merger){/* 
         State state = new State(); *//* 
         for (int i = 0; *//*  i < input.length(); *//*  i++) {
             char c = input.charAt(i);
@@ -86,15 +86,15 @@ struct Main {/*
         state.advance(); *//* 
 
         List<String> segments = state.segments; *//* 
-        StringBuilder output = new StringBuilder(); *//* 
+        String output = ""; *//* 
         for (String segment : segments) {
             String compiled = compileRootSegment.apply(segment);
             output = merger.apply(output, compiled);
         } *//* 
 
-        return output.toString(); *//* 
-     */}/* StringBuilder */ mergeStatements(/* StringBuilder */ output, /* String */ compiled){/* 
-        return output.append(compiled); *//* 
+        return output; *//* 
+     */}/* String */ mergeStatements(/* String */ output, /* String */ compiled){/* 
+        return output + compiled; *//* 
      */}/* State */ foldStatementChar(/* State */ state, /* char */ c){/* 
         state.append(c); *//* 
         if (c == ';' && state.isLevel()) {
@@ -125,7 +125,6 @@ struct Main {/*
         if (classIndex < 0) {
             return Optional.empty();
         } *//* 
-        String beforeKeyword = input.substring(0, classIndex); *//* 
         String afterKeyword = input.substring(classIndex + "class ".length()); *//* 
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
@@ -198,11 +197,11 @@ struct Main {/*
         } *//* 
 
         return state; *//* 
-     */}/* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element){/* 
+     */}/* String */ mergeValues(/* String */ cache, /* String */ element){/* 
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return element;
         } *//* 
-        return cache.append(", ").append(element); *//* 
+        return cache + ", " + element; *//* 
      */}/* Optional<String> */ compileDefinition(/* String */ input){/* 
         String stripped = input.strip(); *//* 
         int nameSeparator = stripped.lastIndexOf(" "); *//* 
