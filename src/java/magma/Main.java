@@ -87,19 +87,39 @@ public class Main {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
-            String withParams = input.substring(paramStart + "(".length());
-            int paramEnd = withParams.indexOf(")".toString());
-            if (paramEnd >= 0) {
-                String params = withParams.substring(0, paramEnd).strip();
-                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+            int nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                String type = definition.substring(0, nameSeparator).strip();
+                String name = definition.substring(nameSeparator + " ".length()).strip();
+                String outputDefinition = generatePlaceholder(type) + " " + name;
 
-                String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
-                methods.add(generated);
-                return "";
+                if (isSymbol(name)) {
+                    String withParams = input.substring(paramStart + "(".length());
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd >= 0) {
+                        String params = withParams.substring(0, paramEnd).strip();
+                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+
+                        String generated = outputDefinition + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
+                        methods.add(generated);
+                        return "";
+                    }
+                }
             }
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static boolean isSymbol(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static String generatePlaceholder(String input) {
