@@ -54,6 +54,7 @@ public class Main {
 
     record Node(String type, String value) {
     }
+
     public static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
@@ -91,6 +92,11 @@ public class Main {
             Function<String, Optional<String>> compiler,
             BiFunction<String, String, String> merger
     ) {
+        return parseAll(input, folder, compiler)
+                .map(output -> generateAll(merger, output));
+    }
+
+    private static Optional<List<String>> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, Optional<String>> compiler) {
         State state = new State();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -117,17 +123,25 @@ public class Main {
         state.advance();
 
         List<String> segments = state.segments;
-        Optional<String> maybeOutput = Optional.of("");
+        Optional<List<String>> maybeOutput = Optional.of(new ArrayList<String>());
         for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
                 return maybeCompiled.map(compiled -> {
-                    return merger.apply(output, compiled);
+                    output.add(compiled);
+                    return output;
                 });
             });
         }
-
         return maybeOutput;
+    }
+
+    private static String generateAll(BiFunction<String, String, String> merger, List<String> output) {
+        String cache = "";
+        for (String element : output) {
+            cache = merger.apply(cache, element);
+        }
+        return cache;
     }
 
     private static String mergeStatements(String output, String compiled) {
@@ -202,7 +216,7 @@ public class Main {
         int valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
             return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
-                    .map(value -> "\n\t" + value + ";");
+                    .map(Main::formatStatement);
         }
         else {
             return Optional.empty();
@@ -220,11 +234,15 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(node -> node.value).map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice).map(node -> node.value).map(Main::formatStatement);
         }
         else {
             return Optional.empty();
         }
+    }
+
+    private static String formatStatement(String inner) {
+        return "\n\t" + inner + ";";
     }
 
     private static Optional<String> compileMethod(String input, String structName) {
@@ -233,10 +251,10 @@ public class Main {
             return Optional.empty();
         }
 
-        String definition = input.substring(0, paramStart).strip();
-        return compileDefinition(definition)
-                .or(() -> compileConstructorHeader(structName, definition))
-                .flatMap(outputDefinition -> {
+        String beforeParamsString = input.substring(0, paramStart).strip();
+        return compileDefinition(beforeParamsString)
+                .or(() -> compileConstructorHeader(structName, beforeParamsString))
+                .flatMap(beforeName -> {
                     String withParams = input.substring(paramStart + "(".length());
                     int paramEnd = withParams.indexOf(")");
                     if (paramEnd < 0) {
@@ -252,13 +270,36 @@ public class Main {
                         }
 
                         String content = withBraces.substring(1, withBraces.length() - 1);
-                        return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                            String generated = outputDefinition.value + "(" + outputParams + "){" + outputContent + "\n}\n";
-                            methods.add(generated);
-                            return Optional.of("");
-                        });
+                        return parseStatements(content)
+                                .map(statements -> modifyMethodBody(structName, beforeName, statements))
+                                .map(Main::generateStatements).flatMap(outputContent -> {
+                                    String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                    methods.add(generated);
+                                    return Optional.of("");
+                                });
                     });
                 });
+    }
+
+    private static List<String> modifyMethodBody(String structName, Node beforeName, List<String> statements) {
+        if (beforeName.type.equals("constructor-header")) {
+            List<String> copy = new ArrayList<>();
+            copy.add(formatStatement("struct " + structName + " this"));
+            copy.addAll(statements);
+            copy.add(formatStatement("return this"));
+            return copy;
+        }
+        else {
+            return statements;
+        }
+    }
+
+    private static String generateStatements(List<String> output) {
+        return generateAll(Main::mergeStatements, output);
+    }
+
+    private static Optional<List<String>> parseStatements(String content) {
+        return parseAll(content, Main::foldStatementChar, Main::compileStatementOrBlock);
     }
 
     private static Optional<Node> compileConstructorHeader(String structName, String definition) {
@@ -368,7 +409,7 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileStatementValue(slice).map(result -> "\n\t" + result + ";");
+            return compileStatementValue(slice).map(result -> formatStatement(result));
         }
 
         return Optional.empty();

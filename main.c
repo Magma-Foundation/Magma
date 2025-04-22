@@ -18,9 +18,11 @@ struct Main {
 	List<char*> methods;
 }
 struct State new_State(List<char*> segments, char* buffer, int depth){
+	struct State this;
 	this.segments = segments;
 	this.buffer = buffer;
 	this.depth = depth;
+	return this;
 }
 /* public */ State(){
 	/* this(new ArrayList<>(), "", 0) */;
@@ -76,6 +78,10 @@ Optional<char*> compileAll(char* input, /*
             BiFunction<State */, /*  Character */, /* State> */ folder, /* 
             Function<String */, Optional</* String> */> compiler, /* 
             BiFunction<String */, /*  String */, /* String> */ merger){
+	/* return parseAll(input, folder, compiler)
+                .map(output -> generateAll(merger, output)) */;
+}
+Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, Optional</* String> */> compiler){
 	/* State state */ = /* new State() */;
 	/* for (int i */ = /* 0 */;
 	/* i < input.length() */;
@@ -103,16 +109,24 @@ Optional<char*> compileAll(char* input, /*
         } */
 	/* state.advance() */;
 	/* List<String> segments */ = state.segments;
-	/* Optional<String> maybeOutput */ = Optional.of("");
+	/* Optional<List<String>> maybeOutput */ = Optional.of(new ArrayList<String>());
 	/* for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
                 return maybeCompiled.map(compiled -> {
-                    return merger.apply(output, compiled);
+                    output.add(compiled);
+                    return output;
                 });
             });
         } */
 	/* return maybeOutput */;
+}
+char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, List<char*> output){
+	/* String cache */ = /* "" */;
+	/* for (String element : output) {
+            cache = merger.apply(cache, element);
+        } */
+	/* return cache */;
 }
 char* mergeStatements(char* output, char* compiled){
 	/* return output + compiled */;
@@ -182,7 +196,7 @@ Optional<char*> compileInitialization(char* input){
 	/* int valueSeparator */ = input.indexOf("=");
 	/* if (valueSeparator >= 0) {
             return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
-                    .map(value -> "\n\t" + value + ";");
+                    .map(Main::formatStatement);
         } */
 	/* else {
             return Optional.empty();
@@ -199,21 +213,25 @@ Optional<char*> compileDefinitionStatement(char* input){
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(node -> node.value).map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice).map(node -> node.value).map(Main::formatStatement);
         } */
 	/* else {
             return Optional.empty();
         } */
+}
+char* formatStatement(char* inner){
+	/* return "\n\t" + inner + " */;
+	/* " */;
 }
 Optional<char*> compileMethod(char* input, char* structName){
 	/* int paramStart */ = input.indexOf("(");
 	/* if (paramStart < 0) {
             return Optional.empty();
         } */
-	/* String definition */ = input.substring(0, paramStart).strip();
-	/* return compileDefinition(definition)
-                .or(() -> compileConstructorHeader(structName, definition))
-                .flatMap(outputDefinition -> {
+	/* String beforeParamsString */ = input.substring(0, paramStart).strip();
+	/* return compileDefinition(beforeParamsString)
+                .or(() -> compileConstructorHeader(structName, beforeParamsString))
+                .flatMap(beforeName -> {
                     String withParams = input.substring(paramStart + "(".length());
                     int paramEnd = withParams.indexOf(")");
                     if (paramEnd < 0) {
@@ -229,14 +247,34 @@ Optional<char*> compileMethod(char* input, char* structName){
                         }
 
                         String content = withBraces.substring(1, withBraces.length() - 1);
-                        return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                            String generated = outputDefinition.value + "(" + outputParams + "){" + outputContent + "\n}\n";
-                            methods.add(generated);
-                            return Optional.of("");
-                        });
+                        return parseStatements(content)
+                                .map(statements -> modifyMethodBody(structName, beforeName, statements))
+                                .map(Main::generateStatements).flatMap(outputContent -> {
+                                    String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                    methods.add(generated);
+                                    return Optional.of("");
+                                });
                     });
                 } */
 	/* ) */;
+}
+List<char*> modifyMethodBody(char* structName, /* Node */ beforeName, List<char*> statements){
+	/* if (beforeName.type.equals("constructor-header")) {
+            ArrayList<String> copy = new ArrayList<>();
+            copy.add(formatStatement("struct " + structName + " this"));
+            copy.addAll(statements);
+            copy.add(formatStatement("return this"));
+            return copy;
+        } */
+	/* else {
+            return statements;
+        } */
+}
+char* generateStatements(List<char*> output){
+	/* return generateAll(Main::mergeStatements, output) */;
+}
+Optional<List<char*>> parseStatements(char* content){
+	/* return parseAll(content, Main::foldStatementChar, Main::compileStatementOrBlock) */;
 }
 Optional</* Node */> compileConstructorHeader(char* structName, char* definition){
 	/* String stripped0 */ = definition.strip();
@@ -330,7 +368,7 @@ Optional<char*> compileStatement(char* input){
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileStatementValue(slice).map(result -> "\n\t" + result + ";");
+            return compileStatementValue(slice).map(result -> formatStatement(result));
         } */
 	/* return Optional.empty() */;
 }
