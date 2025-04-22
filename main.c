@@ -24,13 +24,13 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	this.depth = depth;
 	return this;
 }
-/* State */ createInitial(){
+struct State createInitial(){
 	/* return new State(new ArrayList<>(), "", 0) */;
 }
-/* boolean */ isLevel(){
+struct boolean isLevel(){
 	/* return this */.depth = /* = 0 */;
 }
-/* boolean */ isShallow(){
+struct boolean isShallow(){
 	/* return this */.depth = /* = 1 */;
 }
 void advance(){
@@ -43,10 +43,10 @@ void exit(){
 void enter(){
 	this.depth = this.depth + 1;
 }
-void append(/* char */ c){
+void append(struct char c){
 	this.buffer = this.buffer + c;
 }
-/* record */ Node(char* type, char* value){
+struct record Node(char* type, char* value){
 }
 void __main__(/* String[] */ args){
 	/* try {
@@ -131,7 +131,7 @@ char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, 
 char* mergeStatements(char* output, char* compiled){
 	/* return output + compiled */;
 }
-/* State */ foldStatementChar(/* State */ state, /* char */ c){
+struct State foldStatementChar(struct State state, struct char c){
 	/* state.append(c) */;
 	/* if (c == ';' && state.isLevel()) {
             state.advance();
@@ -258,7 +258,7 @@ Optional<char*> compileMethod(char* input, char* structName){
                 } */
 	/* ) */;
 }
-List<char*> modifyMethodBody(char* structName, /* Node */ beforeName, List<char*> statements){
+List<char*> modifyMethodBody(char* structName, struct Node beforeName, List<char*> statements){
 	/* if (beforeName.type.equals("constructor-header")) {
             List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
@@ -276,7 +276,7 @@ char* generateStatements(List<char*> output){
 Optional<List<char*>> parseStatements(char* content){
 	/* return parseAll(content, Main::foldStatementChar, Main::compileStatementOrBlock) */;
 }
-Optional</* Node */> compileConstructorHeader(char* structName, char* definition){
+Optional<struct Node> compileConstructorHeader(char* structName, char* definition){
 	/* String stripped0 */ = definition.strip();
 	/* int index */ = /* stripped0 */.lastIndexOf(" ");
 	/* if (index >= 0) {
@@ -290,7 +290,7 @@ Optional</* Node */> compileConstructorHeader(char* structName, char* definition
 Optional<char*> compileAllValues(char* inputParams, /*  Function<String */, Optional</* String> */> compiler){
 	/* return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues) */;
 }
-/* State */ foldValueChar(/* State */ state, /* char */ c){
+struct State foldValueChar(struct State state, struct char c){
 	/* if (c == ',') {
             state.advance();
         } */
@@ -305,7 +305,7 @@ char* mergeValues(char* cache, char* element){
         } */
 	/* return cache + ", " + element */;
 }
-Optional</* Node */> compileDefinition(char* input){
+Optional<struct Node> compileDefinition(char* input){
 	/* String stripped */ = input.strip();
 	/* int nameSeparator */ = stripped.lastIndexOf(" ");
 	/* if (nameSeparator < 0) {
@@ -356,6 +356,9 @@ Optional<char*> compileType(char* type){
                 return compileAllValues(arguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
             }
         } */
+	/* if (isSymbol(stripped)) {
+            return Optional.of("struct " + stripped);
+        } */
 	/* return Optional.of(generatePlaceholder(stripped)) */;
 }
 Optional<char*> compileStatementOrBlock(char* input){
@@ -395,7 +398,7 @@ char* compileValue(char* input){
         } */
 	/* return generatePlaceholder(stripped) */;
 }
-/* boolean */ isSymbol(char* input){
+struct boolean isSymbol(char* input){
 	/* for (int i */ = /* 0 */;
 	/* i < input.length() */;
 	/* i++) {
