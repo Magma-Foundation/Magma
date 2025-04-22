@@ -273,7 +273,11 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return divide(input, Main::fold)
+        return compileStatements(input) + "int main(){\n\t__main__();\n\treturn 0;\n}\n";
+    }
+
+    private static String compileStatements(String input) {
+        return divide(input, Main::foldStatementChar)
                 .iter()
                 .map(Main::compileRootSegment)
                 .collect(new Joiner())
@@ -290,7 +294,7 @@ public class Main {
         return current.segments;
     }
 
-    private static State fold(State state, char c) {
+    private static State foldStatementChar(State state, char c) {
         state.append(c);
         if (c == ';' && state.isLevel()) {
             state.advance();
