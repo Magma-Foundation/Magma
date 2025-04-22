@@ -17,11 +17,11 @@ struct Main {
 	List<char*> structs;
 	List<char*> methods;
 }
-/* private */ State(List<char*> segments, char* buffer, int depth){/* 
+/* private */ new_State(List<char*> segments, char* buffer, int depth){/* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; *//* 
-         */}/* public */ State(/*  */){/* 
+         */}/* public */ new_State(/*  */){/* 
             this(new ArrayList<>(), "", 0); *//* 
          */}/* boolean */ isLevel(/*  */){/* 
             return this.depth == 0; *//* 
@@ -135,24 +135,24 @@ struct Main {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
-        String outputContent = compileAllStatements(inputContent, Main::compileClassSegment); *//* 
+        String outputContent = compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name)); *//* 
         if (!isSymbol(name)) {
             return Optional.empty();
         } *//* 
         String generated = "struct " + name + " {" + outputContent + "\n} *//* \n"; *//* 
         structs.add(generated); *//* 
         return Optional.of(""); *//* 
-     */}char* compileClassSegment(char* input){/* 
+     */}char* compileClassSegment(char* input, char* structName){/* 
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input)); *//* 
      */}Optional<char*> compileInitialization(char* input){/* 
         int valueSeparator = input.indexOf("="); *//* 
         if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator))
+            return compileDefinition(input.substring(0, valueSeparator), "temp")
                     .map(value -> "\n\t" + value + ";");
         } *//* 
         else {
@@ -167,24 +167,24 @@ struct Main {
         String stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice, "temp").map(inner -> "\n\t" + inner + ";");
         } *//* 
         else {
             return Optional.empty();
         } *//* 
-     */}Optional<char*> compileMethod(char* input){/* 
+     */}Optional<char*> compileMethod(char* input, char* structName){/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) {
             return Optional.empty();
         } *//* 
 
         String definition = input.substring(0, paramStart).strip(); *//* 
-        return compileDefinition(definition).flatMap(outputDefinition -> {
+        return compileDefinition(definition, structName).flatMap(outputDefinition -> {
             String withParams = input.substring(paramStart + "(".length());
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
-                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
+                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param, structName).orElseGet(() -> generatePlaceholder(param)));
 
                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -213,7 +213,7 @@ struct Main {
             return element;
         } *//* 
         return cache + ", " + element; *//* 
-     */}Optional<char*> compileDefinition(char* input){/* 
+     */}Optional<char*> compileDefinition(char* input, char* structName){/* 
         String stripped = input.strip(); *//* 
         int nameSeparator = stripped.lastIndexOf(" "); *//* 
         if (nameSeparator < 0) {
@@ -226,7 +226,17 @@ struct Main {
             return Optional.empty();
         } *//* 
 
-        String newName = oldName.equals("main") ? "__main__" : oldName; *//* 
+        String newName; *//* 
+        if (oldName.equals("main")) {
+            newName = "__main__";
+        } *//* 
+        else if (oldName.equals(structName)) {
+            newName = "new_" + oldName;
+        } *//* 
+        else {
+            newName = oldName;
+        } *//* 
+
         int typeSeparator = beforeName.lastIndexOf(" "); *//* 
         String type = typeSeparator >= 0
                 ? beforeName.substring(typeSeparator + " ".length())

@@ -168,7 +168,7 @@ public class Main {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        String outputContent = compileAllStatements(inputContent, Main::compileClassSegment);
+        String outputContent = compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name));
         if (!isSymbol(name)) {
             return Optional.empty();
         }
@@ -177,10 +177,10 @@ public class Main {
         return Optional.of("");
     }
 
-    private static String compileClassSegment(String input) {
+    private static String compileClassSegment(String input, String structName) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
-                .or(() -> compileMethod(input))
+                .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
@@ -189,7 +189,7 @@ public class Main {
     private static Optional<String> compileInitialization(String input) {
         int valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator))
+            return compileDefinition(input.substring(0, valueSeparator), "temp")
                     .map(value -> "\n\t" + value + ";");
         }
         else {
@@ -208,26 +208,26 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice, "temp").map(inner -> "\n\t" + inner + ";");
         }
         else {
             return Optional.empty();
         }
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<String> compileMethod(String input, String structName) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return Optional.empty();
         }
 
         String definition = input.substring(0, paramStart).strip();
-        return compileDefinition(definition).flatMap(outputDefinition -> {
+        return compileDefinition(definition, structName).flatMap(outputDefinition -> {
             String withParams = input.substring(paramStart + "(".length());
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
-                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
+                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param, structName).orElseGet(() -> generatePlaceholder(param)));
 
                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -264,7 +264,7 @@ public class Main {
         return cache + ", " + element;
     }
 
-    private static Optional<String> compileDefinition(String input) {
+    private static Optional<String> compileDefinition(String input, String structName) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -277,7 +277,17 @@ public class Main {
             return Optional.empty();
         }
 
-        String newName = oldName.equals("main") ? "__main__" : oldName;
+        String newName;
+        if (oldName.equals("main")) {
+            newName = "__main__";
+        }
+        else if (oldName.equals(structName)) {
+            newName = "new_" + oldName;
+        }
+        else {
+            newName = oldName;
+        }
+
         int typeSeparator = beforeName.lastIndexOf(" ");
         String type = typeSeparator >= 0
                 ? beforeName.substring(typeSeparator + " ".length())
