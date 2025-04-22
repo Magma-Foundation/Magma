@@ -10,6 +10,7 @@
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
+/* import java.util.stream.Collectors; */
 struct Node {
 }
 struct State {
@@ -18,8 +19,11 @@ struct State {
 	int depth;
 }
 struct Definition {
+	List<char*> modifiers;
+	char* value;
 }
 struct ConstructorHeader {
+	char* value;
 }
 struct Main {
 	List<char*> structs;
@@ -179,9 +183,25 @@ Optional<char*> compileStructured(char* input, char* infix){
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
 
         int paramStart = beforeContent.indexOf("(");
-        String name = paramStart >= 0
-                ? beforeContent.substring(0, paramStart).strip()
-                : beforeContent;
+        String name;
+        List<String> recordParameters;
+        if (paramStart >= 0) {
+            name = beforeContent.substring(0, paramStart).strip();
+            String withEnd = beforeContent.substring(paramStart + "(".length());
+            int paramEnd = withEnd.indexOf(")");
+            if (paramEnd >= 0) {
+                String paramString = withEnd.substring(0, paramEnd).strip();
+                recordParameters = parseParameters(paramString).orElse(Collections.emptyList());
+            }
+            else {
+                name = beforeContent;
+                recordParameters = Collections.emptyList();
+            }
+        }
+        else {
+            name = beforeContent;
+            recordParameters = Collections.emptyList();
+        }
 
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
@@ -189,11 +209,17 @@ Optional<char*> compileStructured(char* input, char* infix){
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "} */
 	/* ".length()) */;
-	/* return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
-            if (!isSymbol(name)) {
+	/* String finalName */ = name;
+	/* return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
+            if (!isSymbol(finalName)) {
                 return Optional.empty();
             }
-            String generated = "struct " + name + " {" + outputContent + "\n}\n";
+
+            String joined = recordParameters.stream()
+                    .map(Main::formatStatement)
+                    .collect(Collectors.joining());
+
+            String generated = "struct " + finalName + " {" + joined + outputContent + "\n}\n";
             structs.add(generated);
             return Optional.of("");
         } */
@@ -264,7 +290,7 @@ Optional<char*> compileMethod(char* input, char* structName){
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
-                    return parseAllValues(inputParams, Main::compileParam)
+                    return parseParameters(inputParams)
                             .map(params -> {
                                 if (beforeName instanceof Definition definition) {
                                     if (!definition.modifiers.contains("static")) {
@@ -301,6 +327,9 @@ Optional<char*> compileMethod(char* input, char* structName){
                             });
                 } */
 	/* ) */;
+}
+Optional<List<char*>> parseParameters(char* inputParams){
+	return /* parseAllValues(inputParams, Main::compileParam) */;
 }
 Optional<char*> compileMethodBeforeName(struct Node node){
 	/* if (node instanceof Definition definition) {

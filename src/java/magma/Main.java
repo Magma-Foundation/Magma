@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
     interface Node {
@@ -202,20 +203,42 @@ public class Main {
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
 
         int paramStart = beforeContent.indexOf("(");
-        String name = paramStart >= 0
-                ? beforeContent.substring(0, paramStart).strip()
-                : beforeContent;
+        String name;
+        List<String> recordParameters;
+        if (paramStart >= 0) {
+            name = beforeContent.substring(0, paramStart).strip();
+            String withEnd = beforeContent.substring(paramStart + "(".length());
+            int paramEnd = withEnd.indexOf(")");
+            if (paramEnd >= 0) {
+                String paramString = withEnd.substring(0, paramEnd).strip();
+                recordParameters = parseParameters(paramString).orElse(Collections.emptyList());
+            }
+            else {
+                name = beforeContent;
+                recordParameters = Collections.emptyList();
+            }
+        }
+        else {
+            name = beforeContent;
+            recordParameters = Collections.emptyList();
+        }
 
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
-            if (!isSymbol(name)) {
+        String finalName = name;
+        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
+            if (!isSymbol(finalName)) {
                 return Optional.empty();
             }
-            String generated = "struct " + name + " {" + outputContent + "\n}\n";
+
+            String joined = recordParameters.stream()
+                    .map(Main::formatStatement)
+                    .collect(Collectors.joining());
+
+            String generated = "struct " + finalName + " {" + joined + outputContent + "\n}\n";
             structs.add(generated);
             return Optional.of("");
         });
@@ -292,7 +315,7 @@ public class Main {
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
-                    return parseAllValues(inputParams, Main::compileParam)
+                    return parseParameters(inputParams)
                             .map(params -> {
                                 if (beforeName instanceof Definition definition) {
                                     if (!definition.modifiers.contains("static")) {
@@ -328,6 +351,10 @@ public class Main {
                                         });
                             });
                 });
+    }
+
+    private static Optional<List<String>> parseParameters(String inputParams) {
+        return parseAllValues(inputParams, Main::compileParam);
     }
 
     private static Optional<String> compileMethodBeforeName(Node node) {
