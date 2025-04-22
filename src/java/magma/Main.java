@@ -468,7 +468,9 @@ public class Main {
         if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
             String property = stripped.substring(lastSeparator + ".".length());
-            return compileValue(parent) + "." + property;
+            if (isSymbol(property)) {
+                return compileValue(parent) + "." + property;
+            }
         }
 
         if (isNumber(stripped)) {

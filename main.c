@@ -28,23 +28,23 @@ struct State createInitial(){
 	return new_State(new_ArrayList<>(), "", 0);
 }
 struct boolean isLevel(){
-	return this.depth == 0;
+	return /* this.depth == 0 */;
 }
 struct boolean isShallow(){
-	return this.depth == 1;
+	return /* this.depth == 1 */;
 }
 void advance(){
 	/* this.segments.add(this.buffer) */;
 	this.buffer = "";
 }
 void exit(){
-	this.depth = this.depth - 1;
+	this.depth = /* this.depth - 1 */;
 }
 void enter(){
-	this.depth = this.depth + 1;
+	this.depth = /* this.depth + 1 */;
 }
 void append(struct char c){
-	this.buffer = this.buffer + c;
+	this.buffer = /* this.buffer + c */;
 }
 struct record Node(char* type, char* value){
 }
@@ -66,9 +66,9 @@ void __main__(/* String[] */ args){
         } */
 }
 char* compile(char* input){
-	/* String output */ = /* compileAllStatements(input, Main::compileRootSegment) */.orElse("");
-	/* String joinedStructs */ = String.join("", structs);
-	/* String joinedMethods */ = String.join("", methods);
+	/* String output */ = /* compileAllStatements(input, Main::compileRootSegment).orElse("") */;
+	/* String joinedStructs */ = /* String.join("", structs) */;
+	/* String joinedMethods */ = /* String.join("", methods) */;
 	return /* output + joinedStructs + joinedMethods */;
 }
 Optional<char*> compileAllStatements(char* input, /*  Function<String */, Optional</* String> */> compiler){
@@ -78,10 +78,11 @@ Optional<char*> compileAll(char* input, /*
             BiFunction<State */, /*  Character */, /* State> */ folder, /* 
             Function<String */, Optional</* String> */> compiler, /* 
             BiFunction<String */, /*  String */, /* String> */ merger){
-	return /* parseAll(input, folder, compiler) */.map(output -> generateAll(merger, output));
+	return /* parseAll(input, folder, compiler)
+                .map(output -> generateAll(merger, output)) */;
 }
 Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, Optional</* String> */> compiler){
-	/* State state */ = State.createInitial();
+	/* State state */ = /* State.createInitial() */;
 	/* for (int i */ = 0;
 	/* i < input.length() */;
 	/* i++) {
@@ -108,7 +109,7 @@ Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Charact
         } */
 	/* state.advance() */;
 	/* List<String> segments */ = state.segments;
-	/* Optional<List<String>> maybeOutput */ = Optional.of(new ArrayList<String>());
+	/* Optional<List<String>> maybeOutput */ = /* Optional.of(new ArrayList<String>()) */;
 	/* for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
@@ -153,14 +154,15 @@ Optional<char*> compileRootSegment(char* input){
 	/* if (input.isBlank()) {
             return Optional.of("");
         } */
-	return /* compileClass(input) */.or(() -> Optional.of(generatePlaceholder(input.strip()) + "\n"));
+	return /* compileClass(input)
+                .or(() -> Optional.of(generatePlaceholder(input.strip()) + "\n")) */;
 }
 Optional<char*> compileClass(char* input){
-	/* int classIndex */ = input.indexOf("class ");
+	/* int classIndex */ = /* input.indexOf("class ") */;
 	/* if (classIndex < 0) {
             return Optional.empty();
         } */
-	/* String afterKeyword */ = input.substring(classIndex + "class ".length());
+	/* String afterKeyword */ = /* input.substring(classIndex + "class ".length()) */;
 	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
@@ -183,10 +185,15 @@ Optional<char*> compileClass(char* input){
 	/* ) */;
 }
 Optional<char*> compileClassSegment(char* input, char* structName){
-	return /* compileWhitespace(input) */.or(() -> compileClass(input)).or(() -> compileMethod(input, structName)).or(() -> compileInitialization(input)).or(() -> compileDefinitionStatement(input)).or(() -> Optional.of(generatePlaceholder(input)));
+	return /* compileWhitespace(input)
+                .or(() -> compileClass(input))
+                .or(() -> compileMethod(input, structName))
+                .or(() -> compileInitialization(input))
+                .or(() -> compileDefinitionStatement(input))
+                .or(() -> Optional.of(generatePlaceholder(input))) */;
 }
 Optional<char*> compileInitialization(char* input){
-	/* int valueSeparator */ = input.indexOf("=");
+	/* int valueSeparator */ = /* input.indexOf("=") */;
 	/* if (valueSeparator >= 0) {
             return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
                     .map(Main::formatStatement);
@@ -199,10 +206,10 @@ Optional<char*> compileWhitespace(char* input){
 	/* if (input.isBlank()) {
             return Optional.of("");
         } */
-	return Optional.empty();
+	return /* Optional.empty() */;
 }
 Optional<char*> compileDefinitionStatement(char* input){
-	/* String stripped */ = input.strip();
+	/* String stripped */ = /* input.strip() */;
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
@@ -217,11 +224,11 @@ char* formatStatement(char* inner){
 	/* " */;
 }
 Optional<char*> compileMethod(char* input, char* structName){
-	/* int paramStart */ = input.indexOf("(");
+	/* int paramStart */ = /* input.indexOf("(") */;
 	/* if (paramStart < 0) {
             return Optional.empty();
         } */
-	/* String beforeParamsString */ = input.substring(0, paramStart).strip();
+	/* String beforeParamsString */ = /* input.substring(0, paramStart).strip() */;
 	/* return compileDefinition(beforeParamsString)
                 .or(() -> compileConstructorHeader(structName, beforeParamsString))
                 .flatMap(beforeName -> {
@@ -270,15 +277,15 @@ Optional<List<char*>> parseStatements(char* content){
 	return /* parseAll(content, Main::foldStatementChar, Main::compileStatementOrBlock) */;
 }
 Optional<struct Node> compileConstructorHeader(char* structName, char* definition){
-	/* String stripped0 */ = definition.strip();
-	/* int index */ = /* stripped0 */.lastIndexOf(" ");
+	/* String stripped0 */ = /* definition.strip() */;
+	/* int index */ = /* stripped0.lastIndexOf(" ") */;
 	/* if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
                 return Optional.of(new Node("constructor-header", "struct " + structName + " new_" + structName));
             }
         } */
-	return Optional.empty();
+	return /* Optional.empty() */;
 }
 Optional<char*> compileAllValues(char* inputParams, /*  Function<String */, Optional</* String> */> compiler){
 	return /* compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues) */;
@@ -304,13 +311,13 @@ char* mergeValues(char* cache, char* element){
 	return /* cache + ", " + element */;
 }
 Optional<struct Node> compileDefinition(char* input){
-	/* String stripped */ = input.strip();
-	/* int nameSeparator */ = stripped.lastIndexOf(" ");
+	/* String stripped */ = /* input.strip() */;
+	/* int nameSeparator */ = /* stripped.lastIndexOf(" ") */;
 	/* if (nameSeparator < 0) {
             return Optional.empty();
         } */
-	/* String beforeName */ = stripped.substring(0, nameSeparator).strip();
-	/* String oldName */ = stripped.substring(nameSeparator + " ".length()).strip();
+	/* String beforeName */ = /* stripped.substring(0, nameSeparator).strip() */;
+	/* String oldName */ = /* stripped.substring(nameSeparator + " ".length()).strip() */;
 	/* if (!isSymbol(oldName)) {
             return Optional.empty();
         } */
@@ -321,10 +328,10 @@ Optional<struct Node> compileDefinition(char* input){
 	/* else {
             newName = oldName;
         } */
-	/* int typeSeparator */ = beforeName.lastIndexOf(" ");
+	/* int typeSeparator */ = /* beforeName.lastIndexOf(" ") */;
 	/* String type */ = /* typeSeparator >= 0
-                ? beforeName */.substring(typeSeparator + " ".length())
-                : beforeName;
+                ? beforeName.substring(typeSeparator + " ".length())
+                : beforeName */;
 	/* return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
             return Optional.of(new Node("definition", outputDefinition));
@@ -332,7 +339,7 @@ Optional<struct Node> compileDefinition(char* input){
 	/* ) */;
 }
 Optional<char*> compileType(char* type){
-	/* String stripped */ = type.strip();
+	/* String stripped */ = /* type.strip() */;
 	/* if (stripped.equals("private") || stripped.equals("public")) {
             return Optional.empty();
         } */
@@ -357,37 +364,39 @@ Optional<char*> compileType(char* type){
 	/* if (isSymbol(stripped)) {
             return Optional.of("struct " + stripped);
         } */
-	return Optional.of(generatePlaceholder(stripped));
+	return /* Optional.of(generatePlaceholder(stripped)) */;
 }
 Optional<char*> compileStatementOrBlock(char* input){
-	return /* compileWhitespace(input) */.or(() -> compileStatement(input)).or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip())));
+	return /* compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip()))) */;
 }
 Optional<char*> compileStatement(char* input){
-	/* String stripped */ = input.strip();
+	/* String stripped */ = /* input.strip() */;
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
             return compileStatementValue(slice).map(result -> formatStatement(result));
         } */
-	return Optional.empty();
+	return /* Optional.empty() */;
 }
 Optional<char*> compileStatementValue(char* input){
-	/* String stripped */ = input.strip();
+	/* String stripped */ = /* input.strip() */;
 	/* if (stripped.startsWith("return ")) {
             String slice = stripped.substring("return ".length());
             return Optional.of("return " + compileValue(slice));
         } */
-	/* int valueSeparator */ = stripped.indexOf("=");
+	/* int valueSeparator */ = /* stripped.indexOf("=") */;
 	/* if (valueSeparator >= 0) {
             String destination = stripped.substring(0, valueSeparator).strip();
             String source = stripped.substring(valueSeparator + "=".length()).strip();
 
             return Optional.of(compileValue(destination) + " = " + compileValue(source));
         } */
-	return Optional.of(generatePlaceholder(stripped));
+	return /* Optional.of(generatePlaceholder(stripped)) */;
 }
 char* compileValue(char* input){
-	/* String stripped */ = input.strip();
+	/* String stripped */ = /* input.strip() */;
 	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return stripped;
         } */
@@ -406,11 +415,13 @@ char* compileValue(char* input){
                 }
             }
         } */
-	/* int lastSeparator */ = stripped.lastIndexOf(".");
+	/* int lastSeparator */ = /* stripped.lastIndexOf(".") */;
 	/* if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
             String property = stripped.substring(lastSeparator + ".".length());
-            return compileValue(parent) + "." + property;
+            if (isSymbol(property)) {
+                return compileValue(parent) + "." + property;
+            }
         } */
 	/* if (isNumber(stripped)) {
             return stripped;
