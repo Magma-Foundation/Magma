@@ -10,7 +10,7 @@ import java.util.function.Function; *//*
 
 public  */struct Main {
 }
-/* private static final List<String> methods = new ArrayList<> */(/* ); *//* public static void main */(/* String[] args) {
+/* private static final List<String> methods = new ArrayList<> */(/*  *//* ; *//* public static void main */(/* String[] args *//* {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -87,9 +87,15 @@ public  */struct Main {
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
             String withParams = input.substring(paramStart + "(".length());
-            String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(withParams);
-            methods.add(generated);
-            return "";
+            int paramEnd = withParams.indexOf(")".toString());
+            if (paramEnd >= 0) {
+                String params = withParams.substring(0, paramEnd).strip();
+                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+
+                String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
+                methods.add(generated);
+                return "";
+            }
         }
 
         return generatePlaceholder(input);
@@ -97,5 +103,4 @@ public  */struct Main {
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */";
-    }
- */
+    } */

@@ -88,9 +88,15 @@ public class Main {
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
             String withParams = input.substring(paramStart + "(".length());
-            String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(withParams);
-            methods.add(generated);
-            return "";
+            int paramEnd = withParams.indexOf(")".toString());
+            if (paramEnd >= 0) {
+                String params = withParams.substring(0, paramEnd).strip();
+                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+
+                String generated = generatePlaceholder(definition) + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
+                methods.add(generated);
+                return "";
+            }
         }
 
         return generatePlaceholder(input);
