@@ -8,16 +8,15 @@
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
-struct State {/* private final List<String> segments; *//* 
-        private StringBuilder buffer; *//* 
-        private int depth; *//* 
-     */
+struct State {
+	/* List<String> */ segments;
+	/* StringBuilder */ buffer;
+	/* int */ depth;
 }
 struct Main {/* 
 
     public static final List<String> structs = new ArrayList<>(); *//* 
-    private static final List<String> methods = new ArrayList<>(); *//* 
- */
+    private static final List<String> methods = new ArrayList<>(); */
 }
 /* private */ State(/* List<String> */ segments, /* StringBuilder */ buffer, /* int */ depth){/* 
             this.segments = segments; *//* 
@@ -146,9 +145,25 @@ struct Main {/*
         structs.add(generated); *//* 
         return Optional.of(""); *//* 
      */}/* String */ compileClassSegment(/* String */ input){/* 
-        return compileClass(input)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input))
                 .or(() -> compileMethod(input))
+                .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input)); *//* 
+     */}/* Optional<String> */ compileWhitespace(/* String */ input){/* 
+        if (input.isBlank()) {
+            return Optional.of("");
+        } *//* 
+        return Optional.empty(); *//* 
+     */}/* Optional<String> */ compileDefinitionStatement(/* String */ input){/* 
+        String stripped = input.strip(); *//* 
+        if (stripped.endsWith("; *//* ")) {
+            String slice = stripped.substring(0, stripped.length() - ";".length());
+            return compileDefinition(slice).map(inner -> "\n\t" + inner + ";");
+        } *//* 
+        else {
+            return Optional.empty();
+        } *//* 
      */}/* Optional<String> */ compileMethod(/* String */ input){/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) {

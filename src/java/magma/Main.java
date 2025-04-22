@@ -179,9 +179,29 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input))
                 .or(() -> compileMethod(input))
+                .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileDefinitionStatement(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String slice = stripped.substring(0, stripped.length() - ";".length());
+            return compileDefinition(slice).map(inner -> "\n\t" + inner + ";");
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileMethod(String input) {
