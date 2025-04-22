@@ -182,24 +182,29 @@ Optional<char*> compileStructured(char* input, char* infix){
         }
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
 
-        int paramStart = beforeContent.indexOf("(");
+        int permitsIndex = beforeContent.indexOf(" permits ");
+        String beforeContent1 = permitsIndex >= 0
+                ? beforeContent.substring(0, permitsIndex).strip()
+                : beforeContent;
+
+        int paramStart = beforeContent1.indexOf("(");
         String name;
         List<String> recordParameters;
         if (paramStart >= 0) {
-            name = beforeContent.substring(0, paramStart).strip();
-            String withEnd = beforeContent.substring(paramStart + "(".length());
+            name = beforeContent1.substring(0, paramStart).strip();
+            String withEnd = beforeContent1.substring(paramStart + "(".length());
             int paramEnd = withEnd.indexOf(")");
             if (paramEnd >= 0) {
                 String paramString = withEnd.substring(0, paramEnd).strip();
                 recordParameters = parseParameters(paramString).orElse(Collections.emptyList());
             }
             else {
-                name = beforeContent;
+                name = beforeContent1;
                 recordParameters = Collections.emptyList();
             }
         }
         else {
-            name = beforeContent;
+            name = beforeContent1;
             recordParameters = Collections.emptyList();
         }
 
