@@ -200,7 +200,7 @@ public class Main {
     private static InfixRule createStructuredRule(String infix) {
         Rule rule = (state1, input1) -> Optional.of(compileAll(state1, input1, Main::compileClassSegment));
         Rule afterKeyword = new InfixRule(new StringRule(), "{", new StripRule(new SuffixRule(rule, "}")), concat("{"));
-        return new InfixRule(new PlaceholderRule(), infix, afterKeyword, (state, s, s2) -> {
+        return new InfixRule(new StripRule(new PlaceholderRule()), infix, afterKeyword, (state, s, s2) -> {
             return new Tuple<>(state.addStruct(s + "struct " + s2), "");
         });
     }

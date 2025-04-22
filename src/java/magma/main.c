@@ -1,6 +1,4 @@
-/* 
-
-    private  */struct DivideState(List<String> segments, StringBuilder buffer, int depth) {/* public static DivideState createEmpty() {
+/* private */struct DivideState(List<String> segments, StringBuilder buffer, int depth) {/* public static DivideState createEmpty() {
             return new DivideState(new ArrayList<>(), new StringBuilder(), 0);
         } *//* 
 
@@ -30,9 +28,7 @@
         public boolean isShallow() {
             return this.depth == 1;
         } *//* 
-     *//* 
-
-    private  */struct State(List<String> structs) {/* public State() {
+     *//* private */struct State(List<String> structs) {/* public State() {
             this(new ArrayList<>());
         } *//* 
 
@@ -41,19 +37,13 @@
             copy.add(struct);
             return new State(copy);
         } *//* 
-     *//* 
-
-    private  */struct Tuple<A, B>(A left, B right) {/*  *//* 
-
-    private  */struct StripRule(Rule mapper) implements Rule {/* @Override
+     *//* private */struct Tuple<A, B>(A left, B right) {/*  *//* private */struct StripRule(Rule mapper) implements Rule {/* @Override
         public Optional<Tuple<State, String>> apply(
                 State state,
                 String input) {
             return this.mapper().apply(state, input.strip());
         } *//* 
-     *//* 
-
-    private  */struct SuffixRule(
+     *//* private */struct SuffixRule(
             Rule mapper, String suffix
     ) implements Rule {/* @Override
         public Optional<Tuple<State, String>> apply(
@@ -65,9 +55,7 @@
             String slice = input.substring(0, input.length() - this.suffix().length());
             return this.mapper().apply(state, slice);
         } *//* 
-     *//* 
-
-    private  */struct InfixRule(
+     *//* private */struct InfixRule(
             Rule leftRule,
             String infix,
             Rule rightRule,
@@ -87,9 +75,7 @@
                 });
             });
         } *//* 
-     *//* 
-
-public  */struct Main {/* private interface TriFunction<A, B, C, D> {
+     *//* public */struct Main {/* private interface TriFunction<A, B, C, D> {
         D apply(A a, B b, C c);
     } *//* 
 
@@ -188,7 +174,7 @@ public  */struct Main {/* private interface TriFunction<A, B, C, D> {
 /* private static InfixRule createStructuredRule(String infix) {
         Rule rule = (state1, input1) -> Optional.of(compileAll(state1, input1, Main::compileClassSegment));
         Rule afterKeyword = new InfixRule(new StringRule(), "{", new StripRule(new SuffixRule(rule, "}")), concat("{"));
-        return new InfixRule(new PlaceholderRule(), infix, afterKeyword, (state, s, s2) -> {
+        return new InfixRule(new StripRule(new PlaceholderRule()), infix, afterKeyword, (state, s, s2) -> {
             return new Tuple<>(state.addStruct(s + "struct " + s2), "");
         });
     }
