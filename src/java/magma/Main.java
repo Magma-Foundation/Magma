@@ -387,7 +387,7 @@ public class Main {
             return Optional.of("char*");
         }
 
-        if (stripped.equals("int")) {
+        if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
         }
 

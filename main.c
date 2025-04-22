@@ -27,10 +27,10 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 struct State createInitial(){
 	return new_State(new_ArrayList<>(), "", 0);
 }
-struct boolean isLevel(){
+int isLevel(){
 	return /* this.depth == 0 */;
 }
-struct boolean isShallow(){
+int isShallow(){
 	return /* this.depth == 1 */;
 }
 void advance(){
@@ -349,7 +349,7 @@ Optional<char*> compileType(char* type){
 	/* if (stripped.equals("String")) {
             return Optional.of("char*");
         } */
-	/* if (stripped.equals("int")) {
+	/* if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
         } */
 	/* if (stripped.endsWith(">")) {
@@ -431,7 +431,7 @@ char* compileValue(char* input){
         } */
 	return /* generatePlaceholder(stripped) */;
 }
-struct boolean isNumber(char* input){
+int isNumber(char* input){
 	/* for (int i */ = 0;
 	/* i < input.length() */;
 	/* i++) {
@@ -443,7 +443,7 @@ struct boolean isNumber(char* input){
         } */
 	return true;
 }
-struct boolean isSymbol(char* input){
+int isSymbol(char* input){
 	/* for (int i */ = 0;
 	/* i < input.length() */;
 	/* i++) {
