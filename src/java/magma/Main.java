@@ -115,10 +115,12 @@ public class Main {
             int nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
                 String type = definition.substring(0, nameSeparator).strip();
-                String name = definition.substring(nameSeparator + " ".length()).strip();
-                String outputDefinition = generatePlaceholder(type) + " " + name;
+                String oldName = definition.substring(nameSeparator + " ".length()).strip();
 
-                if (isSymbol(name)) {
+                if (isSymbol(oldName)) {
+                    String newName = oldName.equals("main") ? "__main__" : oldName;
+                    String outputDefinition = generatePlaceholder(type) + " " + newName;
+
                     String withParams = input.substring(paramStart + "(".length());
                     int paramEnd = withParams.indexOf(")");
                     if (paramEnd >= 0) {
@@ -127,7 +129,8 @@ public class Main {
 
                         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                             String content = withBraces.substring(1, withBraces.length() - 1);
-                            String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + compileAll(content, Main::compileStatementOrBlock);
+                            String outputContent = compileAll(content, Main::compileStatementOrBlock);
+                            String generated = outputDefinition + "(" + generatePlaceholder(params) + "){" + outputContent + "}";
                             methods.add(generated);
                             return "";
                         }
