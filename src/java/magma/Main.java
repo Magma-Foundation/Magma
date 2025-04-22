@@ -350,7 +350,19 @@ public class Main {
     }
 
     private static String compileValue(String input) {
-        return generatePlaceholder(input);
+        String stripped = input.strip();
+        int lastSeparator = stripped.lastIndexOf(".");
+        if (lastSeparator >= 0) {
+            String parent = stripped.substring(0, lastSeparator);
+            String property = stripped.substring(lastSeparator + ".".length());
+            return compileValue(parent) + "." + property;
+        }
+
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static boolean isSymbol(String input) {
