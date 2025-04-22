@@ -98,7 +98,11 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        return compileInfix(input, "class ", (modifiers, afterKeyword) ->
+        return compileStructured(input, "class ");
+    }
+
+    private static Optional<String> compileStructured(String input, String infix) {
+        return compileInfix(input, infix, (modifiers, afterKeyword) ->
                 compileInfix(afterKeyword, "{", (left, withEnd) ->
                         compileStripped(withEnd, withEnd2 ->
                                 compileSuffix(withEnd2, "}", content ->
@@ -109,8 +113,9 @@ public class Main {
                                         })))));
     }
 
-    private static String compileClassSegment(String classSegment) {
-        return generatePlaceholder(classSegment);
+    private static String compileClassSegment(String input) {
+        return compileStructured(input, "record ")
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {

@@ -10,38 +10,39 @@
 /* import java.util.function.Function; */
 /* 
 
-public  */struct Main {/* private record State(List<String> segments, StringBuilder buffer, int depth) {
-        public static State createEmpty() {
+public  */struct Main {/* private  */struct State(List<String> segments, StringBuilder buffer, int depth) {/* public static State createEmpty() {
             return new State(new ArrayList<>(), new StringBuilder(), 0);
-        }
+        } *//* 
 
         private State advance() {
             List<String> copy = new ArrayList<>(this.segments);
             copy.add(this.buffer.toString());
 
             return new State(copy, new StringBuilder(), this.depth);
-        }
+        } *//* 
 
         private State append(char c) {
             return new State(this.segments, this.buffer.append(c), this.depth);
-        }
+        } *//* 
 
         public boolean isLevel() {
             return this.depth == 0;
-        }
+        } *//* 
 
         public State enter() {
             return new State(this.segments, this.buffer, this.depth + 1);
-        }
+        } *//* 
 
         public State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
-        }
+        } *//* 
 
         public boolean isShallow() {
             return this.depth == 1;
-        }
-    } *//* 
+        } *//* 
+     */
+};
+/* 
 
     public static void main(String[] args) {
         try {
@@ -95,22 +96,23 @@ public  */struct Main {/* private record State(List<String> segments, StringBuil
 /* private static String compileRootSegment(String input) {
         return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
     } */
-/* 
-
-    private static Optional<String> compileClass(String input) {
-        return compileInfix(input, " */struct ", (modifiers, afterKeyword) ->
-                compileInfix(afterKeyword, " {/* ", (left, withEnd) ->
+/* private static Optional<String> compileClass(String input) {
+        return compileStructured(input, "class ");
+    } */
+/* private static Optional<String> compileStructured(String input, String infix) {
+        return compileInfix(input, infix, (modifiers, afterKeyword) ->
+                compileInfix(afterKeyword, "{", (left, withEnd) ->
                         compileStripped(withEnd, withEnd2 ->
                                 compileSuffix(withEnd2, "}", content ->
                                         compileStripped(left, name -> {
                                             return Optional.of(generatePlaceholder(modifiers) + "struct " + name + " {" +
                                                     compileAll(content, Main::compileClassSegment) +
-                                                    "\n} *//* ; *//* \n"); *//* 
+                                                    "\n};\n");
                                         })))));
-     */
-};
-/* private static String compileClassSegment(String classSegment) {
-        return generatePlaceholder(classSegment);
+    } */
+/* private static String compileClassSegment(String input) {
+        return compileStructured(input, "record ")
+                .orElseGet(() -> generatePlaceholder(input));
     } */
 /* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         int index = input.indexOf(infix);
