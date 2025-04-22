@@ -315,19 +315,28 @@ public class Main {
             return "";
         }
 
-        if (stripped.startsWith("import ")) {
-            String substring = stripped.substring("import ".length());
-            String right = substring.strip();
-            Optional<String> left = compileSuffix(right, ";", Main::compileImportSegments);
-            if (left.isPresent()) {
-                return left.get();
-            }
+        Optional<String> maybeImport = compilePrefix(stripped, "import ", substring1 -> compileStripped(substring1, right1 -> compileSuffix(right1, ";", Main::compileImportSegments)));
+        if (maybeImport.isPresent()) {
+            return maybeImport.get();
         }
 
         if (stripped.contains("class")) {
             return "struct Temp {\n};\n";
         }
         return stripped;
+    }
+
+    private static Optional<String> compilePrefix(String input, String prefix, Function<String, Optional<String>> compiler) {
+        if (!input.startsWith(prefix)) {
+            return Optional.empty();
+        }
+
+        String slice = input.substring(prefix.length());
+        return compiler.apply(slice);
+    }
+
+    private static Optional<String> compileStripped(String input, Function<String, Optional<String>> compiler) {
+        return compiler.apply(input.strip());
     }
 
     private static Optional<String> compileSuffix(
