@@ -370,7 +370,7 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
-        if (stripped.equals("private")) {
+        if (stripped.equals("private") || stripped.equals("public")) {
             return Optional.empty();
         }
 

@@ -24,8 +24,10 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	this.depth = depth;
 	return this;
 }
-/* public */ State(){
+struct State new_State(){
+	struct State this;
 	/* this(new ArrayList<>(), "", 0) */;
+	return this;
 }
 /* boolean */ isLevel(){
 	/* return this */.depth = /* = 0 */;
@@ -260,7 +262,7 @@ Optional<char*> compileMethod(char* input, char* structName){
 }
 List<char*> modifyMethodBody(char* structName, /* Node */ beforeName, List<char*> statements){
 	/* if (beforeName.type.equals("constructor-header")) {
-            ArrayList<String> copy = new ArrayList<>();
+            List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
             copy.addAll(statements);
             copy.add(formatStatement("return this"));
@@ -335,7 +337,7 @@ Optional</* Node */> compileDefinition(char* input){
 }
 Optional<char*> compileType(char* type){
 	/* String stripped */ = type.strip();
-	/* if (stripped.equals("private")) {
+	/* if (stripped.equals("private") || stripped.equals("public")) {
             return Optional.empty();
         } */
 	/* if (stripped.equals("void")) {
