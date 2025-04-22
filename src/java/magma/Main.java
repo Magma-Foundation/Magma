@@ -163,7 +163,7 @@ public class Main {
 
     private record PrefixRule(String prefix, Rule childRule) implements Rule {
         private Optional<String> compileToOptional(String input) {
-            Rule rule = new InfixRule(new ContentRule(), this.prefix(), this.childRule());
+            Rule rule = new InfixRule(new StringRule(), this.prefix(), this.childRule());
             return rule.compile(input).findValue();
         }
 
@@ -177,7 +177,7 @@ public class Main {
 
     private record SuffixRule(Rule childRule, String suffix) implements Rule {
         private Optional<String> compileToOptional(String input) {
-            Rule rule = new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new ContentRule());
+            Rule rule = new InfixRule(this.childRule(), this.suffix(), new LastLocator(), new StringRule());
             return rule.compile(input).findValue();
         }
 
@@ -189,21 +189,7 @@ public class Main {
         }
     }
 
-    public static class ContentRule implements Rule {
-        private Optional<String> compileToOptional(String content) {
-            String generated = content.isBlank() ? content : "/*" + content + "*/";
-            return Optional.of(generated);
-        }
-
-        @Override
-        public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
-        }
-    }
-
-    public static class StringRule implements Rule {
+    private static class StringRule implements Rule {
         private Optional<String> compileToOptional(String name) {
             return Optional.of(name);
         }
@@ -361,13 +347,12 @@ public class Main {
         return new OrRule(List.of(
                 createNamespaceRule("package "),
                 createNamespaceRule("import "),
-                createClassRule(createClassSegmentRule()),
-                new ContentRule()
+                createClassRule(createClassSegmentRule())
         ));
     }
 
     private static Rule createNamespaceRule(String infix) {
-        return new PrefixRule(infix, new SuffixRule(new ContentRule(), ";"));
+        return new PrefixRule(infix, new SuffixRule(new StringRule(), ";"));
     }
 
     private static Rule createClassRule(Rule classSegment) {
@@ -389,8 +374,7 @@ public class Main {
                 createClassRule(classSegment),
                 createStructuredRule("interface ", classSegment),
                 createStructuredRule("record ", classSegment),
-                createMethodRule(),
-                new ContentRule()
+                createMethodRule()
         )));
         return classSegment;
     }
