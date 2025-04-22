@@ -1,3 +1,3 @@
-package magma;#include "../magma/windows/StandardLibrary.h"
+#include "../magma/windows/StandardLibrary.h"
 struct Temp {
 };
