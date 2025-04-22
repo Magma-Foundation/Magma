@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +18,11 @@ public class Main {
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 }
+ */
