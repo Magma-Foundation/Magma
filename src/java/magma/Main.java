@@ -282,15 +282,21 @@ public class Main {
                     String inputParams = withParams.substring(0, paramEnd).strip();
                     return parseAllValues(inputParams, Main::compileParam)
                             .map(params -> {
-                                ArrayList<String> copy = new ArrayList<>();
-                                copy.add("struct " + structName + " this");
+                                if (beforeName instanceof Definition definition) {
+                                    if (!definition.modifiers.contains("static")) {
+                                        ArrayList<String> copy = new ArrayList<>();
+                                        copy.add("struct " + structName + " this");
 
-                                params.forEach(param -> {
-                                    if (!param.isEmpty()) {
-                                        copy.add(param);
+                                        params.forEach(param -> {
+                                            if (!param.isEmpty()) {
+                                                copy.add(param);
+                                            }
+                                        });
+                                        return copy;
                                     }
-                                });
-                                return copy;
+                                }
+                                return params;
+
                             })
                             .map(Main::generateParams).flatMap(outputParams -> {
                                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
@@ -428,7 +434,7 @@ public class Main {
             String modifiersString = beforeName.substring(0, typeSeparator).strip();
             type = beforeName.substring(typeSeparator + " ".length());
 
-            modifiers = List.of(modifiersString);
+            modifiers = Arrays.asList(modifiersString.split(" "));
         }
         else {
             modifiers = Collections.emptyList();
