@@ -262,23 +262,47 @@ public class Main {
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
-                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
-                            .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
-                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                            return Optional.empty();
-                        }
+                    return parseAllValues(inputParams, Main::compileParam)
+                            .map(params -> {
+                                ArrayList<String> copy = new ArrayList<>();
+                                copy.add("struct " + structName + " this");
 
-                        String content = withBraces.substring(1, withBraces.length() - 1);
-                        return parseStatements(content)
-                                .map(statements -> modifyMethodBody(structName, beforeName, statements))
-                                .map(Main::generateStatements).flatMap(outputContent -> {
-                                    String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
-                                    methods.add(generated);
-                                    return Optional.of("");
+                                params.forEach(param -> {
+                                    if (!param.isEmpty()) {
+                                        copy.add(param);
+                                    }
                                 });
-                    });
+                                return copy;
+                            })
+                            .map(Main::generateParams).flatMap(outputParams -> {
+                                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                                if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                                    return Optional.empty();
+                                }
+
+                                String content = withBraces.substring(1, withBraces.length() - 1);
+                                return parseStatements(content)
+                                        .map(statements -> modifyMethodBody(structName, beforeName, statements))
+                                        .map(Main::generateStatements).flatMap(outputContent -> {
+                                            String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                            methods.add(generated);
+                                            return Optional.of("");
+                                        });
+                            });
                 });
+    }
+
+    private static String generateParams(List<String> output) {
+        return generateAll(Main::mergeValues, output);
+    }
+
+    private static Optional<String> compileParam(String param) {
+        return compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
+                .or(() -> Optional.of(generatePlaceholder(param))));
+    }
+
+    private static Optional<List<String>> parseAllValues(String inputParams, Function<String, Optional<String>> compiler) {
+        return parseAll(inputParams, Main::foldValueChar, compiler);
     }
 
     private static List<String> modifyMethodBody(String structName, Node beforeName, List<String> statements) {
