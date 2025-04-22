@@ -73,17 +73,22 @@ public class Main {
     }
 
     private static String compile(String input) {
-        String output = compileAllStatements(input, Main::compileRootSegment);
+        String output = compileAllStatements(input, Main::compileRootSegment).orElse("");
         String joinedStructs = String.join("", structs);
         String joinedMethods = String.join("", methods);
         return output + joinedStructs + joinedMethods;
     }
 
-    private static String compileAllStatements(String input, Function<String, String> compileRootSegment) {
-        return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements);
+    private static Optional<String> compileAllStatements(String input, Function<String, Optional<String>> compiler) {
+        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
     }
 
-    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compileRootSegment, BiFunction<String, String, String> merger) {
+    private static Optional<String> compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, Optional<String>> compiler,
+            BiFunction<String, String, String> merger
+    ) {
         State state = new State();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -110,13 +115,17 @@ public class Main {
         state.advance();
 
         List<String> segments = state.segments;
-        String output = "";
+        Optional<String> maybeOutput = Optional.of("");
         for (String segment : segments) {
-            String compiled = compileRootSegment.apply(segment);
-            output = merger.apply(output, compiled);
+            Optional<String> maybeCompiled = compiler.apply(segment);
+            maybeOutput = maybeOutput.flatMap(output -> {
+                return maybeCompiled.map(compiled -> {
+                    return merger.apply(output, compiled);
+                });
+            });
         }
 
-        return output;
+        return maybeOutput;
     }
 
     private static String mergeStatements(String output, String compiled) {
@@ -143,13 +152,13 @@ public class Main {
         return state;
     }
 
-    private static String compileRootSegment(String input) {
+    private static Optional<String> compileRootSegment(String input) {
         if (input.isBlank()) {
-            return "";
+            return Optional.of("");
         }
 
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
-
+        return compileClass(input)
+                .or(() -> Optional.of(generatePlaceholder(input.strip()) + "\n"));
     }
 
     private static Optional<String> compileClass(String input) {
@@ -168,22 +177,23 @@ public class Main {
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        String outputContent = compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name));
-        if (!isSymbol(name)) {
-            return Optional.empty();
-        }
-        String generated = "struct " + name + " {" + outputContent + "\n}\n";
-        structs.add(generated);
-        return Optional.of("");
+        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
+            if (!isSymbol(name)) {
+                return Optional.empty();
+            }
+            String generated = "struct " + name + " {" + outputContent + "\n}\n";
+            structs.add(generated);
+            return Optional.of("");
+        });
     }
 
-    private static String compileClassSegment(String input, String structName) {
+    private static Optional<String> compileClassSegment(String input, String structName) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
                 .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
-                .orElseGet(() -> generatePlaceholder(input));
+                .or(() -> Optional.of(generatePlaceholder(input)));
     }
 
     private static Optional<String> compileInitialization(String input) {
@@ -225,24 +235,29 @@ public class Main {
         return compileDefinition(definition, structName).flatMap(outputDefinition -> {
             String withParams = input.substring(paramStart + "(".length());
             int paramEnd = withParams.indexOf(")");
-            if (paramEnd >= 0) {
-                String inputParams = withParams.substring(0, paramEnd).strip();
-                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param, structName).orElseGet(() -> generatePlaceholder(param)));
+            if (paramEnd < 0) {
+                return Optional.empty();
+            }
 
+            String inputParams = withParams.substring(0, paramEnd).strip();
+            return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param, structName)
+                    .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    String content = withBraces.substring(1, withBraces.length() - 1);
-                    String outputContent = compileAllStatements(content, Main::compileStatementOrBlock);
+                if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                    return Optional.empty();
+                }
+
+                String content = withBraces.substring(1, withBraces.length() - 1);
+                return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
                     String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
                     methods.add(generated);
                     return Optional.of("");
-                }
-            }
-            return Optional.empty();
+                });
+            });
         });
     }
 
-    private static String compileAllValues(String inputParams, Function<String, String> compiler) {
+    private static Optional<String> compileAllValues(String inputParams, Function<String, Optional<String>> compiler) {
         return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
@@ -293,38 +308,47 @@ public class Main {
                 ? beforeName.substring(typeSeparator + " ".length())
                 : beforeName;
 
-        String outputDefinition = compileType(type) + " " + newName;
-        return Optional.of(outputDefinition);
+        return compileType(type).flatMap(outputType -> {
+            String outputDefinition = outputType + " " + newName;
+            return Optional.of(outputDefinition);
+        });
     }
 
-    private static String compileType(String type) {
+    private static Optional<String> compileType(String type) {
         String stripped = type.strip();
+        if (stripped.equals("private")) {
+            return Optional.empty();
+        }
+
         if (stripped.equals("void")) {
-            return "void";
+            return Optional.of("void");
         }
+
         if (stripped.equals("String")) {
-            return "char*";
+            return Optional.of("char*");
         }
+
         if (stripped.equals("int")) {
-            return "int";
+            return Optional.of("int");
         }
+
         if (stripped.endsWith(">")) {
             String slice = stripped.substring(0, stripped.length() - ">".length());
             int typeArgsStart = slice.indexOf("<");
             if (typeArgsStart >= 0) {
                 String base = slice.substring(0, typeArgsStart).strip();
                 String arguments = slice.substring(typeArgsStart + "<".length()).strip();
-                return base + "<" + compileAllValues(arguments, Main::compileType) + ">";
+                return compileAllValues(arguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
             }
         }
 
-        return generatePlaceholder(stripped);
+        return Optional.of(generatePlaceholder(stripped));
     }
 
-    private static String compileStatementOrBlock(String input) {
+    private static Optional<String> compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input))
-                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+                .or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip())));
     }
 
     private static Optional<String> compileStatement(String input) {
