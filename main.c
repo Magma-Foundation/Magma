@@ -22,7 +22,7 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	this.buffer = buffer;
 	this.depth = depth;
 }
-/* public */ new_State(){
+/* public */ State(){
 	/* this(new ArrayList<>(), "", 0) */;
 }
 /* boolean */ isLevel(){
@@ -43,6 +43,8 @@ void enter(){
 }
 void append(/* char */ c){
 	this.buffer = this.buffer + c;
+}
+/* record */ Node(char* type, char* value){
 }
 void __main__(/* String[] */ args){
 	/* try {
@@ -179,7 +181,7 @@ Optional<char*> compileClassSegment(char* input, char* structName){
 Optional<char*> compileInitialization(char* input){
 	/* int valueSeparator */ = input.indexOf("=");
 	/* if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator), "temp")
+            return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
                     .map(value -> "\n\t" + value + ";");
         } */
 	/* else {
@@ -197,7 +199,7 @@ Optional<char*> compileDefinitionStatement(char* input){
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice, "temp").map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice).map(node -> node.value).map(inner -> "\n\t" + inner + ";");
         } */
 	/* else {
             return Optional.empty();
@@ -209,7 +211,7 @@ Optional<char*> compileMethod(char* input, char* structName){
             return Optional.empty();
         } */
 	/* String definition */ = input.substring(0, paramStart).strip();
-	/* return compileDefinition(definition, structName)
+	/* return compileDefinition(definition)
                 .or(() -> compileConstructorHeader(structName, definition))
                 .flatMap(outputDefinition -> {
                     String withParams = input.substring(paramStart + "(".length());
@@ -219,7 +221,7 @@ Optional<char*> compileMethod(char* input, char* structName){
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
-                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param, structName)
+                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
                             .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
@@ -228,7 +230,7 @@ Optional<char*> compileMethod(char* input, char* structName){
 
                         String content = withBraces.substring(1, withBraces.length() - 1);
                         return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                            String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
+                            String generated = outputDefinition.value + "(" + outputParams + "){" + outputContent + "\n}\n";
                             methods.add(generated);
                             return Optional.of("");
                         });
@@ -236,13 +238,13 @@ Optional<char*> compileMethod(char* input, char* structName){
                 } */
 	/* ) */;
 }
-Optional<char*> compileConstructorHeader(char* structName, char* definition){
+Optional</* Node */> compileConstructorHeader(char* structName, char* definition){
 	/* String stripped0 */ = definition.strip();
 	/* int index */ = /* stripped0 */.lastIndexOf(" ");
 	/* if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
-                return Optional.of("struct " + structName + " new_" + structName);
+                return Optional.of(new Node("constructor-header", "struct " + structName + " new_" + structName));
             }
         } */
 	/* return Optional.empty() */;
@@ -265,7 +267,7 @@ char* mergeValues(char* cache, char* element){
         } */
 	/* return cache + ", " + element */;
 }
-Optional<char*> compileDefinition(char* input, char* structName){
+Optional</* Node */> compileDefinition(char* input){
 	/* String stripped */ = input.strip();
 	/* int nameSeparator */ = stripped.lastIndexOf(" ");
 	/* if (nameSeparator < 0) {
@@ -280,9 +282,6 @@ Optional<char*> compileDefinition(char* input, char* structName){
 	/* if (oldName.equals("main")) {
             newName = "__main__";
         } */
-	/* else if (oldName.equals(structName)) {
-            newName = "new_" + oldName;
-        } */
 	/* else {
             newName = oldName;
         } */
@@ -292,7 +291,7 @@ Optional<char*> compileDefinition(char* input, char* structName){
                 : beforeName;
 	/* return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return Optional.of(outputDefinition);
+            return Optional.of(new Node("definition", outputDefinition));
         } */
 	/* ) */;
 }

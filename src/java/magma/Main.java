@@ -52,6 +52,8 @@ public class Main {
         }
     }
 
+    record Node(String type, String value) {
+    }
     public static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
@@ -199,7 +201,7 @@ public class Main {
     private static Optional<String> compileInitialization(String input) {
         int valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator), "temp")
+            return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
                     .map(value -> "\n\t" + value + ";");
         }
         else {
@@ -218,7 +220,7 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice, "temp").map(inner -> "\n\t" + inner + ";");
+            return compileDefinition(slice).map(node -> node.value).map(inner -> "\n\t" + inner + ";");
         }
         else {
             return Optional.empty();
@@ -232,7 +234,7 @@ public class Main {
         }
 
         String definition = input.substring(0, paramStart).strip();
-        return compileDefinition(definition, structName)
+        return compileDefinition(definition)
                 .or(() -> compileConstructorHeader(structName, definition))
                 .flatMap(outputDefinition -> {
                     String withParams = input.substring(paramStart + "(".length());
@@ -242,7 +244,7 @@ public class Main {
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
-                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param, structName)
+                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
                             .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
@@ -251,7 +253,7 @@ public class Main {
 
                         String content = withBraces.substring(1, withBraces.length() - 1);
                         return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                            String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
+                            String generated = outputDefinition.value + "(" + outputParams + "){" + outputContent + "\n}\n";
                             methods.add(generated);
                             return Optional.of("");
                         });
@@ -259,13 +261,13 @@ public class Main {
                 });
     }
 
-    private static Optional<String> compileConstructorHeader(String structName, String definition) {
+    private static Optional<Node> compileConstructorHeader(String structName, String definition) {
         String stripped0 = definition.strip();
         int index = stripped0.lastIndexOf(" ");
         if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
-                return Optional.of("struct " + structName + " new_" + structName);
+                return Optional.of(new Node("constructor-header", "struct " + structName + " new_" + structName));
             }
         }
         return Optional.empty();
@@ -293,7 +295,7 @@ public class Main {
         return cache + ", " + element;
     }
 
-    private static Optional<String> compileDefinition(String input, String structName) {
+    private static Optional<Node> compileDefinition(String input) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -310,9 +312,6 @@ public class Main {
         if (oldName.equals("main")) {
             newName = "__main__";
         }
-        else if (oldName.equals(structName)) {
-            newName = "new_" + oldName;
-        }
         else {
             newName = oldName;
         }
@@ -324,7 +323,7 @@ public class Main {
 
         return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return Optional.of(outputDefinition);
+            return Optional.of(new Node("definition", outputDefinition));
         });
     }
 
