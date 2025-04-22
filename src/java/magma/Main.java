@@ -11,14 +11,16 @@ public class Main {
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
+        private int depth;
 
-        private State(List<String> segments, StringBuilder buffer) {
+        private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private void append(char c) {
@@ -28,6 +30,18 @@ public class Main {
         private void advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
+        }
+
+        public void enter() {
+            this.depth++;
+        }
+
+        public void exit() {
+            this.depth--;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
         }
     }
 
@@ -54,8 +68,14 @@ public class Main {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             state.append(c);
-            if (c == ';') {
+            if (c == ';' && state.isLevel()) {
                 state.advance();
+            }
+            if (c == '{') {
+                state.enter();
+            }
+            if (c == '}') {
+                state.exit();
             }
         }
         state.advance();
