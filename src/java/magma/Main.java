@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Main {
     private static class State {
@@ -88,9 +89,20 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.contains("class")) {
+        String stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            String right = stripped.substring("import ".length()).strip();
+            if (right.endsWith(";")) {
+                String left = right.substring(0, right.length() - ";".length());
+                String[] separator = left.split(Pattern.quote("."));
+                String joined = String.join("/", separator);
+                return "#include \"%s\"\n".formatted(joined);
+            }
+        }
+
+        if (stripped.contains("class")) {
             return "struct Temp {\n};\n";
         }
-        return input;
+        return stripped;
     }
 }
