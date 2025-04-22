@@ -299,6 +299,10 @@ public class Main {
                 List<String> oldSegments = StandardLibrary.of(left.split(Pattern.quote(".")));
 
                 List<String> newSegments = StandardLibrary.empty();
+                if (oldSegments.size() >= 3 && oldSegments.subList(0, 3).equals(StandardLibrary.of("java", "util", "function"))) {
+                    return "";
+                }
+
                 if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(StandardLibrary.of("magma", "jvm"))) {
                     List<String> after = oldSegments.subList(2, oldSegments.size());
                     newSegments.addAll(StandardLibrary.of("magma", "windows"));
