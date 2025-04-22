@@ -8,10 +8,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
@@ -255,9 +257,23 @@ public class Main {
 
     private record DivideRule(Folder folder, Rule rule) implements Rule {
         private static Stream<String> divide(DivideState state, String input, Folder folder) {
+            LinkedList<Character> queue = IntStream.range(0, input.length())
+                    .mapToObj(input::charAt)
+                    .collect(Collectors.toCollection(LinkedList::new));
+
             DivideState current = state;
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
+            while (!queue.isEmpty()) {
+                char c = queue.pop();
+                if (c == '\'') {
+                    DivideState appended = current.append(c);
+
+                    char popped = queue.pop();
+                    DivideState withMaybeSlash = appended.append(popped);
+
+                    DivideState withEscaped = popped == '\\' ? withMaybeSlash.append(queue.pop()) : withMaybeSlash;
+                    current = withEscaped.append(queue.pop());
+                }
+
                 current = folder.fold(current, c);
             }
 
