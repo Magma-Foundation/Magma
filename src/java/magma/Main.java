@@ -322,7 +322,35 @@ public class Main {
     }
 
     private static String compileStatementOrBlock(String input) {
-        return compileWhitespace(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+        return compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Optional<String> compileStatement(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            String slice = stripped.substring(0, stripped.length() - ";".length());
+            return compileStatementValue(slice).map(result -> "\n\t" + result + ";");
+        }
+
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileStatementValue(String input) {
+        int valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            String destination = input.substring(0, valueSeparator).strip();
+            String source = input.substring(valueSeparator + "=".length()).strip();
+
+            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+        }
+
+        return Optional.of(generatePlaceholder(input));
+    }
+
+    private static String compileValue(String input) {
+        return generatePlaceholder(input);
     }
 
     private static boolean isSymbol(String input) {

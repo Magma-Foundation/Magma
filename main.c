@@ -18,31 +18,31 @@ struct Main {
 	List<char*> methods;
 }
 /* private */ new_State(List<char*> segments, char* buffer, int depth){
-	/* this.segments = segments; */
-	/* this.buffer = buffer; */
-	/* this.depth = depth; */
+	/* this.segments */ = /* segments */;
+	/* this.buffer */ = /* buffer */;
+	/* this.depth */ = /* depth */;
 }
 /* public */ new_State(/*  */){
-	/* this(new ArrayList<>(), "", 0); */
+	/* this(new ArrayList<>(), "", 0) */;
 }
 /* boolean */ isLevel(/*  */){
-	/* return this.depth == 0; */
+	/* return this.depth */ = /* = 0 */;
 }
 /* boolean */ isShallow(/*  */){
-	/* return this.depth == 1; */
+	/* return this.depth */ = /* = 1 */;
 }
 void advance(/*  */){
-	/* this.segments.add(this.buffer); */
-	/* this.buffer = ""; */
+	/* this.segments.add(this.buffer) */;
+	/* this.buffer */ = /* "" */;
 }
 void exit(/*  */){
-	/* this.depth = this.depth - 1; */
+	/* this.depth */ = /* this.depth - 1 */;
 }
 void enter(/*  */){
-	/* this.depth = this.depth + 1; */
+	/* this.depth */ = /* this.depth + 1 */;
 }
 void append(/* char */ c){
-	/* this.buffer = this.buffer + c; */
+	/* this.buffer */ = /* this.buffer + c */;
 }
 void __main__(/* String[] */ args){
 	/* try {
@@ -62,18 +62,18 @@ void __main__(/* String[] */ args){
         } */
 }
 char* compile(char* input){
-	/* String output = compileAllStatements(input, Main::compileRootSegment); */
-	/* String joinedStructs = String.join("", structs); */
-	/* String joinedMethods = String.join("", methods); */
-	/* return output + joinedStructs + joinedMethods; */
+	/* String output */ = /* compileAllStatements(input, Main::compileRootSegment) */;
+	/* String joinedStructs */ = /* String.join("", structs) */;
+	/* String joinedMethods */ = /* String.join("", methods) */;
+	/* return output + joinedStructs + joinedMethods */;
 }
 char* compileAllStatements(char* input, /*  Function<String */, /* String> */ compileRootSegment){
-	/* return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements); */
+	/* return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements) */;
 }
 char* compileAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compileRootSegment, /*  BiFunction<String */, /*  String */, /* String> */ merger){
-	/* State state = new State(); */
-	/* for (int i = 0; */
-	/* i < input.length(); */
+	/* State state */ = /* new State() */;
+	/* for (int i */ = /* 0 */;
+	/* i < input.length() */;
 	/* i++) {
             char c = input.charAt(i);
             if (c == '\'') {
@@ -96,20 +96,20 @@ char* compileAll(char* input, /*  BiFunction<State */, /*  Character */, /* Stat
 
             state = folder.apply(state, c);
         } */
-	/* state.advance(); */
-	/* List<String> segments = state.segments; */
-	/* String output = ""; */
+	/* state.advance() */;
+	/* List<String> segments */ = /* state.segments */;
+	/* String output */ = /* "" */;
 	/* for (String segment : segments) {
             String compiled = compileRootSegment.apply(segment);
             output = merger.apply(output, compiled);
         } */
-	/* return output; */
+	/* return output */;
 }
 char* mergeStatements(char* output, char* compiled){
-	/* return output + compiled; */
+	/* return output + compiled */;
 }
 /* State */ foldStatementChar(/* State */ state, /* char */ c){
-	/* state.append(c); */
+	/* state.append(c) */;
 	/* if (c == ';' && state.isLevel()) {
             state.advance();
         } */
@@ -125,20 +125,20 @@ char* mergeStatements(char* output, char* compiled){
                 state.exit();
             }
         } */
-	/* return state; */
+	/* return state */;
 }
 char* compileRootSegment(char* input){
 	/* if (input.isBlank()) {
             return "";
         } */
-	/* return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n"); */
+	/* return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n") */;
 }
 Optional<char*> compileClass(char* input){
-	/* int classIndex = input.indexOf("class "); */
+	/* int classIndex */ = /* input.indexOf("class ") */;
 	/* if (classIndex < 0) {
             return Optional.empty();
         } */
-	/* String afterKeyword = input.substring(classIndex + "class ".length()); */
+	/* String afterKeyword */ = /* input.substring(classIndex + "class ".length()) */;
 	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
@@ -149,15 +149,15 @@ Optional<char*> compileClass(char* input){
             return Optional.empty();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "} */
-	/* ".length()); */
-	/* String outputContent = compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name)); */
+	/* ".length()) */;
+	/* String outputContent */ = /* compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name)) */;
 	/* if (!isSymbol(name)) {
             return Optional.empty();
         } */
 	/* String generated = "struct " + name + " {" + outputContent + "\n} */
-	/* \n"; */
-	/* structs.add(generated); */
-	/* return Optional.of(""); */
+	/* \n" */;
+	/* structs.add(generated) */;
+	/* return Optional.of("") */;
 }
 char* compileClassSegment(char* input, char* structName){
 	/* return compileWhitespace(input)
@@ -165,10 +165,10 @@ char* compileClassSegment(char* input, char* structName){
                 .or(() -> compileMethod(input, structName))
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
-                .orElseGet(() -> generatePlaceholder(input)); */
+                .orElseGet(() -> generatePlaceholder(input)) */;
 }
 Optional<char*> compileInitialization(char* input){
-	/* int valueSeparator = input.indexOf("="); */
+	/* int valueSeparator */ = /* input.indexOf("=") */;
 	/* if (valueSeparator >= 0) {
             return compileDefinition(input.substring(0, valueSeparator), "temp")
                     .map(value -> "\n\t" + value + ";");
@@ -181,11 +181,11 @@ Optional<char*> compileWhitespace(char* input){
 	/* if (input.isBlank()) {
             return Optional.of("");
         } */
-	/* return Optional.empty(); */
+	/* return Optional.empty() */;
 }
 Optional<char*> compileDefinitionStatement(char* input){
-	/* String stripped = input.strip(); */
-	/* if (stripped.endsWith("; */
+	/* String stripped */ = /* input.strip() */;
+	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
             return compileDefinition(slice, "temp").map(inner -> "\n\t" + inner + ";");
@@ -195,11 +195,11 @@ Optional<char*> compileDefinitionStatement(char* input){
         } */
 }
 Optional<char*> compileMethod(char* input, char* structName){
-	/* int paramStart = input.indexOf("("); */
+	/* int paramStart */ = /* input.indexOf("(") */;
 	/* if (paramStart < 0) {
             return Optional.empty();
         } */
-	/* String definition = input.substring(0, paramStart).strip(); */
+	/* String definition */ = /* input.substring(0, paramStart).strip() */;
 	/* return compileDefinition(definition, structName).flatMap(outputDefinition -> {
             String withParams = input.substring(paramStart + "(".length());
             int paramEnd = withParams.indexOf(")");
@@ -218,10 +218,10 @@ Optional<char*> compileMethod(char* input, char* structName){
             }
             return Optional.empty();
         } */
-	/* ); */
+	/* ) */;
 }
 char* compileAllValues(char* inputParams, /*  Function<String */, /* String> */ compiler){
-	/* return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues); */
+	/* return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues) */;
 }
 /* State */ foldValueChar(/* State */ state, /* char */ c){
 	/* if (c == ',') {
@@ -230,26 +230,26 @@ char* compileAllValues(char* inputParams, /*  Function<String */, /* String> */ 
 	/* else {
             state.append(c);
         } */
-	/* return state; */
+	/* return state */;
 }
 char* mergeValues(char* cache, char* element){
 	/* if (cache.isEmpty()) {
             return element;
         } */
-	/* return cache + ", " + element; */
+	/* return cache + ", " + element */;
 }
 Optional<char*> compileDefinition(char* input, char* structName){
-	/* String stripped = input.strip(); */
-	/* int nameSeparator = stripped.lastIndexOf(" "); */
+	/* String stripped */ = /* input.strip() */;
+	/* int nameSeparator */ = /* stripped.lastIndexOf(" ") */;
 	/* if (nameSeparator < 0) {
             return Optional.empty();
         } */
-	/* String beforeName = stripped.substring(0, nameSeparator).strip(); */
-	/* String oldName = stripped.substring(nameSeparator + " ".length()).strip(); */
+	/* String beforeName */ = /* stripped.substring(0, nameSeparator).strip() */;
+	/* String oldName */ = /* stripped.substring(nameSeparator + " ".length()).strip() */;
 	/* if (!isSymbol(oldName)) {
             return Optional.empty();
         } */
-	/* String newName; */
+	/* String newName */;
 	/* if (oldName.equals("main")) {
             newName = "__main__";
         } */
@@ -259,15 +259,15 @@ Optional<char*> compileDefinition(char* input, char* structName){
 	/* else {
             newName = oldName;
         } */
-	/* int typeSeparator = beforeName.lastIndexOf(" "); */
-	/* String type = typeSeparator >= 0
+	/* int typeSeparator */ = /* beforeName.lastIndexOf(" ") */;
+	/* String type */ = /* typeSeparator >= 0
                 ? beforeName.substring(typeSeparator + " ".length())
-                : beforeName; */
-	/* String outputDefinition = compileType(type) + " " + newName; */
-	/* return Optional.of(outputDefinition); */
+                : beforeName */;
+	/* String outputDefinition */ = /* compileType(type) + " " + newName */;
+	/* return Optional.of(outputDefinition) */;
 }
 char* compileType(char* type){
-	/* String stripped = type.strip(); */
+	/* String stripped */ = /* type.strip() */;
 	/* if (stripped.equals("void")) {
             return "void";
         } */
@@ -286,14 +286,38 @@ char* compileType(char* type){
                 return base + "<" + compileAllValues(arguments, Main::compileType) + ">";
             }
         } */
-	/* return generatePlaceholder(stripped); */
+	/* return generatePlaceholder(stripped) */;
 }
 char* compileStatementOrBlock(char* input){
-	/* return compileWhitespace(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())); */
+	/* return compileWhitespace(input)
+                .or(() -> compileStatement(input))
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())) */;
+}
+Optional<char*> compileStatement(char* input){
+	/* String stripped */ = /* input.strip() */;
+	/* if (stripped.endsWith(" */;
+	/* ")) {
+            String slice = stripped.substring(0, stripped.length() - ";".length());
+            return compileStatementValue(slice).map(result -> "\n\t" + result + ";");
+        } */
+	/* return Optional.empty() */;
+}
+Optional<char*> compileStatementValue(char* input){
+	/* int valueSeparator */ = /* input.indexOf("=") */;
+	/* if (valueSeparator >= 0) {
+            String destination = input.substring(0, valueSeparator).strip();
+            String source = input.substring(valueSeparator + "=".length()).strip();
+
+            return Optional.of(compileValue(destination) + " = " + compileValue(source));
+        } */
+	/* return Optional.of(generatePlaceholder(input)) */;
+}
+char* compileValue(char* input){
+	/* return generatePlaceholder(input) */;
 }
 /* boolean */ isSymbol(char* input){
-	/* for (int i = 0; */
-	/* i < input.length(); */
+	/* for (int i */ = /* 0 */;
+	/* i < input.length() */;
 	/* i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -301,8 +325,8 @@ char* compileStatementOrBlock(char* input){
             }
             return false;
         } */
-	/* return true; */
+	/* return true */;
 }
 char* generatePlaceholder(char* input){
-	/* return "/* " + input + " */"; */
+	/* return "/* " + input + " */" */;
 }
