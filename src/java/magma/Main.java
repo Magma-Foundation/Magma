@@ -296,22 +296,39 @@ public class Main {
     }
 
     private record OrRule(List<Rule> rules) implements Rule {
-        private Optional<String> compileToOptional(String input) {
-            for (Rule rule : this.rules()) {
-                Optional<String> compiled = rule.compile(input).findValue();
-                if (compiled.isPresent()) {
-                    return compiled;
-                }
+        private record OrState(Optional<String> maybeValue, List<CompileError> errors) {
+            public OrState() {
+                this(Optional.empty(), new ArrayList<>());
             }
 
-            return Optional.empty();
+            public OrState withValue(String value) {
+                return new OrState(Optional.of(value), this.errors);
+            }
+
+            public OrState withError(CompileError error) {
+                ArrayList<CompileError> copy = new ArrayList<>(this.errors);
+                copy.add(error);
+                return new OrState(this.maybeValue, this.errors);
+            }
+
+            public Result<String, List<CompileError>> toResult() {
+                return this.maybeValue.<Result<String, List<CompileError>>>map(Ok::new).orElseGet(() -> new Err<>(this.errors));
+            }
         }
 
         @Override
         public Result<String, CompileError> compile(String input) {
-            return this.compileToOptional(input)
-                    .<Result<String, CompileError>>map(Ok::new)
-                    .orElseGet(() -> new Err<>(new CompileError("Invalid value for " + this.getClass(), input)));
+            return this.rules.stream()
+                    .reduce(new OrState(), (orState, rule) -> this.foldRule(input, orState, rule), (_, next) -> next)
+                    .toResult()
+                    .mapErr(errs -> new CompileError("No valid rule present", input, errs));
+        }
+
+        private OrState foldRule(String input, OrState orState, Rule rule) {
+            if (orState.maybeValue.isPresent()) {
+                return orState;
+            }
+            return rule.compile(input).match(orState::withValue, orState::withError);
         }
     }
 
