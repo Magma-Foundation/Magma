@@ -4,6 +4,8 @@
 /* import java.nio.file.Path; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
+/* import java.util.Arrays; */
+/* import java.util.Collections; */
 /* import java.util.List; */
 /* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
@@ -13,7 +15,14 @@ struct State {
 	char* buffer;
 	int depth;
 }
-struct Main {
+struct Main {/* interface Node {
+    } *//* 
+
+    record Definition(List<String> modifiers, String value) implements Node {
+    } *//* 
+
+    record ConstructorHeader(String value) implements Node {
+    } */
 	List<char*> structs;
 	List<char*> methods;
 }
@@ -45,8 +54,6 @@ void enter(struct State this){
 }
 void append(struct State this, struct char c){
 	this.buffer = /* this.buffer + c */;
-}
-struct record Node(struct Main this, char* type, char* value){
 }
 void __main__(struct Main this, /* String[] */ args){
 	/* try {
@@ -194,9 +201,16 @@ Optional<char*> compileClassSegment(struct Main this, char* input, char* structN
 }
 Optional<char*> compileInitialization(struct Main this, char* input){
 	/* int valueSeparator */ = /* input.indexOf("=") */;
-	/* if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
-                    .map(Main::formatStatement);
+	/* if (valueSeparator < 0) {
+            return Optional.empty();
+        } */
+	return /* compileDefinition(input.substring(0, valueSeparator))
+                .flatMap(Main::generateDefinition)
+                .map(Main::formatStatement) */;
+}
+Optional<char*> generateDefinition(struct Main this, struct Node node){
+	/* if (node instanceof Definition definition) {
+            return Optional.of(definition.value);
         } */
 	/* else {
             return Optional.empty();
@@ -210,14 +224,15 @@ Optional<char*> compileWhitespace(struct Main this, char* input){
 }
 Optional<char*> compileDefinitionStatement(struct Main this, char* input){
 	/* String stripped */ = /* input.strip() */;
-	/* if (stripped.endsWith(" */;
+	/* if (!stripped.endsWith(" */;
 	/* ")) {
-            String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(node -> node.value).map(Main::formatStatement);
-        } */
-	/* else {
             return Optional.empty();
         } */
+	/* String slice */ = /* stripped.substring(0, stripped.length() - " */;
+	/* ".length()) */;
+	return /* compileDefinition(slice)
+                .flatMap(Main::generateDefinition)
+                .map(Main::formatStatement) */;
 }
 char* formatStatement(struct Main this, char* inner){
 	return "\n\t" + inner + ";
@@ -261,26 +276,38 @@ Optional<char*> compileMethod(struct Main this, char* input, char* structName){
                                 return parseStatements(content)
                                         .map(statements -> modifyMethodBody(structName, beforeName, statements))
                                         .map(Main::generateStatements).flatMap(outputContent -> {
-                                            String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
-                                            methods.add(generated);
-                                            return Optional.of("");
+                                            return compileMethodBeforeName(beforeName).flatMap(outputBeforeName -> {
+                                                String generated = outputBeforeName + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                                methods.add(generated);
+                                                return Optional.of("");
+                                            });
                                         });
                             });
                 } */
 	/* ) */;
 }
+Optional<char*> compileMethodBeforeName(struct Main this, struct Node node){
+	/* if (node instanceof Definition definition) {
+            return Optional.of(definition.value);
+        } */
+	/* if (node instanceof ConstructorHeader(String value)) {
+            return Optional.of(value);
+        } */
+	return /* Optional.empty() */;
+}
 char* generateParams(struct Main this, List<char*> output){
 	return /* generateAll(Main::mergeValues, output) */;
 }
 Optional<char*> compileParam(struct Main this, char* param){
-	return /* compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
-                .or(() -> Optional.of(generatePlaceholder(param)))) */;
+	return /* compileWhitespace(param)
+                .or(() -> compileDefinition(param).flatMap(Main::generateDefinition))
+                .or(() -> Optional.of(generatePlaceholder(param))) */;
 }
 Optional<List<char*>> parseAllValues(struct Main this, char* inputParams, /*  Function<String */, Optional</* String> */> compiler){
 	return /* parseAll(inputParams, Main::foldValueChar, compiler) */;
 }
 List<char*> modifyMethodBody(struct Main this, char* structName, struct Node beforeName, List<char*> statements){
-	/* if (beforeName.type.equals("constructor-header")) {
+	/* if (beforeName instanceof ConstructorHeader) {
             List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
             copy.addAll(statements);
@@ -303,7 +330,8 @@ Optional<struct Node> compileConstructorHeader(struct Main this, char* structNam
 	/* if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
-                return Optional.of(new Node("constructor-header", "struct " + structName + " new_" + structName));
+                String generated = "struct " + structName + " new_" + structName;
+                return Optional.of(new ConstructorHeader(generated));
             }
         } */
 	return /* Optional.empty() */;
@@ -350,12 +378,21 @@ Optional<struct Node> compileDefinition(struct Main this, char* input){
             newName = oldName;
         } */
 	/* int typeSeparator */ = /* beforeName.lastIndexOf(" ") */;
-	/* String type */ = /* typeSeparator >= 0
-                ? beforeName.substring(typeSeparator + " ".length())
-                : beforeName */;
+	/* List<String> modifiers */;
+	/* String type */;
+	/* if (typeSeparator >= 0) {
+            String modifiersString = beforeName.substring(0, typeSeparator).strip();
+            type = beforeName.substring(typeSeparator + " ".length());
+
+            modifiers = List.of(modifiersString);
+        } */
+	/* else {
+            modifiers = Collections.emptyList();
+            type = beforeName;
+        } */
 	/* return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return Optional.of(new Node("definition", outputDefinition));
+            return Optional.of(new Definition(modifiers, outputDefinition));
         } */
 	/* ) */;
 }

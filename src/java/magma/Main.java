@@ -5,12 +5,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
+    interface Node {
+    }
+
     private static class State {
         private final List<String> segments;
         private String buffer;
@@ -52,7 +57,10 @@ public class Main {
         }
     }
 
-    record Node(String type, String value) {
+    record Definition(List<String> modifiers, String value) implements Node {
+    }
+
+    record ConstructorHeader(String value) implements Node {
     }
 
     public static final List<String> structs = new ArrayList<>();
@@ -214,9 +222,18 @@ public class Main {
 
     private static Optional<String> compileInitialization(String input) {
         int valueSeparator = input.indexOf("=");
-        if (valueSeparator >= 0) {
-            return compileDefinition(input.substring(0, valueSeparator)).map(node -> node.value)
-                    .map(Main::formatStatement);
+        if (valueSeparator < 0) {
+            return Optional.empty();
+        }
+
+        return compileDefinition(input.substring(0, valueSeparator))
+                .flatMap(Main::generateDefinition)
+                .map(Main::formatStatement);
+    }
+
+    private static Optional<String> generateDefinition(Node node) {
+        if (node instanceof Definition definition) {
+            return Optional.of(definition.value);
         }
         else {
             return Optional.empty();
@@ -232,13 +249,14 @@ public class Main {
 
     private static Optional<String> compileDefinitionStatement(String input) {
         String stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileDefinition(slice).map(node -> node.value).map(Main::formatStatement);
-        }
-        else {
+        if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
+
+        String slice = stripped.substring(0, stripped.length() - ";".length());
+        return compileDefinition(slice)
+                .flatMap(Main::generateDefinition)
+                .map(Main::formatStatement);
     }
 
     private static String formatStatement(String inner) {
@@ -284,12 +302,26 @@ public class Main {
                                 return parseStatements(content)
                                         .map(statements -> modifyMethodBody(structName, beforeName, statements))
                                         .map(Main::generateStatements).flatMap(outputContent -> {
-                                            String generated = beforeName.value + "(" + outputParams + "){" + outputContent + "\n}\n";
-                                            methods.add(generated);
-                                            return Optional.of("");
+                                            return compileMethodBeforeName(beforeName).flatMap(outputBeforeName -> {
+                                                String generated = outputBeforeName + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                                methods.add(generated);
+                                                return Optional.of("");
+                                            });
                                         });
                             });
                 });
+    }
+
+    private static Optional<String> compileMethodBeforeName(Node node) {
+        if (node instanceof Definition definition) {
+            return Optional.of(definition.value);
+        }
+
+        if (node instanceof ConstructorHeader(String value)) {
+            return Optional.of(value);
+        }
+
+        return Optional.empty();
     }
 
     private static String generateParams(List<String> output) {
@@ -297,8 +329,9 @@ public class Main {
     }
 
     private static Optional<String> compileParam(String param) {
-        return compileWhitespace(param).or(() -> compileDefinition(param).map(node -> node.value)
-                .or(() -> Optional.of(generatePlaceholder(param))));
+        return compileWhitespace(param)
+                .or(() -> compileDefinition(param).flatMap(Main::generateDefinition))
+                .or(() -> Optional.of(generatePlaceholder(param)));
     }
 
     private static Optional<List<String>> parseAllValues(String inputParams, Function<String, Optional<String>> compiler) {
@@ -306,7 +339,7 @@ public class Main {
     }
 
     private static List<String> modifyMethodBody(String structName, Node beforeName, List<String> statements) {
-        if (beforeName.type.equals("constructor-header")) {
+        if (beforeName instanceof ConstructorHeader) {
             List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
             copy.addAll(statements);
@@ -332,7 +365,8 @@ public class Main {
         if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
-                return Optional.of(new Node("constructor-header", "struct " + structName + " new_" + structName));
+                String generated = "struct " + structName + " new_" + structName;
+                return Optional.of(new ConstructorHeader(generated));
             }
         }
         return Optional.empty();
@@ -387,13 +421,23 @@ public class Main {
         }
 
         int typeSeparator = beforeName.lastIndexOf(" ");
-        String type = typeSeparator >= 0
-                ? beforeName.substring(typeSeparator + " ".length())
-                : beforeName;
+
+        List<String> modifiers;
+        String type;
+        if (typeSeparator >= 0) {
+            String modifiersString = beforeName.substring(0, typeSeparator).strip();
+            type = beforeName.substring(typeSeparator + " ".length());
+
+            modifiers = List.of(modifiersString);
+        }
+        else {
+            modifiers = Collections.emptyList();
+            type = beforeName;
+        }
 
         return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return Optional.of(new Node("definition", outputDefinition));
+            return Optional.of(new Definition(modifiers, outputDefinition));
         });
     }
 
