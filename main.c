@@ -9,15 +9,15 @@
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
 struct State {
-	/* List<String> */ segments;
+	List<char*> segments;
 	char* buffer;
 	int depth;
 }
 struct Main {
-	/* List<String> */ structs;
-	/* List<String> */ methods;
+	List<char*> structs;
+	List<char*> methods;
 }
-/* private */ State(/* List<String> */ segments, char* buffer, int depth){/* 
+/* private */ State(List<char*> segments, char* buffer, int depth){/* 
             this.segments = segments; *//* 
             this.buffer = buffer; *//* 
             this.depth = depth; *//* 
@@ -119,7 +119,7 @@ struct Main {
 
         return compileClass(input).orElseGet(() -> generatePlaceholder(input.strip()) + "\n"); *//* 
 
-     */}/* Optional<String> */ compileClass(char* input){/* 
+     */}Optional<char*> compileClass(char* input){/* 
         int classIndex = input.indexOf("class "); *//* 
         if (classIndex < 0) {
             return Optional.empty();
@@ -149,7 +149,7 @@ struct Main {
                 .or(() -> compileInitialization(input))
                 .or(() -> compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input)); *//* 
-     */}/* Optional<String> */ compileInitialization(char* input){/* 
+     */}Optional<char*> compileInitialization(char* input){/* 
         int valueSeparator = input.indexOf("="); *//* 
         if (valueSeparator >= 0) {
             return compileDefinition(input.substring(0, valueSeparator))
@@ -158,12 +158,12 @@ struct Main {
         else {
             return Optional.empty();
         } *//* 
-     */}/* Optional<String> */ compileWhitespace(char* input){/* 
+     */}Optional<char*> compileWhitespace(char* input){/* 
         if (input.isBlank()) {
             return Optional.of("");
         } *//* 
         return Optional.empty(); *//* 
-     */}/* Optional<String> */ compileDefinitionStatement(char* input){/* 
+     */}Optional<char*> compileDefinitionStatement(char* input){/* 
         String stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
@@ -172,7 +172,7 @@ struct Main {
         else {
             return Optional.empty();
         } *//* 
-     */}/* Optional<String> */ compileMethod(char* input){/* 
+     */}Optional<char*> compileMethod(char* input){/* 
         int paramStart = input.indexOf("("); *//* 
         if (paramStart < 0) {
             return Optional.empty();
@@ -184,7 +184,7 @@ struct Main {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
-                String outputParams = compileAll(inputParams, Main::foldValueChar, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)), Main::mergeValues);
+                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
 
                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -197,6 +197,8 @@ struct Main {
             }
             return Optional.empty();
         } *//* ); *//* 
+     */}char* compileAllValues(char* inputParams, /*  Function<String */, /* String> */ compiler){/* 
+        return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues); *//* 
      */}/* State */ foldValueChar(/* State */ state, /* char */ c){/* 
         if (c == ',') {
             state.advance();
@@ -211,7 +213,7 @@ struct Main {
             return element;
         } *//* 
         return cache + ", " + element; *//* 
-     */}/* Optional<String> */ compileDefinition(char* input){/* 
+     */}Optional<char*> compileDefinition(char* input){/* 
         String stripped = input.strip(); *//* 
         int nameSeparator = stripped.lastIndexOf(" "); *//* 
         if (nameSeparator < 0) {
@@ -242,6 +244,15 @@ struct Main {
         } *//* 
         if (stripped.equals("int")) {
             return "int";
+        } *//* 
+        if (stripped.endsWith(">")) {
+            String slice = stripped.substring(0, stripped.length() - ">".length());
+            int typeArgsStart = slice.indexOf("<");
+            if (typeArgsStart >= 0) {
+                String base = slice.substring(0, typeArgsStart).strip();
+                String arguments = slice.substring(typeArgsStart + "<".length()).strip();
+                return base + "<" + compileAllValues(arguments, Main::compileType) + ">";
+            }
         } *//* 
 
         return generatePlaceholder(stripped); *//* 

@@ -227,7 +227,7 @@ public class Main {
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
                 String inputParams = withParams.substring(0, paramEnd).strip();
-                String outputParams = compileAll(inputParams, Main::foldValueChar, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)), Main::mergeValues);
+                String outputParams = compileAllValues(inputParams, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)));
 
                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -240,6 +240,10 @@ public class Main {
             }
             return Optional.empty();
         });
+    }
+
+    private static String compileAllValues(String inputParams, Function<String, String> compiler) {
+        return compileAll(inputParams, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static State foldValueChar(State state, char c) {
@@ -293,6 +297,15 @@ public class Main {
         }
         if (stripped.equals("int")) {
             return "int";
+        }
+        if (stripped.endsWith(">")) {
+            String slice = stripped.substring(0, stripped.length() - ">".length());
+            int typeArgsStart = slice.indexOf("<");
+            if (typeArgsStart >= 0) {
+                String base = slice.substring(0, typeArgsStart).strip();
+                String arguments = slice.substring(typeArgsStart + "<".length()).strip();
+                return base + "<" + compileAllValues(arguments, Main::compileType) + ">";
+            }
         }
 
         return generatePlaceholder(stripped);
