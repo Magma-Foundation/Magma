@@ -12,12 +12,12 @@ public class Main {
             String input = Files.readString(source);
 
             Path target = source.resolveSibling("main.c");
-            Files.writeString(target, input);
+            Files.writeString(target, compile(input));
 
             new ProcessBuilder("clang.exe", "-o", "main.exe", "./src/java/magma/main.c")
                     .inheritIO()
                     .start()
-                    .wait();
+                    .waitFor();
 
             new ProcessBuilder("main.exe")
                     .inheritIO()
@@ -26,5 +26,24 @@ public class Main {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String compile(String input) {
+        int paramStart = input.indexOf("(");
+        String name = input.substring("def".length(), paramStart).strip();
+        String withParams = input.substring(paramStart + "(".length()).strip();
+        int paramEnd = withParams.indexOf(")");
+        String afterParams = withParams.substring(paramEnd + ")".length());
+        int arrow = afterParams.indexOf("=>");
+        String stripped = afterParams.substring(0, arrow).strip();
+        String body = afterParams.substring(arrow + "=>".length()).strip();
+
+        String type = stripped.substring(1).strip();
+        String outputType = type.equals("I32") ? "int" : type;
+
+        String inner = body.substring(1, body.length() - 1).strip();
+        return outputType + " " + name + "(){" +
+                inner +
+                "\n}\n";
     }
 }
