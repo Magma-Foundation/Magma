@@ -34,6 +34,10 @@ public class Main {
         Optional<Integer> locate(String input, String infix);
     }
 
+    private interface Folder {
+        DivideState fold(DivideState state, char c);
+    }
+
     private static class MutableDivideState implements DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -155,12 +159,23 @@ public class Main {
         }
     }
 
-    private record DivideRule(Rule rule) implements Rule {
+    private record DivideRule(Folder folder, Rule rule) implements Rule {
+        private static Stream<String> divide(DivideState state, String input, Folder folder) {
+            DivideState current = state;
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                current = folder.fold(current, c);
+            }
+
+            return current.advance().stream();
+        }
+
         @Override
         public Optional<String> compile(String input) {
-            return divide(input, new MutableDivideState()).reduce(Optional.of(""),
-                    (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule().compile(element).map(compiled -> current + compiled)),
-                    (_, next) -> next);
+            return divide(new MutableDivideState(), input, this.folder)
+                    .reduce(Optional.of(""),
+                            (maybeCurrent, element) -> maybeCurrent.flatMap(current -> this.rule.compile(element).map(compiled -> current + compiled)),
+                            (_, next) -> next);
         }
     }
 
@@ -201,6 +216,49 @@ public class Main {
         }
     }
 
+    private static class StatementFolder implements Folder {
+        @Override
+        public DivideState fold(DivideState state, char c) {
+            DivideState appended = state.append(c);
+            if (c == ';' && appended.isLevel()) {
+                return appended.advance();
+            }
+            if (c == '}' && appended.isShallow()) {
+                return appended.advance().exit();
+            }
+            if (c == '{') {
+                return appended.enter();
+            }
+            if (c == '}') {
+                return appended.exit();
+            }
+            return appended;
+        }
+    }
+
+    private static class ValueFolder implements Folder {
+        @Override
+        public DivideState fold(DivideState state, char c) {
+            if (c == ',') {
+                return state.advance();
+            }
+
+            return state.append(c);
+        }
+    }
+
+    private static class BlankRule implements Rule {
+        @Override
+        public Optional<String> compile(String input) {
+            if (input.isBlank()) {
+                return Optional.of("");
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+    }
+
     public static void main(String[] args) {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -214,34 +272,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return new DivideRule(createRootSegmentRule()).compile(input).orElse("");
-    }
-
-    private static Stream<String> divide(String input, DivideState state) {
-        DivideState current = state;
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            current = foldStatementChar(current, c);
-        }
-
-        return current.advance().stream();
-    }
-
-    private static DivideState foldStatementChar(DivideState state, char c) {
-        DivideState appended = state.append(c);
-        if (c == ';' && appended.isLevel()) {
-            return appended.advance();
-        }
-        if (c == '}' && appended.isShallow()) {
-            return appended.advance().exit();
-        }
-        if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '}') {
-            return appended.exit();
-        }
-        return appended;
+        return Statements(createRootSegmentRule()).compile(input).orElse("");
     }
 
     private static OrRule createRootSegmentRule() {
@@ -263,7 +294,11 @@ public class Main {
 
     private static Rule createStructuredRule(String infix, Rule classSegment) {
         return new PrefixRule(infix, new InfixRule(new StringRule(), "{",
-                new SuffixRule(new DivideRule(classSegment), "}")));
+                new SuffixRule(Statements(classSegment), "}")));
+    }
+
+    private static DivideRule Statements(Rule classSegment) {
+        return new DivideRule(new StatementFolder(), classSegment);
     }
 
     private static Rule createClassSegmentRule() {
@@ -279,7 +314,13 @@ public class Main {
     }
 
     private static SuffixRule createMethodRule() {
-        return new SuffixRule(new InfixRule(createDefinitionRule(), "(", new SuffixRule(new ContentRule(), ")")), ";");
+        InfixRule definition = createDefinitionRule();
+        Rule params = new DivideRule(new ValueFolder(), new OrRule(List.of(
+                new BlankRule(),
+                definition
+        )));
+
+        return new SuffixRule(new InfixRule(definition, "(", new SuffixRule(params, ")")), ";");
     }
 
     private static InfixRule createDefinitionRule() {
