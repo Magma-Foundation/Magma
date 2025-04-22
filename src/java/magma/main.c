@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,8 +14,7 @@ public class Main {
             Path target = source.resolveSibling("main.c");
             Files.writeString(target, compileRoot(input));
         } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -23,3 +22,4 @@ public class Main {
         return "/* " + input + " */";
     }
 }
+ */
