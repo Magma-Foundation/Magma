@@ -448,6 +448,7 @@ public class Main {
 
     private static OrRule createRootSegmentRule() {
         return new OrRule(List.of(
+                new BlankRule(),
                 createNamespaceRule("package "),
                 createNamespaceRule("import "),
                 createClassRule(createClassSegmentRule())
