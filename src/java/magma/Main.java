@@ -420,15 +420,21 @@ public class Main {
     }
 
     private static Optional<String> compileStatementValue(String input) {
-        int valueSeparator = input.indexOf("=");
+        String stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            String slice = stripped.substring("return ".length());
+            return Optional.of("return " + compileValue(slice));
+        }
+
+        int valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            String destination = input.substring(0, valueSeparator).strip();
-            String source = input.substring(valueSeparator + "=".length()).strip();
+            String destination = stripped.substring(0, valueSeparator).strip();
+            String source = stripped.substring(valueSeparator + "=".length()).strip();
 
             return Optional.of(compileValue(destination) + " = " + compileValue(source));
         }
 
-        return Optional.of(generatePlaceholder(input));
+        return Optional.of(generatePlaceholder(stripped));
     }
 
     private static String compileValue(String input) {
