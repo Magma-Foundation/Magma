@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -71,22 +72,17 @@ public class Main {
     }
 
     private static String compile(String input) {
-        String output = compileAll(input, Main::compileRootSegment);
+        String output = compileAllStatements(input, Main::compileRootSegment);
         String joinedMethods = String.join("", methods);
         return output + joinedMethods;
     }
 
-    private static String compileAll(String input, Function<String, String> compileRootSegment) {
-        List<String> segments = extracted(input, new State());
-        StringBuilder output = new StringBuilder();
-        for (String segment : segments) {
-            output.append(compileRootSegment.apply(segment));
-        }
-
-        return output.toString();
+    private static String compileAllStatements(String input, Function<String, String> compileRootSegment) {
+        return compileAll(input, Main::foldStatementChar, compileRootSegment, Main::mergeStatements);
     }
 
-    private static List<String> extracted(String input, State state) {
+    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compileRootSegment, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        State state = new State();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (c == '\'') {
@@ -107,25 +103,42 @@ public class Main {
                 continue;
             }
 
-            state.append(c);
-            if (c == ';' && state.isLevel()) {
-                state.advance();
-            }
-            else if (c == '}' && state.isShallow()) {
-                state.advance();
-                state.exit();
-            }
-            else {
-                if (c == '{') {
-                    state.enter();
-                }
-                if (c == '}') {
-                    state.exit();
-                }
-            }
+            state = folder.apply(state, c);
         }
         state.advance();
-        return state.segments;
+
+        List<String> segments = state.segments;
+        StringBuilder output = new StringBuilder();
+        for (String segment : segments) {
+            String compiled = compileRootSegment.apply(segment);
+            output = merger.apply(output, compiled);
+        }
+
+        return output.toString();
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
+    }
+
+    private static State foldStatementChar(State state, char c) {
+        state.append(c);
+        if (c == ';' && state.isLevel()) {
+            state.advance();
+        }
+        else if (c == '}' && state.isShallow()) {
+            state.advance();
+            state.exit();
+        }
+        else {
+            if (c == '{') {
+                state.enter();
+            }
+            if (c == '}') {
+                state.exit();
+            }
+        }
+        return state;
     }
 
     private static String compileRootSegment(String input) {
@@ -143,7 +156,7 @@ public class Main {
                 String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    String outputContent = compileAll(inputContent, Main::compileClassSegment);
+                    String outputContent = compileAllStatements(inputContent, Main::compileClassSegment);
                     if (isSymbol(name)) {
                         return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
                     }
@@ -168,19 +181,38 @@ public class Main {
             String withParams = input.substring(paramStart + "(".length());
             int paramEnd = withParams.indexOf(")");
             if (paramEnd >= 0) {
-                String params = withParams.substring(0, paramEnd).strip();
-                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                String inputParams = withParams.substring(0, paramEnd).strip();
+                String outputParams = compileAll(inputParams, Main::foldValueChar, param -> compileDefinition(param).orElseGet(() -> generatePlaceholder(param)), Main::mergeValues);
 
+                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     String content = withBraces.substring(1, withBraces.length() - 1);
-                    String outputContent = compileAll(content, Main::compileStatementOrBlock);
-                    String generated = outputDefinition + "(" + generatePlaceholder(params) + "){" + outputContent + "}";
+                    String outputContent = compileAllStatements(content, Main::compileStatementOrBlock);
+                    String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "}";
                     methods.add(generated);
                     return Optional.of("");
                 }
             }
             return Optional.empty();
         });
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',') {
+            state.advance();
+        }
+        else {
+            state.append(c);
+        }
+
+        return state;
+    }
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
     }
 
     private static Optional<String> compileDefinition(String input) {
