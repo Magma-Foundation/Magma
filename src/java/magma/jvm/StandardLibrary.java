@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -48,7 +49,38 @@ public class StandardLibrary {
 
         @Override
         public String asString() {
-            return path.toString();
+            return this.path.toString();
+        }
+    }
+
+    public record JavaList<T>(List<T> list) implements Main.List<T> {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        @Override
+        public Main.Iterator<T> iter() {
+            return new Main.HeadedIterator<>(new Main.RangeHead(this.list.size())).map(this.list::get);
+        }
+
+        @Override
+        public void add(T element) {
+            this.list.add(element);
+        }
+
+        @Override
+        public int size() {
+            return this.list.size();
+        }
+
+        @Override
+        public Main.List<T> subList(int startInclusive, int endExclusive) {
+            return new JavaList<>(this.list.subList(startInclusive, endExclusive));
+        }
+
+        @Override
+        public void addAll(Main.List<T> others) {
+            this.list.addAll(unwrap(others));
         }
     }
 
@@ -69,9 +101,9 @@ public class StandardLibrary {
         }
     }
 
-    public static Optional<Main.IOError> execute(List<String> command) {
+    public static Optional<Main.IOError> execute(Main.List<String> command) {
         try {
-            new ProcessBuilder(command)
+            new ProcessBuilder(unwrap(command))
                     .inheritIO()
                     .start()
                     .waitFor();
@@ -83,5 +115,20 @@ public class StandardLibrary {
 
     public static Main.Path getPath(String first, String... elements) {
         return new JVMPath(Paths.get(first, elements));
+    }
+
+    public static <T> Main.List<T> empty() {
+        return new JavaList<>();
+    }
+
+    public static <T> Main.List<T> of(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
+    }
+
+    public static <T> List<T> unwrap(Main.List<T> list) {
+        return list.iter().<List<T>>fold(new ArrayList<>(), (ts, t) -> {
+            ts.add(t);
+            return ts;
+        });
     }
 }

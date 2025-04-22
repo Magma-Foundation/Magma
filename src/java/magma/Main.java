@@ -2,15 +2,43 @@ package magma;
 
 import magma.jvm.StandardLibrary;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
+    interface Head<T> {
+        Optional<T> next();
+    }
+
+    public interface List<T> {
+        Iterator<T> iter();
+
+        void add(T element);
+
+        int size();
+
+        List<T> subList(int startInclusive, int endExclusive);
+
+        void addAll(List<T> others);
+    }
+
+    public interface Iterator<T> {
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <C> C collect(Collector<T, C> collector);
+    }
+
+    public interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
     public interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
@@ -27,6 +55,33 @@ public class Main {
         String asString();
     }
 
+    public record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R current = initial;
+            while (true) {
+                R finalCurrent = current;
+                Optional<R> maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (maybeNext.isPresent()) {
+                    current = maybeNext.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+    }
+
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -39,7 +94,7 @@ public class Main {
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(StandardLibrary.empty(), new StringBuilder(), 0);
         }
 
         private void append(char c) {
@@ -78,6 +133,49 @@ public class Main {
         }
     }
 
+    private static class Joiner implements Collector<String, Optional<String>> {
+        private final String delimiter;
+
+        public Joiner(String delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        public Joiner() {
+            this("");
+        }
+
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
+        }
+    }
+
+    public static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter < this.length) {
+                int value = this.counter;
+                this.counter++;
+                return Optional.of(value);
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Path source = StandardLibrary.getPath(".", "src", "java", "magma", "Main.java");
         StandardLibrary.readString(source)
@@ -88,7 +186,7 @@ public class Main {
     private static Optional<IOError> runWithInput(Path source, String input) {
         Path target = source.resolveSibling("main.c");
         return StandardLibrary.writeString(target, compile(input))
-                .or(() -> StandardLibrary.execute(List.of("clang.exe", target.asString(), "-o", "main.exe")));
+                .or(() -> StandardLibrary.execute(StandardLibrary.of("clang.exe", target.asString(), "-o", "main.exe")));
     }
 
     private static String compile(String input) {
@@ -108,11 +206,10 @@ public class Main {
         }
         state.advance();
 
-        StringBuilder output = new StringBuilder();
-        for (String segment : state.segments) {
-            output.append(compileRootSegment(segment));
-        }
-        return output.toString();
+        return state.segments.iter()
+                .map(Main::compileRootSegment)
+                .collect(new Joiner())
+                .orElse("");
     }
 
     private static String compileRootSegment(String input) {
@@ -121,19 +218,19 @@ public class Main {
             String right = stripped.substring("import ".length()).strip();
             if (right.endsWith(";")) {
                 String left = right.substring(0, right.length() - ";".length());
-                List<String> oldSegments = Arrays.asList(left.split(Pattern.quote(".")));
+                List<String> oldSegments = StandardLibrary.of(left.split(Pattern.quote(".")));
 
-                List<String> newSegments = new ArrayList<>();
-                if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(List.of("magma", "jvm"))) {
+                List<String> newSegments = StandardLibrary.empty();
+                if (oldSegments.size() >= 2 && oldSegments.subList(0, 2).equals(StandardLibrary.of("magma", "jvm"))) {
                     List<String> after = oldSegments.subList(2, oldSegments.size());
-                    newSegments.addAll(List.of("magma", "windows"));
+                    newSegments.addAll(StandardLibrary.of("magma", "windows"));
                     newSegments.addAll(after);
                 }
                 else {
                     newSegments.addAll(oldSegments);
                 }
 
-                String joined = String.join("/", newSegments);
+                String joined = newSegments.iter().collect(new Joiner("/")).orElse("");
                 return "#include \"../%s.h\"\n".formatted(joined);
             }
         }
