@@ -232,29 +232,43 @@ public class Main {
         }
 
         String definition = input.substring(0, paramStart).strip();
-        return compileDefinition(definition, structName).flatMap(outputDefinition -> {
-            String withParams = input.substring(paramStart + "(".length());
-            int paramEnd = withParams.indexOf(")");
-            if (paramEnd < 0) {
-                return Optional.empty();
-            }
+        return compileDefinition(definition, structName)
+                .or(() -> compileConstructorHeader(structName, definition))
+                .flatMap(outputDefinition -> {
+                    String withParams = input.substring(paramStart + "(".length());
+                    int paramEnd = withParams.indexOf(")");
+                    if (paramEnd < 0) {
+                        return Optional.empty();
+                    }
 
-            String inputParams = withParams.substring(0, paramEnd).strip();
-            return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param, structName)
-                    .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
-                String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                    return Optional.empty();
-                }
+                    String inputParams = withParams.substring(0, paramEnd).strip();
+                    return compileAllValues(inputParams, param -> compileWhitespace(param).or(() -> compileDefinition(param, structName)
+                            .or(() -> Optional.of(generatePlaceholder(param))))).flatMap(outputParams -> {
+                        String withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                            return Optional.empty();
+                        }
 
-                String content = withBraces.substring(1, withBraces.length() - 1);
-                return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
-                    String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
-                    methods.add(generated);
-                    return Optional.of("");
+                        String content = withBraces.substring(1, withBraces.length() - 1);
+                        return compileAllStatements(content, Main::compileStatementOrBlock).flatMap(outputContent -> {
+                            String generated = outputDefinition + "(" + outputParams + "){" + outputContent + "\n}\n";
+                            methods.add(generated);
+                            return Optional.of("");
+                        });
+                    });
                 });
-            });
-        });
+    }
+
+    private static Optional<String> compileConstructorHeader(String structName, String definition) {
+        String stripped0 = definition.strip();
+        int index = stripped0.lastIndexOf(" ");
+        if (index >= 0) {
+            String constructorName = stripped0.substring(index + " ".length());
+            if (constructorName.equals(structName)) {
+                return Optional.of("struct " + structName + " new_" + structName);
+            }
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> compileAllValues(String inputParams, Function<String, Optional<String>> compiler) {
