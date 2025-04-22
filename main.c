@@ -8,9 +8,11 @@ import java.util.ArrayList; *//*
 import java.util.List; *//* 
 import java.util.function.Function; *//* 
 
-public  */struct Main {/* private static final List<String> methods = new ArrayList<>(); */
+public  */struct Main {/* private static final List<String> methods = new ArrayList<>(); *//* 
+ */
 }
-/* public static void */ main(/* String[] args *//* {
+/* 
+ *//* public static void */ main(/* String[] args */)/* {
         try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -25,24 +27,43 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String compile(String input) {
+    } *//* private static String */ compile(/* String input */)/* {
         String output = compileAll(input, Main::compileRootSegment);
         String joinedMethods = String.join("", methods);
         return output + joinedMethods;
-    }
-
-    private static String compileAll(String input, Function<String, String> compileRootSegment) {
+    } *//* private static String */ compileAll(/* String input, Function<String, String> compileRootSegment */)/* {
         ArrayList<String> segments = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int depth = 0;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
+            if (c == '\'') {
+                buffer.append(c);
+
+                i++;
+                char c1 = input.charAt(i);
+                buffer.append(c1);
+
+                if(c1 == '\\') {
+                    i++;
+                    buffer.append(input.charAt(i));
+                }
+
+                i++;
+                buffer.append(input.charAt(i));
+
+                continue;
+            }
+
             buffer.append(c);
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             }
             else {
                 if (c == '{') {
@@ -61,9 +82,7 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
         }
 
         return output.toString();
-    }
-
-    private static String compileRootSegment(String input) {
+    } *//* private static String */ compileRootSegment(/* String input */)/* {
         int classIndex = input.indexOf("class ");
         if (classIndex >= 0) {
             String beforeKeyword = input.substring(0, classIndex);
@@ -75,14 +94,14 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     String outputContent = compileAll(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+                    if (isSymbol(name)) {
+                        return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+                    }
                 }
             }
         }
         return generatePlaceholder(input);
-    }
-
-    private static String compileClassSegment(String input) {
+    } *//* private static String */ compileClassSegment(/* String input */)/* {
         int paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             String definition = input.substring(0, paramStart).strip();
@@ -99,7 +118,7 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
                         String params = withParams.substring(0, paramEnd).strip();
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                        String generated = outputDefinition + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
+                        String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withBraces);
                         methods.add(generated);
                         return "";
                     }
@@ -108,9 +127,7 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
         }
 
         return generatePlaceholder(input);
-    }
-
-    private static boolean isSymbol(String input) {
+    } *//* private static boolean */ isSymbol(/* String input */)/* {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -119,8 +136,6 @@ public  */struct Main {/* private static final List<String> methods = new ArrayL
             return false;
         }
         return true;
-    }
-
-    private static String generatePlaceholder(String input) {
+    } *//* private static String */ generatePlaceholder(/* String input */)/* {
         return "/* " + input + " */";
     } */

@@ -40,10 +40,33 @@ public class Main {
         int depth = 0;
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
+            if (c == '\'') {
+                buffer.append(c);
+
+                i++;
+                char c1 = input.charAt(i);
+                buffer.append(c1);
+
+                if(c1 == '\\') {
+                    i++;
+                    buffer.append(input.charAt(i));
+                }
+
+                i++;
+                buffer.append(input.charAt(i));
+
+                continue;
+            }
+
             buffer.append(c);
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             }
             else {
                 if (c == '{') {
@@ -76,7 +99,9 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     String outputContent = compileAll(inputContent, Main::compileClassSegment);
-                    return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+                    if (isSymbol(name)) {
+                        return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent + "\n}\n";
+                    }
                 }
             }
         }
@@ -100,7 +125,7 @@ public class Main {
                         String params = withParams.substring(0, paramEnd).strip();
                         String withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                        String generated = outputDefinition + "(" + generatePlaceholder(params) + generatePlaceholder(withBraces);
+                        String generated = outputDefinition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withBraces);
                         methods.add(generated);
                         return "";
                     }
