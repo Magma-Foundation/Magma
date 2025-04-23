@@ -238,11 +238,20 @@ class Main {
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
+        return this.generateAll(merger, this.parseAll(input, folder, compiler));
+    }
+
+    private String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
+        return parsed.iter()
+                .fold(new StringBuilder(), merger)
+                .toString();
+    }
+
+    private List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
         return this.divideAll(input, folder)
                 .iter()
                 .map(compiler)
-                .fold(new StringBuilder(), merger)
-                .toString();
+                .collect(new ListCollector<>());
     }
 
     private StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
