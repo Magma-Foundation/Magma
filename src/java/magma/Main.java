@@ -196,6 +196,7 @@ class Main {
     }
 
     private static final List<String> structs = Lists.emptyList();
+    private static final List<String> methods = Lists.emptyList();
 
     void main() {
         try {
@@ -213,7 +214,8 @@ class Main {
     private String compileRoot(String input) {
         var compiled = this.compileAll(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
-        return compiled + joinedStructs;
+        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
+        return compiled + joinedStructs + joinedMethods;
     }
 
     private String compileAll(String input, Function<String, String> compiler) {
@@ -276,7 +278,9 @@ class Main {
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    return new Some<>("\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body));
+                    var generated = "\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body);
+                    methods.add(generated);
+                    return new Some<>("");
                 }
 
                 return new None<>();

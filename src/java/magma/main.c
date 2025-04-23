@@ -7,11 +7,9 @@
 /* import java.util.function.Supplier; */
 /*  */
 /* sealed  */struct Option<T> permits Some, None {
-	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* ; */
 	/* T */ /* orElseGet(Supplier<T> */ other);
 	/* Option<T> */ /* or(Supplier<Option<T>> */ other);
-	/* T */ /* orElse(T */ other);
-	/* <R> */ /* Option<R> */ flatMap(/* Function<T, Option<R>> mapper */)/* ; *//* 
+	/* T */ /* orElse(T */ other);/* 
      */
 };
 /* 
@@ -66,8 +64,7 @@
                 .orElseGet(() -> this.generatePlaceholder(input));
     }
 
-    private Option<String> compileMethod(String input) {
-	/* var paramStart */ /* = */ input.indexOf(/* "(" */)/* ; *//* 
+    private Option<String> compileMethod(String input) {/* 
         if (paramStart >= 0) {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
@@ -77,64 +74,27 @@
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    return new Some<>("\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body));
+                    var generated = "\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body);
+                    methods.add(generated);
+                    return new Some<>("");
                 }
 
                 return new None<>();
             });
-        } */
-	/* return */ /* new */ None<>(/*  */)/* ; */
-	/* }
-
-    private */ /* Option<String> */ compileDefinitionStatement(/* String input */)/* {
-        var stripped = input.strip(); *//* 
-        if (!stripped.endsWith("; */
-	/* ")) {
-            return */ /* new */ None<>(/*  */)/* ;
-        } */
-	/* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length( */)/* - "; *//* ".length()); *//* 
+        } *//* 
+        if (!stripped.endsWith("; *//* ".length()); *//* 
         return this.compileDefinition(withoutEnd).map(definition -> {
             return "\n\t" + definition + ";";
-        } *//* ); */
-	/* }
-
-    private */ /* Option<String> */ compileDefinition(/* String input */)/* {
-        var nameSeparator = input.lastIndexOf(" "); *//* 
+        } *//* ); *//* 
         if (nameSeparator < 0) {
             return new None<>();
-        } */
-	/* var beforeName */ /* = */ input.substring(/* 0, nameSeparator */)/* .strip(); */
-	/* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " " */)/* ; *//* 
+        } *//* 
         if (typeSeparator < 0) {
             return new None<>();
         } */
-	/* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator */)/* .strip(); */
-	/* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length( */)/* ).strip(); */
-	/* var name */ /* = */ input.substring(/* nameSeparator + " ".length( */)/* ).strip(); */
-	/* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType */)/* + " " + this.compileType(type) + " " + name); */
-	/* }
-
-    private */ /* String */ compileType(/* String type */)/* {
-        return this.generatePlaceholder(type); */
-	/* }
-
-    private */ /* State */ divide(/* String input, State state */)/* {
-        var current = state; */
-	/* for (var i */ /* = */ 0;
-	/* i */ /* < */ input.length(/*  */)/* ; */
-	/* i++) {
-            var c */ /* = */ input.charAt(/* i */)/* ;
-            current = this.foldStatementChar(current, c);
-        } *//* 
+	/* for (var i */ /* = */ 0;/* 
         return current.advance(); */
-	/* }
-
-    private */ /* State */ foldStatementChar(/* State state, char c */)/* {
-        var appended = state.append(c); */
 	/* if (c */ /* == */ ';
-	/* ' */ /* && */ appended.isLevel(/*  */)/* ) {
-            return appended.advance();
-        } */
 	/* if (c == '}' && appended.isShallow()) { */ /* return */ appended.advance().exit();/* 
         }
         if (c == '{') {
@@ -148,7 +108,25 @@
 };
 /* 
 
- */struct Main {
+ */struct Main {/* 
+
+    void main() {
+        try {
+            var source = Paths.get(".", "src", "java", "magma", "Main.java");
+            var input = Files.readString(source);
+
+            var target = source.resolveSibling("main.c");
+            Files.writeString(target, this.compileRoot(input));
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+    } *//* 
+ */
+};
+
+	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* ; */
+	/* <R> */ /* Option<R> */ flatMap(/* Function<T, Option<R>> mapper */)/* ; */
 	/* public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter; */ /* public */ RangeHead(/* int length */)/* {
@@ -298,24 +276,13 @@
             });
         }
     } */
-	/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; *//* 
-
-    void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
-
-            var target = source.resolveSibling("main.c");
-            Files.writeString(target, this.compileRoot(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-    } */
+	/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
+	/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
 	/* private */ /* String */ compileRoot(/* String input */)/* {
         var compiled = this.compileAll(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
-        return compiled + joinedStructs;
+        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
+        return compiled + joinedStructs + joinedMethods;
     } */
 	/* private */ /* String */ compileAll(/* String input, Function<String, String> compiler */)/* {
         return this.divide(input, new State())
@@ -332,8 +299,46 @@
 	/* private */ /* Option<String> */ compileClass(/* String input */)/* {
         return this.compileStructured(input, "class ");
     } */
+	/* var paramStart */ /* = */ input.indexOf(/* "(" */)/* ; */
+	/* return */ /* new */ None<>(/*  */)/* ; */
+	/* }
+
+    private */ /* Option<String> */ compileDefinitionStatement(/* String input */)/* {
+        var stripped = input.strip(); */
+	/* ")) {
+            return */ /* new */ None<>(/*  */)/* ;
+        } */
+	/* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length( */)/* - "; */
+	/* }
+
+    private */ /* Option<String> */ compileDefinition(/* String input */)/* {
+        var nameSeparator = input.lastIndexOf(" "); */
+	/* var beforeName */ /* = */ input.substring(/* 0, nameSeparator */)/* .strip(); */
+	/* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " " */)/* ; */
+	/* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator */)/* .strip(); */
+	/* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length( */)/* ).strip(); */
+	/* var name */ /* = */ input.substring(/* nameSeparator + " ".length( */)/* ).strip(); */
+	/* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType */)/* + " " + this.compileType(type) + " " + name); */
+	/* }
+
+    private */ /* String */ compileType(/* String type */)/* {
+        return this.generatePlaceholder(type); */
+	/* }
+
+    private */ /* State */ divide(/* String input, State state */)/* {
+        var current = state; */
+	/* i */ /* < */ input.length(/*  */)/* ; */
+	/* i++) {
+            var c */ /* = */ input.charAt(/* i */)/* ;
+            current = this.foldStatementChar(current, c);
+        } */
+	/* }
+
+    private */ /* State */ foldStatementChar(/* State state, char c */)/* {
+        var appended = state.append(c); */
+	/* ' */ /* && */ appended.isLevel(/*  */)/* ) {
+            return appended.advance();
+        } */
 	/* private */ /* String */ generatePlaceholder(/* String input */)/* {
         return "/* " + input + " */";
-    } *//* 
- */
-};
+    } */
