@@ -9,68 +9,46 @@
 /* import java.util.stream.Collectors; */
 /* import java.util.stream.IntStream; */
 /*  */
-struct State {/* private final List<String> segments; */
-/* 
-        private StringBuilder buffer; */
-/* 
-        private int depth; */
-/* 
-
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+struct State {
+	/* private final List<String> segments; */
+	/* private StringBuilder buffer; */
+	/* private int depth; */
+	/* private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-/* 
-
-        public State() {
+	/* public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
-/* 
-
-        private State append(char c) {
+	/* private State append(char c) {
             this.buffer.append(c);
             return this;
         } */
-/* 
-
-        private State advance() {
+	/* private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } */
-/* 
-
-        public State enter() {
+	/* public State enter() {
             this.depth++;
             return this;
         } */
-/* 
-
-        public boolean isLevel() {
+	/* public boolean isLevel() {
             return this.depth == 0;
         } */
-/* 
-
-        public State exit() {
+	/* public State exit() {
             this.depth--;
             return this;
         } */
-/* 
-
-        public boolean isShallow() {
+	/* public boolean isShallow() {
             return this.depth == 1;
         } */
-/* 
-     */
-
+	/*  */
 };
-struct Main {/* 
-
-    private static final List<String> structs = new ArrayList<>(); */
-/* 
-
-    public static void main() {
+struct Main {
+	/* private static final List<String> structs = new ArrayList<>(); */
+	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -81,16 +59,12 @@ struct Main {/*
             e.printStackTrace();
         }
     } */
-/* 
-
-    private static String compile(String input) {
+	/* private static String compile(String input) {
         var output = compileStatements(input, Main::compileRootSegment);
         var joinedStructs = String.join("", structs);
         return output + joinedStructs;
     } */
-/* 
-
-    private static String compileStatements(String input, Function<String, String> compiler) {
+	/* private static String compileStatements(String input, Function<String, String> compiler) {
         var segments = divide(input, new State());
 
         var output = new StringBuilder();
@@ -99,9 +73,7 @@ struct Main {/*
         }
         return output.toString();
     } */
-/* 
-
-    private static List<String> divide(String input, State state) {
+	/* private static List<String> divide(String input, State state) {
         var current = state;
 
         var queue = IntStream.range(0, input.length())
@@ -129,9 +101,7 @@ struct Main {/*
 
         return current.advance().segments;
     } */
-/* 
-
-    private static State foldStatementChar(State state, char c) {
+	/* private static State foldStatementChar(State state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -147,19 +117,15 @@ struct Main {/*
         }
         return appended;
     } */
-/* 
-
-    private static String compileRootSegment(String input) {
+	/* private static String compileRootSegment(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ")) {
             return "";
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
     } */
-/* 
-
-    private static Optional<String> compileClass(String stripped) {
+	/* private static Optional<String> compileClass(String stripped) {
         var classIndex = stripped.indexOf("class ");
         if (classIndex < 0) {
             return Optional.empty();
@@ -186,9 +152,7 @@ struct Main {/*
         structs.add(generated);
         return Optional.of("");
     } */
-/* 
-
-    private static boolean isSymbol(String input) {
+	/* private static boolean isSymbol(String input) {
         var stripped = input.strip();
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
@@ -199,17 +163,11 @@ struct Main {/*
         }
         return true;
     } */
-/* 
-
-    private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+	/* private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     } */
-/* 
-
-    private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */\n";
+	/* private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */";
     } */
-/* 
- */
-
+	/*  */
 };

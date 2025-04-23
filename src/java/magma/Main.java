@@ -139,7 +139,7 @@ public class Main {
             return "";
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
     }
 
     private static Optional<String> compileClass(String stripped) {
@@ -183,10 +183,10 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
     private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */\n";
+        return "/* " + stripped + " */";
     }
 }
