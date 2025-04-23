@@ -26,6 +26,42 @@
             this.value = value;
         } */
 };
+/* public static */struct RangeHead implements Head<Integer> {
+	/* private final */ /* int */ length;
+	/* private */ /* int */ counter;
+};
+/* public */struct Iterator<T>(Head<T> head) {
+};
+/* private static */struct State {
+	/* private final */ List<char*> segments;
+	/* private */ /* StringBuilder */ buffer;
+	/* private */ /* int */ depth;
+};
+/* private */struct Some<T>(T value) implements Option<T> {
+};
+/* private static final */struct None<T> implements Option<T> {
+};
+/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
+};
+/* private static */struct ListCollector<T> implements Collector<T, List<T>> {
+};
+/* private */struct Generic(String base, List<Type> args) implements Type {
+};
+/* private */struct Content(String input) implements Type {
+};
+/* private */struct Functional(List<Type> paramTypes, Type returnType) implements Type {
+};
+/* private */struct Definition(Option<String> beforeType, Type type, String name) implements Defined {
+};
+/* private */struct FunctionalDefinition(
+            Option<String> beforeType,
+            Type returns,
+            String name,
+            List<Type> args
+    ) implements Defined {
+};
+/* private */struct Ref(Type type) implements Type {
+};
 /*  */struct Main {
 };
 /* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
@@ -47,14 +83,11 @@ char* generate(/*  */)/* ; */
         public */ char* generate(/*  */)/* {
             return this.value;
         } */
-/* public static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter; */ /* public */ RangeHead(/* int */ length)/* {
+/* public */ RangeHead(/* int */ length)/* {
             this.length = length;
-        }
-
-        @Override
-        public Option<Integer> next() {
+        } */
+/* @Override
+        public */ Option</* Integer */> next(/*  */)/* {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -63,14 +96,11 @@ char* generate(/*  */)/* ; */
             else {
                 return new None<>();
             }
-        }
-    } */
-/* public */ /* record */ Iterator<T>(Head</* T */> head)/* {
-        public <R> Iterator<R> map(Function<T, R> mapper) {
+        } */
+/* public <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */))/* {
             return new Iterator<>(() -> this.head.next().map(mapper));
-        }
-
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+        } */
+/* public <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder)/* {
             var current = initial;
             while (true) {
                 switch (this.head.next()) {
@@ -80,178 +110,134 @@ char* generate(/*  */)/* ; */
                     }
                 }
             }
-        }
-
-        public <C> C collect(Collector<T, C> collector) {
+        } */
+/* public <C> */ /* C */ collect(Collector</* T */, /*  C */> collector)/* {
             return this.fold(collector.createInitial(), collector::fold);
-        }
-    } */
-/* private static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth; */ /* private */ State(List<char*> segments, /* StringBuilder */ buffer, /* int */ depth)/* {
+        } */
+/* private */ State(List<char*> segments, /* StringBuilder */ buffer, /* int */ depth)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        }
-
-        public State() {
+        } */
+/* public */ State(/*  */)/* {
             this(Lists.emptyList(), new StringBuilder(), 0);
-        }
-
-        public boolean isLevel() {
+        } */
+/* public */ int isLevel(/*  */)/* {
             return this.depth == 0;
-        }
-
-        public State enter() {
+        } */
+/* public */ /* State */ enter(/*  */)/* {
             this.depth++;
             return this;
-        }
-
-        public State exit() {
+        } */
+/* public */ /* State */ exit(/*  */)/* {
             this.depth--;
             return this;
-        }
-
-        private State append(char c) {
+        } */
+/* private */ /* State */ append(/* char */ c)/* {
             this.buffer.append(c);
             return this;
-        }
-
-        private State advance() {
+        } */
+/* private */ /* State */ advance(/*  */)/* {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        }
-
-        public boolean isShallow() {
+        } */
+/* public */ int isShallow(/*  */)/* {
             return this.depth == 1;
-        }
-    } */
-/* private */ /* record */ Some<T>(/* T */ value)/* implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
+        } */
+/* @Override
+        public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* {
             return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
+        } */
+/* @Override
+        public */ /* T */ orElseGet(/* T */(*other)())/* {
             return this.value;
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
+        } */
+/* @Override
+        public */ Option</* T */> or(Option</* T */>(*other)())/* {
             return this;
-        }
-
-        @Override
-        public T orElse(T other) {
+        } */
+/* @Override
+        public */ /* T */ orElse(/* T */ other)/* {
             return this.value;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        } */
+/* @Override
+        public <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* {
             return mapper.apply(this.value);
-        }
-    } */
-/* private static final class None<T> implements Option<T> {
-        @Override
+        } */
+/* @Override
         public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* {
             return new None<>();
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
+        } */
+/* @Override
+        public */ /* T */ orElseGet(/* T */(*other)())/* {
             return other.get();
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
+        } */
+/* @Override
+        public */ Option</* T */> or(Option</* T */>(*other)())/* {
             return other.get();
-        }
-
-        @Override
-        public T orElse(T other) {
+        } */
+/* @Override
+        public */ /* T */ orElse(/* T */ other)/* {
             return other;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        } */
+/* @Override
+        public <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* {
             return new None<>();
-        }
-    } */
-/* private */ /* record */ Joiner(char* delimiter)/* implements Collector<String, Option<String>> {
-        private Joiner() {
+        } */
+/* private */ Joiner(/*  */)/* {
             this("");
-        }
-
-        @Override
-        public Option<String> createInitial() {
+        } */
+/* @Override
+        public */ Option<char*> createInitial(/*  */)/* {
             return new None<>();
-        }
-
-        @Override
-        public Option<String> fold(Option<String> maybeCurrent, String element) {
+        } */
+/* @Override
+        public */ Option<char*> fold(Option<char*> maybeCurrent, char* element)/* {
             return new Some<>(switch (maybeCurrent) {
                 case None<String> _ -> element;
                 case Some<String>(var current) -> current + this.delimiter + element;
             });
-        }
-    } */
-/* private static class ListCollector<T> implements Collector<T, List<T>> {
-        @Override
+        } */
+/* @Override
         public */ List</* T */> createInitial(/*  */)/* {
             return Lists.emptyList();
-        }
-
-        @Override
-        public List<T> fold(List<T> current, T element) {
+        } */
+/* @Override
+        public */ List</* T */> fold(List</* T */> current, /* T */ element)/* {
             return current.add(element);
-        }
-    } */
-/* private */ /* record */ Generic(char* base, List</* Type */> args)/* implements Type {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             var joined = generateValuesFromNodes(this.args);
             return this.base + "<" + joined + ">";
-        }
-    } */
-/* private */ /* record */ Content(char* input)/* implements Type {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             return Main.generatePlaceholder(this.input);
-        }
-    } */
-/* private */ /* record */ Functional(List</* Type */> paramTypes, /* Type */ returnType)/* implements Type {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             return this.returnType.generate() + " (*)(" + generateValuesFromNodes(this.paramTypes) + ")";
-        }
-    } */
-/* private */ /* record */ Definition(Option<char*> beforeType, /* Type */ type, char* name)/* implements Defined {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             var beforeTypeString = this.beforeType
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("");
 
             return beforeTypeString + this.type.generate() + " " + this.name;
-        }
-    } */
-/* private */ /* record */ FunctionalDefinition(Option<char*> beforeType, /* Type */ returns, char* name, List</* Type */> args)/* implements Defined {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
             return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
-        }
-    } */
-/* private */ /* record */ Ref(/* Type */ type)/* implements Type {
-        @Override
-        public String generate() {
+        } */
+/* @Override
+        public */ char* generate(/*  */)/* {
             return this.type.generate() + "*";
-        }
-    } */
+        } */
 /* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
 /* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
 /* private static */ char* generateAll(BiFunction</* StringBuilder */, char*, /*  StringBuilder */> merger, List<char*> parsed)/* {
@@ -381,6 +367,8 @@ char* generate(/*  */)/* ; */
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileStructured(input, "enum "))
+                .or(() -> this.compileStructured(input, "class "))
+                .or(() -> this.compileStructured(input, "record "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));

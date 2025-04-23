@@ -441,6 +441,8 @@ class Main {
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileStructured(input, "enum "))
+                .or(() -> this.compileStructured(input, "class "))
+                .or(() -> this.compileStructured(input, "record "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
