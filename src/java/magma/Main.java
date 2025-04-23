@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
     private static class State {
@@ -100,20 +101,29 @@ public class Main {
             return "";
         }
 
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped) {
         var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
-            var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return "struct " + name + " {" + generatePlaceholder(content) + "}";
-                }
-            }
+        if (classIndex < 0) {
+            return Optional.empty();
         }
-        return generatePlaceholder(stripped);
+
+        var afterKeyword = stripped.substring(classIndex + "class ".length());
+        var contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+
+        var name = afterKeyword.substring(0, contentStart).strip();
+        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        var content = withEnd.substring(0, withEnd.length() - "}".length());
+        return Optional.of("struct " + name + " {" + generatePlaceholder(content) + "}");
     }
 
     private static String generatePlaceholder(String stripped) {
