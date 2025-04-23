@@ -78,13 +78,8 @@
 };
 // Option<struct R>
 // Option<struct T>
-// Option<struct T>
-// Option<struct R>
-// Option<struct R>
 // Tuple<struct T, struct R>
 // Option<Tuple<struct T, struct R>>
-// Option<struct R>
-// Option<struct T>
 // List<struct T>
 // Iterator<struct T>
 // Option<int>
@@ -95,59 +90,24 @@
 // case Some</* T>(var value) - */>
 // Collector<struct T, struct C>
 // List<char*>
-// List<char*>
-// Option<struct R>
 // Some<>
-// Option<struct T>
-// Option<struct T>
-// Option<struct R>
-// Option<struct R>
-// Tuple<struct T, struct R>
-// Option<Tuple<struct T, struct R>>
-// Option<struct R>
-// Option<struct R>
 // None<>
-// Option<struct T>
-// Option<struct T>
-// Option<struct R>
-// Option<struct R>
 // None<>
-// Tuple<struct T, struct R>
-// Option<Tuple<struct T, struct R>>
-// Option<struct R>
 // None<>
 // Option<char*>
 // None<>
-// Option<char*>
-// Option<char*>
-// List<struct T>
-// List<struct T>
-// List<struct T>
 // Option<struct C>
 // Some<>
-// Option<struct C>
-// Option<struct C>
-// Option<struct T>
-// List<char*>
-// List<struct T>
 // Option<List<struct T>>
-// Option<struct T>
-// List<char*>
 // Iterator<>
-// List<char*>
 // List<struct Type>
-// Option<char*>
 // Some<>
 // None<>
-// Option<char*>
 // Some<>
 // None<>
-// Option<char*>
 // Some<>
 // Some<>
 // Some<>
-// Option<char*>
-// Option<char*>
 // None<>
 // None<>
 // Some<>
@@ -156,18 +116,11 @@
 // Some<>
 // None<>
 // Option<struct Defined>
-// Option<char*>
-// Option<char*>
 // None<>
-// List<struct T>
-// Option<List<struct T>>
-// Option<struct T>
 // Option<struct Definition>
 // None<>
-// Option<int>
 // Some<>
 // None<>
-// Option<struct Type>
 // Option<struct Type>
 // None<>
 // Some<>
@@ -176,26 +129,16 @@
 // Some<>
 // Some<>
 // Some<>
-// Option<struct Type>
-// Option<char*>
-// List<char*>
 // Option<List<char*>>
-// Option<char*>
-// List<char*>
-// Option<char*>
-// Option<char*>
-// Option<char*>
 // None<>
 // None<>
 // None<>
 // Some<>
-// Option<char*>
 // Some<>
 // None<>
 // Some<>
 // None<>
 // None<>
-// Option<char*>
 /* <R> */ Option<struct R> map_Option(struct R (*mapper)(struct T));
 struct T orElseGet_Option(struct T (*other)());
 Option<struct T> or_Option(Option<struct T> (*other)());
@@ -208,6 +151,7 @@ Iterator<struct T> iter_List();
 int hasElements_List();
 struct T removeFirst_List();
 struct T get_List(int index);
+int contains_List(struct T element);
 struct C createInitial_Collector();
 struct C fold_Collector(struct C current, struct T element);
 char* generate_Type();
@@ -690,7 +634,9 @@ struct private Joiner_Joiner(){
 				return struct Functional(Lists.of(argType, /*  argType2) */, returnType);
 			}
 			else {
-				/* generics.add(generic) */;
+				if (/* !generics */.contains(generic)){
+					/* generics.add(generic) */;
+				}
 			}
 		}
 		return parsed;

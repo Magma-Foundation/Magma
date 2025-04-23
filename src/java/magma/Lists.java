@@ -36,6 +36,11 @@ public class Lists {
         public T get(int index) {
             return this.list.get(index);
         }
+
+        @Override
+        public boolean contains(T element) {
+            return this.list.contains(element);
+        }
     }
 
     public static <T> List<T> emptyList() {

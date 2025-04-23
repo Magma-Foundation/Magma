@@ -36,6 +36,8 @@ class Main {
         T removeFirst();
 
         T get(int index);
+
+        boolean contains(T element);
     }
 
     public interface Collector<T, C> {
@@ -700,7 +702,9 @@ class Main {
                     return new Functional(Lists.of(argType, argType2), returnType);
                 }
                 else {
-                    generics.add(generic);
+                    if (!generics.contains(generic)) {
+                        generics.add(generic);
+                    }
                 }
             }
             return parsed;
