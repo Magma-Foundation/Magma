@@ -18,14 +18,6 @@ import static magma.StandardLibrary.emptyString;
 
 public class Main {
     sealed interface Optional<T> permits Some, None {
-        static <T> Optional<T> of(T error) {
-            return new Some<>(error);
-        }
-
-        static <T> Optional<T> empty() {
-            return new None<>();
-        }
-
         void ifPresent(Consumer<T> consumer);
 
         T orElse(T other);
@@ -198,12 +190,12 @@ public class Main {
 
     public static void main(String[] args) {
         Optional<IOException> result = switch (readString(SOURCE)) {
-            case Err<String, IOException>(IOException error) -> Optional.of(error);
+            case Err<String, IOException>(IOException error) -> new Some<>(error);
             case Ok<String, IOException>(String value) -> {
                 String output = compile(value);
                 yield switch (writeString(TARGET, output)) {
                     case None<IOException> _ -> build();
-                    case Some<IOException>(IOException error) -> Optional.of(error);
+                    case Some<IOException>(IOException error) -> new Some<>(error);
                 };
             }
         };
@@ -217,7 +209,7 @@ public class Main {
                     .inheritIO()
                     .start()
                     .waitFor();
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
             return new Some<>(e);
         } catch (InterruptedException e) {
@@ -228,9 +220,9 @@ public class Main {
     private static Optional<IOException> writeString(Path target, String output) {
         try {
             Files.writeString(target, output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
     }
 
@@ -294,7 +286,7 @@ public class Main {
                 .map(string -> string.toSlice())
                 .toList();
 
-        Optional<List<String>> maybeOutput = Optional.of(new ArrayList<String>());
+        Optional<List<String>> maybeOutput = new Some<>(new ArrayList<String>());
         for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
@@ -341,11 +333,11 @@ public class Main {
 
     private static Optional<String> compileRootSegment(String input) {
         if (input.isBlank()) {
-            return Optional.of("");
+            return new Some<>("");
         }
 
         return compileClass(input)
-                .or(() -> Optional.of(generatePlaceholder(input.strip()) + "\n"));
+                .or(() -> new Some<>(generatePlaceholder(input.strip()) + "\n"));
     }
 
     private static Optional<String> compileClass(String input) {
@@ -355,12 +347,12 @@ public class Main {
     private static Optional<String> compileStructured(String input, String infix) {
         int classIndex = input.indexOf(infix);
         if (classIndex < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String afterKeyword = input.substring(classIndex + infix.length());
         int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String beforeContent = afterKeyword.substring(0, contentStart).strip();
 
@@ -392,13 +384,13 @@ public class Main {
 
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
-            return Optional.empty();
+            return new None<>();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
         String finalName = name;
-        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> Optional.of(generatePlaceholder(input1)))).flatMap(outputContent -> {
+        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> new Some<>(generatePlaceholder(input1)))).flatMap(outputContent -> {
             if (!isSymbol(finalName)) {
-                return Optional.empty();
+                return new None<>();
             }
 
             String joined = recordParameters.stream()
@@ -407,7 +399,7 @@ public class Main {
 
             String generated = "struct " + finalName + " {" + joined + outputContent + "\n};\n";
             structs.add(generated);
-            return Optional.of("");
+            return new Some<>("");
         });
     }
 
@@ -418,29 +410,29 @@ public class Main {
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
                 .or(() -> compileStatement(input, (value) -> compileDefinition(value).flatMap(Main::generateDefinition).or(() -> compileAssigner(value))))
-                .or(() -> Optional.of(generatePlaceholder(input)));
+                .or(() -> new Some<>(generatePlaceholder(input)));
     }
 
     private static Optional<String> generateDefinition(Node node) {
         if (node instanceof Definition definition) {
-            return Optional.of(definition.value);
+            return new Some<>(definition.value);
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
     private static Optional<String> compileWhitespace(String input) {
         if (input.isBlank()) {
-            return Optional.of("");
+            return new Some<>("");
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Optional<String> compileDefinitionStatement(String input) {
         String stripped = input.strip();
         if (!stripped.endsWith(";")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String slice = stripped.substring(0, stripped.length() - ";".length());
@@ -456,7 +448,7 @@ public class Main {
     private static Optional<String> compileMethod(String input, String structName) {
         int paramStart = input.indexOf("(");
         if (paramStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String beforeParamsString = input.substring(0, paramStart).strip();
@@ -466,7 +458,7 @@ public class Main {
                     String withParams = input.substring(paramStart + "(".length());
                     int paramEnd = withParams.indexOf(")");
                     if (paramEnd < 0) {
-                        return Optional.empty();
+                        return new None<>();
                     }
 
                     String inputParams = withParams.substring(0, paramEnd).strip();
@@ -494,7 +486,7 @@ public class Main {
                                 return compileMethodBeforeName(beforeName).flatMap(outputBeforeName -> {
                                     String header = outputBeforeName + "(" + outputParams + ")";
                                     if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                                        return Optional.of(formatStatement(header));
+                                        return new Some<>(formatStatement(header));
                                     }
 
                                     String content = withBraces.substring(1, withBraces.length() - 1);
@@ -504,7 +496,7 @@ public class Main {
                                                 String outputBody = "{" + outputContent + "\n}\n";
                                                 String generated = header + outputBody;
                                                 methods.add(generated);
-                                                return Optional.of("");
+                                                return new Some<>("");
                                             });
                                 });
                             });
@@ -517,14 +509,14 @@ public class Main {
 
     private static Optional<String> compileMethodBeforeName(Node node) {
         if (node instanceof Definition definition) {
-            return Optional.of(definition.value);
+            return new Some<>(definition.value);
         }
 
         if (node instanceof ConstructorHeader(String value)) {
-            return Optional.of(value);
+            return new Some<>(value);
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
     private static String generateParams(List<String> output) {
@@ -534,7 +526,7 @@ public class Main {
     private static Optional<String> compileParam(String param) {
         return compileWhitespace(param)
                 .or(() -> compileDefinition(param).flatMap(Main::generateDefinition))
-                .or(() -> Optional.of(generatePlaceholder(param)));
+                .or(() -> new Some<>(generatePlaceholder(param)));
     }
 
     private static Optional<List<String>> parseAllValues(String inputParams, Function<String, Optional<String>> compiler) {
@@ -569,10 +561,10 @@ public class Main {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
                 String generated = "struct " + structName + " new_" + structName;
-                return Optional.of(new ConstructorHeader(generated));
+                return new Some<>(new ConstructorHeader(generated));
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Optional<String> compileAllValues(String inputParams, Function<String, Optional<String>> compiler) {
@@ -606,13 +598,13 @@ public class Main {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String beforeName = stripped.substring(0, nameSeparator).strip();
         String oldName = stripped.substring(nameSeparator + " ".length()).strip();
 
         if (!isSymbol(oldName)) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String newName;
@@ -640,30 +632,30 @@ public class Main {
 
         return compileType(type).flatMap(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return Optional.of(new Definition(modifiers, outputDefinition));
+            return new Some<>(new Definition(modifiers, outputDefinition));
         });
     }
 
     private static Optional<String> compileType(String type) {
         String stripped = type.strip();
         if (stripped.equals("private") || stripped.equals("public")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         if (stripped.equals("void")) {
-            return Optional.of("void");
+            return new Some<>("void");
         }
 
         if (stripped.equals("String")) {
-            return Optional.of("char*");
+            return new Some<>("char*");
         }
 
         if (stripped.equals("char")) {
-            return Optional.of("char");
+            return new Some<>("char");
         }
 
         if (stripped.equals("int") || stripped.equals("boolean")) {
-            return Optional.of("int");
+            return new Some<>("int");
         }
 
         if (stripped.endsWith("[]")) {
@@ -681,16 +673,16 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return Optional.of("struct " + stripped);
+            return new Some<>("struct " + stripped);
         }
 
-        return Optional.of(generatePlaceholder(stripped));
+        return new Some<>(generatePlaceholder(stripped));
     }
 
     private static Optional<String> compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input, Main::compileStatementValue))
-                .or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip())));
+                .or(() -> new Some<>("\n\t" + generatePlaceholder(input.strip())));
     }
 
     private static Optional<String> compileStatement(String input, Function<String, Optional<String>> compileStatementValue) {
@@ -700,14 +692,14 @@ public class Main {
             return compileStatementValue.apply(slice).map(Main::formatStatement);
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Optional<String> compileStatementValue(String input) {
         String stripped = input.strip();
         if (stripped.startsWith("return ")) {
             String slice = stripped.substring("return ".length());
-            return Optional.of("return " + compileValue(slice));
+            return new Some<>("return " + compileValue(slice));
         }
 
         Optional<String> destination = compileAssigner(stripped);
@@ -720,13 +712,13 @@ public class Main {
             return maybeInvokable;
         }
 
-        return Optional.of(generatePlaceholder(stripped));
+        return new Some<>(generatePlaceholder(stripped));
     }
 
     private static Optional<String> compileAssigner(String stripped) {
         int valueSeparator = stripped.indexOf("=");
         if (valueSeparator < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String destination = stripped.substring(0, valueSeparator).strip();
         String source = stripped.substring(valueSeparator + "=".length()).strip();
@@ -734,7 +726,7 @@ public class Main {
                 .flatMap(Main::generateDefinition)
                 .orElseGet(() -> compileValue(destination));
 
-        return Optional.of(newDestination + " = " + compileValue(source));
+        return new Some<>(newDestination + " = " + compileValue(source));
     }
 
     private static String compileValue(String input) {
@@ -774,30 +766,30 @@ public class Main {
     private static Optional<String> compileOperator(String input, String operator) {
         int equalsIndex = input.indexOf(operator);
         if (equalsIndex < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         String left = input.substring(0, equalsIndex);
         String right = input.substring(equalsIndex + operator.length());
-        return Optional.of(compileValue(left) + " " + operator + " " + compileValue(right));
+        return new Some<>(compileValue(left) + " " + operator + " " + compileValue(right));
     }
 
     private static Optional<String> compileInvokable(String input) {
         String stripped = input.strip();
         if (!stripped.endsWith(")")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
         int argumentStart = withoutEnd.indexOf("(");
         if (argumentStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String beforeArguments = withoutEnd.substring(0, argumentStart).strip();
         String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
-        Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
+        Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> new Some<>(compileValue(argument)));
         if (maybeNewArguments.isEmpty()) {
-            return Optional.empty();
+            return new None<>();
         }
 
         String newArguments = maybeNewArguments.orElse(null);
@@ -812,7 +804,7 @@ public class Main {
     }
 
     private static Optional<String> generateInvocation(String caller, String arguments) {
-        return Optional.of(caller + "(" + arguments + ")");
+        return new Some<>(caller + "(" + arguments + ")");
     }
 
     private static boolean isNumber(String input) {
