@@ -27,7 +27,7 @@
 };
 /* private static */struct State {
 	/* private final */ List<char*> segments;
-	/* private */ /* StringBuilder */ buffer;
+	/* private */ StringBuilder buffer;
 	/* private */ int depth;/* 
 
         public State() {
@@ -65,42 +65,43 @@
 // List<char*>
 // Option<char*>
 // None</*  */>
-// List</* Type */>
-// Option</* Type */>
+// List<Type>
+// Option<Type>
 // Some</* /* this.members.get */ */>
-// List</* T */>
-// Option<List</* T */>>
-// Option</* T */>
-// Iterator</* /* RangeHead */ */>
+// List<T>
+// Option<List<T>>
+// Option<T>
+// Iterator</* RangeHead */>
 // Some</* indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content */, /*  depth) + indent + "}" */>
 // Some</* prefix + " (" + compileValue(condition) + ")" */>
 // Some</* /* /* "return " + compileValue */ */ */>
 // Some</* compileValue(slice) + "++" */>
 // Some</* /* generatePlaceholder */ */>
-// Option</* Invokable */>
-// Option</* Whitespace */>
-// Some</* /* Whitespace */ */>
-// Option</* Defined */>
-// Option</* Definition */>
+// Option<Invokable>
+// Option<Whitespace>
+// Some</* Whitespace */>
+// Option<Defined>
+// Option<Definition>
 // Option<int>
 // Some</* index */>
 // Some</* Primitive */>
-// Some</* /* Ref */ */>
-// Some</* /* Content */ */>
+// Some</* Ref */>
+// Some</* Symbol */>
+// Some</* Content */>
 // Option<List<char*>>
 // Some</* "" */>
 // Some</* this.compileParam(s))) */>
 char* generate_Type extends BeforeArgs();
 char* generate_Defined();
-/* Defined */ mapName_Defined(char* (*mapper)(char*));
+Defined mapName_Defined(char* (*mapper)(char*));
 char* generate_BeforeArgs();
 char* generate_Value();
-/* Type */ resolveType_Value();
+Type resolveType_Value();
 /* @Override
         public */ char* generate_Primitive implements Type(){
 	return this.value;
 }
-/* private */ State_State(List<char*> segments, /* StringBuilder */ buffer, int depth){
+private State_State(List<char*> segments, StringBuilder buffer, int depth){
 	/* this.segments = segments; */
 	/* this.buffer = buffer; */
 	/* this.depth = depth; */
@@ -108,19 +109,19 @@ char* generate_Value();
 /* public */ int isLevel_State(){
 	return this.depth == 0;
 }
-/* public */ /* State */ enter_State(){
+/* public */ State enter_State(){
 	this.depth++;
 	return this;
 }
-/* public */ /* State */ exit_State(){
+/* public */ State exit_State(){
 	/* this.depth-- */;
 	return this;
 }
-/* private */ /* State */ append_State(/* char */ c){
+/* private */ State append_State(char c){
 	/* this.buffer.append(c) */;
 	return this;
 }
-/* private */ /* State */ advance_State(){
+/* private */ State advance_State(){
 	/* this.segments.add(this.buffer.toString()) */;
 	/* this.buffer = new StringBuilder(); */
 	return this;
@@ -128,7 +129,7 @@ char* generate_Value();
 /* public */ int isShallow_State(){
 	return this.depth == 1;
 }
-/* private */ Joiner_Joiner(){
+private Joiner_Joiner(){
 	/* this("") */;
 }
 /* @Override
@@ -148,15 +149,15 @@ char* generate_Value();
 	auto joined = Content[input=generateValuesFromNodes](this.arguments);
 	return this.base + "<" + joined + ">";
 }
-/* public */ /* Generic */ withArgs_Generic(List</* Type */> arguments){
-	return Content[input=Generic](this.base, arguments);
+/* public */ Generic withArgs_Generic(List<Type> arguments){
+	return Symbol[value=Generic](this.base, arguments);
 }
 /* @Override
         public */ char* generate_Content(){
 	return Content[input=Main.generatePlaceholder](this.input);
 }
 /* @Override
-        public */ /* Type */ resolveType_Content(){
+        public */ Type resolveType_Content(){
 	return this;
 }
 /* @Override
@@ -171,8 +172,8 @@ char* generate_Value();
 	return /* beforeTypeString + this */.type.generate() + " " + this.name;
 }
 /* @Override
-        public */ /* Defined */ mapName_Definition(char* (*mapper)(char*)){
-	return Content[input=Definition](this.beforeType, this.type, Content[input=mapper.apply](this.name));
+        public */ Defined mapName_Definition(char* (*mapper)(char*)){
+	return Symbol[value=Definition](this.beforeType, this.type, Content[input=mapper.apply](this.name));
 }
 /* @Override
         public */ char* generate_FunctionalDefinition(){
@@ -180,8 +181,8 @@ char* generate_Value();
 	return Content[input=/* "%s%s  */](Content[input=/* *%s) */](/* %s)" */.formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
 }
 /* @Override
-        public */ /* Defined */ mapName_FunctionalDefinition(char* (*mapper)(char*)){
-	return Content[input=FunctionalDefinition](this.beforeType, this.returns, Content[input=mapper.apply](this.name), this.args);
+        public */ Defined mapName_FunctionalDefinition(char* (*mapper)(char*)){
+	return Symbol[value=FunctionalDefinition](this.beforeType, this.returns, Content[input=mapper.apply](this.name), this.args);
 }
 /* @Override
         public */ char* generate_Ref(){
@@ -191,7 +192,7 @@ char* generate_Value();
         public */ char* generate_Struct(){
 	return /* "struct " + this */.name;
 }
-/* public */ Option</* Type */> find_Struct(char* memberName){
+/* public */ Option<Type> find_Struct(char* memberName){
 	if (Content[input=this.members.containsKey](memberName)){
 		return Generic[base=Some, arguments=JavaList[list=[Content[input=/* this.members.get */]]]](Content[input=this.members.get](memberName));
 	}
@@ -210,62 +211,62 @@ char* generate_Value();
 	return this.beforeArgs + "(" + joined + ")";
 }
 /* @Override
-        public */ /* Type */ resolveType_Invokable(){
+        public */ Type resolveType_Invokable(){
 	if (this.beforeArgs instanceof Functional functional){
 		return functional.returnType;
 	}
-	return Content[input=Content](Content[input=this.beforeArgs.generate](/*  */));
+	return Symbol[value=Content](Content[input=this.beforeArgs.generate](/*  */));
 }
-/* public */ /* Invokable */ withBeforeArgs_Invokable(/* Type */ type){
-	return Content[input=Invokable](type, this.arguments);
+/* public */ Invokable withBeforeArgs_Invokable(Type type){
+	return Symbol[value=Invokable](type, this.arguments);
 }
 /* @Override
         public */ char* generate_Lambda(){
 	return /* generatePlaceholder(this.beforeArrow) + " */ -> /* " + this */.value;
 }
 /* @Override
-        public */ /* Type */ resolveType_Lambda(){
-	return Content[input=Content](/* "?" */);
+        public */ Type resolveType_Lambda(){
+	return Symbol[value=Content](/* "?" */);
 }
 /* @Override
         public */ char* generate_DataAccess(){
 	return this.parent.generate() + "." + this.property;
 }
 /* @Override
-        public */ /* Type */ resolveType_DataAccess(){
+        public */ Type resolveType_DataAccess(){
 	if (this.parent.resolveType() instanceof Struct struct){
 		if (Content[input=struct.find](this.property) instanceof Some(var value)){
 			return value;
 		}
 	}
-	return Content[input=Content](Content[input=this.parent.generate](/*  */));
+	return Symbol[value=Content](Content[input=this.parent.generate](/*  */));
 }
 /* @Override
         public */ char* generate_Symbol(){
 	return this.value;
 }
 /* @Override
-        public */ /* Type */ resolveType_Symbol(){
-	return Content[input=Content](this.value);
+        public */ Type resolveType_Symbol(){
+	return Symbol[value=Content](this.value);
 }
 /* public static final List<Generic> generics */ /* = */ Lists.emptyList_Symbol();
 /* private static final List<String> structs */ /* = */ Lists.emptyList_Symbol();
 /* private static final List<String> methods */ /* = */ Lists.emptyList_Symbol();
-/* private static Option<String> currentStruct = */ /* new */ None<>_Symbol();
-/* private static */ char* generateAll_Symbol(/*  StringBuilder */ (*merger)(/* StringBuilder */, char*), List<char*> parsed){
+/* private static Option<String> currentStruct = */ new None<>_Symbol();
+/* private static */ char* generateAll_Symbol(StringBuilder (*merger)(StringBuilder, char*), List<char*> parsed){
 	return Content[input=parsed.iter](Content[input=/* )
                  */.fold](/* new StringBuilder( */), /* merger)
                  */.toString();
 }
-/* private static <T> */ Option<List</* T */>> parseAll_Symbol(char* input, /*  State */ (*folder)(/* State */, /*  Character */), Option</* T */> (*compiler)(char*)){
+/* private static <T> */ Option<List<T>> parseAll_Symbol(char* input, State (*folder)(State, Character), Option<T> (*compiler)(char*)){
 	return Content[input=Main.divideAll](input, Content[input=/* folder)
                  */.iter](Content[input=/* )
                  */.map](/* compiler)
                  */.collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll_Symbol(char* input, /*  State */ (*folder)(/* State */, /*  Character */)){
-	auto current = Content[input=State](/*  */);
-	auto queue = Generic[base=Iterator, arguments=JavaList[list=[Content[input=/* RangeHead */]]]](Content[input=RangeHead](input.length())).map(input::charAt).collect(new ListCollector<>());
+/* private static */ List<char*> divideAll_Symbol(char* input, State (*folder)(State, Character)){
+	auto current = Symbol[value=State](/*  */);
+	auto queue = Generic[base=Iterator, arguments=JavaList[list=[Content[input=RangeHead]]]](Symbol[value=RangeHead](input.length())).map(input::charAt).collect(new ListCollector<>());
 	while (Content[input=queue.hasElements](/*  */)){
 		auto c = Content[input=queue.removeFirst](/*  */);
 		if (/* c == '\'' */){
@@ -299,7 +300,7 @@ char* generate_Value();
 /* private static */ char* generateValues_Symbol(List<char*> parserd){
 	return Content[input=Main.generateAll](/* Main::mergeValues */, parserd);
 }
-/* private static */ /* StringBuilder */ mergeValues_Symbol(/* StringBuilder */ cache, char* element){
+/* private static */ StringBuilder mergeValues_Symbol(StringBuilder cache, char* element){
 	if (Content[input=cache.isEmpty](/*  */)){
 		return Content[input=cache.append](element);
 	}
@@ -308,7 +309,7 @@ char* generate_Value();
 /* private static */ char* generatePlaceholder_Symbol(char* input){
 	return /* "/* " + input + " */" */;
 }
-/* private static */ char* generateValuesFromNodes_Symbol(List</* Type */> list){
+/* private static */ char* generateValuesFromNodes_Symbol(List<Type> list){
 	return Content[input=list.iter](/* )
                  */.map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
@@ -376,7 +377,7 @@ char* generate_Value();
 /* private static */ char* compileValue_Symbol(char* input){
 	return Content[input=parseValue](/* input) */.generate();
 }
-/* private static */ /* Value */ parseValue_Symbol(char* input){
+/* private static */ Value parseValue_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.startsWith](/* "new " */)){
 		auto slice = Content[input=stripped.substring](Content[input=/* "new " */.length](/* ) */).strip();
@@ -388,7 +389,7 @@ char* generate_Value();
 					auto actualTypes = Content[input=invokable.arguments.iter](Content[input=/* )
                                  */.map](/* Value::resolveType)
                                  */.collect(new ListCollector<>());
-					auto withoutDiamond1 = Content[input=Generic](base, actualTypes);
+					auto withoutDiamond1 = Symbol[value=Generic](base, actualTypes);
 					/* addGeneric(withoutDiamond1) */;
 					/* withoutDiamond = withoutDiamond1; */
 				}
@@ -407,23 +408,23 @@ char* generate_Value();
 	if (/* arrowIndex >= 0 */){
 		auto beforeArrow = Content[input=input.substring](/* 0 */, /* arrowIndex) */.strip();
 		auto afterArrow = Content[input=input.substring](Content[input=/* arrowIndex + " */ -> /* " */.length](/*  */));
-		return Content[input=Lambda](beforeArrow, Content[input=compileValue](afterArrow));
+		return Symbol[value=Lambda](beforeArrow, Content[input=compileValue](afterArrow));
 	}
 	auto separator = Content[input=stripped.lastIndexOf](/* " */.");
 	if (/* separator >= 0 */){
 		auto parent = Content[input=stripped.substring](/* 0 */, separator);
 		auto property = Content[input=stripped.substring](Content[input=/* separator + " */.".length](/*  */));
-		return Content[input=DataAccess](Content[input=parseValue](parent), property);
+		return Symbol[value=DataAccess](Content[input=parseValue](parent), property);
 	}
 	if (Content[input=isSymbol](stripped)){
-		return Content[input=Symbol](stripped);
+		return Symbol[value=Symbol](stripped);
 	}
-	return Content[input=Content](input);
+	return Symbol[value=Content](input);
 }
-/* private static */ Option</* Invokable */> parseInvocation_Symbol(char* input){
+/* private static */ Option<Invokable> parseInvocation_Symbol(char* input){
 	return Content[input=parseInvokable](input, Content[input=/* input1 */ -> /*  new Content */](Content[input=compileValue](/* input1 */)));
 }
-/* private static */ Option</* Invokable */> parseInvokable_Symbol(char* slice, /*  BeforeArgs */ (*beforeArgsCompiler)(char*)){
+/* private static */ Option<Invokable> parseInvokable_Symbol(char* slice, BeforeArgs (*beforeArgsCompiler)(char*)){
 	if (Content[input=/* !slice */.endsWith](/* ")" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 	}
@@ -436,15 +437,15 @@ char* generate_Value();
 	auto args = Content[input=withoutEnd.substring](Content[input=/* argsStart + " */](/* " */.length());
 	/* return parseValues(args, value -> new Some<>(parseValue(value))).map(newArgs -> */{
 		auto generate = Content[input=beforeArgsCompiler.apply](base);
-		return Content[input=Invokable](generate, newArgs);
+		return Symbol[value=Invokable](generate, newArgs);
 	}
 	/* ) */;
 }
-/* private static */ /* BeforeArgs */ compileConstructorCaller_Symbol(char* base){
+/* private static */ BeforeArgs compileConstructorCaller_Symbol(char* base){
 	if (Content[input=parseAndModifyType](/* base) instanceof Some<Type>(var type */)){
 		return type;
 	}
-	return Content[input=Content](base);
+	return Symbol[value=Content](base);
 }
 /* private static */ int isSymbol_Symbol(char* input){
 	if (Content[input=input.isEmpty](/*  */)){
@@ -461,16 +462,16 @@ char* generate_Value();
 	}
 	return true;
 }
-/* private static */ Option</* Whitespace */> parseWhitespace_Symbol(char* input){
+/* private static */ Option<Whitespace> parseWhitespace_Symbol(char* input){
 	if (Content[input=input.isBlank](/*  */)){
-		return Generic[base=Some, arguments=JavaList[list=[Content[input=/* Whitespace */]]]](Content[input=Whitespace](/*  */));
+		return Generic[base=Some, arguments=JavaList[list=[Content[input=Whitespace]]]](Symbol[value=Whitespace](/*  */));
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ Option</* Defined */> parseAndModifyDefinition_Symbol(char* input){
+/* private static */ Option<Defined> parseAndModifyDefinition_Symbol(char* input){
 	/* return Main.parseDefinition(input).map(definition -> */{
 		if (Content[input=definition.type instanceof Functional](/* var args */, /*  var base */)){
-			return Content[input=FunctionalDefinition](definition.beforeType, base, definition.name, args);
+			return Symbol[value=FunctionalDefinition](definition.beforeType, base, definition.name, args);
 		}
 		return definition;
 	}
@@ -487,10 +488,10 @@ char* generate_Value();
 /* private static */ char* generateStatement_Symbol(char* definition, int depth){
 	return /* createIndent(depth) + definition + ";" */;
 }
-/* private static <T> */ Option<List</* T */>> parseValues_Symbol(char* input, Option</* T */> (*compiler)(char*)){
+/* private static <T> */ Option<List<T>> parseValues_Symbol(char* input, Option<T> (*compiler)(char*)){
 	return Content[input=Main.parseAll](input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ /* State */ foldValueChar_Symbol(/* State */ state, /* char */ c){
+/* private static */ State foldValueChar_Symbol(State state, char c){
 	if (Content[input=/* c == ',' && state */.isLevel](/*  */)){
 		return Content[input=state.advance](/*  */);
 	}
@@ -503,7 +504,7 @@ char* generate_Value();
 	}
 	return appended;
 }
-/* private static */ Option</* Definition */> parseDefinition_Symbol(char* input){
+/* private static */ Option<Definition> parseDefinition_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	auto nameSeparator = Content[input=stripped.lastIndexOf](/* " " */);
 	if (/* nameSeparator < 0 */){
@@ -525,7 +526,7 @@ char* generate_Value();
 /* private static */ Option<int> findTypeSeparator_Symbol(char* input){
 	auto depth = /*  0 */;
 	/* for */ /* (var */ index = input.length() - 1;
-	/* index */ > = /*  0 */;
+	index > = /*  0 */;
 	/* index--) */{
 		auto c = Content[input=input.charAt](index);
 		if (/* c == ' ' && depth == 0 */){
@@ -540,7 +541,7 @@ char* generate_Value();
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ Option</* Type */> parseAndModifyType_Symbol(char* input){
+/* private static */ Option<Type> parseAndModifyType_Symbol(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic generic */){
 			auto withoutWhitespace = Content[input=generic.arguments.iter](Content[input=/* )
@@ -552,17 +553,17 @@ char* generate_Value();
 			if (Content[input=base.equals](/* "Function" */)){
 				auto argType = Content[input=/* arguments1 */.get](/* 0 */);
 				auto returnType = Content[input=/* arguments1 */.get](/* 1 */);
-				return Content[input=Functional](Content[input=Lists.of](argType), returnType);
+				return Symbol[value=Functional](Content[input=Lists.of](argType), returnType);
 			}
 			if (Content[input=base.equals](/* "Supplier" */)){
 				auto returns = Content[input=/* arguments1 */.get](/* 0 */);
-				return Content[input=Functional](Content[input=Lists.emptyList](/*  */), returns);
+				return Symbol[value=Functional](Content[input=Lists.emptyList](/*  */), returns);
 			}
 			if (Content[input=base.equals](/* "BiFunction" */)){
 				auto argType = Content[input=/* arguments1 */.get](/* 0 */);
 				auto argType2 = Content[input=/* arguments1 */.get](/* 1 */);
 				auto returnType = Content[input=/* arguments1 */.get](/* 2 */);
-				return Content[input=Functional](Lists.of(argType, /*  argType2) */, returnType);
+				return Symbol[value=Functional](Lists.of(argType, /*  argType2) */, returnType);
 			}
 			else {
 				/* addGeneric(withoutWhitespaceGeneric) */;
@@ -572,12 +573,12 @@ char* generate_Value();
 	}
 	/* ) */;
 }
-/* private static */ /* void */ addGeneric_Symbol(/* Generic */ generic){
+/* private static */ void addGeneric_Symbol(Generic generic){
 	if (Content[input=/* !generics */.contains](/* generic) && generic */.arguments.hasElements()){
 		/* generics.add(generic) */;
 	}
 }
-/* private static */ Option</* Type */> parseType_Symbol(char* input){
+/* private static */ Option<Type> parseType_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.equals](/* "public" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
@@ -586,7 +587,7 @@ char* generate_Value();
 		return Generic[base=Some, arguments=JavaList[list=[Content[input=Primitive]]]](Primitive.Bit);
 	}
 	if (Content[input=stripped.equals](/* "String" */)){
-		return Generic[base=Some, arguments=JavaList[list=[Content[input=/* Ref */]]]](Content[input=Ref](Primitive.I8));
+		return Generic[base=Some, arguments=JavaList[list=[Content[input=Ref]]]](Symbol[value=Ref](Primitive.I8));
 	}
 	if (Content[input=stripped.equals](/* "int") || stripped */.equals("Integer")){
 		return Generic[base=Some, arguments=JavaList[list=[Content[input=Primitive]]]](Primitive.I32);
@@ -605,14 +606,17 @@ char* generate_Value();
 			}
 		}
 	}
-	return Generic[base=Some, arguments=JavaList[list=[Content[input=/* Content */]]]](Content[input=Content](input));
+	if (Content[input=isSymbol](stripped)){
+		return Generic[base=Some, arguments=JavaList[list=[Content[input=Symbol]]]](Symbol[value=Symbol](stripped));
+	}
+	return Generic[base=Some, arguments=JavaList[list=[Content[input=Content]]]](Symbol[value=Content](input));
 }
-/* private static */ Option</* Type */> parseGenericArgument_Symbol(char* input1){
+/* private static */ Option<Type> parseGenericArgument_Symbol(char* input1){
 	return Content[input=parseWhitespace](Content[input=/* input1)
                  */.<Type>map](/* whitespace */ -> /* whitespace)
                 .or(() */ -> /*  parseAndModifyType(input1 */));
 }
-/* private static */ /* StringBuilder */ mergeStatements_Symbol(/* StringBuilder */ stringBuilder, char* str){
+/* private static */ StringBuilder mergeStatements_Symbol(StringBuilder stringBuilder, char* str){
 	return Content[input=stringBuilder.append](str);
 }
 /* private static */ char* compileStatementsOrBlocks_Symbol(char* body, int depth){
@@ -627,7 +631,7 @@ char* generate_Value();
 /* private static */ char* generateStatements_Symbol(List<char*> inner){
 	return Content[input=generateAll](/* Main::mergeStatements */, inner);
 }
-/* private static */ /* State */ foldStatementChar_Symbol(/* State */ state, /* char */ c){
+/* private static */ State foldStatementChar_Symbol(State state, char c){
 	auto appended = Content[input=state.append](c);
 	if (Content[input=/* c == ';' && appended */.isLevel](/*  */)){
 		return Content[input=appended.advance](/*  */);
@@ -649,7 +653,7 @@ char* generate_Value();
 /* private static */ Option<char*> compileDefinitionToString_Symbol(char* input){
 	return Content[input=Main.parseAndModifyDefinition](/* input) */.map(Defined::generate);
 }
-/* void */ main_Symbol(){
+void main_Symbol(){
 	/* try */{
 		auto source = Content[input=Paths.get](/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
 		auto input = Content[input=Files.readString](source);
@@ -663,12 +667,12 @@ char* generate_Value();
 }
 /* private */ char* compileRoot_Symbol(char* input){
 	auto compiled = Content[input=compileStatements](input, Content[input=/* segment */ -> /*  new Some<> */](Content[input=this.compileRootSegment](segment)));
-	auto joinedStructs = Content[input=structs.iter](Content[input=/* ) */.collect](Content[input=Joiner](/*  */)).orElse("");
+	auto joinedStructs = Content[input=structs.iter](Content[input=/* ) */.collect](Symbol[value=Joiner](/*  */)).orElse("");
 	auto joinedGenerics = Content[input=generics.iter](/* )
                 .map(Generic::generate)
                 .map(result */ -> Content[input=/* "// " + result + "\n")
-                 */.collect](Content[input=Joiner](/*  */)).orElse("");
-	auto joinedMethods = Content[input=methods.iter](Content[input=/* ) */.collect](Content[input=Joiner](/*  */)).orElse("");
+                 */.collect](Symbol[value=Joiner](/*  */)).orElse("");
+	auto joinedMethods = Content[input=methods.iter](Content[input=/* ) */.collect](Symbol[value=Joiner](/*  */)).orElse("");
 	return /* compiled + joinedStructs + joinedGenerics + joinedMethods */;
 }
 /* private */ char* compileRootSegment_Symbol(char* input){

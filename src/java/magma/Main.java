@@ -469,7 +469,7 @@ class Main {
         }
     }
 
-    private record Symbol(String value) implements Value {
+    private record Symbol(String value) implements Value, Type {
         @Override
         public String generate() {
             return this.value;
@@ -917,6 +917,10 @@ class Main {
                     return Main.parseValues(inputArgs, Main::parseGenericArgument).map(args -> new Generic(base, args));
                 }
             }
+        }
+
+        if (isSymbol(stripped)) {
+            return new Some<>(new Symbol(stripped));
         }
 
         return new Some<>(new Content(input));
