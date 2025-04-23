@@ -6,27 +6,33 @@
 /* import java.util.function.Function; */
 /* import java.util.function.Supplier; */
 /*  */
-/* sealed  */struct Option<T> permits Some, None {/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper); */
+/* sealed  */struct Option<T> permits Some, None {
+	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* ; */
 	/* T */ /* orElseGet(Supplier<T> */ other);
 	/* Option<T> */ /* or(Supplier<Option<T>> */ other);
-	/* T */ /* orElse(T */ other);/* 
-     */};
+	/* T */ /* orElse(T */ other);
+	/* <R> */ /* Option<R> */ flatMap(/* Function<T, Option<R>> mapper */)/* ; *//* 
+     */
+};
 /* 
 
      */struct Head<T> {/* Option<T> next(); *//* 
-     */};
+     */
+};
 /* 
 
     public  */struct List<T> {
 	/* void */ /* add(T */ element);/* 
 
         Iterator<T> iter(); *//* 
-     */};
+     */
+};
 /* 
 
     public  */struct Collector<T, C> {/* C createInitial(); */
 	/* C fold(C current, */ /* T */ element);/* 
-     */};
+     */
+};
 /* 
 
     private Option<String> compileStructured(String input, String infix) {
@@ -48,7 +54,7 @@
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = this.compileAll(inputContent, this::compileClassSegment);
 
-        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
+        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
@@ -60,48 +66,73 @@
                 .orElseGet(() -> this.generatePlaceholder(input));
     }
 
-    private Option<String> compileMethod(String input) {/* var paramStart */ /* = */ input.indexOf(/* "("); *//* 
+    private Option<String> compileMethod(String input) {
+	/* var paramStart */ /* = */ input.indexOf(/* "(" */)/* ; *//* 
         if (paramStart >= 0) {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return this.compileDefinition(inputDefinition).map(outputDefinition -> {
-                return outputDefinition + "(" + this.generatePlaceholder(withParams);
-            });
-        } *//* return */ /* new */ None<>(/* ); *//* }
+            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                var paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    var params = withParams.substring(0, paramEnd).strip();
+                    var body = withParams.substring(paramEnd + ")".length()).strip();
+                    return new Some<>("\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body));
+                }
 
-    private */ /* Option<String> */ compileDefinitionStatement(/* String input) {
+                return new None<>();
+            });
+        } */
+	/* return */ /* new */ None<>(/*  */)/* ; */
+	/* }
+
+    private */ /* Option<String> */ compileDefinitionStatement(/* String input */)/* {
         var stripped = input.strip(); *//* 
-        if (!stripped.endsWith("; *//* ")) {
-            return */ /* new */ None<>(/* );
-        } *//* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length() - "; *//* ".length()); *//* 
+        if (!stripped.endsWith("; */
+	/* ")) {
+            return */ /* new */ None<>(/*  */)/* ;
+        } */
+	/* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length( */)/* - "; *//* ".length()); *//* 
         return this.compileDefinition(withoutEnd).map(definition -> {
             return "\n\t" + definition + ";";
-        } *//* ); *//* }
+        } *//* ); */
+	/* }
 
-    private */ /* Option<String> */ compileDefinition(/* String input) {
+    private */ /* Option<String> */ compileDefinition(/* String input */)/* {
         var nameSeparator = input.lastIndexOf(" "); *//* 
         if (nameSeparator < 0) {
             return new None<>();
-        } *//* var beforeName */ /* = */ input.substring(/* 0, nameSeparator).strip(); *//* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " "); *//* 
+        } */
+	/* var beforeName */ /* = */ input.substring(/* 0, nameSeparator */)/* .strip(); */
+	/* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " " */)/* ; *//* 
         if (typeSeparator < 0) {
             return new None<>();
-        } *//* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator).strip(); *//* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length()).strip(); *//* var name */ /* = */ input.substring(/* nameSeparator + " ".length()).strip(); *//* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name); *//* }
+        } */
+	/* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator */)/* .strip(); */
+	/* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length( */)/* ).strip(); */
+	/* var name */ /* = */ input.substring(/* nameSeparator + " ".length( */)/* ).strip(); */
+	/* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType */)/* + " " + this.compileType(type) + " " + name); */
+	/* }
 
-    private */ /* String */ compileType(/* String type) {
-        return this.generatePlaceholder(type); *//* }
+    private */ /* String */ compileType(/* String type */)/* {
+        return this.generatePlaceholder(type); */
+	/* }
 
-    private */ /* State */ divide(/* String input, State state) {
+    private */ /* State */ divide(/* String input, State state */)/* {
         var current = state; */
-	/* for (var i */ /* = */ 0;/* i */ /* < */ input.length(/* ); *//* i++) {
-            var c */ /* = */ input.charAt(/* i);
+	/* for (var i */ /* = */ 0;
+	/* i */ /* < */ input.length(/*  */)/* ; */
+	/* i++) {
+            var c */ /* = */ input.charAt(/* i */)/* ;
             current = this.foldStatementChar(current, c);
         } *//* 
-        return current.advance(); *//* }
+        return current.advance(); */
+	/* }
 
-    private */ /* State */ foldStatementChar(/* State state, char c) {
+    private */ /* State */ foldStatementChar(/* State state, char c */)/* {
         var appended = state.append(c); */
-	/* if (c */ /* == */ ';/* ' */ /* && */ appended.isLevel(/* )) {
+	/* if (c */ /* == */ ';
+	/* ' */ /* && */ appended.isLevel(/*  */)/* ) {
             return appended.advance();
         } */
 	/* if (c == '}' && appended.isShallow()) { */ /* return */ appended.advance().exit();/* 
@@ -113,12 +144,14 @@
 	/* }
         else { */ /* return */ appended;/* 
         }
-     */};
+     */
+};
 /* 
 
- */struct Main {/* public static class RangeHead implements Head<Integer> {
+ */struct Main {
+	/* public static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter; */ /* public */ RangeHead(/* int length) {
+        private int counter; */ /* public */ RangeHead(/* int length */)/* {
             this.length = length;
         }
 
@@ -133,7 +166,8 @@
                 return new None<>();
             }
         }
-    } *//* public */ /* record */ Iterator<T>(/* Head<T> head) {
+    } */
+	/* public */ /* record */ Iterator<T>(/* Head<T> head */)/* {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -155,10 +189,11 @@
         public <C> C collect(Collector<T, C> collector) {
             return this.fold(collector.createInitial(), collector::fold);
         }
-    } *//* private static class State {
+    } */
+	/* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
-        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth) {
+        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth */)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -196,7 +231,8 @@
         public boolean isShallow() {
             return this.depth == 1;
         }
-    } *//* private */ /* record */ Some<T>(/* T value) implements Option<T> {
+    } */
+	/* private */ /* record */ Some<T>(/* T value */)/* implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
@@ -216,9 +252,15 @@
         public T orElse(T other) {
             return this.value;
         }
-    } *//* private static final class None<T> implements Option<T> {
+
         @Override
-        public <R> */ /* Option<R> */ map(/* Function<T, R> mapper) {
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+    } */
+	/* private static final class None<T> implements Option<T> {
+        @Override
+        public <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* {
             return new None<>();
         }
 
@@ -236,9 +278,15 @@
         public T orElse(T other) {
             return other;
         }
-    } *//* private static class Joiner implements Collector<String, Option<String>> {
+
         @Override
-        public */ /* Option<String> */ createInitial(/* ) {
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+    } */
+	/* private static class Joiner implements Collector<String, Option<String>> {
+        @Override
+        public */ /* Option<String> */ createInitial(/*  */)/* {
             return new None<>();
         }
 
@@ -249,7 +297,8 @@
                 case Some<String>(var current) -> current + element;
             });
         }
-    } *//* private static final List<String> structs */ /* = */ Lists.emptyList(/* ); *//* 
+    } */
+	/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; *//* 
 
     void main() {
         try {
@@ -262,23 +311,29 @@
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    } *//* private */ /* String */ compileRoot(/* String input) {
+    } */
+	/* private */ /* String */ compileRoot(/* String input */)/* {
         var compiled = this.compileAll(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs;
-    } *//* private */ /* String */ compileAll(/* String input, Function<String, String> compiler) {
+    } */
+	/* private */ /* String */ compileAll(/* String input, Function<String, String> compiler */)/* {
         return this.divide(input, new State())
                 .segments
                 .iter()
                 .map(compiler)
                 .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
-    } *//* private */ /* String */ compileRootSegment(/* String input) {
+    } */
+	/* private */ /* String */ compileRootSegment(/* String input */)/* {
         return this.compileClass(input)
                 .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
-    } *//* private */ /* Option<String> */ compileClass(/* String input) {
+    } */
+	/* private */ /* Option<String> */ compileClass(/* String input */)/* {
         return this.compileStructured(input, "class ");
-    } *//* private */ /* String */ generatePlaceholder(/* String input) {
+    } */
+	/* private */ /* String */ generatePlaceholder(/* String input */)/* {
         return "/* " + input + " */";
     } *//* 
- */};
+ */
+};

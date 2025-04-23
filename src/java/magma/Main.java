@@ -16,6 +16,8 @@ class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         T orElse(T other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
     }
 
     interface Head<T> {
@@ -144,6 +146,11 @@ class Main {
         public T orElse(T other) {
             return this.value;
         }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -165,6 +172,11 @@ class Main {
         @Override
         public T orElse(T other) {
             return other;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
         }
     }
 
@@ -241,7 +253,7 @@ class Main {
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = this.compileAll(inputContent, this::compileClassSegment);
 
-        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
+        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
@@ -259,8 +271,15 @@ class Main {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return this.compileDefinition(inputDefinition).map(outputDefinition -> {
-                return outputDefinition + "(" + this.generatePlaceholder(withParams);
+            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                var paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    var params = withParams.substring(0, paramEnd).strip();
+                    var body = withParams.substring(paramEnd + ")".length()).strip();
+                    return new Some<>("\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body));
+                }
+
+                return new None<>();
             });
         }
 
