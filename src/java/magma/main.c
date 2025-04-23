@@ -97,7 +97,7 @@ char* generate();
 	return this.value;
 }
 /* @Override
-        public */ Option</* Integer */> next(){
+        public */ Option<int> next(){
 	/* if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -418,7 +418,7 @@ char* generate();
         } */
 	/* ; */
 }
-/* private static */ Option</* Integer */> findTypeSeparator(char* input){
+/* private static */ Option<int> findTypeSeparator(char* input){
 	/* var depth = 0; */
 	/* for (var index = input.length() - 1; */
 	/* index >= 0; */
@@ -467,7 +467,7 @@ char* generate();
 	/* if (stripped.equals("String")) {
             return new Some<>(new Ref(Primitive.I8));
         } */
-	/* if (stripped.equals("int")) {
+	/* if (stripped.equals("int") || stripped.equals("Integer")) {
             return new Some<>(Primitive.I32);
         } */
 	/* if (stripped.endsWith(">")) {

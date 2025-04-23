@@ -563,7 +563,7 @@ class Main {
             return new Some<>(new Ref(Primitive.I8));
         }
 
-        if (stripped.equals("int")) {
+        if (stripped.equals("int") || stripped.equals("Integer")) {
             return new Some<>(Primitive.I32);
         }
 
