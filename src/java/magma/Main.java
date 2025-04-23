@@ -92,7 +92,12 @@ private String compileRootSegment(String input) {
 }
 
 private String compileClassSegment(String input) {
-    return this.generatePlaceholder(input);
+    var stripped = input.strip();
+    if (stripped.endsWith(";")) {
+        return "\n\t" + this.generatePlaceholder(stripped) + ";";
+    }
+
+    return this.generatePlaceholder(stripped);
 }
 
 private State divide(String input, State state) {

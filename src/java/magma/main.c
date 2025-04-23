@@ -1,46 +1,30 @@
-/* private static  */struct State {/* private final List<String> segments; *//* 
-    private StringBuilder buffer; *//* 
-    private int depth; *//* 
-
-    private State(List<String> segments, StringBuilder buffer, int depth) {
+/* private static  */struct State {
+	/* private final List<String> segments; */;
+	/* private StringBuilder buffer; */;
+	/* private int depth; */;/* private State(List<String> segments, StringBuilder buffer, int depth) {
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
-    } *//* 
-
-    public State() {
+    } *//* public State() {
         this(new ArrayList<>(), new StringBuilder(), 0);
-    } *//* 
-
-    public boolean isLevel() {
+    } *//* public boolean isLevel() {
         return this.depth == 0;
-    } *//* 
-
-    public State enter() {
+    } *//* public State enter() {
         this.depth++;
         return this;
-    } *//* 
-
-    public State exit() {
+    } *//* public State exit() {
         this.depth--;
         return this;
-    } *//* 
-
-    private State append(char c) {
+    } *//* private State append(char c) {
         this.buffer.append(c);
         return this;
-    } *//* 
-
-    private State advance() {
+    } *//* private State advance() {
         this.segments.add(this.buffer.toString());
         this.buffer = new StringBuilder();
         return this;
-    } *//* 
-
-    public boolean isShallow() {
+    } *//* public boolean isShallow() {
         return this.depth == 1;
-    } *//* 
- */};
+    } *//*  */};
 /* 
 
 void main() {
@@ -73,9 +57,9 @@ private String compileAll(String input, Function<String, String> compiler) {
 
 private String compileRootSegment(String input) {
     var classIndex = input.indexOf(" */struct ");
-    if (classIndex >= 0) {/* var left = input.substring(0, classIndex); *//* 
-        var right = input.substring(classIndex + "class ".length()); *//* 
-        var contentStart = right.indexOf("{");
+    if (classIndex >= 0) {
+	/* var left = input.substring(0, classIndex); */;
+	/* var right = input.substring(classIndex + "class ".length()); */;/* var contentStart = right.indexOf("{");
         if (contentStart >= 0) {
             var name = right.substring(0, contentStart).strip();
             var withEnd = right.substring(contentStart + "{".length()).strip();
@@ -85,42 +69,43 @@ private String compileRootSegment(String input) {
                 return this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
             }
         }
-    } *//* 
-
-    return this.generatePlaceholder(input); *//* 
-}
+    } */
+	/* return this.generatePlaceholder(input); */;
+	/* }
 
 private String compileClassSegment(String input) {
-    return this.generatePlaceholder(input); *//* 
-}
+    var stripped = input.strip(); */;
+	/* if (stripped.endsWith("; */;/* ")) {
+        return "\n\t" + this.generatePlaceholder(stripped) + ";";
+    } */
+	/* return this.generatePlaceholder(stripped); */;
+	/* }
 
 private State divide(String input, State state) {
-    var current = state; *//* 
-    for (var i = 0; *//*  i < input.length(); *//*  i++) {
+    var current = state; */;
+	/* for (var i = 0; */;
+	/* i < input.length(); */;/* i++) {
         var c = input.charAt(i);
         current = this.foldStatementChar(current, c);
-    } *//* 
-    return current.advance(); *//* 
-}
+    } */
+	/* return current.advance(); */;
+	/* }
 
 private State foldStatementChar(State state, char c) {
-    var appended = state.append(c); *//* 
-    if (c == '; *//* ' && appended.isLevel()) {
+    var appended = state.append(c); */;
+	/* if (c == '; */;/* ' && appended.isLevel()) {
         return appended.advance();
-    } *//* 
-    if (c == '}' && appended.isShallow()) {
-        return appended.advance().exit(); *//* 
-    }
+    } */
+	/* if (c == '}' && appended.isShallow()) {
+        return appended.advance().exit(); */;/* }
     if (c == '{') {
         return appended.enter();
-    } *//* 
-    if (c == '}') {
-        return appended.exit(); *//* 
-    }
+    } */
+	/* if (c == '}') {
+        return appended.exit(); */;
+	/* }
     else {
-        return appended; *//* 
-    }
- */};
+        return appended; */;/* } */};
 /* 
 
 private String generatePlaceholder(String input) {
