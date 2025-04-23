@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 class Main {
-    sealed interface Option<T> permits Some, None {
+    public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElseGet(Supplier<T> other);
@@ -25,9 +25,13 @@ class Main {
     }
 
     public interface List<T> {
-        void add(T element);
+        List<T> add(T element);
 
         Iterator<T> iter();
+
+        boolean isEmpty();
+
+        T removeFirst();
     }
 
     public interface Collector<T, C> {
@@ -66,9 +70,7 @@ class Main {
             var current = initial;
             while (true) {
                 switch (this.head.next()) {
-                    case Some<T>(var value) -> {
-                        current = folder.apply(current, value);
-                    }
+                    case Some<T>(var value) -> current = folder.apply(current, value);
                     case None<T> _ -> {
                         return current;
                     }
@@ -195,6 +197,18 @@ class Main {
         }
     }
 
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.emptyList();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -304,9 +318,7 @@ class Main {
             return new None<>();
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return this.compileDefinition(withoutEnd).map(definition -> {
-            return "\n\t" + definition + ";";
-        });
+        return this.compileDefinition(withoutEnd).map(definition -> "\n\t" + definition + ";");
     }
 
     private Option<String> compileDefinition(String input) {
@@ -334,8 +346,40 @@ class Main {
 
     private State divide(String input, State state) {
         var current = state;
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
+        var queue = new Iterator<>(new RangeHead(input.length()))
+                .map(input::charAt)
+                .collect(new ListCollector<>());
+
+        while (!queue.isEmpty()) {
+            var c = queue.removeFirst();
+
+            if (c == '\'') {
+                current.append(c);
+
+                var c1 = queue.removeFirst();
+                current.append(c1);
+                if (c1 == '\\') {
+                    current.append(queue.removeFirst());
+                }
+                current.append(queue.removeFirst());
+                continue;
+            }
+            if (c == '"') {
+                current.append(c);
+                while (!queue.isEmpty()) {
+                    var next = queue.removeFirst();
+                    current.append(next);
+
+                    if (next == '\\') {
+                        current.append(queue.removeFirst());
+                    }
+                    if (next == '"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
             current = this.foldStatementChar(current, c);
         }
         return current.advance();

@@ -9,13 +9,24 @@ public class Lists {
         }
 
         @Override
-        public void add(T element) {
+        public Main.List<T> add(T element) {
             this.list.add(element);
+            return this;
         }
 
         @Override
         public Main.Iterator<T> iter() {
             return new Main.Iterator<>(new Main.RangeHead(this.list.size())).map(this.list::get);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.list.isEmpty();
+        }
+
+        @Override
+        public T removeFirst() {
+            return this.list.removeFirst();
         }
     }
 
