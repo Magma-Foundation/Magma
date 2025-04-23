@@ -45,9 +45,11 @@ private String compile(String input) {
             segments.add(buffer.toString());
             buffer = new StringBuilder();
             depth--;
-        } else if (c == '{') {
+        }
+        else if (c == '{') {
             depth++;
-        } else if (c == '}') {
+        }
+        else if (c == '}') {
             depth--;
         }
     }
@@ -62,6 +64,26 @@ private String compile(String input) {
 }
 
 private String compileRootSegment(String input) {
+    var interfaceIndex = input.indexOf("interface ");
+    if (interfaceIndex >= 0) {
+        var beforeKeyword = input.substring(0, interfaceIndex).strip();
+        var afterKeyword = input.substring(interfaceIndex + "interface ".length());
+        var contentStart = afterKeyword.indexOf("{");
+        if (contentStart >= 0) {
+            var beforeContent = afterKeyword.substring(0, contentStart).strip();
+            var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+            if (withEnd.endsWith("}")) {
+                var content = withEnd.substring(0, withEnd.length() - "}".length());
+                return this.generatePlaceholder(beforeKeyword) + "struct " +
+                        beforeContent + " {" + this.generatePlaceholder(content) + "\n}\n";
+            }
+        }
+    }
+
+    return this.generatePlaceholder(input);
+}
+
+private String generatePlaceholder(String input) {
     return "/* " + input + "*/";
 }
 
