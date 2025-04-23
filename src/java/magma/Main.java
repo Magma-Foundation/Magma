@@ -242,7 +242,7 @@ public class Main {
     public static final Path TARGET = Paths.get(".", "main.c");
     private static final List<String> methods = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void main() {
         Optional<IOException> result = switch (readString(SOURCE)) {
             case Err<String, IOException>(IOException error) -> new Some<>(error);
             case Ok<String, IOException>(String value) -> {
@@ -487,18 +487,6 @@ public class Main {
         return new None<>();
     }
 
-    private static Optional<String> compileDefinitionStatement(String input) {
-        String stripped = input.strip();
-        if (!stripped.endsWith(";")) {
-            return new None<>();
-        }
-
-        String slice = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(slice)
-                .flatMap(Main::generateDefinition)
-                .map(Main::formatStatement);
-    }
-
     private static String formatStatement(String inner) {
         return "\n\t" + inner + ";";
     }
@@ -687,7 +675,7 @@ public class Main {
             }
         }
 
-        return compileType(type).map(outputType -> {
+        return parseType(type).map(Type::generate).map(outputType -> {
             String outputDefinition = outputType + " " + newName;
             return new Definition(modifiers, outputDefinition);
         });
@@ -708,12 +696,6 @@ public class Main {
             }
         }
         return new None<>();
-    }
-
-    private static Optional<String> compileType(String typeString) {
-        return parseType(typeString).map(type -> {
-            return type.generate();
-        });
     }
 
     private static Optional<Type> parseType(String type) {
