@@ -31,8 +31,8 @@ struct ConstructorHeader {
 	char* value;
 }
 struct Main {
-	List<char*> structs = /* new ArrayList<>(); */;
-	List<char*> methods = /* new ArrayList<>(); */;
+	List<char*> structs = new_ArrayList<>();
+	List<char*> methods = new_ArrayList<>();
 }
 struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
@@ -238,8 +238,7 @@ Optional<char*> compileStructured(char* input, char* infix){
 }
 Optional<char*> compileClassSegment(char* input, char* structName){
 	return compileWhitespace(/* input) */.or(/* ( */) - /* > compileClass */(/* input))
-                .or(( */) - /* > compileStructured(input */, /* "interface ")) */.or(/* ( */) - /* > compileStructured(input */, /* "record ")) */.or(/* ( */) - /* > compileMethod(input */, /* structName)) */.or((/* ) */ - /* > compileAssigner */(/* input).map(Main::formatStatement))
-                .or(( */) - /* > compileDefinitionStatement */(/* input))
+                .or(( */) - /* > compileStructured(input */, /* "interface ")) */.or(/* ( */) - /* > compileStructured(input */, /* "record ")) */.or(/* ( */) - /* > compileMethod(input */, /* structName)) */.or(/* ( */) - /* > compileStatement(input */, (/* value) */ - /* > compileDefinition */(/* value) */.flatMap(/* Main::generateDefinition).or(( */) - /* > compileAssigner */(/* value))))
                 .or(( */) - /* > Optional.of(generatePlaceholder(input */)));
 }
 Optional<char*> generateDefinition(struct Node node){
@@ -473,14 +472,14 @@ Optional<char*> compileType(char* type){
 	return Optional.of(generatePlaceholder(stripped));
 }
 Optional<char*> compileStatementOrBlock(char* input){
-	return compileWhitespace(/* input) */.or((/* ) */ - /* > compileStatement */(/* input)) */.or(/* ( */) - /* > Optional.of("\n\t" */ + /* generatePlaceholder(input.strip( */))));
+	return compileWhitespace(/* input) */.or(/* ( */) - /* > compileStatement(input */, /* Main::compileStatementValue)) */.or((/* ) */ - /* > Optional */.of("\n\t" + /* generatePlaceholder(input.strip( */))));
 }
-Optional<char*> compileStatement(char* input){
+Optional<char*> compileStatement(char* input, /*  Function<String */, Optional</* String> */> compileStatementValue){
 	char* stripped = input.strip();
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileStatementValue(slice).map(Main::formatStatement);
+            return compileStatementValue.apply(slice).map(Main::formatStatement);
         } */
 	return Optional.empty();
 }

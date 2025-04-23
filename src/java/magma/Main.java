@@ -267,8 +267,7 @@ public class Main {
                 .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
-                .or(() -> compileAssigner(input).map(Main::formatStatement))
-                .or(() -> compileDefinitionStatement(input))
+                .or(() -> compileStatement(input, (value) -> compileDefinition(value).flatMap(Main::generateDefinition).or(() -> compileAssigner(value))))
                 .or(() -> Optional.of(generatePlaceholder(input)));
     }
 
@@ -536,15 +535,15 @@ public class Main {
 
     private static Optional<String> compileStatementOrBlock(String input) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input))
+                .or(() -> compileStatement(input, Main::compileStatementValue))
                 .or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip())));
     }
 
-    private static Optional<String> compileStatement(String input) {
+    private static Optional<String> compileStatement(String input, Function<String, Optional<String>> compileStatementValue) {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileStatementValue(slice).map(Main::formatStatement);
+            return compileStatementValue.apply(slice).map(Main::formatStatement);
         }
 
         return Optional.empty();
