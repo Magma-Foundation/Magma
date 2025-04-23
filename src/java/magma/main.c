@@ -16,11 +16,11 @@
 };
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(/* Function<T */, /* R> */ mapper)/* ; */
+/* <R> */ Option</* R */> map(Function</* T, R */> mapper)/* ; */
 /* T */ orElseGet(Supplier</* T */> other)/* ; */
 Option</* T */> or(Supplier</* Option<T> */> other)/* ; */
 /* T */ orElse(/* T */ other)/* ; */
-/* <R> */ Option</* R */> flatMap(/* Function<T */, Option</* R> */> mapper)/* ; */
+/* <R> */ Option</* R */> flatMap(Function</* T, Option<R> */> mapper)/* ; */
 Option</* T */> next(/*  */)/* ; */
 List</* T */> add(/* T */ element)/* ; */
 Iterator</* T */> iter(/*  */)/* ; */
@@ -137,7 +137,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */ Option</* R */> map(/* Function<T */, /* R> */ mapper)/* {
+        public <R> */ Option</* R */> map(Function</* T, R */> mapper)/* {
             return new None<>();
         }
 
@@ -206,7 +206,7 @@ Iterator</* T */> iter(/*  */)/* ; */
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */ /* String */ compileAll(/* String */ input, /*  */ BiFunction<State, /*  */ Character, /* State> */ folder, /*  */ Function<String, /* String> */ compiler, /*  */ BiFunction<StringBuilder, /*  */ String, /* StringBuilder> */ merger)/* {
+/* private */ /* String */ compileAll(/* String */ input, BiFunction</* State, Character, State */> folder, Function</* String, String */> compiler, BiFunction</* StringBuilder, String, StringBuilder */> merger)/* {
         return this.divideAll(input, folder)
                 .iter()
                 .map(compiler)
@@ -216,7 +216,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
         return stringBuilder.append(str);
     } */
-/* private */ List</* String */> divideAll(/* String */ input, /*  */ BiFunction<State, /*  */ Character, /* State> */ folder)/* {
+/* private */ List</* String */> divideAll(/* String */ input, BiFunction</* State, Character, State */> folder)/* {
         var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
@@ -329,11 +329,18 @@ Iterator</* T */> iter(/*  */)/* ; */
         return cache.append(", ").append(element);
     } */
 /* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
 
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } */
 /* private */ /* String */ compileParam(/* String */ param)/* {
         return this.compileDefinition(param).orElseGet(() -> this.generatePlaceholder(param));
@@ -354,15 +361,33 @@ Iterator</* T */> iter(/*  */)/* ; */
         var beforeName = input.substring(0, nameSeparator).strip();
         var name = input.substring(nameSeparator + " ".length()).strip();
 
-        var typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
-            return new Some<>(this.compileType(beforeName) + " " + name);
+        return new Some<>(switch (this.findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> this.compileType(beforeName) + " " + name;
+            case Some<Integer>(var typeSeparator) -> {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
+                yield newBeforeName + " " + name;
+            }
+        });
+    } */
+/* private */ Option</* Integer */> findTypeSeparator(/* String */ input)/* {
+        var depth = 0;
+        for (var index = input.length() - 1; index >= 0; index--) {
+            var c = input.charAt(index);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(index);
+            }
+
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
         }
 
-        var beforeType = beforeName.substring(0, typeSeparator).strip();
-        var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
-        return new Some<>(newBeforeName + " " + name);
+        return new None<>();
     } */
 /* private */ /* String */ compileType(/* String */ input)/* {
         var stripped = input.strip();

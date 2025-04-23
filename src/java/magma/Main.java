@@ -370,11 +370,18 @@ class Main {
     }
 
     private State foldValueChar(State state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
 
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private String compileParam(String param) {
@@ -398,15 +405,34 @@ class Main {
         var beforeName = input.substring(0, nameSeparator).strip();
         var name = input.substring(nameSeparator + " ".length()).strip();
 
-        var typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
-            return new Some<>(this.compileType(beforeName) + " " + name);
+        return new Some<>(switch (this.findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> this.compileType(beforeName) + " " + name;
+            case Some<Integer>(var typeSeparator) -> {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
+                yield newBeforeName + " " + name;
+            }
+        });
+    }
+
+    private Option<Integer> findTypeSeparator(String input) {
+        var depth = 0;
+        for (var index = input.length() - 1; index >= 0; index--) {
+            var c = input.charAt(index);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(index);
+            }
+
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
         }
 
-        var beforeType = beforeName.substring(0, typeSeparator).strip();
-        var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
-        return new Some<>(newBeforeName + " " + name);
+        return new None<>();
     }
 
     private String compileType(String input) {
