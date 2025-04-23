@@ -456,7 +456,7 @@ class Main {
             return new Some<>("return " + compileValue(value));
         }
 
-        return new None<>();
+        return new Some<>(generatePlaceholder(input));
     }
 
     private static String compileValue(String input) {
