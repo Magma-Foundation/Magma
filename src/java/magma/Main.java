@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -62,11 +63,15 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         var segments = divide(input, new State());
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
         return output.toString();
     }
@@ -123,7 +128,11 @@ public class Main {
         }
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
-        return Optional.of("struct " + name + " {" + generatePlaceholder(content) + "}");
+        return Optional.of("struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "}");
+    }
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String stripped) {
