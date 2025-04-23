@@ -28,7 +28,7 @@
  Option</* T */> next(/*  */)/* ; */
  List</* T */> add( /* T */ element)/* ; */
  Iterator</* T */> iter(/*  */)/* ; */
- /* boolean */ hasElements(/*  */)/* ; */
+ int hasElements(/*  */)/* ; */
  /* T */ removeFirst(/*  */)/* ; */
  /* T */ get( /* int */ index)/* ; */
  /* C */ createInitial(/*  */)/* ; */
@@ -484,8 +484,25 @@
         }
         return parsed;
     } */
+/* private enum Primitive implements Type */  /* { */ Bit(/* "int" */)/* ;
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return value;
+        }
+    } */
 /* private */  /* Type */ parseType( /* String */ input)/* {
         var stripped = input.strip();
+        if (stripped.equals("boolean")) {
+            return Primitive.Bit;
+        }
+
         if (stripped.endsWith(">")) {
             var slice = stripped.substring(0, stripped.length() - ">".length());
             var argsStart = slice.indexOf("<");

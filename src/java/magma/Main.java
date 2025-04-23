@@ -8,6 +8,21 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 class Main {
+    private enum Primitive implements Type {
+        Bit("int");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -265,7 +280,6 @@ class Main {
             return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
         }
     }
-
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -553,6 +567,10 @@ class Main {
 
     private Type parseType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("boolean")) {
+            return Primitive.Bit;
+        }
+
         if (stripped.endsWith(">")) {
             var slice = stripped.substring(0, stripped.length() - ">".length());
             var argsStart = slice.indexOf("<");
