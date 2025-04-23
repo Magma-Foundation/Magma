@@ -97,21 +97,26 @@ char* generate();
 	return this.value;
 }
 /* @Override
-        public */ Option<int> next(){/* if (this.counter < this.length)  */{
-	/* var value = this.counter; */
-	/* this.counter++; */
-	return /* new Some<>(value) */;
-	}/* else  */{
-	return /* new None<>() */;
+        public */ Option<int> next(){
+	/* if (this.counter < this.length)  */{
+		/* var value = this.counter; */
+		/* this.counter++; */
+		return /* new Some<>(value) */;
+	}
+	/* else  */{
+		return /* new None<>() */;
 	}
 }
 /* public <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */)){
 	return /* new Iterator<>(() -> this */.head.next().map(mapper));
 }
 /* public <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
-	/* var current = initial; *//* while (true)  */{/* switch (this.head.next())  */{
-	/* case Some<T>(var value) -> current = folder.apply(current, value); *//* case None<T> _ ->  */{
-	return current;
+	/* var current = initial; */
+	/* while (true)  */{
+		/* switch (this.head.next())  */{
+			/* case Some<T>(var value) -> current = folder.apply(current, value); */
+			/* case None<T> _ ->  */{
+				return current;
 	}
 	}
 	}
@@ -203,9 +208,10 @@ char* generate();
 	return /* new None<>() */;
 }
 /* @Override
-        public */ Option<char*> fold(Option<char*> maybeCurrent, char* element){/* return new Some<>(switch (maybeCurrent)  */{
-	/* case None<String> _ -> element; */
-	/* case Some<String>(var current) -> current + this.delimiter + element; */
+        public */ Option<char*> fold(Option<char*> maybeCurrent, char* element){
+	/* return new Some<>(switch (maybeCurrent)  */{
+		/* case None<String> _ -> element; */
+		/* case Some<String>(var current) -> current + this.delimiter + element; */
 	}
 	/* ); */
 }
@@ -267,35 +273,43 @@ char* generate();
 	/* var current = new State(); */
 	/* var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
-                .collect(new ListCollector<>()); *//* while (queue.hasElements())  */{
-	/* var c = queue.removeFirst(); *//* if (c == '\'')  */{
-	/* current.append(c); */
-	/* var c1 = queue.removeFirst(); */
-	/* current.append(c1); *//* if (c1 == '\\')  */{
-	/* current.append(queue.removeFirst()); */
+                .collect(new ListCollector<>()); */
+	/* while (queue.hasElements())  */{
+		/* var c = queue.removeFirst(); */
+		/* if (c == '\'')  */{
+			/* current.append(c); */
+			/* var c1 = queue.removeFirst(); */
+			/* current.append(c1); */
+			/* if (c1 == '\\')  */{
+				/* current.append(queue.removeFirst()); */
 	}
-	/* current.append(queue.removeFirst()); */
-	/* continue; */
-	}/* if (c == '"')  */{
-	/* current.append(c); *//* while (queue.hasElements())  */{
-	/* var next = queue.removeFirst(); */
-	/* current.append(next); *//* if (next == '\\')  */{
-	/* current.append(queue.removeFirst()); */
-	}/* if (next == '"')  */{
-	/* break; */
+			/* current.append(queue.removeFirst()); */
+			/* continue; */
+	}
+		/* if (c == '"')  */{
+			/* current.append(c); */
+			/* while (queue.hasElements())  */{
+				/* var next = queue.removeFirst(); */
+				/* current.append(next); */
+				/* if (next == '\\')  */{
+					/* current.append(queue.removeFirst()); */
+	}
+				/* if (next == '"')  */{
+					/* break; */
 	}
 	}
-	/* continue; */
+			/* continue; */
 	}
-	/* current = folder.apply(current, c); */
+		/* current = folder.apply(current, c); */
 	}
 	return current.advance().segments;
 }
 /* private static */ char* generateValues(List<char*> parserd){
 	return Main.generateAll(Main::mergeValues, parserd);
 }
-/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, char* element){/* if (cache.isEmpty())  */{
-	return cache.append(element);
+/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, char* element){
+	/* if (cache.isEmpty())  */{
+		return cache.append(element);
 	}
 	return cache.append(", ").append(element);
 }
@@ -305,92 +319,115 @@ char* generate();
 /* private static */ char* generateValuesFromNodes(List</* Type */> list){
 	return list.iter().map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
-/* private static */ char* compileStatementOrBlock(char* input){
+/* private static */ char* compileStatementOrBlock(char* input, int depth){
 	return /* compileWhitespace(input)
-                 */.or(() -> compileStatement(input, Main::compileStatementValue)).or(() -> compileBlock(input)).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+                 */.or(() -> compileStatement(input, Main::compileStatementValue, depth)).or(() -> compileBlock(input, depth)).orElseGet(() -> createIndent(depth) + generatePlaceholder(input.strip()));
 }
-/* private static */ Option<char*> compileBlock(char* input){
-	/* var stripped = input.strip(); *//* if (stripped.endsWith("}"))  */{
-	/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
-	/* var contentStart = withoutEnd.indexOf("{"); *//* if (contentStart >= 0)  */{
-	/* var beforeContent = withoutEnd.substring(0, contentStart); */
-	/* var content = withoutEnd.substring(contentStart + "{".length()); */
-	return /* new Some<>(generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content) + "\n\t}") */;
+/* private static */ char* createIndent(int depth){
+	return /* "\n" + "\t" */.repeat(depth);
+}
+/* private static */ Option<char*> compileBlock(char* input, int depth){
+	/* var stripped = input.strip(); */
+	/* if (stripped.endsWith("}"))  */{
+		/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
+		/* var contentStart = withoutEnd.indexOf("{"); */
+		/* if (contentStart >= 0)  */{
+			/* var beforeContent = withoutEnd.substring(0, contentStart); */
+			/* var content = withoutEnd.substring(contentStart + "{".length()); */
+			return /* new Some<>(createIndent(depth) + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + "\n\t}") */;
 	}
 	}
 	return /* new None<>() */;
 }
 /* private static */ Option<char*> compileStatementValue(char* input){
-	/* var stripped = input.strip(); *//* if (stripped.startsWith("return "))  */{
-	/* var value = stripped.substring("return ".length()); */
-	return /* new Some<>("return " + compileValue(value)) */;
+	/* var stripped = input.strip(); */
+	/* if (stripped.startsWith("return "))  */{
+		/* var value = stripped.substring("return ".length()); */
+		return /* new Some<>("return " + compileValue(value)) */;
 	}
 	return /* new None<>() */;
 }
 /* private static */ char* compileValue(char* input){
 	/* var stripped = input.strip(); */
-	/* var separator = stripped.lastIndexOf("."); *//* if (separator >= 0)  */{
-	/* var parent = stripped.substring(0, separator); */
-	/* var property = stripped.substring(separator + ".".length()); */
-	return /* compileValue(parent) + " */." + property;
-	}/* if (isSymbol(stripped))  */{
-	return stripped;
+	/* var separator = stripped.lastIndexOf("."); */
+	/* if (separator >= 0)  */{
+		/* var parent = stripped.substring(0, separator); */
+		/* var property = stripped.substring(separator + ".".length()); */
+		return /* compileValue(parent) + " */." + property;
+	}
+	/* if (isSymbol(stripped))  */{
+		return stripped;
 	}
 	return /* generatePlaceholder(input) */;
 }
 /* private static */ int isSymbol(char* input){
 	/* for (var i = 0; */
-	/* i < input.length(); *//* i++)  */{
-	/* var c = input.charAt(i); *//* if (Character.isLetter(c))  */{
-	/* continue; */
+	/* i < input.length(); */
+	/* i++)  */{
+		/* var c = input.charAt(i); */
+		/* if (Character.isLetter(c))  */{
+			/* continue; */
 	}
-	return false;
+		return false;
 	}
 	return true;
 }
-/* private static */ Option<char*> compileWhitespace(char* input){/* if (input.isBlank())  */{
-	return /* new Some<>("") */;
+/* private static */ Option<char*> compileWhitespace(char* input){
+	/* if (input.isBlank())  */{
+		return /* new Some<>("") */;
 	}
 	return /* new None<>() */;
 }
-/* private static */ Option</* Defined */> parseAndModifyDefinition(char* input){/* return Main.parseDefinition(input).map(definition ->  */{/* if (definition.type instanceof Functional(var args, var base))  */{
-	return /* new FunctionalDefinition(definition */.beforeType, base, definition.name, args);
+/* private static */ Option</* Defined */> parseAndModifyDefinition(char* input){
+	/* return Main.parseDefinition(input).map(definition ->  */{
+		/* if (definition.type instanceof Functional(var args, var base))  */{
+			return /* new FunctionalDefinition(definition */.beforeType, base, definition.name, args);
 	}
-	return definition;
+		return definition;
 	}
 	/* ); */
 }
-/* private static */ Option<char*> compileStatement(char* input, Option<char*>(*compiler)(char*)){
-	/* var stripped = input.strip(); *//* if (!stripped.endsWith(";"))  */{
-	return /* new None<>() */;
+/* private static */ Option<char*> compileStatement(char* input, Option<char*>(*compiler)(char*), int depth){
+	/* var stripped = input.strip(); */
+	/* if (!stripped.endsWith(";"))  */{
+		return /* new None<>() */;
 	}
 	/* var withoutEnd = stripped.substring(0, stripped.length() - ";".length()); */
-	return compiler.apply(withoutEnd).map(definition -> "\n\t" + definition + ";");
+	return compiler.apply(withoutEnd).map(definition -> generateStatement(definition, depth));
+}
+/* private static */ char* generateStatement(char* definition, int depth){
+	return /* createIndent(depth) + definition + ";" */;
 }
 /* private static <T> */ Option<List</* T */>> parseValues(char* input, Option</* T */>(*compiler)(char*)){
 	return Main.parseAll(input, Main::foldValueChar, compiler);
 }
-/* private static */ /* State */ foldValueChar(/* State */ state, /* char */ c){/* if (c == ',' && state.isLevel())  */{
-	return state.advance();
+/* private static */ /* State */ foldValueChar(/* State */ state, /* char */ c){
+	/* if (c == ',' && state.isLevel())  */{
+		return state.advance();
 	}
-	/* var appended = state.append(c); *//* if (c == '<')  */{
-	return appended.enter();
-	}/* if (c == '>')  */{
-	return appended.exit();
+	/* var appended = state.append(c); */
+	/* if (c == '<')  */{
+		return appended.enter();
+	}
+	/* if (c == '>')  */{
+		return appended.exit();
 	}
 	return appended;
 }
 /* private static */ Option</* Definition */> parseDefinition(char* input){
-	/* var nameSeparator = input.lastIndexOf(" "); *//* if (nameSeparator < 0)  */{
-	return /* new None<>() */;
+	/* var nameSeparator = input.lastIndexOf(" "); */
+	/* if (nameSeparator < 0)  */{
+		return /* new None<>() */;
 	}
 	/* var beforeName = input.substring(0, nameSeparator).strip(); */
-	/* var name = input.substring(nameSeparator + " ".length()).strip(); *//* return switch (Main.findTypeSeparator(beforeName))  */{
-	/* case None<Integer> _ ->
-                    Main.parseAndModifyType(beforeName).map(type -> new Definition(new None<>(), type, name)); *//* case Some<Integer>(var typeSeparator) ->  */{
-	/* var beforeType = beforeName.substring(0, typeSeparator).strip(); */
-	/* var inputType = beforeName.substring(typeSeparator + " ".length()).strip(); */
-	/* yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name)); */
+	/* var name = input.substring(nameSeparator + " ".length()).strip(); */
+	/* return switch (Main.findTypeSeparator(beforeName))  */{
+		/* case None<Integer> _ ->
+                    Main.parseAndModifyType(beforeName).map(type -> new Definition(new None<>(), type, name)); */
+		/* case Some<Integer>(var typeSeparator) ->  */{
+			/* var beforeType = beforeName.substring(0, typeSeparator).strip(); */
+			/* var inputType = beforeName.substring(typeSeparator + " ".length()).strip(); */
+			/* yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name)); */
 	}
 	}
 	/* ; */
@@ -398,45 +435,59 @@ char* generate();
 /* private static */ Option<int> findTypeSeparator(char* input){
 	/* var depth = 0; */
 	/* for (var index = input.length() - 1; */
-	/* index >= 0; *//* index--)  */{
-	/* var c = input.charAt(index); *//* if (c == ' ' && depth == 0)  */{
-	return /* new Some<>(index) */;
-	}/* if (c == '>')  */{
-	/* depth++; */
-	}/* if (c == '<')  */{
-	/* depth--; */
+	/* index >= 0; */
+	/* index--)  */{
+		/* var c = input.charAt(index); */
+		/* if (c == ' ' && depth == 0)  */{
+			return /* new Some<>(index) */;
+	}
+		/* if (c == '>')  */{
+			/* depth++; */
+	}
+		/* if (c == '<')  */{
+			/* depth--; */
 	}
 	}
 	return /* new None<>() */;
 }
-/* private static */ Option</* Type */> parseAndModifyType(char* input){/* return Main.parseType(input).map(parsed ->  */{/* if (parsed instanceof Generic(var base, var arguments))  */{/* if (base.equals("Function"))  */{
-	/* var argType = arguments.get(0); */
-	/* var returnType = arguments.get(1); */
-	return /* new Functional(Lists */.of(argType), returnType);
-	}/* if (base.equals("Supplier"))  */{
-	/* var returns = arguments.get(0); */
-	return /* new Functional(Lists */.emptyList(), returns);
+/* private static */ Option</* Type */> parseAndModifyType(char* input){
+	/* return Main.parseType(input).map(parsed ->  */{
+		/* if (parsed instanceof Generic(var base, var arguments))  */{
+			/* if (base.equals("Function"))  */{
+				/* var argType = arguments.get(0); */
+				/* var returnType = arguments.get(1); */
+				return /* new Functional(Lists */.of(argType), returnType);
+	}
+			/* if (base.equals("Supplier"))  */{
+				/* var returns = arguments.get(0); */
+				return /* new Functional(Lists */.emptyList(), returns);
 	}
 	}
-	return parsed;
+		return parsed;
 	}
 	/* ); */
 }
 /* private static */ Option</* Type */> parseType(char* input){
-	/* var stripped = input.strip(); *//* if (stripped.equals("public"))  */{
-	return /* new None<>() */;
-	}/* if (stripped.equals("boolean"))  */{
-	return /* new Some<>(Primitive */.Bit);
-	}/* if (stripped.equals("String"))  */{
-	return /* new Some<>(new Ref(Primitive */.I8));
-	}/* if (stripped.equals("int") || stripped.equals("Integer"))  */{
-	return /* new Some<>(Primitive */.I32);
-	}/* if (stripped.endsWith(">"))  */{
-	/* var slice = stripped.substring(0, stripped.length() - ">".length()); */
-	/* var argsStart = slice.indexOf("<"); *//* if (argsStart >= 0)  */{
-	/* var base = slice.substring(0, argsStart).strip(); */
-	/* var inputArgs = slice.substring(argsStart + "<".length()); */
-	return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
+	/* var stripped = input.strip(); */
+	/* if (stripped.equals("public"))  */{
+		return /* new None<>() */;
+	}
+	/* if (stripped.equals("boolean"))  */{
+		return /* new Some<>(Primitive */.Bit);
+	}
+	/* if (stripped.equals("String"))  */{
+		return /* new Some<>(new Ref(Primitive */.I8));
+	}
+	/* if (stripped.equals("int") || stripped.equals("Integer"))  */{
+		return /* new Some<>(Primitive */.I32);
+	}
+	/* if (stripped.endsWith(">"))  */{
+		/* var slice = stripped.substring(0, stripped.length() - ">".length()); */
+		/* var argsStart = slice.indexOf("<"); */
+		/* if (argsStart >= 0)  */{
+			/* var base = slice.substring(0, argsStart).strip(); */
+			/* var inputArgs = slice.substring(argsStart + "<".length()); */
+			return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
 	}
 	}
 	return /* new Some<>(new Content(input)) */;
@@ -444,8 +495,8 @@ char* generate();
 /* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, char* str){
 	return stringBuilder.append(str);
 }
-/* private static */ char* compileStatementsOrBlocks(char* body){
-	return Main.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment)));
+/* private static */ char* compileStatementsOrBlocks(char* body, int depth){
+	return Main.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment, depth + 1)));
 }
 /* private static */ char* compileStatements(char* input, Option<char*>(*compiler)(char*)){
 	return Main.parseStatements(input, compiler).map(Main::generateStatements).orElse("");
@@ -457,26 +508,33 @@ char* generate();
 	return /* generateAll(Main::mergeStatements, inner) */;
 }
 /* private static */ /* State */ foldStatementChar(/* State */ state, /* char */ c){
-	/* var appended = state.append(c); *//* if (c == ';' && appended.isLevel())  */{
-	return appended.advance();
-	}/* if (c == '}' && appended.isShallow())  */{
-	return appended.advance().exit();
-	}/* if (c == ' */{
-	/* ') {
+	/* var appended = state.append(c); */
+	/* if (c == ';' && appended.isLevel())  */{
+		return appended.advance();
+	}
+	/* if (c == '}' && appended.isShallow())  */{
+		return appended.advance().exit();
+	}
+	/* if (c == ' */{
+		/* ') {
             return appended.enter(); */
-	}/* if (c == '}')  */{
-	return appended.exit();
-	}/* else  */{
-	return appended;
+	}
+	/* if (c == '}')  */{
+		return appended.exit();
+	}
+	/* else  */{
+		return appended;
 	}
 }
-/* void */ main(){/* try  */{
-	/* var source = Paths.get(".", "src", "java", "magma", "Main.java"); */
-	/* var input = Files.readString(source); */
-	/* var target = source.resolveSibling("main.c"); */
-	/* Files.writeString(target, this.compileRoot(input)); */
-	}/* catch (IOException e)  */{
-	/* //noinspection CallToPrintStackTrace
+/* void */ main(){
+	/* try  */{
+		/* var source = Paths.get(".", "src", "java", "magma", "Main.java"); */
+		/* var input = Files.readString(source); */
+		/* var target = source.resolveSibling("main.c"); */
+		/* Files.writeString(target, this.compileRoot(input)); */
+	}
+	/* catch (IOException e)  */{
+		/* //noinspection CallToPrintStackTrace
             e.printStackTrace(); */
 	}
 }
@@ -493,17 +551,20 @@ char* generate();
 	return this.compileStructured(input, "class ");
 }
 /* private */ Option<char*> compileStructured(char* input, char* infix){
-	/* var classIndex = input.indexOf(infix); *//* if (classIndex < 0)  */{
-	return /* new None<>() */;
+	/* var classIndex = input.indexOf(infix); */
+	/* if (classIndex < 0)  */{
+		return /* new None<>() */;
 	}
 	/* var left = input.substring(0, classIndex).strip(); */
 	/* var right = input.substring(classIndex + infix.length()); */
-	/* var contentStart = right.indexOf("{"); *//* if (contentStart < 0)  */{
-	return /* new None<>() */;
+	/* var contentStart = right.indexOf("{"); */
+	/* if (contentStart < 0)  */{
+		return /* new None<>() */;
 	}
 	/* var name = right.substring(0, contentStart).strip(); */
-	/* var withEnd = right.substring(contentStart + "{".length()).strip(); *//* if (!withEnd.endsWith("}"))  */{
-	return /* new None<>() */;
+	/* var withEnd = right.substring(contentStart + "{".length()).strip(); */
+	/* if (!withEnd.endsWith("}"))  */{
+		return /* new None<>() */;
 	}
 	/* var inputContent = withEnd.substring(0, withEnd.length() - 1); */
 	/* var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment))); */
@@ -516,31 +577,37 @@ char* generate();
                  */.or(() -> this.compileStructured(input, "interface ")).or(() -> this.compileStructured(input, "enum ")).or(() -> this.compileStructured(input, "class ")).or(() -> this.compileStructured(input, "record ")).or(() -> this.compileMethod(input)).or(() -> this.compileDefinitionStatement(input)).orElseGet(() -> generatePlaceholder(input));
 }
 /* private */ Option<char*> compileMethod(char* input){
-	/* var paramStart = input.indexOf("("); *//* if (paramStart >= 0)  */{
-	/* var inputDefinition = input.substring(0, paramStart).strip(); */
-	/* var withParams = input.substring(paramStart + "(".length()); *//* return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition ->  */{
-	/* var paramEnd = withParams.indexOf(")"); *//* if (paramEnd >= 0)  */{
-	/* var paramString = withParams.substring(0, paramEnd).strip(); */
-	/* var withBraces = withParams.substring(paramEnd + ")".length()).strip(); */
-	/* var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
+	/* var paramStart = input.indexOf("("); */
+	/* if (paramStart >= 0)  */{
+		/* var inputDefinition = input.substring(0, paramStart).strip(); */
+		/* var withParams = input.substring(paramStart + "(".length()); */
+		/* return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition ->  */{
+			/* var paramEnd = withParams.indexOf(")"); */
+			/* if (paramEnd >= 0)  */{
+				/* var paramString = withParams.substring(0, paramEnd).strip(); */
+				/* var withBraces = withParams.substring(paramEnd + ")".length()).strip(); */
+				/* var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
                             .map(Main::generateValues)
                             .orElse(""); */
-	/* String newBody; *//* if (withBraces.startsWith(" */{
-	/* ") && withBraces.endsWith("}")) {
+				/* String newBody; */
+				/* if (withBraces.startsWith(" */{
+					/* ") && withBraces.endsWith("}")) {
                         var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + compileStatementsOrBlocks(body) + "\n}"; */
-	}/* else if (withBraces.equals(";"))  */{
-	/* newBody = ";"; */
-	}/* else  */{
-	return /* new None<>() */;
+                        newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}"; */
 	}
-	/* var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n"; */
-	/* methods.add(generated); */
-	return /* new Some<>("") */;
+				/* else if (withBraces.equals(";"))  */{
+					/* newBody = ";"; */
 	}
-	return /* new None<>() */;
+				/* else  */{
+					return /* new None<>() */;
 	}
-	/* ); */
+				/* var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n"; */
+				/* methods.add(generated); */
+				return /* new Some<>("") */;
+	}
+			return /* new None<>() */;
+	}
+		/* ); */
 	}
 	return /* new None<>() */;
 }
@@ -549,5 +616,5 @@ char* generate();
                  */.or(() -> parseAndModifyDefinition(param).map(Defined::generate)).orElseGet(() -> generatePlaceholder(param));
 }
 /* private */ Option<char*> compileDefinitionStatement(char* input){
-	return /* compileStatement(input, withoutEnd -> Main */.parseAndModifyDefinition(withoutEnd).map(Defined::generate));
+	return /* compileStatement(input, withoutEnd -> Main */.parseAndModifyDefinition(withoutEnd).map(Defined::generate), 1);
 }

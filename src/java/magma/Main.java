@@ -404,14 +404,18 @@ class Main {
                 .orElse("");
     }
 
-    private static String compileStatementOrBlock(String input) {
+    private static String compileStatementOrBlock(String input, int depth) {
         return compileWhitespace(input)
-                .or(() -> compileStatement(input, Main::compileStatementValue))
-                .or(() -> compileBlock(input))
-                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+                .or(() -> compileStatement(input, Main::compileStatementValue, depth))
+                .or(() -> compileBlock(input, depth))
+                .orElseGet(() -> createIndent(depth) + generatePlaceholder(input.strip()));
     }
 
-    private static Option<String> compileBlock(String input) {
+    private static String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
+    }
+
+    private static Option<String> compileBlock(String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -420,7 +424,7 @@ class Main {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
 
-                return new Some<>(generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content) + "\n\t}");
+                return new Some<>(createIndent(depth) + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + "\n\t}");
             }
         }
 
@@ -481,13 +485,17 @@ class Main {
         });
     }
 
-    private static Option<String> compileStatement(String input, Function<String, Option<String>> compiler) {
+    private static Option<String> compileStatement(String input, Function<String, Option<String>> compiler, int depth) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return new None<>();
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return compiler.apply(withoutEnd).map(definition -> "\n\t" + definition + ";");
+        return compiler.apply(withoutEnd).map(definition -> generateStatement(definition, depth));
+    }
+
+    private static String generateStatement(String definition, int depth) {
+        return createIndent(depth) + definition + ";";
     }
 
     private static <T> Option<List<T>> parseValues(String input, Function<String, Option<T>> compiler) {
@@ -601,8 +609,8 @@ class Main {
         return stringBuilder.append(str);
     }
 
-    private static String compileStatementsOrBlocks(String body) {
-        return Main.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment)));
+    private static String compileStatementsOrBlocks(String body, int depth) {
+        return Main.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment, depth + 1)));
     }
 
     private static String compileStatements(String input, Function<String, Option<String>> compiler) {
@@ -718,7 +726,7 @@ class Main {
                     String newBody;
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + compileStatementsOrBlocks(body) + "\n}";
+                        newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}";
                     }
                     else if (withBraces.equals(";")) {
                         newBody = ";";
@@ -746,6 +754,6 @@ class Main {
     }
 
     private Option<String> compileDefinitionStatement(String input) {
-        return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate));
+        return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate), 1);
     }
 }
