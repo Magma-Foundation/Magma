@@ -496,6 +496,13 @@ class Main {
             }
         }
 
+        var arrowIndex = input.indexOf("->");
+        if (arrowIndex >= 0) {
+            var beforeArrow = input.substring(0, arrowIndex).strip();
+            var afterArrow = input.substring(arrowIndex + "->".length());
+            return generatePlaceholder(beforeArrow) + " -> " + compileValue(afterArrow);
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
