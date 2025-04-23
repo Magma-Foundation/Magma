@@ -630,6 +630,14 @@ class Main {
                     var returns = arguments.get(0);
                     return new Functional(Lists.emptyList(), returns);
                 }
+
+                if (base.equals("BiFunction")) {
+                    var argType = arguments.get(0);
+                    var argType2 = arguments.get(1);
+                    var returnType = arguments.get(2);
+
+                    return new Functional(Lists.of(argType, argType2), returnType);
+                }
             }
             return parsed;
         });

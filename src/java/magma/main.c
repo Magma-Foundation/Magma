@@ -111,7 +111,7 @@ char* generate();
 /* public <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */)){
 	return Iterator</*  */>(/* () */ -> this.head.next().map(mapper));
 }
-/* public <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
+/* public <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */)){
 	auto current = initial;
 	/* while (true) */{
 		/* switch (this.head.next()) */{
@@ -264,13 +264,13 @@ char* generate();
 }
 /* private static final List<String> structs */ /* = */ Lists.emptyList();
 /* private static final List<String> methods */ /* = */ Lists.emptyList();
-/* private static */ char* generateAll(BiFunction</* StringBuilder */, char*, /*  StringBuilder */> merger, List<char*> parsed){
+/* private static */ char* generateAll(/*  StringBuilder */(*merger)(/* StringBuilder */, char*), List<char*> parsed){
 	return parsed.iter().fold(new StringBuilder(), merger).toString();
 }
-/* private static <T> */ Option<List</* T */>> parseAll(char* input, BiFunction</* State */, /*  Character */, /*  State */> folder, Option</* T */>(*compiler)(char*)){
+/* private static <T> */ Option<List</* T */>> parseAll(char* input, /*  State */(*folder)(/* State */, /*  Character */), Option</* T */>(*compiler)(char*)){
 	return Main.divideAll(input, folder).iter().map(compiler).collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll(char* input, BiFunction</* State */, /*  Character */, /*  State */> folder){
+/* private static */ List<char*> divideAll(char* input, /*  State */(*folder)(/* State */, /*  Character */)){
 	auto current = /* State */();
 	auto queue = Iterator</*  */>(/* RangeHead */(input.length())).map(input::charAt).collect(new ListCollector<>());
 	/* while (queue.hasElements()) */{
@@ -513,6 +513,12 @@ char* generate();
 			if (base.equals("Supplier")){
 				auto returns = arguments.get(0);
 				return /* Functional */(Lists.emptyList(), returns);
+			}
+			if (base.equals("BiFunction")){
+				auto argType = arguments.get(0);
+				auto argType2 = arguments.get(1);
+				auto returnType = arguments.get(2);
+				return /* Functional */(Lists.of(argType, /*  argType2) */, returnType);
 			}
 		}
 		return parsed;
