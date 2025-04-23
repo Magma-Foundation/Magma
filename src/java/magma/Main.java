@@ -489,7 +489,7 @@ class Main {
             }
         }
 
-        if (compileInvokable(input, Main::compileValue) instanceof Some(var value)) {
+        if (compileInvocation(input) instanceof Some(var value)) {
             return value;
         }
 
@@ -512,6 +512,10 @@ class Main {
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static Option<String> compileInvocation(String input) {
+        return compileInvokable(input, Main::compileValue);
     }
 
     private static Option<String> compileInvokable(String slice, Function<String, String> beforeArgsCompiler) {
