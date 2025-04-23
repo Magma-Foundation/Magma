@@ -3,6 +3,7 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -46,7 +47,7 @@ class Main {
         C fold(C current, T element);
     }
 
-    private interface Type {
+    private interface Type extends BeforeArgs {
         String generate();
     }
 
@@ -54,6 +55,16 @@ class Main {
         String generate();
 
         Defined mapName(Function<String, String> mapper);
+    }
+
+    interface BeforeArgs {
+        String generate();
+    }
+
+    interface Value {
+        String generate();
+
+        Type resolveType();
     }
 
     private enum Primitive implements Type {
@@ -268,10 +279,15 @@ class Main {
         }
     }
 
-    private record Content(String input) implements Type {
+    private record Content(String input) implements Type, Value {
         @Override
         public String generate() {
             return Main.generatePlaceholder(this.input);
+        }
+
+        @Override
+        public Type resolveType() {
+            return this;
         }
     }
 
@@ -336,10 +352,19 @@ class Main {
         }
     }
 
-    private record Struct(String name) implements Type {
+    private record Struct(String name, Map<String, Type> members) implements Type {
         @Override
         public String generate() {
             return "struct " + this.name;
+        }
+
+        public Option<Type> find(String memberName) {
+            if (this.members.containsKey(memberName)) {
+                return new Some<>(this.members.get(memberName));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -350,10 +375,66 @@ class Main {
         }
     }
 
-    private record Invokable(String beforeArgs, List<String> args) {
-        private String generate() {
-            var joined = Main.generateValues(this.args);
+    private record Invokable(BeforeArgs beforeArgs, List<Value> arguments) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.arguments.iter()
+                    .map(Value::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
             return this.beforeArgs + "(" + joined + ")";
+        }
+
+        @Override
+        public Type resolveType() {
+            if (this.beforeArgs instanceof Functional functional) {
+                return functional.returnType;
+            }
+
+            return new Content(this.beforeArgs.generate());
+        }
+    }
+
+    private record Lambda(String beforeArrow, String value) implements Value {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.beforeArrow) + " -> " + this.value;
+        }
+
+        @Override
+        public Type resolveType() {
+            return new Content("?");
+        }
+    }
+
+    private record DataAccess(Value parent, String property) implements Value {
+        @Override
+        public String generate() {
+            return this.parent.generate() + "." + this.property;
+        }
+
+        @Override
+        public Type resolveType() {
+            if (this.parent.resolveType() instanceof Struct struct) {
+                if (struct.find(this.property) instanceof Some(var value)) {
+                    return value;
+                }
+            }
+
+            return new Content(this.parent.generate());
+        }
+    }
+
+    private record Symbol(String value) implements Value {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public Type resolveType() {
+            return new Content(this.value);
         }
     }
 
@@ -517,16 +598,29 @@ class Main {
     }
 
     private static String compileValue(String input) {
+        return parseValue(input).generate();
+    }
+
+    private static Value parseValue(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("new ")) {
             var slice = stripped.substring("new ".length()).strip();
-            var parsed = parseInvokable(slice, Main::compileConstructorCaller);
-            if (parsed instanceof Some(var invokable)) {
-                return invokable.generate();
+            var construction = parseInvokable(slice, Main::compileConstructorCaller);
+            if (construction instanceof Some(var invokable)) {
+                var invokable1 = invokable;
+                if (invokable.beforeArgs instanceof Type caller) {
+                    if (caller instanceof Generic) {
+                        invokable.arguments
+                                .iter()
+                                .map(value -> value.resolveType());
+                    }
+                }
+
+                return invokable1;
             }
         }
 
-        if (compileInvocation(input) instanceof Some(var value)) {
+        if (parseInvocation(input) instanceof Some(var value)) {
             return value;
         }
 
@@ -534,28 +628,31 @@ class Main {
         if (arrowIndex >= 0) {
             var beforeArrow = input.substring(0, arrowIndex).strip();
             var afterArrow = input.substring(arrowIndex + "->".length());
-            return generatePlaceholder(beforeArrow) + " -> " + compileValue(afterArrow);
+            return new Lambda(beforeArrow, compileValue(afterArrow));
         }
 
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length());
-            return compileValue(parent) + "." + property;
+            return new DataAccess(parseValue(parent), property);
         }
 
         if (isSymbol(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         }
 
-        return generatePlaceholder(input);
+        return new Content(input);
     }
 
-    private static Option<String> compileInvocation(String input) {
-        return parseInvokable(input, Main::compileValue).map(Invokable::generate);
+    private static Option<Invokable> parseInvocation(String input) {
+        return parseInvokable(input, input1 -> new Content(compileValue(input1)));
     }
 
-    private static Option<Invokable> parseInvokable(String slice, Function<String, String> beforeArgsCompiler) {
+    private static Option<Invokable> parseInvokable(
+            String slice,
+            Function<String, BeforeArgs> beforeArgsCompiler
+    ) {
         if (!slice.endsWith(")")) {
             return new None<>();
         }
@@ -566,17 +663,18 @@ class Main {
         }
         var base = withoutEnd.substring(0, argsStart);
         var args = withoutEnd.substring(argsStart + "(".length());
-        return parseValues(args, value -> new Some<>(compileValue(value))).map(newArgs -> {
+        return parseValues(args, value -> new Some<>(parseValue(value))).map(newArgs -> {
             var generate = beforeArgsCompiler.apply(base);
             return new Invokable(generate, newArgs);
         });
     }
 
-    private static String compileConstructorCaller(String base) {
+    private static BeforeArgs compileConstructorCaller(String base) {
         if (parseAndModifyType(base) instanceof Some<Type>(var type)) {
-            return type.generate();
+            return type;
         }
-        return generatePlaceholder(base);
+
+        return new Content(base);
     }
 
     private static boolean isSymbol(String input) {
@@ -749,10 +847,6 @@ class Main {
                     return Main.parseValues(inputArgs, Main::parseGenericArgument).map(args -> new Generic(base, args));
                 }
             }
-        }
-
-        if (isSymbol(stripped)) {
-            return new Some<>(new Struct(stripped));
         }
 
         return new Some<>(new Content(input));
