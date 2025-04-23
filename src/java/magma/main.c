@@ -5,17 +5,17 @@
      */
 }
 /* public */struct List<T> {
-	/* Iterator<T> */ iter(/*  */);
+	Iterator</* T */> iter(/*  */);
 	void add(/* T */ element);/* 
      */
 }
 /* public */struct Iterator<T> {
-	/* <R>  */ map(/* Function<T, R> */ mapper);
-	/* <R>  */ fold(/* R */ initial, /* BiFunction<R, T, R> */ folder);
-	/* <R>  */ flatMap(/* Function<T, Iterator<R>> */ mapper);
-	/* Iterator<T> */ concat(/* Iterator<T> */ other);
-	/* Option<T> */ next(/*  */);
-	/* <C>  */ collect(/* Collector<T, C> */ collector);/* 
+	</* R */> map(Function</* T */, /*  R */> mapper);
+	</* R */> fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder);
+	</* R */> flatMap(Function</* T */, Iterator</* R */>> mapper);
+	Iterator</* T */> concat(Iterator</* T */> other);
+	Option</* T */> next(/*  */);
+	</* C */> collect(Collector</* T */, /*  C */> collector);/* 
      */
 }
 /*  */struct Collector<T, C> {
@@ -24,7 +24,7 @@
      */
 }
 /*  */struct Head<T> {
-	/* Option<T> */ next(/*  */);/* 
+	Option</* T */> next(/*  */);/* 
      */
 }
 /*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
@@ -50,7 +50,7 @@
 /* private static */struct State {
 	/* private  */ segments;
 	/* private  */ buffer;
-	/* private  */ depth;/* private */ State(/* List<String> */ segments, /* StringBuilder */ buffer, int depth){
+	/* private  */ depth;/* private */ State(List</* String */> segments, /* StringBuilder */ buffer, int depth){
 	/* this.segments */ = segments;
 	/* this.buffer */ = buffer;
 	/* this.depth */ = depth;/* 
@@ -101,7 +101,7 @@
      */
 }
 /* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* @Override
-  */ map(/* Function<T, R> */ mapper){/* 
+  */ map(Function</* T */, /*  R */> mapper){/* 
             return new HeadedIterator<>(() -> switch (this.head.next()) {
                 case None<T> _ -> new None<>();
                 case Some<T>(T value) -> new Some<>(mapper.apply(value));
@@ -109,7 +109,7 @@
          */
 }
 /* @Override
-  */ fold(/* R */ initial, /* BiFunction<R, T, R> */ folder){
+  */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
 	/* var */ current = initial;/* 
             while (true) {
                 switch (this.head.next()) {
@@ -124,12 +124,12 @@
          */
 }
 /* @Override
-  */ flatMap(/* Function<T, Iterator<R>> */ mapper){/* 
+  */ flatMap(Function</* T */, Iterator</* R */>> mapper){/* 
             return this.map(mapper).fold(Iterators.empty(), Iterator::concat); *//* 
          */
 }
 /* @Override
-  */ concat(/* Iterator<T> */ other){/* 
+  */ concat(Iterator</* T */> other){/* 
             return new HeadedIterator<>(() -> switch (this.head.next()) {
                 case Some<T> option -> option;
                 case None<T> _ -> other.next();
@@ -142,7 +142,7 @@
          */
 }
 /* @Override
-  */ collect(/* Collector<T, C> */ collector){/* 
+  */ collect(Collector</* T */, /*  C */> collector){/* 
             return this.fold(collector.createInitial(), collector::fold); *//* 
          */
 }
@@ -192,7 +192,7 @@
             return new HeadedIterator<>(new EmptyHead<>()); *//* 
          */
 }
-/* public  */ fromOption(/* Option<T> */ option){/* 
+/* public  */ fromOption(Option</* T */> option){/* 
             return new HeadedIterator<>(switch (option) {
                 case None<T> _ -> new EmptyHead<T>();
                 case Some<T>(var value) -> new SingleHead<T>(value);
@@ -208,7 +208,7 @@
          */
 }
 /* @Override
-  */ fold(/* Option<String> */ current, /* String */ element){/* 
+  */ fold(Option</* String */> current, /* String */ element){/* 
             return switch (current) {
                 case None<String> _ -> new Some<>(element);
                 case Some<String>(var value) -> new Some<>(value + element);
@@ -241,7 +241,7 @@
         return structs.iter().collect(new Joiner()).orElse("") + output; *//* 
      */
 }
-/* private  */ compileAll(/* String */ input, /* BiFunction<State, Character, State> */ folder, /* Function<String, String> */ compiler, /* BiFunction<StringBuilder, String, StringBuilder> */ merger){/* 
+/* private  */ compileAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  String */> compiler, BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger){/* 
         return this.divide(input, new State(), folder)
                 .iter()
                 .map(compiler)
@@ -253,7 +253,7 @@
         return output.append(compiled); *//* 
      */
 }
-/* private  */ divide(/* String */ input, /* State */ state, /* BiFunction<State, Character, State> */ folder){
+/* private  */ divide(/* String */ input, /* State */ state, BiFunction</* State */, /*  Character */, /*  State */> folder){
 	/* var */ current = state;
 	/* for  */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
             var c = input.charAt(i);
@@ -298,7 +298,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         )); *//* 
      */
 }
-/* private  */ compileOr(/* String */ input0, /* List<Function<String, Option<String>>> */ rules){
+/* private  */ compileOr(/* String */ input0, List<Function</* String */, Option</* String */>>> rules){
 	/* var */ result = rules.iter(/* )
                  */.map(/* rule -> rule */.apply(/* input0) */).flatMap(Iterators::fromOption).next();/* 
 
@@ -332,7 +332,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         } */
 	/* var */ params = withParams.substring(/* 0 */, /* paramEnd) */.strip();
 	/* var */ withBraces = withParams.substring(/* paramEnd + ")" */.length(/* ) */).strip();
-	/* var */ newParams = this.compileAll(params, /*  this::foldValueChar */, /*  this::compileDefinition */, /*  this::mergeValues */);
+	/* var */ newParams = this.compileValues(params, /*  this::compileDefinition */);
 	/* var */ header = this.compileDefinition(definition) + "(" + newParams + ")";/* 
 
         if (withBraces.startsWith("{") && withBraces.endsWith("} *//* ")) {
@@ -388,7 +388,21 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             return "int";
         } *//* 
 
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var argumentStart = withoutEnd.indexOf("<");
+            if (argumentStart >= 0) {
+                var base = withoutEnd.substring(0, argumentStart).strip();
+                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), this::compileType);
+                return base + "<" + arguments + ">";
+            }
+        } *//* 
+
         return this.generatePlaceholder(input); *//* 
+     */
+}
+/* private  */ compileValues(/* String */ input, Function</* String */, /*  String */> compileType){/* 
+        return this.compileAll(input, this::foldValueChar, compileType, this::mergeValues); *//* 
      */
 }
 /* private  */ compileStatementOrBlock(/* String */ input){
@@ -418,7 +432,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             if (paramStart >= 0) {
                 var caller = withoutEnd.substring(0, paramStart).strip();
                 var arguments = withoutEnd.substring(paramStart + "(".length());
-                return this.compileValue(caller) + "(" + this.compileAll(arguments, this::foldValueChar, this::compileValue, this::mergeValues) + ")";
+                return this.compileValue(caller) + "(" + this.compileValues(arguments, this::compileValue) + ")";
             }
         } */
 	/* var */ separator = stripped.lastIndexOf(".");/* 

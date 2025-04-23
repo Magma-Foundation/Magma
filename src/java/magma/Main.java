@@ -352,7 +352,7 @@ class Main {
         var params = withParams.substring(0, paramEnd).strip();
         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-        var newParams = this.compileAll(params, this::foldValueChar, this::compileDefinition, this::mergeValues);
+        var newParams = this.compileValues(params, this::compileDefinition);
         var header = this.compileDefinition(definition) + "(" + newParams + ")";
 
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
@@ -410,7 +410,21 @@ class Main {
             return "int";
         }
 
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var argumentStart = withoutEnd.indexOf("<");
+            if (argumentStart >= 0) {
+                var base = withoutEnd.substring(0, argumentStart).strip();
+                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), this::compileType);
+                return base + "<" + arguments + ">";
+            }
+        }
+
         return this.generatePlaceholder(input);
+    }
+
+    private String compileValues(String input, Function<String, String> compileType) {
+        return this.compileAll(input, this::foldValueChar, compileType, this::mergeValues);
     }
 
     private String compileStatementOrBlock(String input) {
@@ -440,7 +454,7 @@ class Main {
             if (paramStart >= 0) {
                 var caller = withoutEnd.substring(0, paramStart).strip();
                 var arguments = withoutEnd.substring(paramStart + "(".length());
-                return this.compileValue(caller) + "(" + this.compileAll(arguments, this::foldValueChar, this::compileValue, this::mergeValues) + ")";
+                return this.compileValue(caller) + "(" + this.compileValues(arguments, this::compileValue) + ")";
             }
         }
 
