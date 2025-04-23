@@ -99,7 +99,7 @@ char* generate();
 /* @Override
         public */ Option<int> next(){
 	if (this.counter < this.length){
-		/* var value = this.counter */;
+		/* var */ value = this.counter;
 		/* this.counter++ */;
 		return /* new Some<>(value) */;
 	}
@@ -111,10 +111,10 @@ char* generate();
 	return /* new Iterator<>(() -> this */.head.next().map(mapper));
 }
 /* public <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
-	/* var current = initial */;
+	/* var */ current = initial;
 	/* while (true) */{
 		/* switch (this.head.next()) */{
-			/* case Some<T>(var value) -> current = folder.apply(current, value) */;
+			case Some</* T>(var value) - */> current = folder.apply(current, value);
 			/* case None<T> _ -> */{
 				return current;
 			}
@@ -125,9 +125,9 @@ char* generate();
 	return this.fold(collector.createInitial(), collector::fold);
 }
 /* private */ State(List<char*> segments, /* StringBuilder */ buffer, int depth){
-	/* this.segments = segments */;
-	/* this.buffer = buffer */;
-	/* this.depth = depth */;
+	/* this.segments = segments; */
+	/* this.buffer = buffer; */
+	/* this.depth = depth; */
 }
 /* public */ int isLevel(){
 	return this.depth == 0;
@@ -146,7 +146,7 @@ char* generate();
 }
 /* private */ /* State */ advance(){
 	/* this.segments.add(this.buffer.toString()) */;
-	/* this.buffer = new StringBuilder() */;
+	/* this.buffer = new StringBuilder(); */
 	return this;
 }
 /* public */ int isShallow(){
@@ -225,7 +225,7 @@ char* generate();
 }
 /* @Override
         public */ char* generate(){
-	/* var joined = generateValuesFromNodes(this.args) */;
+	/* var */ joined = /* generateValuesFromNodes(this */.args);
 	return this.base + "<" + joined + ">";
 }
 /* @Override
@@ -238,15 +238,12 @@ char* generate();
 }
 /* @Override
         public */ char* generate(){
-	/* var beforeTypeString = this.beforeType
-                    .map(Main::generatePlaceholder)
-                    .map(inner -> inner + " ")
-                    .orElse("") */;
+	/* var */ beforeTypeString = this.beforeType.map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
 	return /* beforeTypeString + this */.type.generate() + " " + this.name;
 }
 /* @Override
         public */ char* generate(){
-	/* var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("") */;
+	/* var */ beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
 	return /* "%s%s(*%s)(%s)" */.formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
 }
 /* @Override
@@ -270,15 +267,13 @@ char* generate();
 	return Main.divideAll(input, folder).iter().map(compiler).collect(new OptionCollector<>(new ListCollector<>()));
 }
 /* private static */ List<char*> divideAll(char* input, BiFunction</* State */, /*  Character */, /*  State */> folder){
-	/* var current = new State() */;
-	/* var queue = new Iterator<>(new RangeHead(input.length()))
-                .map(input::charAt)
-                .collect(new ListCollector<>()) */;
+	/* var */ current = /*  new State() */;
+	/* var */ queue = /* new Iterator<>(new RangeHead(input */.length())).map(input::charAt).collect(new ListCollector<>());
 	/* while (queue.hasElements()) */{
-		/* var c = queue.removeFirst() */;
+		/* var */ c = queue.removeFirst();
 		if (/* c == '\'' */){
 			/* current.append(c) */;
-			/* var c1 = queue.removeFirst() */;
+			/* var */ c1 = queue.removeFirst();
 			/* current.append(c1) */;
 			if (/* c1 == '\\' */){
 				/* current.append(queue.removeFirst()) */;
@@ -289,7 +284,7 @@ char* generate();
 		if (/* c == '"' */){
 			/* current.append(c) */;
 			/* while (queue.hasElements()) */{
-				/* var next = queue.removeFirst() */;
+				/* var */ next = queue.removeFirst();
 				/* current.append(next) */;
 				if (/* next == '\\' */){
 					/* current.append(queue.removeFirst()) */;
@@ -300,7 +295,7 @@ char* generate();
 			}
 			/* continue */;
 		}
-		/* current = folder.apply(current, c) */;
+		/* current = folder.apply(current, c); */
 	}
 	return current.advance().segments;
 }
@@ -327,25 +322,25 @@ char* generate();
 	return /* "\n" + "\t" */.repeat(depth);
 }
 /* private static */ Option<char*> compileBlock(char* input, int depth){
-	/* var stripped = input.strip() */;
+	/* var */ stripped = input.strip();
 	if (stripped.endsWith("}")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()) */;
-		/* var contentStart = withoutEnd.indexOf("{") */;
+		/* var */ withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+		/* var */ contentStart = withoutEnd.indexOf("{");
 		if (/* contentStart >= 0 */){
-			/* var beforeContent = withoutEnd.substring(0, contentStart) */;
-			/* var content = withoutEnd.substring(contentStart + "{".length()) */;
-			/* var indent = createIndent(depth) */;
+			/* var */ beforeContent = withoutEnd.substring(0, contentStart);
+			/* var */ content = withoutEnd.substring(contentStart + "{".length());
+			/* var */ indent = /*  createIndent(depth) */;
 			return /* new Some<>(indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}") */;
 		}
 	}
 	return /* new None<>() */;
 }
 /* private static */ char* compileBeforeBlock(char* input){
-	/* var stripped = input.strip() */;
+	/* var */ stripped = input.strip();
 	if (stripped.startsWith("if")){
-		/* var withoutKeyword = stripped.substring("if".length()).strip() */;
+		/* var */ withoutKeyword = stripped.substring("if".length()).strip();
 		if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")){
-			/* var condition = withoutKeyword.substring(1, withoutKeyword.length() - 1) */;
+			/* var */ condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
 			return /* "if (" + compileValue(condition) + ")" */;
 		}
 	}
@@ -355,19 +350,28 @@ char* generate();
 	return /* generatePlaceholder(stripped) */;
 }
 /* private static */ Option<char*> compileStatementValue(char* input){
-	/* var stripped = input.strip() */;
+	/* var */ stripped = input.strip();
 	if (stripped.startsWith("return ")){
-		/* var value = stripped.substring("return ".length()) */;
+		/* var */ value = stripped.substring("return ".length());
 		return /* new Some<>("return " + compileValue(value)) */;
+	}
+	/* var */ valueSeparator = stripped.indexOf("=");
+	if (/* valueSeparator >= 0 */){
+		/* var */ definition = stripped.substring(0, valueSeparator);
+		/* var */ value = stripped.substring(valueSeparator + "=".length());
+		/* return compileDefinitionToString(definition).map(outputDefinition -> */{
+			return /* outputDefinition + " = " + compileValue(value) */;
+		}
+		/* ) */;
 	}
 	return /* new Some<>(generatePlaceholder(input)) */;
 }
 /* private static */ char* compileValue(char* input){
-	/* var stripped = input.strip() */;
-	/* var separator = stripped.lastIndexOf(".") */;
+	/* var */ stripped = input.strip();
+	/* var */ separator = stripped.lastIndexOf(".");
 	if (/* separator >= 0 */){
-		/* var parent = stripped.substring(0, separator) */;
-		/* var property = stripped.substring(separator + ".".length()) */;
+		/* var */ parent = stripped.substring(0, separator);
+		/* var */ property = stripped.substring(separator + ".".length());
 		return /* compileValue(parent) + " */." + property;
 	}
 	if (/* isSymbol(stripped) */){
@@ -376,10 +380,10 @@ char* generate();
 	return /* generatePlaceholder(input) */;
 }
 /* private static */ int isSymbol(char* input){
-	/* for (var i = 0 */;
+	/* for */ /* (var */ i = /*  0 */;
 	/* i < input.length() */;
 	/* i++) */{
-		/* var c = input.charAt(i) */;
+		/* var */ c = input.charAt(i);
 		if (Character.isLetter(c)){
 			/* continue */;
 		}
@@ -403,11 +407,11 @@ char* generate();
 	/* ) */;
 }
 /* private static */ Option<char*> compileStatement(char* input, Option<char*>(*compiler)(char*), int depth){
-	/* var stripped = input.strip() */;
+	/* var */ stripped = input.strip();
 	if (/* !stripped */.endsWith(";")){
 		return /* new None<>() */;
 	}
-	/* var withoutEnd = stripped.substring(0, stripped.length() - ";".length()) */;
+	/* var */ withoutEnd = stripped.substring(0, stripped.length() - ";".length());
 	return compiler.apply(withoutEnd).map(definition -> generateStatement(definition, depth));
 }
 /* private static */ char* generateStatement(char* definition, int depth){
@@ -420,7 +424,7 @@ char* generate();
 	if (/* c == ',' && state */.isLevel()){
 		return state.advance();
 	}
-	/* var appended = state.append(c) */;
+	/* var */ appended = state.append(c);
 	if (/* c == '<' */){
 		return appended.enter();
 	}
@@ -430,29 +434,30 @@ char* generate();
 	return appended;
 }
 /* private static */ Option</* Definition */> parseDefinition(char* input){
-	/* var nameSeparator = input.lastIndexOf(" ") */;
+	/* var */ stripped = input.strip();
+	/* var */ nameSeparator = stripped.lastIndexOf(" ");
 	if (/* nameSeparator < 0 */){
 		return /* new None<>() */;
 	}
-	/* var beforeName = input.substring(0, nameSeparator).strip() */;
-	/* var name = input.substring(nameSeparator + " ".length()).strip() */;
+	/* var */ beforeName = stripped.substring(0, nameSeparator).strip();
+	/* var */ name = stripped.substring(nameSeparator + " ".length()).strip();
 	/* return switch (Main.findTypeSeparator(beforeName)) */{
 		/* case None<Integer> _ ->
                     Main.parseAndModifyType(beforeName).map(type -> new Definition(new None<>(), type, name)) */;
 		/* case Some<Integer>(var typeSeparator) -> */{
-			/* var beforeType = beforeName.substring(0, typeSeparator).strip() */;
-			/* var inputType = beforeName.substring(typeSeparator + " ".length()).strip() */;
+			/* var */ beforeType = beforeName.substring(0, typeSeparator).strip();
+			/* var */ inputType = beforeName.substring(typeSeparator + " ".length()).strip();
 			/* yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name)) */;
 		}
 	}
 	/*  */;
 }
 /* private static */ Option<int> findTypeSeparator(char* input){
-	/* var depth = 0 */;
-	/* for (var index = input.length() - 1 */;
-	/* index >= 0 */;
+	/* var */ depth = /*  0 */;
+	/* for */ /* (var */ index = input.length() - 1;
+	/* index */ > = /*  0 */;
 	/* index--) */{
-		/* var c = input.charAt(index) */;
+		/* var */ c = input.charAt(index);
 		if (/* c == ' ' && depth == 0 */){
 			return /* new Some<>(index) */;
 		}
@@ -469,12 +474,12 @@ char* generate();
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic(var base, var arguments) */){
 			if (base.equals("Function")){
-				/* var argType = arguments.get(0) */;
-				/* var returnType = arguments.get(1) */;
+				/* var */ argType = arguments.get(0);
+				/* var */ returnType = arguments.get(1);
 				return /* new Functional(Lists */.of(argType), returnType);
 			}
 			if (base.equals("Supplier")){
-				/* var returns = arguments.get(0) */;
+				/* var */ returns = arguments.get(0);
 				return /* new Functional(Lists */.emptyList(), returns);
 			}
 		}
@@ -483,7 +488,7 @@ char* generate();
 	/* ) */;
 }
 /* private static */ Option</* Type */> parseType(char* input){
-	/* var stripped = input.strip() */;
+	/* var */ stripped = input.strip();
 	if (stripped.equals("public")){
 		return /* new None<>() */;
 	}
@@ -497,11 +502,11 @@ char* generate();
 		return /* new Some<>(Primitive */.I32);
 	}
 	if (stripped.endsWith(">")){
-		/* var slice = stripped.substring(0, stripped.length() - ">".length()) */;
-		/* var argsStart = slice.indexOf("<") */;
+		/* var */ slice = stripped.substring(0, stripped.length() - ">".length());
+		/* var */ argsStart = slice.indexOf("<");
 		if (/* argsStart >= 0 */){
-			/* var base = slice.substring(0, argsStart).strip() */;
-			/* var inputArgs = slice.substring(argsStart + "<".length()) */;
+			/* var */ base = slice.substring(0, argsStart).strip();
+			/* var */ inputArgs = slice.substring(argsStart + "<".length());
 			return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
 		}
 	}
@@ -523,7 +528,7 @@ char* generate();
 	return /* generateAll(Main::mergeStatements, inner) */;
 }
 /* private static */ /* State */ foldStatementChar(/* State */ state, /* char */ c){
-	/* var appended = state.append(c) */;
+	/* var */ appended = state.append(c);
 	if (/* c == ';' && appended */.isLevel()){
 		return appended.advance();
 	}
@@ -541,11 +546,14 @@ char* generate();
 		return appended;
 	}
 }
+/* private static */ Option<char*> compileDefinitionToString(char* input){
+	return Main.parseAndModifyDefinition(input).map(Defined::generate);
+}
 /* void */ main(){
 	/* try */{
-		/* var source = Paths.get(".", "src", "java", "magma", "Main.java") */;
-		/* var input = Files.readString(source) */;
-		/* var target = source.resolveSibling("main.c") */;
+		/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
+		/* var */ input = Files.readString(source);
+		/* var */ target = source.resolveSibling("main.c");
 		/* Files.writeString(target, this.compileRoot(input)) */;
 	}
 	/* catch (IOException e) */{
@@ -554,9 +562,9 @@ char* generate();
 	}
 }
 /* private */ char* compileRoot(char* input){
-	/* var compiled = compileStatements(input, segment -> new Some<>(this.compileRootSegment(segment))) */;
-	/* var joinedStructs = structs.iter().collect(new Joiner()).orElse("") */;
-	/* var joinedMethods = methods.iter().collect(new Joiner()).orElse("") */;
+	/* var */ compiled = /* compileStatements(input, segment -> new Some<>(this */.compileRootSegment(segment)));
+	/* var */ joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+	/* var */ joinedMethods = methods.iter().collect(new Joiner()).orElse("");
 	return /* compiled + joinedStructs + joinedMethods */;
 }
 /* private */ char* compileRootSegment(char* input){
@@ -566,24 +574,24 @@ char* generate();
 	return this.compileStructured(input, "class ");
 }
 /* private */ Option<char*> compileStructured(char* input, char* infix){
-	/* var classIndex = input.indexOf(infix) */;
+	/* var */ classIndex = input.indexOf(infix);
 	if (/* classIndex < 0 */){
 		return /* new None<>() */;
 	}
-	/* var left = input.substring(0, classIndex).strip() */;
-	/* var right = input.substring(classIndex + infix.length()) */;
-	/* var contentStart = right.indexOf("{") */;
+	/* var */ left = input.substring(0, classIndex).strip();
+	/* var */ right = input.substring(classIndex + infix.length());
+	/* var */ contentStart = right.indexOf("{");
 	if (/* contentStart < 0 */){
 		return /* new None<>() */;
 	}
-	/* var name = right.substring(0, contentStart).strip() */;
-	/* var withEnd = right.substring(contentStart + "{".length()).strip() */;
+	/* var */ name = right.substring(0, contentStart).strip();
+	/* var */ withEnd = right.substring(contentStart + "{".length()).strip();
 	if (/* !withEnd */.endsWith("}")){
 		return /* new None<>() */;
 	}
-	/* var inputContent = withEnd.substring(0, withEnd.length() - 1) */;
-	/* var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment))) */;
-	/* var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n" */;
+	/* var */ inputContent = withEnd.substring(0, withEnd.length() - 1);
+	/* var */ outputContent = /* compileStatements(inputContent, segment -> new Some<>(this */.compileStructuredSegment(segment)));
+	/* var */ generated = /*  generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n" */;
 	/* structs.add(generated) */;
 	return /* new Some<>("") */;
 }
@@ -592,31 +600,28 @@ char* generate();
                  */.or(() -> this.compileStructured(input, "interface ")).or(() -> this.compileStructured(input, "enum ")).or(() -> this.compileStructured(input, "class ")).or(() -> this.compileStructured(input, "record ")).or(() -> this.compileMethod(input)).or(() -> this.compileDefinitionStatement(input)).orElseGet(() -> generatePlaceholder(input));
 }
 /* private */ Option<char*> compileMethod(char* input){
-	/* var paramStart = input.indexOf("(") */;
+	/* var */ paramStart = input.indexOf("(");
 	if (/* paramStart >= 0 */){
-		/* var inputDefinition = input.substring(0, paramStart).strip() */;
-		/* var withParams = input.substring(paramStart + "(".length()) */;
+		/* var */ inputDefinition = input.substring(0, paramStart).strip();
+		/* var */ withParams = input.substring(paramStart + "(".length());
 		/* return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> */{
-			/* var paramEnd = withParams.indexOf(")") */;
+			/* var */ paramEnd = withParams.indexOf(")");
 			if (/* paramEnd >= 0 */){
-				/* var paramString = withParams.substring(0, paramEnd).strip() */;
-				/* var withBraces = withParams.substring(paramEnd + ")".length()).strip() */;
-				/* var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
-                            .map(Main::generateValues)
-                            .orElse("") */;
+				/* var */ paramString = withParams.substring(0, paramEnd).strip();
+				/* var */ withBraces = withParams.substring(paramEnd + ")".length()).strip();
+				/* var */ outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s))).map(Main::generateValues).orElse("");
 				/* String newBody */;
 				/* if (withBraces.startsWith(" */{
-					/* ") && withBraces.endsWith("}")) {
-                        var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}" */;
+					/* ") && withBraces.endsWith("}")) { */ /* var */ body = withBraces.substring(1, withBraces.length() - 1);
+                        newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}";
 				}
 				/* else if (withBraces.equals(";")) */{
-					/* newBody = ";" */;
+					/* newBody = ";"; */
 				}
 				else {
 					return /* new None<>() */;
 				}
-				/* var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n" */;
+				/* var */ generated = /*  outputDefinition + "(" + outputParams + ")" + newBody + "\n" */;
 				/* methods.add(generated) */;
 				return /* new Some<>("") */;
 			}
@@ -631,5 +636,5 @@ char* generate();
                  */.or(() -> parseAndModifyDefinition(param).map(Defined::generate)).orElseGet(() -> generatePlaceholder(param));
 }
 /* private */ Option<char*> compileDefinitionStatement(char* input){
-	return /* compileStatement(input, withoutEnd -> Main */.parseAndModifyDefinition(withoutEnd).map(Defined::generate), 1);
+	return /* compileStatement(input, Main::compileDefinitionToString, 1) */;
 }

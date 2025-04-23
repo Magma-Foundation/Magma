@@ -456,6 +456,16 @@ class Main {
             return new Some<>("return " + compileValue(value));
         }
 
+        var valueSeparator = stripped.indexOf("=");
+        if (valueSeparator >= 0) {
+            var definition = stripped.substring(0, valueSeparator);
+            var value = stripped.substring(valueSeparator + "=".length());
+
+            return compileDefinitionToString(definition).map(outputDefinition -> {
+                return outputDefinition + " = " + compileValue(value);
+            });
+        }
+
         return new Some<>(generatePlaceholder(input));
     }
 
@@ -536,12 +546,13 @@ class Main {
     }
 
     private static Option<Definition> parseDefinition(String input) {
-        var nameSeparator = input.lastIndexOf(" ");
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
         }
-        var beforeName = input.substring(0, nameSeparator).strip();
-        var name = input.substring(nameSeparator + " ".length()).strip();
+        var beforeName = stripped.substring(0, nameSeparator).strip();
+        var name = stripped.substring(nameSeparator + " ".length()).strip();
 
         return switch (Main.findTypeSeparator(beforeName)) {
             case None<Integer> _ ->
@@ -662,6 +673,10 @@ class Main {
         }
     }
 
+    private static Option<String> compileDefinitionToString(String input) {
+        return Main.parseAndModifyDefinition(input).map(Defined::generate);
+    }
+
     void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -772,6 +787,6 @@ class Main {
     }
 
     private Option<String> compileDefinitionStatement(String input) {
-        return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate), 1);
+        return compileStatement(input, Main::compileDefinitionToString, 1);
     }
 }
