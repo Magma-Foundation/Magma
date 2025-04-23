@@ -1,15 +1,15 @@
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//* 
-import java.util.function.Supplier; *//* 
-
- */struct Main {/* sealed  */struct Option<T> permits Some, None {/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper); */
+/* package magma; */
+/* import java.io.IOException; */
+/* import java.nio.file.Files; */
+/* import java.nio.file.Paths; */
+/* import java.util.function.BiFunction; */
+/* import java.util.function.Function; */
+/* import java.util.function.Supplier; */
+/*  */
+/* sealed  */struct Option<T> permits Some, None {/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper); */
 	/* T */ /* orElseGet(Supplier<T> */ other);
-	/* Option<T> */ /* or(Supplier<Option<T>> */ other);/* 
+	/* Option<T> */ /* or(Supplier<Option<T>> */ other);
+	/* T */ /* orElse(T */ other);/* 
      */};
 /* 
 
@@ -17,146 +17,17 @@ import java.util.function.Supplier; *//*
      */};
 /* 
 
-     */struct List<T> {
+    public  */struct List<T> {
 	/* void */ /* add(T */ element);/* 
 
         Iterator<T> iter(); *//* 
      */};
-/* public static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter; */ /* public */ RangeHead(/* int length) {
-            this.length = length;
-        }
+/* 
 
-        @Override
-        public Option<Integer> next() {
-            if (this.counter < this.length) {
-                var value = this.counter;
-                this.counter++;
-                return new Some<>(value);
-            }
-            else {
-                return new None<>();
-            }
-        }
-    } *//* 
-
-    record Iterator<T>(Head<T> head) {
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new Iterator<>(() -> this.head.next().map(mapper));
-        }
-
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-            var current = initial;
-            while (true) {
-                switch (this.head.next()) {
-                    case Some<T>(var value) -> {
-                        current = folder.apply(current, value);
-                    }
-                    case None<T> _ -> {
-                        return current;
-                    }
-                }
-            }
-        }
-    } *//* private static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-        }
-
-        public State() {
-            this(Lists.emptyList(), new StringBuilder(), 0);
-        }
-
-        public boolean isLevel() {
-            return this.depth == 0;
-        }
-
-        public State enter() {
-            this.depth++;
-            return this;
-        }
-
-        public State exit() {
-            this.depth--;
-            return this;
-        }
-
-        private State append(char c) {
-            this.buffer.append(c);
-            return this;
-        }
-
-        private State advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        }
-
-        public boolean isShallow() {
-            return this.depth == 1;
-        }
-    } *//* private */ /* record */ Some<T>(/* T value) implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return this.value;
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return this;
-        }
-    } *//* private static final class None<T> implements Option<T> {
-        @Override
-        public <R> */ /* Option<R> */ map(/* Function<T, R> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return other.get();
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other.get();
-        }
-    } *//* 
-
-    void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
-
-            var target = source.resolveSibling("main.c");
-            Files.writeString(target, this.compileRoot(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-    } *//* private */ /* String */ compileRoot(/* String input) {
-        return this.compileAll(input, this::compileRootSegment);
-    } *//* private */ /* String */ compileAll(/* String input, Function<String, String> compiler) {
-        return this.divide(input, new State())
-                .segments
-                .iter()
-                .map(compiler)
-                .fold(new StringBuilder(), StringBuilder::append)
-                .toString();
-    } *//* private */ /* String */ compileRootSegment(/* String input) {
-        return this.compileClass(input).orElseGet(() -> this.generatePlaceholder(input));
-    } *//* private */ /* Option<String> */ compileClass(/* String input) {
-        return this.compileStructured(input, "class ");
-    } *//* 
+    public  */struct Collector<T, C> {/* C createInitial(); */
+	/* C fold(C current, */ /* T */ element);/* 
+     */};
+/* 
 
     private Option<String> compileStructured(String input, String infix) {
         var classIndex = input.indexOf(infix);
@@ -176,7 +47,10 @@ import java.util.function.Supplier; *//*
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = this.compileAll(inputContent, this::compileClassSegment);
-        return new Some<>(this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n");
+
+        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
+        structs.add(generated);
+        return new Some<>("");
     }
 
     private String compileClassSegment(String input) {
@@ -240,8 +114,171 @@ import java.util.function.Supplier; *//*
         else { */ /* return */ appended;/* 
         }
      */};
-/* private */ /* String */ generatePlaceholder(/* String input) {
+/* 
+
+ */struct Main {/* public static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter; */ /* public */ RangeHead(/* int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                this.counter++;
+                return new Some<>(value);
+            }
+            else {
+                return new None<>();
+            }
+        }
+    } *//* public */ /* record */ Iterator<T>(/* Head<T> head) {
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                switch (this.head.next()) {
+                    case Some<T>(var value) -> {
+                        current = folder.apply(current, value);
+                    }
+                    case None<T> _ -> {
+                        return current;
+                    }
+                }
+            }
+        }
+
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+    } *//* private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        public State() {
+            this(Lists.emptyList(), new StringBuilder(), 0);
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State enter() {
+            this.depth++;
+            return this;
+        }
+
+        public State exit() {
+            this.depth--;
+            return this;
+        }
+
+        private State append(char c) {
+            this.buffer.append(c);
+            return this;
+        }
+
+        private State advance() {
+            this.segments.add(this.buffer.toString());
+            this.buffer = new StringBuilder();
+            return this;
+        }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    } *//* private */ /* record */ Some<T>(/* T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+    } *//* private static final class None<T> implements Option<T> {
+        @Override
+        public <R> */ /* Option<R> */ map(/* Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+    } *//* private static class Joiner implements Collector<String, Option<String>> {
+        @Override
+        public */ /* Option<String> */ createInitial(/* ) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> maybeCurrent, String element) {
+            return new Some<>(switch (maybeCurrent) {
+                case None<String> _ -> element;
+                case Some<String>(var current) -> current + element;
+            });
+        }
+    } *//* private static final List<String> structs */ /* = */ Lists.emptyList(/* ); *//* 
+
+    void main() {
+        try {
+            var source = Paths.get(".", "src", "java", "magma", "Main.java");
+            var input = Files.readString(source);
+
+            var target = source.resolveSibling("main.c");
+            Files.writeString(target, this.compileRoot(input));
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+    } *//* private */ /* String */ compileRoot(/* String input) {
+        var compiled = this.compileAll(input, this::compileRootSegment);
+        var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+        return compiled + joinedStructs;
+    } *//* private */ /* String */ compileAll(/* String input, Function<String, String> compiler) {
+        return this.divide(input, new State())
+                .segments
+                .iter()
+                .map(compiler)
+                .fold(new StringBuilder(), StringBuilder::append)
+                .toString();
+    } *//* private */ /* String */ compileRootSegment(/* String input) {
+        return this.compileClass(input)
+                .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
+    } *//* private */ /* Option<String> */ compileClass(/* String input) {
+        return this.compileStructured(input, "class ");
+    } *//* private */ /* String */ generatePlaceholder(/* String input) {
         return "/* " + input + " */";
     } *//* 
  */};
-/*  */

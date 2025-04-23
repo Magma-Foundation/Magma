@@ -14,16 +14,24 @@ class Main {
         T orElseGet(Supplier<T> other);
 
         Option<T> or(Supplier<Option<T>> other);
+
+        T orElse(T other);
     }
 
     interface Head<T> {
         Option<T> next();
     }
 
-    interface List<T> {
+    public interface List<T> {
         void add(T element);
 
         Iterator<T> iter();
+    }
+
+    public interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -47,7 +55,7 @@ class Main {
         }
     }
 
-    record Iterator<T>(Head<T> head) {
+    public record Iterator<T>(Head<T> head) {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -64,6 +72,10 @@ class Main {
                     }
                 }
             }
+        }
+
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
         }
     }
 
@@ -127,6 +139,11 @@ class Main {
         public Option<T> or(Supplier<Option<T>> other) {
             return this;
         }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -144,7 +161,29 @@ class Main {
         public Option<T> or(Supplier<Option<T>> other) {
             return other.get();
         }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
     }
+
+    private static class Joiner implements Collector<String, Option<String>> {
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> maybeCurrent, String element) {
+            return new Some<>(switch (maybeCurrent) {
+                case None<String> _ -> element;
+                case Some<String>(var current) -> current + element;
+            });
+        }
+    }
+
+    private static final List<String> structs = Lists.emptyList();
 
     void main() {
         try {
@@ -160,7 +199,9 @@ class Main {
     }
 
     private String compileRoot(String input) {
-        return this.compileAll(input, this::compileRootSegment);
+        var compiled = this.compileAll(input, this::compileRootSegment);
+        var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+        return compiled + joinedStructs;
     }
 
     private String compileAll(String input, Function<String, String> compiler) {
@@ -173,7 +214,8 @@ class Main {
     }
 
     private String compileRootSegment(String input) {
-        return this.compileClass(input).orElseGet(() -> this.generatePlaceholder(input));
+        return this.compileClass(input)
+                .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
     }
 
     private Option<String> compileClass(String input) {
@@ -198,7 +240,10 @@ class Main {
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = this.compileAll(inputContent, this::compileClassSegment);
-        return new Some<>(this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n");
+
+        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
+        structs.add(generated);
+        return new Some<>("");
     }
 
     private String compileClassSegment(String input) {
