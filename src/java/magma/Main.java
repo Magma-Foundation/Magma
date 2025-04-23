@@ -300,7 +300,7 @@ class Main {
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    var generated = "\n\t" + outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body);
+                    var generated = outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body) + "\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -340,8 +340,19 @@ class Main {
         return new Some<>(newBeforeName + " " + name);
     }
 
-    private String compileType(String type) {
-        return this.generatePlaceholder(type);
+    private String compileType(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(">")) {
+            var slice = stripped.substring(0, stripped.length() - ">".length());
+            var argsStart = slice.indexOf("<");
+            if (argsStart >= 0) {
+                var base = slice.substring(0, argsStart).strip();
+                var args = slice.substring(argsStart + "<".length());
+                return base + "<" + this.generatePlaceholder(args) + ">";
+            }
+        }
+
+        return this.generatePlaceholder(input);
     }
 
     private State divide(String input, State state) {
