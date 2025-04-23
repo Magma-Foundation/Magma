@@ -264,12 +264,15 @@ class Main {
     }
 
     private String compileRootSegment(String input0) {
-        var rules = Lists.<Function<String, Option<String>>>of(
+        return this.compileOr(input0, Lists.of(
                 input -> this.compileStructured(input, "interface "),
                 input -> this.compileStructured(input, "record "),
                 input -> this.compileStructured(input, "class "),
-                this::compileMethod);
+                this::compileMethod
+        ));
+    }
 
+    private String compileOr(String input0, List<Function<String, Option<String>>> rules) {
         var result = rules
                 .iter()
                 .map(rule -> rule.apply(input0))
@@ -295,23 +298,28 @@ class Main {
 
     private Option<String> compileMethod(String input) {
         var paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            var definition = input.substring(0, paramStart).strip();
-            var withParams = input.substring(paramStart + "(".length());
+        if (paramStart < 0) {
+            return new None<>();
+        }
+        var definition = input.substring(0, paramStart).strip();
+        var withParams = input.substring(paramStart + "(".length());
 
-            var paramEnd = withParams.indexOf(")");
-            if (paramEnd >= 0) {
-                var params = withParams.substring(0, paramEnd).strip();
-                var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var inputContent = withBraces.substring(1, withBraces.length() - 1);
-                    var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
-                    return new Some<>(this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
-                }
-            }
+        var paramEnd = withParams.indexOf(")");
+        if (paramEnd < 0) {
+            return new None<>();
+        }
+        var params = withParams.substring(0, paramEnd).strip();
+        var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+        var header = this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + ")";
+        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+            var inputContent = withBraces.substring(1, withBraces.length() - 1);
+            var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
+            return new Some<>(header + "{" + outputContent + "\n}\n");
+        }
+        else {
+            return new Some<>("\n\t" + header + ";");
         }
 
-        return new None<>();
     }
 
     private String compileDefinition(String input) {
@@ -436,17 +444,15 @@ class Main {
         }
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
-        return new Some<>(this.generatePlaceholder(beforeKeyword) + "struct " +
+        return new Some<>(this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
                 beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n");
     }
 
     private String compileClassMember(String input) {
-        var field = this.compileDefinitionStatement(input);
-        if (field instanceof Some(var value)) {
-            return value;
-        }
-
-        return this.generatePlaceholder(input);
+        return this.compileOr(input, Lists.of(
+                this::compileMethod,
+                this::compileDefinitionStatement
+        ));
     }
 
     private String generatePlaceholder(String input) {
