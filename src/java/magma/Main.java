@@ -376,6 +376,18 @@ class Main {
                 .orElse("");
     }
 
+    private static String compileStatementOrBlock(String input) {
+        return compileWhitespace(input)
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Option<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return new Some<>("");
+        }
+        return new None<>();
+    }
+
     void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -438,7 +450,7 @@ class Main {
     }
 
     private String compileStructuredSegment(String input) {
-        return this.compileWhitespace(input)
+        return compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileStructured(input, "enum "))
                 .or(() -> this.compileStructured(input, "class "))
@@ -446,13 +458,6 @@ class Main {
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
-    }
-
-    private Option<String> compileWhitespace(String input) {
-        if (input.isBlank()) {
-            return new Some<>("");
-        }
-        return new None<>();
     }
 
     private Option<String> compileMethod(String input) {
@@ -465,9 +470,21 @@ class Main {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
-                    var body = withParams.substring(paramEnd + ")".length()).strip();
+                    var withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     var outputParams = this.compileValues(inputParams, this::compileParam);
-                    var generated = outputDefinition + "(" + outputParams + ")" + generatePlaceholder(body) + "\n";
+                    String newBody;
+                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                        var body = withBraces.substring(1, withBraces.length() - 1);
+                        newBody = "{" + this.compileStatements(body, Main::compileStatementOrBlock) + "\n}";
+                    }
+                    else if (withBraces.equals(";")) {
+                        newBody = ";";
+                    }
+                    else {
+                        return new None<>();
+                    }
+
+                    var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -503,7 +520,7 @@ class Main {
     }
 
     private String compileParam(String param) {
-        return this.compileWhitespace(param)
+        return compileWhitespace(param)
                 .or(() -> this.parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() -> generatePlaceholder(param));
     }
