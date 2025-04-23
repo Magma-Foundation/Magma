@@ -34,6 +34,34 @@ private Option<IOException> run(Path source, Path target) {
 }
 
 private String compile(String input) {
+    var segments = new ArrayList<String>();
+    var buffer = new StringBuilder();
+    var depth = 0;
+    for (var i = 0; i < input.length(); i++) {
+        var c = input.charAt(i);
+        buffer.append(c);
+
+        if (c == '}' && depth == 1) {
+            segments.add(buffer.toString());
+            buffer = new StringBuilder();
+            depth--;
+        } else if (c == '{') {
+            depth++;
+        } else if (c == '}') {
+            depth--;
+        }
+    }
+    segments.add(buffer.toString());
+
+    var output = new StringBuilder();
+    for (var segment : segments) {
+        output.append(this.compileRootSegment(segment));
+    }
+
+    return output.toString();
+}
+
+private String compileRootSegment(String input) {
     return "/* " + input + "*/";
 }
 
