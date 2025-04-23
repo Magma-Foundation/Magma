@@ -424,7 +424,8 @@ class Main {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
 
-                return new Some<>(createIndent(depth) + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + "\n\t}");
+                var indent = createIndent(depth);
+                return new Some<>(indent + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}");
             }
         }
 

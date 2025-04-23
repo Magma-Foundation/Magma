@@ -117,8 +117,8 @@ char* generate();
 			/* case Some<T>(var value) -> current = folder.apply(current, value); */
 			/* case None<T> _ ->  */{
 				return current;
-	}
-	}
+			}
+		}
 	}
 }
 /* public <C> */ /* C */ collect(Collector</* T */, /*  C */> collector){
@@ -282,10 +282,10 @@ char* generate();
 			/* current.append(c1); */
 			/* if (c1 == '\\')  */{
 				/* current.append(queue.removeFirst()); */
-	}
+			}
 			/* current.append(queue.removeFirst()); */
 			/* continue; */
-	}
+		}
 		/* if (c == '"')  */{
 			/* current.append(c); */
 			/* while (queue.hasElements())  */{
@@ -293,13 +293,13 @@ char* generate();
 				/* current.append(next); */
 				/* if (next == '\\')  */{
 					/* current.append(queue.removeFirst()); */
-	}
+				}
 				/* if (next == '"')  */{
 					/* break; */
-	}
-	}
+				}
+			}
 			/* continue; */
-	}
+		}
 		/* current = folder.apply(current, c); */
 	}
 	return current.advance().segments;
@@ -334,8 +334,9 @@ char* generate();
 		/* if (contentStart >= 0)  */{
 			/* var beforeContent = withoutEnd.substring(0, contentStart); */
 			/* var content = withoutEnd.substring(contentStart + "{".length()); */
-			return /* new Some<>(createIndent(depth) + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + "\n\t}") */;
-	}
+			/* var indent = createIndent(depth); */
+			return /* new Some<>(indent + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}") */;
+		}
 	}
 	return /* new None<>() */;
 }
@@ -367,7 +368,7 @@ char* generate();
 		/* var c = input.charAt(i); */
 		/* if (Character.isLetter(c))  */{
 			/* continue; */
-	}
+		}
 		return false;
 	}
 	return true;
@@ -382,7 +383,7 @@ char* generate();
 	/* return Main.parseDefinition(input).map(definition ->  */{
 		/* if (definition.type instanceof Functional(var args, var base))  */{
 			return /* new FunctionalDefinition(definition */.beforeType, base, definition.name, args);
-	}
+		}
 		return definition;
 	}
 	/* ); */
@@ -428,7 +429,7 @@ char* generate();
 			/* var beforeType = beforeName.substring(0, typeSeparator).strip(); */
 			/* var inputType = beforeName.substring(typeSeparator + " ".length()).strip(); */
 			/* yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name)); */
-	}
+		}
 	}
 	/* ; */
 }
@@ -440,13 +441,13 @@ char* generate();
 		/* var c = input.charAt(index); */
 		/* if (c == ' ' && depth == 0)  */{
 			return /* new Some<>(index) */;
-	}
+		}
 		/* if (c == '>')  */{
 			/* depth++; */
-	}
+		}
 		/* if (c == '<')  */{
 			/* depth--; */
-	}
+		}
 	}
 	return /* new None<>() */;
 }
@@ -457,12 +458,12 @@ char* generate();
 				/* var argType = arguments.get(0); */
 				/* var returnType = arguments.get(1); */
 				return /* new Functional(Lists */.of(argType), returnType);
-	}
+			}
 			/* if (base.equals("Supplier"))  */{
 				/* var returns = arguments.get(0); */
 				return /* new Functional(Lists */.emptyList(), returns);
-	}
-	}
+			}
+		}
 		return parsed;
 	}
 	/* ); */
@@ -488,7 +489,7 @@ char* generate();
 			/* var base = slice.substring(0, argsStart).strip(); */
 			/* var inputArgs = slice.substring(argsStart + "<".length()); */
 			return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
-	}
+		}
 	}
 	return /* new Some<>(new Content(input)) */;
 }
@@ -594,19 +595,19 @@ char* generate();
 					/* ") && withBraces.endsWith("}")) {
                         var body = withBraces.substring(1, withBraces.length() - 1);
                         newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}"; */
-	}
+				}
 				/* else if (withBraces.equals(";"))  */{
 					/* newBody = ";"; */
-	}
+				}
 				/* else  */{
 					return /* new None<>() */;
-	}
+				}
 				/* var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n"; */
 				/* methods.add(generated); */
 				return /* new Some<>("") */;
-	}
+			}
 			return /* new None<>() */;
-	}
+		}
 		/* ); */
 	}
 	return /* new None<>() */;
