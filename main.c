@@ -63,7 +63,7 @@ void enter(struct State this){
 void append(struct State this, char c){
 	this.buffer = this.buffer.concatChar(c);
 }
-void __main__(/* String[] */ args){
+void __main__(char** args){
 	/* try {
             Path source = Paths.get(".", "src", "java", "magma", "Main.java");
             String input = Files.readString(source);
@@ -456,6 +456,9 @@ Optional<char*> compileType(char* type){
         } */
 	/* if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
+        } */
+	/* if(stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(result -> result + "*");
         } */
 	/* if (stripped.endsWith(">")) {
             String slice = stripped.substring(0, stripped.length() - ">".length());

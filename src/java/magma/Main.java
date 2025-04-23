@@ -516,6 +516,10 @@ public class Main {
             return Optional.of("int");
         }
 
+        if(stripped.endsWith("[]")) {
+            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(result -> result + "*");
+        }
+
         if (stripped.endsWith(">")) {
             String slice = stripped.substring(0, stripped.length() - ">".length());
             int typeArgsStart = slice.indexOf("<");
@@ -615,7 +619,6 @@ public class Main {
                 .or(() -> compileOperator(stripped, "+"))
                 .or(() -> compileOperator(stripped, "-"))
                 .orElseGet(() -> generatePlaceholder(stripped));
-
     }
 
     private static Optional<String> compileOperator(String input, String operator) {
