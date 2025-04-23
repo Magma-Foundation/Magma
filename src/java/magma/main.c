@@ -2,7 +2,32 @@
 /* import java.nio.file.Files; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
-struct Main {/* public static void main() {
+/* import java.util.List; */
+struct Main {/* private static class State {
+        private final List<String> segments; */
+/* private StringBuilder buffer; */
+/* private State(List<String> segments, StringBuilder buffer) {
+            this.segments = segments; */
+/* this.buffer = buffer; */
+/* }
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder()); */
+/* }
+
+        private State append(char c) {
+            this.buffer.append(c); */
+/* return this; */
+/* }
+
+        private State advance() {
+            this.segments.add(this.buffer.toString()); */
+/* this.buffer = new StringBuilder(); */
+/* return this; */
+/* }
+    }
+
+    public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java"); */
 /* var input = Files.readString(source); */
@@ -14,26 +39,36 @@ struct Main {/* public static void main() {
     }
 
     private static String compile(String input) {
-        var segments = new ArrayList<String>(); */
-/* var buffer = new StringBuilder(); */
-/* for (var i = 0; */
-/* i < input.length(); */
-/* i++) {
-            var c = input.charAt(i); */
-/* buffer.append(c); */
-/* if (c == '; */
-/* ') {
-                segments.add(buffer.toString()); */
-/* buffer = new StringBuilder(); */
-/* }
-        }
-        segments.add(buffer.toString()); */
+        var segments = divide(input, new State()); */
 /* var output = new StringBuilder(); */
 /* for (var segment : segments) {
             output.append(compileRootSegment(segment)); */
 /* }
         return output.toString(); */
 /* }
+
+    private static List<String> divide(String input, State state) {
+        var current = state; */
+/* for (var i = 0; */
+/* i < input.length(); */
+/* i++) {
+            var c = input.charAt(i); */
+/* current = foldStatementChar(current, c); */
+/* }
+
+        return current.advance().segments; */
+/* }
+
+    private static State foldStatementChar(State state, char c) {
+        var appended = state.append(c); */
+/* if (c == '; */
+/* ') {
+            return appended.advance(); */
+/* }
+        else {
+            return appended; */
+/* }
+    }
 
     private static String compileRootSegment(String input) {
         var stripped = input.strip(); */
