@@ -10,14 +10,16 @@ public class Main {
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
+        private int depth;
 
-        private State(List<String> segments, StringBuilder buffer) {
+        private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State append(char c) {
@@ -28,6 +30,20 @@ public class Main {
         private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
+            return this;
+        }
+
+        public State enter() {
+            this.depth++;
+            return this;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State exit() {
+            this.depth--;
             return this;
         }
     }
@@ -66,12 +82,16 @@ public class Main {
 
     private static State foldStatementChar(State state, char c) {
         var appended = state.append(c);
-        if (c == ';') {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        else {
-            return appended;
+        if (c == '{') {
+            return appended.enter();
         }
+        if (c == '}') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String compileRootSegment(String input) {
@@ -87,7 +107,10 @@ public class Main {
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
                 var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                return "struct " + name + " {" + generatePlaceholder(withEnd);
+                if (withEnd.endsWith("}")) {
+                    var content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return "struct " + name + " {" + generatePlaceholder(content) + "}";
+                }
             }
         }
         return generatePlaceholder(stripped);
