@@ -72,7 +72,12 @@ private String compileRootSegment(String input) {
     if (classIndex >= 0) {
         var left = input.substring(0, classIndex);
         var right = input.substring(classIndex + "class ".length());
-        return this.generatePlaceholder(left) + "struct " + this.generatePlaceholder(right);
+        var contentStart = right.indexOf("{");
+        if (contentStart >= 0) {
+            var name = right.substring(0, contentStart).strip();
+            var withEnd = right.substring(contentStart + "{".length()).strip();
+            return this.generatePlaceholder(left) + "struct " + name + " {" + this.generatePlaceholder(withEnd);
+        }
     }
 
     return this.generatePlaceholder(input);

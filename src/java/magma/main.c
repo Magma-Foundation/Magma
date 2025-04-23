@@ -1,5 +1,4 @@
-/* private static  */struct /* State {
-    private final List<String> segments;
+/* private static  */struct State {/* private final List<String> segments;
     private StringBuilder buffer;
     private int depth;
 
@@ -68,15 +67,19 @@ private String compileRoot(String input) {
 } *//* 
 
 private String compileRootSegment(String input) {
-    var classIndex = input.indexOf(" */struct /* ");
-    if (classIndex >= 0) {
-        var left = input.substring(0, classIndex);
+    var classIndex = input.indexOf(" */struct ");
+    if (classIndex >= 0) {/* var left = input.substring(0, classIndex);
         var right = input.substring(classIndex + "class ".length());
-        return this.generatePlaceholder(left) + "struct " + this.generatePlaceholder(right);
+        var contentStart = right.indexOf("{");
+        if (contentStart >= 0) {
+            var name = right.substring(0, contentStart).strip();
+            var withEnd = right.substring(contentStart + "{".length()).strip();
+            return this.generatePlaceholder(left) + "struct " + name + " {" + this.generatePlaceholder(withEnd);
+        }
     }
 
     return this.generatePlaceholder(input);
-} *//* 
+}
 
 private State divide(String input, State state) {
     var current = state;
@@ -85,27 +88,27 @@ private State divide(String input, State state) {
         current = this.foldStatementChar(current, c);
     }
     return current.advance();
-} *//* 
+}
 
 private State foldStatementChar(State state, char c) {
     var appended = state.append(c);
     if (c == ';' && appended.isLevel()) {
         return appended.advance();
     }
-    if (c == '} *//* ' && appended.isShallow()) {
+    if (c == '}' && appended.isShallow()) {
         return appended.advance().exit();
-    } *//* 
+    }
     if (c == '{') {
         return appended.enter();
     }
-    if (c == '} *//* ') {
+    if (c == '}') {
         return appended.exit();
-    } *//* 
+    }
     else {
         return appended;
-    } *//* 
+    }
 }
 
 private String generatePlaceholder(String input) {
-    return "/* " + input + " */"; *//* 
+    return "/* " + input + " */";
 } */
