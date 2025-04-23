@@ -6,29 +6,22 @@
 /* import java.util.function.Function; */
 /* import java.util.function.Supplier; */
 /*  */
-/* sealed  */struct Option<T> permits Some, None {
-	/* T */ /* orElseGet(Supplier<T> */ other);
-	/* Option<T> */ /* or(Supplier<Option<T>> */ other);
-	/* T */ /* orElse(T */ other);/* 
+/* sealed  */struct Option<T> permits Some, None {/* 
      */
 };
 /* 
 
-     */struct Head<T> {/* Option<T> next(); *//* 
+     */struct Head<T> {/* 
      */
 };
 /* 
 
-    public  */struct List<T> {
-	/* void */ /* add(T */ element);/* 
-
-        Iterator<T> iter(); *//* 
+    public  */struct List<T> {/* 
      */
 };
 /* 
 
-    public  */struct Collector<T, C> {/* C createInitial(); */
-	/* C fold(C current, */ /* T */ element);/* 
+    public  */struct Collector<T, C> {/* 
      */
 };
 /* 
@@ -81,25 +74,17 @@
 
                 return new None<>();
             });
-        } *//* 
-        if (!stripped.endsWith("; *//* ".length()); *//* 
-        return this.compileDefinition(withoutEnd).map(definition -> {
-            return "\n\t" + definition + ";";
-        } *//* ); *//* 
+        } */
+	/* if */ (!stripped.endsWith(";/* ".length()); *//* ); *//* 
         if (nameSeparator < 0) {
             return new None<>();
         } *//* 
         if (typeSeparator < 0) {
-            return new None<>();
+            return new Some<>(this.compileType(beforeName) + " " + name);
         } */
-	/* for (var i */ /* = */ 0;/* 
-        return current.advance(); */
+	/* for (var i */ /* = */ 0;
 	/* if (c */ /* == */ ';
-	/* if (c == '}' && appended.isShallow()) { */ /* return */ appended.advance().exit();/* 
-        }
-        if (c == '{') {
-            return appended.enter();
-        } */
+	/* if (c == '}' && appended.isShallow()) { */ /* return */ appended.advance().exit();
 	/* if (c == '}') { */ /* return */ appended.exit();
 	/* }
         else { */ /* return */ appended;/* 
@@ -109,24 +94,19 @@
 /* 
 
  */struct Main {/* 
-
-    void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
-
-            var target = source.resolveSibling("main.c");
-            Files.writeString(target, this.compileRoot(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-    } *//* 
  */
 };
 
 	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* ; */
+	/* T */ orElseGet(/* Supplier<T> other */)/* ; */
+	/* Option<T> */ or(/* Supplier<Option<T>> other */)/* ; */
+	/* T */ orElse(/* T other */)/* ; */
 	/* <R> */ /* Option<R> */ flatMap(/* Function<T, Option<R>> mapper */)/* ; */
+	/* Option<T> */ next(/*  */)/* ; */
+	/* void */ add(/* T element */)/* ; */
+	/* Iterator<T> */ iter(/*  */)/* ; */
+	/* C */ createInitial(/*  */)/* ; */
+	/* C */ fold(/* C current, T element */)/* ; */
 	/* public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter; */ /* public */ RangeHead(/* int length */)/* {
@@ -278,6 +258,18 @@
     } */
 	/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
 	/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
+	/* void */ main(/*  */)/* {
+        try {
+            var source = Paths.get(".", "src", "java", "magma", "Main.java");
+            var input = Files.readString(source);
+
+            var target = source.resolveSibling("main.c");
+            Files.writeString(target, this.compileRoot(input));
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+    } */
 	/* private */ /* String */ compileRoot(/* String input */)/* {
         var compiled = this.compileAll(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
@@ -309,16 +301,20 @@
             return */ /* new */ None<>(/*  */)/* ;
         } */
 	/* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length( */)/* - "; */
+	/* return */ this.compileDefinition(/* withoutEnd */)/* .map(definition -> {
+            return "\n\t" + definition + ";";
+        } */
 	/* }
 
     private */ /* Option<String> */ compileDefinition(/* String input */)/* {
         var nameSeparator = input.lastIndexOf(" "); */
 	/* var beforeName */ /* = */ input.substring(/* 0, nameSeparator */)/* .strip(); */
+	/* var name */ /* = */ input.substring(/* nameSeparator + " ".length( */)/* ).strip(); */
 	/* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " " */)/* ; */
 	/* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator */)/* .strip(); */
 	/* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length( */)/* ).strip(); */
-	/* var name */ /* = */ input.substring(/* nameSeparator + " ".length( */)/* ).strip(); */
-	/* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType */)/* + " " + this.compileType(type) + " " + name); */
+	/* var newBeforeName */ /* = */ this.generatePlaceholder(/* beforeType */)/* + " " + this.compileType(type); */
+	/* return */ /* new */ Some<>(/* newBeforeName + " " + name */)/* ; */
 	/* }
 
     private */ /* String */ compileType(/* String type */)/* {
@@ -332,12 +328,16 @@
             var c */ /* = */ input.charAt(/* i */)/* ;
             current = this.foldStatementChar(current, c);
         } */
+	/* return */ current.advance(/*  */)/* ; */
 	/* }
 
     private */ /* State */ foldStatementChar(/* State state, char c */)/* {
         var appended = state.append(c); */
 	/* ' */ /* && */ appended.isLevel(/*  */)/* ) {
             return appended.advance();
+        } */
+	/* } */ if(/* c == '{' */)/* {
+            return appended.enter();
         } */
 	/* private */ /* String */ generatePlaceholder(/* String input */)/* {
         return "/* " + input + " */";

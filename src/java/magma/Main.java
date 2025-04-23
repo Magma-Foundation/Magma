@@ -307,14 +307,17 @@ class Main {
             return new None<>();
         }
         var beforeName = input.substring(0, nameSeparator).strip();
+        var name = input.substring(nameSeparator + " ".length()).strip();
+
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
-            return new None<>();
+            return new Some<>(this.compileType(beforeName) + " " + name);
         }
+
         var beforeType = beforeName.substring(0, typeSeparator).strip();
         var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        var name = input.substring(nameSeparator + " ".length()).strip();
-        return new Some<>(this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name);
+        var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
+        return new Some<>(newBeforeName + " " + name);
     }
 
     private String compileType(String type) {
