@@ -351,7 +351,10 @@ class Main {
         }
         var params = withParams.substring(0, paramEnd).strip();
         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-        var header = this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + ")";
+
+        var newParams = this.compileAll(params, this::foldValueChar, this::compileDefinition, this::mergeValues);
+        var header = this.compileDefinition(definition) + "(" + newParams + ")";
+
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
             var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
@@ -366,18 +369,35 @@ class Main {
     private String compileDefinition(String input) {
         var stripped = input.strip();
         var space = stripped.lastIndexOf(" ");
-        if (space >= 0) {
-            var beforeName = stripped.substring(0, space);
-            var typeSeparator = beforeName.lastIndexOf(" ");
-            var type = typeSeparator >= 0
-                    ? beforeName.substring(typeSeparator + " ".length())
-                    : beforeName;
-
-            var name = stripped.substring(space + " ".length());
-            return this.compileType(type) + " " + name;
+        if (space < 0) {
+            return this.generatePlaceholder(stripped);
         }
 
-        return this.generatePlaceholder(stripped);
+        var beforeName = stripped.substring(0, space);
+        var type = switch (this.findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> beforeName;
+            case Some<Integer>(var typeSeparator) -> beforeName.substring(0, typeSeparator + " ".length());
+        };
+
+        var name = stripped.substring(space + " ".length());
+        return this.compileType(type) + " " + name;
+    }
+
+    private Option<Integer> findTypeSeparator(String input) {
+        var depth = 0;
+        for (var index = 0; index < input.length(); index++) {
+            var c = input.charAt(index);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(index);
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
+        }
+        return new None<>();
     }
 
     private String compileType(String input) {
@@ -444,7 +464,14 @@ class Main {
             return state.advance();
         }
 
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private StringBuilder mergeValues(StringBuilder cache, String element) {
