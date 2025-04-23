@@ -621,7 +621,6 @@ public class Main {
 
         List<String> modifiers;
         String type;
-
         switch (findTypeSeparator(beforeName)) {
             case None<Integer> _ -> {
                 modifiers = Collections.emptyList();
@@ -634,9 +633,9 @@ public class Main {
             }
         }
 
-        return compileType(type).flatMap(outputType -> {
+        return compileType(type).map(outputType -> {
             String outputDefinition = outputType + " " + newName;
-            return new Some<>(new Definition(modifiers, outputDefinition));
+            return new Definition(modifiers, outputDefinition);
         });
     }
 
