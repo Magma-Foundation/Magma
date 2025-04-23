@@ -24,7 +24,7 @@ Option</* T */> or(Supplier<Option</* T */>> other)/* ; */
 Option</* T */> next(/*  */)/* ; */
 List</* T */> add(/* T */ element)/* ; */
 Iterator</* T */> iter(/*  */)/* ; */
-/* boolean */ isEmpty(/*  */)/* ; */
+/* boolean */ hasElements(/*  */)/* ; */
 /* T */ removeFirst(/*  */)/* ; */
 /* C */ createInitial(/*  */)/* ; */
 /* C */ fold(/* C */ current, /* T */ element)/* ; */
@@ -186,43 +186,32 @@ Iterator</* T */> iter(/*  */)/* ; */
             return current.add(element);
         }
     } */
-/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
-/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
-/* void */ main(/*  */)/* {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
-
-            var target = source.resolveSibling("main.c");
-            Files.writeString(target, this.compileRoot(input));
-        } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+/* private */ /* record */ Generic(/* String */ base, List</* String */> args)/* {
+        private String generate() {
+            var outputArgs = Main.generateValues(this.args());
+            return this.base() + "<" + outputArgs + ">";
         }
     } */
-/* private */ /* String */ compileRoot(/* String */ input)/* {
-        var compiled = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
-        var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
-        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
-        return compiled + joinedStructs + joinedMethods;
-    } */
-/* private */ /* String */ compileAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  String */> compiler, BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger)/* {
-        return this.divideAll(input, folder)
-                .iter()
-                .map(compiler)
+/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static */ /* String */ generateAll(BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger, List</* String */> parsed)/* {
+        return parsed.iter()
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-/* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
-        return stringBuilder.append(str);
+/* private static */ List</* String */> parseAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  String */> compiler)/* {
+        return Main.divideAll(input, folder)
+                .iter()
+                .map(compiler)
+                .collect(new ListCollector<>());
     } */
-/* private */ List</* String */> divideAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
+/* private static */ List</* String */> divideAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
         var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
                 .collect(new ListCollector<>());
 
-        while (!queue.isEmpty()) {
+        while (queue.hasElements()) {
             var c = queue.removeFirst();
 
             if (c == '\'') {
@@ -238,7 +227,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             }
             if (c == '"') {
                 current.append(c);
-                while (!queue.isEmpty()) {
+                while (queue.hasElements()) {
                     var next = queue.removeFirst();
                     current.append(next);
 
@@ -255,6 +244,39 @@ Iterator</* T */> iter(/*  */)/* ; */
             current = folder.apply(current, c);
         }
         return current.advance().segments;
+    } */
+/* private static */ /* String */ generateValues(List</* String */> parserd)/* {
+        return Main.generateAll(Main::mergeValues, parserd);
+    } */
+/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element)/* {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    } */
+/* void */ main(/*  */)/* {
+        try {
+            var source = Paths.get(".", "src", "java", "magma", "Main.java");
+            var input = Files.readString(source);
+
+            var target = source.resolveSibling("main.c");
+            Files.writeString(target, this.compileRoot(input));
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+    } */
+/* private */ /* String */ compileRoot(/* String */ input)/* {
+        var compiled = this.compileStatements(input, this::compileRootSegment);
+        var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
+        return compiled + joinedStructs + joinedMethods;
+    } */
+/* private */ /* String */ compileStatements(/* String */ input, Function</* String */, /*  String */> segment)/* {
+        return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
+    } */
+/* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
+        return stringBuilder.append(str);
     } */
 /* private */ /* String */ compileRootSegment(/* String */ input)/* {
         return this.compileClass(input)
@@ -280,7 +302,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStructuredSegment, this::mergeStatements);
+        var outputContent = this.compileStatements(inputContent, this::compileStructuredSegment);
 
         var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
@@ -323,13 +345,10 @@ Iterator</* T */> iter(/*  */)/* ; */
         return new None<>();
     } */
 /* private */ /* String */ compileValues(/* String */ input, Function</* String */, /*  String */> compiler)/* {
-        return this.compileAll(input, this::foldValueChar, compiler, this::mergeValues);
+        return Main.generateValues(this.parseValues(input, compiler));
     } */
-/* private */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element)/* {
-        if (cache.isEmpty()) {
-            return cache.append(element);
-        }
-        return cache.append(", ").append(element);
+/* private */ List</* String */> parseValues(/* String */ input, Function</* String */, /*  String */> compiler)/* {
+        return Main.parseAll(input, this::foldValueChar, compiler);
     } */
 /* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
         if (c == ',' && state.isLevel()) {
@@ -400,8 +419,8 @@ Iterator</* T */> iter(/*  */)/* ; */
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var outputArgs = this.compileValues(inputArgs, this::compileType);
-                return base + "<" + outputArgs + ">";
+                var args = this.parseValues(inputArgs, this::compileType);
+                return new Generic(base, args).generate();
             }
         }
 

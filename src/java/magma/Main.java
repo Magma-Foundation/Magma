@@ -40,6 +40,10 @@ class Main {
         C fold(C current, T element);
     }
 
+    private interface Type {
+        String generate();
+    }
+
     public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter;
@@ -209,10 +213,18 @@ class Main {
         }
     }
 
-    private record Generic(String base, List<String> args) {
-        private String generate() {
+    private record Generic(String base, List<String> args) implements Type {
+        @Override
+        public String generate() {
             var outputArgs = Main.generateValues(this.args());
             return this.base() + "<" + outputArgs + ">";
+        }
+    }
+
+    private record Content(String input) implements Type {
+        @Override
+        public String generate() {
+            return Main.generatePlaceholder(this.input);
         }
     }
 
@@ -284,6 +296,10 @@ class Main {
         return cache.append(", ").append(element);
     }
 
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
+    }
+
     void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -314,7 +330,7 @@ class Main {
 
     private String compileRootSegment(String input) {
         return this.compileClass(input)
-                .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
+                .orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
     }
 
     private Option<String> compileClass(String input) {
@@ -340,7 +356,7 @@ class Main {
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = this.compileStatements(inputContent, this::compileStructuredSegment);
 
-        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
+        var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
@@ -350,7 +366,7 @@ class Main {
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
-                .orElseGet(() -> this.generatePlaceholder(input));
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private Option<String> compileWhitespace(String input) {
@@ -372,7 +388,7 @@ class Main {
                     var inputParams = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
                     var outputParams = this.compileValues(inputParams, this::compileParam);
-                    var generated = outputDefinition + "(" + outputParams + ")" + this.generatePlaceholder(body) + "\n";
+                    var generated = outputDefinition + "(" + outputParams + ")" + generatePlaceholder(body) + "\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -408,7 +424,7 @@ class Main {
     }
 
     private String compileParam(String param) {
-        return this.compileDefinition(param).orElseGet(() -> this.generatePlaceholder(param));
+        return this.compileDefinition(param).orElseGet(() -> generatePlaceholder(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {
@@ -429,11 +445,11 @@ class Main {
         var name = input.substring(nameSeparator + " ".length()).strip();
 
         return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> this.compileType(beforeName) + " " + name;
+            case None<Integer> _ -> this.parseType(beforeName).generate() + " " + name;
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
+                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseType(type).generate();
                 yield newBeforeName + " " + name;
             }
         });
@@ -458,7 +474,7 @@ class Main {
         return new None<>();
     }
 
-    private String compileType(String input) {
+    private Type parseType(String input) {
         var stripped = input.strip();
         if (stripped.endsWith(">")) {
             var slice = stripped.substring(0, stripped.length() - ">".length());
@@ -466,12 +482,12 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = this.parseValues(inputArgs, this::compileType);
-                return new Generic(base, args).generate();
+                var args = this.parseValues(inputArgs, input1 -> this.parseType(input1).generate());
+                return new Generic(base, args);
             }
         }
 
-        return this.generatePlaceholder(input);
+        return new Content(input);
     }
 
     private State foldStatementChar(State state, char c) {
@@ -491,9 +507,5 @@ class Main {
         else {
             return appended;
         }
-    }
-
-    private String generatePlaceholder(String input) {
-        return "/* " + input + " */";
     }
 }
