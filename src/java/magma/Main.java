@@ -46,6 +46,10 @@ class Main {
         String generate();
     }
 
+    private interface Defined {
+        String generate();
+    }
+
     public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter;
@@ -241,6 +245,27 @@ class Main {
         }
     }
 
+    private record Definition(Option<String> beforeType, Type type, String name) implements Defined {
+        @Override
+        public String generate() {
+            var beforeTypeString = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
+            return beforeTypeString + " " + this.type().generate() + " " + this.name();
+        }
+    }
+
+    private record FunctionalDefinition(
+            Option<String> beforeType,
+            Type returns,
+            String name,
+            List<Type> args
+    ) implements Defined {
+        @Override
+        public String generate() {
+            var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
+            return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -406,7 +431,7 @@ class Main {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+            return this.parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
@@ -448,7 +473,7 @@ class Main {
     }
 
     private String compileParam(String param) {
-        return this.compileDefinition(param).orElseGet(() -> generatePlaceholder(param));
+        return this.parseAndModifyDefinition(param).map(Defined::generate).orElseGet(() -> generatePlaceholder(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {
@@ -457,10 +482,20 @@ class Main {
             return new None<>();
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return this.compileDefinition(withoutEnd).map(definition -> "\n\t" + definition + ";");
+        return this.parseAndModifyDefinition(withoutEnd).map(Defined::generate).map(definition -> "\n\t" + definition + ";");
     }
 
-    private Option<String> compileDefinition(String input) {
+    private Option<Defined> parseAndModifyDefinition(String input) {
+        return this.parseDefinition(input).map(definition -> {
+            if (definition.type instanceof Functional(var args, var base)) {
+                return new FunctionalDefinition(definition.beforeType, base, definition.name, args);
+            }
+
+            return definition;
+        });
+    }
+
+    private Option<Definition> parseDefinition(String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
@@ -469,12 +504,12 @@ class Main {
         var name = input.substring(nameSeparator + " ".length()).strip();
 
         return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> this.parseAndModifyType(beforeName).generate() + " " + name;
+            case None<Integer> _ -> new Definition(new None<>(), this.parseAndModifyType(beforeName), name);
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseAndModifyType(type).generate();
-                yield newBeforeName + " " + name;
+                var newType = this.parseAndModifyType(type);
+                yield new Definition(new Some<>(beforeType), newType, name);
             }
         });
     }
