@@ -13,9 +13,13 @@
 /* import java.util.stream.Collectors; */
 struct Node {
 }
+struct String_ {/* String_ concatChar(char c); *//* 
+
+        String toSlice(); */
+}
 struct State {
-	List<char*> segments;
-	char* buffer;
+	List<struct String_> segments;
+	struct String_ buffer;
 	int depth;
 }
 struct Definition {
@@ -29,7 +33,7 @@ struct Main {
 	List<char*> structs;
 	List<char*> methods;
 }
-struct State new_State(List<char*> segments, char* buffer, int depth){
+struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
 	this.segments = segments;
 	this.buffer = buffer;
@@ -37,7 +41,7 @@ struct State new_State(List<char*> segments, char* buffer, int depth){
 	return this;
 }
 struct State createInitial(){
-	return new_State(new_ArrayList<>(), "", 0);
+	return new_State(new_ArrayList<>(), Strings.empty(), 0);
 }
 int isLevel(struct State this){
 	return this.depth == 0;
@@ -47,7 +51,7 @@ int isShallow(struct State this){
 }
 void advance(struct State this){
 	this.segments.add(this.buffer);
-	this.buffer = "";
+	/* this.buffer = Strings */.empty();
 }
 void exit(struct State this){
 	this.depth = this.depth - 1;
@@ -56,7 +60,7 @@ void enter(struct State this){
 	this.depth = this.depth + 1;
 }
 void append(struct State this, struct char c){
-	this.buffer = this.buffer + c;
+	/* this.buffer = this */.buffer.concatChar(c);
 }
 void __main__(/* String[] */ args){
 	/* try {
@@ -118,7 +122,9 @@ Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Charact
             state = folder.apply(state, c);
         } */
 	state.advance();
-	/* List<String> segments */ = state.segments;
+	/* List<String> segments = state */.segments.stream(/* )
+                .map(string */ - /* > string.toSlice())
+                .toList( */);
 	/* Optional<List<String>> maybeOutput = Optional */.of(new_ArrayList<String>());
 	/* for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
@@ -578,7 +584,7 @@ int isSymbol(char* input){
 	/* i < input */.length();
 	/* i++) {
             char c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;

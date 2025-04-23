@@ -17,19 +17,25 @@ public class Main {
     sealed interface Node permits Definition, ConstructorHeader {
     }
 
+    public interface String_ {
+        String_ concatChar(char c);
+
+        String toSlice();
+    }
+
     private static class State {
-        private final List<String> segments;
-        private String buffer;
+        private final List<String_> segments;
+        private String_ buffer;
         private int depth;
 
-        private State(List<String> segments, String buffer, int depth) {
+        private State(List<String_> segments, String_ buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
         public static State createInitial() {
-            return new State(new ArrayList<>(), "", 0);
+            return new State(new ArrayList<>(), Strings.empty(), 0);
         }
 
         private boolean isLevel() {
@@ -42,7 +48,7 @@ public class Main {
 
         private void advance() {
             this.segments.add(this.buffer);
-            this.buffer = "";
+            this.buffer = Strings.empty();
         }
 
         private void exit() {
@@ -54,7 +60,7 @@ public class Main {
         }
 
         private void append(char c) {
-            this.buffer = this.buffer + c;
+            this.buffer = this.buffer.concatChar(c);
         }
     }
 
@@ -131,7 +137,11 @@ public class Main {
         }
         state.advance();
 
-        List<String> segments = state.segments;
+        List<String> segments = state.segments
+                .stream()
+                .map(string -> string.toSlice())
+                .toList();
+
         Optional<List<String>> maybeOutput = Optional.of(new ArrayList<String>());
         for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
@@ -654,7 +664,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;
