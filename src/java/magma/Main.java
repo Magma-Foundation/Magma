@@ -484,21 +484,13 @@ class Main {
         var stripped = input.strip();
         if (stripped.startsWith("new ")) {
             var slice = stripped.substring("new ".length()).strip();
-            if (slice.endsWith(")")) {
-                var withoutEnd = slice.substring(0, slice.length() - ")".length());
-                var argsStart = withoutEnd.indexOf("(");
-                if (argsStart >= 0) {
-                    var base = withoutEnd.substring(0, argsStart);
-                    var args = withoutEnd.substring(argsStart + "(".length());
-                    if (parseAndModifyType(base) instanceof Some<Type>(Type type)) {
-                        var newArgs = parseValues(args, value -> new Some<>(compileValue(value)))
-                                .map(Main::generateValues)
-                                .orElse("");
-
-                        return type.generate() + "(" + newArgs + ")";
-                    }
-                }
+            if (compileInvokable(slice, Main::compileConstructorCaller) instanceof Some(var value)) {
+                return value;
             }
+        }
+
+        if (compileInvokable(input, Main::compileValue) instanceof Some(var value)) {
+            return value;
         }
 
         var arrowIndex = input.indexOf("->");
@@ -520,6 +512,32 @@ class Main {
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static Option<String> compileInvokable(String slice, Function<String, String> beforeArgsCompiler) {
+        if (!slice.endsWith(")")) {
+            return new None<>();
+        }
+        var withoutEnd = slice.substring(0, slice.length() - ")".length());
+        var argsStart = withoutEnd.indexOf("(");
+        if (argsStart < 0) {
+            return new None<>();
+        }
+        var base = withoutEnd.substring(0, argsStart);
+        var args = withoutEnd.substring(argsStart + "(".length());
+        var newArgs = parseValues(args, value -> new Some<>(compileValue(value)))
+                .map(Main::generateValues)
+                .orElse("");
+
+        var generate = beforeArgsCompiler.apply(base);
+        return new Some<>(generate + "(" + newArgs + ")");
+    }
+
+    private static String compileConstructorCaller(String base) {
+        if (parseAndModifyType(base) instanceof Some<Type>(var type)) {
+            return type.generate();
+        }
+        return generatePlaceholder(base);
     }
 
     private static boolean isSymbol(String input) {
