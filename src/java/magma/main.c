@@ -18,22 +18,16 @@
 };
 /* private */struct Defined {
 };
-/*  */struct Main {
-};
-/* private enum Primitive implements Type */ /* { */ Bit(/* "int" */)/* ,
-        I8("char");
-
-        private final String value;
+/* private */struct Primitive implements Type {
+	/* Bit("int"), */ I8("char");
+	/* private final */ char* value;/* 
 
         Primitive(String value) {
             this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-    } */
+        } */
+};
+/*  */struct Main {
+};
 /* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
 /* T */ orElseGet(/* T */(*other)())/* ; */
 Option</* T */> or(Option</* T */>(*other)())/* ; */
@@ -49,6 +43,10 @@ int hasElements(/*  */)/* ; */
 /* C */ fold(/* C */ current, /* T */ element)/* ; */
 char* generate(/*  */)/* ; */
 char* generate(/*  */)/* ; */
+/* @Override
+        public */ char* generate(/*  */)/* {
+            return this.value;
+        } */
 /* public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter; */ /* public */ RangeHead(/* int */ length)/* {
@@ -237,7 +235,7 @@ char* generate(/*  */)/* ; */
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("");
-            
+
             return beforeTypeString + this.type.generate() + " " + this.name;
         }
     } */
@@ -382,6 +380,7 @@ char* generate(/*  */)/* ; */
 /* private */ char* compileStructuredSegment(char* input)/* {
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
+                .or(() -> this.compileStructured(input, "enum "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));

@@ -8,22 +8,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 class Main {
-    private enum Primitive implements Type {
-        Bit("int"),
-        I8("char");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-    }
-
     public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -64,6 +48,22 @@ class Main {
 
     private interface Defined {
         String generate();
+    }
+
+    private enum Primitive implements Type {
+        Bit("int"),
+        I8("char");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -440,6 +440,7 @@ class Main {
     private String compileStructuredSegment(String input) {
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
+                .or(() -> this.compileStructured(input, "enum "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
