@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static class State {
@@ -86,8 +89,27 @@ public class Main {
 
     private static List<String> divide(String input, State state) {
         var current = state;
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
+
+        var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+
+            if (c == '\'') {
+                state.append(c);
+
+                var maybeSlash = queue.pop();
+                state.append(maybeSlash);
+                if (maybeSlash == '\\') {
+                    state.append(queue.pop());
+                }
+
+                state.append(queue.pop());
+                continue;
+            }
+
             current = foldStatementChar(current, c);
         }
 

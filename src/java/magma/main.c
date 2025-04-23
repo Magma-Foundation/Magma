@@ -2,62 +2,13 @@
 /* import java.nio.file.Files; */
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
+/* import java.util.LinkedList; */
 /* import java.util.List; */
 /* import java.util.Optional; */
 /* import java.util.function.Function; */
-/* private static String compileRootSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ")) {
-            return "";
-        }
-
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
-    } */
-/* private static Optional<String> compileClass(String stripped) {
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex < 0) {
-            return Optional.empty();
-        }
-
-        var afterKeyword = stripped.substring(classIndex + "class ".length());
-        var contentStart = afterKeyword.indexOf("{");
-        if (contentStart < 0) {
-            return Optional.empty();
-        }
-
-        var name = afterKeyword.substring(0, contentStart).strip();
-        if (!isSymbol(name)) {
-            return Optional.empty();
-        }
-
-        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return Optional.empty();
-        }
-
-        var content = withEnd.substring(0, withEnd.length() - "}".length());
-        var generated = "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
-        structs.add(generated);
-        return Optional.of("");
-    } */
-/* private static boolean isSymbol(String input) {
-        var stripped = input.strip();
-        for (var i = 0; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    } */
-/* private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
-    } */
-/* private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */\n";
-    } */
-/* } */
+/* import java.util.stream.Collectors; */
+/* import java.util.stream.IntStream; */
+/*  */
 struct State {/* private final List<String> segments; */
 /* 
         private StringBuilder buffer; */
@@ -152,8 +103,27 @@ struct Main {/*
 
     private static List<String> divide(String input, State state) {
         var current = state;
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
+
+        var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+
+            if (c == '\'') {
+                state.append(c);
+
+                var maybeSlash = queue.pop();
+                state.append(maybeSlash);
+                if (maybeSlash == '\\') {
+                    state.append(queue.pop());
+                }
+
+                state.append(queue.pop());
+                continue;
+            }
+
             current = foldStatementChar(current, c);
         }
 
@@ -166,21 +136,80 @@ struct Main {/*
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} */
-/* ' && appended.isShallow()) {
+        if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
-        } */
-/* 
+        }
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '} */
-/* ') {
+        if (c == '}') {
             return appended.exit();
-        } */
+        }
+        return appended;
+    } */
 /* 
-        return appended; */
+
+    private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    } */
 /* 
-     */
+
+    private static Optional<String> compileClass(String stripped) {
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex < 0) {
+            return Optional.empty();
+        }
+
+        var afterKeyword = stripped.substring(classIndex + "class ".length());
+        var contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+
+        var name = afterKeyword.substring(0, contentStart).strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+
+        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        var content = withEnd.substring(0, withEnd.length() - "}".length());
+        var generated = "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+        structs.add(generated);
+        return Optional.of("");
+    } */
+/* 
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip();
+        for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    } */
+/* 
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+    } */
+/* 
+
+    private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */\n";
+    } */
+/* 
+ */
 
 };
