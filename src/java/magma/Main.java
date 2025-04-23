@@ -43,6 +43,21 @@ public class Main {
         if (stripped.startsWith("package ")) {
             return "";
         }
+
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var afterKeyword = stripped.substring(classIndex + "class ".length());
+            var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                var name = afterKeyword.substring(0, contentStart).strip();
+                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                return "struct " + name + " {" + generatePlaceholder(withEnd);
+            }
+        }
+        return generatePlaceholder(stripped);
+    }
+
+    private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */\n";
     }
 }
