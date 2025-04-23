@@ -3,5 +3,9 @@ void main() throws IOException {
     var input = Files.readString(source);
 
     var target = source.resolveSibling("main.c");
-    Files.writeString(target, input);
+    Files.writeString(target, this.compileRoot(input));
+}
+
+private String compileRoot(String input) {
+    return "/* " + input + " */";
 }
