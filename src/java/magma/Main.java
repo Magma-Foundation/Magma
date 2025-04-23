@@ -241,7 +241,7 @@ class Main {
         if (classIndex < 0) {
             return new None<>();
         }
-        var left = input.substring(0, classIndex);
+        var left = input.substring(0, classIndex).strip();
         var right = input.substring(classIndex + infix.length());
         var contentStart = right.indexOf("{");
         if (contentStart < 0) {
@@ -253,18 +253,26 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::compileClassSegment);
+        var outputContent = this.compileAll(inputContent, this::compileStructuredSegment);
 
         var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
 
-    private String compileClassSegment(String input) {
-        return this.compileStructured(input, "interface ")
+    private String compileStructuredSegment(String input) {
+        return this.compileWhitespace(input)
+                .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> this.generatePlaceholder(input));
+    }
+
+    private Option<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return new Some<>("");
+        }
+        return new None<>();
     }
 
     private Option<String> compileMethod(String input) {

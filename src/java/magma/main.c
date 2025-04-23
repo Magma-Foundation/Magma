@@ -6,32 +6,20 @@
 /* import java.util.function.Function; */
 /* import java.util.function.Supplier; */
 /*  */
-/* sealed  */struct Option<T> permits Some, None {/* 
-     */
+/* sealed */struct Option<T> permits Some, None {
 };
-/* 
-
-     */struct Head<T> {/* 
-     */
+/*  */struct Head<T> {
 };
-/* 
-
-    public  */struct List<T> {/* 
-     */
+/* public */struct List<T> {
 };
-/* 
-
-    public  */struct Collector<T, C> {/* 
-     */
+/* public */struct Collector<T, C> {
 };
-/* 
-
-    private Option<String> compileStructured(String input, String infix) {
+/* private Option<String> compileStructured(String input, String infix) {
         var classIndex = input.indexOf(infix);
         if (classIndex < 0) {
             return new None<>();
         }
-        var left = input.substring(0, classIndex);
+        var left = input.substring(0, classIndex).strip();
         var right = input.substring(classIndex + infix.length());
         var contentStart = right.indexOf("{");
         if (contentStart < 0) {
@@ -43,21 +31,24 @@
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::compileClassSegment);
+        var outputContent = this.compileAll(inputContent, this::compileStructuredSegment);
 
         var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
 
-    private String compileClassSegment(String input) {
-        return this.compileStructured(input, " */struct ")
+    private String compileStructuredSegment(String input) {
+        return this.compileWhitespace(input)
+                .or(() -> this.compileStructured(input, " */struct "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> this.generatePlaceholder(input));
     }
 
-    private Option<String> compileMethod(String input) {/* 
+    private Option<String> compileWhitespace(String input) {/* if (input.isBlank()) {
+            return new Some<>("");
+        } *//* 
         if (paramStart >= 0) {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
@@ -91,10 +82,7 @@
         }
      */
 };
-/* 
-
- */struct Main {/* 
- */
+/*  */struct Main {
 };
 
 	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */)/* ; */
@@ -291,7 +279,11 @@
 	/* private */ /* Option<String> */ compileClass(/* String input */)/* {
         return this.compileStructured(input, "class ");
     } */
-	/* var paramStart */ /* = */ input.indexOf(/* "(" */)/* ; */
+	/* return */ /* new */ None<>(/*  */)/* ; */
+	/* }
+
+    private */ /* Option<String> */ compileMethod(/* String input */)/* {
+        var paramStart = input.indexOf("("); */
 	/* return */ /* new */ None<>(/*  */)/* ; */
 	/* }
 
