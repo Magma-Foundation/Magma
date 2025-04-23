@@ -29,7 +29,7 @@ class Main {
 
         Iterator<T> iter();
 
-        boolean isEmpty();
+        boolean hasElements();
 
         T removeFirst();
     }
@@ -209,8 +209,80 @@ class Main {
         }
     }
 
+    private record Generic(String base, List<String> args) {
+        private String generate() {
+            var outputArgs = Main.generateValues(this.args());
+            return this.base() + "<" + outputArgs + ">";
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
+
+    private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
+        return parsed.iter()
+                .fold(new StringBuilder(), merger)
+                .toString();
+    }
+
+    private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
+        return Main.divideAll(input, folder)
+                .iter()
+                .map(compiler)
+                .collect(new ListCollector<>());
+    }
+
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
+        var current = new State();
+        var queue = new Iterator<>(new RangeHead(input.length()))
+                .map(input::charAt)
+                .collect(new ListCollector<>());
+
+        while (queue.hasElements()) {
+            var c = queue.removeFirst();
+
+            if (c == '\'') {
+                current.append(c);
+
+                var c1 = queue.removeFirst();
+                current.append(c1);
+                if (c1 == '\\') {
+                    current.append(queue.removeFirst());
+                }
+                current.append(queue.removeFirst());
+                continue;
+            }
+            if (c == '"') {
+                current.append(c);
+                while (queue.hasElements()) {
+                    var next = queue.removeFirst();
+                    current.append(next);
+
+                    if (next == '\\') {
+                        current.append(queue.removeFirst());
+                    }
+                    if (next == '"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+            current = folder.apply(current, c);
+        }
+        return current.advance().segments;
+    }
+
+    private static String generateValues(List<String> parserd) {
+        return Main.generateAll(Main::mergeValues, parserd);
+    }
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    }
 
     void main() {
         try {
@@ -233,74 +305,11 @@ class Main {
     }
 
     private String compileStatements(String input, Function<String, String> segment) {
-        return this.compileAll(input, this::foldStatementChar, segment, this::mergeStatements);
-    }
-
-    private String compileAll(
-            String input,
-            BiFunction<State, Character, State> folder,
-            Function<String, String> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
-        return this.generateAll(merger, this.parseAll(input, folder, compiler));
-    }
-
-    private String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
-        return parsed.iter()
-                .fold(new StringBuilder(), merger)
-                .toString();
-    }
-
-    private List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
-        return this.divideAll(input, folder)
-                .iter()
-                .map(compiler)
-                .collect(new ListCollector<>());
+        return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
     }
 
     private StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
         return stringBuilder.append(str);
-    }
-
-    private List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
-        var current = new State();
-        var queue = new Iterator<>(new RangeHead(input.length()))
-                .map(input::charAt)
-                .collect(new ListCollector<>());
-
-        while (!queue.isEmpty()) {
-            var c = queue.removeFirst();
-
-            if (c == '\'') {
-                current.append(c);
-
-                var c1 = queue.removeFirst();
-                current.append(c1);
-                if (c1 == '\\') {
-                    current.append(queue.removeFirst());
-                }
-                current.append(queue.removeFirst());
-                continue;
-            }
-            if (c == '"') {
-                current.append(c);
-                while (!queue.isEmpty()) {
-                    var next = queue.removeFirst();
-                    current.append(next);
-
-                    if (next == '\\') {
-                        current.append(queue.removeFirst());
-                    }
-                    if (next == '"') {
-                        break;
-                    }
-                }
-
-                continue;
-            }
-            current = folder.apply(current, c);
-        }
-        return current.advance().segments;
     }
 
     private String compileRootSegment(String input) {
@@ -376,14 +385,11 @@ class Main {
     }
 
     private String compileValues(String input, Function<String, String> compiler) {
-        return this.compileAll(input, this::foldValueChar, compiler, this::mergeValues);
+        return Main.generateValues(this.parseValues(input, compiler));
     }
 
-    private StringBuilder mergeValues(StringBuilder cache, String element) {
-        if (cache.isEmpty()) {
-            return cache.append(element);
-        }
-        return cache.append(", ").append(element);
+    private List<String> parseValues(String input, Function<String, String> compiler) {
+        return Main.parseAll(input, this::foldValueChar, compiler);
     }
 
     private State foldValueChar(State state, char c) {
@@ -460,8 +466,8 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var outputArgs = this.compileValues(inputArgs, this::compileType);
-                return base + "<" + outputArgs + ">";
+                var args = this.parseValues(inputArgs, this::compileType);
+                return new Generic(base, args).generate();
             }
         }
 

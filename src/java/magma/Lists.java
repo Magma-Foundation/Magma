@@ -20,8 +20,8 @@ public class Lists {
         }
 
         @Override
-        public boolean isEmpty() {
-            return this.list.isEmpty();
+        public boolean hasElements() {
+            return !this.list.isEmpty();
         }
 
         @Override
