@@ -25,6 +25,9 @@ public class Main {
         String toSlice();
     }
 
+    sealed interface Result<T, X> permits Ok, Err {
+    }
+
     private static class State {
         private final List<String_> segments;
         private String_ buffer;
@@ -72,6 +75,11 @@ public class Main {
     record ConstructorHeader(String value) implements Node {
     }
 
+    record Ok<T, X>(T value) implements Result<T, X> {
+    }
+
+    record Err<T, X>(X error) implements Result<T, X> {
+    }
     public static final List<String> structs = new ArrayList<>();
     private static final List<String> methods = new ArrayList<>();
 
@@ -516,7 +524,7 @@ public class Main {
             return Optional.of("int");
         }
 
-        if(stripped.endsWith("[]")) {
+        if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(result -> result + "*");
         }
 

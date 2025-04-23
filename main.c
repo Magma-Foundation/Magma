@@ -30,7 +30,16 @@ struct Definition {
 struct ConstructorHeader {
 	char* value;
 };
-struct Main {
+struct Main {/* 
+
+    sealed interface Result<T, X> permits Ok, Err {
+    } *//* 
+
+    record Ok<T, X>(T value) implements Result<T, X> {
+    } *//* 
+
+    record Err<T, X>(X error) implements Result<T, X> {
+    } */
 	List<char*> structs = new_ArrayList<>();
 	List<char*> methods = new_ArrayList<>();
 };
@@ -457,7 +466,7 @@ Optional<char*> compileType(char* type){
 	/* if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
         } */
-	/* if(stripped.endsWith("[]")) {
+	/* if (stripped.endsWith("[]")) {
             return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(result -> result + "*");
         } */
 	/* if (stripped.endsWith(">")) {
