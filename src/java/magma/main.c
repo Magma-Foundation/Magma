@@ -98,12 +98,12 @@ char* generate();
 }
 /* @Override
         public */ Option<int> next(){
-	/* if (this.counter < this.length)  */{
+	if (this.counter < this.length){
 		/* var value = this.counter; */
 		/* this.counter++; */
 		return /* new Some<>(value) */;
 	}
-	/* else  */{
+	else {
 		return /* new None<>() */;
 	}
 }
@@ -112,10 +112,10 @@ char* generate();
 }
 /* public <R> */ /* R */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
 	/* var current = initial; */
-	/* while (true)  */{
-		/* switch (this.head.next())  */{
+	/* while (true) */{
+		/* switch (this.head.next()) */{
 			/* case Some<T>(var value) -> current = folder.apply(current, value); */
-			/* case None<T> _ ->  */{
+			/* case None<T> _ -> */{
 				return current;
 			}
 		}
@@ -209,7 +209,7 @@ char* generate();
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> maybeCurrent, char* element){
-	/* return new Some<>(switch (maybeCurrent)  */{
+	/* return new Some<>(switch (maybeCurrent) */{
 		/* case None<String> _ -> element; */
 		/* case Some<String>(var current) -> current + this.delimiter + element; */
 	}
@@ -274,27 +274,27 @@ char* generate();
 	/* var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
                 .collect(new ListCollector<>()); */
-	/* while (queue.hasElements())  */{
+	/* while (queue.hasElements()) */{
 		/* var c = queue.removeFirst(); */
-		/* if (c == '\'')  */{
+		if (/* c == '\'' */){
 			/* current.append(c); */
 			/* var c1 = queue.removeFirst(); */
 			/* current.append(c1); */
-			/* if (c1 == '\\')  */{
+			if (/* c1 == '\\' */){
 				/* current.append(queue.removeFirst()); */
 			}
 			/* current.append(queue.removeFirst()); */
 			/* continue; */
 		}
-		/* if (c == '"')  */{
+		if (/* c == '"' */){
 			/* current.append(c); */
-			/* while (queue.hasElements())  */{
+			/* while (queue.hasElements()) */{
 				/* var next = queue.removeFirst(); */
 				/* current.append(next); */
-				/* if (next == '\\')  */{
+				if (/* next == '\\' */){
 					/* current.append(queue.removeFirst()); */
 				}
-				/* if (next == '"')  */{
+				if (/* next == '"' */){
 					/* break; */
 				}
 			}
@@ -308,7 +308,7 @@ char* generate();
 	return Main.generateAll(Main::mergeValues, parserd);
 }
 /* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, char* element){
-	/* if (cache.isEmpty())  */{
+	if (cache.isEmpty()){
 		return cache.append(element);
 	}
 	return cache.append(", ").append(element);
@@ -328,21 +328,35 @@ char* generate();
 }
 /* private static */ Option<char*> compileBlock(char* input, int depth){
 	/* var stripped = input.strip(); */
-	/* if (stripped.endsWith("}"))  */{
+	if (stripped.endsWith("}")){
 		/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
 		/* var contentStart = withoutEnd.indexOf("{"); */
-		/* if (contentStart >= 0)  */{
+		if (/* contentStart >= 0 */){
 			/* var beforeContent = withoutEnd.substring(0, contentStart); */
 			/* var content = withoutEnd.substring(contentStart + "{".length()); */
 			/* var indent = createIndent(depth); */
-			return /* new Some<>(indent + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}") */;
+			return /* new Some<>(indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}") */;
 		}
 	}
 	return /* new None<>() */;
 }
+/* private static */ char* compileBeforeBlock(char* input){
+	/* var stripped = input.strip(); */
+	if (stripped.startsWith("if")){
+		/* var withoutKeyword = stripped.substring("if".length()).strip(); */
+		if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")){
+			/* var condition = withoutKeyword.substring(1, withoutKeyword.length() - 1); */
+			return /* "if (" + compileValue(condition) + ")" */;
+		}
+	}
+	if (stripped.equals("else")){
+		return /* "else " */;
+	}
+	return /* generatePlaceholder(stripped) */;
+}
 /* private static */ Option<char*> compileStatementValue(char* input){
 	/* var stripped = input.strip(); */
-	/* if (stripped.startsWith("return "))  */{
+	if (stripped.startsWith("return ")){
 		/* var value = stripped.substring("return ".length()); */
 		return /* new Some<>("return " + compileValue(value)) */;
 	}
@@ -351,12 +365,12 @@ char* generate();
 /* private static */ char* compileValue(char* input){
 	/* var stripped = input.strip(); */
 	/* var separator = stripped.lastIndexOf("."); */
-	/* if (separator >= 0)  */{
+	if (/* separator >= 0 */){
 		/* var parent = stripped.substring(0, separator); */
 		/* var property = stripped.substring(separator + ".".length()); */
 		return /* compileValue(parent) + " */." + property;
 	}
-	/* if (isSymbol(stripped))  */{
+	if (/* isSymbol(stripped) */){
 		return stripped;
 	}
 	return /* generatePlaceholder(input) */;
@@ -364,9 +378,9 @@ char* generate();
 /* private static */ int isSymbol(char* input){
 	/* for (var i = 0; */
 	/* i < input.length(); */
-	/* i++)  */{
+	/* i++) */{
 		/* var c = input.charAt(i); */
-		/* if (Character.isLetter(c))  */{
+		if (Character.isLetter(c)){
 			/* continue; */
 		}
 		return false;
@@ -374,14 +388,14 @@ char* generate();
 	return true;
 }
 /* private static */ Option<char*> compileWhitespace(char* input){
-	/* if (input.isBlank())  */{
+	if (input.isBlank()){
 		return /* new Some<>("") */;
 	}
 	return /* new None<>() */;
 }
 /* private static */ Option</* Defined */> parseAndModifyDefinition(char* input){
-	/* return Main.parseDefinition(input).map(definition ->  */{
-		/* if (definition.type instanceof Functional(var args, var base))  */{
+	/* return Main.parseDefinition(input).map(definition -> */{
+		if (definition.type instanceof Functional(var args, var base)){
 			return /* new FunctionalDefinition(definition */.beforeType, base, definition.name, args);
 		}
 		return definition;
@@ -390,7 +404,7 @@ char* generate();
 }
 /* private static */ Option<char*> compileStatement(char* input, Option<char*>(*compiler)(char*), int depth){
 	/* var stripped = input.strip(); */
-	/* if (!stripped.endsWith(";"))  */{
+	if (/* !stripped */.endsWith(";")){
 		return /* new None<>() */;
 	}
 	/* var withoutEnd = stripped.substring(0, stripped.length() - ";".length()); */
@@ -403,29 +417,29 @@ char* generate();
 	return Main.parseAll(input, Main::foldValueChar, compiler);
 }
 /* private static */ /* State */ foldValueChar(/* State */ state, /* char */ c){
-	/* if (c == ',' && state.isLevel())  */{
+	if (/* c == ',' && state */.isLevel()){
 		return state.advance();
 	}
 	/* var appended = state.append(c); */
-	/* if (c == '<')  */{
+	if (/* c == '<' */){
 		return appended.enter();
 	}
-	/* if (c == '>')  */{
+	if (/* c == '>' */){
 		return appended.exit();
 	}
 	return appended;
 }
 /* private static */ Option</* Definition */> parseDefinition(char* input){
 	/* var nameSeparator = input.lastIndexOf(" "); */
-	/* if (nameSeparator < 0)  */{
+	if (/* nameSeparator < 0 */){
 		return /* new None<>() */;
 	}
 	/* var beforeName = input.substring(0, nameSeparator).strip(); */
 	/* var name = input.substring(nameSeparator + " ".length()).strip(); */
-	/* return switch (Main.findTypeSeparator(beforeName))  */{
+	/* return switch (Main.findTypeSeparator(beforeName)) */{
 		/* case None<Integer> _ ->
                     Main.parseAndModifyType(beforeName).map(type -> new Definition(new None<>(), type, name)); */
-		/* case Some<Integer>(var typeSeparator) ->  */{
+		/* case Some<Integer>(var typeSeparator) -> */{
 			/* var beforeType = beforeName.substring(0, typeSeparator).strip(); */
 			/* var inputType = beforeName.substring(typeSeparator + " ".length()).strip(); */
 			/* yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name)); */
@@ -437,29 +451,29 @@ char* generate();
 	/* var depth = 0; */
 	/* for (var index = input.length() - 1; */
 	/* index >= 0; */
-	/* index--)  */{
+	/* index--) */{
 		/* var c = input.charAt(index); */
-		/* if (c == ' ' && depth == 0)  */{
+		if (/* c == ' ' && depth == 0 */){
 			return /* new Some<>(index) */;
 		}
-		/* if (c == '>')  */{
+		if (/* c == '>' */){
 			/* depth++; */
 		}
-		/* if (c == '<')  */{
+		if (/* c == '<' */){
 			/* depth--; */
 		}
 	}
 	return /* new None<>() */;
 }
 /* private static */ Option</* Type */> parseAndModifyType(char* input){
-	/* return Main.parseType(input).map(parsed ->  */{
-		/* if (parsed instanceof Generic(var base, var arguments))  */{
-			/* if (base.equals("Function"))  */{
+	/* return Main.parseType(input).map(parsed -> */{
+		if (/* parsed instanceof Generic(var base, var arguments) */){
+			if (base.equals("Function")){
 				/* var argType = arguments.get(0); */
 				/* var returnType = arguments.get(1); */
 				return /* new Functional(Lists */.of(argType), returnType);
 			}
-			/* if (base.equals("Supplier"))  */{
+			if (base.equals("Supplier")){
 				/* var returns = arguments.get(0); */
 				return /* new Functional(Lists */.emptyList(), returns);
 			}
@@ -470,22 +484,22 @@ char* generate();
 }
 /* private static */ Option</* Type */> parseType(char* input){
 	/* var stripped = input.strip(); */
-	/* if (stripped.equals("public"))  */{
+	if (stripped.equals("public")){
 		return /* new None<>() */;
 	}
-	/* if (stripped.equals("boolean"))  */{
+	if (stripped.equals("boolean")){
 		return /* new Some<>(Primitive */.Bit);
 	}
-	/* if (stripped.equals("String"))  */{
+	if (stripped.equals("String")){
 		return /* new Some<>(new Ref(Primitive */.I8));
 	}
-	/* if (stripped.equals("int") || stripped.equals("Integer"))  */{
+	if (stripped.equals("int") || stripped.equals("Integer")){
 		return /* new Some<>(Primitive */.I32);
 	}
-	/* if (stripped.endsWith(">"))  */{
+	if (stripped.endsWith(">")){
 		/* var slice = stripped.substring(0, stripped.length() - ">".length()); */
 		/* var argsStart = slice.indexOf("<"); */
-		/* if (argsStart >= 0)  */{
+		if (/* argsStart >= 0 */){
 			/* var base = slice.substring(0, argsStart).strip(); */
 			/* var inputArgs = slice.substring(argsStart + "<".length()); */
 			return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
@@ -510,31 +524,31 @@ char* generate();
 }
 /* private static */ /* State */ foldStatementChar(/* State */ state, /* char */ c){
 	/* var appended = state.append(c); */
-	/* if (c == ';' && appended.isLevel())  */{
+	if (/* c == ';' && appended */.isLevel()){
 		return appended.advance();
 	}
-	/* if (c == '}' && appended.isShallow())  */{
+	if (/* c == '}' && appended */.isShallow()){
 		return appended.advance().exit();
 	}
 	/* if (c == ' */{
 		/* ') {
             return appended.enter(); */
 	}
-	/* if (c == '}')  */{
+	if (/* c == '}' */){
 		return appended.exit();
 	}
-	/* else  */{
+	else {
 		return appended;
 	}
 }
 /* void */ main(){
-	/* try  */{
+	/* try */{
 		/* var source = Paths.get(".", "src", "java", "magma", "Main.java"); */
 		/* var input = Files.readString(source); */
 		/* var target = source.resolveSibling("main.c"); */
 		/* Files.writeString(target, this.compileRoot(input)); */
 	}
-	/* catch (IOException e)  */{
+	/* catch (IOException e) */{
 		/* //noinspection CallToPrintStackTrace
             e.printStackTrace(); */
 	}
@@ -553,18 +567,18 @@ char* generate();
 }
 /* private */ Option<char*> compileStructured(char* input, char* infix){
 	/* var classIndex = input.indexOf(infix); */
-	/* if (classIndex < 0)  */{
+	if (/* classIndex < 0 */){
 		return /* new None<>() */;
 	}
 	/* var left = input.substring(0, classIndex).strip(); */
 	/* var right = input.substring(classIndex + infix.length()); */
 	/* var contentStart = right.indexOf("{"); */
-	/* if (contentStart < 0)  */{
+	if (/* contentStart < 0 */){
 		return /* new None<>() */;
 	}
 	/* var name = right.substring(0, contentStart).strip(); */
 	/* var withEnd = right.substring(contentStart + "{".length()).strip(); */
-	/* if (!withEnd.endsWith("}"))  */{
+	if (/* !withEnd */.endsWith("}")){
 		return /* new None<>() */;
 	}
 	/* var inputContent = withEnd.substring(0, withEnd.length() - 1); */
@@ -579,12 +593,12 @@ char* generate();
 }
 /* private */ Option<char*> compileMethod(char* input){
 	/* var paramStart = input.indexOf("("); */
-	/* if (paramStart >= 0)  */{
+	if (/* paramStart >= 0 */){
 		/* var inputDefinition = input.substring(0, paramStart).strip(); */
 		/* var withParams = input.substring(paramStart + "(".length()); */
-		/* return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition ->  */{
+		/* return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> */{
 			/* var paramEnd = withParams.indexOf(")"); */
-			/* if (paramEnd >= 0)  */{
+			if (/* paramEnd >= 0 */){
 				/* var paramString = withParams.substring(0, paramEnd).strip(); */
 				/* var withBraces = withParams.substring(paramEnd + ")".length()).strip(); */
 				/* var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
@@ -596,10 +610,10 @@ char* generate();
                         var body = withBraces.substring(1, withBraces.length() - 1);
                         newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}"; */
 				}
-				/* else if (withBraces.equals(";"))  */{
+				/* else if (withBraces.equals(";")) */{
 					/* newBody = ";"; */
 				}
-				/* else  */{
+				else {
 					return /* new None<>() */;
 				}
 				/* var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n"; */

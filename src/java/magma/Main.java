@@ -425,11 +425,28 @@ class Main {
                 var content = withoutEnd.substring(contentStart + "{".length());
 
                 var indent = createIndent(depth);
-                return new Some<>(indent + generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}");
+                return new Some<>(indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content, depth) + indent + "}");
             }
         }
 
         return new None<>();
+    }
+
+    private static String compileBeforeBlock(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutKeyword = stripped.substring("if".length()).strip();
+            if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")) {
+                var condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+                return "if (" + compileValue(condition) + ")";
+            }
+        }
+
+        if (stripped.equals("else")) {
+            return "else ";
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static Option<String> compileStatementValue(String input) {
