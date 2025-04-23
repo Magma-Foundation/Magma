@@ -55,7 +55,8 @@ class Main {
     private enum Primitive implements Type {
         Bit("int"),
         I8("char"),
-        I32("int");
+        I32("int"),
+        Var("auto");
 
         private final String value;
 
@@ -619,6 +620,10 @@ class Main {
 
         if (stripped.equals("int") || stripped.equals("Integer")) {
             return new Some<>(Primitive.I32);
+        }
+
+        if (stripped.equals("var")) {
+            return new Some<>(Primitive.Var);
         }
 
         if (stripped.endsWith(">")) {
