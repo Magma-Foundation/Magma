@@ -202,7 +202,7 @@ public class Main {
             if (nameSeparator >= 0) {
                 var beforeName = definition.substring(0, nameSeparator).strip();
                 var name = definition.substring(nameSeparator + " ".length());
-                var typeSeparator = beforeName.indexOf(" ".toString());
+                var typeSeparator = beforeName.lastIndexOf(" ");
                 if (typeSeparator >= 0) {
                     var beforeType = beforeName.substring(0, typeSeparator).strip();
                     var type = beforeName.substring(typeSeparator + " ".length());
