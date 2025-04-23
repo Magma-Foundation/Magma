@@ -8,14 +8,6 @@
 /* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /*  */
-/* public sealed */struct Option {
-};
-/*  */struct Head {
-};
-/* public */struct List {
-};
-/* public */struct Collector {
-};
 /* private */struct Type extends BeforeArgs {
 };
 /* private */struct Defined {
@@ -33,26 +25,6 @@
             this.value = value;
         } */
 };
-/* public */struct Tuple {
-};
-/* public static */struct RangeHead implements Head {
-	/* private final */ int length;
-	/* private */ int counter;/* 
-
-        public RangeHead(int length) {
-            this.length = length;
-        } */
-};
-/* private static */struct SingleHead {
-	/* private final */ /* T */ value;
-	/* private boolean retrieved */ /* = */ false;/* 
-
-        public SingleHead(T value) {
-            this.value = value;
-        } */
-};
-/* public */struct Iterator {
-};
 /* private static */struct State {
 	/* private final */ List<char*> segments;
 	/* private */ /* StringBuilder */ buffer;
@@ -62,13 +34,7 @@
             this(Lists.emptyList(), new StringBuilder(), 0);
         } */
 };
-/* private */struct Some {
-};
-/* private */struct None {
-};
 /* private */struct Joiner {
-};
-/* private static */struct ListCollector {
 };
 /* private */struct Generic {
 };
@@ -82,8 +48,6 @@
 };
 /* private */struct Ref {
 };
-/* private */struct OptionCollector {
-};
 /* private */struct Struct {
 };
 /* private */struct Whitespace {
@@ -96,35 +60,17 @@
 };
 /* private */struct Symbol {
 };
-/* private static */struct EmptyHead {
-};
 /*  */struct Main {
 };
-// Option</* R */>
-// Option</* T */>
-// Tuple</* T */, /*  R */>
-// Option<Tuple</* T */, /*  R */>>
-// List</* T */>
-// Iterator</* T */>
-// Option<int>
-// Some</* value */>
-// None</*  */>
-// Some</* this */>
-// Iterator</* R */>
-// Iterator</* /* /*  */ */ */>
-// Collector</* T */, /*  C */>
-// Predicate</* T */>
-// Iterator</* /* predicate.test */ */>
-// Iterator</* new EmptyHead<>( */>
 // List<char*>
-// Some</* /* mapper.apply */ */>
 // Option<char*>
+// None</*  */>
 // List</* Type */>
-// Option</* C */>
-// Some</* /* this.collector.createInitial */ */>
 // Option</* Type */>
 // Some</* /* this.members.get */ */>
+// List</* T */>
 // Option<List</* T */>>
+// Option</* T */>
 // Iterator</* /* RangeHead */ */>
 // Some</* indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content */, /*  depth) + indent + "}" */>
 // Some</* prefix + " (" + compileValue(condition) + ")" */>
@@ -136,6 +82,7 @@
 // Some</* /* Whitespace */ */>
 // Option</* Defined */>
 // Option</* Definition */>
+// Option<int>
 // Some</* index */>
 // Some</* Primitive */>
 // Some</* /* Ref */ */>
@@ -143,21 +90,6 @@
 // Option<List<char*>>
 // Some</* "" */>
 // Some</* this.compileParam(s))) */>
-/* <R> */ Option</* R */> map_Option(/*  R */ (*mapper)(/* T */));
-/* T */ orElseGet_Option(/* T */ (*other)());
-Option</* T */> or_Option(Option</* T */> (*other)());
-/* T */ orElse_Option(/* T */ other);
-/* <R> */ Option</* R */> flatMap_Option(Option</* R */> (*mapper)(/* T */));
-/* <R> */ Option<Tuple</* T */, /*  R */>> and_Option(Option</* R */> (*other)());
-Option</* T */> next_Head();
-List</* T */> add_List(/* T */ element);
-Iterator</* T */> iter_List();
-int hasElements_List();
-/* T */ removeFirst_List();
-/* T */ get_List(int index);
-int contains_List(/* T */ element);
-/* C */ createInitial_Collector();
-/* C */ fold_Collector(/* C */ current, /* T */ element);
 char* generate_Type extends BeforeArgs();
 char* generate_Defined();
 /* Defined */ mapName_Defined(char* (*mapper)(char*));
@@ -167,54 +99,6 @@ char* generate_Value();
 /* @Override
         public */ char* generate_Primitive implements Type(){
 	return this.value;
-}
-/* @Override
-        public */ Option<int> next_RangeHead implements Head(){
-	if (this.counter < this.length){
-		auto value = this.counter;
-		this.counter++;
-		return Generic[base=Some, arguments=JavaList[list=[Content[input=value]]]](value);
-	}
-	else {
-		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-	}
-}
-/* @Override
-        public */ Option</* T */> next_SingleHead(){
-	if (this.retrieved){
-		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-	}
-	/* this.retrieved = true; */
-	return Generic[base=Some, arguments=JavaList[list=[Content[input=this]]]](this.value);
-}
-/* public <R> */ Iterator</* R */> map_Iterator(/*  R */ (*mapper)(/* T */)){
-	return Generic[base=Iterator, arguments=JavaList[list=[Content[input=/* /*  */ */]]]](Content[input=/*  */](/* ) */ -> Content[input=this.head.next](/*  */).map(mapper));
-}
-/* public <R> */ /* R */ fold_Iterator(/* R */ initial, /*  R */ (*folder)(/* R */, /*  T */)){
-	auto current = initial;
-	while (true){
-		/* switch (this.head.next()) */{
-			/* case Some<T>(var value) -> */ current = Content[input=folder.apply](current, value);
-			/* case None<T> _ -> */{
-				return current;
-			}
-		}
-	}
-}
-/* public <C> */ /* C */ collect_Iterator(Collector</* T */, /*  C */> collector){
-	return Content[input=this.fold](Content[input=collector.createInitial](/*  */), /*  collector::fold */);
-}
-/* public */ Iterator</* T */> filter_Iterator(Predicate</* T */> predicate){
-	/* return this.flatMap(value -> */{
-		return Generic[base=Iterator, arguments=JavaList[list=[Content[input=/* predicate.test */]]]](Content[input=predicate.test](/* value) ? new SingleHead<>(value) : new EmptyHead<>( */));
-	}
-	/* ) */;
-}
-/* private <R> */ Iterator</* R */> flatMap_Iterator(Iterator</* R */> (*mapper)(/* T */)){
-	return Content[input=this.map](Content[input=/* mapper) */.fold](Generic[base=Iterator, arguments=JavaList[list=[Content[input=new EmptyHead<>(]]]](/* new EmptyHead<>( */)), /*  Iterator::concat */);
-}
-/* private */ Iterator</* T */> concat_Iterator(Iterator</* T */> other){
-	return Generic[base=Iterator, arguments=JavaList[list=[Content[input=/* /*  */ */]]]](Content[input=/*  */](/* ) */ -> Content[input=this.head.next](/*  */).or(other.head::next));
 }
 /* private */ State_State(List<char*> segments, /* StringBuilder */ buffer, int depth){
 	/* this.segments = segments; */
@@ -244,54 +128,6 @@ char* generate_Value();
 /* public */ int isShallow_State(){
 	return this.depth == 1;
 }
-/* @Override
-        public <R> */ Option</* R */> map_Some(/*  R */ (*mapper)(/* T */)){
-	return Generic[base=Some, arguments=JavaList[list=[Content[input=/* mapper.apply */]]]](Content[input=mapper.apply](this.value));
-}
-/* @Override
-        public */ /* T */ orElseGet_Some(/* T */ (*other)()){
-	return this.value;
-}
-/* @Override
-        public */ Option</* T */> or_Some(Option</* T */> (*other)()){
-	return this;
-}
-/* @Override
-        public */ /* T */ orElse_Some(/* T */ other){
-	return this.value;
-}
-/* @Override
-        public <R> */ Option</* R */> flatMap_Some(Option</* R */> (*mapper)(/* T */)){
-	return Content[input=mapper.apply](this.value);
-}
-/* @Override
-        public <R> */ Option<Tuple</* T */, /*  R */>> and_Some(Option</* R */> (*other)()){
-	return Content[input=other.get](Content[input=/* ) */.map](/* otherValue */ -> /* new Tuple<>(this */.value, otherValue));
-}
-/* @Override
-        public <R> */ Option</* R */> map_None(/*  R */ (*mapper)(/* T */)){
-	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-}
-/* @Override
-        public */ /* T */ orElseGet_None(/* T */ (*other)()){
-	return Content[input=other.get](/*  */);
-}
-/* @Override
-        public */ Option</* T */> or_None(Option</* T */> (*other)()){
-	return Content[input=other.get](/*  */);
-}
-/* @Override
-        public */ /* T */ orElse_None(/* T */ other){
-	return other;
-}
-/* @Override
-        public <R> */ Option</* R */> flatMap_None(Option</* R */> (*mapper)(/* T */)){
-	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-}
-/* @Override
-        public <R> */ Option<Tuple</* T */, /*  R */>> and_None(Option</* R */> (*other)()){
-	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-}
 /* private */ Joiner_Joiner(){
 	/* this("") */;
 }
@@ -306,14 +142,6 @@ char* generate_Value();
 		/* case Some<String>(var current) -> current + this.delimiter + element */;
 	}
 	/* ) */;
-}
-/* @Override
-        public */ List</* T */> createInitial_ListCollector(){
-	return Content[input=Lists.emptyList](/*  */);
-}
-/* @Override
-        public */ List</* T */> fold_ListCollector(List</* T */> current, /* T */ element){
-	return Content[input=current.add](element);
 }
 /* @Override
         public */ char* generate_Generic(){
@@ -358,14 +186,6 @@ char* generate_Value();
 /* @Override
         public */ char* generate_Ref(){
 	return this.type.generate() + "*";
-}
-/* @Override
-        public */ Option</* C */> createInitial_OptionCollector(){
-	return Generic[base=Some, arguments=JavaList[list=[Content[input=/* this.collector.createInitial */]]]](Content[input=this.collector.createInitial](/*  */));
-}
-/* @Override
-        public */ Option</* C */> fold_OptionCollector(Option</* C */> current, Option</* T */> element){
-	return Content[input=current.and](Content[input=/*  */](/* ) */ -> /* element).map(tuple */ -> this.collector.fold(tuple.left, tuple.right));
 }
 /* @Override
         public */ char* generate_Struct(){
@@ -428,26 +248,22 @@ char* generate_Value();
         public */ /* Type */ resolveType_Symbol(){
 	return Content[input=Content](this.value);
 }
-/* @Override
-        public */ Option</* T */> next_EmptyHead(){
-	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
-}
-/* public static final List<Generic> generics */ /* = */ Lists.emptyList_EmptyHead();
-/* private static final List<String> structs */ /* = */ Lists.emptyList_EmptyHead();
-/* private static final List<String> methods */ /* = */ Lists.emptyList_EmptyHead();
-/* private static Option<String> currentStruct = */ /* new */ None<>_EmptyHead();
-/* private static */ char* generateAll_EmptyHead(/*  StringBuilder */ (*merger)(/* StringBuilder */, char*), List<char*> parsed){
+/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Symbol();
+/* private static final List<String> structs */ /* = */ Lists.emptyList_Symbol();
+/* private static final List<String> methods */ /* = */ Lists.emptyList_Symbol();
+/* private static Option<String> currentStruct = */ /* new */ None<>_Symbol();
+/* private static */ char* generateAll_Symbol(/*  StringBuilder */ (*merger)(/* StringBuilder */, char*), List<char*> parsed){
 	return Content[input=parsed.iter](Content[input=/* )
                  */.fold](/* new StringBuilder( */), /* merger)
                  */.toString();
 }
-/* private static <T> */ Option<List</* T */>> parseAll_EmptyHead(char* input, /*  State */ (*folder)(/* State */, /*  Character */), Option</* T */> (*compiler)(char*)){
+/* private static <T> */ Option<List</* T */>> parseAll_Symbol(char* input, /*  State */ (*folder)(/* State */, /*  Character */), Option</* T */> (*compiler)(char*)){
 	return Content[input=Main.divideAll](input, Content[input=/* folder)
                  */.iter](Content[input=/* )
                  */.map](/* compiler)
                  */.collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll_EmptyHead(char* input, /*  State */ (*folder)(/* State */, /*  Character */)){
+/* private static */ List<char*> divideAll_Symbol(char* input, /*  State */ (*folder)(/* State */, /*  Character */)){
 	auto current = Content[input=State](/*  */);
 	auto queue = Generic[base=Iterator, arguments=JavaList[list=[Content[input=/* RangeHead */]]]](Content[input=RangeHead](input.length())).map(input::charAt).collect(new ListCollector<>());
 	while (Content[input=queue.hasElements](/*  */)){
@@ -480,32 +296,32 @@ char* generate_Value();
 	}
 	return Content[input=current.advance](/*  */).segments;
 }
-/* private static */ char* generateValues_EmptyHead(List<char*> parserd){
+/* private static */ char* generateValues_Symbol(List<char*> parserd){
 	return Content[input=Main.generateAll](/* Main::mergeValues */, parserd);
 }
-/* private static */ /* StringBuilder */ mergeValues_EmptyHead(/* StringBuilder */ cache, char* element){
+/* private static */ /* StringBuilder */ mergeValues_Symbol(/* StringBuilder */ cache, char* element){
 	if (Content[input=cache.isEmpty](/*  */)){
 		return Content[input=cache.append](element);
 	}
 	return Content[input=cache.append](/* ", ") */.append(element);
 }
-/* private static */ char* generatePlaceholder_EmptyHead(char* input){
+/* private static */ char* generatePlaceholder_Symbol(char* input){
 	return /* "/* " + input + " */" */;
 }
-/* private static */ char* generateValuesFromNodes_EmptyHead(List</* Type */> list){
+/* private static */ char* generateValuesFromNodes_Symbol(List</* Type */> list){
 	return Content[input=list.iter](/* )
                  */.map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
-/* private static */ char* compileStatementOrBlock_EmptyHead(char* input, int depth){
+/* private static */ char* compileStatementOrBlock_Symbol(char* input, int depth){
 	return Content[input=parseWhitespace](Content[input=/* input) */.map](Content[input=/* Whitespace::generate)
                  */.or](/* () */ -> /* compileStatement(input, Main::compileStatementValue, depth))
                 .or(() */ -> /* compileBlock(input, depth))
                 .orElseGet(() */ -> /* createIndent(depth) + generatePlaceholder(input */.strip()));
 }
-/* private static */ char* createIndent_EmptyHead(int depth){
+/* private static */ char* createIndent_Symbol(int depth){
 	return Content[input=/* "\n" + "\t" */.repeat](depth);
 }
-/* private static */ Option<char*> compileBlock_EmptyHead(char* input, int depth){
+/* private static */ Option<char*> compileBlock_Symbol(char* input, int depth){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.endsWith](/* "}" */)){
 		auto withoutEnd = Content[input=stripped.substring](/* 0 */, Content[input=stripped.length](/* ) - "}" */.length());
@@ -519,7 +335,7 @@ char* generate_Value();
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ char* compileBeforeBlock_EmptyHead(char* input){
+/* private static */ char* compileBeforeBlock_Symbol(char* input){
 	if (Content[input=input.strip](/* ) */.equals("else")){
 		return /* "else " */;
 	}
@@ -527,7 +343,7 @@ char* generate_Value();
                  */.or](Content[input=/*  */](/* ) */ -> /* compileConditional(input, "while"))
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()));
 }
-/* private static */ Option<char*> compileConditional_EmptyHead(char* input, char* prefix){
+/* private static */ Option<char*> compileConditional_Symbol(char* input, char* prefix){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.startsWith](prefix)){
 		auto withoutKeyword = Content[input=stripped.substring](Content[input=prefix.length](/* ) */).strip();
@@ -538,7 +354,7 @@ char* generate_Value();
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ Option<char*> compileStatementValue_EmptyHead(char* input){
+/* private static */ Option<char*> compileStatementValue_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.startsWith](/* "return " */)){
 		auto value = Content[input=stripped.substring](Content[input=/* "return " */.length](/*  */));
@@ -557,10 +373,10 @@ char* generate_Value();
 	}
 	return Generic[base=Some, arguments=JavaList[list=[Content[input=/* generatePlaceholder */]]]](Content[input=generatePlaceholder](input));
 }
-/* private static */ char* compileValue_EmptyHead(char* input){
+/* private static */ char* compileValue_Symbol(char* input){
 	return Content[input=parseValue](/* input) */.generate();
 }
-/* private static */ /* Value */ parseValue_EmptyHead(char* input){
+/* private static */ /* Value */ parseValue_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.startsWith](/* "new " */)){
 		auto slice = Content[input=stripped.substring](Content[input=/* "new " */.length](/* ) */).strip();
@@ -604,10 +420,10 @@ char* generate_Value();
 	}
 	return Content[input=Content](input);
 }
-/* private static */ Option</* Invokable */> parseInvocation_EmptyHead(char* input){
+/* private static */ Option</* Invokable */> parseInvocation_Symbol(char* input){
 	return Content[input=parseInvokable](input, Content[input=/* input1 */ -> /*  new Content */](Content[input=compileValue](/* input1 */)));
 }
-/* private static */ Option</* Invokable */> parseInvokable_EmptyHead(char* slice, /*  BeforeArgs */ (*beforeArgsCompiler)(char*)){
+/* private static */ Option</* Invokable */> parseInvokable_Symbol(char* slice, /*  BeforeArgs */ (*beforeArgsCompiler)(char*)){
 	if (Content[input=/* !slice */.endsWith](/* ")" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 	}
@@ -624,13 +440,13 @@ char* generate_Value();
 	}
 	/* ) */;
 }
-/* private static */ /* BeforeArgs */ compileConstructorCaller_EmptyHead(char* base){
+/* private static */ /* BeforeArgs */ compileConstructorCaller_Symbol(char* base){
 	if (Content[input=parseAndModifyType](/* base) instanceof Some<Type>(var type */)){
 		return type;
 	}
 	return Content[input=Content](base);
 }
-/* private static */ int isSymbol_EmptyHead(char* input){
+/* private static */ int isSymbol_Symbol(char* input){
 	if (Content[input=input.isEmpty](/*  */)){
 		return false;
 	}
@@ -645,13 +461,13 @@ char* generate_Value();
 	}
 	return true;
 }
-/* private static */ Option</* Whitespace */> parseWhitespace_EmptyHead(char* input){
+/* private static */ Option</* Whitespace */> parseWhitespace_Symbol(char* input){
 	if (Content[input=input.isBlank](/*  */)){
 		return Generic[base=Some, arguments=JavaList[list=[Content[input=/* Whitespace */]]]](Content[input=Whitespace](/*  */));
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ Option</* Defined */> parseAndModifyDefinition_EmptyHead(char* input){
+/* private static */ Option</* Defined */> parseAndModifyDefinition_Symbol(char* input){
 	/* return Main.parseDefinition(input).map(definition -> */{
 		if (Content[input=definition.type instanceof Functional](/* var args */, /*  var base */)){
 			return Content[input=FunctionalDefinition](definition.beforeType, base, definition.name, args);
@@ -660,7 +476,7 @@ char* generate_Value();
 	}
 	/* ) */;
 }
-/* private static */ Option<char*> compileStatement_EmptyHead(char* input, Option<char*> (*compiler)(char*), int depth){
+/* private static */ Option<char*> compileStatement_Symbol(char* input, Option<char*> (*compiler)(char*), int depth){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=/* !stripped */.endsWith](/* ";" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
@@ -668,13 +484,13 @@ char* generate_Value();
 	auto withoutEnd = Content[input=stripped.substring](/* 0 */, Content[input=stripped.length](/* ) - ";" */.length());
 	return Content[input=compiler.apply](Content[input=/* withoutEnd) */.map](/* definition */ -> /*  generateStatement(definition, depth */));
 }
-/* private static */ char* generateStatement_EmptyHead(char* definition, int depth){
+/* private static */ char* generateStatement_Symbol(char* definition, int depth){
 	return /* createIndent(depth) + definition + ";" */;
 }
-/* private static <T> */ Option<List</* T */>> parseValues_EmptyHead(char* input, Option</* T */> (*compiler)(char*)){
+/* private static <T> */ Option<List</* T */>> parseValues_Symbol(char* input, Option</* T */> (*compiler)(char*)){
 	return Content[input=Main.parseAll](input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ /* State */ foldValueChar_EmptyHead(/* State */ state, /* char */ c){
+/* private static */ /* State */ foldValueChar_Symbol(/* State */ state, /* char */ c){
 	if (Content[input=/* c == ',' && state */.isLevel](/*  */)){
 		return Content[input=state.advance](/*  */);
 	}
@@ -687,7 +503,7 @@ char* generate_Value();
 	}
 	return appended;
 }
-/* private static */ Option</* Definition */> parseDefinition_EmptyHead(char* input){
+/* private static */ Option</* Definition */> parseDefinition_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	auto nameSeparator = Content[input=stripped.lastIndexOf](/* " " */);
 	if (/* nameSeparator < 0 */){
@@ -706,7 +522,7 @@ char* generate_Value();
 	}
 	/*  */;
 }
-/* private static */ Option<int> findTypeSeparator_EmptyHead(char* input){
+/* private static */ Option<int> findTypeSeparator_Symbol(char* input){
 	auto depth = /*  0 */;
 	/* for */ /* (var */ index = input.length() - 1;
 	/* index */ > = /*  0 */;
@@ -724,7 +540,7 @@ char* generate_Value();
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private static */ Option</* Type */> parseAndModifyType_EmptyHead(char* input){
+/* private static */ Option</* Type */> parseAndModifyType_Symbol(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic generic */){
 			auto withoutWhitespace = Content[input=generic.arguments.iter](Content[input=/* )
@@ -756,12 +572,12 @@ char* generate_Value();
 	}
 	/* ) */;
 }
-/* private static */ /* void */ addGeneric_EmptyHead(/* Generic */ generic){
+/* private static */ /* void */ addGeneric_Symbol(/* Generic */ generic){
 	if (Content[input=/* !generics */.contains](/* generic) && generic */.arguments.hasElements()){
 		/* generics.add(generic) */;
 	}
 }
-/* private static */ Option</* Type */> parseType_EmptyHead(char* input){
+/* private static */ Option</* Type */> parseType_Symbol(char* input){
 	auto stripped = Content[input=input.strip](/*  */);
 	if (Content[input=stripped.equals](/* "public" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
@@ -791,27 +607,27 @@ char* generate_Value();
 	}
 	return Generic[base=Some, arguments=JavaList[list=[Content[input=/* Content */]]]](Content[input=Content](input));
 }
-/* private static */ Option</* Type */> parseGenericArgument_EmptyHead(char* input1){
+/* private static */ Option</* Type */> parseGenericArgument_Symbol(char* input1){
 	return Content[input=parseWhitespace](Content[input=/* input1)
                  */.<Type>map](/* whitespace */ -> /* whitespace)
                 .or(() */ -> /*  parseAndModifyType(input1 */));
 }
-/* private static */ /* StringBuilder */ mergeStatements_EmptyHead(/* StringBuilder */ stringBuilder, char* str){
+/* private static */ /* StringBuilder */ mergeStatements_Symbol(/* StringBuilder */ stringBuilder, char* str){
 	return Content[input=stringBuilder.append](str);
 }
-/* private static */ char* compileStatementsOrBlocks_EmptyHead(char* body, int depth){
+/* private static */ char* compileStatementsOrBlocks_Symbol(char* body, int depth){
 	return Content[input=Main.compileStatements](body, Content[input=/* segment */ -> /*  new Some<> */](/* compileStatementOrBlock(segment */, /*  depth + 1) */));
 }
-/* private static */ char* compileStatements_EmptyHead(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ char* compileStatements_Symbol(char* input, Option<char*> (*compiler)(char*)){
 	return Content[input=Main.parseStatements](input, Content[input=/* compiler) */.map](/* Main::generateStatements */).orElse("");
 }
-/* private static */ Option<List<char*>> parseStatements_EmptyHead(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ Option<List<char*>> parseStatements_Symbol(char* input, Option<char*> (*compiler)(char*)){
 	return Content[input=Main.parseAll](input, /*  Main::foldStatementChar */, compiler);
 }
-/* private static */ char* generateStatements_EmptyHead(List<char*> inner){
+/* private static */ char* generateStatements_Symbol(List<char*> inner){
 	return Content[input=generateAll](/* Main::mergeStatements */, inner);
 }
-/* private static */ /* State */ foldStatementChar_EmptyHead(/* State */ state, /* char */ c){
+/* private static */ /* State */ foldStatementChar_Symbol(/* State */ state, /* char */ c){
 	auto appended = Content[input=state.append](c);
 	if (Content[input=/* c == ';' && appended */.isLevel](/*  */)){
 		return Content[input=appended.advance](/*  */);
@@ -830,10 +646,10 @@ char* generate_Value();
 		return appended;
 	}
 }
-/* private static */ Option<char*> compileDefinitionToString_EmptyHead(char* input){
+/* private static */ Option<char*> compileDefinitionToString_Symbol(char* input){
 	return Content[input=Main.parseAndModifyDefinition](/* input) */.map(Defined::generate);
 }
-/* void */ main_EmptyHead(){
+/* void */ main_Symbol(){
 	/* try */{
 		auto source = Content[input=Paths.get](/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
 		auto input = Content[input=Files.readString](source);
@@ -845,7 +661,7 @@ char* generate_Value();
             e.printStackTrace() */;
 	}
 }
-/* private */ char* compileRoot_EmptyHead(char* input){
+/* private */ char* compileRoot_Symbol(char* input){
 	auto compiled = Content[input=compileStatements](input, Content[input=/* segment */ -> /*  new Some<> */](Content[input=this.compileRootSegment](segment)));
 	auto joinedStructs = Content[input=structs.iter](Content[input=/* ) */.collect](Content[input=Joiner](/*  */)).orElse("");
 	auto joinedGenerics = Content[input=generics.iter](/* )
@@ -855,14 +671,14 @@ char* generate_Value();
 	auto joinedMethods = Content[input=methods.iter](Content[input=/* ) */.collect](Content[input=Joiner](/*  */)).orElse("");
 	return /* compiled + joinedStructs + joinedGenerics + joinedMethods */;
 }
-/* private */ char* compileRootSegment_EmptyHead(char* input){
+/* private */ char* compileRootSegment_Symbol(char* input){
 	return Content[input=this.compileClass](/* input)
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()) + "\n");
 }
-/* private */ Option<char*> compileClass_EmptyHead(char* input){
+/* private */ Option<char*> compileClass_Symbol(char* input){
 	return Content[input=this.compileStructured](input, /*  "class " */);
 }
-/* private */ Option<char*> compileStructured_EmptyHead(char* input, char* infix){
+/* private */ Option<char*> compileStructured_Symbol(char* input, char* infix){
 	auto classIndex = Content[input=input.indexOf](infix);
 	if (/* classIndex < 0 */){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
@@ -879,9 +695,13 @@ char* generate_Value();
                 ? beforeContent */.substring](/* 0 */, paramStart).strip()
                 : beforeContent;
 	auto typeParamStart = Content[input=withoutParams.indexOf](/* "<" */);
-	auto name = Content[input=/* typeParamStart >= 0
-                ? withoutParams */.substring](/* 0 */, typeParamStart).strip()
-                : withoutParams;
+	/* String name */;
+	if (/* typeParamStart >= 0 */){
+		return Generic[base=Some, arguments=JavaList[list=[Content[input=""]]]](/* "" */);
+	}
+	else {
+		/* name = withoutParams; */
+	}
 	auto withEnd = Content[input=right.substring](Content[input=/* contentStart + "{" */.length](/* ) */).strip();
 	if (Content[input=/* !withEnd */.endsWith](/* "}" */)){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
@@ -893,7 +713,7 @@ char* generate_Value();
 	/* structs.add(generated) */;
 	return Generic[base=Some, arguments=JavaList[list=[Content[input=""]]]](/* "" */);
 }
-/* private */ char* compileStructuredSegment_EmptyHead(char* input){
+/* private */ char* compileStructuredSegment_Symbol(char* input){
 	return Content[input=parseWhitespace](Content[input=/* input) */.map](/* Whitespace::generate)
                 .or(() */ -> /* this.compileStructured(input, "interface "))
                 .or(() */ -> /* this.compileStructured(input, "enum "))
@@ -903,7 +723,7 @@ char* generate_Value();
                 .or(() */ -> /* this.compileDefinitionStatement(input))
                 .orElseGet(() */ -> /*  generatePlaceholder(input */));
 }
-/* private */ Option<char*> compileMethod_EmptyHead(char* input){
+/* private */ Option<char*> compileMethod_Symbol(char* input){
 	auto paramStart = Content[input=input.indexOf](/* "(" */);
 	if (/* paramStart >= 0 */){
 		auto inputDefinition = Content[input=input.substring](/* 0 */, /* paramStart) */.strip();
@@ -943,11 +763,11 @@ char* generate_Value();
 	}
 	return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 }
-/* private */ char* compileParam_EmptyHead(char* param){
+/* private */ char* compileParam_Symbol(char* param){
 	return Content[input=parseWhitespace](Content[input=/* param) */.map](/* Whitespace::generate)
                 .or(() */ -> /* parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() */ -> /*  generatePlaceholder(param */));
 }
-/* private */ Option<char*> compileDefinitionStatement_EmptyHead(char* input){
+/* private */ Option<char*> compileDefinitionStatement_Symbol(char* input){
 	return Content[input=compileStatement](input, /*  Main::compileDefinitionToString */, /*  1 */);
 }

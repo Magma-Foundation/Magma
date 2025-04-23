@@ -1026,9 +1026,13 @@ class Main {
                 : beforeContent;
 
         var typeParamStart = withoutParams.indexOf("<");
-        var name = typeParamStart >= 0
-                ? withoutParams.substring(0, typeParamStart).strip()
-                : withoutParams;
+        String name;
+        if (typeParamStart >= 0) {
+            return new Some<>("");
+        }
+        else {
+            name = withoutParams;
+        }
 
         var withEnd = right.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
