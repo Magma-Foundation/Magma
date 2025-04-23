@@ -545,28 +545,28 @@ Optional<char*> compileOperator(char* input, char* operator){
 }
 Optional<char*> compileInvokable(char* input){
 	char* stripped = input.strip();
-	/* if (stripped.endsWith(")")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argumentStart = withoutEnd.indexOf("(");
-            if (argumentStart >= 0) {
-                String beforeArguments = withoutEnd.substring(0, argumentStart).strip();
-                String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
-                Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
-                if (maybeNewArguments.isPresent()) {
-                    String newArguments = maybeNewArguments.get();
-                    if (beforeArguments.startsWith("new ")) {
-                        String type = beforeArguments.substring("new ".length()).strip();
-                        String caller = "new_" + type;
-                        return generateInvocation(caller, newArguments);
-                    }
-                    else {
-                        String caller = compileValue(beforeArguments);
-                        return generateInvocation(caller, newArguments);
-                    }
-                }
-            }
+	/* if (!stripped.endsWith(")")) {
+            return Optional.empty();
         } */
-	return Optional.empty();
+	char* withoutEnd = stripped.substring(0, stripped.length(/* ) */ - /* ")".length( */));
+	int argumentStart = withoutEnd.indexOf("(");
+	/* if (argumentStart < 0) {
+            return Optional.empty();
+        } */
+	char* beforeArguments = withoutEnd.substring(0, /* argumentStart).strip( */);
+	char* arguments = withoutEnd.substring(argumentStart + /* "(".length()).strip( */);
+	Optional<char*> maybeNewArguments = compileAllValues(arguments, argument - /* > Optional */.of(compileValue(argument)));
+	/* if (maybeNewArguments.isEmpty()) {
+            return Optional.empty();
+        } */
+	char* newArguments = maybeNewArguments.get();
+	/* if (!beforeArguments.startsWith("new ")) {
+            String caller = compileValue(beforeArguments);
+            return generateInvocation(caller, newArguments);
+        } */
+	char* type = beforeArguments.substring(/* "new ".length()).strip( */);
+	char* caller = "new_" + type;
+	return generateInvocation(caller, newArguments);
 }
 Optional<char*> generateInvocation(char* caller, char* arguments){
 	return Optional.of(caller + "(" + arguments + ")");
