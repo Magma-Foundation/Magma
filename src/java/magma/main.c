@@ -9,9 +9,9 @@
 /* import java.util.function.Supplier; */
 /*  */
 typedef /* private */struct {
-} Type extends BeforeArgs;
+} Type;
 typedef /* private */struct {
-} Defined extends Parameter;
+} Defined;
 typedef /*  */struct {
 } BeforeArgs;
 typedef /*  */struct {
@@ -94,9 +94,9 @@ typedef /*  */struct {
 // Some</* Content */>
 // Option<List<char*>>
 // Some</* "" */>
-char* generate_Type extends BeforeArgs(Type extends BeforeArgs this);
-char* generate_Defined extends Parameter(Defined extends Parameter this);
-Defined mapName_Defined extends Parameter(Defined extends Parameter this, char* (*mapper)(char*));
+char* generate_Type(Type this);
+char* generate_Defined(Defined this);
+Defined mapName_Defined(Defined this, char* (*mapper)(char*));
 char* generate_BeforeArgs(BeforeArgs this);
 char* generate_Value(Value this);
 Type resolveType_Value(Value this);
@@ -701,10 +701,14 @@ void main_Symbol(Symbol this){
 		return Generic[base=None, arguments=JavaList[list=[Content[input=]]]](/*  */);
 	}
 	auto beforeContent = Content[input=right.substring](/* 0 */, /* contentStart) */.strip();
-	auto paramStart = Content[input=beforeContent.indexOf](/* "(" */);
-	auto withoutParams = Content[input=/* paramStart >= 0
-                ? beforeContent */.substring](/* 0 */, paramStart).strip()
+	auto extendsIndex = Content[input=beforeContent.indexOf](/* "extends " */);
+	auto withoutExtends = Content[input=/* extendsIndex >= 0
+                ? beforeContent */.substring](/* 0 */, extendsIndex).strip()
                 : beforeContent;
+	auto paramStart = Content[input=withoutExtends.indexOf](/* "(" */);
+	auto withoutParams = Content[input=/* paramStart >= 0
+                ? withoutExtends */.substring](/* 0 */, paramStart).strip()
+                : withoutExtends;
 	auto typeParamStart = Content[input=withoutParams.indexOf](/* "<" */);
 	/* String name */;
 	if (/* typeParamStart >= 0 */){

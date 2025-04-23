@@ -1036,11 +1036,15 @@ class Main {
         }
 
         var beforeContent = right.substring(0, contentStart).strip();
-
-        var paramStart = beforeContent.indexOf("(");
-        var withoutParams = paramStart >= 0
-                ? beforeContent.substring(0, paramStart).strip()
+        var extendsIndex = beforeContent.indexOf("extends ");
+        var withoutExtends = extendsIndex >= 0
+                ? beforeContent.substring(0, extendsIndex).strip()
                 : beforeContent;
+
+        var paramStart = withoutExtends.indexOf("(");
+        var withoutParams = paramStart >= 0
+                ? withoutExtends.substring(0, paramStart).strip()
+                : withoutExtends;
 
         var typeParamStart = withoutParams.indexOf("<");
         String name;
