@@ -87,7 +87,6 @@
 // None<>
 // Iterator<struct R>
 // Iterator<>
-// case Some</* T>(var value) - */>
 // Collector<struct T, struct C>
 // List<char*>
 // Option<char*>
@@ -139,7 +138,7 @@ struct Defined mapName_Defined(char* (*mapper)(char*));
 	auto current = initial;
 	while (true){
 		/* switch (this.head.next()) */{
-			case Some</* T>(var value) - */> current = folder.apply(current, value);
+			/* case Some<T>(var value) -> */ current = folder.apply(current, value);
 			/* case None<T> _ -> */{
 				return current;
 			}
@@ -625,8 +624,10 @@ struct private Joiner_Joiner(){
 		auto argsStart = slice.indexOf(/* "<" */);
 		if (/* argsStart >= 0 */){
 			auto base = slice.substring(/* 0 */, /* argsStart) */.strip();
-			auto inputArgs = slice.substring(/* argsStart + "<" */.length(/*  */));
-			return Main.parseValues(inputArgs, /* Main::parseGenericArgument) */.map(/* args */ -> /*  new Generic(base, args */));
+			if (isSymbol(base)){
+				auto inputArgs = slice.substring(/* argsStart + "<" */.length(/*  */));
+				return Main.parseValues(inputArgs, /* Main::parseGenericArgument) */.map(/* args */ -> /*  new Generic(base, args */));
+			}
 		}
 	}
 	if (isSymbol(stripped)){

@@ -738,8 +738,10 @@ class Main {
             var argsStart = slice.indexOf("<");
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
-                var inputArgs = slice.substring(argsStart + "<".length());
-                return Main.parseValues(inputArgs, Main::parseGenericArgument).map(args -> new Generic(base, args));
+                if (isSymbol(base)) {
+                    var inputArgs = slice.substring(argsStart + "<".length());
+                    return Main.parseValues(inputArgs, Main::parseGenericArgument).map(args -> new Generic(base, args));
+                }
             }
         }
 
