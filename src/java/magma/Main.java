@@ -1,7 +1,7 @@
-sealed private interface Result<T, X> {
+sealed private interface Result<T, X> permits Ok, Err {
 }
 
-sealed private interface Option<T> {
+sealed private interface Option<T> permits Some, None {
 }
 
 record Ok<T, X>(T value) implements Result<T, X> {
@@ -34,6 +34,10 @@ private Option<IOException> run(Path source, Path target) {
 }
 
 private String compile(String input) {
+    return this.compileAll(input, this::compileRootSegment);
+}
+
+private String compileAll(String input, Function<String, String> compiler) {
     var segments = new ArrayList<String>();
     var buffer = new StringBuilder();
     var depth = 0;
@@ -41,7 +45,11 @@ private String compile(String input) {
         var c = input.charAt(i);
         buffer.append(c);
 
-        if (c == '}' && depth == 1) {
+        if (c == ';' && depth == 0) {
+            segments.add(buffer.toString());
+            buffer = new StringBuilder();
+        }
+        else if (c == '}' && depth == 1) {
             segments.add(buffer.toString());
             buffer = new StringBuilder();
             depth--;
@@ -57,7 +65,7 @@ private String compile(String input) {
 
     var output = new StringBuilder();
     for (var segment : segments) {
-        output.append(this.compileRootSegment(segment));
+        output.append(compiler.apply(segment));
     }
 
     return output.toString();
@@ -89,12 +97,20 @@ private Option<String> compileMethod(String input) {
         var paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
             var params = withParams.substring(0, paramEnd).strip();
-            var body = withParams.substring(paramEnd + ")".length()).strip();
-            return new Some<>(this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body) + "\n");
+            var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                var inputContent = withBraces.substring(1, withBraces.length() - 1);
+                var outputContent = this.compileAll(inputContent, this::compileStatementOrBlock);
+                return new Some<>(this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
+            }
         }
     }
 
     return new None<>();
+}
+
+private String compileStatementOrBlock(String input) {
+    return this.generatePlaceholder(input);
 }
 
 private Option<String> compileStructured(String input, String infix) {
