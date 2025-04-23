@@ -728,12 +728,20 @@ class Main {
 
     private String compileClassMember(String input0) {
         return this.compileOr(input0, Lists.of(
+                this::compileWhitespace,
                 input -> this.compileStructured(input, "class "),
                 input -> this.compileStructured(input, "interface "),
                 input -> this.compileStructured(input, "record "),
                 this::compileMethod,
                 this::compileDefinitionStatement
         ));
+    }
+
+    private Option<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return new Some<>("");
+        }
+        return new None<>();
     }
 
     private Option<IOException> writeString(Path target, String output) {

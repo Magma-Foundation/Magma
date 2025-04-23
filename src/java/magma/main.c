@@ -1,14 +1,12 @@
-/* sealed */struct Result<T, X> permits Ok, Err {/*  */
+/* sealed */struct Result<T, X> permits Ok, Err {
 }
 /* public sealed */struct Option<T> permits Some, None {
-	/* T */ (*orElse)(/* T */);/* 
-     */
+	/* T */ (*orElse)(/* T */);
 }
 /* public */struct List<T> {
 	Iterator</* T */> (*iter)();
 	List</* T */> (*add)(/* T */);
-	/* T */ (*get)(int);/* 
-     */
+	/* T */ (*get)(int);
 }
 /* public */struct Iterator<T> {
 	</* R */> (*map)(/*  R */ (*)(/* T */));
@@ -16,28 +14,23 @@
 	</* R */> (*flatMap)(Iterator</* R */> (*)(/* T */));
 	Iterator</* T */> (*concat)(Iterator</* T */>);
 	Option</* T */> (*next)();
-	</* C */> (*collect)(Collector</* T */, /*  C */>);/* 
-     */
+	</* C */> (*collect)(Collector</* T */, /*  C */>);
 }
 /* public */struct Collector<T, C> {
 	/* C */ (*createInitial)();
-	/* C */ (*fold)(/* C */, /* T */);/* 
-     */
+	/* C */ (*fold)(/* C */, /* T */);
 }
 /*  */struct Head<T> {
-	Option</* T */> (*next)();/* 
-     */
+	Option</* T */> (*next)();
 }
 /*  */struct Type extends Node {/* default  */ flattenType(/*  */){/* 
             return this; *//* 
          */
 }
-/* 
-     */
+
 }
 /*  */struct Node {
-	/* String */ (*generate)();/* 
-     */
+	/* String */ (*generate)();
 }
 /* sealed */struct Definable extends Node {/* default  */ flattenDefinable(/*  */){/* 
             return this; *//* 
@@ -45,28 +38,25 @@
 }
 
 	Option</* Type */> (*findType)();
-	/* Definable */ (*withParams)(List</* Type */>);/* 
-     */
+	/* Definable */ (*withParams)(List</* Type */>);
 }
-/*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
+/*  */struct Ok<T, X>(T value) implements Result<T, X> {
 }
-/*  */struct Err<T, X>(X error) implements Result<T, X> {/*  */
+/*  */struct Err<T, X>(X error) implements Result<T, X> {
 }
 /*  */struct Some<T>(T value) implements Option<T> {/* @Override
   */ orElse(/* T */ other){/* 
             return this.value; *//* 
          */
 }
-/* 
-     */
+
 }
 /* static final */struct None<T> implements Option<T> {/* @Override
   */ orElse(/* T */ other){/* 
             return other; *//* 
          */
 }
-/* 
-     */
+
 }
 /* private static */struct State {
 	/* private  */ segments;
@@ -110,16 +100,14 @@
             return this; *//* 
          */
 }
-/* 
-     */
+
 }
 /* private static */struct EmptyHead<T> implements Head<T> {/* @Override
   */ next(/*  */){/* 
             return new None<>(); *//* 
          */
 }
-/* 
-     */
+
 }
 /* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* @Override
   */ map(/*  R */ (*mapper)(/* T */)){/* 
@@ -165,8 +153,7 @@
             return this.fold(collector.createInitial(), collector::fold); *//* 
          */
 }
-/* 
-     */
+
 }
 /* public static */struct RangeHead implements Head<Integer> {
 	/* private  */ length;
@@ -186,8 +173,7 @@
             } *//* 
          */
 }
-/* 
-     */
+
 }
 /* private static final */struct SingleHead<T> implements Head<T> {
 	/* private  */ value;
@@ -204,8 +190,7 @@
             return new Some<>(this.value); *//* 
          */
 }
-/* 
-     */
+
 }
 /* static */struct Iterators {/* public  */ empty(/*  */){/* 
             return new HeadedIterator<>(new EmptyHead<>()); *//* 
@@ -218,8 +203,7 @@
             } *//* ); *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {/* private */ Joiner(/*  */){/* 
             this(""); *//* 
@@ -238,8 +222,7 @@
             } *//* ; *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct Generic(String base, List<Type> arguments) implements Type {/* @Override
   */ generate(/*  */){
@@ -263,8 +246,7 @@
             return this; *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct Content(String input) implements Type, Definable {/* private  */ generatePlaceholder(/* String */ input){/* 
             return "/* " + input + " */"; *//* 
@@ -285,8 +267,7 @@
             return this; *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct Functional(List<Type> typeParams, Type returns) implements Type {/* @Override
   */ generate(/*  */){
@@ -297,9 +278,7 @@
             return this.returns.generate() + " (*)(" + joined + ")"; *//* 
          */
 }
-/* 
 
-     */
 }
 /* private static */struct ListCollector<T> implements Collector<T, List<T>> {/* @Override
   */ createInitial(/*  */){/* 
@@ -311,8 +290,7 @@
             return current.add(element); *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct FunctionalDefinition(Functional functional, String name) implements Definable {/* @Override
   */ generate(/*  */){
@@ -333,8 +311,7 @@
             return new FunctionalDefinition(new Functional(paramTypes, this.functional), this.name); *//* 
          */
 }
-/* 
-     */
+
 }
 /* private */struct Definition(Type parsed, String name) implements Definable {/* @Override
   */ generate(/*  */){/* 
@@ -359,8 +336,7 @@
             return new FunctionalDefinition(new Functional(paramTypes, this.parsed), this.name); *//* 
          */
 }
-/* 
-     */
+
 }
 /*  */struct Main {
 	/* enum  */ (*Void)();
@@ -432,8 +408,7 @@
 }
 
 	/* ')  */ (*state.exit)();
-	/* return */ state;/* 
-     */
+	/* return */ state;
 }
 /* package magma; *//* 
 
@@ -504,7 +479,6 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             var definable1 = definable.withParams(paramTypes);
             return new Some<>("\n\t" + definable1.generate() + ";");
         } *//* 
-
      */
 }
 /* private  */ joinNodes(List</* T */> nodes, /* String */ delimiter){/* 
@@ -693,12 +667,20 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
 }
 /* private  */ compileClassMember(/* String */ input0){/* 
         return this.compileOr(input0, Lists.of(
+                this::compileWhitespace,
                 input -> this.compileStructured(input, "class "),
                 input -> this.compileStructured(input, "interface "),
                 input -> this.compileStructured(input, "record "),
                 this::compileMethod,
                 this::compileDefinitionStatement
         )); *//* 
+     */
+}
+/* private  */ compileWhitespace(/* String */ input){/* 
+        if (input.isBlank()) {
+            return new Some<>("");
+        } *//* 
+        return new None<>(); *//* 
      */
 }
 /* private  */ writeString(/* Path */ target, /* String */ output){/* 
