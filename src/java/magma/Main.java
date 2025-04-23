@@ -226,10 +226,14 @@ class Main {
     }
 
     private String compileRoot(String input) {
-        var compiled = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
+        var compiled = this.compileStatements(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
+    }
+
+    private String compileStatements(String input, Function<String, String> segment) {
+        return this.compileAll(input, this::foldStatementChar, segment, this::mergeStatements);
     }
 
     private String compileAll(
@@ -325,7 +329,7 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStructuredSegment, this::mergeStatements);
+        var outputContent = this.compileStatements(inputContent, this::compileStructuredSegment);
 
         var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
