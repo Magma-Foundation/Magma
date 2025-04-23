@@ -63,24 +63,44 @@ private String compile(String input) {
     return output.toString();
 }
 
-private String compileRootSegment(String input) {
-    var interfaceIndex = input.indexOf("interface ");
-    if (interfaceIndex >= 0) {
-        var beforeKeyword = input.substring(0, interfaceIndex).strip();
-        var afterKeyword = input.substring(interfaceIndex + "interface ".length());
-        var contentStart = afterKeyword.indexOf("{");
-        if (contentStart >= 0) {
-            var beforeContent = afterKeyword.substring(0, contentStart).strip();
-            var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-            if (withEnd.endsWith("}")) {
-                var content = withEnd.substring(0, withEnd.length() - "}".length());
-                return this.generatePlaceholder(beforeKeyword) + "struct " +
-                        beforeContent + " {" + this.generatePlaceholder(content) + "\n}\n";
-            }
+private String compileRootSegment(String input0) {
+    var rules = List.<Function<String, Option<String>>>of(
+            input -> this.compileStructured(input, "interface "),
+            input -> this.compileStructured(input, "record "),
+            input -> this.compileStructured(input, "class ")
+    );
+
+    for (var rule : rules) {
+        if (rule.apply(input0) instanceof Some(var compiled)) {
+            return compiled;
         }
     }
 
-    return this.generatePlaceholder(input);
+    return this.generatePlaceholder(input0);
+}
+
+private Option<String> compileStructured(String input, String infix) {
+    var interfaceIndex = input.indexOf(infix);
+    if (interfaceIndex < 0) {
+        return new None<>();
+    }
+
+    var beforeKeyword = input.substring(0, interfaceIndex).strip();
+    var afterKeyword = input.substring(interfaceIndex + infix.length());
+    var contentStart = afterKeyword.indexOf("{");
+    if (contentStart < 0) {
+        return new None<>();
+    }
+
+    var beforeContent = afterKeyword.substring(0, contentStart).strip();
+    var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+    if (!withEnd.endsWith("}")) {
+        return new None<>();
+    }
+
+    var content = withEnd.substring(0, withEnd.length() - "}".length());
+    return new Some<>(this.generatePlaceholder(beforeKeyword) + "struct " +
+            beforeContent + " {" + this.generatePlaceholder(content) + "\n}\n");
 }
 
 private String generatePlaceholder(String input) {
