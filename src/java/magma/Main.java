@@ -322,6 +322,20 @@ class Main {
         }
     }
 
+    private record Struct(String name) implements Type {
+        @Override
+        public String generate() {
+            return "struct " + this.name;
+        }
+    }
+
+    private static class Whitespace implements Type {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -406,7 +420,7 @@ class Main {
     }
 
     private static String compileStatementOrBlock(String input, int depth) {
-        return compileWhitespace(input)
+        return parseWhitespace(input).map(Whitespace::generate)
                 .or(() -> compileStatement(input, Main::compileStatementValue, depth))
                 .or(() -> compileBlock(input, depth))
                 .orElseGet(() -> createIndent(depth) + generatePlaceholder(input.strip()));
@@ -545,6 +559,10 @@ class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.isEmpty()) {
+            return false;
+        }
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -555,9 +573,9 @@ class Main {
         return true;
     }
 
-    private static Option<String> compileWhitespace(String input) {
+    private static Option<Whitespace> parseWhitespace(String input) {
         if (input.isBlank()) {
-            return new Some<>("");
+            return new Some<>(new Whitespace());
         }
         return new None<>();
     }
@@ -698,11 +716,21 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
+                return Main.parseValues(inputArgs, Main::parseGenericArgument).map(args -> new Generic(base, args));
             }
         }
 
+        if (isSymbol(stripped)) {
+            return new Some<>(new Struct(stripped));
+        }
+
         return new Some<>(new Content(input));
+    }
+
+    private static Option<Type> parseGenericArgument(String input1) {
+        return parseWhitespace(input1)
+                .<Type>map(whitespace -> whitespace)
+                .or(() -> parseAndModifyType(input1));
     }
 
     private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
@@ -814,7 +842,7 @@ class Main {
     }
 
     private String compileStructuredSegment(String input) {
-        return compileWhitespace(input)
+        return parseWhitespace(input).map(Whitespace::generate)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileStructured(input, "enum "))
                 .or(() -> this.compileStructured(input, "class "))
@@ -864,7 +892,7 @@ class Main {
     }
 
     private String compileParam(String param) {
-        return compileWhitespace(param)
+        return parseWhitespace(param).map(Whitespace::generate)
                 .or(() -> parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() -> generatePlaceholder(param));
     }

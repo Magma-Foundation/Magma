@@ -41,7 +41,7 @@
 };
 /* private static */struct State {
 	/* private final */ List<char*> segments;
-	/* private */ /* StringBuilder */ buffer;
+	/* private */ struct StringBuilder buffer;
 	/* private */ int depth;/* 
 
         public State() {
@@ -70,22 +70,26 @@
 };
 /* private */struct OptionCollector {
 };
+/* private */struct Struct {
+};
+/* private static */struct Whitespace implements Type {
+};
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */));
-/* T */ orElseGet(/* T */(*other)());
-Option</* T */> or(Option</* T */>(*other)());
-/* T */ orElse(/* T */ other);
-/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */));
-/* <R> */ Option<Tuple</* T */, /*  R */>> and(Option</* R */>(*other)());
-Option</* T */> next();
-List</* T */> add(/* T */ element);
-Iterator</* T */> iter();
+/* <R> */ Option<struct R> map(struct R(*mapper)(struct T));
+struct T orElseGet(struct T(*other)());
+Option<struct T> or(Option<struct T>(*other)());
+struct T orElse(struct T other);
+/* <R> */ Option<struct R> flatMap(Option<struct R>(*mapper)(struct T));
+/* <R> */ Option<Tuple<struct T, struct R>> and(Option<struct R>(*other)());
+Option<struct T> next();
+List<struct T> add(struct T element);
+Iterator<struct T> iter();
 int hasElements();
-/* T */ removeFirst();
-/* T */ get(int index);
-/* C */ createInitial();
-/* C */ fold(/* C */ current, /* T */ element);
+struct T removeFirst();
+struct T get(int index);
+struct C createInitial();
+struct C fold(struct C current, struct T element);
 char* generate();
 char* generate();
 /* @Override
@@ -97,16 +101,16 @@ char* generate();
 	if (this.counter < this.length){
 		auto value = this.counter;
 		this.counter++;
-		return Some</*  */>(value);
+		return Some<>(value);
 	}
 	else {
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 }
-/* public <R> */ Iterator</* R */> map(/*  R */(*mapper)(/* T */)){
-	return Iterator</*  */>((/* ) */ -> this.head.next().map(mapper));
+/* public <R> */ Iterator<struct R> map(struct R(*mapper)(struct T)){
+	return Iterator<>(/*  */(/* ) */ -> this.head.next(/*  */).map(mapper));
 }
-/* public <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */)){
+/* public <R> */ struct R fold(struct R initial, struct R(*folder)(struct R, struct T)){
 	auto current = initial;
 	while (true){
 		/* switch (this.head.next()) */{
@@ -117,10 +121,10 @@ char* generate();
 		}
 	}
 }
-/* public <C> */ /* C */ collect(Collector</* T */, /*  C */> collector){
-	return this.fold(collector.createInitial(), /*  collector::fold */);
+/* public <C> */ struct C collect(Collector<struct T, struct C> collector){
+	return this.fold(collector.createInitial(/*  */), /*  collector::fold */);
 }
-/* private */ State(List<char*> segments, /* StringBuilder */ buffer, int depth){
+struct private State(List<char*> segments, struct StringBuilder buffer, int depth){
 	/* this.segments = segments; */
 	/* this.buffer = buffer; */
 	/* this.depth = depth; */
@@ -128,19 +132,19 @@ char* generate();
 /* public */ int isLevel(){
 	return this.depth == 0;
 }
-/* public */ /* State */ enter(){
+/* public */ struct State enter(){
 	this.depth++;
 	return this;
 }
-/* public */ /* State */ exit(){
+/* public */ struct State exit(){
 	/* this.depth-- */;
 	return this;
 }
-/* private */ /* State */ append(/* char */ c){
+/* private */ struct State append(struct char c){
 	/* this.buffer.append(c) */;
 	return this;
 }
-/* private */ /* State */ advance(){
+/* private */ struct State advance(){
 	/* this.segments.add(this.buffer.toString()) */;
 	/* this.buffer = new StringBuilder(); */
 	return this;
@@ -149,59 +153,59 @@ char* generate();
 	return this.depth == 1;
 }
 /* @Override
-        public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */)){
-	return Some</*  */>(mapper.apply(this.value));
+        public <R> */ Option<struct R> map(struct R(*mapper)(struct T)){
+	return Some<>(mapper.apply(this.value));
 }
 /* @Override
-        public */ /* T */ orElseGet(/* T */(*other)()){
+        public */ struct T orElseGet(struct T(*other)()){
 	return this.value;
 }
 /* @Override
-        public */ Option</* T */> or(Option</* T */>(*other)()){
+        public */ Option<struct T> or(Option<struct T>(*other)()){
 	return this;
 }
 /* @Override
-        public */ /* T */ orElse(/* T */ other){
+        public */ struct T orElse(struct T other){
 	return this.value;
 }
 /* @Override
-        public <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */)){
+        public <R> */ Option<struct R> flatMap(Option<struct R>(*mapper)(struct T)){
 	return mapper.apply(this.value);
 }
 /* @Override
-        public <R> */ Option<Tuple</* T */, /*  R */>> and(Option</* R */>(*other)()){
+        public <R> */ Option<Tuple<struct T, struct R>> and(Option<struct R>(*other)()){
 	return other.get(/* ) */.map(/* otherValue */ -> /* new Tuple<>(this */.value, otherValue));
 }
 /* @Override
-        public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */)){
-	return None</*  */>();
+        public <R> */ Option<struct R> map(struct R(*mapper)(struct T)){
+	return None<>(/*  */);
 }
 /* @Override
-        public */ /* T */ orElseGet(/* T */(*other)()){
-	return other.get();
+        public */ struct T orElseGet(struct T(*other)()){
+	return other.get(/*  */);
 }
 /* @Override
-        public */ Option</* T */> or(Option</* T */>(*other)()){
-	return other.get();
+        public */ Option<struct T> or(Option<struct T>(*other)()){
+	return other.get(/*  */);
 }
 /* @Override
-        public */ /* T */ orElse(/* T */ other){
+        public */ struct T orElse(struct T other){
 	return other;
 }
 /* @Override
-        public <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */)){
-	return None</*  */>();
+        public <R> */ Option<struct R> flatMap(Option<struct R>(*mapper)(struct T)){
+	return None<>(/*  */);
 }
 /* @Override
-        public <R> */ Option<Tuple</* T */, /*  R */>> and(Option</* R */>(*other)()){
-	return None</*  */>();
+        public <R> */ Option<Tuple<struct T, struct R>> and(Option<struct R>(*other)()){
+	return None<>(/*  */);
 }
-/* private */ Joiner(){
+struct private Joiner(){
 	/* this("") */;
 }
 /* @Override
         public */ Option<char*> createInitial(){
-	return None</*  */>();
+	return None<>(/*  */);
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> maybeCurrent, char* element){
@@ -212,11 +216,11 @@ char* generate();
 	/* ) */;
 }
 /* @Override
-        public */ List</* T */> createInitial(){
-	return Lists.emptyList();
+        public */ List<struct T> createInitial(){
+	return Lists.emptyList(/*  */);
 }
 /* @Override
-        public */ List</* T */> fold(List</* T */> current, /* T */ element){
+        public */ List<struct T> fold(List<struct T> current, struct T element){
 	return current.add(element);
 }
 /* @Override
@@ -249,34 +253,42 @@ char* generate();
 	return this.type.generate() + "*";
 }
 /* @Override
-        public */ Option</* C */> createInitial(){
-	return Some</*  */>(this.collector.createInitial());
+        public */ Option<struct C> createInitial(){
+	return Some<>(this.collector.createInitial(/*  */));
 }
 /* @Override
-        public */ Option</* C */> fold(Option</* C */> current, Option</* T */> element){
-	return current.and((/* ) */ -> /* element).map(tuple */ -> this.collector.fold(tuple.left, tuple.right));
+        public */ Option<struct C> fold(Option<struct C> current, Option<struct T> element){
+	return current.and(/*  */(/* ) */ -> /* element).map(tuple */ -> this.collector.fold(tuple.left, tuple.right));
+}
+/* @Override
+        public */ char* generate(){
+	return /* "struct " + this */.name;
+}
+/* @Override
+        public */ char* generate(){
+	return /* "" */;
 }
 /* private static final List<String> structs */ /* = */ Lists.emptyList();
 /* private static final List<String> methods */ /* = */ Lists.emptyList();
-/* private static */ char* generateAll(/*  StringBuilder */(*merger)(/* StringBuilder */, char*), List<char*> parsed){
+/* private static */ char* generateAll(struct StringBuilder(*merger)(struct StringBuilder, char*), List<char*> parsed){
 	return parsed.iter(/* )
                  */.fold(/* new StringBuilder( */), /* merger)
                  */.toString();
 }
-/* private static <T> */ Option<List</* T */>> parseAll(char* input, /*  State */(*folder)(/* State */, /*  Character */), Option</* T */>(*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseAll(char* input, struct State(*folder)(struct State, struct Character), Option<struct T>(*compiler)(char*)){
 	return Main.divideAll(input, /* folder)
                  */.iter(/* )
                  */.map(/* compiler)
                  */.collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll(char* input, /*  State */(*folder)(/* State */, /*  Character */)){
-	auto current = /* State */();
-	auto queue = Iterator</*  */>(/* RangeHead */(input.length())).map(input::charAt).collect(new ListCollector<>());
-	while (queue.hasElements()){
-		auto c = queue.removeFirst();
+/* private static */ List<char*> divideAll(char* input, struct State(*folder)(struct State, struct Character)){
+	auto current = struct State(/*  */);
+	auto queue = Iterator<>(struct RangeHead(input.length())).map(input::charAt).collect(new ListCollector<>());
+	while (queue.hasElements(/*  */)){
+		auto c = queue.removeFirst(/*  */);
 		if (/* c == '\'' */){
 			/* current.append(c) */;
-			auto c1 = queue.removeFirst();
+			auto c1 = queue.removeFirst(/*  */);
 			/* current.append(c1) */;
 			if (/* c1 == '\\' */){
 				/* current.append(queue.removeFirst()) */;
@@ -286,8 +298,8 @@ char* generate();
 		}
 		if (/* c == '"' */){
 			/* current.append(c) */;
-			while (queue.hasElements()){
-				auto next = queue.removeFirst();
+			while (queue.hasElements(/*  */)){
+				auto next = queue.removeFirst(/*  */);
 				/* current.append(next) */;
 				if (/* next == '\\' */){
 					/* current.append(queue.removeFirst()) */;
@@ -300,13 +312,13 @@ char* generate();
 		}
 		/* current = folder.apply(current, c); */
 	}
-	return current.advance().segments;
+	return current.advance(/*  */).segments;
 }
 /* private static */ char* generateValues(List<char*> parserd){
 	return Main.generateAll(/* Main::mergeValues */, parserd);
 }
-/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, char* element){
-	if (cache.isEmpty()){
+/* private static */ struct StringBuilder mergeValues(struct StringBuilder cache, char* element){
+	if (cache.isEmpty(/*  */)){
 		return cache.append(element);
 	}
 	return cache.append(/* ", ") */.append(element);
@@ -314,13 +326,13 @@ char* generate();
 /* private static */ char* generatePlaceholder(char* input){
 	return /* "/* " + input + " */" */;
 }
-/* private static */ char* generateValuesFromNodes(List</* Type */> list){
+/* private static */ char* generateValuesFromNodes(List<struct Type> list){
 	return list.iter(/* )
                  */.map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
 /* private static */ char* compileStatementOrBlock(char* input, int depth){
-	return compileWhitespace(/* input)
-                 */.or((/* ) */ -> /* compileStatement(input, Main::compileStatementValue, depth))
+	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
+                 */.or(/* () */ -> /* compileStatement(input, Main::compileStatementValue, depth))
                 .or(() */ -> /* compileBlock(input, depth))
                 .orElseGet(() */ -> /* createIndent(depth) + generatePlaceholder(input */.strip()));
 }
@@ -328,61 +340,61 @@ char* generate();
 	return /* "\n" + "\t" */.repeat(depth);
 }
 /* private static */ Option<char*> compileBlock(char* input, int depth){
-	auto stripped = input.strip();
+	auto stripped = input.strip(/*  */);
 	if (stripped.endsWith(/* "}" */)){
 		auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - "}" */.length());
 		auto contentStart = withoutEnd.indexOf(/* "{" */);
 		if (/* contentStart >= 0 */){
 			auto beforeContent = withoutEnd.substring(/* 0 */, contentStart);
-			auto content = withoutEnd.substring(/* contentStart + "{" */.length());
+			auto content = withoutEnd.substring(/* contentStart + "{" */.length(/*  */));
 			auto indent = createIndent(depth);
-			return Some</*  */>(/* indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content */, /*  depth) + indent + "}" */);
+			return Some<>(/* indent + compileBeforeBlock(beforeContent) + "{" + compileStatementsOrBlocks(content */, /*  depth) + indent + "}" */);
 		}
 	}
-	return None</*  */>();
+	return None<>(/*  */);
 }
 /* private static */ char* compileBeforeBlock(char* input){
 	if (input.strip(/* ) */.equals("else")){
 		return /* "else " */;
 	}
 	return compileConditional(input, /* "if")
-                 */.or((/* ) */ -> /* compileConditional(input, "while"))
+                 */.or(/*  */(/* ) */ -> /* compileConditional(input, "while"))
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()));
 }
 /* private static */ Option<char*> compileConditional(char* input, char* prefix){
-	auto stripped = input.strip();
+	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(prefix)){
 		auto withoutKeyword = stripped.substring(prefix.length(/* ) */).strip();
 		if (withoutKeyword.startsWith(/* "(") && withoutKeyword */.endsWith(")")){
 			auto condition = withoutKeyword.substring(/* 1 */, withoutKeyword.length() - 1);
-			return Some</*  */>(/* prefix + " (" + compileValue(condition) + ")" */);
+			return Some<>(/* prefix + " (" + compileValue(condition) + ")" */);
 		}
 	}
-	return None</*  */>();
+	return None<>(/*  */);
 }
 /* private static */ Option<char*> compileStatementValue(char* input){
-	auto stripped = input.strip();
+	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "return " */)){
-		auto value = stripped.substring(/* "return " */.length());
-		return Some</*  */>(/* "return " + compileValue */(value));
+		auto value = stripped.substring(/* "return " */.length(/*  */));
+		return Some<>(/* "return " + compileValue */(value));
 	}
 	if (stripped.endsWith(/* "++" */)){
 		auto slice = stripped.substring(/* 0 */, stripped.length(/* ) - "++" */.length());
-		return Some</*  */>(/* compileValue(slice) + "++" */);
+		return Some<>(/* compileValue(slice) + "++" */);
 	}
 	auto valueSeparator = stripped.indexOf(/* "=" */);
 	if (/* valueSeparator >= 0 */){
 		auto definition = stripped.substring(/* 0 */, valueSeparator);
-		auto value = stripped.substring(/* valueSeparator + "=" */.length());
+		auto value = stripped.substring(/* valueSeparator + "=" */.length(/*  */));
 		/* return compileDefinitionToString(definition).map(outputDefinition -> */{
 			return /* outputDefinition + " = " + compileValue */(value);
 		}
 		/* ) */;
 	}
-	return Some</*  */>(generatePlaceholder(input));
+	return Some<>(generatePlaceholder(input));
 }
 /* private static */ char* compileValue(char* input){
-	auto stripped = input.strip();
+	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "new " */)){
 		auto slice = stripped.substring(/* "new " */.length(/* ) */).strip();
 		if (compileInvokable(slice, /*  Main::compileConstructorCaller) instanceof Some(var value */)){
@@ -395,13 +407,13 @@ char* generate();
 	auto arrowIndex = input.indexOf(/* " */ -> /* " */);
 	if (/* arrowIndex >= 0 */){
 		auto beforeArrow = input.substring(/* 0 */, /* arrowIndex) */.strip();
-		auto afterArrow = input.substring(/* arrowIndex + " */ -> /* " */.length());
+		auto afterArrow = input.substring(/* arrowIndex + " */ -> /* " */.length(/*  */));
 		return generatePlaceholder(/* beforeArrow) + " */ -> /*  " + compileValue(afterArrow */);
 	}
 	auto separator = stripped.lastIndexOf(/* " */.");
 	if (/* separator >= 0 */){
 		auto parent = stripped.substring(/* 0 */, separator);
-		auto property = stripped.substring(/* separator + " */.".length());
+		auto property = stripped.substring(/* separator + " */.".length(/*  */));
 		return /* compileValue(parent) + " */." + property;
 	}
 	if (isSymbol(stripped)){
@@ -414,27 +426,30 @@ char* generate();
 }
 /* private static */ Option<char*> compileInvokable(char* slice, char*(*beforeArgsCompiler)(char*)){
 	if (/* !slice */.endsWith(/* ")" */)){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto withoutEnd = slice.substring(/* 0 */, slice.length(/* ) - ")" */.length());
 	auto argsStart = withoutEnd.indexOf(/* "(" */);
 	if (/* argsStart < 0 */){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto base = withoutEnd.substring(/* 0 */, argsStart);
 	auto args = withoutEnd.substring(/* argsStart + " */(/* " */.length());
-	auto newArgs = parseValues(args, /* value */ -> Some</*  */>(/* compileValue(value)))
+	auto newArgs = parseValues(args, /* value */ -> Some<>(/* compileValue(value)))
                  */.map(Main::generateValues).orElse("");
 	auto generate = beforeArgsCompiler.apply(base);
-	return Some</*  */>(/* generate + "(" + newArgs + ")" */);
+	return Some<>(/* generate + "(" + newArgs + ")" */);
 }
 /* private static */ char* compileConstructorCaller(char* base){
 	if (parseAndModifyType(/* base) instanceof Some<Type>(var type */)){
-		return type.generate();
+		return type.generate(/*  */);
 	}
 	return generatePlaceholder(base);
 }
 /* private static */ int isSymbol(char* input){
+	if (input.isEmpty(/*  */)){
+		return false;
+	}
 	/* for */ /* (var */ i = /*  0 */;
 	/* i < input.length() */;
 	/* i++) */{
@@ -446,25 +461,25 @@ char* generate();
 	}
 	return true;
 }
-/* private static */ Option<char*> compileWhitespace(char* input){
-	if (input.isBlank()){
-		return Some</*  */>(/* "" */);
+/* private static */ Option<struct Whitespace> parseWhitespace(char* input){
+	if (input.isBlank(/*  */)){
+		return Some<>(struct Whitespace(/*  */));
 	}
-	return None</*  */>();
+	return None<>(/*  */);
 }
-/* private static */ Option</* Defined */> parseAndModifyDefinition(char* input){
+/* private static */ Option<struct Defined> parseAndModifyDefinition(char* input){
 	/* return Main.parseDefinition(input).map(definition -> */{
 		if (definition.type instanceof Functional(/* var args */, /*  var base */)){
-			return /* FunctionalDefinition */(definition.beforeType, base, definition.name, args);
+			return struct FunctionalDefinition(definition.beforeType, base, definition.name, args);
 		}
 		return definition;
 	}
 	/* ) */;
 }
 /* private static */ Option<char*> compileStatement(char* input, Option<char*>(*compiler)(char*), int depth){
-	auto stripped = input.strip();
+	auto stripped = input.strip(/*  */);
 	if (/* !stripped */.endsWith(/* ";" */)){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - ";" */.length());
 	return compiler.apply(/* withoutEnd) */.map(/* definition */ -> /*  generateStatement(definition, depth */));
@@ -472,27 +487,27 @@ char* generate();
 /* private static */ char* generateStatement(char* definition, int depth){
 	return /* createIndent(depth) + definition + ";" */;
 }
-/* private static <T> */ Option<List</* T */>> parseValues(char* input, Option</* T */>(*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseValues(char* input, Option<struct T>(*compiler)(char*)){
 	return Main.parseAll(input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ /* State */ foldValueChar(/* State */ state, /* char */ c){
-	if (/* c == ',' && state */.isLevel()){
-		return state.advance();
+/* private static */ struct State foldValueChar(struct State state, struct char c){
+	if (/* c == ',' && state */.isLevel(/*  */)){
+		return state.advance(/*  */);
 	}
 	auto appended = state.append(c);
 	if (/* c == '<' */){
-		return appended.enter();
+		return appended.enter(/*  */);
 	}
 	if (/* c == '>' */){
-		return appended.exit();
+		return appended.exit(/*  */);
 	}
 	return appended;
 }
-/* private static */ Option</* Definition */> parseDefinition(char* input){
-	auto stripped = input.strip();
+/* private static */ Option<struct Definition> parseDefinition(char* input){
+	auto stripped = input.strip(/*  */);
 	auto nameSeparator = stripped.lastIndexOf(/* " " */);
 	if (/* nameSeparator < 0 */){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto beforeName = stripped.substring(/* 0 */, /* nameSeparator) */.strip();
 	auto name = stripped.substring(/* nameSeparator + " " */.length(/* ) */).strip();
@@ -510,11 +525,11 @@ char* generate();
 /* private static */ Option<int> findTypeSeparator(char* input){
 	auto depth = /*  0 */;
 	/* for */ /* (var */ index = input.length() - 1;
-	/* index */ > = /*  0 */;
+	struct index > = /*  0 */;
 	/* index--) */{
 		auto c = input.charAt(index);
 		if (/* c == ' ' && depth == 0 */){
-			return Some</*  */>(index);
+			return Some<>(index);
 		}
 		if (/* c == '>' */){
 			depth++;
@@ -523,60 +538,68 @@ char* generate();
 			/* depth-- */;
 		}
 	}
-	return None</*  */>();
+	return None<>(/*  */);
 }
-/* private static */ Option</* Type */> parseAndModifyType(char* input){
+/* private static */ Option<struct Type> parseAndModifyType(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic */(/* var base */, /*  var arguments */)){
 			if (base.equals(/* "Function" */)){
 				auto argType = arguments.get(/* 0 */);
 				auto returnType = arguments.get(/* 1 */);
-				return /* Functional */(Lists.of(argType), returnType);
+				return struct Functional(Lists.of(argType), returnType);
 			}
 			if (base.equals(/* "Supplier" */)){
 				auto returns = arguments.get(/* 0 */);
-				return /* Functional */(Lists.emptyList(), returns);
+				return struct Functional(Lists.emptyList(/*  */), returns);
 			}
 			if (base.equals(/* "BiFunction" */)){
 				auto argType = arguments.get(/* 0 */);
 				auto argType2 = arguments.get(/* 1 */);
 				auto returnType = arguments.get(/* 2 */);
-				return /* Functional */(Lists.of(argType, /*  argType2) */, returnType);
+				return struct Functional(Lists.of(argType, /*  argType2) */, returnType);
 			}
 		}
 		return parsed;
 	}
 	/* ) */;
 }
-/* private static */ Option</* Type */> parseType(char* input){
-	auto stripped = input.strip();
+/* private static */ Option<struct Type> parseType(char* input){
+	auto stripped = input.strip(/*  */);
 	if (stripped.equals(/* "public" */)){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	if (stripped.equals(/* "boolean" */)){
-		return Some</*  */>(Primitive.Bit);
+		return Some<>(Primitive.Bit);
 	}
 	if (stripped.equals(/* "String" */)){
-		return Some</*  */>(/* Ref */(Primitive.I8));
+		return Some<>(struct Ref(Primitive.I8));
 	}
 	if (stripped.equals(/* "int") || stripped */.equals("Integer")){
-		return Some</*  */>(Primitive.I32);
+		return Some<>(Primitive.I32);
 	}
 	if (stripped.equals(/* "var" */)){
-		return Some</*  */>(Primitive.Var);
+		return Some<>(Primitive.Var);
 	}
 	if (stripped.endsWith(/* ">" */)){
 		auto slice = stripped.substring(/* 0 */, stripped.length(/* ) - ">" */.length());
 		auto argsStart = slice.indexOf(/* "<" */);
 		if (/* argsStart >= 0 */){
 			auto base = slice.substring(/* 0 */, /* argsStart) */.strip();
-			auto inputArgs = slice.substring(/* argsStart + "<" */.length());
-			return Main.parseValues(inputArgs, /* Main::parseAndModifyType) */.map(/* args */ -> /*  new Generic(base, args */));
+			auto inputArgs = slice.substring(/* argsStart + "<" */.length(/*  */));
+			return Main.parseValues(inputArgs, /* Main::parseGenericArgument) */.map(/* args */ -> /*  new Generic(base, args */));
 		}
 	}
-	return Some</*  */>(/* Content */(input));
+	if (isSymbol(stripped)){
+		return Some<>(struct Struct(stripped));
+	}
+	return Some<>(struct Content(input));
 }
-/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, char* str){
+/* private static */ Option<struct Type> parseGenericArgument(char* input1){
+	return parseWhitespace(/* input1)
+                 */.<Type>map(/* whitespace */ -> /* whitespace)
+                .or(() */ -> /*  parseAndModifyType(input1 */));
+}
+/* private static */ struct StringBuilder mergeStatements(struct StringBuilder stringBuilder, char* str){
 	return stringBuilder.append(str);
 }
 /* private static */ char* compileStatementsOrBlocks(char* body, int depth){
@@ -591,12 +614,12 @@ char* generate();
 /* private static */ char* generateStatements(List<char*> inner){
 	return generateAll(/* Main::mergeStatements */, inner);
 }
-/* private static */ /* State */ foldStatementChar(/* State */ state, /* char */ c){
+/* private static */ struct State foldStatementChar(struct State state, struct char c){
 	auto appended = state.append(c);
-	if (/* c == ';' && appended */.isLevel()){
-		return appended.advance();
+	if (/* c == ';' && appended */.isLevel(/*  */)){
+		return appended.advance(/*  */);
 	}
-	if (/* c == '}' && appended */.isShallow()){
+	if (/* c == '}' && appended */.isShallow(/*  */)){
 		return appended.advance(/* ) */.exit();
 	}
 	/* if (c == ' */{
@@ -604,7 +627,7 @@ char* generate();
             return appended.enter() */;
 	}
 	if (/* c == '}' */){
-		return appended.exit();
+		return appended.exit(/*  */);
 	}
 	else {
 		return appended;
@@ -613,7 +636,7 @@ char* generate();
 /* private static */ Option<char*> compileDefinitionToString(char* input){
 	return Main.parseAndModifyDefinition(/* input) */.map(Defined::generate);
 }
-/* void */ main(){
+struct void main(){
 	/* try */{
 		auto source = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
 		auto input = Files.readString(source);
@@ -627,8 +650,8 @@ char* generate();
 }
 /* private */ char* compileRoot(char* input){
 	auto compiled = compileStatements(input, /* segment */ -> /*  new Some<> */(this.compileRootSegment(segment)));
-	auto joinedStructs = structs.iter(/* ) */.collect(/* Joiner */()).orElse("");
-	auto joinedMethods = methods.iter(/* ) */.collect(/* Joiner */()).orElse("");
+	auto joinedStructs = structs.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
+	auto joinedMethods = methods.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
 	return /* compiled + joinedStructs + joinedMethods */;
 }
 /* private */ char* compileRootSegment(char* input){
@@ -641,13 +664,13 @@ char* generate();
 /* private */ Option<char*> compileStructured(char* input, char* infix){
 	auto classIndex = input.indexOf(infix);
 	if (/* classIndex < 0 */){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto left = input.substring(/* 0 */, /* classIndex) */.strip();
-	auto right = input.substring(/* classIndex + infix */.length());
+	auto right = input.substring(/* classIndex + infix */.length(/*  */));
 	auto contentStart = right.indexOf(/* "{" */);
 	if (/* contentStart < 0 */){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto beforeContent = right.substring(/* 0 */, /* contentStart) */.strip();
 	auto paramStart = beforeContent.indexOf(/* "(" */);
@@ -660,17 +683,17 @@ char* generate();
                 : withoutParams;
 	auto withEnd = right.substring(/* contentStart + "{" */.length(/* ) */).strip();
 	if (/* !withEnd */.endsWith(/* "}" */)){
-		return None</*  */>();
+		return None<>(/*  */);
 	}
 	auto inputContent = withEnd.substring(/* 0 */, withEnd.length() - 1);
 	auto outputContent = compileStatements(inputContent, /* segment */ -> /*  new Some<> */(this.compileStructuredSegment(segment)));
 	auto generated = /*  generatePlaceholder(left) + "struct " + withoutTypeParams + " {" + outputContent + "\n};\n" */;
 	/* structs.add(generated) */;
-	return Some</*  */>(/* "" */);
+	return Some<>(/* "" */);
 }
 /* private */ char* compileStructuredSegment(char* input){
-	return compileWhitespace(/* input)
-                 */.or(/* () */ -> /* this.compileStructured(input, "interface "))
+	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
+                .or(() */ -> /* this.compileStructured(input, "interface "))
                 .or(() */ -> /* this.compileStructured(input, "enum "))
                 .or(() */ -> /* this.compileStructured(input, "class "))
                 .or(() */ -> /* this.compileStructured(input, "record "))
@@ -688,7 +711,7 @@ char* generate();
 			if (/* paramEnd >= 0 */){
 				auto paramString = withParams.substring(/* 0 */, /* paramEnd) */.strip();
 				auto withBraces = withParams.substring(/* paramEnd + ")" */.length(/* ) */).strip();
-				auto outputParams = Main.parseValues(paramString, /* s */ -> Some</*  */>(this.compileParam(s))).map(Main::generateValues).orElse("");
+				auto outputParams = Main.parseValues(paramString, /* s */ -> Some<>(this.compileParam(s))).map(Main::generateValues).orElse("");
 				/* String newBody */;
 				/* if (withBraces.startsWith(" */{
 					/* ") && withBraces.endsWith("}")) { */ auto body = withBraces.substring(1, withBraces.length() - 1);
@@ -698,21 +721,21 @@ char* generate();
 					/* newBody = ";"; */
 				}
 				else {
-					return None</*  */>();
+					return None<>(/*  */);
 				}
 				auto generated = /*  outputDefinition + "(" + outputParams + ")" + newBody + "\n" */;
 				/* methods.add(generated) */;
-				return Some</*  */>(/* "" */);
+				return Some<>(/* "" */);
 			}
-			return None</*  */>();
+			return None<>(/*  */);
 		}
 		/* ) */;
 	}
-	return None</*  */>();
+	return None<>(/*  */);
 }
 /* private */ char* compileParam(char* param){
-	return compileWhitespace(/* param)
-                 */.or(/* () */ -> /* parseAndModifyDefinition(param).map(Defined::generate))
+	return parseWhitespace(/* param) */.map(/* Whitespace::generate)
+                .or(() */ -> /* parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() */ -> /*  generatePlaceholder(param */));
 }
 /* private */ Option<char*> compileDefinitionStatement(char* input){
