@@ -10,7 +10,7 @@
 }
 /* static final*/struct None<T> implements Option<T> {/* */
 }
-/* void main*/(/* */){/* 
+void main(/* */){/* 
     var source = Paths.get(".", "src", "java", "magma", "Main.java");*//* 
     var target = source.resolveSibling("main.c");*//* 
 
@@ -20,18 +20,18 @@
     }*//* 
 */
 }
-/* private Option<IOException> run*/(/* Path source, Path target*/){/* 
+/* private Option<IOException>*/ run(/* Path source, Path target*/){/* 
     return switch (this.readString(source)) {
         case Err(var error) -> new Some<>(error);
         case Ok(var input) -> this.writeString(target, this.compile(input));
     }*//* ;*//* 
 */
 }
-/* private String compile*/(/* String input*/){/* 
+/* private String*/ compile(/* String input*/){/* 
     return this.compileAll(input, this::compileRootSegment);*//* 
 */
 }
-/* private String compileAll*/(/* String input, Function<String, String> compiler*/){/* 
+/* private String*/ compileAll(/* String input, Function<String, String> compiler*/){/* 
     var segments = new ArrayList<String>();*//* 
     var buffer = new StringBuilder();*//* 
     var depth = 0;*//* 
@@ -97,7 +97,7 @@ private Option<String> compileMethod(String input) {
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var inputContent = withBraces.substring(1, withBraces.length() - 1);
                 var outputContent = this.compileAll(inputContent, this::compileStatementOrBlock);
-                return new Some<>(this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
+                return new Some<>(this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
             }
         }*//* 
     */
@@ -105,6 +105,28 @@ private Option<String> compileMethod(String input) {
 /* 
 
     return new None<>();*//* 
+}
+
+private String compileDefinition(String input) {
+    var stripped = input.strip();*//* 
+    var space = stripped.lastIndexOf(" ");*//* if*/(/* space >= 0*/){/* 
+        var type = stripped.substring(0, space);*//* 
+        var name = stripped.substring(space + " ".length());*//* 
+        return this.compileType(type) + " " + name;*//* 
+    */
+}
+/* 
+
+    return this.generatePlaceholder(stripped);*//* 
+}
+
+private String compileType(String input) {
+    var stripped = input.strip();*//* 
+    if (stripped.equals("void")) {
+        return "void";
+    }*//* 
+    
+    return this.generatePlaceholder(input);*//* 
 }
 
 private String compileStatementOrBlock(String input) {
@@ -139,7 +161,7 @@ private Option<String> compileStructured(String input, String infix) {
 private String generatePlaceholder(String input) {
     return "/* " + input + "*/";*//* }
 
-private Option<IOException> writeString*/(/* Path target, String output*/){/* 
+private Option<IOException>*/ writeString(/* Path target, String output*/){/* 
     try {
         Files.writeString(target, output);
         return new None<>();
@@ -151,7 +173,7 @@ private Option<IOException> writeString*/(/* Path target, String output*/){/*
 }
 /* }
 
-private Result<String, IOException> readString*/(/* Path source*/){/* 
+private Result<String, IOException>*/ readString(/* Path source*/){/* 
     try {
         return new Ok<>(Files.readString(source));
     */

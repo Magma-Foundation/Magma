@@ -101,12 +101,33 @@ private Option<String> compileMethod(String input) {
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var inputContent = withBraces.substring(1, withBraces.length() - 1);
                 var outputContent = this.compileAll(inputContent, this::compileStatementOrBlock);
-                return new Some<>(this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
+                return new Some<>(this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
             }
         }
     }
 
     return new None<>();
+}
+
+private String compileDefinition(String input) {
+    var stripped = input.strip();
+    var space = stripped.lastIndexOf(" ");
+    if (space >= 0) {
+        var type = stripped.substring(0, space);
+        var name = stripped.substring(space + " ".length());
+        return this.compileType(type) + " " + name;
+    }
+
+    return this.generatePlaceholder(stripped);
+}
+
+private String compileType(String input) {
+    var stripped = input.strip();
+    if (stripped.equals("void")) {
+        return "void";
+    }
+
+    return this.generatePlaceholder(input);
 }
 
 private String compileStatementOrBlock(String input) {
