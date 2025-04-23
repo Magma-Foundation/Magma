@@ -57,11 +57,15 @@ void main() {
 }
 
 private String compileRoot(String input) {
+    return this.compileAll(input, this::compileRootSegment);
+}
+
+private String compileAll(String input, Function<String, String> compiler) {
     var segments = this.divide(input, new State()).segments;
 
     var output = new StringBuilder();
     for (var segment : segments) {
-        output.append(this.compileRootSegment(segment));
+        output.append(compiler.apply(segment));
     }
 
     return output.toString();
@@ -76,10 +80,18 @@ private String compileRootSegment(String input) {
         if (contentStart >= 0) {
             var name = right.substring(0, contentStart).strip();
             var withEnd = right.substring(contentStart + "{".length()).strip();
-            return this.generatePlaceholder(left) + "struct " + name + " {" + this.generatePlaceholder(withEnd);
+            if (withEnd.endsWith("}")) {
+                var inputContent = withEnd.substring(0, withEnd.length() - 1);
+                var outputContent = this.compileAll(inputContent, this::compileClassSegment);
+                return this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
+            }
         }
     }
 
+    return this.generatePlaceholder(input);
+}
+
+private String compileClassSegment(String input) {
     return this.generatePlaceholder(input);
 }
 
