@@ -29,7 +29,7 @@ class Main {
     }
 
     public interface List<T> {
-        List<T> add(T element);
+        List<T> addLast(T element);
 
         Iterator<T> iter();
 
@@ -40,6 +40,8 @@ class Main {
         T get(int index);
 
         boolean contains(T element);
+
+        List<T> addFirst(T element);
     }
 
     public interface Collector<T, C> {
@@ -52,7 +54,7 @@ class Main {
         String generate();
     }
 
-    private interface Defined {
+    private interface Defined extends Parameter {
         String generate();
 
         Defined mapName(Function<String, String> mapper);
@@ -66,6 +68,10 @@ class Main {
         String generate();
 
         Type resolveType();
+    }
+
+    interface Parameter {
+        String generate();
     }
 
     private enum Primitive implements Type {
@@ -128,7 +134,6 @@ class Main {
             return new Some<>(this.value);
         }
     }
-
 
     public record Iterator<T>(Head<T> head) {
         public <R> Iterator<R> map(Function<T, R> mapper) {
@@ -201,7 +206,7 @@ class Main {
         }
 
         private State advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments.addLast(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -302,7 +307,7 @@ class Main {
 
         @Override
         public List<T> fold(List<T> current, T element) {
-            return current.add(element);
+            return current.addLast(element);
         }
     }
 
@@ -318,7 +323,7 @@ class Main {
         }
     }
 
-    private record Content(String input) implements Type, Value {
+    private record Content(String input) implements Type, Value, Parameter {
         @Override
         public String generate() {
             return Main.generatePlaceholder(this.input);
@@ -338,6 +343,10 @@ class Main {
     }
 
     private record Definition(Option<String> beforeType, Type type, String name) implements Defined {
+        public Definition(Type type, String name) {
+            this(new None<>(), type, name);
+        }
+
         @Override
         public String generate() {
             var beforeTypeString = this.beforeType
@@ -407,7 +416,7 @@ class Main {
         }
     }
 
-    private record Whitespace() implements Type {
+    private record Whitespace() implements Type, Parameter {
         @Override
         public String generate() {
             return "";
@@ -881,7 +890,7 @@ class Main {
 
     private static void addGeneric(Generic generic) {
         if (!generics.contains(generic) && generic.arguments.hasElements()) {
-            generics.add(generic);
+            generics.addLast(generic);
         }
     }
 
@@ -1047,7 +1056,7 @@ class Main {
         currentStruct = new Some<>(name);
         var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
         var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
-        structs.add(generated);
+        structs.addLast(generated);
 
         return new Some<>("");
     }
@@ -1080,8 +1089,19 @@ class Main {
                         if (paramEnd >= 0) {
                             var paramString = withParams.substring(0, paramEnd).strip();
                             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                            var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
-                                    .map(Main::generateValues)
+                            var inputParameters = Main.parseValues(paramString, s -> new Some<>(this.parseParameter(s)))
+                                    .orElse(Lists.emptyList())
+                                    .iter()
+                                    .filter(param -> !(param instanceof Whitespace))
+                                    .collect(new ListCollector<>());
+
+                            var aThis = new Definition(new Symbol(currentStruct.orElse("")), "this");
+
+                            var outputParams = inputParameters
+                                    .addFirst(aThis)
+                                    .iter()
+                                    .map(Parameter::generate)
+                                    .collect(new Joiner(", "))
                                     .orElse("");
 
                             String newBody;
@@ -1097,7 +1117,7 @@ class Main {
                             }
 
                             var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n";
-                            methods.add(generated);
+                            methods.addLast(generated);
                             return new Some<>("");
                         }
 
@@ -1108,10 +1128,10 @@ class Main {
         return new None<>();
     }
 
-    private String compileParam(String param) {
-        return parseWhitespace(param).map(Whitespace::generate)
-                .or(() -> parseAndModifyDefinition(param).map(Defined::generate))
-                .orElseGet(() -> generatePlaceholder(param));
+    private Parameter parseParameter(String param) {
+        return parseWhitespace(param).<Parameter>map(inner -> inner)
+                .or(() -> parseAndModifyDefinition(param).map(inner -> inner))
+                .orElseGet(() -> new Content(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {

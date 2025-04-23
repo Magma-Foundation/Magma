@@ -12,7 +12,7 @@ public class Lists {
         }
 
         @Override
-        public List<T> add(T element) {
+        public List<T> addLast(T element) {
             this.list.add(element);
             return this;
         }
@@ -40,6 +40,12 @@ public class Lists {
         @Override
         public boolean contains(T element) {
             return this.list.contains(element);
+        }
+
+        @Override
+        public List<T> addFirst(T element) {
+            this.list.addFirst(element);
+            return this;
         }
     }
 
