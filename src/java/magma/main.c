@@ -4,99 +4,61 @@ import java.io.IOException; *//*
 import java.nio.file.Files; *//* 
 import java.nio.file.Path; *//* 
 import java.nio.file.Paths; *//* 
+import java.util.Arrays; *//* 
 import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//* class Main {
-    sealed */struct Result<T, X> permits Ok, Err {
+import java.util.function.Function; *//*  */struct Main {/* sealed interface Result<T, X> permits Ok, Err {
+    } *//* 
+
+    sealed interface Option<T> permits Some, None {
+    } */
 	/* Iterator<T> */ iter(/*  */);
-	void add(/* T element */);
 	/* Iterator<R> */ map(/* Function<T, R> mapper */);
-	/* R */ fold(/* R initial, BiFunction<R, T, R> folder */);
-	/* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */);
-	/* Iterator<T> */ concat(/* Iterator<T> other */);
-	/* Option<T> */ next(/*  */);
 	/* Option<T> */ next(/*  */);
 	/* Ok<T, */ X>(/* T value */);
-	/* StringBuilder */ buffer;
-	int depth;/* private */ State(/* List<String> segments, StringBuilder buffer, int depth */){
+	/* Err<T, */ X>(/* X error */);
+	/* record */ Some<T>(/* T value */);/* 
+
+    static final class None<T> implements Option<T> {
+    } *//* private */ State(/* List<String> segments, StringBuilder buffer, int depth */){
 	/* this.segments */ = segments;
 	/* this.buffer */ = buffer;
 	/* this.depth */ = depth;/* 
-         */
-}
-/* public */ State(/*  */){/* 
+        }
+
+        public State() {
             this(Lists.empty(), new StringBuilder(), 0); *//* 
-         */
-}
-/* State */ append(/* char c */){/* 
+        }
+
+        private State append(char c) {
             this.buffer.append(c); *//* 
+            return this; */
+	/* return */ this.depth = /* = 0 */;
+	/* return */ this.depth = /* = 1 */;
+	/*  */ this.depth = this.depth + 1;/* 
+            return this; */
+	/*  */ this.depth = this.depth - 1;/* 
             return this; *//* 
-         */
-}
-/* boolean */ isLevel(/*  */){
-	/* return */ this.depth = /* = 0 */;/* 
-         */
-}
-/* boolean */ isShallow(/*  */){
-	/* return */ this.depth = /* = 1 */;/* 
-         */
-}
-/* State */ enter(/*  */){
-	/* this.depth */ = this.depth + 1;/* 
-            return this; *//* 
-         */
-}
-/* State */ exit(/*  */){
-	/* this.depth */ = this.depth - 1;/* 
-            return this; *//* 
-         */
-}
-/* State */ advance(/*  */){/* 
+        }
+
+        private State advance() {
             this.segments.add(this.buffer.toString()); */
 	/* this.buffer */ = /* new StringBuilder */();/* 
             return this; *//* 
-         */
+        }
+     */
 }
 /* Option<T> */ next(/*  */){/* 
             return new None<>(); *//* 
-         */
+        }
+     */
 }
 
-	/* record */ HeadedIterator<T>(/* Head<T> head */);/* R */ fold(/* R initial, BiFunction<R, T, R> folder */){
-	/* var */ current = initial;/* 
-            while (true) {
-                switch (this.head.next()) {
-                    case None<T> _ -> {
-                        return current;
-                    }
-                    case Some(var value) -> {
-                        current = folder.apply(current, value);
-                    }
-                }
-            } *//* 
-         */
-}
-/* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */){/* 
-            return this.map(mapper).fold(Iterators.empty(), Iterator::concat); *//* 
-         */
-}
-/* Iterator<T> */ concat(/* Iterator<T> other */){/* 
-            return new HeadedIterator<>(() -> switch (this.head.next()) {
-                case Some<T> option -> option;
-                case None<T> _ -> other.next();
-            } *//* ); *//* 
-         */
-}
-/* Option<T> */ next(/*  */){/* 
-            return this.head.next(); *//* 
-         */
-}
-
-	int length;
-	/* = */ 0;/* public */ RangeHead(/* int length */){
+	/* record */ HeadedIterator<T>(/* Head<T> head */);/* public */ RangeHead(/* int length */){
 	/* this.length */ = length;/* 
-         */
-}
-/* Option<Integer> */ next(/*  */){/* 
+        }
+
+        @Override
+        public Option<Integer> next() {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -105,67 +67,98 @@ import java.util.function.Function; *//* class Main {
             else {
                 return new None<>();
             } *//* 
-         */
+        }
+     */
 }
-
-	/* T */ value;
-	/* = */ false;/* private */ SingleHead(/* T value */){
+/* private */ SingleHead(/* T value */){
 	/* this.value */ = value;/* 
-         */
-}
-/* Option<T> */ next(/*  */){/* 
+        }
+
+        @Override
+        public Option<T> next() {
             if (this.retrieved) {
                 return new None<>();
             } */
 	/* this.retrieved */ = true;/* 
             return new Some<>(this.value); *//* 
-         */
+        }
+     */
 }
 /* Iterator<T> */ empty(/*  */){/* 
             return new HeadedIterator<>(new EmptyHead<>()); *//* 
-         */
-}
-/* Iterator<T> */ fromOption(/* Option<T> option */){/* 
+        }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
             return new HeadedIterator<>(switch (option) {
                 case None<T> _ -> new EmptyHead<T>();
                 case Some<T>(var value) -> new SingleHead<T>(value);
             } *//* ); *//* 
-         */
+        }
+     */
 }
+void main(/*  */){
+	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
+	/* var */ target = source.resolveSibling("main.c");/* 
 
-	void main(/*  */);
-	/* = */ source.resolveSibling(/* "main.c" */);
-	/* if */(/* this.run(source, target */);/* Option<IOException> */ run(/* Path source, Path target */){/* 
+        if (this.run(source, target) instanceof Some(var error)) {
+            //noinspection CallToPrintStackTrace
+            error.printStackTrace();
+        } *//* 
+     */
+}
+/* Option<IOException> */ run(/* Path source, Path target */){/* 
         return switch (this.readString(source)) {
             case Err(var error) -> new Some<>(error);
             case Ok(var input) -> this.writeString(target, this.compile(input));
-         */
+        } *//* ; *//* 
+     */
 }
-
-	/*  */;
-	/* String */ compile(/* String input */);
-	/* String */ compileAll(/* String input,
+/* String */ compile(/* String input */){/* 
+        return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements); *//* 
+     */
+}
+/* String */ compileAll(/* String input,
             BiFunction<State, Character, State> folder,
             Function<String, String> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger */);
-	/* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */);
-	/* List<String> */ divide(/* String input, State state, BiFunction<State, Character, State> folder */);
-	/* = */ 0;
-	/* < */ input.length(/*  */);
-	/* = */ input.charAt(/* i */);
-	/* current.advance */(/*  */);
-	/* return */ current.segments;
-	/* State */ foldStatementChar(/* State state, char c */);
-	/* == */ ';
-	/* && */ state.isLevel(/*  */);
-	/* else */ if(/* c == '}' && state.isShallow( */);
-	/* state.exit */(/*  */);/* else */ if(/* c == '{' */){/* 
-            state.enter(); *//* 
-         */
+            BiFunction<StringBuilder, String, StringBuilder> merger */){/* 
+        return this.divide(input, new State(), folder)
+                .iter()
+                .map(compiler)
+                .fold(new StringBuilder(), merger)
+                .toString(); *//* 
+     */
+}
+/* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
+        return output.append(compiled); *//* 
+     */
+}
+/* List<String> */ divide(/* String input, State state, BiFunction<State, Character, State> folder */){
+	/* var */ current = state;
+	/* (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
+            var c = input.charAt(i);
+            current = folder.apply(current, c);
+        } *//* 
+        current.advance(); *//* 
+        return current.segments; *//* 
+     */
+}
+/* State */ foldStatementChar(/* State state, char c */){/* 
+        state.append(c); */
+	/* if */ (c = /* = ' */;/* ' && state.isLevel()) {
+            state.advance();
+        } *//* 
+        else if (c == ' */
 }
 
-	/* else */ if(/* c == '}' */);
-	/* return */ state;
+	/* && */ state.isShallow(/*  */);/* else */ if(/* c == '{' */){/* 
+            state.enter(); *//* 
+        }
+        else if (c == ' */
+}
+
+	/*  */ state.exit(/*  */);
+	/* return */ state;/* 
+     */
 }
 /* String */ compileRootSegment(/* String input0 */){/* 
         return this.compileOr(input0, Lists.of(
@@ -329,6 +322,13 @@ import java.util.function.Function; *//* class Main {
             return new None<>();
         } */
 	/* var */ beforeKeyword = input.substring(/* 0 */, /* interfaceIndex) */.strip();
+	/* var */ allSymbols = Arrays.stream(beforeKeyword.split(/* " "))
+                 */.map(/* String::strip)
+                 */.filter(value -> !value.isEmpty()).allMatch(this::isSymbol);/* 
+
+        if (!allSymbols) {
+            return new None<>();
+        } */
 	/* var */ afterKeyword = input.substring(/* interfaceIndex + infix */.length());/* 
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {

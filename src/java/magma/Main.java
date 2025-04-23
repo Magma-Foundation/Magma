@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -431,6 +432,15 @@ class Main {
         }
 
         var beforeKeyword = input.substring(0, interfaceIndex).strip();
+        var allSymbols = Arrays.stream(beforeKeyword.split(" "))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .allMatch(this::isSymbol);
+
+        if (!allSymbols) {
+            return new None<>();
+        }
+
         var afterKeyword = input.substring(interfaceIndex + infix.length());
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
