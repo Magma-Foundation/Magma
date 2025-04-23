@@ -18,6 +18,8 @@ class Main {
         T orElse(T other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     interface Head<T> {
@@ -65,6 +67,9 @@ class Main {
         public String generate() {
             return this.value;
         }
+    }
+
+    public record Tuple<A, B>(A left, B right) {
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -180,6 +185,11 @@ class Main {
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -205,6 +215,11 @@ class Main {
 
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
         }
     }
@@ -294,6 +309,18 @@ class Main {
         }
     }
 
+    private record OptionCollector<T, C>(Collector<T, C> collector) implements Collector<Option<T>, Option<C>> {
+        @Override
+        public Option<C> createInitial() {
+            return new Some<>(this.collector.createInitial());
+        }
+
+        @Override
+        public Option<C> fold(Option<C> current, Option<T> element) {
+            return current.and(() -> element).map(tuple -> this.collector.fold(tuple.left, tuple.right));
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -303,15 +330,15 @@ class Main {
                 .toString();
     }
 
-    private static <T> List<T> parseAll(
+    private static <T> Option<List<T>> parseAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, T> compiler
+            Function<String, Option<T>> compiler
     ) {
         return Main.divideAll(input, folder)
                 .iter()
                 .map(compiler)
-                .collect(new ListCollector<>());
+                .collect(new OptionCollector<>(new ListCollector<>()));
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
@@ -446,7 +473,7 @@ class Main {
         return compiler.apply(withoutEnd).map(definition -> "\n\t" + definition + ";");
     }
 
-    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
+    private static <T> Option<List<T>> parseValues(String input, Function<String, Option<T>> compiler) {
         return Main.parseAll(input, Main::foldValueChar, compiler);
     }
 
@@ -473,15 +500,15 @@ class Main {
         var beforeName = input.substring(0, nameSeparator).strip();
         var name = input.substring(nameSeparator + " ".length()).strip();
 
-        return new Some<>(switch (Main.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> new Definition(new None<>(), Main.parseAndModifyType(beforeName), name);
+        return switch (Main.findTypeSeparator(beforeName)) {
+            case None<Integer> _ ->
+                    Main.parseAndModifyType(beforeName).map(type -> new Definition(new None<>(), type, name));
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
-                var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newType = Main.parseAndModifyType(type);
-                yield new Definition(new Some<>(beforeType), newType, name);
+                var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+                yield Main.parseAndModifyType(inputType).map(outputType -> new Definition(new Some<>(beforeType), outputType, name));
             }
-        });
+        };
     }
 
     private static Option<Integer> findTypeSeparator(String input) {
@@ -503,36 +530,41 @@ class Main {
         return new None<>();
     }
 
-    private static Type parseAndModifyType(String input) {
-        var parsed = Main.parseType(input);
-        if (parsed instanceof Generic(var base, var arguments)) {
-            if (base.equals("Function")) {
-                var argType = arguments.get(0);
-                var returnType = arguments.get(1);
+    private static Option<Type> parseAndModifyType(String input) {
+        return Main.parseType(input).map(parsed -> {
+            if (parsed instanceof Generic(var base, var arguments)) {
+                if (base.equals("Function")) {
+                    var argType = arguments.get(0);
+                    var returnType = arguments.get(1);
 
-                return new Functional(Lists.of(argType), returnType);
-            }
+                    return new Functional(Lists.of(argType), returnType);
+                }
 
-            if (base.equals("Supplier")) {
-                var returns = arguments.get(0);
-                return new Functional(Lists.emptyList(), returns);
+                if (base.equals("Supplier")) {
+                    var returns = arguments.get(0);
+                    return new Functional(Lists.emptyList(), returns);
+                }
             }
-        }
-        return parsed;
+            return parsed;
+        });
     }
 
-    private static Type parseType(String input) {
+    private static Option<Type> parseType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("public")) {
+            return new None<>();
+        }
+
         if (stripped.equals("boolean")) {
-            return Primitive.Bit;
+            return new Some<>(Primitive.Bit);
         }
 
         if (stripped.equals("String")) {
-            return new Ref(Primitive.I8);
+            return new Some<>(new Ref(Primitive.I8));
         }
 
         if (stripped.equals("int")) {
-            return Primitive.I32;
+            return new Some<>(Primitive.I32);
         }
 
         if (stripped.endsWith(">")) {
@@ -541,12 +573,11 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = Main.parseValues(inputArgs, input1 -> parseAndModifyType(input1));
-                return new Generic(base, args);
+                return Main.parseValues(inputArgs, Main::parseAndModifyType).map(args -> new Generic(base, args));
             }
         }
 
-        return new Content(input);
+        return new Some<>(new Content(input));
     }
 
     void main() {
@@ -563,17 +594,25 @@ class Main {
     }
 
     private String compileRoot(String input) {
-        var compiled = this.compileStatements(input, this::compileRootSegment);
+        var compiled = this.compileStatements(input, segment -> new Some<>(this.compileRootSegment(segment)));
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     }
 
-    private String compileStatements(String input, Function<String, String> segment) {
-        return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
+    private String compileStatements(String input, Function<String, Option<String>> compiler) {
+        return this.parseStatements(input, compiler).map(this::generateStatements).orElse("");
     }
 
-    private StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
+    private Option<List<String>> parseStatements(String input, Function<String, Option<String>> compiler) {
+        return Main.parseAll(input, this::foldStatementChar, compiler);
+    }
+
+    private String generateStatements(List<String> inner) {
+        return generateAll(Main::mergeStatements, inner);
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
         return stringBuilder.append(str);
     }
 
@@ -603,7 +642,7 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileStatements(inputContent, this::compileStructuredSegment);
+        var outputContent = this.compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
 
         var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
@@ -630,13 +669,16 @@ class Main {
             return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
-                    var inputParams = withParams.substring(0, paramEnd).strip();
+                    var paramString = withParams.substring(0, paramEnd).strip();
                     var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    var outputParams = this.compileValues(inputParams, this::compileParam);
+                    var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
+                            .map(Main::generateValues)
+                            .orElse("");
+
                     String newBody;
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + this.compileStatements(body, Main::compileStatementOrBlock) + "\n}";
+                        newBody = "{" + this.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment))) + "\n}";
                     }
                     else if (withBraces.equals(";")) {
                         newBody = ";";
@@ -655,10 +697,6 @@ class Main {
         }
 
         return new None<>();
-    }
-
-    private String compileValues(String input, Function<String, String> compiler) {
-        return Main.generateValues(Main.parseValues(input, compiler));
     }
 
     private String compileParam(String param) {
