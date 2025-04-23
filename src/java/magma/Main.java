@@ -184,7 +184,12 @@ private String compileDefinition(String input) {
     var stripped = input.strip();
     var space = stripped.lastIndexOf(" ");
     if (space >= 0) {
-        var type = stripped.substring(0, space);
+        var beforeName = stripped.substring(0, space);
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        var type = typeSeparator >= 0
+                ? beforeName.substring(typeSeparator + " ".length())
+                : beforeName;
+
         var name = stripped.substring(space + " ".length());
         return this.compileType(type) + " " + name;
     }
@@ -196,6 +201,10 @@ private String compileType(String input) {
     var stripped = input.strip();
     if (stripped.equals("void")) {
         return "void";
+    }
+
+    if (stripped.equals("int")) {
+        return "int";
     }
 
     return this.generatePlaceholder(input);

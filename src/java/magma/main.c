@@ -11,9 +11,9 @@
 /* static final */struct None<T> implements Option<T> {/*  */
 }
 /* private static */struct State {
-	/* private final List<String> */ segments;
-	/* private StringBuilder */ buffer;
-	/* private int */ depth;/* 
+	/* List<String> */ segments;
+	/* StringBuilder */ buffer;
+	int depth;/* 
 
     private State(List<String> segments, StringBuilder buffer, int depth) {
         this.segments = segments;
@@ -65,18 +65,18 @@ void main(/*  */){
     } *//* 
  */
 }
-/* private Option<IOException> */ run(/* Path source, Path target */){/* 
+/* Option<IOException> */ run(/* Path source, Path target */){/* 
     return switch (this.readString(source)) {
         case Err(var error) -> new Some<>(error);
         case Ok(var input) -> this.writeString(target, this.compile(input));
     } *//* ; *//* 
  */
 }
-/* private String */ compile(/* String input */){/* 
+/* String */ compile(/* String input */){/* 
     return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements); *//* 
  */
 }
-/* private String */ compileAll(/* String input,
+/* String */ compileAll(/* String input,
         BiFunction<State, Character, State> folder,
         Function<String, String> compiler,
         BiFunction<StringBuilder, String, StringBuilder> merger */){
@@ -90,13 +90,13 @@ void main(/*  */){
     return output.toString(); *//* 
  */
 }
-/* private StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
+/* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
     return output.append(compiled); *//* 
  */
 }
-/* private List<String> */ divide(/* String input, State state, BiFunction<State, Character, State> folder */){
+/* List<String> */ divide(/* String input, State state, BiFunction<State, Character, State> folder */){
 	/* var */ current = state;
-	/* for (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
+	/* (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
         var c = input.charAt(i);
         current = folder.apply(current, c);
     } *//* 
@@ -104,7 +104,7 @@ void main(/*  */){
     return current.segments; *//* 
  */
 }
-/* private State */ foldStatementChar(/* State state, char c */){/* 
+/* State */ foldStatementChar(/* State state, char c */){/* 
     state.append(c); */
 	/* if */ (c = /* = ' */;/* ' && state.isLevel()) {
         state.advance();
@@ -142,7 +142,7 @@ private String compileRootSegment(String input0) {
     return this.generatePlaceholder(input0); *//* 
 }
 
-private Option<String> compileField(String input) {
+private Option<String> compileDefinitionStatement(String input) {
     var stripped = input.strip(); *//* 
     if (stripped.endsWith("; *//* ")) {
         var content = stripped.substring(0, stripped.length() - ";".length());
@@ -177,7 +177,11 @@ private Option<String> compileMethod(String input) {
 private String compileDefinition(String input) {
     var stripped = input.strip(); *//* 
     var space = stripped.lastIndexOf(" "); *//* if */(/* space >= 0 */){
-	/* var */ type = stripped.substring(/* 0 */, space);
+	/* var */ beforeName = stripped.substring(/* 0 */, space);
+	/* var */ typeSeparator = beforeName.lastIndexOf(" ");
+	/* var */ type = /* typeSeparator >= 0
+                ? beforeName */.substring(typeSeparator + " ".length())
+                : beforeName;
 	/* var */ name = stripped.substring(/* space + " " */.length());/* 
         return this.compileType(type) + " " + name; *//* 
      */
@@ -191,6 +195,10 @@ private String compileType(String input) {
     var stripped = input.strip(); *//* 
     if (stripped.equals("void")) {
         return "void";
+    } *//* 
+
+    if (stripped.equals("int")) {
+        return "int";
     } *//* 
 
     return this.generatePlaceholder(input); *//* 
@@ -240,17 +248,13 @@ private String compileValue(String input) {
         return stripped;
     } *//* 
 
-    return this.generatePlaceholder(input); *//* }
-
-private State */ foldValueChar(/* State state, char c */){
+    return this.generatePlaceholder(input); *//* State */ foldValueChar(/* State state, char c */){
 	/* if */ (c = /* = ',' && state */.isLevel(/* )) {
         return state */.advance();
 }
 /* 
 
-    return state.append(c); *//* }
-
-private StringBuilder */ mergeValues(/* StringBuilder cache, String element */){/* 
+    return state.append(c); *//* StringBuilder */ mergeValues(/* StringBuilder cache, String element */){/* 
     if (cache.isEmpty()) {
         return cache.append(element);
      */
@@ -296,7 +300,7 @@ private Option<String> compileStructured(String input, String infix) {
 }
 
 private String compileClassMember(String input) {
-    var field = this.compileField(input); *//* 
+    var field = this.compileDefinitionStatement(input); *//* 
     if (field instanceof Some(var value)) {
         return value;
     } *//* 
@@ -305,9 +309,7 @@ private String compileClassMember(String input) {
 }
 
 private String generatePlaceholder(String input) {
-    return "/* " + input + " */"; *//* }
-
-private Option<IOException> */ writeString(/* Path target, String output */){/* 
+    return "/* " + input + " */"; *//* Option<IOException> */ writeString(/* Path target, String output */){/* 
     try {
         Files.writeString(target, output);
         return new None<>();
@@ -317,9 +319,7 @@ private Option<IOException> */ writeString(/* Path target, String output */){/*
         return new Some<>(e); *//* 
      */
 }
-/* }
-
-private Result<String, IOException> */ readString(/* Path source */){/* 
+/* IOException> */ readString(/* Path source */){/* 
     try {
         return new Ok<>(Files.readString(source));
      */
