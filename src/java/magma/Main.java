@@ -94,7 +94,13 @@ private String compileRootSegment(String input) {
 private String compileClassSegment(String input) {
     var stripped = input.strip();
     if (stripped.endsWith(";")) {
-        return "\n\t" + this.generatePlaceholder(stripped) + ";";
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        var nameSeparator = withoutEnd.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var beforeName = withoutEnd.substring(0, nameSeparator).strip();
+            var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
+            return "\n\t" + this.generatePlaceholder(beforeName) + " " + name + ";";
+        }
     }
 
     return this.generatePlaceholder(stripped);
