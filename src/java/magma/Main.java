@@ -98,8 +98,13 @@ private String compileClassSegment(String input) {
         var nameSeparator = withoutEnd.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = withoutEnd.substring(0, nameSeparator).strip();
-            var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
-            return "\n\t" + this.generatePlaceholder(beforeName) + " " + name + ";";
+            var typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
+                return "\n\t" + this.generatePlaceholder(beforeType) + " " + this.generatePlaceholder(type) + " " + name + ";";
+            }
         }
     }
 
