@@ -16,25 +16,28 @@
 };
 /* private */struct Type {
 };
+/* private */struct Defined {
+};
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(/*  R */ (*)(/* T */) mapper)/* ; */
-/* T */ orElseGet(Supplier</* T */> other)/* ; */
-Option</* T */> or(Supplier<Option</* T */>> other)/* ; */
-/* T */ orElse(/* T */ other)/* ; */
-/* <R> */ Option</* R */> flatMap(Option</* R */> (*)(/* T */) mapper)/* ; */
-Option</* T */> next(/*  */)/* ; */
-List</* T */> add(/* T */ element)/* ; */
-Iterator</* T */> iter(/*  */)/* ; */
-/* boolean */ hasElements(/*  */)/* ; */
-/* T */ removeFirst(/*  */)/* ; */
-/* T */ get(/* int */ index)/* ; */
-/* C */ createInitial(/*  */)/* ; */
-/* C */ fold(/* C */ current, /* T */ element)/* ; */
-/* String */ generate(/*  */)/* ; */
+/* <R> */  Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
+ /* T */ orElseGet( Supplier</* T */> other)/* ; */
+ Option</* T */> or( Supplier<Option</* T */>> other)/* ; */
+ /* T */ orElse( /* T */ other)/* ; */
+/* <R> */  Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* ; */
+ Option</* T */> next(/*  */)/* ; */
+ List</* T */> add( /* T */ element)/* ; */
+ Iterator</* T */> iter(/*  */)/* ; */
+ /* boolean */ hasElements(/*  */)/* ; */
+ /* T */ removeFirst(/*  */)/* ; */
+ /* T */ get( /* int */ index)/* ; */
+ /* C */ createInitial(/*  */)/* ; */
+ /* C */ fold( /* C */ current,  /* T */ element)/* ; */
+ /* String */ generate(/*  */)/* ; */
+ /* String */ generate(/*  */)/* ; */
 /* public static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter; */ /* public */ RangeHead(/* int */ length)/* {
+        private int counter; */  /* public */ RangeHead( /* int */ length)/* {
             this.length = length;
         }
 
@@ -50,7 +53,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             }
         }
     } */
-/* public */ /* record */ Iterator<T>(Head</* T */> head)/* {
+/* public */  /* record */ Iterator<T>( Head</* T */> head)/* {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -74,7 +77,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
-        private int depth; */ /* private */ State(List</* String */> segments, /* StringBuilder */ buffer, /* int */ depth)/* {
+        private int depth; */  /* private */ State( List</* String */> segments,  /* StringBuilder */ buffer,  /* int */ depth)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -113,7 +116,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             return this.depth == 1;
         }
     } */
-/* private */ /* record */ Some<T>(/* T */ value)/* implements Option<T> {
+/* private */  /* record */ Some<T>( /* T */ value)/* implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
@@ -141,7 +144,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */ Option</* R */> map(/*  R */ (*)(/* T */) mapper)/* {
+        public <R> */  Option</* R */> map(/*  R */(*mapper)(/* T */))/* {
             return new None<>();
         }
 
@@ -165,7 +168,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             return new None<>();
         }
     } */
-/* private */ /* record */ Joiner(/* String */ delimiter)/* implements Collector<String, Option<String>> {
+/* private */  /* record */ Joiner( /* String */ delimiter)/* implements Collector<String, Option<String>> {
         private Joiner() {
             this("");
         }
@@ -185,7 +188,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static class ListCollector<T> implements Collector<T, List<T>> {
         @Override
-        public */ List</* T */> createInitial(/*  */)/* {
+        public */  List</* T */> createInitial(/*  */)/* {
             return Lists.emptyList();
         }
 
@@ -194,39 +197,53 @@ Iterator</* T */> iter(/*  */)/* ; */
             return current.add(element);
         }
     } */
-/* private */ /* record */ Generic(/* String */ base, List</* Type */> args)/* implements Type {
+/* private */  /* record */ Generic( /* String */ base,  List</* Type */> args)/* implements Type {
         @Override
         public String generate() {
             var joined = generateValuesFromNodes(this.args);
             return this.base + "<" + joined + ">";
         }
     } */
-/* private */ /* record */ Content(/* String */ input)/* implements Type {
+/* private */  /* record */ Content( /* String */ input)/* implements Type {
         @Override
         public String generate() {
             return Main.generatePlaceholder(this.input);
         }
     } */
-/* private */ /* record */ Functional(List</* Type */> paramTypes, /* Type */ returnType)/* implements Type {
+/* private */  /* record */ Functional( List</* Type */> paramTypes,  /* Type */ returnType)/* implements Type {
         @Override
         public String generate() {
             return this.returnType.generate() + " (*)(" + generateValuesFromNodes(this.paramTypes) + ")";
         }
     } */
-/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
-/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
-/* private static */ /* String */ generateAll(BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger, List</* String */> parsed)/* {
+/* private */  /* record */ Definition( Option</* String */> beforeType,  /* Type */ type,  /* String */ name)/* implements Defined {
+        @Override
+        public String generate() {
+            var beforeTypeString = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
+            return beforeTypeString + " " + this.type().generate() + " " + this.name();
+        }
+    } */
+/* private */  /* record */ FunctionalDefinition( Option</* String */> beforeType,  /* Type */ returns,  /* String */ name,  List</* Type */> args)/* implements Defined {
+        @Override
+        public String generate() {
+            var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
+            return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
+        }
+    } */
+/* private static final List<String> structs */  /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static final List<String> methods */  /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static */  /* String */ generateAll( BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger,  List</* String */> parsed)/* {
         return parsed.iter()
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-/* private static <T> */ List</* T */> parseAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, /*  T */ (*)(/* String */) compiler)/* {
+/* private static <T> */  List</* T */> parseAll( /* String */ input,  BiFunction</* State */, /*  Character */, /*  State */> folder, /*  T */(*compiler)(/* String */))/* {
         return Main.divideAll(input, folder)
                 .iter()
                 .map(compiler)
                 .collect(new ListCollector<>());
     } */
-/* private static */ List</* String */> divideAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
+/* private static */  List</* String */> divideAll( /* String */ input,  BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
         var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
@@ -266,25 +283,25 @@ Iterator</* T */> iter(/*  */)/* ; */
         }
         return current.advance().segments;
     } */
-/* private static */ /* String */ generateValues(List</* String */> parserd)/* {
+/* private static */  /* String */ generateValues( List</* String */> parserd)/* {
         return Main.generateAll(Main::mergeValues, parserd);
     } */
-/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element)/* {
+/* private static */  /* StringBuilder */ mergeValues( /* StringBuilder */ cache,  /* String */ element)/* {
         if (cache.isEmpty()) {
             return cache.append(element);
         }
         return cache.append(", ").append(element);
     } */
-/* private static */ /* String */ generatePlaceholder(/* String */ input)/* {
+/* private static */  /* String */ generatePlaceholder( /* String */ input)/* {
         return "/* " + input + " */";
     } */
-/* private static */ /* String */ generateValuesFromNodes(List</* Type */> list)/* {
+/* private static */  /* String */ generateValuesFromNodes( List</* Type */> list)/* {
         return list.iter()
                 .map(Type::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
     } */
-/* void */ main(/*  */)/* {
+ /* void */ main(/*  */)/* {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -296,26 +313,26 @@ Iterator</* T */> iter(/*  */)/* ; */
             e.printStackTrace();
         }
     } */
-/* private */ /* String */ compileRoot(/* String */ input)/* {
+/* private */  /* String */ compileRoot( /* String */ input)/* {
         var compiled = this.compileStatements(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */ /* String */ compileStatements(/* String */ input, /*  String */ (*)(/* String */) segment)/* {
+/* private */  /* String */ compileStatements( /* String */ input, /*  String */(*segment)(/* String */))/* {
         return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
     } */
-/* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
+/* private */  /* StringBuilder */ mergeStatements( /* StringBuilder */ stringBuilder,  /* String */ str)/* {
         return stringBuilder.append(str);
     } */
-/* private */ /* String */ compileRootSegment(/* String */ input)/* {
+/* private */  /* String */ compileRootSegment( /* String */ input)/* {
         return this.compileClass(input)
                 .orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
     } */
-/* private */ Option</* String */> compileClass(/* String */ input)/* {
+/* private */  Option</* String */> compileClass( /* String */ input)/* {
         return this.compileStructured(input, "class ");
     } */
-/* private */ Option</* String */> compileStructured(/* String */ input, /* String */ infix)/* {
+/* private */  Option</* String */> compileStructured( /* String */ input,  /* String */ infix)/* {
         var classIndex = input.indexOf(infix);
         if (classIndex < 0) {
             return new None<>();
@@ -338,26 +355,26 @@ Iterator</* T */> iter(/*  */)/* ; */
         structs.add(generated);
         return new Some<>("");
     } */
-/* private */ /* String */ compileStructuredSegment(/* String */ input)/* {
+/* private */  /* String */ compileStructuredSegment( /* String */ input)/* {
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
     } */
-/* private */ Option</* String */> compileWhitespace(/* String */ input)/* {
+/* private */  Option</* String */> compileWhitespace( /* String */ input)/* {
         if (input.isBlank()) {
             return new Some<>("");
         }
         return new None<>();
     } */
-/* private */ Option</* String */> compileMethod(/* String */ input)/* {
+/* private */  Option</* String */> compileMethod( /* String */ input)/* {
         var paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+            return this.parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
@@ -374,13 +391,13 @@ Iterator</* T */> iter(/*  */)/* ; */
 
         return new None<>();
     } */
-/* private */ /* String */ compileValues(/* String */ input, /*  String */ (*)(/* String */) compiler)/* {
+/* private */  /* String */ compileValues( /* String */ input, /*  String */(*compiler)(/* String */))/* {
         return Main.generateValues(this.parseValues(input, compiler));
     } */
-/* private <T> */ List</* T */> parseValues(/* String */ input, /*  T */ (*)(/* String */) compiler)/* {
+/* private <T> */  List</* T */> parseValues( /* String */ input, /*  T */(*compiler)(/* String */))/* {
         return Main.parseAll(input, this::foldValueChar, compiler);
     } */
-/* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
+/* private */  /* State */ foldValueChar( /* State */ state,  /* char */ c)/* {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
@@ -394,18 +411,27 @@ Iterator</* T */> iter(/*  */)/* ; */
         }
         return appended;
     } */
-/* private */ /* String */ compileParam(/* String */ param)/* {
-        return this.compileDefinition(param).orElseGet(() -> generatePlaceholder(param));
+/* private */  /* String */ compileParam( /* String */ param)/* {
+        return this.parseAndModifyDefinition(param).map(Defined::generate).orElseGet(() -> generatePlaceholder(param));
     } */
-/* private */ Option</* String */> compileDefinitionStatement(/* String */ input)/* {
+/* private */  Option</* String */> compileDefinitionStatement( /* String */ input)/* {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return new None<>();
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return this.compileDefinition(withoutEnd).map(definition -> "\n\t" + definition + ";");
+        return this.parseAndModifyDefinition(withoutEnd).map(Defined::generate).map(definition -> "\n\t" + definition + ";");
     } */
-/* private */ Option</* String */> compileDefinition(/* String */ input)/* {
+/* private */  Option</* Defined */> parseAndModifyDefinition( /* String */ input)/* {
+        return this.parseDefinition(input).map(definition -> {
+            if (definition.type instanceof Functional(var args, var base)) {
+                return new FunctionalDefinition(definition.beforeType, base, definition.name, args);
+            }
+
+            return definition;
+        });
+    } */
+/* private */  Option</* Definition */> parseDefinition( /* String */ input)/* {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
@@ -414,16 +440,16 @@ Iterator</* T */> iter(/*  */)/* ; */
         var name = input.substring(nameSeparator + " ".length()).strip();
 
         return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> this.parseAndModifyType(beforeName).generate() + " " + name;
+            case None<Integer> _ -> new Definition(new None<>(), this.parseAndModifyType(beforeName), name);
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseAndModifyType(type).generate();
-                yield newBeforeName + " " + name;
+                var newType = this.parseAndModifyType(type);
+                yield new Definition(new Some<>(beforeType), newType, name);
             }
         });
     } */
-/* private */ Option</* Integer */> findTypeSeparator(/* String */ input)/* {
+/* private */  Option</* Integer */> findTypeSeparator( /* String */ input)/* {
         var depth = 0;
         for (var index = input.length() - 1; index >= 0; index--) {
             var c = input.charAt(index);
@@ -441,7 +467,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 
         return new None<>();
     } */
-/* private */ /* Type */ parseAndModifyType(/* String */ input)/* {
+/* private */  /* Type */ parseAndModifyType( /* String */ input)/* {
         var parsed = this.parseType(input);
         if (parsed instanceof Generic(var base, var arguments)) {
             if (base.equals("Function")) {
@@ -453,7 +479,7 @@ Iterator</* T */> iter(/*  */)/* ; */
         }
         return parsed;
     } */
-/* private */ /* Type */ parseType(/* String */ input)/* {
+/* private */  /* Type */ parseType( /* String */ input)/* {
         var stripped = input.strip();
         if (stripped.endsWith(">")) {
             var slice = stripped.substring(0, stripped.length() - ">".length());
@@ -468,7 +494,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 
         return new Content(input);
     } */
-/* private */ /* State */ foldStatementChar(/* State */ state, /* char */ c)/* {
+/* private */  /* State */ foldStatementChar( /* State */ state,  /* char */ c)/* {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
