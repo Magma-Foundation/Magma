@@ -8,17 +8,17 @@
 /* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /*  */
-/* private */struct Type extends BeforeArgs {
-};
-/* private */struct Defined extends Parameter {
-};
-/*  */struct BeforeArgs {
-};
-/*  */struct Value {
-};
-/*  */struct Parameter {
-};
-/* private */struct Primitive implements Type {
+typedef /* private */struct {
+} Type extends BeforeArgs;
+typedef /* private */struct {
+} Defined extends Parameter;
+typedef /*  */struct {
+} BeforeArgs;
+typedef /*  */struct {
+} Value;
+typedef /*  */struct {
+} Parameter;
+typedef /* private */struct {
 	/* Bit("int"),
         I8("char"), */ /* I32("int"), */ Var("auto");
 	/* private final */ char* value;/* 
@@ -26,8 +26,8 @@
         Primitive(String value) {
             this.value = value;
         } */
-};
-/* private static */struct State {
+} Primitive implements Type;
+typedef /* private static */struct {
 	/* private final */ List<char*> segments;
 	/* private */ StringBuilder buffer;
 	/* private */ int depth;/* 
@@ -35,37 +35,37 @@
         public State() {
             this(Lists.emptyList(), new StringBuilder(), 0);
         } */
-};
-/* private */struct Joiner {
-};
-/* private */struct Generic {
-};
-/* private */struct Content {
-};
-/* private */struct Functional {
-};
-/* private */struct Definition {/* public Definition(Type type, String name) {
+} State;
+typedef /* private */struct {
+} Joiner;
+typedef /* private */struct {
+} Generic;
+typedef /* private */struct {
+} Content;
+typedef /* private */struct {
+} Functional;
+typedef /* private */struct {/* public Definition(Type type, String name) {
             this(new None<>(), type, name);
         } */
-};
-/* private */struct FunctionalDefinition {
-};
-/* private */struct Ref {
-};
-/* private */struct Struct {
-};
-/* private */struct Whitespace {
-};
-/* private */struct Invokable {
-};
-/* private */struct Lambda {
-};
-/* private */struct DataAccess {
-};
-/* private */struct Symbol {
-};
-/*  */struct Main {
-};
+} Definition;
+typedef /* private */struct {
+} FunctionalDefinition;
+typedef /* private */struct {
+} Ref;
+typedef /* private */struct {
+} Struct;
+typedef /* private */struct {
+} Whitespace;
+typedef /* private */struct {
+} Invokable;
+typedef /* private */struct {
+} Lambda;
+typedef /* private */struct {
+} DataAccess;
+typedef /* private */struct {
+} Symbol;
+typedef /*  */struct {
+} Main;
 // List<char*>
 // Option<char*>
 // None</*  */>
@@ -720,7 +720,9 @@ void main_Symbol(Symbol this){
 	auto inputContent = Content[input=withEnd.substring](/* 0 */, withEnd.length() - 1);
 	/* currentStruct = new Some<>(name); */
 	auto outputContent = Content[input=compileStatements](inputContent, Content[input=/* segment */ -> /*  new Some<> */](Content[input=this.compileStructuredSegment](segment)));
-	auto generated = /*  generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n" */;
+	auto generated = /*  "typedef " + generatePlaceholder(left) + "struct {" + outputContent + "\n} " +
+                name +
+                ";\n" */;
 	/* structs.addLast(generated) */;
 	return Generic[base=Some, arguments=JavaList[list=[Content[input=""]]]](/* "" */);
 }

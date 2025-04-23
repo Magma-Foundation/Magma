@@ -1059,7 +1059,9 @@ class Main {
 
         currentStruct = new Some<>(name);
         var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
-        var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
+        var generated = "typedef " + generatePlaceholder(left) + "struct {" + outputContent + "\n} " +
+                name +
+                ";\n";
         structs.addLast(generated);
 
         return new Some<>("");
