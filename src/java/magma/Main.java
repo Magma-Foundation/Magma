@@ -536,7 +536,7 @@ public class Main {
         String stripped = input.strip();
         if (stripped.endsWith(";")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
-            return compileStatementValue(slice).map(result -> formatStatement(result));
+            return compileStatementValue(slice).map(Main::formatStatement);
         }
 
         return Optional.empty();
@@ -547,6 +547,11 @@ public class Main {
         if (stripped.startsWith("return ")) {
             String slice = stripped.substring("return ".length());
             return Optional.of("return " + compileValue(slice));
+        }
+
+        Optional<String> maybeInvokable = compileInvokable(stripped);
+        if (maybeInvokable.isPresent()) {
+            return maybeInvokable;
         }
 
         int valueSeparator = stripped.indexOf("=");
@@ -574,20 +579,9 @@ public class Main {
             return stripped;
         }
 
-        if (stripped.endsWith(")")) {
-            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            int argumentStart = withoutEnd.indexOf("(");
-            if (argumentStart >= 0) {
-                String caller = withoutEnd.substring(0, argumentStart).strip();
-                String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
-                if (caller.startsWith("new ")) {
-                    String type = caller.substring("new ".length()).strip();
-                    Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
-                    if (maybeNewArguments.isPresent()) {
-                        return "new_" + type + "(" + maybeNewArguments.get() + ")";
-                    }
-                }
-            }
+        Optional<String> maybeInvokable = compileInvokable(stripped);
+        if (maybeInvokable.isPresent()) {
+            return maybeInvokable.get();
         }
 
         int equalsIndex = stripped.indexOf("==");
@@ -607,6 +601,36 @@ public class Main {
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static Optional<String> compileInvokable(String input) {
+        String stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            int argumentStart = withoutEnd.indexOf("(");
+            if (argumentStart >= 0) {
+                String beforeArguments = withoutEnd.substring(0, argumentStart).strip();
+                String arguments = withoutEnd.substring(argumentStart + "(".length()).strip();
+                Optional<String> maybeNewArguments = compileAllValues(arguments, argument -> Optional.of(compileValue(argument)));
+                if (maybeNewArguments.isPresent()) {
+                    String newArguments = maybeNewArguments.get();
+                    if (beforeArguments.startsWith("new ")) {
+                        String type = beforeArguments.substring("new ".length()).strip();
+                        String caller = "new_" + type;
+                        return generateInvocation(caller, newArguments);
+                    }
+                    else {
+                        String caller = compileValue(beforeArguments);
+                        return generateInvocation(caller, newArguments);
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> generateInvocation(String caller, String arguments) {
+        return Optional.of(caller + "(" + arguments + ")");
     }
 
     private static boolean isNumber(String input) {
