@@ -13,11 +13,23 @@
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import static magma.StandardLibrary.emptyString; */
+struct Optional {
+	void ifPresent(struct Optional this, Consumer<struct T> consumer);
+	struct T orElse(struct Optional this, struct T other);
+	Optional<struct R> map(struct Optional this, /* Function<T */, /* R> */ mapper);
+	Optional<struct R> flatMap(struct Optional this, /* Function<T */, Optional</* R> */> mapper);
+	Optional<struct T> or(struct Optional this, Supplier<Optional<struct T>> other);
+	int isPresent(struct Optional this);
+	struct T orElseGet(struct Optional this, Supplier<struct T> other);
+	int isEmpty(struct Optional this);
+};
 struct Node {
 };
 struct String_ {
 	struct String_ concatChar(struct String_ this, char c);
 	char* toSlice(struct String_ this);
+};
+struct Result {
 };
 struct State {
 	List<struct String_> segments;
@@ -31,59 +43,18 @@ struct Definition {
 struct ConstructorHeader {
 	char* value;
 };
+struct Ok {
+	struct T value;
+};
+struct Err {
+	struct X error;
+};
+struct Some {
+	struct T value;
+};
+struct None {
+};
 struct Main {
-	void ifPresent(struct Main this, Consumer<struct T> consumer);/* 
-
-    sealed interface Result<T, X> permits Ok, Err {
-    } *//* 
-
-    record Ok<T, X>(T value) implements Result<T, X> {
-    } *//* 
-
-    record Err<T, X>(X error) implements Result<T, X> {
-    } *//* 
-
-    private record Some<T>(T value) implements Optional<T> {
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-            consumer.accept(this.value);
-        }
-
-        @Override
-        public T orElse(T other) {
-            return this.value;
-        }
-
-        @Override
-        public <R> Optional<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public Optional<T> or(Supplier<Optional<T>> other) {
-            return this;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return this.value;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-    } */
 	List<char*> structs = new_ArrayList<>();
 	struct Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
 	struct Path TARGET = Paths.get(".", "main.c");
@@ -118,90 +89,52 @@ void enter(struct State this){
 void append(struct State this, char c){
 	this.buffer = this.buffer.concatChar(c);
 }
-void ifPresent(struct Some<T> this, Consumer<struct T> consumer){
+void ifPresent(struct Some this, Consumer<struct T> consumer){
 	consumer.accept(this.value);
 }
-struct T orElse(struct Some<T> this, struct T other){
+struct T orElse(struct Some this, struct T other){
 	return this.value;
 }
-Optional<struct R> map(struct Some<T> this, /* Function<T */, /* R> */ mapper){
+Optional<struct R> map(struct Some this, /* Function<T */, /* R> */ mapper){
 	return new_Some<>(mapper.apply(this.value));
 }
-Optional<struct R> flatMap(struct Some<T> this, /* Function<T */, Optional</* R> */> mapper){
+Optional<struct R> flatMap(struct Some this, /* Function<T */, Optional</* R> */> mapper){
 	return mapper.apply(this.value);
 }
-Optional<struct T> or(struct Some<T> this, Supplier<Optional<struct T>> other){
+Optional<struct T> or(struct Some this, Supplier<Optional<struct T>> other){
 	return this;
 }
-int isPresent(struct Some<T> this){
+int isPresent(struct Some this){
 	return true;
 }
-struct T orElseGet(struct Some<T> this, Supplier<struct T> other){
+struct T orElseGet(struct Some this, Supplier<struct T> other){
 	return this.value;
 }
-int isEmpty(struct Some<T> this){
+int isEmpty(struct Some this){
 	return false;
 }
-void ifPresent(struct None<T> implements Optional<T> this, Consumer<struct T> consumer){
+void ifPresent(struct None this, Consumer<struct T> consumer){
 }
-struct T orElse(struct None<T> implements Optional<T> this, struct T other){
+struct T orElse(struct None this, struct T other){
 	return other;
 }
-Optional<struct R> map(struct None<T> implements Optional<T> this, /* Function<T */, /* R> */ mapper){
+Optional<struct R> map(struct None this, /* Function<T */, /* R> */ mapper){
 	return new_None<>();
 }
-Optional<struct R> flatMap(struct None<T> implements Optional<T> this, /* Function<T */, Optional</* R> */> mapper){
+Optional<struct R> flatMap(struct None this, /* Function<T */, Optional</* R> */> mapper){
 	return new_None<>();
 }
-Optional<struct T> or(struct None<T> implements Optional<T> this, Supplier<Optional<struct T>> other){
+Optional<struct T> or(struct None this, Supplier<Optional<struct T>> other){
 	return other.get();
 }
-int isPresent(struct None<T> implements Optional<T> this){
+int isPresent(struct None this){
 	return false;
 }
-struct T orElseGet(struct None<T> implements Optional<T> this, Supplier<struct T> other){
+struct T orElseGet(struct None this, Supplier<struct T> other){
 	return other.get();
 }
-int isEmpty(struct None<T> implements Optional<T> this){
+int isEmpty(struct None this){
 	return true;
-}
-void ifPresent(Consumer<struct T> consumer){
-	/* }
-
-        @Override
-        public T orElse(T other) {
-            return other */;
-	/* }
-
-        @Override
-        public <R> Optional<R> map */(/* Function<T */, /* R> mapper) {
-            return new None<>( */);
-	/* }
-
-        @Override
-        public <R> Optional<R> flatMap */(/* Function<T */, /* Optional<R>> mapper) {
-            return new None<>( */);
-	/* }
-
-        @Override
-        public Optional<T> or */(/* Supplier<Optional<T>> other) {
-            return other.get( */);
-	/* }
-
-        @Override
-        public boolean isPresent() {
-            return false */;
-	/* }
-
-        @Override
-        public T orElseGet */(/* Supplier<T> other) {
-            return other.get( */);
-	/* }
-
-        @Override
-        public boolean isEmpty() {
-            return true */;
-	/* } */
 }
 void __main__(char** args){
 	/* Optional<IOException> result = switch (readString(SOURCE)) {
@@ -363,10 +296,10 @@ Optional<char*> compileStructured(char* input, char* infix){
                 : beforeContent;
 
         int paramStart = beforeContent1.indexOf("(");
-        String name;
+        String withoutParams;
         List<String> recordParameters;
         if (paramStart >= 0) {
-            name = beforeContent1.substring(0, paramStart).strip();
+            withoutParams = beforeContent1.substring(0, paramStart).strip();
             String withEnd = beforeContent1.substring(paramStart + "(".length());
             int paramEnd = withEnd.indexOf(")");
             if (paramEnd >= 0) {
@@ -374,14 +307,19 @@ Optional<char*> compileStructured(char* input, char* infix){
                 recordParameters = parseParameters(paramString).orElse(Collections.emptyList());
             }
             else {
-                name = beforeContent1;
+                withoutParams = beforeContent1;
                 recordParameters = Collections.emptyList();
             }
         }
         else {
-            name = beforeContent1;
+            withoutParams = beforeContent1;
             recordParameters = Collections.emptyList();
         }
+
+        int typeParamStart = withoutParams.indexOf("<");
+        String name = typeParamStart >= 0
+                ? withoutParams.substring(0, typeParamStart).strip()
+                : withoutParams;
 
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
@@ -389,9 +327,8 @@ Optional<char*> compileStructured(char* input, char* infix){
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "} */
 	".length(/* ) */);
-	char* finalName = name;
-	/* return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> new Some<>(generatePlaceholder(input1)))).flatMap(outputContent -> {
-            if (!isSymbol(finalName)) {
+	/* return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name).or(() -> new Some<>(generatePlaceholder(input1)))).flatMap(outputContent -> {
+            if (!isSymbol(name)) {
                 return new None<>();
             }
 
@@ -399,7 +336,7 @@ Optional<char*> compileStructured(char* input, char* infix){
                     .map(Main::formatStatement)
                     .collect(Collectors.joining());
 
-            String generated = "struct " + finalName + " {" + joined + outputContent + "\n};\n";
+            String generated = "struct " + name + " {" + joined + outputContent + "\n};\n";
             structs.add(generated);
             return new Some<>("");
         } */

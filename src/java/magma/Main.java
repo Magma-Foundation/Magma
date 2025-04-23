@@ -362,10 +362,10 @@ public class Main {
                 : beforeContent;
 
         int paramStart = beforeContent1.indexOf("(");
-        String name;
+        String withoutParams;
         List<String> recordParameters;
         if (paramStart >= 0) {
-            name = beforeContent1.substring(0, paramStart).strip();
+            withoutParams = beforeContent1.substring(0, paramStart).strip();
             String withEnd = beforeContent1.substring(paramStart + "(".length());
             int paramEnd = withEnd.indexOf(")");
             if (paramEnd >= 0) {
@@ -373,23 +373,27 @@ public class Main {
                 recordParameters = parseParameters(paramString).orElse(Collections.emptyList());
             }
             else {
-                name = beforeContent1;
+                withoutParams = beforeContent1;
                 recordParameters = Collections.emptyList();
             }
         }
         else {
-            name = beforeContent1;
+            withoutParams = beforeContent1;
             recordParameters = Collections.emptyList();
         }
+
+        int typeParamStart = withoutParams.indexOf("<");
+        String name = typeParamStart >= 0
+                ? withoutParams.substring(0, typeParamStart).strip()
+                : withoutParams;
 
         String withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return new None<>();
         }
         String inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-        String finalName = name;
-        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, finalName).or(() -> new Some<>(generatePlaceholder(input1)))).flatMap(outputContent -> {
-            if (!isSymbol(finalName)) {
+        return compileAllStatements(inputContent, input1 -> compileClassSegment(input1, name).or(() -> new Some<>(generatePlaceholder(input1)))).flatMap(outputContent -> {
+            if (!isSymbol(name)) {
                 return new None<>();
             }
 
@@ -397,7 +401,7 @@ public class Main {
                     .map(Main::formatStatement)
                     .collect(Collectors.joining());
 
-            String generated = "struct " + finalName + " {" + joined + outputContent + "\n};\n";
+            String generated = "struct " + name + " {" + joined + outputContent + "\n};\n";
             structs.add(generated);
             return new Some<>("");
         });
