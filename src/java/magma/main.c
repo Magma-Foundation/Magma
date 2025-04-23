@@ -1,64 +1,152 @@
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Path; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.Arrays; *//* 
-import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//*  */struct Main {/* sealed interface Result<T, X> permits Ok, Err {
-    } *//* 
-
-    sealed interface Option<T> permits Some, None {
-    } */
+/* sealed */struct Result<T, X> permits Ok, Err {/*  */
+}
+/* sealed */struct Option<T> permits Some, None {
+	/* T */ orElse(/* T other */);/* 
+     */
+}
+/* public */struct List<T> {
 	/* Iterator<T> */ iter(/*  */);
+	void add(/* T element */);/* 
+     */
+}
+/* public */struct Iterator<T> {
 	/* Iterator<R> */ map(/* Function<T, R> mapper */);
+	/* R */ fold(/* R initial, BiFunction<R, T, R> folder */);
+	/* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */);
+	/* Iterator<T> */ concat(/* Iterator<T> other */);
 	/* Option<T> */ next(/*  */);
-	/* Ok<T, */ X>(/* T value */);
-	/* Err<T, */ X>(/* X error */);
-	/* record */ Some<T>(/* T value */);/* 
-
-    static final class None<T> implements Option<T> {
-    } *//* private */ State(/* List<String> segments, StringBuilder buffer, int depth */){
+	/* C */ collect(/* Collector<T, C> collector */);/* 
+     */
+}
+/*  */struct Collector<T, C> {
+	/* C */ createInitial(/*  */);
+	/* C */ fold(/* C current, T element */);/* 
+     */
+}
+/*  */struct Head<T> {
+	/* Option<T> */ next(/*  */);/* 
+     */
+}
+/*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
+}
+/*  */struct Err<T, X>(X error) implements Result<T, X> {/*  */
+}
+/*  */struct Some<T>(T value) implements Option<T> {/* T */ orElse(/* T other */){/* 
+            return this.value; *//* 
+         */
+}
+/* 
+     */
+}
+/* static final */struct None<T> implements Option<T> {/* T */ orElse(/* T other */){/* 
+            return other; *//* 
+         */
+}
+/* 
+     */
+}
+/* private static */struct State {
+	/* List<String> */ segments;
+	/* StringBuilder */ buffer;
+	int depth;/* private */ State(/* List<String> segments, StringBuilder buffer, int depth */){
 	/* this.segments */ = segments;
 	/* this.buffer */ = buffer;
 	/* this.depth */ = depth;/* 
-        }
-
-        public State() {
+         */
+}
+/* public */ State(/*  */){/* 
             this(Lists.empty(), new StringBuilder(), 0); *//* 
-        }
-
-        private State append(char c) {
+         */
+}
+/* State */ append(/* char c */){/* 
             this.buffer.append(c); *//* 
-            return this; */
-	/* return */ this.depth = /* = 0 */;
-	/* return */ this.depth = /* = 1 */;
-	/*  */ this.depth = this.depth + 1;/* 
-            return this; */
-	/*  */ this.depth = this.depth - 1;/* 
             return this; *//* 
-        }
-
-        private State advance() {
+         */
+}
+/* boolean */ isLevel(/*  */){
+	/* return */ this.depth = /* = 0 */;/* 
+         */
+}
+/* boolean */ isShallow(/*  */){
+	/* return */ this.depth = /* = 1 */;/* 
+         */
+}
+/* State */ enter(/*  */){
+	/* this.depth */ = this.depth + 1;/* 
+            return this; *//* 
+         */
+}
+/* State */ exit(/*  */){
+	/* this.depth */ = this.depth - 1;/* 
+            return this; *//* 
+         */
+}
+/* State */ advance(/*  */){/* 
             this.segments.add(this.buffer.toString()); */
 	/* this.buffer */ = /* new StringBuilder */();/* 
             return this; *//* 
-        }
+         */
+}
+/* 
      */
+}
+/* private static */struct EmptyHead<T> implements Head<T> {/* Option<T> */ next(/*  */){/* 
+            return new None<>(); *//* 
+         */
+}
+/* 
+     */
+}
+/* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* Iterator<R> */ map(/* Function<T, R> mapper */){/* 
+            return new HeadedIterator<>(() -> switch (this.head.next()) {
+                case None<T> _ -> new None<>();
+                case Some<T>(T value) -> new Some<>(mapper.apply(value));
+            } *//* ); *//* 
+         */
+}
+/* R */ fold(/* R initial, BiFunction<R, T, R> folder */){
+	/* var */ current = initial;/* 
+            while (true) {
+                switch (this.head.next()) {
+                    case None<T> _ -> {
+                        return current;
+                    }
+                    case Some(var value) -> {
+                        current = folder.apply(current, value);
+                    }
+                }
+            } *//* 
+         */
+}
+/* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */){/* 
+            return this.map(mapper).fold(Iterators.empty(), Iterator::concat); *//* 
+         */
+}
+/* Iterator<T> */ concat(/* Iterator<T> other */){/* 
+            return new HeadedIterator<>(() -> switch (this.head.next()) {
+                case Some<T> option -> option;
+                case None<T> _ -> other.next();
+            } *//* ); *//* 
+         */
 }
 /* Option<T> */ next(/*  */){/* 
-            return new None<>(); *//* 
-        }
+            return this.head.next(); *//* 
+         */
+}
+/* C */ collect(/* Collector<T, C> collector */){/* 
+            return this.fold(collector.createInitial(), collector::fold); *//* 
+         */
+}
+/* 
      */
 }
-
-	/* record */ HeadedIterator<T>(/* Head<T> head */);/* public */ RangeHead(/* int length */){
+/* public static */struct RangeHead implements Head<Integer> {
+	int length;
+	/* = */ 0;/* public */ RangeHead(/* int length */){
 	/* this.length */ = length;/* 
-        }
-
-        @Override
-        public Option<Integer> next() {
+         */
+}
+/* Option<Integer> */ next(/*  */){/* 
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -67,36 +155,58 @@ import java.util.function.Function; *//*  */struct Main {/* sealed interface Res
             else {
                 return new None<>();
             } *//* 
-        }
+         */
+}
+/* 
      */
 }
-/* private */ SingleHead(/* T value */){
+/* private static final */struct SingleHead<T> implements Head<T> {
+	/* T */ value;
+	/* = */ false;/* private */ SingleHead(/* T value */){
 	/* this.value */ = value;/* 
-        }
-
-        @Override
-        public Option<T> next() {
+         */
+}
+/* Option<T> */ next(/*  */){/* 
             if (this.retrieved) {
                 return new None<>();
             } */
 	/* this.retrieved */ = true;/* 
             return new Some<>(this.value); *//* 
-        }
+         */
+}
+/* 
      */
 }
-/* Iterator<T> */ empty(/*  */){/* 
+/* static */struct Iterators {/* Iterator<T> */ empty(/*  */){/* 
             return new HeadedIterator<>(new EmptyHead<>()); *//* 
-        }
-
-        public static <T> Iterator<T> fromOption(Option<T> option) {
+         */
+}
+/* Iterator<T> */ fromOption(/* Option<T> option */){/* 
             return new HeadedIterator<>(switch (option) {
                 case None<T> _ -> new EmptyHead<T>();
                 case Some<T>(var value) -> new SingleHead<T>(value);
             } *//* ); *//* 
-        }
+         */
+}
+/* 
      */
 }
-void main(/*  */){
+/* private static */struct Joiner implements Collector<String, Option<String>> {/* Option<String> */ createInitial(/*  */){/* 
+            return new None<>(); *//* 
+         */
+}
+/* Option<String> */ fold(/* Option<String> current, String element */){/* 
+            return switch (current) {
+                case None<String> _ -> new Some<>(element);
+                case Some<String>(var value) -> new Some<>(value + element);
+            } *//* ; *//* 
+         */
+}
+/* 
+     */
+}
+/*  */struct Main {
+	/* = */ Lists.empty(/*  */);void main(/*  */){
 	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
 	/* var */ target = source.resolveSibling("main.c");/* 
 
@@ -113,8 +223,9 @@ void main(/*  */){
         } *//* ; *//* 
      */
 }
-/* String */ compile(/* String input */){/* 
-        return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements); *//* 
+/* String */ compile(/* String input */){
+	/* var */ output = this.compileAll(input, /*  this::foldStatementChar */, /*  this::compileRootSegment */, /*  this::mergeStatements */);/* 
+        return structs.iter().collect(new Joiner()).orElse("") + output; *//* 
      */
 }
 /* String */ compileAll(/* String input,
@@ -160,7 +271,15 @@ void main(/*  */){
 	/* return */ state;/* 
      */
 }
-/* String */ compileRootSegment(/* String input0 */){/* 
+/* package magma; *//* 
+
+import java.io.IOException; *//* 
+import java.nio.file.Files; *//* 
+import java.nio.file.Path; *//* 
+import java.nio.file.Paths; *//* 
+import java.util.Arrays; *//* 
+import java.util.function.BiFunction; *//* 
+import java.util.function.Function; *//* String */ compileRootSegment(/* String input0 */){/* 
         return this.compileOr(input0, Lists.of(
                 input -> this.compileStructured(input, "interface "),
                 input -> this.compileStructured(input, "record "),
@@ -342,12 +461,18 @@ void main(/*  */){
         }
 
         var content = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
-        return new Some<>(this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
-                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n} *//* \n"); *//* 
+        var generated = this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
+                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n} *//* \n"; *//* 
+
+        structs.add(generated); *//* 
+        return new Some<>(""); *//* 
      */
 }
-/* String */ compileClassMember(/* String input */){/* 
-        return this.compileOr(input, Lists.of(
+/* String */ compileClassMember(/* String input0 */){/* 
+        return this.compileOr(input0, Lists.of(
+                input -> this.compileStructured(input, "class "),
+                input -> this.compileStructured(input, "interface "),
+                input -> this.compileStructured(input, "record "),
                 this::compileMethod,
                 this::compileDefinitionStatement
         )); *//* 

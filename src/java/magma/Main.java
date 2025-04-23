@@ -13,6 +13,7 @@ class Main {
     }
 
     sealed interface Option<T> permits Some, None {
+        T orElse(T other);
     }
 
     public interface List<T> {
@@ -31,6 +32,14 @@ class Main {
         Iterator<T> concat(Iterator<T> other);
 
         Option<T> next();
+
+        <C> C collect(Collector<T, C> collector);
+    }
+
+    interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
     }
 
     interface Head<T> {
@@ -44,9 +53,17 @@ class Main {
     }
 
     record Some<T>(T value) implements Option<T> {
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
     }
 
     static final class None<T> implements Option<T> {
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
     }
 
     private static class State {
@@ -142,6 +159,11 @@ class Main {
         public Option<T> next() {
             return this.head.next();
         }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -198,6 +220,23 @@ class Main {
         }
     }
 
+    private static class Joiner implements Collector<String, Option<String>> {
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> current, String element) {
+            return switch (current) {
+                case None<String> _ -> new Some<>(element);
+                case Some<String>(var value) -> new Some<>(value + element);
+            };
+        }
+    }
+
+    public static final List<String> structs = Lists.empty();
+
     void main() {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.c");
@@ -216,7 +255,8 @@ class Main {
     }
 
     private String compile(String input) {
-        return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
+        var output = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
+        return structs.iter().collect(new Joiner()).orElse("") + output;
     }
 
     private String compileAll(
@@ -454,12 +494,18 @@ class Main {
         }
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
-        return new Some<>(this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
-                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n");
+        var generated = this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
+                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n";
+
+        structs.add(generated);
+        return new Some<>("");
     }
 
-    private String compileClassMember(String input) {
-        return this.compileOr(input, Lists.of(
+    private String compileClassMember(String input0) {
+        return this.compileOr(input0, Lists.of(
+                input -> this.compileStructured(input, "class "),
+                input -> this.compileStructured(input, "interface "),
+                input -> this.compileStructured(input, "record "),
                 this::compileMethod,
                 this::compileDefinitionStatement
         ));
