@@ -16,11 +16,11 @@
 };
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(Function</* T, R */> mapper)/* ; */
+/* <R> */ Option</* R */> map(Function</* T */, /*  R */> mapper)/* ; */
 /* T */ orElseGet(Supplier</* T */> other)/* ; */
-Option</* T */> or(Supplier</* Option<T> */> other)/* ; */
+Option</* T */> or(Supplier<Option</* T */>> other)/* ; */
 /* T */ orElse(/* T */ other)/* ; */
-/* <R> */ Option</* R */> flatMap(Function</* T, Option<R> */> mapper)/* ; */
+/* <R> */ Option</* R */> flatMap(Function</* T */, Option</* R */>> mapper)/* ; */
 Option</* T */> next(/*  */)/* ; */
 List</* T */> add(/* T */ element)/* ; */
 Iterator</* T */> iter(/*  */)/* ; */
@@ -137,7 +137,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */ Option</* R */> map(Function</* T, R */> mapper)/* {
+        public <R> */ Option</* R */> map(Function</* T */, /*  R */> mapper)/* {
             return new None<>();
         }
 
@@ -206,7 +206,7 @@ Iterator</* T */> iter(/*  */)/* ; */
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */ /* String */ compileAll(/* String */ input, BiFunction</* State, Character, State */> folder, Function</* String, String */> compiler, BiFunction</* StringBuilder, String, StringBuilder */> merger)/* {
+/* private */ /* String */ compileAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  String */> compiler, BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger)/* {
         return this.divideAll(input, folder)
                 .iter()
                 .map(compiler)
@@ -216,7 +216,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
         return stringBuilder.append(str);
     } */
-/* private */ List</* String */> divideAll(/* String */ input, BiFunction</* State, Character, State */> folder)/* {
+/* private */ List</* String */> divideAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
         var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
@@ -310,7 +310,7 @@ Iterator</* T */> iter(/*  */)/* ; */
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    var outputParams = this.compileAll(inputParams, this::foldValueChar, this::compileParam, this::mergeValues);
+                    var outputParams = this.compileValues(inputParams, this::compileParam);
                     var generated = outputDefinition + "(" + outputParams + ")" + this.generatePlaceholder(body) + "\n";
                     methods.add(generated);
                     return new Some<>("");
@@ -321,6 +321,9 @@ Iterator</* T */> iter(/*  */)/* ; */
         }
 
         return new None<>();
+    } */
+/* private */ /* String */ compileValues(/* String */ input, Function</* String */, /*  String */> compiler)/* {
+        return this.compileAll(input, this::foldValueChar, compiler, this::mergeValues);
     } */
 /* private */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element)/* {
         if (cache.isEmpty()) {
@@ -396,8 +399,9 @@ Iterator</* T */> iter(/*  */)/* ; */
             var argsStart = slice.indexOf("<");
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
-                var args = slice.substring(argsStart + "<".length());
-                return base + "<" + this.generatePlaceholder(args) + ">";
+                var inputArgs = slice.substring(argsStart + "<".length());
+                var outputArgs = this.compileValues(inputArgs, this::compileType);
+                return base + "<" + outputArgs + ">";
             }
         }
 

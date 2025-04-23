@@ -349,7 +349,7 @@ class Main {
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    var outputParams = this.compileAll(inputParams, this::foldValueChar, this::compileParam, this::mergeValues);
+                    var outputParams = this.compileValues(inputParams, this::compileParam);
                     var generated = outputDefinition + "(" + outputParams + ")" + this.generatePlaceholder(body) + "\n";
                     methods.add(generated);
                     return new Some<>("");
@@ -360,6 +360,10 @@ class Main {
         }
 
         return new None<>();
+    }
+
+    private String compileValues(String input, Function<String, String> compiler) {
+        return this.compileAll(input, this::foldValueChar, compiler, this::mergeValues);
     }
 
     private StringBuilder mergeValues(StringBuilder cache, String element) {
@@ -442,8 +446,9 @@ class Main {
             var argsStart = slice.indexOf("<");
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
-                var args = slice.substring(argsStart + "<".length());
-                return base + "<" + this.generatePlaceholder(args) + ">";
+                var inputArgs = slice.substring(argsStart + "<".length());
+                var outputArgs = this.compileValues(inputArgs, this::compileType);
+                return base + "<" + outputArgs + ">";
             }
         }
 
