@@ -74,10 +74,14 @@ class Main {
         String generate();
     }
 
-    interface Definable extends Node {
+    sealed interface Definable extends Node {
         default Definable flattenDefinable() {
             return this;
         }
+
+        Option<Type> findType();
+
+        Definable withParams(List<Type> paramTypes);
     }
 
     record Ok<T, X>(T value) implements Result<T, X> {
@@ -305,6 +309,16 @@ class Main {
         public String generate() {
             return generatePlaceholder(this.input);
         }
+
+        @Override
+        public Option<Type> findType() {
+            return new None<>();
+        }
+
+        @Override
+        public Definable withParams(List<Type> paramTypes) {
+            return this;
+        }
     }
 
     private record Functional(List<Type> typeParams, Type returns) implements Type {
@@ -343,6 +357,16 @@ class Main {
 
             return this.functional.returns.generate() + " (*" + this.name + ")(" + joined + ")";
         }
+
+        @Override
+        public Option<Type> findType() {
+            return new Some<>(this.functional);
+        }
+
+        @Override
+        public Definable withParams(List<Type> paramTypes) {
+            return new FunctionalDefinition(new Functional(paramTypes, this.functional), this.name);
+        }
     }
 
     private record Definition(Type parsed, String name) implements Definable {
@@ -357,6 +381,16 @@ class Main {
                 return new FunctionalDefinition(functional, this.name);
             }
             return this;
+        }
+
+        @Override
+        public Option<Type> findType() {
+            return new Some<>(this.parsed);
+        }
+
+        @Override
+        public Definable withParams(List<Type> paramTypes) {
+            return new FunctionalDefinition(new Functional(paramTypes, this.parsed), this.name);
         }
     }
 
@@ -478,21 +512,34 @@ class Main {
         if (paramEnd < 0) {
             return new None<>();
         }
-        var params = withParams.substring(0, paramEnd).strip();
+        var paramsString = withParams.substring(0, paramEnd).strip();
         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-        var newParams = this.generateAll(this::mergeValues, this.parseValues(params, this::compileDefinition));
-        var header = this.compileDefinition(definition) + "(" + newParams + ")";
+        List<Definable> params = this.parseValues(paramsString, input1 -> this.parseDefinition(input1).flattenDefinable());
 
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
             var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
-            return new Some<>(header + "{" + outputContent + "\n}\n");
+            var joinedParams = this.joinNodes(params, ", ");
+            return new Some<>(this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n");
         }
         else {
-            return new Some<>("\n\t" + header + ";");
-        }
+            var paramTypes = params.iter()
+                    .map(Definable::findType)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
 
+            var definable = this.parseDefinition(definition).flattenDefinable();
+            var definable1 = definable.withParams(paramTypes);
+            return new Some<>("\n\t" + definable1.generate() + ";");
+        }
+    }
+
+    private <T extends Node> String joinNodes(List<T> nodes, String delimiter) {
+        return nodes.iter()
+                .map(Node::generate)
+                .collect(new Joiner(delimiter))
+                .orElse("");
     }
 
     private String compileDefinition(String input) {

@@ -1,31 +1,31 @@
 /* sealed */struct Result<T, X> permits Ok, Err {/*  */
 }
 /* public sealed */struct Option<T> permits Some, None {
-	/* T */ orElse(/* T */ other);/* 
+	/* T */ (*orElse)(/* T */);/* 
      */
 }
 /* public */struct List<T> {
-	Iterator</* T */> iter(/*  */);
-	List</* T */> add(/* T */ element);
-	/* T */ get(int index);/* 
+	Iterator</* T */> (*iter)();
+	List</* T */> (*add)(/* T */);
+	/* T */ (*get)(int);/* 
      */
 }
 /* public */struct Iterator<T> {
-	</* R */> map(/*  R */ (*mapper)(/* T */));
-	</* R */> fold(/* R */ initial, /*  R */ (*folder)(/* R */, /*  T */));
-	</* R */> flatMap(Iterator</* R */> (*mapper)(/* T */));
-	Iterator</* T */> concat(Iterator</* T */> other);
-	Option</* T */> next(/*  */);
-	</* C */> collect(Collector</* T */, /*  C */> collector);/* 
+	</* R */> (*map)(/*  R */ (*)(/* T */));
+	</* R */> (*fold)(/* R */, /*  R */ (*)(/* R */, /*  T */));
+	</* R */> (*flatMap)(Iterator</* R */> (*)(/* T */));
+	Iterator</* T */> (*concat)(Iterator</* T */>);
+	Option</* T */> (*next)();
+	</* C */> (*collect)(Collector</* T */, /*  C */>);/* 
      */
 }
 /* public */struct Collector<T, C> {
-	/* C */ createInitial(/*  */);
-	/* C */ fold(/* C */ current, /* T */ element);/* 
+	/* C */ (*createInitial)();
+	/* C */ (*fold)(/* C */, /* T */);/* 
      */
 }
 /*  */struct Head<T> {
-	Option</* T */> next(/*  */);/* 
+	Option</* T */> (*next)();/* 
      */
 }
 /*  */struct Type extends Node {/* default  */ flattenType(/*  */){/* 
@@ -36,14 +36,16 @@
      */
 }
 /*  */struct Node {
-	/* String */ generate(/*  */);/* 
+	/* String */ (*generate)();/* 
      */
 }
-/*  */struct Definable extends Node {/* default  */ flattenDefinable(/*  */){/* 
+/* sealed */struct Definable extends Node {/* default  */ flattenDefinable(/*  */){/* 
             return this; *//* 
          */
 }
-/* 
+
+	Option</* Type */> (*findType)();
+	/* Definable */ (*withParams)(List</* Type */>);/* 
      */
 }
 /*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
@@ -273,6 +275,16 @@
             return generatePlaceholder(this.input); *//* 
          */
 }
+/* @Override
+  */ findType(/*  */){/* 
+            return new None<>(); *//* 
+         */
+}
+/* @Override
+  */ withParams(List</* Type */> paramTypes){/* 
+            return this; *//* 
+         */
+}
 /* 
      */
 }
@@ -311,6 +323,16 @@
             return this.functional.returns.generate() + " (*" + this.name + ")(" + joined + ")"; *//* 
          */
 }
+/* @Override
+  */ findType(/*  */){/* 
+            return new Some<>(this.functional); *//* 
+         */
+}
+/* @Override
+  */ withParams(List</* Type */> paramTypes){/* 
+            return new FunctionalDefinition(new Functional(paramTypes, this.functional), this.name); *//* 
+         */
+}
 /* 
      */
 }
@@ -327,12 +349,22 @@
             return this; *//* 
          */
 }
+/* @Override
+  */ findType(/*  */){/* 
+            return new Some<>(this.parsed); *//* 
+         */
+}
+/* @Override
+  */ withParams(List</* Type */> paramTypes){/* 
+            return new FunctionalDefinition(new Functional(paramTypes, this.parsed), this.name); *//* 
+         */
+}
 /* 
      */
 }
 /*  */struct Main {
-	/* enum  */ Void(/* "void" */);
-	/* public  */ Lists.empty(/*  */);void main(/*  */){
+	/* enum  */ (*Void)();
+	/* public  */ (*Lists.empty)();void main(/*  */){
 	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
 	/* var */ target = source.resolveSibling("main.c");/* 
 
@@ -393,13 +425,13 @@
         else if (c == ' */
 }
 
-	/* '  */ state.isShallow(/*  */);/* else */ if(/* c  */ '{'){/* 
+	/* '  */ (*state.isShallow)();/* else */ if(/* c  */ '{'){/* 
             state.enter(); *//* 
         }
         else if (c == ' */
 }
 
-	/* ')  */ state.exit(/*  */);
+	/* ')  */ (*state.exit)();
 	/* return */ state;/* 
      */
 }
@@ -452,20 +484,34 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         if (paramEnd < 0) {
             return new None<>();
         } */
-	/* var */ params = withParams.substring(/* 0 */, /* paramEnd) */.strip();
+	/* var */ paramsString = withParams.substring(/* 0 */, /* paramEnd) */.strip();
 	/* var */ withBraces = withParams.substring(/* paramEnd + ")" */.length(/* ) */).strip();
-	/* var */ newParams = this.generateAll(/* this::mergeValues */, this.parseValues(params, /*  this::compileDefinition) */);
-	/* var */ header = this.compileDefinition(definition) + "(" + newParams + ")";/* 
+	List</* Definable */> params = this.parseValues(paramsString, /* input1 -> this */.parseDefinition(/* input1) */.flattenDefinable());/* 
 
         if (withBraces.startsWith("{") && withBraces.endsWith("} *//* ")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
             var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
-            return new Some<>(header + "{" + outputContent + "\n}\n");
+            var joinedParams = this.joinNodes(params, ", ");
+            return new Some<>(this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n");
         } *//* 
         else {
-            return new Some<>("\n\t" + header + ";");
+            var paramTypes = params.iter()
+                    .map(Definable::findType)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
+
+            var definable = this.parseDefinition(definition).flattenDefinable();
+            var definable1 = definable.withParams(paramTypes);
+            return new Some<>("\n\t" + definable1.generate() + ";");
         } *//* 
 
+     */
+}
+/* private  */ joinNodes(List</* T */> nodes, /* String */ delimiter){/* 
+        return nodes.iter()
+                .map(Node::generate)
+                .collect(new Joiner(delimiter))
+                .orElse(""); *//* 
      */
 }
 /* private  */ compileDefinition(/* String */ input){/* 
