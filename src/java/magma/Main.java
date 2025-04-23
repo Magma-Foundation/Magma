@@ -407,7 +407,24 @@ class Main {
     private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
                 .or(() -> compileStatement(input, Main::compileStatementValue))
+                .or(() -> compileBlock(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Option<String> compileBlock(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeContent = withoutEnd.substring(0, contentStart);
+                var content = withoutEnd.substring(contentStart + "{".length());
+
+                return new Some<>(generatePlaceholder(beforeContent) + "{" + compileStatementsOrBlocks(content) + "\n\t}");
+            }
+        }
+
+        return new None<>();
     }
 
     private static Option<String> compileStatementValue(String input) {
@@ -580,6 +597,45 @@ class Main {
         return new Some<>(new Content(input));
     }
 
+    private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
+        return stringBuilder.append(str);
+    }
+
+    private static String compileStatementsOrBlocks(String body) {
+        return Main.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment)));
+    }
+
+    private static String compileStatements(String input, Function<String, Option<String>> compiler) {
+        return Main.parseStatements(input, compiler).map(Main::generateStatements).orElse("");
+    }
+
+    private static Option<List<String>> parseStatements(String input, Function<String, Option<String>> compiler) {
+        return Main.parseAll(input, Main::foldStatementChar, compiler);
+    }
+
+    private static String generateStatements(List<String> inner) {
+        return generateAll(Main::mergeStatements, inner);
+    }
+
+    private static State foldStatementChar(State state, char c) {
+        var appended = state.append(c);
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
+        if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '}') {
+            return appended.exit();
+        }
+        else {
+            return appended;
+        }
+    }
+
     void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -594,26 +650,10 @@ class Main {
     }
 
     private String compileRoot(String input) {
-        var compiled = this.compileStatements(input, segment -> new Some<>(this.compileRootSegment(segment)));
+        var compiled = compileStatements(input, segment -> new Some<>(this.compileRootSegment(segment)));
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
-    }
-
-    private String compileStatements(String input, Function<String, Option<String>> compiler) {
-        return this.parseStatements(input, compiler).map(this::generateStatements).orElse("");
-    }
-
-    private Option<List<String>> parseStatements(String input, Function<String, Option<String>> compiler) {
-        return Main.parseAll(input, this::foldStatementChar, compiler);
-    }
-
-    private String generateStatements(List<String> inner) {
-        return generateAll(Main::mergeStatements, inner);
-    }
-
-    private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
-        return stringBuilder.append(str);
     }
 
     private String compileRootSegment(String input) {
@@ -642,7 +682,7 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
+        var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
 
         var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
@@ -678,7 +718,7 @@ class Main {
                     String newBody;
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + this.compileStatements(body, segment -> new Some<>(compileStatementOrBlock(segment))) + "\n}";
+                        newBody = "{" + compileStatementsOrBlocks(body) + "\n}";
                     }
                     else if (withBraces.equals(";")) {
                         newBody = ";";
@@ -707,24 +747,5 @@ class Main {
 
     private Option<String> compileDefinitionStatement(String input) {
         return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate));
-    }
-
-    private State foldStatementChar(State state, char c) {
-        var appended = state.append(c);
-        if (c == ';' && appended.isLevel()) {
-            return appended.advance();
-        }
-        if (c == '}' && appended.isShallow()) {
-            return appended.advance().exit();
-        }
-        if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '}') {
-            return appended.exit();
-        }
-        else {
-            return appended;
-        }
     }
 }
