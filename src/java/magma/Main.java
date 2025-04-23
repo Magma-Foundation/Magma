@@ -202,9 +202,24 @@ class Main {
     }
 
     private String compileClassSegment(String input) {
-        return this.compileDefinitionStatement(input)
-                .or(() -> this.compileStructured(input, "interface "))
+        return this.compileStructured(input, "interface ")
+                .or(() -> this.compileMethod(input))
+                .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> this.generatePlaceholder(input));
+    }
+
+    private Option<String> compileMethod(String input) {
+        var paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            var inputDefinition = input.substring(0, paramStart).strip();
+            var withParams = input.substring(paramStart + "(".length());
+
+            return this.compileDefinition(inputDefinition).map(outputDefinition -> {
+                return outputDefinition + "(" + this.generatePlaceholder(withParams);
+            });
+        }
+
+        return new None<>();
     }
 
     private Option<String> compileDefinitionStatement(String input) {
@@ -213,19 +228,25 @@ class Main {
             return new None<>();
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        var nameSeparator = withoutEnd.lastIndexOf(" ");
+        return this.compileDefinition(withoutEnd).map(definition -> {
+            return "\n\t" + definition + ";";
+        });
+    }
+
+    private Option<String> compileDefinition(String input) {
+        var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
         }
-        var beforeName = withoutEnd.substring(0, nameSeparator).strip();
+        var beforeName = input.substring(0, nameSeparator).strip();
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
             return new None<>();
         }
         var beforeType = beforeName.substring(0, typeSeparator).strip();
         var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
-        return new Some<>("\n\t" + this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name + ";");
+        var name = input.substring(nameSeparator + " ".length()).strip();
+        return new Some<>(this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name);
     }
 
     private String compileType(String type) {

@@ -7,8 +7,7 @@ import java.util.function.BiFunction; *//*
 import java.util.function.Function; *//* 
 import java.util.function.Supplier; *//* 
 
- */struct Main {/* sealed  */struct Option<T> permits Some, None {
-	/* <R> Option<R> map(Function<T, */ /* R> */ mapper);
+ */struct Main {/* sealed  */struct Option<T> permits Some, None {/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper); */
 	/* T */ /* orElseGet(Supplier<T> */ other);
 	/* Option<T> */ /* or(Supplier<Option<T>> */ other);/* 
      */};
@@ -23,13 +22,9 @@ import java.util.function.Supplier; *//*
 
         Iterator<T> iter(); *//* 
      */};
-/* 
-
-    public static class RangeHead implements Head<Integer> {
+/* public static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter;
-
-        public RangeHead(int length) {
+        private int counter; */ /* public */ RangeHead(/* int length) {
             this.length = length;
         }
 
@@ -64,14 +59,10 @@ import java.util.function.Supplier; *//*
                 }
             }
         }
-    } *//* 
-
-    private static class State {
+    } *//* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
-        private int depth;
-
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -109,9 +100,7 @@ import java.util.function.Supplier; *//*
         public boolean isShallow() {
             return this.depth == 1;
         }
-    } *//* 
-
-    private record Some<T>(T value) implements Option<T> {
+    } *//* private */ /* record */ Some<T>(/* T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
@@ -126,11 +115,9 @@ import java.util.function.Supplier; *//*
         public Option<T> or(Supplier<Option<T>> other) {
             return this;
         }
-    } *//* 
-
-    private static final class None<T> implements Option<T> {
+    } *//* private static final class None<T> implements Option<T> {
         @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
+        public <R> */ /* Option<R> */ map(/* Function<T, R> mapper) {
             return new None<>();
         }
 
@@ -156,26 +143,18 @@ import java.util.function.Supplier; *//*
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    } *//* 
-
-    private String compileRoot(String input) {
+    } *//* private */ /* String */ compileRoot(/* String input) {
         return this.compileAll(input, this::compileRootSegment);
-    } *//* 
-
-    private String compileAll(String input, Function<String, String> compiler) {
+    } *//* private */ /* String */ compileAll(/* String input, Function<String, String> compiler) {
         return this.divide(input, new State())
                 .segments
                 .iter()
                 .map(compiler)
                 .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
-    } *//* 
-
-    private String compileRootSegment(String input) {
+    } *//* private */ /* String */ compileRootSegment(/* String input) {
         return this.compileClass(input).orElseGet(() -> this.generatePlaceholder(input));
-    } *//* 
-
-    private Option<String> compileClass(String input) {
+    } *//* private */ /* Option<String> */ compileClass(/* String input) {
         return this.compileStructured(input, "class ");
     } *//* 
 
@@ -201,48 +180,54 @@ import java.util.function.Supplier; *//*
     }
 
     private String compileClassSegment(String input) {
-        return this.compileDefinitionStatement(input)
-                .or(() -> this.compileStructured(input, " */struct "))
+        return this.compileStructured(input, " */struct ")
+                .or(() -> this.compileMethod(input))
+                .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> this.generatePlaceholder(input));
     }
 
-    private Option<String> compileDefinitionStatement(String input) {
-	/* var stripped */ /* = */ input.strip();/* 
+    private Option<String> compileMethod(String input) {/* var paramStart */ /* = */ input.indexOf(/* "("); *//* 
+        if (paramStart >= 0) {
+            var inputDefinition = input.substring(0, paramStart).strip();
+            var withParams = input.substring(paramStart + "(".length());
+
+            return this.compileDefinition(inputDefinition).map(outputDefinition -> {
+                return outputDefinition + "(" + this.generatePlaceholder(withParams);
+            });
+        } *//* return */ /* new */ None<>(/* ); *//* }
+
+    private */ /* Option<String> */ compileDefinitionStatement(/* String input) {
+        var stripped = input.strip(); *//* 
         if (!stripped.endsWith("; *//* ")) {
-            return new None<>();
-        } */
-	/* var withoutEnd = stripped.substring(0, stripped.length() */ /* - */ ";/* ".length()); */
-	/* var nameSeparator = */ /* withoutEnd.lastIndexOf(" */ ");/* 
+            return */ /* new */ None<>(/* );
+        } *//* var withoutEnd */ /* = */ stripped.substring(/* 0, stripped.length() - "; *//* ".length()); *//* 
+        return this.compileDefinition(withoutEnd).map(definition -> {
+            return "\n\t" + definition + ";";
+        } *//* ); *//* }
+
+    private */ /* Option<String> */ compileDefinition(/* String input) {
+        var nameSeparator = input.lastIndexOf(" "); *//* 
         if (nameSeparator < 0) {
             return new None<>();
-        } */
-	/* var beforeName = */ /* withoutEnd.substring(0, */ nameSeparator).strip();
-	/* var typeSeparator = */ /* beforeName.lastIndexOf(" */ ");/* 
+        } *//* var beforeName */ /* = */ input.substring(/* 0, nameSeparator).strip(); *//* var typeSeparator */ /* = */ beforeName.lastIndexOf(/* " "); *//* 
         if (typeSeparator < 0) {
             return new None<>();
-        } */
-	/* var beforeType = */ /* beforeName.substring(0, */ typeSeparator).strip();
-	/* var type = beforeName.substring(typeSeparator + */ /* " */ ".length()).strip();
-	/* var name = withoutEnd.substring(nameSeparator + */ /* " */ ".length()).strip();
-	/* return new Some<>("\n\t" + this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name */ /* + */ ";/* "); */
-	/* }
+        } *//* var beforeType */ /* = */ beforeName.substring(/* 0, typeSeparator).strip(); *//* var type */ /* = */ beforeName.substring(/* typeSeparator + " ".length()).strip(); *//* var name */ /* = */ input.substring(/* nameSeparator + " ".length()).strip(); *//* return */ /* new */ Some<>(/* this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name); *//* }
 
-    private String compileType(String type) { */ /* return */ this.generatePlaceholder(type);
-	/* }
+    private */ /* String */ compileType(/* String type) {
+        return this.generatePlaceholder(type); *//* }
 
-    private State divide(String input, State state) {
-        var current */ /* = */ state;
-	/* for (var i */ /* = */ 0;
-	/* i */ /* < */ input.length();/*  i++) {
-            var c = input.charAt(i);
+    private */ /* State */ divide(/* String input, State state) {
+        var current = state; */
+	/* for (var i */ /* = */ 0;/* i */ /* < */ input.length(/* ); *//* i++) {
+            var c */ /* = */ input.charAt(/* i);
             current = this.foldStatementChar(current, c);
         } *//* 
-        return current.advance(); */
-	/* }
+        return current.advance(); *//* }
 
-    private State foldStatementChar(State state, char c) {
-        var appended */ /* = */ state.append(c);
-	/* if (c */ /* == */ ';/* ' && appended.isLevel()) {
+    private */ /* State */ foldStatementChar(/* State state, char c) {
+        var appended = state.append(c); */
+	/* if (c */ /* == */ ';/* ' */ /* && */ appended.isLevel(/* )) {
             return appended.advance();
         } */
 	/* if (c == '}' && appended.isShallow()) { */ /* return */ appended.advance().exit();/* 
@@ -255,9 +240,7 @@ import java.util.function.Supplier; *//*
         else { */ /* return */ appended;/* 
         }
      */};
-/* 
-
-    private String generatePlaceholder(String input) {
+/* private */ /* String */ generatePlaceholder(/* String input) {
         return "/* " + input + " */";
     } *//* 
  */};
