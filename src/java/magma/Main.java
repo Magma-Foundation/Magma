@@ -477,6 +477,25 @@ class Main {
 
     private static String compileValue(String input) {
         var stripped = input.strip();
+        if (stripped.startsWith("new ")) {
+            var slice = stripped.substring("new ".length()).strip();
+            if (slice.endsWith(")")) {
+                var withoutEnd = slice.substring(0, slice.length() - ")".length());
+                var argsStart = withoutEnd.indexOf("(");
+                if (argsStart >= 0) {
+                    var base = withoutEnd.substring(0, argsStart);
+                    var args = withoutEnd.substring(argsStart + "(".length());
+                    if (parseAndModifyType(base) instanceof Some<Type>(Type type)) {
+                        var newArgs = parseValues(args, value -> new Some<>(compileValue(value)))
+                                .map(Main::generateValues)
+                                .orElse("");
+
+                        return type.generate() + "(" + newArgs + ")";
+                    }
+                }
+            }
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
