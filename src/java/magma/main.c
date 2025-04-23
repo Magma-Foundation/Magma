@@ -6,12 +6,13 @@
 }
 /* public */struct List<T> {
 	Iterator</* T */> iter(/*  */);
-	void add(/* T */ element);/* 
+	List</* T */> add(/* T */ element);
+	/* T */ get(int index);/* 
      */
 }
 /* public */struct Iterator<T> {
 	</* R */> map(Function</* T */, /*  R */> mapper);
-	</* R */> fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder);
+	</* R */> fold(/* R */ initial, /*  R */ (*)(/* R */, /*  T */) folder);
 	</* R */> flatMap(Function</* T */, Iterator</* R */>> mapper);
 	Iterator</* T */> concat(Iterator</* T */> other);
 	Option</* T */> next(/*  */);
@@ -113,7 +114,7 @@
          */
 }
 /* @Override
-  */ fold(/* R */ initial, BiFunction</* R */, /*  T */, /*  R */> folder){
+  */ fold(/* R */ initial, /*  R */ (*)(/* R */, /*  T */) folder){
 	/* var */ current = initial;/* 
             while (true) {
                 switch (this.head.next()) {
@@ -206,7 +207,11 @@
 /* 
      */
 }
-/* private static */struct Joiner implements Collector<String, Option<String>> {/* @Override
+/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {/* private */ Joiner(/*  */){/* 
+            this(""); *//* 
+         */
+}
+/* @Override
   */ createInitial(/*  */){/* 
             return new None<>(); *//* 
          */
@@ -215,16 +220,20 @@
   */ fold(Option</* String */> current, /* String */ element){/* 
             return switch (current) {
                 case None<String> _ -> new Some<>(element);
-                case Some<String>(var value) -> new Some<>(value + element);
+                case Some<String>(var value) -> new Some<>(value + this.delimiter + element);
             } *//* ; *//* 
          */
 }
 /* 
      */
 }
-/* private */struct Generic(String base, String arguments) implements Type {/* @Override
-  */ generate(/*  */){/* 
-            return this.base() + "<" + this.arguments() + ">"; *//* 
+/* private */struct Generic(String base, List<Type> arguments) implements Type {/* @Override
+  */ generate(/*  */){
+	/* var */ joined = this.arguments.iter(/* )
+                     */.map(/* Type::generate */).collect(new Joiner(", "))
+                    .orElse("");/* 
+
+            return this.base() + "<" + joined + ">"; *//* 
          */
 }
 /* 
@@ -237,6 +246,31 @@
 /* @Override
   */ generate(/*  */){/* 
             return generatePlaceholder(this.input); *//* 
+         */
+}
+/* 
+     */
+}
+/* private */struct Functional(List<Type> typeParams, Type returns) implements Type {/* @Override
+  */ generate(/*  */){
+	/* var */ joined = this.typeParams.iter(/* )
+                     */.map(/* Type::generate */).collect(new Joiner(", "))
+                    .orElse("");/* 
+
+            return this.returns.generate() + " (*)(" + joined + ")"; *//* 
+         */
+}
+/* 
+     */
+}
+/* private static */struct ListCollector<T> implements Collector<T, List<T>> {/* @Override
+  */ createInitial(/*  */){/* 
+            return Lists.empty(); *//* 
+         */
+}
+/* @Override
+  */ fold(List</* T */> current, /* T */ element){/* 
+            return current.add(element); *//* 
          */
 }
 /* 
@@ -262,23 +296,32 @@
      */
 }
 /* private  */ compile(/* String */ input){
-	/* var */ output = this.compileAll(input, /*  this::foldStatementChar */, /*  this::compileRootSegment */, /*  this::mergeStatements */);/* 
+	/* var */ output = this.generateAll(/* this::mergeStatements */, this.parseStatements(input));/* 
         return structs.iter().collect(new Joiner()).orElse("") + output; *//* 
      */
 }
-/* private  */ compileAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  String */> compiler, BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger){/* 
+/* private  */ parseStatements(/* String */ input){/* 
+        return this.parseAll(input, this::foldStatementChar, this::compileRootSegment); *//* 
+     */
+}
+/* private  */ generateAll(/*  StringBuilder */ (*)(/* StringBuilder */, /*  String */) merger, List</* String */> parsed){/* 
+        return parsed.iter()
+                .fold(new StringBuilder(), merger)
+                .toString(); *//* 
+     */
+}
+/* private  */ parseAll(/* String */ input, /*  State */ (*)(/* State */, /*  Character */) folder, Function</* String */, /*  T */> compiler){/* 
         return this.divide(input, new State(), folder)
                 .iter()
                 .map(compiler)
-                .fold(new StringBuilder(), merger)
-                .toString(); *//* 
+                .collect(new ListCollector<>()); *//* 
      */
 }
 /* private  */ mergeStatements(/* StringBuilder */ output, /* String */ compiled){/* 
         return output.append(compiled); *//* 
      */
 }
-/* private  */ divide(/* String */ input, /* State */ state, BiFunction</* State */, /*  Character */, /*  State */> folder){
+/* private  */ divide(/* String */ input, /* State */ state, /*  State */ (*)(/* State */, /*  Character */) folder){
 	/* var */ current = state;
 	/* for  */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
             var c = input.charAt(i);
@@ -357,12 +400,12 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         } */
 	/* var */ params = withParams.substring(/* 0 */, /* paramEnd) */.strip();
 	/* var */ withBraces = withParams.substring(/* paramEnd + ")" */.length(/* ) */).strip();
-	/* var */ newParams = this.compileValues(params, /*  this::compileDefinition */);
+	/* var */ newParams = this.generateAll(/* this::mergeValues */, this.parseValues(params, /*  this::compileDefinition) */);
 	/* var */ header = this.compileDefinition(definition) + "(" + newParams + ")";/* 
 
         if (withBraces.startsWith("{") && withBraces.endsWith("} *//* ")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
-            var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
+            var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
             return new Some<>(header + "{" + outputContent + "\n}\n");
         } *//* 
         else {
@@ -382,8 +425,19 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             case None<Integer> _ -> beforeName;
             case Some<Integer>(var typeSeparator) -> beforeName.substring(0, typeSeparator + " ".length());
         } *//* ; */
-	/* var */ name = stripped.substring(/* space + " " */.length());/* 
-        return this.compileType(type) + " " + name; *//* 
+	/* var */ name = stripped.substring(/* space + " " */.length());
+	/* var */ parsed = this.modifyType(this.parseType(type));/* 
+        return parsed.generate() + " " + name; *//* 
+     */
+}
+/* private  */ modifyType(/* Type */ type){/* 
+        if (type instanceof Generic(String base, List<Type> arguments)) {
+            if (base.equals("BiFunction")) {
+                return new Functional(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
+            }
+        } *//* 
+
+        return type; *//* 
      */
 }
 /* private  */ findTypeSeparator(/* String */ input){
@@ -403,10 +457,6 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         return new None<>(); *//* 
      */
 }
-/* private  */ compileType(/* String */ input){/* 
-        return this.parseType(input).generate(); *//* 
-     */
-}
 /* private  */ parseType(/* String */ input){
 	/* var */ stripped = input.strip();/* 
         if (stripped.equals("void")) {
@@ -422,16 +472,16 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), this::compileType);
-                return new Generic(base, arguments);
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.modifyType(this.parseType(input1)));
+                return new Generic(base, parsed);
             }
         } *//* 
 
         return new Content(input); *//* 
      */
 }
-/* private  */ compileValues(/* String */ input, Function</* String */, /*  String */> compileType){/* 
-        return this.compileAll(input, this::foldValueChar, compileType, this::mergeValues); *//* 
+/* private  */ parseValues(/* String */ input, Function</* String */, /*  T */> compileType){/* 
+        return this.parseAll(input, this::foldValueChar, compileType); *//* 
      */
 }
 /* private  */ compileStatementOrBlock(/* String */ input){
@@ -461,7 +511,8 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             if (paramStart >= 0) {
                 var caller = withoutEnd.substring(0, paramStart).strip();
                 var arguments = withoutEnd.substring(paramStart + "(".length());
-                return this.compileValue(caller) + "(" + this.compileValues(arguments, this::compileValue) + ")";
+                var tList = this.parseValues(arguments, this::compileValue);
+                return this.compileValue(caller) + "(" + this.generateAll(this::mergeValues, tList) + ")";
             }
         } */
 	/* var */ separator = stripped.lastIndexOf(".");/* 
@@ -538,7 +589,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
 
         var content = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
         var generated = Content.generatePlaceholder(beforeKeyword.strip()) + "struct " +
-                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n} *//* \n"; *//* 
+                beforeContent + " {" + this.generateAll(this::mergeStatements, this.parseAll(content, this::foldStatementChar, this::compileClassMember)) + "\n} *//* \n"; *//* 
 
         structs.add(generated); *//* 
         return new Some<>(""); *//* 

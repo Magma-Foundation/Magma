@@ -35,7 +35,9 @@ class Main {
     public interface List<T> {
         Iterator<T> iter();
 
-        void add(T element);
+        List<T> add(T element);
+
+        T get(int index);
     }
 
     public interface Iterator<T> {
@@ -240,7 +242,11 @@ class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Option<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        private Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -250,15 +256,20 @@ class Main {
         public Option<String> fold(Option<String> current, String element) {
             return switch (current) {
                 case None<String> _ -> new Some<>(element);
-                case Some<String>(var value) -> new Some<>(value + element);
+                case Some<String>(var value) -> new Some<>(value + this.delimiter + element);
             };
         }
     }
 
-    private record Generic(String base, String arguments) implements Type {
+    private record Generic(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            return this.base() + "<" + this.arguments() + ">";
+            var joined = this.arguments.iter()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.base() + "<" + joined + ">";
         }
     }
 
@@ -270,6 +281,30 @@ class Main {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+    }
+
+    private record Functional(List<Type> typeParams, Type returns) implements Type {
+        @Override
+        public String generate() {
+            var joined = this.typeParams.iter()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returns.generate() + " (*)(" + joined + ")";
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
         }
     }
 
@@ -293,21 +328,25 @@ class Main {
     }
 
     private String compile(String input) {
-        var output = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
+        var output = this.generateAll(this::mergeStatements, this.parseStatements(input));
         return structs.iter().collect(new Joiner()).orElse("") + output;
     }
 
-    private String compileAll(
-            String input,
-            BiFunction<State, Character, State> folder,
-            Function<String, String> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
+    private List<String> parseStatements(String input) {
+        return this.parseAll(input, this::foldStatementChar, this::compileRootSegment);
+    }
+
+    private String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
+        return parsed.iter()
+                .fold(new StringBuilder(), merger)
+                .toString();
+    }
+
+    private <T> List<T> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, T> compiler) {
         return this.divide(input, new State(), folder)
                 .iter()
                 .map(compiler)
-                .fold(new StringBuilder(), merger)
-                .toString();
+                .collect(new ListCollector<>());
     }
 
     private StringBuilder mergeStatements(StringBuilder output, String compiled) {
@@ -390,12 +429,12 @@ class Main {
         var params = withParams.substring(0, paramEnd).strip();
         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-        var newParams = this.compileValues(params, this::compileDefinition);
+        var newParams = this.generateAll(this::mergeValues, this.parseValues(params, this::compileDefinition));
         var header = this.compileDefinition(definition) + "(" + newParams + ")";
 
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
-            var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
+            var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
             return new Some<>(header + "{" + outputContent + "\n}\n");
         }
         else {
@@ -418,7 +457,18 @@ class Main {
         };
 
         var name = stripped.substring(space + " ".length());
-        return this.parseType(type).generate() + " " + name;
+        var parsed = this.modifyType(this.parseType(type));
+        return parsed.generate() + " " + name;
+    }
+
+    private Type modifyType(Type type) {
+        if (type instanceof Generic(String base, List<Type> arguments)) {
+            if (base.equals("BiFunction")) {
+                return new Functional(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
+            }
+        }
+
+        return type;
     }
 
     private Option<Integer> findTypeSeparator(String input) {
@@ -453,16 +503,16 @@ class Main {
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).generate());
-                return new Generic(base, arguments);
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.modifyType(this.parseType(input1)));
+                return new Generic(base, parsed);
             }
         }
 
         return new Content(input);
     }
 
-    private String compileValues(String input, Function<String, String> compileType) {
-        return this.compileAll(input, this::foldValueChar, compileType, this::mergeValues);
+    private <T> List<T> parseValues(String input, Function<String, T> compileType) {
+        return this.parseAll(input, this::foldValueChar, compileType);
     }
 
     private String compileStatementOrBlock(String input) {
@@ -492,7 +542,8 @@ class Main {
             if (paramStart >= 0) {
                 var caller = withoutEnd.substring(0, paramStart).strip();
                 var arguments = withoutEnd.substring(paramStart + "(".length());
-                return this.compileValue(caller) + "(" + this.compileValues(arguments, this::compileValue) + ")";
+                var tList = this.parseValues(arguments, this::compileValue);
+                return this.compileValue(caller) + "(" + this.generateAll(this::mergeValues, tList) + ")";
             }
         }
 
@@ -574,7 +625,7 @@ class Main {
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
         var generated = Content.generatePlaceholder(beforeKeyword.strip()) + "struct " +
-                beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n";
+                beforeContent + " {" + this.generateAll(this::mergeStatements, this.parseAll(content, this::foldStatementChar, this::compileClassMember)) + "\n}\n";
 
         structs.add(generated);
         return new Some<>("");
