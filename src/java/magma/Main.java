@@ -503,7 +503,9 @@ class Main {
     }
 
     private String compileParam(String param) {
-        return this.parseAndModifyDefinition(param).map(Defined::generate).orElseGet(() -> generatePlaceholder(param));
+        return this.compileWhitespace(param)
+                .or(() -> this.parseAndModifyDefinition(param).map(Defined::generate))
+                .orElseGet(() -> generatePlaceholder(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {
