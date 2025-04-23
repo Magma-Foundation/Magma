@@ -11,9 +11,9 @@
 /* import java.util.stream.IntStream; */
 /*  */
 struct State {
-	/* private final List<String> */ segments;
-	/* private StringBuilder */ buffer;
-	/* private int */ depth;
+	/* private */ /* final List<String> */ segments;
+	/* private */ /* StringBuilder */ buffer;
+	/* private */ /* int */ depth;
 	/* private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
@@ -48,7 +48,7 @@ struct State {
 	/*  */
 };
 struct Main {
-	/* private static final List<String> structs = new */ ArrayList<>();
+	/* private */ /* static final List<String> structs = new */ ArrayList<>();
 	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -178,9 +178,14 @@ struct Main {
             var definition = stripped.substring(0, stripped.length() - ";".length()).strip();
             var nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                var beforeName = definition.substring(0, nameSeparator);
+                var beforeName = definition.substring(0, nameSeparator).strip();
                 var name = definition.substring(nameSeparator + " ".length());
-                return Optional.of(formatSegment(generatePlaceholder(beforeName) + " " + name + ";"));
+                var typeSeparator = beforeName.indexOf(" ".toString());
+                if (typeSeparator >= 0) {
+                    var beforeType = beforeName.substring(0, typeSeparator).strip();
+                    var type = beforeName.substring(typeSeparator + " ".length());
+                    return Optional.of(formatSegment(generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                }
             }
         }
 

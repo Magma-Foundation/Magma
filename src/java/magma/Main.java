@@ -200,9 +200,14 @@ public class Main {
             var definition = stripped.substring(0, stripped.length() - ";".length()).strip();
             var nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                var beforeName = definition.substring(0, nameSeparator);
+                var beforeName = definition.substring(0, nameSeparator).strip();
                 var name = definition.substring(nameSeparator + " ".length());
-                return Optional.of(formatSegment(generatePlaceholder(beforeName) + " " + name + ";"));
+                var typeSeparator = beforeName.indexOf(" ".toString());
+                if (typeSeparator >= 0) {
+                    var beforeType = beforeName.substring(0, typeSeparator).strip();
+                    var type = beforeName.substring(typeSeparator + " ".length());
+                    return Optional.of(formatSegment(generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                }
             }
         }
 
