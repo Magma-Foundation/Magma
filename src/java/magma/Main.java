@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 class Main {
@@ -109,6 +110,26 @@ class Main {
         }
     }
 
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.value);
+        }
+    }
+
+
     public record Iterator<T>(Head<T> head) {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
@@ -128,6 +149,20 @@ class Main {
 
         public <C> C collect(Collector<T, C> collector) {
             return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(value -> {
+                return new Iterator<>(predicate.test(value) ? new SingleHead<>(value) : new EmptyHead<>());
+            });
+        }
+
+        private <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other.head::next));
         }
     }
 
@@ -271,11 +306,15 @@ class Main {
         }
     }
 
-    private record Generic(String base, List<Type> args) implements Type {
+    private record Generic(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joined = generateValuesFromNodes(this.args);
+            var joined = generateValuesFromNodes(this.arguments);
             return this.base + "<" + joined + ">";
+        }
+
+        public Generic withArgs(List<Type> arguments) {
+            return new Generic(this.base, arguments);
         }
     }
 
@@ -394,6 +433,10 @@ class Main {
 
             return new Content(this.beforeArgs.generate());
         }
+
+        public Invokable withBeforeArgs(Type type) {
+            return new Invokable(type, this.arguments);
+        }
     }
 
     private record Lambda(String beforeArrow, String value) implements Value {
@@ -435,6 +478,13 @@ class Main {
         @Override
         public Type resolveType() {
             return new Content(this.value);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
         }
     }
 
@@ -607,16 +657,26 @@ class Main {
             var slice = stripped.substring("new ".length()).strip();
             var construction = parseInvokable(slice, Main::compileConstructorCaller);
             if (construction instanceof Some(var invokable)) {
-                var invokable1 = invokable;
                 if (invokable.beforeArgs instanceof Type caller) {
-                    if (caller instanceof Generic) {
-                        invokable.arguments
+                    Type withoutDiamond;
+                    if (caller instanceof Generic(var base, var _)) {
+                        var actualTypes = invokable.arguments
                                 .iter()
-                                .map(value -> value.resolveType());
+                                .map(Value::resolveType)
+                                .collect(new ListCollector<>());
+
+                        var withoutDiamond1 = new Generic(base, actualTypes);
+                        addGeneric(withoutDiamond1);
+                        withoutDiamond = withoutDiamond1;
                     }
+                    else {
+                        withoutDiamond = caller;
+                    }
+
+                    return invokable.withBeforeArgs(withoutDiamond);
                 }
 
-                return invokable1;
+                return invokable;
             }
         }
 
@@ -783,36 +843,46 @@ class Main {
     private static Option<Type> parseAndModifyType(String input) {
         return Main.parseType(input).map(parsed -> {
             if (parsed instanceof Generic generic) {
-                var base = generic.base;
-                var arguments = generic.args;
+                var withoutWhitespace = generic.arguments
+                        .iter()
+                        .filter(arg -> !(arg instanceof Whitespace))
+                        .collect(new ListCollector<>());
+
+                var withoutWhitespaceGeneric = generic.withArgs(withoutWhitespace);
+                var base = withoutWhitespaceGeneric.base;
+                var arguments1 = withoutWhitespaceGeneric.arguments;
 
                 if (base.equals("Function")) {
-                    var argType = arguments.get(0);
-                    var returnType = arguments.get(1);
+                    var argType = arguments1.get(0);
+                    var returnType = arguments1.get(1);
 
                     return new Functional(Lists.of(argType), returnType);
                 }
 
                 if (base.equals("Supplier")) {
-                    var returns = arguments.get(0);
+                    var returns = arguments1.get(0);
                     return new Functional(Lists.emptyList(), returns);
                 }
 
                 if (base.equals("BiFunction")) {
-                    var argType = arguments.get(0);
-                    var argType2 = arguments.get(1);
-                    var returnType = arguments.get(2);
+                    var argType = arguments1.get(0);
+                    var argType2 = arguments1.get(1);
+                    var returnType = arguments1.get(2);
 
                     return new Functional(Lists.of(argType, argType2), returnType);
                 }
                 else {
-                    if (!generics.contains(generic)) {
-                        generics.add(generic);
-                    }
+                    addGeneric(withoutWhitespaceGeneric);
                 }
             }
             return parsed;
         });
+    }
+
+    private static void addGeneric(Generic generic) {
+        if (!generics.contains(generic) && generic.arguments.hasElements()) {
+            generics.add(generic);
+        }
     }
 
     private static Option<Type> parseType(String input) {
