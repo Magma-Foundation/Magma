@@ -27,6 +27,10 @@
 	Option</* T */> next(/*  */);/* 
      */
 }
+/*  */struct Type {
+	/* String */ generate(/*  */);/* 
+     */
+}
 /*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
 }
 /*  */struct Err<T, X>(X error) implements Result<T, X> {/*  */
@@ -218,7 +222,28 @@
 /* 
      */
 }
+/* private */struct Generic(String base, String arguments) implements Type {/* @Override
+  */ generate(/*  */){/* 
+            return this.base() + "<" + this.arguments() + ">"; *//* 
+         */
+}
+/* 
+     */
+}
+/* private */struct Content(String input) implements Type {/* private  */ generatePlaceholder(/* String */ input){/* 
+            return "/* " + input + " */"; *//* 
+         */
+}
+/* @Override
+  */ generate(/*  */){/* 
+            return generatePlaceholder(this.input); *//* 
+         */
+}
+/* 
+     */
+}
 /*  */struct Main {
+	/* enum  */ Void(/* "void" */);
 	/* public  */ Lists.empty(/*  */);void main(/*  */){
 	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
 	/* var */ target = source.resolveSibling("main.c");/* 
@@ -303,7 +328,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
                  */.map(/* rule -> rule */.apply(/* input0) */).flatMap(Iterators::fromOption).next();/* 
 
         return switch (result) {
-            case None<String> _ -> this.generatePlaceholder(input0);
+            case None<String> _ -> Content.generatePlaceholder(input0);
             case Some<String>(var value) -> value;
         } *//* ; *//* 
      */
@@ -350,7 +375,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
 	/* var */ stripped = input.strip();
 	/* var */ space = stripped.lastIndexOf(" ");/* 
         if (space < 0) {
-            return this.generatePlaceholder(stripped);
+            return Content.generatePlaceholder(stripped);
         } */
 	/* var */ beforeName = stripped.substring(/* 0 */, space);/* 
         var type = switch (this.findTypeSeparator(beforeName)) {
@@ -378,14 +403,18 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         return new None<>(); *//* 
      */
 }
-/* private  */ compileType(/* String */ input){
+/* private  */ compileType(/* String */ input){/* 
+        return this.parseType(input).generate(); *//* 
+     */
+}
+/* private  */ parseType(/* String */ input){
 	/* var */ stripped = input.strip();/* 
         if (stripped.equals("void")) {
-            return "void";
+            return Primitive.Void;
         } *//* 
 
         if (stripped.equals("int")) {
-            return "int";
+            return Primitive.I32;
         } *//* 
 
         if (stripped.endsWith(">")) {
@@ -394,11 +423,11 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
                 var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), this::compileType);
-                return base + "<" + arguments + ">";
+                return new Generic(base, arguments);
             }
         } *//* 
 
-        return this.generatePlaceholder(input); *//* 
+        return new Content(input); *//* 
      */
 }
 /* private  */ compileValues(/* String */ input, Function</* String */, /*  String */> compileType){/* 
@@ -417,7 +446,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             }
         } *//* 
 
-        return this.generatePlaceholder(input); *//* 
+        return Content.generatePlaceholder(input); *//* 
      */
 }
 /* private  */ compileValue(/* String */ input){
@@ -447,7 +476,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             return stripped;
         } *//* 
 
-        return this.generatePlaceholder(input); *//* 
+        return Content.generatePlaceholder(input); *//* 
      */
 }
 /* private  */ foldValueChar(/* State */ state, /* char */ c){/* 
@@ -508,7 +537,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         }
 
         var content = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
-        var generated = this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
+        var generated = Content.generatePlaceholder(beforeKeyword.strip()) + "struct " +
                 beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n} *//* \n"; *//* 
 
         structs.add(generated); *//* 
@@ -523,10 +552,6 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
                 this::compileMethod,
                 this::compileDefinitionStatement
         )); *//* 
-     */
-}
-/* private  */ generatePlaceholder(/* String */ input){/* 
-        return "/* " + input + " */"; *//* 
      */
 }
 /* private  */ writeString(/* Path */ target, /* String */ output){/* 

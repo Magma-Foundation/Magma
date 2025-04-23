@@ -9,6 +9,22 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class Main {
+    enum Primitive implements Type {
+        Void("void"),
+        I32("int");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     sealed interface Result<T, X> permits Ok, Err {
     }
 
@@ -44,6 +60,10 @@ class Main {
 
     interface Head<T> {
         Option<T> next();
+    }
+
+    interface Type {
+        String generate();
     }
 
     record Ok<T, X>(T value) implements Result<T, X> {
@@ -235,6 +255,24 @@ class Main {
         }
     }
 
+    private record Generic(String base, String arguments) implements Type {
+        @Override
+        public String generate() {
+            return this.base() + "<" + this.arguments() + ">";
+        }
+    }
+
+    private record Content(String input) implements Type {
+        private static String generatePlaceholder(String input) {
+            return "/* " + input + " */";
+        }
+
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
+        }
+    }
+
     public static final List<String> structs = Lists.empty();
 
     void main() {
@@ -321,7 +359,7 @@ class Main {
                 .next();
 
         return switch (result) {
-            case None<String> _ -> this.generatePlaceholder(input0);
+            case None<String> _ -> Content.generatePlaceholder(input0);
             case Some<String>(var value) -> value;
         };
     }
@@ -370,7 +408,7 @@ class Main {
         var stripped = input.strip();
         var space = stripped.lastIndexOf(" ");
         if (space < 0) {
-            return this.generatePlaceholder(stripped);
+            return Content.generatePlaceholder(stripped);
         }
 
         var beforeName = stripped.substring(0, space);
@@ -380,7 +418,7 @@ class Main {
         };
 
         var name = stripped.substring(space + " ".length());
-        return this.compileType(type) + " " + name;
+        return this.parseType(type).generate() + " " + name;
     }
 
     private Option<Integer> findTypeSeparator(String input) {
@@ -400,14 +438,14 @@ class Main {
         return new None<>();
     }
 
-    private String compileType(String input) {
+    private Type parseType(String input) {
         var stripped = input.strip();
         if (stripped.equals("void")) {
-            return "void";
+            return Primitive.Void;
         }
 
         if (stripped.equals("int")) {
-            return "int";
+            return Primitive.I32;
         }
 
         if (stripped.endsWith(">")) {
@@ -415,12 +453,12 @@ class Main {
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), this::compileType);
-                return base + "<" + arguments + ">";
+                var arguments = this.compileValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).generate());
+                return new Generic(base, arguments);
             }
         }
 
-        return this.generatePlaceholder(input);
+        return new Content(input);
     }
 
     private String compileValues(String input, Function<String, String> compileType) {
@@ -439,7 +477,7 @@ class Main {
             }
         }
 
-        return this.generatePlaceholder(input);
+        return Content.generatePlaceholder(input);
     }
 
     private String compileValue(String input) {
@@ -470,7 +508,7 @@ class Main {
             return stripped;
         }
 
-        return this.generatePlaceholder(input);
+        return Content.generatePlaceholder(input);
     }
 
     private State foldValueChar(State state, char c) {
@@ -535,7 +573,7 @@ class Main {
         }
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
-        var generated = this.generatePlaceholder(beforeKeyword.strip()) + "struct " +
+        var generated = Content.generatePlaceholder(beforeKeyword.strip()) + "struct " +
                 beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n";
 
         structs.add(generated);
@@ -550,10 +588,6 @@ class Main {
                 this::compileMethod,
                 this::compileDefinitionStatement
         ));
-    }
-
-    private String generatePlaceholder(String input) {
-        return "/* " + input + " */";
     }
 
     private Option<IOException> writeString(Path target, String output) {
