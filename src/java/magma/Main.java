@@ -52,7 +52,8 @@ class Main {
 
     private enum Primitive implements Type {
         Bit("int"),
-        I8("char");
+        I8("char"),
+        I32("int");
 
         private final String value;
 
@@ -407,7 +408,7 @@ class Main {
 
         return generatePlaceholder(input);
     }
-kRe
+
     private static boolean isSymbol(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -528,6 +529,10 @@ kRe
 
         if (stripped.equals("String")) {
             return new Ref(Primitive.I8);
+        }
+
+        if (stripped.equals("int")) {
+            return Primitive.I32;
         }
 
         if (stripped.endsWith(">")) {

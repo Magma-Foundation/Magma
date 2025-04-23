@@ -19,7 +19,7 @@
 /* private */struct Defined {
 };
 /* private */struct Primitive implements Type {
-	/* Bit("int"), */ I8("char");
+	/* Bit("int"), */ /* I8("char"), */ I32("int");
 	/* private final */ char* value;/* 
 
         Primitive(String value) {
@@ -27,15 +27,15 @@
         } */
 };
 /* public static */struct RangeHead implements Head<Integer> {
-	/* private final */ /* int */ length;
-	/* private */ /* int */ counter;
+	/* private final */ int length;
+	/* private */ int counter;
 };
 /* public */struct Iterator<T>(Head<T> head) {
 };
 /* private static */struct State {
 	/* private final */ List<char*> segments;
 	/* private */ /* StringBuilder */ buffer;
-	/* private */ /* int */ depth;
+	/* private */ int depth;
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -74,7 +74,7 @@ List</* T */> add(/* T */ element);
 Iterator</* T */> iter();
 int hasElements();
 /* T */ removeFirst();
-/* T */ get(/* int */ index);
+/* T */ get(int index);
 /* C */ createInitial();
 /* C */ fold(/* C */ current, /* T */ element);
 char* generate();
@@ -83,7 +83,7 @@ char* generate();
         public */ char* generate(){
 	return this.value;
 }
-/* public */ RangeHead(/* int */ length){
+/* public */ RangeHead(int length){
 	/* this.length = length; */
 }
 /* @Override
@@ -114,7 +114,7 @@ char* generate();
 /* public <C> */ /* C */ collect(Collector</* T */, /*  C */> collector){
 	return this.fold(collector.createInitial(), collector::fold);
 }
-/* private */ State(List<char*> segments, /* StringBuilder */ buffer, /* int */ depth){
+/* private */ State(List<char*> segments, /* StringBuilder */ buffer, int depth){
 	/* this.segments = segments; */
 	/* this.buffer = buffer; */
 	/* this.depth = depth; */
@@ -438,6 +438,9 @@ char* generate();
         } */
 	/* if (stripped.equals("String")) {
             return new Ref(Primitive.I8);
+        } */
+	/* if (stripped.equals("int")) {
+            return Primitive.I32;
         } */
 	/* if (stripped.endsWith(">")) {
             var slice = stripped.substring(0, stripped.length() - ">".length());
