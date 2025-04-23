@@ -619,28 +619,25 @@ public class Main {
             newName = oldName;
         }
 
-        return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> new None<>();
-            case Some<Integer>(int typeSeparator) -> {
-                List<String> modifiers;
-                String type;
-                if (typeSeparator >= 0) {
-                    String modifiersString = beforeName.substring(0, typeSeparator).strip();
-                    type = beforeName.substring(typeSeparator + " ".length());
+        List<String> modifiers;
+        String type;
 
-                    modifiers = Arrays.asList(modifiersString.split(" "));
-                }
-                else {
-                    modifiers = Collections.emptyList();
-                    type = beforeName;
-                }
-
-                yield compileType(type).flatMap(outputType -> {
-                    String outputDefinition = outputType + " " + newName;
-                    return new Some<>(new Definition(modifiers, outputDefinition));
-                });
+        switch (findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> {
+                modifiers = Collections.emptyList();
+                type = beforeName;
             }
-        };
+            case Some<Integer>(int typeSeparator) -> {
+                String modifiersString = beforeName.substring(0, typeSeparator).strip();
+                modifiers = Arrays.asList(modifiersString.split(" "));
+                type = beforeName.substring(typeSeparator + " ".length());
+            }
+        }
+
+        return compileType(type).flatMap(outputType -> {
+            String outputDefinition = outputType + " " + newName;
+            return new Some<>(new Definition(modifiers, outputDefinition));
+        });
     }
 
     private static Optional<Integer> findTypeSeparator(String input) {

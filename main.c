@@ -13,25 +13,21 @@
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import static magma.StandardLibrary.emptyString; */
-struct Optional {/* void ifPresent(Consumer<T> consumer); *//* 
-
-        T orElse(T other); */
-	Optional<struct R> map(struct Optional this, /* Function<T, R> mapper */);
-	Optional<struct R> flatMap(struct Optional this, /* Function<T, Optional<R>> mapper */);/* 
-
-        Optional<T> or(Supplier<Optional<T>> other); *//* 
-
-        boolean isPresent(); *//* 
-
-        T orElseGet(Supplier<T> other); *//* 
-
-        boolean isEmpty(); */
+struct Optional {
+	void ifPresent(struct Optional this, Consumer<struct T> consumer);
+	struct T orElse(struct Optional this, struct T other);
+	Optional<struct R> map(struct Optional this, Function<struct T, struct R> mapper);
+	Optional<struct R> flatMap(struct Optional this, Function<struct T, Optional<struct R>> mapper);
+	Optional<struct T> or(struct Optional this, Supplier<Optional<struct T>> other);
+	int isPresent(struct Optional this);
+	struct T orElseGet(struct Optional this, Supplier<struct T> other);
+	int isEmpty(struct Optional this);
 };
 struct Node {
 };
-struct String_ {/* String_ concatChar(char c); *//* 
-
-        String toSlice(); */
+struct String_ {
+	struct String_ concatChar(struct String_ this, char c);
+	char* toSlice(struct String_ this);
 };
 struct Result {
 };
@@ -41,20 +37,20 @@ struct State {
 	int depth;
 };
 struct Definition {
-	/* List<String> modifiers */;
-	/*  String value */;
+	List<char*> modifiers;
+	char* value;
 };
 struct ConstructorHeader {
-	/* String value */;
+	char* value;
 };
 struct Ok {
-	/* T value */;
+	struct T value;
 };
 struct Err {
-	/* X error */;
+	struct X error;
 };
 struct Some {
-	/* T value */;
+	struct T value;
 };
 struct None {
 };
@@ -64,7 +60,7 @@ struct Main {
 	struct Path TARGET = Paths.get(".", "main.c");
 	List<char*> methods = new_ArrayList<>();
 };
-struct State new_State(/* List<String_> segments */, /*  String_ buffer */, /*  int depth */){
+struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
 	this.segments = segments;
 	this.buffer = buffer;
@@ -90,57 +86,57 @@ void exit(struct State this){
 void enter(struct State this){
 	this.depth = this.depth + 1;
 }
-void append(struct State this, /* char c */){
+void append(struct State this, char c){
 	this.buffer = this.buffer.concatChar(c);
 }
-void ifPresent(struct Some this, /* Consumer<T> consumer */){
+void ifPresent(struct Some this, Consumer<struct T> consumer){
 	consumer.accept(this.value);
 }
-struct T orElse(struct Some this, /* T other */){
+struct T orElse(struct Some this, struct T other){
 	return this.value;
 }
-Optional<struct R> map(struct Some this, /* Function<T, R> mapper */){
+Optional<struct R> map(struct Some this, Function<struct T, struct R> mapper){
 	return new_Some<>(mapper.apply(this.value));
 }
-Optional<struct R> flatMap(struct Some this, /* Function<T, Optional<R>> mapper */){
+Optional<struct R> flatMap(struct Some this, Function<struct T, Optional<struct R>> mapper){
 	return mapper.apply(this.value);
 }
-Optional<struct T> or(struct Some this, /* Supplier<Optional<T>> other */){
+Optional<struct T> or(struct Some this, Supplier<Optional<struct T>> other){
 	return this;
 }
 int isPresent(struct Some this){
 	return true;
 }
-struct T orElseGet(struct Some this, /* Supplier<T> other */){
+struct T orElseGet(struct Some this, Supplier<struct T> other){
 	return this.value;
 }
 int isEmpty(struct Some this){
 	return false;
 }
-void ifPresent(struct None this, /* Consumer<T> consumer */){
+void ifPresent(struct None this, Consumer<struct T> consumer){
 }
-struct T orElse(struct None this, /* T other */){
+struct T orElse(struct None this, struct T other){
 	return other;
 }
-Optional<struct R> map(struct None this, /* Function<T, R> mapper */){
+Optional<struct R> map(struct None this, Function<struct T, struct R> mapper){
 	return new_None<>();
 }
-Optional<struct R> flatMap(struct None this, /* Function<T, Optional<R>> mapper */){
+Optional<struct R> flatMap(struct None this, Function<struct T, Optional<struct R>> mapper){
 	return new_None<>();
 }
-Optional<struct T> or(struct None this, /* Supplier<Optional<T>> other */){
+Optional<struct T> or(struct None this, Supplier<Optional<struct T>> other){
 	return other.get();
 }
 int isPresent(struct None this){
 	return false;
 }
-struct T orElseGet(struct None this, /* Supplier<T> other */){
+struct T orElseGet(struct None this, Supplier<struct T> other){
 	return other.get();
 }
 int isEmpty(struct None this){
 	return true;
 }
-void __main__(/* String[] args */){
+void __main__(char** args){
 	/* Optional<IOException> result = switch (readString(SOURCE)) {
             case Err<String, IOException>(IOException error) -> new Some<>(error);
             case Ok<String, IOException>(String value) -> {
@@ -169,7 +165,7 @@ Optional<struct IOException> build(){
             return new Some<>(new IOException(e));
         } */
 }
-Optional<struct IOException> writeString(/* Path target */, /*  String output */){
+Optional<struct IOException> writeString(struct Path target, char* output){
 	/* try {
             Files.writeString(target, output);
             return new None<>();
@@ -178,7 +174,7 @@ Optional<struct IOException> writeString(/* Path target */, /*  String output */
             return new Some<>(e);
         } */
 }
-Result<char*, struct IOException> readString(/* Path source */){
+Result<char*, struct IOException> readString(struct Path source){
 	/* try {
             return new Ok<>(Files.readString(source));
         } */
@@ -186,24 +182,21 @@ Result<char*, struct IOException> readString(/* Path source */){
             return new Err<>(e);
         } */
 }
-char* compile(/* String input */){
-	/* String output */ = compileAllStatements(input, /* Main::compileRootSegment).orElse("" */);
-	/* String joinedStructs */ = String.join("", structs);
-	/* String joinedMethods */ = String.join("", methods);
+char* compile(char* input){
+	char* output = compileAllStatements(input, /* Main::compileRootSegment).orElse("" */);
+	char* joinedStructs = String.join("", structs);
+	char* joinedMethods = String.join("", methods);
 	return output + joinedStructs + joinedMethods;
 }
-Optional<char*> compileAllStatements(/* String input */, /*  Function<String, Optional<String>> compiler */){
+Optional<char*> compileAllStatements(char* input, Function<char*, Optional<char*>> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-Optional<char*> compileAll(/* String input */, /* 
-            BiFunction<State, Character, State> folder */, /* 
-            Function<String, Optional<String>> compiler */, /* 
-            BiFunction<String, String, String> merger */){
+Optional<char*> compileAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, Optional<char*>> compiler, BiFunction<char*, char*, char*> merger){
 	return parseAll(input, folder, /* compiler)
                 .map(output */ - /* > generateAll(merger */, /* output) */);
 }
-Optional<List<char*>> parseAll(/* String input */, /*  BiFunction<State, Character, State> folder */, /*  Function<String, Optional<String>> compiler */){
-	/* State state */ = State.createInitial();
+Optional<List<char*>> parseAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, Optional<char*>> compiler){
+	struct State state = State.createInitial();
 	/* (int */ i = 0;
 	/* i < input */.length();
 	/* i++) {
@@ -229,10 +222,10 @@ Optional<List<char*>> parseAll(/* String input */, /*  BiFunction<State, Charact
             state = folder.apply(state, c);
         } */
 	state.advance();
-	/* List<String> segments */ = state.segments.stream(/* )
+	List<char*> segments = state.segments.stream(/* )
                 .map(string */ - /* > string.toSlice())
                 .toList( */);
-	/* Optional<List<String>> maybeOutput */ = new_Some<>(new_ArrayList<String>());
+	Optional<List<char*>> maybeOutput = new_Some<>(new_ArrayList<String>());
 	/* for (String segment : segments) {
             Optional<String> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
@@ -244,17 +237,17 @@ Optional<List<char*>> parseAll(/* String input */, /*  BiFunction<State, Charact
         } */
 	return maybeOutput;
 }
-char* generateAll(/* BiFunction<String, String, String> merger */, /*  List<String> output */){
-	/* String cache */ = "";
+char* generateAll(BiFunction<char*, char*, char*> merger, List<char*> output){
+	char* cache = "";
 	/* for (String element : output) {
             cache = merger.apply(cache, element);
         } */
 	return cache;
 }
-char* mergeStatements(/* String output */, /*  String compiled */){
+char* mergeStatements(char* output, char* compiled){
 	return output + compiled;
 }
-struct State foldStatementChar(/* State state */, /*  char c */){
+struct State foldStatementChar(struct State state, char c){
 	state.append(c);
 	/* if (c == ';' && state.isLevel()) {
             state.advance();
@@ -273,21 +266,21 @@ struct State foldStatementChar(/* State state */, /*  char c */){
         } */
 	return state;
 }
-Optional<char*> compileRootSegment(/* String input */){
+Optional<char*> compileRootSegment(char* input){
 	/* if (input.isBlank()) {
             return new Some<>("");
         } */
 	return compileClass(/* input) */.or((/* ) */ - /* > new Some<> */(/* generatePlaceholder(input.strip( */)) + "\n"));
 }
-Optional<char*> compileClass(/* String input */){
+Optional<char*> compileClass(char* input){
 	return compileStructured(input, "class ");
 }
-Optional<char*> compileStructured(/* String input */, /*  String infix */){
-	/* int classIndex */ = input.indexOf(infix);
+Optional<char*> compileStructured(char* input, char* infix){
+	int classIndex = input.indexOf(infix);
 	/* if (classIndex < 0) {
             return new None<>();
         } */
-	/* String afterKeyword */ = input.substring(classIndex + infix.length());
+	char* afterKeyword = input.substring(classIndex + infix.length());
 	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return new None<>();
@@ -346,7 +339,7 @@ Optional<char*> compileStructured(/* String input */, /*  String infix */){
         } */
 	/* ) */;
 }
-Optional<char*> compileClassSegment(/* String input */, /*  String structName */){
+Optional<char*> compileClassSegment(char* input, char* structName){
 	return compileWhitespace(/* input) */.or((/* ) */ - /* > compileClass */(/* input))
                 .or(( */) - /* > compileStructured */(input, /* "interface "))
                 .or(( */) - /* > compileStructured */(input, /* "record "))
@@ -354,7 +347,7 @@ Optional<char*> compileClassSegment(/* String input */, /*  String structName */
                 .or(( */) - /* > compileStatement */(input, /* (value */) - /* > compileDefinition */(/* value).flatMap(Main::generateDefinition).or(( */) - /* > compileAssigner */(/* value))))
                 .or(( */) - /* > new Some<>(generatePlaceholder(input */)));
 }
-Optional<char*> generateDefinition(/* Node node */){
+Optional<char*> generateDefinition(struct Node node){
 	/* if (node instanceof Definition definition) {
             return new Some<>(definition.value);
         } */
@@ -362,34 +355,34 @@ Optional<char*> generateDefinition(/* Node node */){
             return new None<>();
         } */
 }
-Optional<char*> compileWhitespace(/* String input */){
+Optional<char*> compileWhitespace(char* input){
 	/* if (input.isBlank()) {
             return new Some<>("");
         } */
 	return new_None<>();
 }
-Optional<char*> compileDefinitionStatement(/* String input */){
-	/* String stripped */ = input.strip();
+Optional<char*> compileDefinitionStatement(char* input){
+	char* stripped = input.strip();
 	/* if (!stripped.endsWith(" */;
 	/* ")) {
             return new None<>();
         } */
-	/* String slice */ = stripped.substring(0, /* stripped.length( */) - ";
+	char* slice = stripped.substring(0, /* stripped.length( */) - ";
 	".length(/* ) */);
 	return compileDefinition(/* slice)
                 .flatMap(Main::generateDefinition)
                 .map(Main::formatStatement */);
 }
-char* formatStatement(/* String inner */){
+char* formatStatement(char* inner){
 	return "\n\t" + inner + ";
 	/* " */;
 }
-Optional<char*> compileMethod(/* String input */, /*  String structName */){
-	/* int paramStart */ = input.indexOf("(");
+Optional<char*> compileMethod(char* input, char* structName){
+	int paramStart = input.indexOf("(");
 	/* if (paramStart < 0) {
             return new None<>();
         } */
-	/* String beforeParamsString */ = input.substring(0, /* paramStart).strip( */);
+	char* beforeParamsString = input.substring(0, /* paramStart).strip( */);
 	/* return compileDefinition(beforeParamsString)
                 .or(() -> compileConstructorHeader(structName, beforeParamsString))
                 .flatMap(beforeName -> {
@@ -441,10 +434,10 @@ Optional<char*> compileMethod(/* String input */, /*  String structName */){
                 } */
 	/* ) */;
 }
-Optional<List<char*>> parseParameters(/* String inputParams */){
+Optional<List<char*>> parseParameters(char* inputParams){
 	return parseAllValues(inputParams, /* Main::compileParam */);
 }
-Optional<char*> compileMethodBeforeName(/* Node node */){
+Optional<char*> compileMethodBeforeName(struct Node node){
 	/* if (node instanceof Definition definition) {
             return new Some<>(definition.value);
         } */
@@ -453,17 +446,17 @@ Optional<char*> compileMethodBeforeName(/* Node node */){
         } */
 	return new_None<>();
 }
-char* generateParams(/* List<String> output */){
+char* generateParams(List<char*> output){
 	return generateAll(/* Main::mergeValues */, output);
 }
-Optional<char*> compileParam(/* String param */){
+Optional<char*> compileParam(char* param){
 	return compileWhitespace(/* param) */.or((/* ) */ - /* > compileDefinition */(/* param).flatMap(Main::generateDefinition))
                 .or(( */) - /* > new Some<>(generatePlaceholder(param */)));
 }
-Optional<List<char*>> parseAllValues(/* String inputParams */, /*  Function<String, Optional<String>> compiler */){
+Optional<List<char*>> parseAllValues(char* inputParams, Function<char*, Optional<char*>> compiler){
 	return parseAll(inputParams, /* Main::foldValueChar */, compiler);
 }
-List<char*> modifyMethodBody(/* String structName */, /*  Node beforeName */, /*  List<String> statements */){
+List<char*> modifyMethodBody(char* structName, struct Node beforeName, List<char*> statements){
 	/* if (beforeName instanceof ConstructorHeader) {
             List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
@@ -475,15 +468,15 @@ List<char*> modifyMethodBody(/* String structName */, /*  Node beforeName */, /*
             return statements;
         } */
 }
-char* generateStatements(/* List<String> output */){
+char* generateStatements(List<char*> output){
 	return generateAll(/* Main::mergeStatements */, output);
 }
-Optional<List<char*>> parseStatements(/* String content */){
+Optional<List<char*>> parseStatements(char* content){
 	return parseAll(content, /* Main::foldStatementChar */, /* Main::compileStatementOrBlock */);
 }
-Optional<struct Node> compileConstructorHeader(/* String structName */, /*  String definition */){
+Optional<struct Node> compileConstructorHeader(char* structName, char* definition){
 	/* String stripped0 */ = definition.strip();
-	/* int index */ = /* stripped0 */.lastIndexOf(" ");
+	int index = /* stripped0 */.lastIndexOf(" ");
 	/* if (index >= 0) {
             String constructorName = stripped0.substring(index + " ".length());
             if (constructorName.equals(structName)) {
@@ -493,10 +486,10 @@ Optional<struct Node> compileConstructorHeader(/* String structName */, /*  Stri
         } */
 	return new_None<>();
 }
-Optional<char*> compileAllValues(/* String inputParams */, /*  Function<String, Optional<String>> compiler */){
+Optional<char*> compileAllValues(char* inputParams, Function<char*, Optional<char*>> compiler){
 	return compileAll(inputParams, /* Main::foldValueChar */, compiler, /* Main::mergeValues */);
 }
-struct State foldValueChar(/* State state */, /*  char c */){
+struct State foldValueChar(struct State state, char c){
 	/* if (c == ',' && state.isLevel()) {
             state.advance();
             return state;
@@ -510,20 +503,20 @@ struct State foldValueChar(/* State state */, /*  char c */){
         } */
 	return state;
 }
-char* mergeValues(/* String cache */, /*  String element */){
+char* mergeValues(char* cache, char* element){
 	/* if (cache.isEmpty()) {
             return element;
         } */
 	return cache + ", " + element;
 }
-Optional<struct Node> compileDefinition(/* String input */){
-	/* String stripped */ = input.strip();
-	/* int nameSeparator */ = stripped.lastIndexOf(" ");
+Optional<struct Node> compileDefinition(char* input){
+	char* stripped = input.strip();
+	int nameSeparator = stripped.lastIndexOf(" ");
 	/* if (nameSeparator < 0) {
             return new None<>();
         } */
-	/* String beforeName */ = stripped.substring(0, /* nameSeparator).strip( */);
-	/* String oldName */ = stripped.substring(nameSeparator + /* " ".length()).strip( */);
+	char* beforeName = stripped.substring(0, /* nameSeparator).strip( */);
+	char* oldName = stripped.substring(nameSeparator + /* " ".length()).strip( */);
 	/* if (!isSymbol(oldName)) {
             return new None<>();
         } */
@@ -534,32 +527,27 @@ Optional<struct Node> compileDefinition(/* String input */){
 	/* else {
             newName = oldName;
         } */
-	/* return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> new None<>();
+	/* List<String> modifiers */;
+	/* String type */;
+	/* switch (findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> {
+                modifiers = Collections.emptyList();
+                type = beforeName;
+            }
             case Some<Integer>(int typeSeparator) -> {
-                List<String> modifiers;
-                String type;
-                if (typeSeparator >= 0) {
-                    String modifiersString = beforeName.substring(0, typeSeparator).strip();
-                    type = beforeName.substring(typeSeparator + " ".length());
-
-                    modifiers = Arrays.asList(modifiersString.split(" "));
-                }
-                else {
-                    modifiers = Collections.emptyList();
-                    type = beforeName;
-                }
-
-                yield compileType(type).flatMap(outputType -> {
-                    String outputDefinition = outputType + " " + newName;
-                    return new Some<>(new Definition(modifiers, outputDefinition));
-                });
+                String modifiersString = beforeName.substring(0, typeSeparator).strip();
+                modifiers = Arrays.asList(modifiersString.split(" "));
+                type = beforeName.substring(typeSeparator + " ".length());
             }
         } */
-	/*  */;
+	/* return compileType(type).flatMap(outputType -> {
+            String outputDefinition = outputType + " " + newName;
+            return new Some<>(new Definition(modifiers, outputDefinition));
+        } */
+	/* ) */;
 }
-Optional<struct Integer> findTypeSeparator(/* String input */){
-	/* int depth */ = 0;
+Optional<struct Integer> findTypeSeparator(char* input){
+	int depth = 0;
 	/* (int */ i = input.length() - 1;
 	/* i > */ = 0;
 	/* i--) {
@@ -576,8 +564,8 @@ Optional<struct Integer> findTypeSeparator(/* String input */){
         } */
 	return new_None<>();
 }
-Optional<char*> compileType(/* String type */){
-	/* String stripped */ = type.strip();
+Optional<char*> compileType(char* type){
+	char* stripped = type.strip();
 	/* if (stripped.equals("private") || stripped.equals("public")) {
             return new None<>();
         } */
@@ -610,11 +598,11 @@ Optional<char*> compileType(/* String type */){
         } */
 	return new_Some<>(generatePlaceholder(stripped));
 }
-Optional<char*> compileStatementOrBlock(/* String input */){
+Optional<char*> compileStatementOrBlock(char* input){
 	return compileWhitespace(/* input) */.or(/* ( */) - /* > compileStatement(input */, /* Main::compileStatementValue)) */.or((/* ) */ - /* > new Some<> */("\n\t" + /* generatePlaceholder(input.strip( */))));
 }
-Optional<char*> compileStatement(/* String input */, /*  Function<String, Optional<String>> compileStatementValue */){
-	/* String stripped */ = input.strip();
+Optional<char*> compileStatement(char* input, Function<char*, Optional<char*>> compileStatementValue){
+	char* stripped = input.strip();
 	/* if (stripped.endsWith(" */;
 	/* ")) {
             String slice = stripped.substring(0, stripped.length() - ";".length());
@@ -622,34 +610,34 @@ Optional<char*> compileStatement(/* String input */, /*  Function<String, Option
         } */
 	return new_None<>();
 }
-Optional<char*> compileStatementValue(/* String input */){
-	/* String stripped */ = input.strip();
+Optional<char*> compileStatementValue(char* input){
+	char* stripped = input.strip();
 	/* if (stripped.startsWith("return ")) {
             String slice = stripped.substring("return ".length());
             return new Some<>("return " + compileValue(slice));
         } */
-	/* Optional<String> destination */ = compileAssigner(stripped);
+	Optional<char*> destination = compileAssigner(stripped);
 	/* if (destination.isPresent()) {
             return destination;
         } */
-	/* Optional<String> maybeInvokable */ = compileInvokable(stripped);
+	Optional<char*> maybeInvokable = compileInvokable(stripped);
 	/* if (maybeInvokable.isPresent()) {
             return maybeInvokable;
         } */
 	return new_Some<>(generatePlaceholder(stripped));
 }
-Optional<char*> compileAssigner(/* String stripped */){
-	/* int valueSeparator */ = stripped.indexOf("=");
+Optional<char*> compileAssigner(char* stripped){
+	int valueSeparator = stripped.indexOf("=");
 	/* if (valueSeparator < 0) {
             return new None<>();
         } */
-	/* String destination */ = stripped.substring(0, /* valueSeparator).strip( */);
-	/* String source */ = stripped.substring(valueSeparator + /* "=".length()).strip( */);
-	/* String newDestination */ = compileDefinition(/* destination) */.flatMap(/* Main::generateDefinition) */.orElseGet(/* ( */) - /* > compileValue(destination */));
+	char* destination = stripped.substring(0, /* valueSeparator).strip( */);
+	char* source = stripped.substring(valueSeparator + /* "=".length()).strip( */);
+	char* newDestination = compileDefinition(/* destination) */.flatMap(/* Main::generateDefinition) */.orElseGet(/* ( */) - /* > compileValue(destination */));
 	return new_Some<>(newDestination + " = " + compileValue(source));
 }
-char* compileValue(/* String input */){
-	/* String stripped */ = input.strip();
+char* compileValue(char* input){
+	char* stripped = input.strip();
 	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return stripped;
         } */
@@ -659,11 +647,11 @@ char* compileValue(/* String input */){
 	/* if (isSymbol(stripped)) {
             return stripped;
         } */
-	/* Optional<String> maybeInvokable */ = compileInvokable(stripped);
+	Optional<char*> maybeInvokable = compileInvokable(stripped);
 	/* if (maybeInvokable.isPresent()) {
             return maybeInvokable.orElse(null);
         } */
-	/* int lastSeparator */ = stripped.lastIndexOf(".");
+	int lastSeparator = stripped.lastIndexOf(".");
 	/* if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
             String property = stripped.substring(lastSeparator + ".".length());
@@ -673,44 +661,44 @@ char* compileValue(/* String input */){
         } */
 	return compileOperator(stripped, " == /* ") */.or(/* ( */) - /* > compileOperator(stripped */, " + /* ")) */.or(() - /* > compileOperator(stripped */, " - /* ")) */.orElseGet(/* ( */) - /* > generatePlaceholder(stripped */));
 }
-Optional<char*> compileOperator(/* String input */, /*  String operator */){
-	/* int equalsIndex */ = input.indexOf(operator);
+Optional<char*> compileOperator(char* input, char* operator){
+	int equalsIndex = input.indexOf(operator);
 	/* if (equalsIndex < 0) {
             return new None<>();
         } */
-	/* String left */ = input.substring(0, equalsIndex);
-	/* String right */ = input.substring(equalsIndex + operator.length());
+	char* left = input.substring(0, equalsIndex);
+	char* right = input.substring(equalsIndex + operator.length());
 	return new_Some<>(compileValue(/* left) */ + " " + operator + " " + /* compileValue(right */));
 }
-Optional<char*> compileInvokable(/* String input */){
-	/* String stripped */ = input.strip();
+Optional<char*> compileInvokable(char* input){
+	char* stripped = input.strip();
 	/* if (!stripped.endsWith(")")) {
             return new None<>();
         } */
-	/* String withoutEnd */ = stripped.substring(0, stripped.length(/* ) */ - /* ")".length( */));
-	/* int argumentStart */ = withoutEnd.indexOf("(");
+	char* withoutEnd = stripped.substring(0, stripped.length(/* ) */ - /* ")".length( */));
+	int argumentStart = withoutEnd.indexOf("(");
 	/* if (argumentStart < 0) {
             return new None<>();
         } */
-	/* String beforeArguments */ = withoutEnd.substring(0, /* argumentStart).strip( */);
-	/* String arguments */ = withoutEnd.substring(argumentStart + /* "(".length()).strip( */);
-	/* Optional<String> maybeNewArguments */ = compileAllValues(arguments, argument - /* > new Some<> */(compileValue(argument)));
+	char* beforeArguments = withoutEnd.substring(0, /* argumentStart).strip( */);
+	char* arguments = withoutEnd.substring(argumentStart + /* "(".length()).strip( */);
+	Optional<char*> maybeNewArguments = compileAllValues(arguments, argument - /* > new Some<> */(compileValue(argument)));
 	/* if (maybeNewArguments.isEmpty()) {
             return new None<>();
         } */
-	/* String newArguments */ = maybeNewArguments.orElse(null);
+	char* newArguments = maybeNewArguments.orElse(null);
 	/* if (!beforeArguments.startsWith("new ")) {
             String caller = compileValue(beforeArguments);
             return generateInvocation(caller, newArguments);
         } */
-	/* String type */ = beforeArguments.substring(/* "new ".length()).strip( */);
-	/* String caller */ = "new_" + type;
+	char* type = beforeArguments.substring(/* "new ".length()).strip( */);
+	char* caller = "new_" + type;
 	return generateInvocation(caller, newArguments);
 }
-Optional<char*> generateInvocation(/* String caller */, /*  String arguments */){
+Optional<char*> generateInvocation(char* caller, char* arguments){
 	return new_Some<>(caller + "(" + arguments + ")");
 }
-int isNumber(/* String input */){
+int isNumber(char* input){
 	/* (int */ i = 0;
 	/* i < input */.length();
 	/* i++) {
@@ -722,7 +710,7 @@ int isNumber(/* String input */){
         } */
 	return true;
 }
-int isSymbol(/* String input */){
+int isSymbol(char* input){
 	/* (int */ i = 0;
 	/* i < input */.length();
 	/* i++) {
@@ -734,6 +722,6 @@ int isSymbol(/* String input */){
         } */
 	return true;
 }
-char* generatePlaceholder(/* String input */){
+char* generatePlaceholder(char* input){
 	return "/* " + input + " */";
 }
