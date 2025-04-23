@@ -348,6 +348,7 @@ class Main {
         }
     }
 
+    public static final List<Generic> generics = Lists.emptyList();
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
     private static Option<String> currentStruct = new None<>();
@@ -675,7 +676,10 @@ class Main {
 
     private static Option<Type> parseAndModifyType(String input) {
         return Main.parseType(input).map(parsed -> {
-            if (parsed instanceof Generic(var base, var arguments)) {
+            if (parsed instanceof Generic generic) {
+                var base = generic.base;
+                var arguments = generic.args;
+
                 if (base.equals("Function")) {
                     var argType = arguments.get(0);
                     var returnType = arguments.get(1);
@@ -694,6 +698,9 @@ class Main {
                     var returnType = arguments.get(2);
 
                     return new Functional(Lists.of(argType, argType2), returnType);
+                }
+                else {
+                    generics.add(generic);
                 }
             }
             return parsed;
@@ -804,8 +811,14 @@ class Main {
     private String compileRoot(String input) {
         var compiled = compileStatements(input, segment -> new Some<>(this.compileRootSegment(segment)));
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+
+        var joinedGenerics = generics.iter()
+                .map(Generic::generate)
+                .map(result -> "// " + result + "\n")
+                .collect(new Joiner()).orElse("");
+
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
-        return compiled + joinedStructs + joinedMethods;
+        return compiled + joinedStructs + joinedGenerics + joinedMethods;
     }
 
     private String compileRootSegment(String input) {

@@ -76,6 +76,126 @@
 };
 /*  */struct Main {
 };
+// Option<struct R>
+// Option<struct T>
+// Option<struct T>
+// Option<struct R>
+// Option<struct R>
+// Tuple<struct T, struct R>
+// Option<Tuple<struct T, struct R>>
+// Option<struct R>
+// Option<struct T>
+// List<struct T>
+// Iterator<struct T>
+// Option<int>
+// Some<>
+// None<>
+// Iterator<struct R>
+// Iterator<>
+// case Some</* T>(var value) - */>
+// Collector<struct T, struct C>
+// List<char*>
+// List<char*>
+// Option<struct R>
+// Some<>
+// Option<struct T>
+// Option<struct T>
+// Option<struct R>
+// Option<struct R>
+// Tuple<struct T, struct R>
+// Option<Tuple<struct T, struct R>>
+// Option<struct R>
+// Option<struct R>
+// None<>
+// Option<struct T>
+// Option<struct T>
+// Option<struct R>
+// Option<struct R>
+// None<>
+// Tuple<struct T, struct R>
+// Option<Tuple<struct T, struct R>>
+// Option<struct R>
+// None<>
+// Option<char*>
+// None<>
+// Option<char*>
+// Option<char*>
+// List<struct T>
+// List<struct T>
+// List<struct T>
+// Option<struct C>
+// Some<>
+// Option<struct C>
+// Option<struct C>
+// Option<struct T>
+// List<char*>
+// List<struct T>
+// Option<List<struct T>>
+// Option<struct T>
+// List<char*>
+// Iterator<>
+// List<char*>
+// List<struct Type>
+// Option<char*>
+// Some<>
+// None<>
+// Option<char*>
+// Some<>
+// None<>
+// Option<char*>
+// Some<>
+// Some<>
+// Some<>
+// Option<char*>
+// Option<char*>
+// None<>
+// None<>
+// Some<>
+// Some<>
+// Option<struct Whitespace>
+// Some<>
+// None<>
+// Option<struct Defined>
+// Option<char*>
+// Option<char*>
+// None<>
+// List<struct T>
+// Option<List<struct T>>
+// Option<struct T>
+// Option<struct Definition>
+// None<>
+// Option<int>
+// Some<>
+// None<>
+// Option<struct Type>
+// Option<struct Type>
+// None<>
+// Some<>
+// Some<>
+// Some<>
+// Some<>
+// Some<>
+// Some<>
+// Option<struct Type>
+// Option<char*>
+// List<char*>
+// Option<List<char*>>
+// Option<char*>
+// List<char*>
+// Option<char*>
+// Option<char*>
+// Option<char*>
+// None<>
+// None<>
+// None<>
+// Some<>
+// Option<char*>
+// Some<>
+// None<>
+// Some<>
+// None<>
+// None<>
+// Option<char*>
 /* <R> */ Option<struct R> map_Option(struct R (*mapper)(struct T));
 struct T orElseGet_Option(struct T (*other)());
 Option<struct T> or_Option(Option<struct T> (*other)());
@@ -277,6 +397,7 @@ struct private Joiner_Joiner(){
         public */ char* generate_Whitespace implements Type(){
 	return /* "" */;
 }
+/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Whitespace implements Type();
 /* private static final List<String> structs */ /* = */ Lists.emptyList_Whitespace implements Type();
 /* private static final List<String> methods */ /* = */ Lists.emptyList_Whitespace implements Type();
 /* private static Option<String> currentStruct = */ struct new None<>_Whitespace implements Type();
@@ -550,7 +671,9 @@ struct private Joiner_Joiner(){
 }
 /* private static */ Option<struct Type> parseAndModifyType_Whitespace implements Type(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
-		if (/* parsed instanceof Generic */(/* var base */, /*  var arguments */)){
+		if (/* parsed instanceof Generic generic */){
+			auto base = generic.base;
+			auto arguments = generic.args;
 			if (base.equals(/* "Function" */)){
 				auto argType = arguments.get(/* 0 */);
 				auto returnType = arguments.get(/* 1 */);
@@ -565,6 +688,9 @@ struct private Joiner_Joiner(){
 				auto argType2 = arguments.get(/* 1 */);
 				auto returnType = arguments.get(/* 2 */);
 				return struct Functional(Lists.of(argType, /*  argType2) */, returnType);
+			}
+			else {
+				/* generics.add(generic) */;
 			}
 		}
 		return parsed;
@@ -659,8 +785,12 @@ struct void main_Whitespace implements Type(){
 /* private */ char* compileRoot_Whitespace implements Type(char* input){
 	auto compiled = compileStatements(input, /* segment */ -> /*  new Some<> */(this.compileRootSegment(segment)));
 	auto joinedStructs = structs.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
+	auto joinedGenerics = generics.iter(/* )
+                .map(Generic::generate)
+                .map(result */ -> /* "// " + result + "\n")
+                 */.collect(struct Joiner(/*  */)).orElse("");
 	auto joinedMethods = methods.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
-	return /* compiled + joinedStructs + joinedMethods */;
+	return /* compiled + joinedStructs + joinedGenerics + joinedMethods */;
 }
 /* private */ char* compileRootSegment_Whitespace implements Type(char* input){
 	return this.compileClass(/* input)
