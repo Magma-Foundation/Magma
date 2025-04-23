@@ -10,9 +10,53 @@
 }
 /* static final */struct None<T> implements Option<T> {/*  */
 }
+/* private static */struct State {/* private final List<String> segments;
+    private StringBuilder buffer;
+    private int depth;
+
+    private State(List<String> segments, StringBuilder buffer, int depth) {
+        this.segments = segments;
+        this.buffer = buffer;
+        this.depth = depth;
+    }
+
+    public State() {
+        this(new ArrayList<>(), new StringBuilder(), 0);
+    }
+
+    private State append(char c) {
+        this.buffer.append(c);
+        return this;
+    }
+
+    private boolean isLevel() {
+        return this.depth == 0;
+    }
+
+    private boolean isShallow() {
+        return this.depth == 1;
+    }
+
+    private State enter() {
+        this.depth = this.depth + 1;
+        return this;
+    }
+
+    private State exit() {
+        this.depth = this.depth - 1;
+        return this;
+    }
+
+    private State advance() {
+        this.segments.add(this.buffer.toString());
+        this.buffer = new StringBuilder();
+        return this;
+    }
+ */
+}
 void main(/*  */){
-	/* var */ source = Paths.get(/* ".", "src", "java", "magma", "Main.java" */);
-	/* var */ target = source.resolveSibling(/* "main.c" */);/* 
+	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
+	/* var */ target = source.resolveSibling("main.c");/* 
 
     if (this.run(source, target) instanceof Some(var error)) {
         //noinspection CallToPrintStackTrace
@@ -28,44 +72,56 @@ void main(/*  */){
  */
 }
 /* private String */ compile(/* String input */){/* 
-    return this.compileAll(input, this::compileRootSegment); *//* 
+    return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements); *//* 
  */
 }
-/* private String */ compileAll(/* String input, Function<String, String> compiler */){
-	/* var */ segments = /* new ArrayList<String> */(/*  */);
-	/* var */ buffer = /* new StringBuilder */(/*  */);
-	/* var */ depth = /*  0 */;
-	/* for (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
-        var c = input.charAt(i);
-        buffer.append(c);
-
-        if (c == ';' && depth == 0) {
-            segments.add(buffer.toString());
-            buffer = new StringBuilder();
-        }
-        else if (c == '} *//* ' && depth == 1) {
-            segments.add(buffer.toString());
-            buffer = new StringBuilder();
-            depth--;
-        } *//* 
-        else if (c == '{') {
-            depth++;
-        }
-        else if (c == '} *//* ') {
-            depth--;
-        } *//* 
-     */
-}
-/* 
-    segments.add(buffer.toString()); *//* 
-
-    var output = new StringBuilder(); *//* for */(/* var segment : segments */){/* 
-        output.append(compiler.apply(segment)); *//* 
-     */
-}
-/* 
+/* private String */ compileAll(/* String input,
+        BiFunction<State, Character, State> folder,
+        Function<String, String> compiler,
+        BiFunction<StringBuilder, String, StringBuilder> merger */){
+	/* var */ segments = this.divide(input, /* new State */(), folder);
+	/* var */ output = /* new StringBuilder */();/* 
+    for (var segment : segments) {
+        var compiled = compiler.apply(segment);
+        output = merger.apply(output, compiled);
+    } *//* 
 
     return output.toString(); *//* 
+ */
+}
+/* private StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
+    return output.append(compiled); *//* 
+ */
+}
+/* private List<String> */ divide(/* String input, State state, BiFunction<State, Character, State> folder */){
+	/* var */ current = state;
+	/* for (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
+        var c = input.charAt(i);
+        current = folder.apply(current, c);
+    } *//* 
+    current.advance(); *//* 
+    return current.segments; *//* 
+ */
+}
+/* private State */ foldStatementChar(/* State state, char c */){/* 
+    state.append(c); */
+	/* if */ (c = /* = ' */;/* ' && state.isLevel()) {
+        state.advance();
+    } *//* 
+    else if (c == ' */
+}
+/* ' && state.isShallow()) {
+        state.advance();
+        state.exit();
+    } *//* else */ if(/* c == '{' */){/* 
+        state.enter(); *//* 
+    }
+    else if (c == ' */
+}
+/* ') {
+        state.exit();
+    } *//* 
+    return state; *//* 
 }
 
 private String compileRootSegment(String input0) {
@@ -87,15 +143,15 @@ private String compileRootSegment(String input0) {
 
 private Option<String> compileMethod(String input) {
     var paramStart = input.indexOf("("); *//* if */(/* paramStart >= 0 */){
-	/* var */ definition = input.substring(/* 0, paramStart).strip( */);
-	/* var */ withParams = input.substring(/* paramStart + "(".length() */);
-	/* var */ paramEnd = withParams.indexOf(/* ")" */);/* 
+	/* var */ definition = input.substring(/* 0 */, /* paramStart) */.strip();
+	/* var */ withParams = input.substring(/* paramStart + " */(".length());
+	/* var */ paramEnd = withParams.indexOf(")");/* 
         if (paramEnd >= 0) {
             var params = withParams.substring(0, paramEnd).strip();
             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var inputContent = withBraces.substring(1, withBraces.length() - 1);
-                var outputContent = this.compileAll(inputContent, this::compileStatementOrBlock);
+                var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock, this::mergeStatements);
                 return new Some<>(this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + outputContent + "\n}\n");
             }
         } *//* 
@@ -109,8 +165,8 @@ private Option<String> compileMethod(String input) {
 private String compileDefinition(String input) {
     var stripped = input.strip(); *//* 
     var space = stripped.lastIndexOf(" "); *//* if */(/* space >= 0 */){
-	/* var */ type = stripped.substring(/* 0, space */);
-	/* var */ name = stripped.substring(/* space + " ".length() */);/* 
+	/* var */ type = stripped.substring(/* 0 */, space);
+	/* var */ name = stripped.substring(/* space + " " */.length());/* 
         return this.compileType(type) + " " + name; *//* 
      */
 }
@@ -145,19 +201,23 @@ private String compileStatementOrBlock(String input) {
 
 private String compileValue(String input) {
     var stripped = input.strip(); *//* 
+    if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+        return stripped;
+    } *//* 
+
     if (stripped.endsWith(")")) {
         var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
         var paramStart = withoutEnd.indexOf("(");
         if (paramStart >= 0) {
             var caller = withoutEnd.substring(0, paramStart).strip();
             var arguments = withoutEnd.substring(paramStart + "(".length());
-            return this.compileValue(caller) + "(" + this.generatePlaceholder(arguments) + ")";
+            return this.compileValue(caller) + "(" + this.compileAll(arguments, this::foldValueChar, this::compileValue, this::mergeValues) + ")";
         }
     } *//* 
 
     var separator = stripped.lastIndexOf("."); *//* if */(/* separator >= 0 */){
-	/* var */ parent = stripped.substring(/* 0, separator */);
-	/* var */ child = stripped.substring(/* separator + ".".length() */);/* 
+	/* var */ parent = stripped.substring(/* 0 */, separator);
+	/* var */ child = stripped.substring(/* separator + " */.".length());/* 
 
         return this.compileValue(parent) + "." + child; *//* 
      */
@@ -168,7 +228,23 @@ private String compileValue(String input) {
         return stripped;
     } *//* 
 
-    return this.generatePlaceholder(input); *//* 
+    return this.generatePlaceholder(input); *//* }
+
+private State */ foldValueChar(/* State state, char c */){
+	/* if */ (c = /* = ',' && state */.isLevel(/* )) {
+        return state */.advance();
+}
+/* 
+
+    return state.append(c); *//* }
+
+private StringBuilder */ mergeValues(/* StringBuilder cache, String element */){/* 
+    if (cache.isEmpty()) {
+        return cache.append(element);
+     */
+}
+/* 
+    return cache.append(", ").append(element); *//* 
 }
 
 private boolean isSymbol(String input) {
