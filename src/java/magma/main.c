@@ -18,16 +18,17 @@
 };
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(Function</* T */, /*  R */> mapper)/* ; */
+/* <R> */ Option</* R */> map(/*  R */ (*)(/* T */) mapper)/* ; */
 /* T */ orElseGet(Supplier</* T */> other)/* ; */
 Option</* T */> or(Supplier<Option</* T */>> other)/* ; */
 /* T */ orElse(/* T */ other)/* ; */
-/* <R> */ Option</* R */> flatMap(Function</* T */, Option</* R */>> mapper)/* ; */
+/* <R> */ Option</* R */> flatMap(Option</* R */> (*)(/* T */) mapper)/* ; */
 Option</* T */> next(/*  */)/* ; */
 List</* T */> add(/* T */ element)/* ; */
 Iterator</* T */> iter(/*  */)/* ; */
 /* boolean */ hasElements(/*  */)/* ; */
 /* T */ removeFirst(/*  */)/* ; */
+/* T */ get(/* int */ index)/* ; */
 /* C */ createInitial(/*  */)/* ; */
 /* C */ fold(/* C */ current, /* T */ element)/* ; */
 /* String */ generate(/*  */)/* ; */
@@ -140,7 +141,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */ Option</* R */> map(Function</* T */, /*  R */> mapper)/* {
+        public <R> */ Option</* R */> map(/*  R */ (*)(/* T */) mapper)/* {
             return new None<>();
         }
 
@@ -196,11 +197,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private */ /* record */ Generic(/* String */ base, List</* Type */> args)/* implements Type {
         @Override
         public String generate() {
-            var joined = this.args.iter()
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
+            var joined = generateValuesFromNodes(this.args);
             return this.base + "<" + joined + ">";
         }
     } */
@@ -210,6 +207,12 @@ Iterator</* T */> iter(/*  */)/* ; */
             return Main.generatePlaceholder(this.input);
         }
     } */
+/* private */ /* record */ Functional(List</* Type */> paramTypes, /* Type */ returnType)/* implements Type {
+        @Override
+        public String generate() {
+            return this.returnType.generate() + " (*)(" + generateValuesFromNodes(this.paramTypes) + ")";
+        }
+    } */
 /* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
 /* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
 /* private static */ /* String */ generateAll(BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger, List</* String */> parsed)/* {
@@ -217,7 +220,7 @@ Iterator</* T */> iter(/*  */)/* ; */
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-/* private static <T> */ List</* T */> parseAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, Function</* String */, /*  T */> compiler)/* {
+/* private static <T> */ List</* T */> parseAll(/* String */ input, BiFunction</* State */, /*  Character */, /*  State */> folder, /*  T */ (*)(/* String */) compiler)/* {
         return Main.divideAll(input, folder)
                 .iter()
                 .map(compiler)
@@ -275,6 +278,12 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private static */ /* String */ generatePlaceholder(/* String */ input)/* {
         return "/* " + input + " */";
     } */
+/* private static */ /* String */ generateValuesFromNodes(List</* Type */> list)/* {
+        return list.iter()
+                .map(Type::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
+    } */
 /* void */ main(/*  */)/* {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -293,7 +302,7 @@ Iterator</* T */> iter(/*  */)/* ; */
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */ /* String */ compileStatements(/* String */ input, Function</* String */, /*  String */> segment)/* {
+/* private */ /* String */ compileStatements(/* String */ input, /*  String */ (*)(/* String */) segment)/* {
         return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
     } */
 /* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
@@ -365,10 +374,10 @@ Iterator</* T */> iter(/*  */)/* ; */
 
         return new None<>();
     } */
-/* private */ /* String */ compileValues(/* String */ input, Function</* String */, /*  String */> compiler)/* {
+/* private */ /* String */ compileValues(/* String */ input, /*  String */ (*)(/* String */) compiler)/* {
         return Main.generateValues(this.parseValues(input, compiler));
     } */
-/* private <T> */ List</* T */> parseValues(/* String */ input, Function</* String */, /*  T */> compiler)/* {
+/* private <T> */ List</* T */> parseValues(/* String */ input, /*  T */ (*)(/* String */) compiler)/* {
         return Main.parseAll(input, this::foldValueChar, compiler);
     } */
 /* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
@@ -405,11 +414,11 @@ Iterator</* T */> iter(/*  */)/* ; */
         var name = input.substring(nameSeparator + " ".length()).strip();
 
         return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> this.parseType(beforeName).generate() + " " + name;
+            case None<Integer> _ -> this.parseAndModifyType(beforeName).generate() + " " + name;
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseType(type).generate();
+                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseAndModifyType(type).generate();
                 yield newBeforeName + " " + name;
             }
         });
@@ -432,6 +441,18 @@ Iterator</* T */> iter(/*  */)/* ; */
 
         return new None<>();
     } */
+/* private */ /* Type */ parseAndModifyType(/* String */ input)/* {
+        var parsed = this.parseType(input);
+        if (parsed instanceof Generic(var base, var arguments)) {
+            if (base.equals("Function")) {
+                var argType = arguments.get(0);
+                var returnType = arguments.get(1);
+
+                return new Functional(Lists.of(argType), returnType);
+            }
+        }
+        return parsed;
+    } */
 /* private */ /* Type */ parseType(/* String */ input)/* {
         var stripped = input.strip();
         if (stripped.endsWith(">")) {
@@ -440,7 +461,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = this.parseValues(inputArgs, this::parseType);
+                var args = this.parseValues(inputArgs, this::parseAndModifyType);
                 return new Generic(base, args);
             }
         }

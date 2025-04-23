@@ -32,6 +32,8 @@ class Main {
         boolean hasElements();
 
         T removeFirst();
+
+        T get(int index);
     }
 
     public interface Collector<T, C> {
@@ -220,11 +222,7 @@ class Main {
     private record Generic(String base, List<Type> args) implements Type {
         @Override
         public String generate() {
-            var joined = this.args.iter()
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
+            var joined = generateValuesFromNodes(this.args);
             return this.base + "<" + joined + ">";
         }
     }
@@ -233,6 +231,13 @@ class Main {
         @Override
         public String generate() {
             return Main.generatePlaceholder(this.input);
+        }
+    }
+
+    private record Functional(List<Type> paramTypes, Type returnType) implements Type {
+        @Override
+        public String generate() {
+            return this.returnType.generate() + " (*)(" + generateValuesFromNodes(this.paramTypes) + ")";
         }
     }
 
@@ -310,6 +315,13 @@ class Main {
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */";
+    }
+
+    private static String generateValuesFromNodes(List<Type> list) {
+        return list.iter()
+                .map(Type::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
     }
 
     void main() {
@@ -457,11 +469,11 @@ class Main {
         var name = input.substring(nameSeparator + " ".length()).strip();
 
         return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> this.parseType(beforeName).generate() + " " + name;
+            case None<Integer> _ -> this.parseAndModifyType(beforeName).generate() + " " + name;
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseType(type).generate();
+                var newBeforeName = generatePlaceholder(beforeType) + " " + this.parseAndModifyType(type).generate();
                 yield newBeforeName + " " + name;
             }
         });
@@ -486,6 +498,19 @@ class Main {
         return new None<>();
     }
 
+    private Type parseAndModifyType(String input) {
+        var parsed = this.parseType(input);
+        if (parsed instanceof Generic(var base, var arguments)) {
+            if (base.equals("Function")) {
+                var argType = arguments.get(0);
+                var returnType = arguments.get(1);
+
+                return new Functional(Lists.of(argType), returnType);
+            }
+        }
+        return parsed;
+    }
+
     private Type parseType(String input) {
         var stripped = input.strip();
         if (stripped.endsWith(">")) {
@@ -494,7 +519,7 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = this.parseValues(inputArgs, this::parseType);
+                var args = this.parseValues(inputArgs, this::parseAndModifyType);
                 return new Generic(base, args);
             }
         }

@@ -1,15 +1,18 @@
 package magma;
 
+import magma.Main.List;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Lists {
-    record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
+    record JavaList<T>(java.util.List<T> list) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
         }
 
         @Override
-        public Main.List<T> add(T element) {
+        public List<T> add(T element) {
             this.list.add(element);
             return this;
         }
@@ -28,9 +31,18 @@ public class Lists {
         public T removeFirst() {
             return this.list.removeFirst();
         }
+
+        @Override
+        public T get(int index) {
+            return this.list.get(index);
+        }
     }
 
-    public static <T> Main.List<T> emptyList() {
+    public static <T> List<T> emptyList() {
         return new JavaList<>();
+    }
+
+    public static <T> List<T> of(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
     }
 }
