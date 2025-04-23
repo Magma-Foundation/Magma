@@ -182,7 +182,7 @@ char* generate(struct Struct this){
 char* generate(struct Placeholder this){
 	return this.value;
 }
-void __main__(char** args){
+void __main__(){
 	/* Optional<IOException> result = switch (readString(SOURCE)) {
             case Err<String, IOException>(IOException error) -> new Some<>(error);
             case Ok<String, IOException>(String value) -> {
@@ -407,18 +407,6 @@ Optional<char*> compileWhitespace(char* input){
         } */
 	return new_None<>();
 }
-Optional<char*> compileDefinitionStatement(char* input){
-	char* stripped = input.strip();
-	/* if (!stripped.endsWith(" */;
-	/* ")) {
-            return new None<>();
-        } */
-	char* slice = stripped.substring(0, /* stripped.length( */) - ";
-	".length(/* ) */);
-	return compileDefinition(/* slice)
-                .flatMap(Main::generateDefinition)
-                .map(Main::formatStatement */);
-}
 char* formatStatement(char* inner){
 	return "\n\t" + inner + ";
 	/* " */;
@@ -586,7 +574,7 @@ Optional<struct BeforeName> compileDefinition(char* input){
                 type = beforeName.substring(typeSeparator + " ".length());
             }
         } */
-	/* return compileType(type).map(outputType -> {
+	/* return parseType(type).map(Type::generate).map(outputType -> {
             String outputDefinition = outputType + " " + newName;
             return new Definition(modifiers, outputDefinition);
         } */
@@ -609,12 +597,6 @@ Optional<struct Integer> findTypeSeparator(char* input){
             }
         } */
 	return new_None<>();
-}
-Optional<char*> compileType(char* typeString){
-	/* return parseType(typeString).map(type -> {
-            return type.generate();
-        } */
-	/* ) */;
 }
 Optional<struct Type> parseType(char* type){
 	char* stripped = type.strip();
