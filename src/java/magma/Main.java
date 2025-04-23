@@ -350,20 +350,23 @@ public class Main {
                             })
                             .map(Main::generateParams).flatMap(outputParams -> {
                                 String withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                                if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                                    return Optional.empty();
-                                }
 
-                                String content = withBraces.substring(1, withBraces.length() - 1);
-                                return parseStatements(content)
-                                        .map(statements -> modifyMethodBody(structName, beforeName, statements))
-                                        .map(Main::generateStatements).flatMap(outputContent -> {
-                                            return compileMethodBeforeName(beforeName).flatMap(outputBeforeName -> {
-                                                String generated = outputBeforeName + "(" + outputParams + "){" + outputContent + "\n}\n";
+                                return compileMethodBeforeName(beforeName).flatMap(outputBeforeName -> {
+                                    String header = outputBeforeName + "(" + outputParams + ")";
+                                    if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                                        return Optional.of(formatStatement(header));
+                                    }
+
+                                    String content = withBraces.substring(1, withBraces.length() - 1);
+                                    return parseStatements(content)
+                                            .map(statements -> modifyMethodBody(structName, beforeName, statements))
+                                            .map(Main::generateStatements).flatMap(outputContent -> {
+                                                String outputBody = "{" + outputContent + "\n}\n";
+                                                String generated = header + outputBody;
                                                 methods.add(generated);
                                                 return Optional.of("");
                                             });
-                                        });
+                                });
                             });
                 });
     }
