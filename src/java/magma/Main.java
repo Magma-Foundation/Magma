@@ -131,7 +131,22 @@ private String compileType(String input) {
 }
 
 private String compileStatementOrBlock(String input) {
+    var stripped = input.strip();
+    if (stripped.endsWith(";")) {
+        var statement = stripped.substring(0, stripped.length() - ";".length());
+        var valueSeparator = statement.indexOf("=");
+        if (valueSeparator >= 0) {
+            var definition = statement.substring(0, valueSeparator).strip();
+            var value = statement.substring(valueSeparator + "=".length());
+            return "\n\t" + this.compileDefinition(definition) + " = " + this.compileValue(value) + ";";
+        }
+    }
+
     return this.generatePlaceholder(input);
+}
+
+private String compileValue(String value) {
+    return this.generatePlaceholder(value);
 }
 
 private Option<String> compileStructured(String input, String infix) {
@@ -159,7 +174,7 @@ private Option<String> compileStructured(String input, String infix) {
 }
 
 private String generatePlaceholder(String input) {
-    return "/* " + input + "*/";
+    return "/* " + input + " */";
 }
 
 private Option<IOException> writeString(Path target, String output) {
