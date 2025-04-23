@@ -5,10 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 class Main {
     sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
+
+        T orElseGet(Supplier<T> other);
+
+        Option<T> or(Supplier<Option<T>> other);
     }
 
     interface Head<T> {
@@ -112,12 +117,32 @@ class Main {
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
         }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
     }
 
     private static final class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
         }
     }
 
@@ -142,49 +167,65 @@ class Main {
         return this.divide(input, new State())
                 .segments
                 .iter()
-                .map(compiler::apply)
-                .fold(new StringBuilder(), (builder, element) -> builder.append(element))
+                .map(compiler)
+                .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
     }
 
     private String compileRootSegment(String input) {
-        var classIndex = input.indexOf("class ");
-        if (classIndex >= 0) {
-            var left = input.substring(0, classIndex);
-            var right = input.substring(classIndex + "class ".length());
-            var contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                var name = right.substring(0, contentStart).strip();
-                var withEnd = right.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var inputContent = withEnd.substring(0, withEnd.length() - 1);
-                    var outputContent = this.compileAll(inputContent, this::compileClassSegment);
-                    return this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n";
-                }
-            }
-        }
+        return this.compileClass(input).orElseGet(() -> this.generatePlaceholder(input));
+    }
 
-        return this.generatePlaceholder(input);
+    private Option<String> compileClass(String input) {
+        return this.compileStructured(input, "class ");
+    }
+
+    private Option<String> compileStructured(String input, String infix) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex < 0) {
+            return new None<>();
+        }
+        var left = input.substring(0, classIndex);
+        var right = input.substring(classIndex + infix.length());
+        var contentStart = right.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+        var name = right.substring(0, contentStart).strip();
+        var withEnd = right.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return new None<>();
+        }
+        var inputContent = withEnd.substring(0, withEnd.length() - 1);
+        var outputContent = this.compileAll(inputContent, this::compileClassSegment);
+        return new Some<>(this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "};\n");
     }
 
     private String compileClassSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            var nameSeparator = withoutEnd.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                var beforeName = withoutEnd.substring(0, nameSeparator).strip();
-                var typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator).strip();
-                    var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                    var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
-                    return "\n\t" + this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name + ";";
-                }
-            }
-        }
+        return this.compileDefinitionStatement(input)
+                .or(() -> this.compileStructured(input, "interface "))
+                .orElseGet(() -> this.generatePlaceholder(input));
+    }
 
-        return this.generatePlaceholder(stripped);
+    private Option<String> compileDefinitionStatement(String input) {
+        var stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return new None<>();
+        }
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        var nameSeparator = withoutEnd.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return new None<>();
+        }
+        var beforeName = withoutEnd.substring(0, nameSeparator).strip();
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return new None<>();
+        }
+        var beforeType = beforeName.substring(0, typeSeparator).strip();
+        var type = beforeName.substring(typeSeparator + " ".length()).strip();
+        var name = withoutEnd.substring(nameSeparator + " ".length()).strip();
+        return new Some<>("\n\t" + this.generatePlaceholder(beforeType) + " " + this.compileType(type) + " " + name + ";");
     }
 
     private String compileType(String type) {
