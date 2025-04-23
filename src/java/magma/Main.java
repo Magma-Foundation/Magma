@@ -1,7 +1,7 @@
-package magma;
+void main() throws IOException {
+    var source = Paths.get(".", "src", "java", "magma", "Main.java");
+    var input = Files.readString(source);
 
-public class Main {
-    public static void main() {
-
-    }
+    var target = source.resolveSibling("main.c");
+    Files.writeString(target, "/* " + target + " */");
 }
