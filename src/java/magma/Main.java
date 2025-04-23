@@ -50,6 +50,8 @@ class Main {
 
     private interface Defined {
         String generate();
+
+        Defined mapName(Function<String, String> mapper);
     }
 
     private enum Primitive implements Type {
@@ -288,6 +290,11 @@ class Main {
 
             return beforeTypeString + this.type.generate() + " " + this.name;
         }
+
+        @Override
+        public Defined mapName(Function<String, String> mapper) {
+            return new Definition(this.beforeType, this.type, mapper.apply(this.name));
+        }
     }
 
     private record FunctionalDefinition(
@@ -300,6 +307,11 @@ class Main {
         public String generate() {
             var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
             return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
+        }
+
+        @Override
+        public Defined mapName(Function<String, String> mapper) {
+            return new FunctionalDefinition(this.beforeType, this.returns, mapper.apply(this.name), this.args);
         }
     }
 
@@ -338,6 +350,7 @@ class Main {
 
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
+    private static Option<String> currentStruct = new None<>();
 
     private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
         return parsed.iter()
@@ -486,9 +499,8 @@ class Main {
             var definition = stripped.substring(0, valueSeparator);
             var value = stripped.substring(valueSeparator + "=".length());
 
-            return compileDefinitionToString(definition).map(outputDefinition -> {
-                return outputDefinition + " = " + compileValue(value);
-            });
+            return compileDefinitionToString(definition)
+                    .map(outputDefinition -> outputDefinition + " = " + compileValue(value));
         }
 
         return new Some<>(generatePlaceholder(input));
@@ -825,7 +837,7 @@ class Main {
                 : beforeContent;
 
         var typeParamStart = withoutParams.indexOf("<");
-        var withoutTypeParams = typeParamStart >= 0
+        var name = typeParamStart >= 0
                 ? withoutParams.substring(0, typeParamStart).strip()
                 : withoutParams;
 
@@ -834,10 +846,12 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
 
-        var generated = generatePlaceholder(left) + "struct " + withoutTypeParams + " {" + outputContent + "\n};\n";
+        currentStruct = new Some<>(name);
+        var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
+        var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
+
         return new Some<>("");
     }
 
@@ -858,34 +872,40 @@ class Main {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
-                var paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    var paramString = withParams.substring(0, paramEnd).strip();
-                    var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
-                            .map(Main::generateValues)
-                            .orElse("");
+            return parseAndModifyDefinition(inputDefinition)
+                    .map(definition -> {
+                        return definition.mapName(name -> {
+                            return name + currentStruct.map(inner -> "_" + inner).orElse("");
+                        });
+                    })
+                    .map(Defined::generate).flatMap(outputDefinition -> {
+                        var paramEnd = withParams.indexOf(")");
+                        if (paramEnd >= 0) {
+                            var paramString = withParams.substring(0, paramEnd).strip();
+                            var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                            var outputParams = Main.parseValues(paramString, s -> new Some<>(this.compileParam(s)))
+                                    .map(Main::generateValues)
+                                    .orElse("");
 
-                    String newBody;
-                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                        var body = withBraces.substring(1, withBraces.length() - 1);
-                        newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}";
-                    }
-                    else if (withBraces.equals(";")) {
-                        newBody = ";";
-                    }
-                    else {
+                            String newBody;
+                            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                                var body = withBraces.substring(1, withBraces.length() - 1);
+                                newBody = "{" + compileStatementsOrBlocks(body, 0) + "\n}";
+                            }
+                            else if (withBraces.equals(";")) {
+                                newBody = ";";
+                            }
+                            else {
+                                return new None<>();
+                            }
+
+                            var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n";
+                            methods.add(generated);
+                            return new Some<>("");
+                        }
+
                         return new None<>();
-                    }
-
-                    var generated = outputDefinition + "(" + outputParams + ")" + newBody + "\n";
-                    methods.add(generated);
-                    return new Some<>("");
-                }
-
-                return new None<>();
-            });
+                    });
         }
 
         return new None<>();
