@@ -7,9 +7,10 @@
 /* import java.util.Arrays; */
 /* import java.util.Collections; */
 /* import java.util.List; */
-/* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
+/* import java.util.function.Consumer; */
 /* import java.util.function.Function; */
+/* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /* import static magma.StandardLibrary.emptyString; */
 struct Node {
@@ -39,10 +40,84 @@ struct Main {/*
     } *//* 
 
     record Err<T, X>(X error) implements Result<T, X> {
+    } *//* 
+
+    private record Some<T>(T value) implements Optional<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return this;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     } */
 	List<char*> structs = new_ArrayList<>();
+	struct Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+	struct Path TARGET = Paths.get(".", "main.c");
 	List<char*> methods = new_ArrayList<>();
 };
+Optional<struct T> of(struct T error){
+	return new_Some<>(error);
+}
+Optional<struct T> empty(){
+	return new_None<>();
+}
+Optional<struct T> of(struct T error){
+	return new_Some<>(error);
+	/* }
+
+        static <T> Optional<T> empty */(/* ) {
+            return new None<>( */);
+	/* }
+
+        void ifPresent */(/* Consumer<T> consumer);
+
+        T orElse(T other);
+
+        <R> Optional<R> map(Function<T */, /* R> mapper);
+
+        <R> Optional<R> flatMap(Function<T */, /* Optional<R>> mapper);
+
+        Optional<T> or(Supplier<Optional<T>> other);
+
+        boolean isPresent();
+
+        T orElseGet(Supplier<T> other);
+
+        boolean isEmpty( */);
+}
 struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
 	this.segments = segments;
@@ -72,21 +147,135 @@ void enter(struct State this){
 void append(struct State this, char c){
 	this.buffer = this.buffer.concatChar(c);
 }
+void ifPresent(struct Some<T> this, Consumer<struct T> consumer){
+	consumer.accept(this.value);
+}
+struct T orElse(struct Some<T> this, struct T other){
+	return this.value;
+}
+Optional<struct R> map(struct Some<T> this, /* Function<T */, /* R> */ mapper){
+	return new_Some<>(mapper.apply(this.value));
+}
+Optional<struct R> flatMap(struct Some<T> this, /* Function<T */, Optional</* R> */> mapper){
+	return mapper.apply(this.value);
+}
+Optional<struct T> or(struct Some<T> this, Supplier<Optional<struct T>> other){
+	return this;
+}
+int isPresent(struct Some<T> this){
+	return true;
+}
+struct T orElseGet(struct Some<T> this, Supplier<struct T> other){
+	return this.value;
+}
+int isEmpty(struct Some<T> this){
+	return false;
+}
+void ifPresent(struct None<T> implements Optional<T> this, Consumer<struct T> consumer){
+}
+struct T orElse(struct None<T> implements Optional<T> this, struct T other){
+	return other;
+}
+Optional<struct R> map(struct None<T> implements Optional<T> this, /* Function<T */, /* R> */ mapper){
+	return new_None<>();
+}
+Optional<struct R> flatMap(struct None<T> implements Optional<T> this, /* Function<T */, Optional</* R> */> mapper){
+	return new_None<>();
+}
+Optional<struct T> or(struct None<T> implements Optional<T> this, Supplier<Optional<struct T>> other){
+	return other.get();
+}
+int isPresent(struct None<T> implements Optional<T> this){
+	return false;
+}
+struct T orElseGet(struct None<T> implements Optional<T> this, Supplier<struct T> other){
+	return other.get();
+}
+int isEmpty(struct None<T> implements Optional<T> this){
+	return true;
+}
+void ifPresent(Consumer<struct T> consumer){
+	/* }
+
+        @Override
+        public T orElse(T other) {
+            return other */;
+	/* }
+
+        @Override
+        public <R> Optional<R> map */(/* Function<T */, /* R> mapper) {
+            return new None<>( */);
+	/* }
+
+        @Override
+        public <R> Optional<R> flatMap */(/* Function<T */, /* Optional<R>> mapper) {
+            return new None<>( */);
+	/* }
+
+        @Override
+        public Optional<T> or */(/* Supplier<Optional<T>> other) {
+            return other.get( */);
+	/* }
+
+        @Override
+        public boolean isPresent() {
+            return false */;
+	/* }
+
+        @Override
+        public T orElseGet */(/* Supplier<T> other) {
+            return other.get( */);
+	/* }
+
+        @Override
+        public boolean isEmpty() {
+            return true */;
+	/* } */
+}
 void __main__(char** args){
+	/* Optional<IOException> result = switch (readString(SOURCE)) {
+            case Err<String, IOException>(IOException error) -> Optional.of(error);
+            case Ok<String, IOException>(String value) -> {
+                String output = compile(value);
+                yield switch (writeString(TARGET, output)) {
+                    case None<IOException> _ -> build();
+                    case Some<IOException>(IOException error) -> Optional.of(error);
+                };
+            }
+        } */
+	/*  */;
+	result.ifPresent(/* Throwable::printStackTrace */);
+}
+Optional<struct IOException> build(){
 	/* try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-
-            Path target = Paths.get(".", "main.c");
-            Files.writeString(target, compile(input));
-
             new ProcessBuilder("clang", "-o", "main.exe", "main.c")
                     .inheritIO()
                     .start()
                     .waitFor();
+            return Optional.empty();
         } */
-	/* catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+	/* catch (IOException e) {
+            return new Some<>(e);
+        } */
+	/* catch (InterruptedException e) {
+            return new Some<>(new IOException(e));
+        } */
+}
+Optional<struct IOException> writeString(struct Path target, char* output){
+	/* try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } */
+	/* catch (IOException e) {
+            return Optional.of(e);
+        } */
+}
+/* IOException> */ readString(struct Path source){
+	/* try {
+            return new Ok<>(Files.readString(source));
+        } */
+	/* catch (IOException e) {
+            return new Err<>(e);
         } */
 }
 char* compile(char* input){
@@ -534,7 +723,7 @@ char* compileValue(char* input){
         } */
 	Optional<char*> maybeInvokable = compileInvokable(stripped);
 	/* if (maybeInvokable.isPresent()) {
-            return maybeInvokable.get();
+            return maybeInvokable.orElse(null);
         } */
 	int lastSeparator = stripped.lastIndexOf(".");
 	/* if (lastSeparator >= 0) {
@@ -571,7 +760,7 @@ Optional<char*> compileInvokable(char* input){
 	/* if (maybeNewArguments.isEmpty()) {
             return Optional.empty();
         } */
-	char* newArguments = maybeNewArguments.get();
+	char* newArguments = maybeNewArguments.orElse(null);
 	/* if (!beforeArguments.startsWith("new ")) {
             String caller = compileValue(beforeArguments);
             return generateInvocation(caller, newArguments);

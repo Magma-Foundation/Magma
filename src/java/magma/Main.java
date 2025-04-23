@@ -8,14 +8,41 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static magma.StandardLibrary.emptyString;
 
 public class Main {
+    sealed interface Optional<T> permits Some, None {
+        static <T> Optional<T> of(T error) {
+            return new Some<>(error);
+        }
+
+        static <T> Optional<T> empty() {
+            return new None<>();
+        }
+
+        void ifPresent(Consumer<T> consumer);
+
+        T orElse(T other);
+
+        <R> Optional<R> map(Function<T, R> mapper);
+
+        <R> Optional<R> flatMap(Function<T, Optional<R>> mapper);
+
+        Optional<T> or(Supplier<Optional<T>> other);
+
+        boolean isPresent();
+
+        T orElseGet(Supplier<T> other);
+
+        boolean isEmpty();
+    }
+
     sealed interface Node permits Definition, ConstructorHeader {
     }
 
@@ -80,23 +107,138 @@ public class Main {
 
     record Err<T, X>(X error) implements Result<T, X> {
     }
+
+    private record Some<T>(T value) implements Optional<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return this;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+    }
+
+    private static final class None<T> implements Optional<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+    }
+
     public static final List<String> structs = new ArrayList<>();
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    public static final Path TARGET = Paths.get(".", "main.c");
     private static final List<String> methods = new ArrayList<>();
 
     public static void main(String[] args) {
+        Optional<IOException> result = switch (readString(SOURCE)) {
+            case Err<String, IOException>(IOException error) -> Optional.of(error);
+            case Ok<String, IOException>(String value) -> {
+                String output = compile(value);
+                yield switch (writeString(TARGET, output)) {
+                    case None<IOException> _ -> build();
+                    case Some<IOException>(IOException error) -> Optional.of(error);
+                };
+            }
+        };
+
+        result.ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> build() {
         try {
-            Path source = Paths.get(".", "src", "java", "magma", "Main.java");
-            String input = Files.readString(source);
-
-            Path target = Paths.get(".", "main.c");
-            Files.writeString(target, compile(input));
-
             new ProcessBuilder("clang", "-o", "main.exe", "main.c")
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            return Optional.empty();
+        } catch (IOException e) {
+            return new Some<>(e);
+        } catch (InterruptedException e) {
+            return new Some<>(new IOException(e));
+        }
+    }
+
+    private static Optional<IOException> writeString(Path target, String output) {
+        try {
+            Files.writeString(target, output);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
@@ -611,7 +753,7 @@ public class Main {
 
         Optional<String> maybeInvokable = compileInvokable(stripped);
         if (maybeInvokable.isPresent()) {
-            return maybeInvokable.get();
+            return maybeInvokable.orElse(null);
         }
 
         int lastSeparator = stripped.lastIndexOf(".");
@@ -658,7 +800,7 @@ public class Main {
             return Optional.empty();
         }
 
-        String newArguments = maybeNewArguments.get();
+        String newArguments = maybeNewArguments.orElse(null);
         if (!beforeArguments.startsWith("new ")) {
             String caller = compileValue(beforeArguments);
             return generateInvocation(caller, newArguments);
