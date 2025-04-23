@@ -14,7 +14,7 @@
 struct Node {
 }
 struct String_ {
-	struct String_ concatChar(struct String_ this, struct char c);
+	struct String_ concatChar(struct String_ this, char c);
 	char* toSlice(struct String_ this);
 }
 struct State {
@@ -59,7 +59,7 @@ void exit(struct State this){
 void enter(struct State this){
 	this.depth = this.depth + 1;
 }
-void append(struct State this, struct char c){
+void append(struct State this, char c){
 	/* this.buffer = this */.buffer.concatChar(c);
 }
 void __main__(/* String[] */ args){
@@ -147,7 +147,7 @@ char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, 
 char* mergeStatements(char* output, char* compiled){
 	return output + compiled;
 }
-struct State foldStatementChar(struct State state, struct char c){
+struct State foldStatementChar(struct State state, char c){
 	state.append(c);
 	/* if (c == ';' && state.isLevel()) {
             state.advance();
@@ -392,7 +392,7 @@ Optional<struct Node> compileConstructorHeader(char* structName, char* definitio
 Optional<char*> compileAllValues(char* inputParams, /*  Function<String */, Optional</* String> */> compiler){
 	return compileAll(inputParams, /* Main::foldValueChar */, compiler, /* Main::mergeValues */);
 }
-struct State foldValueChar(struct State state, struct char c){
+struct State foldValueChar(struct State state, char c){
 	/* if (c == ',') {
             state.advance();
             return state;
@@ -459,6 +459,9 @@ Optional<char*> compileType(char* type){
         } */
 	/* if (stripped.equals("String")) {
             return Optional.of("char*");
+        } */
+	/* if (stripped.equals("char")) {
+            return Optional.of("char");
         } */
 	/* if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");

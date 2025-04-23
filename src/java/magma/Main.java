@@ -518,6 +518,10 @@ public class Main {
             return Optional.of("char*");
         }
 
+        if (stripped.equals("char")) {
+            return Optional.of("char");
+        }
+
         if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of("int");
         }
