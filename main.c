@@ -11,6 +11,7 @@
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
 /* import java.util.stream.Collectors; */
+/* import static magma.StandardLibrary.emptyString; */
 struct Node {
 }
 struct String_ {
@@ -41,7 +42,7 @@ struct State new_State(List<struct String_> segments, struct String_ buffer, int
 	return this;
 }
 struct State createInitial(){
-	return new_State(new_ArrayList<>(), Strings.empty(), 0);
+	return new_State(new_ArrayList<>(), emptyString(), 0);
 }
 int isLevel(struct State this){
 	return this.depth == 0;
@@ -51,7 +52,7 @@ int isShallow(struct State this){
 }
 void advance(struct State this){
 	this.segments.add(this.buffer);
-	/* this.buffer = Strings */.empty();
+	/* this.buffer = emptyString */();
 }
 void exit(struct State this){
 	this.depth = this.depth - 1;

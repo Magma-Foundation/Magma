@@ -13,6 +13,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static magma.StandardLibrary.emptyString;
+
 public class Main {
     sealed interface Node permits Definition, ConstructorHeader {
     }
@@ -35,7 +37,7 @@ public class Main {
         }
 
         public static State createInitial() {
-            return new State(new ArrayList<>(), Strings.empty(), 0);
+            return new State(new ArrayList<>(), emptyString(), 0);
         }
 
         private boolean isLevel() {
@@ -48,7 +50,7 @@ public class Main {
 
         private void advance() {
             this.segments.add(this.buffer);
-            this.buffer = Strings.empty();
+            this.buffer = emptyString();
         }
 
         private void exit() {
