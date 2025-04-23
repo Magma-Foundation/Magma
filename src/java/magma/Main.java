@@ -393,7 +393,30 @@ class Main {
     }
 
     private static String compileValue(String input) {
+        var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length());
+            return compileValue(parent) + "." + property;
+        }
+
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(input);
+    }
+kRe
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Option<String> compileWhitespace(String input) {
@@ -420,6 +443,105 @@ class Main {
         }
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
         return compiler.apply(withoutEnd).map(definition -> "\n\t" + definition + ";");
+    }
+
+    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
+        return Main.parseAll(input, Main::foldValueChar, compiler);
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
+    }
+
+    private static Option<Definition> parseDefinition(String input) {
+        var nameSeparator = input.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return new None<>();
+        }
+        var beforeName = input.substring(0, nameSeparator).strip();
+        var name = input.substring(nameSeparator + " ".length()).strip();
+
+        return new Some<>(switch (Main.findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> new Definition(new None<>(), Main.parseAndModifyType(beforeName), name);
+            case Some<Integer>(var typeSeparator) -> {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                var newType = Main.parseAndModifyType(type);
+                yield new Definition(new Some<>(beforeType), newType, name);
+            }
+        });
+    }
+
+    private static Option<Integer> findTypeSeparator(String input) {
+        var depth = 0;
+        for (var index = input.length() - 1; index >= 0; index--) {
+            var c = input.charAt(index);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(index);
+            }
+
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
+        }
+
+        return new None<>();
+    }
+
+    private static Type parseAndModifyType(String input) {
+        var parsed = Main.parseType(input);
+        if (parsed instanceof Generic(var base, var arguments)) {
+            if (base.equals("Function")) {
+                var argType = arguments.get(0);
+                var returnType = arguments.get(1);
+
+                return new Functional(Lists.of(argType), returnType);
+            }
+
+            if (base.equals("Supplier")) {
+                var returns = arguments.get(0);
+                return new Functional(Lists.emptyList(), returns);
+            }
+        }
+        return parsed;
+    }
+
+    private static Type parseType(String input) {
+        var stripped = input.strip();
+        if (stripped.equals("boolean")) {
+            return Primitive.Bit;
+        }
+
+        if (stripped.equals("String")) {
+            return new Ref(Primitive.I8);
+        }
+
+        if (stripped.endsWith(">")) {
+            var slice = stripped.substring(0, stripped.length() - ">".length());
+            var argsStart = slice.indexOf("<");
+            if (argsStart >= 0) {
+                var base = slice.substring(0, argsStart).strip();
+                var inputArgs = slice.substring(argsStart + "<".length());
+                var args = Main.parseValues(inputArgs, input1 -> parseAndModifyType(input1));
+                return new Generic(base, args);
+            }
+        }
+
+        return new Content(input);
     }
 
     void main() {
@@ -534,25 +656,6 @@ class Main {
         return Main.generateValues(Main.parseValues(input, compiler));
     }
 
-    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
-        return Main.parseAll(input, Main::foldValueChar, compiler);
-    }
-
-    private static State foldValueChar(State state, char c) {
-        if (c == ',' && state.isLevel()) {
-            return state.advance();
-        }
-
-        var appended = state.append(c);
-        if (c == '<') {
-            return appended.enter();
-        }
-        if (c == '>') {
-            return appended.exit();
-        }
-        return appended;
-    }
-
     private String compileParam(String param) {
         return compileWhitespace(param)
                 .or(() -> parseAndModifyDefinition(param).map(Defined::generate))
@@ -561,86 +664,6 @@ class Main {
 
     private Option<String> compileDefinitionStatement(String input) {
         return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate));
-    }
-
-    private static Option<Definition> parseDefinition(String input) {
-        var nameSeparator = input.lastIndexOf(" ");
-        if (nameSeparator < 0) {
-            return new None<>();
-        }
-        var beforeName = input.substring(0, nameSeparator).strip();
-        var name = input.substring(nameSeparator + " ".length()).strip();
-
-        return new Some<>(switch (Main.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> new Definition(new None<>(), Main.parseAndModifyType(beforeName), name);
-            case Some<Integer>(var typeSeparator) -> {
-                var beforeType = beforeName.substring(0, typeSeparator).strip();
-                var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newType = Main.parseAndModifyType(type);
-                yield new Definition(new Some<>(beforeType), newType, name);
-            }
-        });
-    }
-
-    private static Option<Integer> findTypeSeparator(String input) {
-        var depth = 0;
-        for (var index = input.length() - 1; index >= 0; index--) {
-            var c = input.charAt(index);
-            if (c == ' ' && depth == 0) {
-                return new Some<>(index);
-            }
-
-            if (c == '>') {
-                depth++;
-            }
-            if (c == '<') {
-                depth--;
-            }
-        }
-
-        return new None<>();
-    }
-
-    private static Type parseAndModifyType(String input) {
-        var parsed = Main.parseType(input);
-        if (parsed instanceof Generic(var base, var arguments)) {
-            if (base.equals("Function")) {
-                var argType = arguments.get(0);
-                var returnType = arguments.get(1);
-
-                return new Functional(Lists.of(argType), returnType);
-            }
-
-            if (base.equals("Supplier")) {
-                var returns = arguments.get(0);
-                return new Functional(Lists.emptyList(), returns);
-            }
-        }
-        return parsed;
-    }
-
-    private static Type parseType(String input) {
-        var stripped = input.strip();
-        if (stripped.equals("boolean")) {
-            return Primitive.Bit;
-        }
-
-        if (stripped.equals("String")) {
-            return new Ref(Primitive.I8);
-        }
-
-        if (stripped.endsWith(">")) {
-            var slice = stripped.substring(0, stripped.length() - ">".length());
-            var argsStart = slice.indexOf("<");
-            if (argsStart >= 0) {
-                var base = slice.substring(0, argsStart).strip();
-                var inputArgs = slice.substring(argsStart + "<".length());
-                var args = Main.parseValues(inputArgs, input1 -> parseAndModifyType(input1));
-                return new Generic(base, args);
-            }
-        }
-
-        return new Content(input);
     }
 
     private State foldStatementChar(State state, char c) {
