@@ -788,7 +788,13 @@ class Main {
         if (contentStart < 0) {
             return new None<>();
         }
-        var name = right.substring(0, contentStart).strip();
+
+        var beforeContent = right.substring(0, contentStart).strip();
+        var paramStart = beforeContent.indexOf("<");
+        var name = paramStart >= 0
+                ? beforeContent.substring(0, paramStart).strip()
+                : beforeContent;
+
         var withEnd = right.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return new None<>();

@@ -6,13 +6,13 @@
 /* import java.util.function.Function; */
 /* import java.util.function.Supplier; */
 /*  */
-/* public sealed */struct Option<T> permits Some, None {
+/* public sealed */struct Option {
 };
-/*  */struct Head<T> {
+/*  */struct Head {
 };
-/* public */struct List<T> {
+/* public */struct List {
 };
-/* public */struct Collector<T, C> {
+/* public */struct Collector {
 };
 /* private */struct Type {
 };
@@ -27,9 +27,9 @@
             this.value = value;
         } */
 };
-/* public */struct Tuple<A, B>(A left, B right) {
+/* public */struct Tuple {
 };
-/* public static */struct RangeHead implements Head<Integer> {
+/* public static */struct RangeHead implements Head {
 	/* private final */ int length;
 	/* private */ int counter;/* 
 
@@ -37,7 +37,7 @@
             this.length = length;
         } */
 };
-/* public */struct Iterator<T>(Head<T> head) {
+/* public */struct Iterator {
 };
 /* private static */struct State {
 	/* private final */ List<char*> segments;
@@ -48,32 +48,28 @@
             this(Lists.emptyList(), new StringBuilder(), 0);
         } */
 };
-/* private */struct Some<T>(T value) implements Option<T> {
+/* private */struct Some {
 };
-/* private static final */struct None<T> implements Option<T> {
+/* private static final */struct None {
 };
-/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
+/* private */struct Joiner(String delimiter) implements Collector {
 };
-/* private static */struct ListCollector<T> implements Collector<T, List<T>> {
+/* private static */struct ListCollector {
 };
-/* private */struct Generic(String base, List<Type> args) implements Type {
+/* private */struct Generic(String base, List {
 };
 /* private */struct Content(String input) implements Type {
 };
-/* private */struct Functional(List<Type> paramTypes, Type returnType) implements Type {
+/* private */struct Functional(List {
 };
-/* private */struct Definition(Option<String> beforeType, Type type, String name) implements Defined {
+/* private */struct Definition(Option {
 };
 /* private */struct FunctionalDefinition(
-            Option<String> beforeType,
-            Type returns,
-            String name,
-            List<Type> args
-    ) implements Defined {
+            Option {
 };
 /* private */struct Ref(Type type) implements Type {
 };
-/* private */struct OptionCollector<T, C>(Collector<T, C> collector) implements Collector<Option<T>, Option<C>> {
+/* private */struct OptionCollector {
 };
 /*  */struct Main {
 };
@@ -394,7 +390,7 @@ char* generate();
 			return value;
 		}
 	}
-	if (compileInvokable(input, /*  Main::compileValue) instanceof Some(var value */)){
+	if (compileInvocation(/* input) instanceof Some(var value */)){
 		return value;
 	}
 	auto arrowIndex = input.indexOf(/* " */ -> /* " */);
@@ -413,6 +409,9 @@ char* generate();
 		return stripped;
 	}
 	return generatePlaceholder(input);
+}
+/* private static */ Option<char*> compileInvocation(char* input){
+	return compileInvokable(input, /*  Main::compileValue */);
 }
 /* private static */ Option<char*> compileInvokable(char* slice, char*(*beforeArgsCompiler)(char*)){
 	if (/* !slice */.endsWith(/* ")" */)){
@@ -651,7 +650,11 @@ char* generate();
 	if (/* contentStart < 0 */){
 		return None</*  */>();
 	}
-	auto name = right.substring(/* 0 */, /* contentStart) */.strip();
+	auto beforeContent = right.substring(/* 0 */, /* contentStart) */.strip();
+	auto paramStart = beforeContent.indexOf(/* "<" */);
+	auto name = /* paramStart >= 0
+                ? beforeContent */.substring(/* 0 */, paramStart).strip()
+                : beforeContent;
 	auto withEnd = right.substring(/* contentStart + "{" */.length(/* ) */).strip();
 	if (/* !withEnd */.endsWith(/* "}" */)){
 		return None</*  */>();
