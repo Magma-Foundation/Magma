@@ -1,30 +1,30 @@
 private static class State {
     private final List<String> segments;
     private StringBuilder buffer;
+    private int depth;
 
-    private State(List<String> segments, StringBuilder buffer) {
+    private State(List<String> segments, StringBuilder buffer, int depth) {
         this.segments = segments;
         this.buffer = buffer;
+        this.depth = depth;
     }
 
     public State() {
-        this(new ArrayList<>(), new StringBuilder());
+        this(new ArrayList<>(), new StringBuilder(), 0);
     }
 
-    public List<String> getSegments() {
-        return this.segments;
+    public boolean isLevel() {
+        return this.depth == 0;
     }
 
-    public StringBuilder getBuffer() {
-        return this.buffer;
+    public State enter() {
+        this.depth++;
+        return this;
     }
 
-    public void setBuffer(StringBuilder buffer) {
-        this.buffer = buffer;
-    }
-
-    public List<String> segments() {
-        return this.segments;
+    public State exit() {
+        this.depth--;
+        return this;
     }
 }
 
@@ -63,8 +63,14 @@ private State divide(String input, State state) {
 
 private State foldStatementChar(State state, char c) {
     var appended = this.append(state, c);
-    if (c == ';') {
+    if (c == ';' && appended.isLevel()) {
         return this.advance(appended);
+    }
+    if (c == '{') {
+        return appended.enter();
+    }
+    if (c == '}') {
+        return appended.exit();
     }
     else {
         return appended;
@@ -72,13 +78,13 @@ private State foldStatementChar(State state, char c) {
 }
 
 private State append(State state, char c) {
-    state.getBuffer().append(c);
+    state.buffer.append(c);
     return state;
 }
 
 private State advance(State state) {
-    state.segments().add(state.getBuffer().toString());
-    state.setBuffer(new StringBuilder());
+    state.segments.add(state.buffer.toString());
+    state.buffer = new StringBuilder();
     return state;
 }
 
