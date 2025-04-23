@@ -9,7 +9,8 @@ import java.util.function.Supplier;
 
 class Main {
     private enum Primitive implements Type {
-        Bit("int");
+        Bit("int"),
+        I8("char");
 
         private final String value;
 
@@ -263,8 +264,12 @@ class Main {
     private record Definition(Option<String> beforeType, Type type, String name) implements Defined {
         @Override
         public String generate() {
-            var beforeTypeString = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
-            return beforeTypeString + " " + this.type().generate() + " " + this.name();
+            var beforeTypeString = this.beforeType
+                    .map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+
+            return beforeTypeString + this.type.generate() + " " + this.name;
         }
     }
 
@@ -280,6 +285,14 @@ class Main {
             return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
         }
     }
+
+    private record Ref(Type type) implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    }
+
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
 
@@ -569,6 +582,10 @@ class Main {
         var stripped = input.strip();
         if (stripped.equals("boolean")) {
             return Primitive.Bit;
+        }
+
+        if (stripped.equals("String")) {
+            return new Ref(Primitive.I8);
         }
 
         if (stripped.endsWith(">")) {

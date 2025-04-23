@@ -20,24 +20,38 @@
 };
 /*  */struct Main {
 };
-/* <R> */  Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
- /* T */ orElseGet(/* T */(*other)())/* ; */
- Option</* T */> or(Option</* T */>(*other)())/* ; */
- /* T */ orElse( /* T */ other)/* ; */
-/* <R> */  Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* ; */
- Option</* T */> next(/*  */)/* ; */
- List</* T */> add( /* T */ element)/* ; */
- Iterator</* T */> iter(/*  */)/* ; */
- int hasElements(/*  */)/* ; */
- /* T */ removeFirst(/*  */)/* ; */
- /* T */ get( /* int */ index)/* ; */
- /* C */ createInitial(/*  */)/* ; */
- /* C */ fold( /* C */ current,  /* T */ element)/* ; */
- /* String */ generate(/*  */)/* ; */
- /* String */ generate(/*  */)/* ; */
+/* private enum Primitive implements Type */ /* { */ Bit(/* "int" */)/* ,
+        I8("char");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    } */
+/* <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
+/* T */ orElseGet(/* T */(*other)())/* ; */
+Option</* T */> or(Option</* T */>(*other)())/* ; */
+/* T */ orElse(/* T */ other)/* ; */
+/* <R> */ Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* ; */
+Option</* T */> next(/*  */)/* ; */
+List</* T */> add(/* T */ element)/* ; */
+Iterator</* T */> iter(/*  */)/* ; */
+int hasElements(/*  */)/* ; */
+/* T */ removeFirst(/*  */)/* ; */
+/* T */ get(/* int */ index)/* ; */
+/* C */ createInitial(/*  */)/* ; */
+/* C */ fold(/* C */ current, /* T */ element)/* ; */
+char* generate(/*  */)/* ; */
+char* generate(/*  */)/* ; */
 /* public static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter; */  /* public */ RangeHead( /* int */ length)/* {
+        private int counter; */ /* public */ RangeHead(/* int */ length)/* {
             this.length = length;
         }
 
@@ -53,7 +67,7 @@
             }
         }
     } */
-/* public */  /* record */ Iterator<T>( Head</* T */> head)/* {
+/* public */ /* record */ Iterator<T>(Head</* T */> head)/* {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -77,7 +91,7 @@
 /* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
-        private int depth; */  /* private */ State( List</* String */> segments,  /* StringBuilder */ buffer,  /* int */ depth)/* {
+        private int depth; */ /* private */ State(List<char*> segments, /* StringBuilder */ buffer, /* int */ depth)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -116,7 +130,7 @@
             return this.depth == 1;
         }
     } */
-/* private */  /* record */ Some<T>( /* T */ value)/* implements Option<T> {
+/* private */ /* record */ Some<T>(/* T */ value)/* implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
@@ -144,7 +158,7 @@
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */  Option</* R */> map(/*  R */(*mapper)(/* T */))/* {
+        public <R> */ Option</* R */> map(/*  R */(*mapper)(/* T */))/* {
             return new None<>();
         }
 
@@ -168,7 +182,7 @@
             return new None<>();
         }
     } */
-/* private */  /* record */ Joiner( /* String */ delimiter)/* implements Collector<String, Option<String>> {
+/* private */ /* record */ Joiner(char* delimiter)/* implements Collector<String, Option<String>> {
         private Joiner() {
             this("");
         }
@@ -188,7 +202,7 @@
     } */
 /* private static class ListCollector<T> implements Collector<T, List<T>> {
         @Override
-        public */  List</* T */> createInitial(/*  */)/* {
+        public */ List</* T */> createInitial(/*  */)/* {
             return Lists.emptyList();
         }
 
@@ -197,53 +211,63 @@
             return current.add(element);
         }
     } */
-/* private */  /* record */ Generic( /* String */ base,  List</* Type */> args)/* implements Type {
+/* private */ /* record */ Generic(char* base, List</* Type */> args)/* implements Type {
         @Override
         public String generate() {
             var joined = generateValuesFromNodes(this.args);
             return this.base + "<" + joined + ">";
         }
     } */
-/* private */  /* record */ Content( /* String */ input)/* implements Type {
+/* private */ /* record */ Content(char* input)/* implements Type {
         @Override
         public String generate() {
             return Main.generatePlaceholder(this.input);
         }
     } */
-/* private */  /* record */ Functional( List</* Type */> paramTypes,  /* Type */ returnType)/* implements Type {
+/* private */ /* record */ Functional(List</* Type */> paramTypes, /* Type */ returnType)/* implements Type {
         @Override
         public String generate() {
             return this.returnType.generate() + " (*)(" + generateValuesFromNodes(this.paramTypes) + ")";
         }
     } */
-/* private */  /* record */ Definition( Option</* String */> beforeType,  /* Type */ type,  /* String */ name)/* implements Defined {
+/* private */ /* record */ Definition(Option<char*> beforeType, /* Type */ type, char* name)/* implements Defined {
         @Override
         public String generate() {
-            var beforeTypeString = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
-            return beforeTypeString + " " + this.type().generate() + " " + this.name();
+            var beforeTypeString = this.beforeType
+                    .map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+            
+            return beforeTypeString + this.type.generate() + " " + this.name;
         }
     } */
-/* private */  /* record */ FunctionalDefinition( Option</* String */> beforeType,  /* Type */ returns,  /* String */ name,  List</* Type */> args)/* implements Defined {
+/* private */ /* record */ FunctionalDefinition(Option<char*> beforeType, /* Type */ returns, char* name, List</* Type */> args)/* implements Defined {
         @Override
         public String generate() {
             var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
             return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
         }
     } */
-/* private static final List<String> structs */  /* = */ Lists.emptyList(/*  */)/* ; */
-/* private static final List<String> methods */  /* = */ Lists.emptyList(/*  */)/* ; */
-/* private static */  /* String */ generateAll( BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger,  List</* String */> parsed)/* {
+/* private */ /* record */ Ref(/* Type */ type)/* implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    } */
+/* private static final List<String> structs */ /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static final List<String> methods */ /* = */ Lists.emptyList(/*  */)/* ; */
+/* private static */ char* generateAll(BiFunction</* StringBuilder */, char*, /*  StringBuilder */> merger, List<char*> parsed)/* {
         return parsed.iter()
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-/* private static <T> */  List</* T */> parseAll( /* String */ input,  BiFunction</* State */, /*  Character */, /*  State */> folder, /*  T */(*compiler)(/* String */))/* {
+/* private static <T> */ List</* T */> parseAll(char* input, BiFunction</* State */, /*  Character */, /*  State */> folder, /*  T */(*compiler)(char*))/* {
         return Main.divideAll(input, folder)
                 .iter()
                 .map(compiler)
                 .collect(new ListCollector<>());
     } */
-/* private static */  List</* String */> divideAll( /* String */ input,  BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
+/* private static */ List<char*> divideAll(char* input, BiFunction</* State */, /*  Character */, /*  State */> folder)/* {
         var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
@@ -283,25 +307,25 @@
         }
         return current.advance().segments;
     } */
-/* private static */  /* String */ generateValues( List</* String */> parserd)/* {
+/* private static */ char* generateValues(List<char*> parserd)/* {
         return Main.generateAll(Main::mergeValues, parserd);
     } */
-/* private static */  /* StringBuilder */ mergeValues( /* StringBuilder */ cache,  /* String */ element)/* {
+/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, char* element)/* {
         if (cache.isEmpty()) {
             return cache.append(element);
         }
         return cache.append(", ").append(element);
     } */
-/* private static */  /* String */ generatePlaceholder( /* String */ input)/* {
+/* private static */ char* generatePlaceholder(char* input)/* {
         return "/* " + input + " */";
     } */
-/* private static */  /* String */ generateValuesFromNodes( List</* Type */> list)/* {
+/* private static */ char* generateValuesFromNodes(List</* Type */> list)/* {
         return list.iter()
                 .map(Type::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
     } */
- /* void */ main(/*  */)/* {
+/* void */ main(/*  */)/* {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -313,26 +337,26 @@
             e.printStackTrace();
         }
     } */
-/* private */  /* String */ compileRoot( /* String */ input)/* {
+/* private */ char* compileRoot(char* input)/* {
         var compiled = this.compileStatements(input, this::compileRootSegment);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */  /* String */ compileStatements( /* String */ input, /*  String */(*segment)(/* String */))/* {
+/* private */ char* compileStatements(char* input, char*(*segment)(char*))/* {
         return Main.generateAll(this::mergeStatements, Main.parseAll(input, this::foldStatementChar, segment));
     } */
-/* private */  /* StringBuilder */ mergeStatements( /* StringBuilder */ stringBuilder,  /* String */ str)/* {
+/* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, char* str)/* {
         return stringBuilder.append(str);
     } */
-/* private */  /* String */ compileRootSegment( /* String */ input)/* {
+/* private */ char* compileRootSegment(char* input)/* {
         return this.compileClass(input)
                 .orElseGet(() -> generatePlaceholder(input.strip()) + "\n");
     } */
-/* private */  Option</* String */> compileClass( /* String */ input)/* {
+/* private */ Option<char*> compileClass(char* input)/* {
         return this.compileStructured(input, "class ");
     } */
-/* private */  Option</* String */> compileStructured( /* String */ input,  /* String */ infix)/* {
+/* private */ Option<char*> compileStructured(char* input, char* infix)/* {
         var classIndex = input.indexOf(infix);
         if (classIndex < 0) {
             return new None<>();
@@ -355,20 +379,20 @@
         structs.add(generated);
         return new Some<>("");
     } */
-/* private */  /* String */ compileStructuredSegment( /* String */ input)/* {
+/* private */ char* compileStructuredSegment(char* input)/* {
         return this.compileWhitespace(input)
                 .or(() -> this.compileStructured(input, "interface "))
                 .or(() -> this.compileMethod(input))
                 .or(() -> this.compileDefinitionStatement(input))
                 .orElseGet(() -> generatePlaceholder(input));
     } */
-/* private */  Option</* String */> compileWhitespace( /* String */ input)/* {
+/* private */ Option<char*> compileWhitespace(char* input)/* {
         if (input.isBlank()) {
             return new Some<>("");
         }
         return new None<>();
     } */
-/* private */  Option</* String */> compileMethod( /* String */ input)/* {
+/* private */ Option<char*> compileMethod(char* input)/* {
         var paramStart = input.indexOf("(");
         if (paramStart >= 0) {
             var inputDefinition = input.substring(0, paramStart).strip();
@@ -391,13 +415,13 @@
 
         return new None<>();
     } */
-/* private */  /* String */ compileValues( /* String */ input, /*  String */(*compiler)(/* String */))/* {
+/* private */ char* compileValues(char* input, char*(*compiler)(char*))/* {
         return Main.generateValues(this.parseValues(input, compiler));
     } */
-/* private <T> */  List</* T */> parseValues( /* String */ input, /*  T */(*compiler)(/* String */))/* {
+/* private <T> */ List</* T */> parseValues(char* input, /*  T */(*compiler)(char*))/* {
         return Main.parseAll(input, this::foldValueChar, compiler);
     } */
-/* private */  /* State */ foldValueChar( /* State */ state,  /* char */ c)/* {
+/* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
@@ -411,10 +435,10 @@
         }
         return appended;
     } */
-/* private */  /* String */ compileParam( /* String */ param)/* {
+/* private */ char* compileParam(char* param)/* {
         return this.parseAndModifyDefinition(param).map(Defined::generate).orElseGet(() -> generatePlaceholder(param));
     } */
-/* private */  Option</* String */> compileDefinitionStatement( /* String */ input)/* {
+/* private */ Option<char*> compileDefinitionStatement(char* input)/* {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return new None<>();
@@ -422,7 +446,7 @@
         var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
         return this.parseAndModifyDefinition(withoutEnd).map(Defined::generate).map(definition -> "\n\t" + definition + ";");
     } */
-/* private */  Option</* Defined */> parseAndModifyDefinition( /* String */ input)/* {
+/* private */ Option</* Defined */> parseAndModifyDefinition(char* input)/* {
         return this.parseDefinition(input).map(definition -> {
             if (definition.type instanceof Functional(var args, var base)) {
                 return new FunctionalDefinition(definition.beforeType, base, definition.name, args);
@@ -431,7 +455,7 @@
             return definition;
         });
     } */
-/* private */  Option</* Definition */> parseDefinition( /* String */ input)/* {
+/* private */ Option</* Definition */> parseDefinition(char* input)/* {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
@@ -449,7 +473,7 @@
             }
         });
     } */
-/* private */  Option</* Integer */> findTypeSeparator( /* String */ input)/* {
+/* private */ Option</* Integer */> findTypeSeparator(char* input)/* {
         var depth = 0;
         for (var index = input.length() - 1; index >= 0; index--) {
             var c = input.charAt(index);
@@ -467,7 +491,7 @@
 
         return new None<>();
     } */
-/* private */  /* Type */ parseAndModifyType( /* String */ input)/* {
+/* private */ /* Type */ parseAndModifyType(char* input)/* {
         var parsed = this.parseType(input);
         if (parsed instanceof Generic(var base, var arguments)) {
             if (base.equals("Function")) {
@@ -484,23 +508,14 @@
         }
         return parsed;
     } */
-/* private enum Primitive implements Type */  /* { */ Bit(/* "int" */)/* ;
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return value;
-        }
-    } */
-/* private */  /* Type */ parseType( /* String */ input)/* {
+/* private */ /* Type */ parseType(char* input)/* {
         var stripped = input.strip();
         if (stripped.equals("boolean")) {
             return Primitive.Bit;
+        }
+
+        if (stripped.equals("String")) {
+            return new Ref(Primitive.I8);
         }
 
         if (stripped.endsWith(">")) {
@@ -516,7 +531,7 @@
 
         return new Content(input);
     } */
-/* private */  /* State */ foldStatementChar( /* State */ state,  /* char */ c)/* {
+/* private */ /* State */ foldStatementChar(/* State */ state, /* char */ c)/* {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
