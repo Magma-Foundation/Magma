@@ -186,7 +186,11 @@ class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Option<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        private Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -196,7 +200,7 @@ class Main {
         public Option<String> fold(Option<String> maybeCurrent, String element) {
             return new Some<>(switch (maybeCurrent) {
                 case None<String> _ -> element;
-                case Some<String>(var current) -> current + element;
+                case Some<String>(var current) -> current + this.delimiter + element;
             });
         }
     }
@@ -213,11 +217,15 @@ class Main {
         }
     }
 
-    private record Generic(String base, List<String> args) implements Type {
+    private record Generic(String base, List<Type> args) implements Type {
         @Override
         public String generate() {
-            var outputArgs = Main.generateValues(this.args());
-            return this.base() + "<" + outputArgs + ">";
+            var joined = this.args.iter()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.base + "<" + joined + ">";
         }
     }
 
@@ -237,7 +245,11 @@ class Main {
                 .toString();
     }
 
-    private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
+    private static <T> List<T> parseAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, T> compiler
+    ) {
         return Main.divideAll(input, folder)
                 .iter()
                 .map(compiler)
@@ -404,7 +416,7 @@ class Main {
         return Main.generateValues(this.parseValues(input, compiler));
     }
 
-    private List<String> parseValues(String input, Function<String, String> compiler) {
+    private <T> List<T> parseValues(String input, Function<String, T> compiler) {
         return Main.parseAll(input, this::foldValueChar, compiler);
     }
 
@@ -482,7 +494,7 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = this.parseValues(inputArgs, input1 -> this.parseType(input1).generate());
+                var args = this.parseValues(inputArgs, this::parseType);
                 return new Generic(base, args);
             }
         }
