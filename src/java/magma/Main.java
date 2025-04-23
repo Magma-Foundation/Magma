@@ -226,19 +226,68 @@ class Main {
     }
 
     private String compileRoot(String input) {
-        var compiled = this.compileAll(input, this::compileRootSegment);
+        var compiled = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     }
 
-    private String compileAll(String input, Function<String, String> compiler) {
-        return this.divide(input, new State())
-                .segments
+    private String compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        return this.divideAll(input, folder)
                 .iter()
                 .map(compiler)
-                .fold(new StringBuilder(), StringBuilder::append)
+                .fold(new StringBuilder(), merger)
                 .toString();
+    }
+
+    private StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
+        return stringBuilder.append(str);
+    }
+
+    private List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
+        var current = new State();
+        var queue = new Iterator<>(new RangeHead(input.length()))
+                .map(input::charAt)
+                .collect(new ListCollector<>());
+
+        while (!queue.isEmpty()) {
+            var c = queue.removeFirst();
+
+            if (c == '\'') {
+                current.append(c);
+
+                var c1 = queue.removeFirst();
+                current.append(c1);
+                if (c1 == '\\') {
+                    current.append(queue.removeFirst());
+                }
+                current.append(queue.removeFirst());
+                continue;
+            }
+            if (c == '"') {
+                current.append(c);
+                while (!queue.isEmpty()) {
+                    var next = queue.removeFirst();
+                    current.append(next);
+
+                    if (next == '\\') {
+                        current.append(queue.removeFirst());
+                    }
+                    if (next == '"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+            current = folder.apply(current, c);
+        }
+        return current.advance().segments;
     }
 
     private String compileRootSegment(String input) {
@@ -267,7 +316,7 @@ class Main {
             return new None<>();
         }
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::compileStructuredSegment);
+        var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStructuredSegment, this::mergeStatements);
 
         var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
         structs.add(generated);
@@ -298,9 +347,10 @@ class Main {
             return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
-                    var params = withParams.substring(0, paramEnd).strip();
+                    var inputParams = withParams.substring(0, paramEnd).strip();
                     var body = withParams.substring(paramEnd + ")".length()).strip();
-                    var generated = outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body) + "\n";
+                    var outputParams = this.compileAll(inputParams, this::foldValueChar, this::compileParam, this::mergeValues);
+                    var generated = outputDefinition + "(" + outputParams + ")" + this.generatePlaceholder(body) + "\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -310,6 +360,25 @@ class Main {
         }
 
         return new None<>();
+    }
+
+    private StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    }
+
+    private State foldValueChar(State state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+
+        return state.append(c);
+    }
+
+    private String compileParam(String param) {
+        return this.compileDefinition(param).orElseGet(() -> this.generatePlaceholder(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {
@@ -353,47 +422,6 @@ class Main {
         }
 
         return this.generatePlaceholder(input);
-    }
-
-    private State divide(String input, State state) {
-        var current = state;
-        var queue = new Iterator<>(new RangeHead(input.length()))
-                .map(input::charAt)
-                .collect(new ListCollector<>());
-
-        while (!queue.isEmpty()) {
-            var c = queue.removeFirst();
-
-            if (c == '\'') {
-                current.append(c);
-
-                var c1 = queue.removeFirst();
-                current.append(c1);
-                if (c1 == '\\') {
-                    current.append(queue.removeFirst());
-                }
-                current.append(queue.removeFirst());
-                continue;
-            }
-            if (c == '"') {
-                current.append(c);
-                while (!queue.isEmpty()) {
-                    var next = queue.removeFirst();
-                    current.append(next);
-
-                    if (next == '\\') {
-                        current.append(queue.removeFirst());
-                    }
-                    if (next == '"') {
-                        break;
-                    }
-                }
-
-                continue;
-            }
-            current = this.foldStatementChar(current, c);
-        }
-        return current.advance();
     }
 
     private State foldStatementChar(State state, char c) {

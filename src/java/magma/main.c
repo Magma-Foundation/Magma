@@ -16,21 +16,21 @@
 };
 /*  */struct Main {
 };
-/* <R> */ Option</* R */> map(/* Function<T, R> mapper */)/* ; */
-/* T */ orElseGet(/* Supplier<T> other */)/* ; */
-Option</* T */> or(/* Supplier<Option<T>> other */)/* ; */
-/* T */ orElse(/* T other */)/* ; */
-/* <R> */ Option</* R */> flatMap(/* Function<T, Option<R>> mapper */)/* ; */
+/* <R> */ Option</* R */> map(/* Function<T */, /* R> */ mapper)/* ; */
+/* T */ orElseGet(Supplier</* T */> other)/* ; */
+Option</* T */> or(Supplier</* Option<T> */> other)/* ; */
+/* T */ orElse(/* T */ other)/* ; */
+/* <R> */ Option</* R */> flatMap(/* Function<T */, Option</* R> */> mapper)/* ; */
 Option</* T */> next(/*  */)/* ; */
-List</* T */> add(/* T element */)/* ; */
+List</* T */> add(/* T */ element)/* ; */
 Iterator</* T */> iter(/*  */)/* ; */
 /* boolean */ isEmpty(/*  */)/* ; */
 /* T */ removeFirst(/*  */)/* ; */
 /* C */ createInitial(/*  */)/* ; */
-/* C */ fold(/* C current, T element */)/* ; */
+/* C */ fold(/* C */ current, /* T */ element)/* ; */
 /* public static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter; */ /* public */ RangeHead(/* int length */)/* {
+        private int counter; */ /* public */ RangeHead(/* int */ length)/* {
             this.length = length;
         }
 
@@ -46,7 +46,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             }
         }
     } */
-/* public */ /* record */ Iterator<T>(/* Head<T> head */)/* {
+/* public */ /* record */ Iterator<T>(Head</* T */> head)/* {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -70,7 +70,7 @@ Iterator</* T */> iter(/*  */)/* ; */
 /* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
-        private int depth; */ /* private */ State(/* List<String> segments, StringBuilder buffer, int depth */)/* {
+        private int depth; */ /* private */ State(List</* String */> segments, /* StringBuilder */ buffer, /* int */ depth)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -109,7 +109,7 @@ Iterator</* T */> iter(/*  */)/* ; */
             return this.depth == 1;
         }
     } */
-/* private */ /* record */ Some<T>(/* T value */)/* implements Option<T> {
+/* private */ /* record */ Some<T>(/* T */ value)/* implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
@@ -137,7 +137,7 @@ Iterator</* T */> iter(/*  */)/* ; */
     } */
 /* private static final class None<T> implements Option<T> {
         @Override
-        public <R> */ Option</* R */> map(/* Function<T, R> mapper */)/* {
+        public <R> */ Option</* R */> map(/* Function<T */, /* R> */ mapper)/* {
             return new None<>();
         }
 
@@ -200,127 +200,24 @@ Iterator</* T */> iter(/*  */)/* ; */
             e.printStackTrace();
         }
     } */
-/* private */ /* String */ compileRoot(/* String input */)/* {
-        var compiled = this.compileAll(input, this::compileRootSegment);
+/* private */ /* String */ compileRoot(/* String */ input)/* {
+        var compiled = this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
         var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
         var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
         return compiled + joinedStructs + joinedMethods;
     } */
-/* private */ /* String */ compileAll(/* String input, Function<String, String> compiler */)/* {
-        return this.divide(input, new State())
-                .segments
+/* private */ /* String */ compileAll(/* String */ input, /*  */ BiFunction<State, /*  */ Character, /* State> */ folder, /*  */ Function<String, /* String> */ compiler, /*  */ BiFunction<StringBuilder, /*  */ String, /* StringBuilder> */ merger)/* {
+        return this.divideAll(input, folder)
                 .iter()
                 .map(compiler)
-                .fold(new StringBuilder(), StringBuilder::append)
+                .fold(new StringBuilder(), merger)
                 .toString();
     } */
-/* private */ /* String */ compileRootSegment(/* String input */)/* {
-        return this.compileClass(input)
-                .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
+/* private */ /* StringBuilder */ mergeStatements(/* StringBuilder */ stringBuilder, /* String */ str)/* {
+        return stringBuilder.append(str);
     } */
-/* private */ Option</* String */> compileClass(/* String input */)/* {
-        return this.compileStructured(input, "class ");
-    } */
-/* private */ Option</* String */> compileStructured(/* String input, String infix */)/* {
-        var classIndex = input.indexOf(infix);
-        if (classIndex < 0) {
-            return new None<>();
-        }
-        var left = input.substring(0, classIndex).strip();
-        var right = input.substring(classIndex + infix.length());
-        var contentStart = right.indexOf("{");
-        if (contentStart < 0) {
-            return new None<>();
-        }
-        var name = right.substring(0, contentStart).strip();
-        var withEnd = right.substring(contentStart + "{".length()).strip();
-        if (!withEnd.endsWith("}")) {
-            return new None<>();
-        }
-        var inputContent = withEnd.substring(0, withEnd.length() - 1);
-        var outputContent = this.compileAll(inputContent, this::compileStructuredSegment);
-
-        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
-        structs.add(generated);
-        return new Some<>("");
-    } */
-/* private */ /* String */ compileStructuredSegment(/* String input */)/* {
-        return this.compileWhitespace(input)
-                .or(() -> this.compileStructured(input, "interface "))
-                .or(() -> this.compileMethod(input))
-                .or(() -> this.compileDefinitionStatement(input))
-                .orElseGet(() -> this.generatePlaceholder(input));
-    } */
-/* private */ Option</* String */> compileWhitespace(/* String input */)/* {
-        if (input.isBlank()) {
-            return new Some<>("");
-        }
-        return new None<>();
-    } */
-/* private */ Option</* String */> compileMethod(/* String input */)/* {
-        var paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            var inputDefinition = input.substring(0, paramStart).strip();
-            var withParams = input.substring(paramStart + "(".length());
-
-            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
-                var paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    var params = withParams.substring(0, paramEnd).strip();
-                    var body = withParams.substring(paramEnd + ")".length()).strip();
-                    var generated = outputDefinition + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body) + "\n";
-                    methods.add(generated);
-                    return new Some<>("");
-                }
-
-                return new None<>();
-            });
-        }
-
-        return new None<>();
-    } */
-/* private */ Option</* String */> compileDefinitionStatement(/* String input */)/* {
-        var stripped = input.strip();
-        if (!stripped.endsWith(";")) {
-            return new None<>();
-        }
-        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return this.compileDefinition(withoutEnd).map(definition -> "\n\t" + definition + ";");
-    } */
-/* private */ Option</* String */> compileDefinition(/* String input */)/* {
-        var nameSeparator = input.lastIndexOf(" ");
-        if (nameSeparator < 0) {
-            return new None<>();
-        }
-        var beforeName = input.substring(0, nameSeparator).strip();
-        var name = input.substring(nameSeparator + " ".length()).strip();
-
-        var typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
-            return new Some<>(this.compileType(beforeName) + " " + name);
-        }
-
-        var beforeType = beforeName.substring(0, typeSeparator).strip();
-        var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
-        return new Some<>(newBeforeName + " " + name);
-    } */
-/* private */ /* String */ compileType(/* String input */)/* {
-        var stripped = input.strip();
-        if (stripped.endsWith(">")) {
-            var slice = stripped.substring(0, stripped.length() - ">".length());
-            var argsStart = slice.indexOf("<");
-            if (argsStart >= 0) {
-                var base = slice.substring(0, argsStart).strip();
-                var args = slice.substring(argsStart + "<".length());
-                return base + "<" + this.generatePlaceholder(args) + ">";
-            }
-        }
-
-        return this.generatePlaceholder(input);
-    } */
-/* private */ /* State */ divide(/* String input, State state */)/* {
-        var current = state;
+/* private */ List</* String */> divideAll(/* String */ input, /*  */ BiFunction<State, /*  */ Character, /* State> */ folder)/* {
+        var current = new State();
         var queue = new Iterator<>(new RangeHead(input.length()))
                 .map(input::charAt)
                 .collect(new ListCollector<>());
@@ -355,11 +252,133 @@ Iterator</* T */> iter(/*  */)/* ; */
 
                 continue;
             }
-            current = this.foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
-        return current.advance();
+        return current.advance().segments;
     } */
-/* private */ /* State */ foldStatementChar(/* State state, char c */)/* {
+/* private */ /* String */ compileRootSegment(/* String */ input)/* {
+        return this.compileClass(input)
+                .orElseGet(() -> this.generatePlaceholder(input.strip()) + "\n");
+    } */
+/* private */ Option</* String */> compileClass(/* String */ input)/* {
+        return this.compileStructured(input, "class ");
+    } */
+/* private */ Option</* String */> compileStructured(/* String */ input, /* String */ infix)/* {
+        var classIndex = input.indexOf(infix);
+        if (classIndex < 0) {
+            return new None<>();
+        }
+        var left = input.substring(0, classIndex).strip();
+        var right = input.substring(classIndex + infix.length());
+        var contentStart = right.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+        var name = right.substring(0, contentStart).strip();
+        var withEnd = right.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return new None<>();
+        }
+        var inputContent = withEnd.substring(0, withEnd.length() - 1);
+        var outputContent = this.compileAll(inputContent, this::foldStatementChar, this::compileStructuredSegment, this::mergeStatements);
+
+        var generated = this.generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
+        structs.add(generated);
+        return new Some<>("");
+    } */
+/* private */ /* String */ compileStructuredSegment(/* String */ input)/* {
+        return this.compileWhitespace(input)
+                .or(() -> this.compileStructured(input, "interface "))
+                .or(() -> this.compileMethod(input))
+                .or(() -> this.compileDefinitionStatement(input))
+                .orElseGet(() -> this.generatePlaceholder(input));
+    } */
+/* private */ Option</* String */> compileWhitespace(/* String */ input)/* {
+        if (input.isBlank()) {
+            return new Some<>("");
+        }
+        return new None<>();
+    } */
+/* private */ Option</* String */> compileMethod(/* String */ input)/* {
+        var paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            var inputDefinition = input.substring(0, paramStart).strip();
+            var withParams = input.substring(paramStart + "(".length());
+
+            return this.compileDefinition(inputDefinition).flatMap(outputDefinition -> {
+                var paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    var inputParams = withParams.substring(0, paramEnd).strip();
+                    var body = withParams.substring(paramEnd + ")".length()).strip();
+                    var outputParams = this.compileAll(inputParams, this::foldValueChar, this::compileParam, this::mergeValues);
+                    var generated = outputDefinition + "(" + outputParams + ")" + this.generatePlaceholder(body) + "\n";
+                    methods.add(generated);
+                    return new Some<>("");
+                }
+
+                return new None<>();
+            });
+        }
+
+        return new None<>();
+    } */
+/* private */ /* StringBuilder */ mergeValues(/* StringBuilder */ cache, /* String */ element)/* {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    } */
+/* private */ /* State */ foldValueChar(/* State */ state, /* char */ c)/* {
+        if (c == ',') {
+            return state.advance();
+        }
+
+        return state.append(c);
+    } */
+/* private */ /* String */ compileParam(/* String */ param)/* {
+        return this.compileDefinition(param).orElseGet(() -> this.generatePlaceholder(param));
+    } */
+/* private */ Option</* String */> compileDefinitionStatement(/* String */ input)/* {
+        var stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return new None<>();
+        }
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return this.compileDefinition(withoutEnd).map(definition -> "\n\t" + definition + ";");
+    } */
+/* private */ Option</* String */> compileDefinition(/* String */ input)/* {
+        var nameSeparator = input.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return new None<>();
+        }
+        var beforeName = input.substring(0, nameSeparator).strip();
+        var name = input.substring(nameSeparator + " ".length()).strip();
+
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return new Some<>(this.compileType(beforeName) + " " + name);
+        }
+
+        var beforeType = beforeName.substring(0, typeSeparator).strip();
+        var type = beforeName.substring(typeSeparator + " ".length()).strip();
+        var newBeforeName = this.generatePlaceholder(beforeType) + " " + this.compileType(type);
+        return new Some<>(newBeforeName + " " + name);
+    } */
+/* private */ /* String */ compileType(/* String */ input)/* {
+        var stripped = input.strip();
+        if (stripped.endsWith(">")) {
+            var slice = stripped.substring(0, stripped.length() - ">".length());
+            var argsStart = slice.indexOf("<");
+            if (argsStart >= 0) {
+                var base = slice.substring(0, argsStart).strip();
+                var args = slice.substring(argsStart + "<".length());
+                return base + "<" + this.generatePlaceholder(args) + ">";
+            }
+        }
+
+        return this.generatePlaceholder(input);
+    } */
+/* private */ /* State */ foldStatementChar(/* State */ state, /* char */ c)/* {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -377,6 +396,6 @@ Iterator</* T */> iter(/*  */)/* ; */
             return appended;
         }
     } */
-/* private */ /* String */ generatePlaceholder(/* String input */)/* {
+/* private */ /* String */ generatePlaceholder(/* String */ input)/* {
         return "/* " + input + " */";
     } */
