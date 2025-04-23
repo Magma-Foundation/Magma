@@ -26,7 +26,22 @@
         this.depth--;
         return this;
     }
-}
+
+    private State append(char c) {
+        this.buffer.append(c);
+        return this;
+    }
+
+    private State advance() {
+        this.segments.add(this.buffer.toString());
+        this.buffer = new StringBuilder();
+        return this;
+    }
+
+    public boolean isShallow() {
+        return this.depth == 1;
+    }
+} *//* 
 
 void main() {
     try {
@@ -39,7 +54,7 @@ void main() {
         //noinspection CallToPrintStackTrace
         e.printStackTrace();
     }
-}
+} *//* 
 
 private String compileRoot(String input) {
     var segments = this.divide(input, new State()).segments;
@@ -50,7 +65,7 @@ private String compileRoot(String input) {
     }
 
     return output.toString();
-}
+} *//* 
 
 private State divide(String input, State state) {
     var current = state;
@@ -58,36 +73,28 @@ private State divide(String input, State state) {
         var c = input.charAt(i);
         current = this.foldStatementChar(current, c);
     }
-    return this.advance(current);
-}
+    return current.advance();
+} *//* 
 
 private State foldStatementChar(State state, char c) {
-    var appended = this.append(state, c);
+    var appended = state.append(c);
     if (c == ';' && appended.isLevel()) {
-        return this.advance(appended);
+        return appended.advance();
     }
+    if (c == '} *//* ' && appended.isShallow()) {
+        return appended.advance().exit();
+    } *//* 
     if (c == '{') {
         return appended.enter();
     }
-    if (c == '}') {
+    if (c == '} *//* ') {
         return appended.exit();
-    }
+    } *//* 
     else {
         return appended;
-    }
-}
-
-private State append(State state, char c) {
-    state.buffer.append(c);
-    return state;
-}
-
-private State advance(State state) {
-    state.segments.add(state.buffer.toString());
-    state.buffer = new StringBuilder();
-    return state;
+    } *//* 
 }
 
 private String generatePlaceholder(String input) {
-    return "/* " + input + " */";
+    return "/* " + input + " */"; *//* 
 } */
