@@ -267,20 +267,9 @@ public class Main {
                 .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
-                .or(() -> compileInitialization(input))
+                .or(() -> compileAssigner(input))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> Optional.of(generatePlaceholder(input)));
-    }
-
-    private static Optional<String> compileInitialization(String input) {
-        int valueSeparator = input.indexOf("=");
-        if (valueSeparator < 0) {
-            return Optional.empty();
-        }
-
-        return compileDefinition(input.substring(0, valueSeparator))
-                .flatMap(Main::generateDefinition)
-                .map(Main::formatStatement);
     }
 
     private static Optional<String> generateDefinition(Node node) {
@@ -568,20 +557,31 @@ public class Main {
             return Optional.of("return " + compileValue(slice));
         }
 
+        Optional<String> destination = compileAssigner(stripped);
+        if (destination.isPresent()) {
+            return destination;
+        }
+
         Optional<String> maybeInvokable = compileInvokable(stripped);
         if (maybeInvokable.isPresent()) {
             return maybeInvokable;
         }
 
-        int valueSeparator = stripped.indexOf("=");
-        if (valueSeparator >= 0) {
-            String destination = stripped.substring(0, valueSeparator).strip();
-            String source = stripped.substring(valueSeparator + "=".length()).strip();
-
-            return Optional.of(compileValue(destination) + " = " + compileValue(source));
-        }
-
         return Optional.of(generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileAssigner(String stripped) {
+        int valueSeparator = stripped.indexOf("=");
+        if (valueSeparator < 0) {
+            return Optional.empty();
+        }
+        String destination = stripped.substring(0, valueSeparator).strip();
+        String source = stripped.substring(valueSeparator + "=".length()).strip();
+        String newDestination = compileDefinition(destination)
+                .flatMap(Main::generateDefinition)
+                .orElseGet(() -> compileValue(destination));
+
+        return Optional.of(newDestination + " = " + compileValue(source));
     }
 
     private static String compileValue(String input) {
