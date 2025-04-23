@@ -67,7 +67,8 @@ private String compileRootSegment(String input0) {
     var rules = List.<Function<String, Option<String>>>of(
             input -> this.compileStructured(input, "interface "),
             input -> this.compileStructured(input, "record "),
-            input -> this.compileStructured(input, "class ")
+            input -> this.compileStructured(input, "class "),
+            this::compileMethod
     );
 
     for (var rule : rules) {
@@ -77,6 +78,23 @@ private String compileRootSegment(String input0) {
     }
 
     return this.generatePlaceholder(input0);
+}
+
+private Option<String> compileMethod(String input) {
+    var paramStart = input.indexOf("(");
+    if (paramStart >= 0) {
+        var definition = input.substring(0, paramStart).strip();
+        var withParams = input.substring(paramStart + "(".length());
+
+        var paramEnd = withParams.indexOf(")");
+        if (paramEnd >= 0) {
+            var params = withParams.substring(0, paramEnd).strip();
+            var body = withParams.substring(paramEnd + ")".length()).strip();
+            return new Some<>(this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(body) + "\n");
+        }
+    }
+
+    return new None<>();
 }
 
 private Option<String> compileStructured(String input, String infix) {
