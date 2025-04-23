@@ -50,13 +50,13 @@ void advance(struct State this){
 	this.buffer = "";
 }
 void exit(struct State this){
-	this.depth = /* this.depth - 1 */;
+	this.depth = this.depth - 1;
 }
 void enter(struct State this){
-	this.depth = /* this.depth + 1 */;
+	this.depth = this.depth + 1;
 }
 void append(struct State this, struct char c){
-	this.buffer = /* this.buffer + c */;
+	this.buffer = this.buffer + c;
 }
 void __main__(/* String[] */ args){
 	/* try {
@@ -79,7 +79,7 @@ char* compile(char* input){
 	/* String output = compileAllStatements */(input, /* Main::compileRootSegment).orElse("" */);
 	/* String joinedStructs = String */.join("", structs);
 	/* String joinedMethods = String */.join("", methods);
-	return /* output + joinedStructs + joinedMethods */;
+	return output + joinedStructs + joinedMethods;
 }
 Optional<char*> compileAllStatements(char* input, /*  Function<String */, Optional</* String> */> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
@@ -89,7 +89,7 @@ Optional<char*> compileAll(char* input, /*
             Function<String */, Optional</* String> */> compiler, /* 
             BiFunction<String */, /*  String */, /* String> */ merger){
 	return parseAll(input, folder, /* compiler)
-                .map(output -> generateAll(merger */, /* output) */);
+                .map(output */ - /* > generateAll(merger */, /* output) */);
 }
 Optional<List<char*>> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, Optional</* String> */> compiler){
 	/* State state = State */.createInitial();
@@ -139,7 +139,7 @@ char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, 
 	return cache;
 }
 char* mergeStatements(char* output, char* compiled){
-	return /* output + compiled */;
+	return output + compiled;
 }
 struct State foldStatementChar(struct State state, struct char c){
 	state.append(c);
@@ -164,7 +164,7 @@ Optional<char*> compileRootSegment(char* input){
 	/* if (input.isBlank()) {
             return Optional.of("");
         } */
-	return compileClass(/* input) */.or(/* () -> Optional.of(generatePlaceholder(input.strip()) + "\n" */));
+	return compileClass(/* input) */.or((/* ) */ - /* > Optional */.of(/* generatePlaceholder(input.strip( */)) + "\n"));
 }
 Optional<char*> compileClass(char* input){
 	return compileStructured(input, "class ");
@@ -174,7 +174,7 @@ Optional<char*> compileStructured(char* input, char* infix){
 	/* if (classIndex < 0) {
             return Optional.empty();
         } */
-	/* String afterKeyword = input */.substring(/* classIndex + infix */.length());
+	/* String afterKeyword = input */.substring(classIndex + infix.length());
 	/* int contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return Optional.empty();
@@ -230,13 +230,10 @@ Optional<char*> compileStructured(char* input, char* infix){
 	/* ) */;
 }
 Optional<char*> compileClassSegment(char* input, char* structName){
-	return compileWhitespace(/* input)
-                .or(() -> compileClass(input))
-                .or(() -> compileStructured(input */, /* "interface "))
-                .or(() -> compileStructured(input */, /* "record "))
-                .or(() -> compileMethod(input */, /* structName)) */.or((/* ) -> compileInitialization(input))
-                .or(() -> compileDefinitionStatement(input))
-                .or(() -> Optional.of(generatePlaceholder(input */)));
+	return compileWhitespace(/* input) */.or(/* ( */) - /* > compileClass */(/* input))
+                .or(( */) - /* > compileStructured(input */, /* "interface ")) */.or(/* ( */) - /* > compileStructured(input */, /* "record ")) */.or(/* ( */) - /* > compileMethod(input */, /* structName)) */.or((/* ) */ - /* > compileInitialization */(/* input))
+                .or(( */) - /* > compileDefinitionStatement */(/* input))
+                .or(( */) - /* > Optional.of(generatePlaceholder(input */)));
 }
 Optional<char*> compileInitialization(char* input){
 	/* int valueSeparator = input */.indexOf("=");
@@ -267,7 +264,7 @@ Optional<char*> compileDefinitionStatement(char* input){
 	/* ")) {
             return Optional.empty();
         } */
-	/* String slice */ = /* stripped.substring(0, stripped.length() - " */;
+	/* String slice */ = stripped.substring(0, /* stripped.length( */) - ";
 	".length(/* ) */);
 	return compileDefinition(/* slice)
                 .flatMap(Main::generateDefinition)
@@ -347,8 +344,8 @@ char* generateParams(List<char*> output){
 	return generateAll(/* Main::mergeValues */, output);
 }
 Optional<char*> compileParam(char* param){
-	return compileWhitespace(/* param) */.or((/* ) -> compileDefinition(param).flatMap(Main::generateDefinition))
-                .or(() -> Optional.of(generatePlaceholder(param */)));
+	return compileWhitespace(/* param) */.or((/* ) */ - /* > compileDefinition */(/* param).flatMap(Main::generateDefinition))
+                .or(( */) - /* > Optional.of(generatePlaceholder(param */)));
 }
 Optional<List<char*>> parseAllValues(char* inputParams, /*  Function<String */, Optional</* String> */> compiler){
 	return parseAll(inputParams, /* Main::foldValueChar */, compiler);
@@ -404,7 +401,7 @@ char* mergeValues(char* cache, char* element){
 	/* if (cache.isEmpty()) {
             return element;
         } */
-	return /* cache + ", " + element */;
+	return cache + ", " + element;
 }
 Optional<struct Node> compileDefinition(char* input){
 	/* String stripped = input */.strip();
@@ -413,7 +410,7 @@ Optional<struct Node> compileDefinition(char* input){
             return Optional.empty();
         } */
 	/* String beforeName = stripped */.substring(0, /* nameSeparator).strip( */);
-	/* String oldName = stripped */.substring(/* nameSeparator + " ".length()).strip( */);
+	/* String oldName = stripped */.substring(nameSeparator + /* " ".length()).strip( */);
 	/* if (!isSymbol(oldName)) {
             return Optional.empty();
         } */
@@ -472,8 +469,7 @@ Optional<char*> compileType(char* type){
 	return Optional.of(generatePlaceholder(stripped));
 }
 Optional<char*> compileStatementOrBlock(char* input){
-	return compileWhitespace(/* input) */.or((/* ) -> compileStatement */(/* input))
-                .or(() -> Optional.of("\n\t" + generatePlaceholder(input.strip( */))));
+	return compileWhitespace(/* input) */.or((/* ) */ - /* > compileStatement */(/* input)) */.or(/* ( */) - /* > Optional.of("\n\t" */ + /* generatePlaceholder(input.strip( */))));
 }
 Optional<char*> compileStatement(char* input){
 	/* String stripped = input */.strip();
@@ -518,12 +514,6 @@ char* compileValue(char* input){
 	/* if (maybeInvokable.isPresent()) {
             return maybeInvokable.get();
         } */
-	/* int equalsIndex = stripped */.indexOf("==");
-	/* if (equalsIndex >= 0) {
-            String left = stripped.substring(0, equalsIndex);
-            String right = stripped.substring(equalsIndex + "==".length());
-            return compileValue(left) + " == " + compileValue(right);
-        } */
 	/* int lastSeparator = stripped */.lastIndexOf(".");
 	/* if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
@@ -532,7 +522,16 @@ char* compileValue(char* input){
                 return compileValue(parent) + "." + property;
             }
         } */
-	return generatePlaceholder(stripped);
+	return compileOperator(stripped, " == /* ") */.or(/* ( */) - /* > compileOperator(stripped */, " + /* ")) */.or(/* ( */) - /* > compileOperator(stripped */, " - /* ")) */.orElseGet(() - /* > generatePlaceholder(stripped */));
+}
+Optional<char*> compileOperator(char* input, char* operator){
+	/* int equalsIndex = input */.indexOf(operator);
+	/* if (equalsIndex < 0) {
+            return Optional.empty();
+        } */
+	/* String left = input */.substring(0, equalsIndex);
+	/* String right = input */.substring(equalsIndex + operator.length());
+	return Optional.of(compileValue(/* left) */ + " " + operator + " " + /* compileValue(right */));
 }
 Optional<char*> compileInvokable(char* input){
 	/* String stripped = input */.strip();
@@ -560,7 +559,7 @@ Optional<char*> compileInvokable(char* input){
 	return Optional.empty();
 }
 Optional<char*> generateInvocation(char* caller, char* arguments){
-	return Optional.of(/* caller + "(" + arguments + ")" */);
+	return Optional.of(caller + "(" + arguments + ")");
 }
 int isNumber(char* input){
 	/* for (int i */ = 0;

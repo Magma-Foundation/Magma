@@ -584,13 +584,6 @@ public class Main {
             return maybeInvokable.get();
         }
 
-        int equalsIndex = stripped.indexOf("==");
-        if (equalsIndex >= 0) {
-            String left = stripped.substring(0, equalsIndex);
-            String right = stripped.substring(equalsIndex + "==".length());
-            return compileValue(left) + " == " + compileValue(right);
-        }
-
         int lastSeparator = stripped.lastIndexOf(".");
         if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
@@ -600,7 +593,21 @@ public class Main {
             }
         }
 
-        return generatePlaceholder(stripped);
+        return compileOperator(stripped, "==")
+                .or(() -> compileOperator(stripped, "+"))
+                .or(() -> compileOperator(stripped, "-"))
+                .orElseGet(() -> generatePlaceholder(stripped));
+
+    }
+
+    private static Optional<String> compileOperator(String input, String operator) {
+        int equalsIndex = input.indexOf(operator);
+        if (equalsIndex < 0) {
+            return Optional.empty();
+        }
+        String left = input.substring(0, equalsIndex);
+        String right = input.substring(equalsIndex + operator.length());
+        return Optional.of(compileValue(left) + " " + operator + " " + compileValue(right));
     }
 
     private static Optional<String> compileInvokable(String input) {
