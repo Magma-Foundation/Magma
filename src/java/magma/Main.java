@@ -751,6 +751,10 @@ class Main {
             return false;
         }
 
+        if (input.equals("private")) {
+            return false;
+        }
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {

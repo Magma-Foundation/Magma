@@ -105,7 +105,7 @@ char* generate_Parameter(Parameter this);
         public */ char* generate_Primitive implements Type(Primitive implements Type this){
 	return this.value;
 }
-private State_State(State this, List<char*> segments, StringBuilder buffer, int depth){
+/* private */ State_State(State this, List<char*> segments, StringBuilder buffer, int depth){
 	/* this.segments = segments; */
 	/* this.buffer = buffer; */
 	/* this.depth = depth; */
@@ -133,7 +133,7 @@ private State_State(State this, List<char*> segments, StringBuilder buffer, int 
 /* public */ int isShallow_State(State this){
 	return this.depth == 1;
 }
-private Joiner_Joiner(Joiner this){
+/* private */ Joiner_Joiner(Joiner this){
 	/* this("") */;
 }
 /* @Override
@@ -453,6 +453,9 @@ private Joiner_Joiner(Joiner this){
 }
 /* private static */ int isSymbol_Symbol(Symbol this, char* input){
 	if (Content[input=input.isEmpty](/*  */)){
+		return false;
+	}
+	if (Content[input=input.equals](/* "private" */)){
 		return false;
 	}
 	/* for */ /* (var */ i = /*  0 */;
