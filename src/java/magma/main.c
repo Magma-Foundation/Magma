@@ -74,6 +74,8 @@
 };
 /* private */struct Whitespace {
 };
+/* private */struct Invokable {
+};
 /*  */struct Main {
 };
 // Option<struct R>
@@ -93,6 +95,7 @@
 // Option<struct C>
 // Option<List<struct T>>
 // List<struct Type>
+// Option<struct Invokable>
 // Option<struct Whitespace>
 // Option<struct Defined>
 // Option<struct Definition>
@@ -300,22 +303,26 @@ struct private Joiner_Joiner(){
         public */ char* generate_Whitespace(){
 	return /* "" */;
 }
-/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Whitespace();
-/* private static final List<String> structs */ /* = */ Lists.emptyList_Whitespace();
-/* private static final List<String> methods */ /* = */ Lists.emptyList_Whitespace();
-/* private static Option<String> currentStruct = */ struct new None<>_Whitespace();
-/* private static */ char* generateAll_Whitespace(struct StringBuilder (*merger)(struct StringBuilder, char*), List<char*> parsed){
+/* private */ char* generate_Invokable(){
+	auto joined = Main.generateValues(this.args);
+	return this.beforeArgs + "(" + joined + ")";
+}
+/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Invokable();
+/* private static final List<String> structs */ /* = */ Lists.emptyList_Invokable();
+/* private static final List<String> methods */ /* = */ Lists.emptyList_Invokable();
+/* private static Option<String> currentStruct = */ struct new None<>_Invokable();
+/* private static */ char* generateAll_Invokable(struct StringBuilder (*merger)(struct StringBuilder, char*), List<char*> parsed){
 	return parsed.iter(/* )
                  */.fold(/* new StringBuilder( */), /* merger)
                  */.toString();
 }
-/* private static <T> */ Option<List<struct T>> parseAll_Whitespace(char* input, struct State (*folder)(struct State, struct Character), Option<struct T> (*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseAll_Invokable(char* input, struct State (*folder)(struct State, struct Character), Option<struct T> (*compiler)(char*)){
 	return Main.divideAll(input, /* folder)
                  */.iter(/* )
                  */.map(/* compiler)
                  */.collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll_Whitespace(char* input, struct State (*folder)(struct State, struct Character)){
+/* private static */ List<char*> divideAll_Invokable(char* input, struct State (*folder)(struct State, struct Character)){
 	auto current = struct State(/*  */);
 	auto queue = Iterator<>(struct RangeHead(input.length())).map(input::charAt).collect(new ListCollector<>());
 	while (queue.hasElements(/*  */)){
@@ -348,32 +355,32 @@ struct private Joiner_Joiner(){
 	}
 	return current.advance(/*  */).segments;
 }
-/* private static */ char* generateValues_Whitespace(List<char*> parserd){
+/* private static */ char* generateValues_Invokable(List<char*> parserd){
 	return Main.generateAll(/* Main::mergeValues */, parserd);
 }
-/* private static */ struct StringBuilder mergeValues_Whitespace(struct StringBuilder cache, char* element){
+/* private static */ struct StringBuilder mergeValues_Invokable(struct StringBuilder cache, char* element){
 	if (cache.isEmpty(/*  */)){
 		return cache.append(element);
 	}
 	return cache.append(/* ", ") */.append(element);
 }
-/* private static */ char* generatePlaceholder_Whitespace(char* input){
+/* private static */ char* generatePlaceholder_Invokable(char* input){
 	return /* "/* " + input + " */" */;
 }
-/* private static */ char* generateValuesFromNodes_Whitespace(List<struct Type> list){
+/* private static */ char* generateValuesFromNodes_Invokable(List<struct Type> list){
 	return list.iter(/* )
                  */.map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
-/* private static */ char* compileStatementOrBlock_Whitespace(char* input, int depth){
+/* private static */ char* compileStatementOrBlock_Invokable(char* input, int depth){
 	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
                  */.or(/* () */ -> /* compileStatement(input, Main::compileStatementValue, depth))
                 .or(() */ -> /* compileBlock(input, depth))
                 .orElseGet(() */ -> /* createIndent(depth) + generatePlaceholder(input */.strip()));
 }
-/* private static */ char* createIndent_Whitespace(int depth){
+/* private static */ char* createIndent_Invokable(int depth){
 	return /* "\n" + "\t" */.repeat(depth);
 }
-/* private static */ Option<char*> compileBlock_Whitespace(char* input, int depth){
+/* private static */ Option<char*> compileBlock_Invokable(char* input, int depth){
 	auto stripped = input.strip(/*  */);
 	if (stripped.endsWith(/* "}" */)){
 		auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - "}" */.length());
@@ -387,7 +394,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ char* compileBeforeBlock_Whitespace(char* input){
+/* private static */ char* compileBeforeBlock_Invokable(char* input){
 	if (input.strip(/* ) */.equals("else")){
 		return /* "else " */;
 	}
@@ -395,7 +402,7 @@ struct private Joiner_Joiner(){
                  */.or(/*  */(/* ) */ -> /* compileConditional(input, "while"))
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()));
 }
-/* private static */ Option<char*> compileConditional_Whitespace(char* input, char* prefix){
+/* private static */ Option<char*> compileConditional_Invokable(char* input, char* prefix){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(prefix)){
 		auto withoutKeyword = stripped.substring(prefix.length(/* ) */).strip();
@@ -406,7 +413,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<char*> compileStatementValue_Whitespace(char* input){
+/* private static */ Option<char*> compileStatementValue_Invokable(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "return " */)){
 		auto value = stripped.substring(/* "return " */.length(/*  */));
@@ -425,7 +432,7 @@ struct private Joiner_Joiner(){
 	}
 	return Some<>(generatePlaceholder(input));
 }
-/* private static */ char* compileValue_Whitespace(char* input){
+/* private static */ char* compileValue_Invokable(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "new " */)){
 		auto slice = stripped.substring(/* "new " */.length(/* ) */).strip();
@@ -453,10 +460,13 @@ struct private Joiner_Joiner(){
 	}
 	return generatePlaceholder(input);
 }
-/* private static */ Option<char*> compileInvocation_Whitespace(char* input){
+/* private static */ Option<char*> compileInvocation_Invokable(char* input){
 	return compileInvokable(input, /*  Main::compileValue */);
 }
-/* private static */ Option<char*> compileInvokable_Whitespace(char* slice, char* (*beforeArgsCompiler)(char*)){
+/* private static */ Option<char*> compileInvokable_Invokable(char* slice, char* (*beforeArgsCompiler)(char*)){
+	return getRecord(slice, /* beforeArgsCompiler) */.map(Invokable::generate);
+}
+/* private static */ Option<struct Invokable> getRecord_Invokable(char* slice, char* (*beforeArgsCompiler)(char*)){
 	if (/* !slice */.endsWith(/* ")" */)){
 		return None<>(/*  */);
 	}
@@ -467,18 +477,19 @@ struct private Joiner_Joiner(){
 	}
 	auto base = withoutEnd.substring(/* 0 */, argsStart);
 	auto args = withoutEnd.substring(/* argsStart + " */(/* " */.length());
-	auto newArgs = parseValues(args, /* value */ -> Some<>(/* compileValue(value)))
-                 */.map(Main::generateValues).orElse("");
-	auto generate = beforeArgsCompiler.apply(base);
-	return Some<>(/* generate + "(" + newArgs + ")" */);
+	/* return parseValues(args, value -> new Some<>(compileValue(value))).map(newArgs -> */{
+		auto generate = beforeArgsCompiler.apply(base);
+		return struct Invokable(generate, newArgs);
+	}
+	/* ) */;
 }
-/* private static */ char* compileConstructorCaller_Whitespace(char* base){
+/* private static */ char* compileConstructorCaller_Invokable(char* base){
 	if (parseAndModifyType(/* base) instanceof Some<Type>(var type */)){
 		return type.generate(/*  */);
 	}
 	return generatePlaceholder(base);
 }
-/* private static */ int isSymbol_Whitespace(char* input){
+/* private static */ int isSymbol_Invokable(char* input){
 	if (input.isEmpty(/*  */)){
 		return false;
 	}
@@ -493,13 +504,13 @@ struct private Joiner_Joiner(){
 	}
 	return true;
 }
-/* private static */ Option<struct Whitespace> parseWhitespace_Whitespace(char* input){
+/* private static */ Option<struct Whitespace> parseWhitespace_Invokable(char* input){
 	if (input.isBlank(/*  */)){
 		return Some<>(struct Whitespace(/*  */));
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<struct Defined> parseAndModifyDefinition_Whitespace(char* input){
+/* private static */ Option<struct Defined> parseAndModifyDefinition_Invokable(char* input){
 	/* return Main.parseDefinition(input).map(definition -> */{
 		if (definition.type instanceof Functional(/* var args */, /*  var base */)){
 			return struct FunctionalDefinition(definition.beforeType, base, definition.name, args);
@@ -508,7 +519,7 @@ struct private Joiner_Joiner(){
 	}
 	/* ) */;
 }
-/* private static */ Option<char*> compileStatement_Whitespace(char* input, Option<char*> (*compiler)(char*), int depth){
+/* private static */ Option<char*> compileStatement_Invokable(char* input, Option<char*> (*compiler)(char*), int depth){
 	auto stripped = input.strip(/*  */);
 	if (/* !stripped */.endsWith(/* ";" */)){
 		return None<>(/*  */);
@@ -516,13 +527,13 @@ struct private Joiner_Joiner(){
 	auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - ";" */.length());
 	return compiler.apply(/* withoutEnd) */.map(/* definition */ -> /*  generateStatement(definition, depth */));
 }
-/* private static */ char* generateStatement_Whitespace(char* definition, int depth){
+/* private static */ char* generateStatement_Invokable(char* definition, int depth){
 	return /* createIndent(depth) + definition + ";" */;
 }
-/* private static <T> */ Option<List<struct T>> parseValues_Whitespace(char* input, Option<struct T> (*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseValues_Invokable(char* input, Option<struct T> (*compiler)(char*)){
 	return Main.parseAll(input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ struct State foldValueChar_Whitespace(struct State state, struct char c){
+/* private static */ struct State foldValueChar_Invokable(struct State state, struct char c){
 	if (/* c == ',' && state */.isLevel(/*  */)){
 		return state.advance(/*  */);
 	}
@@ -535,7 +546,7 @@ struct private Joiner_Joiner(){
 	}
 	return appended;
 }
-/* private static */ Option<struct Definition> parseDefinition_Whitespace(char* input){
+/* private static */ Option<struct Definition> parseDefinition_Invokable(char* input){
 	auto stripped = input.strip(/*  */);
 	auto nameSeparator = stripped.lastIndexOf(/* " " */);
 	if (/* nameSeparator < 0 */){
@@ -554,7 +565,7 @@ struct private Joiner_Joiner(){
 	}
 	/*  */;
 }
-/* private static */ Option<int> findTypeSeparator_Whitespace(char* input){
+/* private static */ Option<int> findTypeSeparator_Invokable(char* input){
 	auto depth = /*  0 */;
 	/* for */ /* (var */ index = input.length() - 1;
 	struct index > = /*  0 */;
@@ -572,7 +583,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<struct Type> parseAndModifyType_Whitespace(char* input){
+/* private static */ Option<struct Type> parseAndModifyType_Invokable(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic generic */){
 			auto base = generic.base;
@@ -602,7 +613,7 @@ struct private Joiner_Joiner(){
 	}
 	/* ) */;
 }
-/* private static */ Option<struct Type> parseType_Whitespace(char* input){
+/* private static */ Option<struct Type> parseType_Invokable(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.equals(/* "public" */)){
 		return None<>(/*  */);
@@ -635,27 +646,27 @@ struct private Joiner_Joiner(){
 	}
 	return Some<>(struct Content(input));
 }
-/* private static */ Option<struct Type> parseGenericArgument_Whitespace(char* input1){
+/* private static */ Option<struct Type> parseGenericArgument_Invokable(char* input1){
 	return parseWhitespace(/* input1)
                  */.<Type>map(/* whitespace */ -> /* whitespace)
                 .or(() */ -> /*  parseAndModifyType(input1 */));
 }
-/* private static */ struct StringBuilder mergeStatements_Whitespace(struct StringBuilder stringBuilder, char* str){
+/* private static */ struct StringBuilder mergeStatements_Invokable(struct StringBuilder stringBuilder, char* str){
 	return stringBuilder.append(str);
 }
-/* private static */ char* compileStatementsOrBlocks_Whitespace(char* body, int depth){
+/* private static */ char* compileStatementsOrBlocks_Invokable(char* body, int depth){
 	return Main.compileStatements(body, /* segment */ -> /*  new Some<> */(/* compileStatementOrBlock(segment */, /*  depth + 1) */));
 }
-/* private static */ char* compileStatements_Whitespace(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ char* compileStatements_Invokable(char* input, Option<char*> (*compiler)(char*)){
 	return Main.parseStatements(input, /* compiler) */.map(/* Main::generateStatements */).orElse("");
 }
-/* private static */ Option<List<char*>> parseStatements_Whitespace(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ Option<List<char*>> parseStatements_Invokable(char* input, Option<char*> (*compiler)(char*)){
 	return Main.parseAll(input, /*  Main::foldStatementChar */, compiler);
 }
-/* private static */ char* generateStatements_Whitespace(List<char*> inner){
+/* private static */ char* generateStatements_Invokable(List<char*> inner){
 	return generateAll(/* Main::mergeStatements */, inner);
 }
-/* private static */ struct State foldStatementChar_Whitespace(struct State state, struct char c){
+/* private static */ struct State foldStatementChar_Invokable(struct State state, struct char c){
 	auto appended = state.append(c);
 	if (/* c == ';' && appended */.isLevel(/*  */)){
 		return appended.advance(/*  */);
@@ -674,10 +685,10 @@ struct private Joiner_Joiner(){
 		return appended;
 	}
 }
-/* private static */ Option<char*> compileDefinitionToString_Whitespace(char* input){
+/* private static */ Option<char*> compileDefinitionToString_Invokable(char* input){
 	return Main.parseAndModifyDefinition(/* input) */.map(Defined::generate);
 }
-struct void main_Whitespace(){
+struct void main_Invokable(){
 	/* try */{
 		auto source = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
 		auto input = Files.readString(source);
@@ -689,7 +700,7 @@ struct void main_Whitespace(){
             e.printStackTrace() */;
 	}
 }
-/* private */ char* compileRoot_Whitespace(char* input){
+/* private */ char* compileRoot_Invokable(char* input){
 	auto compiled = compileStatements(input, /* segment */ -> /*  new Some<> */(this.compileRootSegment(segment)));
 	auto joinedStructs = structs.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
 	auto joinedGenerics = generics.iter(/* )
@@ -699,14 +710,14 @@ struct void main_Whitespace(){
 	auto joinedMethods = methods.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
 	return /* compiled + joinedStructs + joinedGenerics + joinedMethods */;
 }
-/* private */ char* compileRootSegment_Whitespace(char* input){
+/* private */ char* compileRootSegment_Invokable(char* input){
 	return this.compileClass(/* input)
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()) + "\n");
 }
-/* private */ Option<char*> compileClass_Whitespace(char* input){
+/* private */ Option<char*> compileClass_Invokable(char* input){
 	return this.compileStructured(input, /*  "class " */);
 }
-/* private */ Option<char*> compileStructured_Whitespace(char* input, char* infix){
+/* private */ Option<char*> compileStructured_Invokable(char* input, char* infix){
 	auto classIndex = input.indexOf(infix);
 	if (/* classIndex < 0 */){
 		return None<>(/*  */);
@@ -737,7 +748,7 @@ struct void main_Whitespace(){
 	/* structs.add(generated) */;
 	return Some<>(/* "" */);
 }
-/* private */ char* compileStructuredSegment_Whitespace(char* input){
+/* private */ char* compileStructuredSegment_Invokable(char* input){
 	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
                 .or(() */ -> /* this.compileStructured(input, "interface "))
                 .or(() */ -> /* this.compileStructured(input, "enum "))
@@ -747,7 +758,7 @@ struct void main_Whitespace(){
                 .or(() */ -> /* this.compileDefinitionStatement(input))
                 .orElseGet(() */ -> /*  generatePlaceholder(input */));
 }
-/* private */ Option<char*> compileMethod_Whitespace(char* input){
+/* private */ Option<char*> compileMethod_Invokable(char* input){
 	auto paramStart = input.indexOf(/* "(" */);
 	if (/* paramStart >= 0 */){
 		auto inputDefinition = input.substring(/* 0 */, /* paramStart) */.strip();
@@ -787,11 +798,11 @@ struct void main_Whitespace(){
 	}
 	return None<>(/*  */);
 }
-/* private */ char* compileParam_Whitespace(char* param){
+/* private */ char* compileParam_Invokable(char* param){
 	return parseWhitespace(/* param) */.map(/* Whitespace::generate)
                 .or(() */ -> /* parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() */ -> /*  generatePlaceholder(param */));
 }
-/* private */ Option<char*> compileDefinitionStatement_Whitespace(char* input){
+/* private */ Option<char*> compileDefinitionStatement_Invokable(char* input){
 	return compileStatement(input, /*  Main::compileDefinitionToString */, /*  1 */);
 }

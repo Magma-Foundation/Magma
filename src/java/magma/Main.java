@@ -350,6 +350,13 @@ class Main {
         }
     }
 
+    private record Invokable(String beforeArgs, List<String> args) {
+        private String generate() {
+            var joined = Main.generateValues(this.args);
+            return this.beforeArgs + "(" + joined + ")";
+        }
+    }
+
     public static final List<Generic> generics = Lists.emptyList();
     private static final List<String> structs = Lists.emptyList();
     private static final List<String> methods = Lists.emptyList();
@@ -513,8 +520,9 @@ class Main {
         var stripped = input.strip();
         if (stripped.startsWith("new ")) {
             var slice = stripped.substring("new ".length()).strip();
-            if (compileInvokable(slice, Main::compileConstructorCaller) instanceof Some(var value)) {
-                return value;
+            var parsed = parseInvokable(slice, Main::compileConstructorCaller);
+            if (parsed instanceof Some(var invokable)) {
+                return invokable.generate();
             }
         }
 
@@ -544,10 +552,10 @@ class Main {
     }
 
     private static Option<String> compileInvocation(String input) {
-        return compileInvokable(input, Main::compileValue);
+        return parseInvokable(input, Main::compileValue).map(Invokable::generate);
     }
 
-    private static Option<String> compileInvokable(String slice, Function<String, String> beforeArgsCompiler) {
+    private static Option<Invokable> parseInvokable(String slice, Function<String, String> beforeArgsCompiler) {
         if (!slice.endsWith(")")) {
             return new None<>();
         }
@@ -558,12 +566,10 @@ class Main {
         }
         var base = withoutEnd.substring(0, argsStart);
         var args = withoutEnd.substring(argsStart + "(".length());
-        var newArgs = parseValues(args, value -> new Some<>(compileValue(value)))
-                .map(Main::generateValues)
-                .orElse("");
-
-        var generate = beforeArgsCompiler.apply(base);
-        return new Some<>(generate + "(" + newArgs + ")");
+        return parseValues(args, value -> new Some<>(compileValue(value))).map(newArgs -> {
+            var generate = beforeArgsCompiler.apply(base);
+            return new Invokable(generate, newArgs);
+        });
     }
 
     private static String compileConstructorCaller(String base) {
