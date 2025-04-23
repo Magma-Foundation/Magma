@@ -457,6 +457,11 @@ class Main {
             return new Some<>("return " + compileValue(value));
         }
 
+        if (stripped.endsWith("++")) {
+            var slice = stripped.substring(0, stripped.length() - "++".length());
+            return new Some<>(compileValue(slice) + "++");
+        }
+
         var valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
             var definition = stripped.substring(0, valueSeparator);

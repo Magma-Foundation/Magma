@@ -101,7 +101,7 @@ char* generate();
         public */ Option<int> next(){
 	if (this.counter < this.length){
 		auto value = this.counter;
-		/* this.counter++ */;
+		this.counter++;
 		return /* new Some<>(value) */;
 	}
 	else {
@@ -134,7 +134,7 @@ char* generate();
 	return this.depth == 0;
 }
 /* public */ /* State */ enter(){
-	/* this.depth++ */;
+	this.depth++;
 	return this;
 }
 /* public */ /* State */ exit(){
@@ -356,6 +356,10 @@ char* generate();
 		auto value = stripped.substring("return ".length());
 		return /* new Some<>("return " + compileValue(value)) */;
 	}
+	if (stripped.endsWith("++")){
+		auto slice = stripped.substring(0, stripped.length() - "++".length());
+		return /* new Some<>(compileValue(slice) + "++") */;
+	}
 	auto valueSeparator = stripped.indexOf("=");
 	if (/* valueSeparator >= 0 */){
 		auto definition = stripped.substring(0, valueSeparator);
@@ -463,7 +467,7 @@ char* generate();
 			return /* new Some<>(index) */;
 		}
 		if (/* c == '>' */){
-			/* depth++ */;
+			depth++;
 		}
 		if (/* c == '<' */){
 			/* depth-- */;
