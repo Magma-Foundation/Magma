@@ -566,6 +566,14 @@ public class Main {
             return stripped;
         }
 
+        if (isNumber(stripped)) {
+            return stripped;
+        }
+
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
         if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentStart = withoutEnd.indexOf("(");
@@ -582,6 +590,13 @@ public class Main {
             }
         }
 
+        int equalsIndex = stripped.indexOf("==");
+        if (equalsIndex >= 0) {
+            String left = stripped.substring(0, equalsIndex);
+            String right = stripped.substring(equalsIndex + "==".length());
+            return compileValue(left) + " == " + compileValue(right);
+        }
+
         int lastSeparator = stripped.lastIndexOf(".");
         if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
@@ -589,14 +604,6 @@ public class Main {
             if (isSymbol(property)) {
                 return compileValue(parent) + "." + property;
             }
-        }
-
-        if (isNumber(stripped)) {
-            return stripped;
-        }
-
-        if (isSymbol(stripped)) {
-            return stripped;
         }
 
         return generatePlaceholder(stripped);

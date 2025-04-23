@@ -40,10 +40,10 @@ struct State createInitial(){
 	return new_State(new_ArrayList<>(), "", 0);
 }
 int isLevel(struct State this){
-	return /* this.depth == 0 */;
+	return this.depth == 0;
 }
 int isShallow(struct State this){
-	return /* this.depth == 1 */;
+	return this.depth == 1;
 }
 void advance(struct State this){
 	/* this.segments.add(this.buffer) */;
@@ -508,6 +508,12 @@ char* compileValue(char* input){
 	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return stripped;
         } */
+	/* if (isNumber(stripped)) {
+            return stripped;
+        } */
+	/* if (isSymbol(stripped)) {
+            return stripped;
+        } */
 	/* if (stripped.endsWith(")")) {
             String withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             int argumentStart = withoutEnd.indexOf("(");
@@ -523,6 +529,12 @@ char* compileValue(char* input){
                 }
             }
         } */
+	/* int equalsIndex */ = /* stripped.indexOf(" */ == /* ") */;
+	/* if (equalsIndex >= 0) {
+            String left = stripped.substring(0, equalsIndex);
+            String right = stripped.substring(equalsIndex + "==".length());
+            return compileValue(left) + " == " + compileValue(right);
+        } */
 	/* int lastSeparator */ = /* stripped.lastIndexOf(".") */;
 	/* if (lastSeparator >= 0) {
             String parent = stripped.substring(0, lastSeparator);
@@ -530,12 +542,6 @@ char* compileValue(char* input){
             if (isSymbol(property)) {
                 return compileValue(parent) + "." + property;
             }
-        } */
-	/* if (isNumber(stripped)) {
-            return stripped;
-        } */
-	/* if (isSymbol(stripped)) {
-            return stripped;
         } */
 	return /* generatePlaceholder(stripped) */;
 }
