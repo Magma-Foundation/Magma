@@ -1,4 +1,4 @@
-/* private static class State {
+/* private static  */struct /* State {
     private final List<String> segments;
     private StringBuilder buffer;
     private int depth;
@@ -61,10 +61,21 @@ private String compileRoot(String input) {
 
     var output = new StringBuilder();
     for (var segment : segments) {
-        output.append(this.generatePlaceholder(segment));
+        output.append(this.compileRootSegment(segment));
     }
 
     return output.toString();
+} *//* 
+
+private String compileRootSegment(String input) {
+    var classIndex = input.indexOf(" */struct /* ");
+    if (classIndex >= 0) {
+        var left = input.substring(0, classIndex);
+        var right = input.substring(classIndex + "class ".length());
+        return this.generatePlaceholder(left) + "struct " + this.generatePlaceholder(right);
+    }
+
+    return this.generatePlaceholder(input);
 } *//* 
 
 private State divide(String input, State state) {
