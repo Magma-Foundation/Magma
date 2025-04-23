@@ -576,16 +576,16 @@ public class Main {
     }
 
     private static State foldValueChar(State state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             state.advance();
             return state;
         }
 
         state.append(c);
-        if (c == '(') {
+        if (c == '(' || c == '<') {
             state.enter();
         }
-        else if (c == ')') {
+        else if (c == ')' || c == '>') {
             state.exit();
         }
         return state;
@@ -619,25 +619,45 @@ public class Main {
             newName = oldName;
         }
 
-        int typeSeparator = beforeName.lastIndexOf(" ");
+        return switch (findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> new None<>();
+            case Some<Integer>(int typeSeparator) -> {
+                List<String> modifiers;
+                String type;
+                if (typeSeparator >= 0) {
+                    String modifiersString = beforeName.substring(0, typeSeparator).strip();
+                    type = beforeName.substring(typeSeparator + " ".length());
 
-        List<String> modifiers;
-        String type;
-        if (typeSeparator >= 0) {
-            String modifiersString = beforeName.substring(0, typeSeparator).strip();
-            type = beforeName.substring(typeSeparator + " ".length());
+                    modifiers = Arrays.asList(modifiersString.split(" "));
+                }
+                else {
+                    modifiers = Collections.emptyList();
+                    type = beforeName;
+                }
 
-            modifiers = Arrays.asList(modifiersString.split(" "));
+                yield compileType(type).flatMap(outputType -> {
+                    String outputDefinition = outputType + " " + newName;
+                    return new Some<>(new Definition(modifiers, outputDefinition));
+                });
+            }
+        };
+    }
+
+    private static Optional<Integer> findTypeSeparator(String input) {
+        int depth = 0;
+        for (int i = input.length() - 1; i >= 0; i--) {
+            char c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(i);
+            }
+            else if (c == '>') {
+                depth++;
+            }
+            else if (c == '<') {
+                depth--;
+            }
         }
-        else {
-            modifiers = Collections.emptyList();
-            type = beforeName;
-        }
-
-        return compileType(type).flatMap(outputType -> {
-            String outputDefinition = outputType + " " + newName;
-            return new Some<>(new Definition(modifiers, outputDefinition));
-        });
+        return new None<>();
     }
 
     private static Optional<String> compileType(String type) {
