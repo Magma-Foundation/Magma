@@ -10,48 +10,49 @@
 }
 /* static final */struct None<T> implements Option<T> {/*  */
 }
-/* private static */struct State {/* private final List<String> segments;
-    private StringBuilder buffer;
-    private int depth;
+/* private static */struct State {
+	/* private final List<String> */ segments;
+	/* private StringBuilder */ buffer;
+	/* private int */ depth;/* 
 
     private State(List<String> segments, StringBuilder buffer, int depth) {
         this.segments = segments;
         this.buffer = buffer;
         this.depth = depth;
-    }
+    } *//* 
 
     public State() {
         this(new ArrayList<>(), new StringBuilder(), 0);
-    }
+    } *//* 
 
     private State append(char c) {
         this.buffer.append(c);
         return this;
-    }
+    } *//* 
 
     private boolean isLevel() {
         return this.depth == 0;
-    }
+    } *//* 
 
     private boolean isShallow() {
         return this.depth == 1;
-    }
+    } *//* 
 
     private State enter() {
         this.depth = this.depth + 1;
         return this;
-    }
+    } *//* 
 
     private State exit() {
         this.depth = this.depth - 1;
         return this;
-    }
+    } *//* 
 
     private State advance() {
         this.segments.add(this.buffer.toString());
         this.buffer = new StringBuilder();
         return this;
-    }
+    } *//* 
  */
 }
 void main(/*  */){
@@ -139,6 +140,17 @@ private String compileRootSegment(String input0) {
 /* 
 
     return this.generatePlaceholder(input0); *//* 
+}
+
+private Option<String> compileField(String input) {
+    var stripped = input.strip(); *//* 
+    if (stripped.endsWith("; *//* ")) {
+        var content = stripped.substring(0, stripped.length() - ";".length());
+        return new Some<>("\n\t" + this.compileDefinition(content) + ";");
+    } *//* 
+    else {
+        return new None<>();
+    } *//* 
 }
 
 private Option<String> compileMethod(String input) {
@@ -280,7 +292,16 @@ private Option<String> compileStructured(String input, String infix) {
 
     var content = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
     return new Some<>(this.generatePlaceholder(beforeKeyword) + "struct " +
-            beforeContent + " {" + this.generatePlaceholder(content) + "\n} *//* \n"); *//* 
+            beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n} *//* \n"); *//* 
+}
+
+private String compileClassMember(String input) {
+    var field = this.compileField(input); *//* 
+    if (field instanceof Some(var value)) {
+        return value;
+    } *//* 
+
+    return this.generatePlaceholder(input); *//* 
 }
 
 private String generatePlaceholder(String input) {

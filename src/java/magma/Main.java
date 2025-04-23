@@ -148,6 +148,17 @@ private String compileRootSegment(String input0) {
     return this.generatePlaceholder(input0);
 }
 
+private Option<String> compileDefinitionStatement(String input) {
+    var stripped = input.strip();
+    if (stripped.endsWith(";")) {
+        var content = stripped.substring(0, stripped.length() - ";".length());
+        return new Some<>("\n\t" + this.compileDefinition(content) + ";");
+    }
+    else {
+        return new None<>();
+    }
+}
+
 private Option<String> compileMethod(String input) {
     var paramStart = input.indexOf("(");
     if (paramStart >= 0) {
@@ -283,7 +294,16 @@ private Option<String> compileStructured(String input, String infix) {
 
     var content = withEnd.substring(0, withEnd.length() - "}".length());
     return new Some<>(this.generatePlaceholder(beforeKeyword) + "struct " +
-            beforeContent + " {" + this.generatePlaceholder(content) + "\n}\n");
+            beforeContent + " {" + this.compileAll(content, this::foldStatementChar, this::compileClassMember, this::mergeStatements) + "\n}\n");
+}
+
+private String compileClassMember(String input) {
+    var field = this.compileDefinitionStatement(input);
+    if (field instanceof Some(var value)) {
+        return value;
+    }
+
+    return this.generatePlaceholder(input);
 }
 
 private String generatePlaceholder(String input) {
