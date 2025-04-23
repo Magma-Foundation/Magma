@@ -28,7 +28,7 @@ class Main {
     sealed interface Result<T, X> permits Ok, Err {
     }
 
-    sealed interface Option<T> permits Some, None {
+    public sealed interface Option<T> permits Some, None {
         T orElse(T other);
     }
 
@@ -54,7 +54,7 @@ class Main {
         <C> C collect(Collector<T, C> collector);
     }
 
-    interface Collector<T, C> {
+    public interface Collector<T, C> {
         C createInitial();
 
         C fold(C current, T element);
@@ -64,10 +64,18 @@ class Main {
         Option<T> next();
     }
 
-    interface Type {
-        String generate();
+    interface Type extends Node {
+        default Type flattenType() {
+            return this;
+        }
+    }
 
-        default Type flatten() {
+    interface Node {
+        String generate();
+    }
+
+    interface Definable extends Node {
+        default Definable flattenDefinable() {
             return this;
         }
     }
@@ -161,9 +169,7 @@ class Main {
                     case None<T> _ -> {
                         return current;
                     }
-                    case Some(var value) -> {
-                        current = folder.apply(current, value);
-                    }
+                    case Some(var value) -> current = folder.apply(current, value);
                 }
             }
         }
@@ -277,7 +283,7 @@ class Main {
         }
 
         @Override
-        public Type flatten() {
+        public Type flattenType() {
             if (this.base.equals("Function")) {
                 return new Functional(Lists.of(this.arguments.get(0)), this.arguments.get(1));
             }
@@ -290,7 +296,7 @@ class Main {
         }
     }
 
-    private record Content(String input) implements Type {
+    private record Content(String input) implements Type, Definable {
         private static String generatePlaceholder(String input) {
             return "/* " + input + " */";
         }
@@ -323,6 +329,34 @@ class Main {
         @Override
         public List<T> fold(List<T> current, T element) {
             return current.add(element);
+        }
+    }
+
+    private record FunctionalDefinition(Functional functional, String name) implements Definable {
+        @Override
+        public String generate() {
+            var joined = this.functional.typeParams
+                    .iter()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.functional.returns.generate() + " (*" + this.name + ")(" + joined + ")";
+        }
+    }
+
+    private record Definition(Type parsed, String name) implements Definable {
+        @Override
+        public String generate() {
+            return this.parsed().generate() + " " + this.name();
+        }
+
+        @Override
+        public Definable flattenDefinable() {
+            if (this.parsed instanceof Functional functional) {
+                return new FunctionalDefinition(functional, this.name);
+            }
+            return this;
         }
     }
 
@@ -462,10 +496,16 @@ class Main {
     }
 
     private String compileDefinition(String input) {
+        return this.parseDefinition(input)
+                .flattenDefinable()
+                .generate();
+    }
+
+    private Definable parseDefinition(String input) {
         var stripped = input.strip();
         var space = stripped.lastIndexOf(" ");
         if (space < 0) {
-            return Content.generatePlaceholder(stripped);
+            return new Content(stripped);
         }
 
         var beforeName = stripped.substring(0, space);
@@ -475,8 +515,8 @@ class Main {
         };
 
         var name = stripped.substring(space + " ".length());
-        var parsed = this.parseType(type).flatten();
-        return parsed.generate() + " " + name;
+        var parsed = this.parseType(type).flattenType();
+        return new Definition(parsed, name);
     }
 
     private Option<Integer> findTypeSeparator(String input) {
@@ -511,7 +551,7 @@ class Main {
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flatten());
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flattenType());
                 return new Generic(base, parsed);
             }
         }

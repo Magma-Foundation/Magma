@@ -1,6 +1,6 @@
 /* sealed */struct Result<T, X> permits Ok, Err {/*  */
 }
-/* sealed */struct Option<T> permits Some, None {
+/* public sealed */struct Option<T> permits Some, None {
 	/* T */ orElse(/* T */ other);/* 
      */
 }
@@ -11,15 +11,15 @@
      */
 }
 /* public */struct Iterator<T> {
-	</* R */> map(/*  R */ (*)(/* T */) mapper);
-	</* R */> fold(/* R */ initial, /*  R */ (*)(/* R */, /*  T */) folder);
-	</* R */> flatMap(Iterator</* R */> (*)(/* T */) mapper);
+	</* R */> map(/*  R */ (*mapper)(/* T */));
+	</* R */> fold(/* R */ initial, /*  R */ (*folder)(/* R */, /*  T */));
+	</* R */> flatMap(Iterator</* R */> (*mapper)(/* T */));
 	Iterator</* T */> concat(Iterator</* T */> other);
 	Option</* T */> next(/*  */);
 	</* C */> collect(Collector</* T */, /*  C */> collector);/* 
      */
 }
-/*  */struct Collector<T, C> {
+/* public */struct Collector<T, C> {
 	/* C */ createInitial(/*  */);
 	/* C */ fold(/* C */ current, /* T */ element);/* 
      */
@@ -28,8 +28,18 @@
 	Option</* T */> next(/*  */);/* 
      */
 }
-/*  */struct Type {
-	/* String */ generate(/*  */);/* default  */ flatten(/*  */){/* 
+/*  */struct Type extends Node {/* default  */ flattenType(/*  */){/* 
+            return this; *//* 
+         */
+}
+/* 
+     */
+}
+/*  */struct Node {
+	/* String */ generate(/*  */);/* 
+     */
+}
+/*  */struct Definable extends Node {/* default  */ flattenDefinable(/*  */){/* 
             return this; *//* 
          */
 }
@@ -110,7 +120,7 @@
      */
 }
 /* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* @Override
-  */ map(/*  R */ (*)(/* T */) mapper){/* 
+  */ map(/*  R */ (*mapper)(/* T */)){/* 
             return new HeadedIterator<>(() -> switch (this.head.next()) {
                 case None<T> _ -> new None<>();
                 case Some<T>(T value) -> new Some<>(mapper.apply(value));
@@ -118,22 +128,20 @@
          */
 }
 /* @Override
-  */ fold(/* R */ initial, /*  R */ (*)(/* R */, /*  T */) folder){
+  */ fold(/* R */ initial, /*  R */ (*folder)(/* R */, /*  T */)){
 	/* var */ current = initial;/* 
             while (true) {
                 switch (this.head.next()) {
                     case None<T> _ -> {
                         return current;
                     }
-                    case Some(var value) -> {
-                        current = folder.apply(current, value);
-                    }
+                    case Some(var value) -> current = folder.apply(current, value);
                 }
             } *//* 
          */
 }
 /* @Override
-  */ flatMap(Iterator</* R */> (*)(/* T */) mapper){/* 
+  */ flatMap(Iterator</* R */> (*mapper)(/* T */)){/* 
             return this.map(mapper).fold(Iterators.empty(), Iterator::concat); *//* 
          */
 }
@@ -241,7 +249,7 @@
          */
 }
 /* @Override
-  */ flatten(/*  */){/* 
+  */ flattenType(/*  */){/* 
             if (this.base.equals("Function")) {
                 return new Functional(Lists.of(this.arguments.get(0)), this.arguments.get(1));
             } *//* 
@@ -256,7 +264,7 @@
 /* 
      */
 }
-/* private */struct Content(String input) implements Type {/* private  */ generatePlaceholder(/* String */ input){/* 
+/* private */struct Content(String input) implements Type, Definable {/* private  */ generatePlaceholder(/* String */ input){/* 
             return "/* " + input + " */"; *//* 
          */
 }
@@ -294,6 +302,34 @@
 /* 
      */
 }
+/* private */struct FunctionalDefinition(Functional functional, String name) implements Definable {/* @Override
+  */ generate(/*  */){
+	/* var */ joined = this.functional.typeParams.iter(/* )
+                     */.map(/* Node::generate */).collect(new Joiner(", "))
+                    .orElse("");/* 
+
+            return this.functional.returns.generate() + " (*" + this.name + ")(" + joined + ")"; *//* 
+         */
+}
+/* 
+     */
+}
+/* private */struct Definition(Type parsed, String name) implements Definable {/* @Override
+  */ generate(/*  */){/* 
+            return this.parsed().generate() + " " + this.name(); *//* 
+         */
+}
+/* @Override
+  */ flattenDefinable(/*  */){/* 
+            if (this.parsed instanceof Functional functional) {
+                return new FunctionalDefinition(functional, this.name);
+            } *//* 
+            return this; *//* 
+         */
+}
+/* 
+     */
+}
 /*  */struct Main {
 	/* enum  */ Void(/* "void" */);
 	/* public  */ Lists.empty(/*  */);void main(/*  */){
@@ -322,13 +358,13 @@
         return this.parseAll(input, this::foldStatementChar, this::compileRootSegment); *//* 
      */
 }
-/* private  */ generateAll(/*  StringBuilder */ (*)(/* StringBuilder */, /*  String */) merger, List</* String */> parsed){/* 
+/* private  */ generateAll(/*  StringBuilder */ (*merger)(/* StringBuilder */, /*  String */), List</* String */> parsed){/* 
         return parsed.iter()
                 .fold(new StringBuilder(), merger)
                 .toString(); *//* 
      */
 }
-/* private  */ parseAll(/* String */ input, /*  State */ (*)(/* State */, /*  Character */) folder, /*  T */ (*)(/* String */) compiler){/* 
+/* private  */ parseAll(/* String */ input, /*  State */ (*folder)(/* State */, /*  Character */), /*  T */ (*compiler)(/* String */)){/* 
         return this.divide(input, new State(), folder)
                 .iter()
                 .map(compiler)
@@ -339,7 +375,7 @@
         return output.append(compiled); *//* 
      */
 }
-/* private  */ divide(/* String */ input, /* State */ state, /*  State */ (*)(/* State */, /*  Character */) folder){
+/* private  */ divide(/* String */ input, /* State */ state, /*  State */ (*folder)(/* State */, /*  Character */)){
 	/* var */ current = state;
 	/* for  */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
             var c = input.charAt(i);
@@ -432,11 +468,17 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
 
      */
 }
-/* private  */ compileDefinition(/* String */ input){
+/* private  */ compileDefinition(/* String */ input){/* 
+        return this.parseDefinition(input)
+                .flattenDefinable()
+                .generate(); *//* 
+     */
+}
+/* private  */ parseDefinition(/* String */ input){
 	/* var */ stripped = input.strip();
 	/* var */ space = stripped.lastIndexOf(" ");/* 
         if (space < 0) {
-            return Content.generatePlaceholder(stripped);
+            return new Content(stripped);
         } */
 	/* var */ beforeName = stripped.substring(/* 0 */, space);/* 
         var type = switch (this.findTypeSeparator(beforeName)) {
@@ -444,8 +486,8 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             case Some<Integer>(var typeSeparator) -> beforeName.substring(0, typeSeparator + " ".length());
         } *//* ; */
 	/* var */ name = stripped.substring(/* space + " " */.length());
-	/* var */ parsed = this.parseType(/* type) */.flatten();/* 
-        return parsed.generate() + " " + name; *//* 
+	/* var */ parsed = this.parseType(/* type) */.flattenType();/* 
+        return new Definition(parsed, name); *//* 
      */
 }
 /* private  */ findTypeSeparator(/* String */ input){
@@ -480,7 +522,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flatten());
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flattenType());
                 return new Generic(base, parsed);
             }
         } *//* 
@@ -488,7 +530,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         return new Content(input); *//* 
      */
 }
-/* private  */ parseValues(/* String */ input, /*  T */ (*)(/* String */) compileType){/* 
+/* private  */ parseValues(/* String */ input, /*  T */ (*compileType)(/* String */)){/* 
         return this.parseAll(input, this::foldValueChar, compileType); *//* 
      */
 }
