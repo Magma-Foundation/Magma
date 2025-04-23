@@ -434,20 +434,25 @@ class Main {
     }
 
     private static String compileBeforeBlock(String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("if")) {
-            var withoutKeyword = stripped.substring("if".length()).strip();
-            if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")) {
-                var condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
-                return "if (" + compileValue(condition) + ")";
-            }
-        }
-
-        if (stripped.equals("else")) {
+        if (input.strip().equals("else")) {
             return "else ";
         }
 
-        return generatePlaceholder(stripped);
+        return compileConditional(input, "if")
+                .or(() -> compileConditional(input, "while"))
+                .orElseGet(() -> generatePlaceholder(input.strip()));
+    }
+
+    private static Option<String> compileConditional(String input, String prefix) {
+        var stripped = input.strip();
+        if (stripped.startsWith(prefix)) {
+            var withoutKeyword = stripped.substring(prefix.length()).strip();
+            if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")) {
+                var condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+                return new Some<>(prefix + " (" + compileValue(condition) + ")");
+            }
+        }
+        return new None<>();
     }
 
     private static Option<String> compileStatementValue(String input) {

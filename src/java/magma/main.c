@@ -113,7 +113,7 @@ char* generate();
 }
 /* public <R> */ /* R */ fold(/* R */ initial, /*  R */(*folder)(/* R */, /*  T */)){
 	auto current = initial;
-	/* while (true) */{
+	while (true){
 		/* switch (this.head.next()) */{
 			case Some</* T>(var value) - */> current = folder.apply(current, value);
 			/* case None<T> _ -> */{
@@ -273,7 +273,7 @@ char* generate();
 /* private static */ List<char*> divideAll(char* input, /*  State */(*folder)(/* State */, /*  Character */)){
 	auto current = /* State */();
 	auto queue = Iterator</*  */>(/* RangeHead */(input.length())).map(input::charAt).collect(new ListCollector<>());
-	/* while (queue.hasElements()) */{
+	while (queue.hasElements()){
 		auto c = queue.removeFirst();
 		if (/* c == '\'' */){
 			/* current.append(c) */;
@@ -287,7 +287,7 @@ char* generate();
 		}
 		if (/* c == '"' */){
 			/* current.append(c) */;
-			/* while (queue.hasElements()) */{
+			while (queue.hasElements()){
 				auto next = queue.removeFirst();
 				/* current.append(next) */;
 				if (/* next == '\\' */){
@@ -342,18 +342,23 @@ char* generate();
 	return None</*  */>();
 }
 /* private static */ char* compileBeforeBlock(char* input){
-	auto stripped = input.strip();
-	if (stripped.startsWith("if")){
-		auto withoutKeyword = stripped.substring("if".length()).strip();
-		if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")){
-			auto condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
-			return /* "if (" + compileValue(condition) + ")" */;
-		}
-	}
-	if (stripped.equals("else")){
+	if (input.strip().equals("else")){
 		return /* "else " */;
 	}
-	return /* generatePlaceholder(stripped) */;
+	return /* compileConditional(input, "if")
+                .or(() */ -> /* compileConditional(input, "while"))
+                .orElseGet(() */ -> /* generatePlaceholder(input */.strip()));
+}
+/* private static */ Option<char*> compileConditional(char* input, char* prefix){
+	auto stripped = input.strip();
+	if (stripped.startsWith(prefix)){
+		auto withoutKeyword = stripped.substring(prefix.length()).strip();
+		if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")){
+			auto condition = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+			return Some</*  */>(/* prefix + " (" + compileValue(condition) + ")" */);
+		}
+	}
+	return None</*  */>();
 }
 /* private static */ Option<char*> compileStatementValue(char* input){
 	auto stripped = input.strip();
