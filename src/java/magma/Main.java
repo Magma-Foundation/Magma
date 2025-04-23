@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -183,7 +185,24 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+        return compileClass(input)
+                .or(() -> compileDefinitionStatement(input))
+                .orElseGet(() -> formatSegment(generatePlaceholder(input.strip())));
+    }
+
+    private static String formatSegment(String content) {
+        return "\n\t" + content;
+    }
+
+    private static @NotNull Optional<? extends String> compileDefinitionStatement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var content = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of(formatSegment(generatePlaceholder(content) + ";"));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static String generatePlaceholder(String stripped) {
