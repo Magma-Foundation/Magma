@@ -306,7 +306,7 @@ class Main {
         @Override
         public String generate() {
             var beforeTypeString = this.beforeType.map(inner -> inner + " ").orElse("");
-            return "%s%s(*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
+            return "%s%s (*%s)(%s)".formatted(beforeTypeString, this.returns.generate(), this.name, generateValuesFromNodes(this.args));
         }
 
         @Override
