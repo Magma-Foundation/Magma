@@ -52,22 +52,21 @@
 };
 /* private static final */struct None {
 };
-/* private */struct Joiner(String delimiter) implements Collector {
+/* private */struct Joiner {
 };
 /* private static */struct ListCollector {
 };
-/* private */struct Generic(String base, List {
+/* private */struct Generic {
 };
-/* private */struct Content(String input) implements Type {
+/* private */struct Content {
 };
-/* private */struct Functional(List {
+/* private */struct Functional {
 };
-/* private */struct Definition(Option {
+/* private */struct Definition {
 };
-/* private */struct FunctionalDefinition(
-            Option {
+/* private */struct FunctionalDefinition {
 };
-/* private */struct Ref(Type type) implements Type {
+/* private */struct Ref {
 };
 /* private */struct OptionCollector {
 };
@@ -651,17 +650,21 @@ char* generate();
 		return None</*  */>();
 	}
 	auto beforeContent = right.substring(/* 0 */, /* contentStart) */.strip();
-	auto paramStart = beforeContent.indexOf(/* "<" */);
-	auto name = /* paramStart >= 0
+	auto paramStart = beforeContent.indexOf(/* "(" */);
+	auto withoutParams = /* paramStart >= 0
                 ? beforeContent */.substring(/* 0 */, paramStart).strip()
                 : beforeContent;
+	auto typeParamStart = withoutParams.indexOf(/* "<" */);
+	auto withoutTypeParams = /* typeParamStart >= 0
+                ? withoutParams */.substring(/* 0 */, typeParamStart).strip()
+                : withoutParams;
 	auto withEnd = right.substring(/* contentStart + "{" */.length(/* ) */).strip();
 	if (/* !withEnd */.endsWith(/* "}" */)){
 		return None</*  */>();
 	}
 	auto inputContent = withEnd.substring(/* 0 */, withEnd.length() - 1);
 	auto outputContent = compileStatements(inputContent, /* segment */ -> /*  new Some<> */(this.compileStructuredSegment(segment)));
-	auto generated = /*  generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n" */;
+	auto generated = /*  generatePlaceholder(left) + "struct " + withoutTypeParams + " {" + outputContent + "\n};\n" */;
 	/* structs.add(generated) */;
 	return Some</*  */>(/* "" */);
 }

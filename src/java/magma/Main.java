@@ -790,10 +790,16 @@ class Main {
         }
 
         var beforeContent = right.substring(0, contentStart).strip();
-        var paramStart = beforeContent.indexOf("<");
-        var name = paramStart >= 0
+
+        var paramStart = beforeContent.indexOf("(");
+        var withoutParams = paramStart >= 0
                 ? beforeContent.substring(0, paramStart).strip()
                 : beforeContent;
+
+        var typeParamStart = withoutParams.indexOf("<");
+        var withoutTypeParams = typeParamStart >= 0
+                ? withoutParams.substring(0, typeParamStart).strip()
+                : withoutParams;
 
         var withEnd = right.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
@@ -802,7 +808,7 @@ class Main {
         var inputContent = withEnd.substring(0, withEnd.length() - 1);
         var outputContent = compileStatements(inputContent, segment -> new Some<>(this.compileStructuredSegment(segment)));
 
-        var generated = generatePlaceholder(left) + "struct " + name + " {" + outputContent + "\n};\n";
+        var generated = generatePlaceholder(left) + "struct " + withoutTypeParams + " {" + outputContent + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
