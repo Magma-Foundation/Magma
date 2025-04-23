@@ -11,9 +11,9 @@
      */
 }
 /* public */struct Iterator<T> {
-	</* R */> map(Function</* T */, /*  R */> mapper);
+	</* R */> map(/*  R */ (*)(/* T */) mapper);
 	</* R */> fold(/* R */ initial, /*  R */ (*)(/* R */, /*  T */) folder);
-	</* R */> flatMap(Function</* T */, Iterator</* R */>> mapper);
+	</* R */> flatMap(Iterator</* R */> (*)(/* T */) mapper);
 	Iterator</* T */> concat(Iterator</* T */> other);
 	Option</* T */> next(/*  */);
 	</* C */> collect(Collector</* T */, /*  C */> collector);/* 
@@ -29,7 +29,11 @@
      */
 }
 /*  */struct Type {
-	/* String */ generate(/*  */);/* 
+	/* String */ generate(/*  */);/* default  */ flatten(/*  */){/* 
+            return this; *//* 
+         */
+}
+/* 
      */
 }
 /*  */struct Ok<T, X>(T value) implements Result<T, X> {/*  */
@@ -106,7 +110,7 @@
      */
 }
 /* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* @Override
-  */ map(Function</* T */, /*  R */> mapper){/* 
+  */ map(/*  R */ (*)(/* T */) mapper){/* 
             return new HeadedIterator<>(() -> switch (this.head.next()) {
                 case None<T> _ -> new None<>();
                 case Some<T>(T value) -> new Some<>(mapper.apply(value));
@@ -129,7 +133,7 @@
          */
 }
 /* @Override
-  */ flatMap(Function</* T */, Iterator</* R */>> mapper){/* 
+  */ flatMap(Iterator</* R */> (*)(/* T */) mapper){/* 
             return this.map(mapper).fold(Iterators.empty(), Iterator::concat); *//* 
          */
 }
@@ -233,7 +237,20 @@
                      */.map(/* Type::generate */).collect(new Joiner(", "))
                     .orElse("");/* 
 
-            return this.base() + "<" + joined + ">"; *//* 
+            return this.base + "<" + joined + ">"; *//* 
+         */
+}
+/* @Override
+  */ flatten(/*  */){/* 
+            if (this.base.equals("Function")) {
+                return new Functional(Lists.of(this.arguments.get(0)), this.arguments.get(1));
+            } *//* 
+
+            if (this.base.equals("BiFunction")) {
+                return new Functional(Lists.of(this.arguments.get(0), this.arguments.get(1)), this.arguments.get(2));
+            } *//* 
+
+            return this; *//* 
          */
 }
 /* 
@@ -261,6 +278,7 @@
          */
 }
 /* 
+
      */
 }
 /* private static */struct ListCollector<T> implements Collector<T, List<T>> {/* @Override
@@ -310,7 +328,7 @@
                 .toString(); *//* 
      */
 }
-/* private  */ parseAll(/* String */ input, /*  State */ (*)(/* State */, /*  Character */) folder, Function</* String */, /*  T */> compiler){/* 
+/* private  */ parseAll(/* String */ input, /*  State */ (*)(/* State */, /*  Character */) folder, /*  T */ (*)(/* String */) compiler){/* 
         return this.divide(input, new State(), folder)
                 .iter()
                 .map(compiler)
@@ -366,7 +384,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         )); *//* 
      */
 }
-/* private  */ compileOr(/* String */ input0, List<Function</* String */, Option</* String */>>> rules){
+/* private  */ compileOr(/* String */ input0, List<Option</* String */> (*)(/* String */)> rules){
 	/* var */ result = rules.iter(/* )
                  */.map(/* rule -> rule */.apply(/* input0) */).flatMap(Iterators::fromOption).next();/* 
 
@@ -426,18 +444,8 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             case Some<Integer>(var typeSeparator) -> beforeName.substring(0, typeSeparator + " ".length());
         } *//* ; */
 	/* var */ name = stripped.substring(/* space + " " */.length());
-	/* var */ parsed = this.modifyType(this.parseType(type));/* 
+	/* var */ parsed = this.parseType(/* type) */.flatten();/* 
         return parsed.generate() + " " + name; *//* 
-     */
-}
-/* private  */ modifyType(/* Type */ type){/* 
-        if (type instanceof Generic(String base, List<Type> arguments)) {
-            if (base.equals("BiFunction")) {
-                return new Functional(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
-            }
-        } *//* 
-
-        return type; *//* 
      */
 }
 /* private  */ findTypeSeparator(/* String */ input){
@@ -472,7 +480,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.modifyType(this.parseType(input1)));
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flatten());
                 return new Generic(base, parsed);
             }
         } *//* 
@@ -480,7 +488,7 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         return new Content(input); *//* 
      */
 }
-/* private  */ parseValues(/* String */ input, Function</* String */, /*  T */> compileType){/* 
+/* private  */ parseValues(/* String */ input, /*  T */ (*)(/* String */) compileType){/* 
         return this.parseAll(input, this::foldValueChar, compileType); *//* 
      */
 }

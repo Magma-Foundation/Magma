@@ -66,6 +66,10 @@ class Main {
 
     interface Type {
         String generate();
+
+        default Type flatten() {
+            return this;
+        }
     }
 
     record Ok<T, X>(T value) implements Result<T, X> {
@@ -269,7 +273,20 @@ class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.base() + "<" + joined + ">";
+            return this.base + "<" + joined + ">";
+        }
+
+        @Override
+        public Type flatten() {
+            if (this.base.equals("Function")) {
+                return new Functional(Lists.of(this.arguments.get(0)), this.arguments.get(1));
+            }
+
+            if (this.base.equals("BiFunction")) {
+                return new Functional(Lists.of(this.arguments.get(0), this.arguments.get(1)), this.arguments.get(2));
+            }
+
+            return this;
         }
     }
 
@@ -294,6 +311,7 @@ class Main {
 
             return this.returns.generate() + " (*)(" + joined + ")";
         }
+
     }
 
     private static class ListCollector<T> implements Collector<T, List<T>> {
@@ -457,18 +475,8 @@ class Main {
         };
 
         var name = stripped.substring(space + " ".length());
-        var parsed = this.modifyType(this.parseType(type));
+        var parsed = this.parseType(type).flatten();
         return parsed.generate() + " " + name;
-    }
-
-    private Type modifyType(Type type) {
-        if (type instanceof Generic(String base, List<Type> arguments)) {
-            if (base.equals("BiFunction")) {
-                return new Functional(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
-            }
-        }
-
-        return type;
     }
 
     private Option<Integer> findTypeSeparator(String input) {
@@ -503,7 +511,7 @@ class Main {
             var argumentStart = withoutEnd.indexOf("<");
             if (argumentStart >= 0) {
                 var base = withoutEnd.substring(0, argumentStart).strip();
-                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.modifyType(this.parseType(input1)));
+                var parsed = this.parseValues(withoutEnd.substring(argumentStart + "<".length()), input1 -> this.parseType(input1).flatten());
                 return new Generic(base, parsed);
             }
         }
