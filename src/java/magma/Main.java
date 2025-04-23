@@ -378,7 +378,22 @@ class Main {
 
     private static String compileStatementOrBlock(String input) {
         return compileWhitespace(input)
+                .or(() -> compileStatement(input, Main::compileStatementValue))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Option<String> compileStatementValue(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            var value = stripped.substring("return ".length());
+            return new Some<>("return " + compileValue(value));
+        }
+
+        return new None<>();
+    }
+
+    private static String compileValue(String input) {
+        return generatePlaceholder(input);
     }
 
     private static Option<String> compileWhitespace(String input) {
@@ -386,6 +401,25 @@ class Main {
             return new Some<>("");
         }
         return new None<>();
+    }
+
+    private static Option<Defined> parseAndModifyDefinition(String input) {
+        return Main.parseDefinition(input).map(definition -> {
+            if (definition.type instanceof Functional(var args, var base)) {
+                return new FunctionalDefinition(definition.beforeType, base, definition.name, args);
+            }
+
+            return definition;
+        });
+    }
+
+    private static Option<String> compileStatement(String input, Function<String, Option<String>> compiler) {
+        var stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return new None<>();
+        }
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return compiler.apply(withoutEnd).map(definition -> "\n\t" + definition + ";");
     }
 
     void main() {
@@ -466,7 +500,7 @@ class Main {
             var inputDefinition = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            return this.parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
+            return parseAndModifyDefinition(inputDefinition).map(Defined::generate).flatMap(outputDefinition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var inputParams = withParams.substring(0, paramEnd).strip();
@@ -497,14 +531,14 @@ class Main {
     }
 
     private String compileValues(String input, Function<String, String> compiler) {
-        return Main.generateValues(this.parseValues(input, compiler));
+        return Main.generateValues(Main.parseValues(input, compiler));
     }
 
-    private <T> List<T> parseValues(String input, Function<String, T> compiler) {
-        return Main.parseAll(input, this::foldValueChar, compiler);
+    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
+        return Main.parseAll(input, Main::foldValueChar, compiler);
     }
 
-    private State foldValueChar(State state, char c) {
+    private static State foldValueChar(State state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
@@ -521,30 +555,15 @@ class Main {
 
     private String compileParam(String param) {
         return compileWhitespace(param)
-                .or(() -> this.parseAndModifyDefinition(param).map(Defined::generate))
+                .or(() -> parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() -> generatePlaceholder(param));
     }
 
     private Option<String> compileDefinitionStatement(String input) {
-        var stripped = input.strip();
-        if (!stripped.endsWith(";")) {
-            return new None<>();
-        }
-        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return this.parseAndModifyDefinition(withoutEnd).map(Defined::generate).map(definition -> "\n\t" + definition + ";");
+        return compileStatement(input, withoutEnd -> Main.parseAndModifyDefinition(withoutEnd).map(Defined::generate));
     }
 
-    private Option<Defined> parseAndModifyDefinition(String input) {
-        return this.parseDefinition(input).map(definition -> {
-            if (definition.type instanceof Functional(var args, var base)) {
-                return new FunctionalDefinition(definition.beforeType, base, definition.name, args);
-            }
-
-            return definition;
-        });
-    }
-
-    private Option<Definition> parseDefinition(String input) {
+    private static Option<Definition> parseDefinition(String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator < 0) {
             return new None<>();
@@ -552,18 +571,18 @@ class Main {
         var beforeName = input.substring(0, nameSeparator).strip();
         var name = input.substring(nameSeparator + " ".length()).strip();
 
-        return new Some<>(switch (this.findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> new Definition(new None<>(), this.parseAndModifyType(beforeName), name);
+        return new Some<>(switch (Main.findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> new Definition(new None<>(), Main.parseAndModifyType(beforeName), name);
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                var newType = this.parseAndModifyType(type);
+                var newType = Main.parseAndModifyType(type);
                 yield new Definition(new Some<>(beforeType), newType, name);
             }
         });
     }
 
-    private Option<Integer> findTypeSeparator(String input) {
+    private static Option<Integer> findTypeSeparator(String input) {
         var depth = 0;
         for (var index = input.length() - 1; index >= 0; index--) {
             var c = input.charAt(index);
@@ -582,8 +601,8 @@ class Main {
         return new None<>();
     }
 
-    private Type parseAndModifyType(String input) {
-        var parsed = this.parseType(input);
+    private static Type parseAndModifyType(String input) {
+        var parsed = Main.parseType(input);
         if (parsed instanceof Generic(var base, var arguments)) {
             if (base.equals("Function")) {
                 var argType = arguments.get(0);
@@ -600,7 +619,7 @@ class Main {
         return parsed;
     }
 
-    private Type parseType(String input) {
+    private static Type parseType(String input) {
         var stripped = input.strip();
         if (stripped.equals("boolean")) {
             return Primitive.Bit;
@@ -616,7 +635,7 @@ class Main {
             if (argsStart >= 0) {
                 var base = slice.substring(0, argsStart).strip();
                 var inputArgs = slice.substring(argsStart + "<".length());
-                var args = this.parseValues(inputArgs, this::parseAndModifyType);
+                var args = Main.parseValues(inputArgs, input1 -> parseAndModifyType(input1));
                 return new Generic(base, args);
             }
         }
