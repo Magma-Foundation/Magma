@@ -145,8 +145,42 @@ private String compileStatementOrBlock(String input) {
     return this.generatePlaceholder(input);
 }
 
-private String compileValue(String value) {
-    return this.generatePlaceholder(value);
+private String compileValue(String input) {
+    var stripped = input.strip();
+    if (stripped.endsWith(")")) {
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var paramStart = withoutEnd.indexOf("(");
+        if (paramStart >= 0) {
+            var caller = withoutEnd.substring(0, paramStart).strip();
+            var arguments = withoutEnd.substring(paramStart + "(".length());
+            return this.compileValue(caller) + "(" + this.generatePlaceholder(arguments) + ")";
+        }
+    }
+
+    var separator = stripped.lastIndexOf(".");
+    if (separator >= 0) {
+        var parent = stripped.substring(0, separator);
+        var child = stripped.substring(separator + ".".length());
+
+        return this.compileValue(parent) + "." + child;
+    }
+
+    if (this.isSymbol(stripped)) {
+        return stripped;
+    }
+
+    return this.generatePlaceholder(input);
+}
+
+private boolean isSymbol(String input) {
+    for (var i = 0; i < input.length(); i++) {
+        var c = input.charAt(i);
+        if (Character.isLetter(c)) {
+            continue;
+        }
+        return false;
+    }
+    return true;
 }
 
 private Option<String> compileStructured(String input, String infix) {

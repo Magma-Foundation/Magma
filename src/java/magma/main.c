@@ -11,8 +11,8 @@
 /* static final */struct None<T> implements Option<T> {/*  */
 }
 void main(/*  */){
-	/* var */ source = /*  Paths.get(".", "src", "java", "magma", "Main.java") */;
-	/* var */ target = /*  source.resolveSibling("main.c") */;/* 
+	/* var */ source = Paths.get(/* ".", "src", "java", "magma", "Main.java" */);
+	/* var */ target = source.resolveSibling(/* "main.c" */);/* 
 
     if (this.run(source, target) instanceof Some(var error)) {
         //noinspection CallToPrintStackTrace
@@ -32,8 +32,8 @@ void main(/*  */){
  */
 }
 /* private String */ compileAll(/* String input, Function<String, String> compiler */){
-	/* var */ segments = /*  new ArrayList<String>() */;
-	/* var */ buffer = /*  new StringBuilder() */;
+	/* var */ segments = /* new ArrayList<String> */(/*  */);
+	/* var */ buffer = /* new StringBuilder */(/*  */);
 	/* var */ depth = /*  0 */;
 	/* for (var */ i = /*  0 */;/*  i < input.length(); *//*  i++) {
         var c = input.charAt(i);
@@ -87,9 +87,9 @@ private String compileRootSegment(String input0) {
 
 private Option<String> compileMethod(String input) {
     var paramStart = input.indexOf("("); *//* if */(/* paramStart >= 0 */){
-	/* var */ definition = /*  input.substring(0, paramStart).strip() */;
-	/* var */ withParams = /*  input.substring(paramStart + "(".length()) */;
-	/* var */ paramEnd = /*  withParams.indexOf(")") */;/* 
+	/* var */ definition = input.substring(/* 0, paramStart).strip( */);
+	/* var */ withParams = input.substring(/* paramStart + "(".length() */);
+	/* var */ paramEnd = withParams.indexOf(/* ")" */);/* 
         if (paramEnd >= 0) {
             var params = withParams.substring(0, paramEnd).strip();
             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
@@ -109,8 +109,8 @@ private Option<String> compileMethod(String input) {
 private String compileDefinition(String input) {
     var stripped = input.strip(); *//* 
     var space = stripped.lastIndexOf(" "); *//* if */(/* space >= 0 */){
-	/* var */ type = /*  stripped.substring(0, space) */;
-	/* var */ name = /*  stripped.substring(space + " ".length()) */;/* 
+	/* var */ type = stripped.substring(/* 0, space */);
+	/* var */ name = stripped.substring(/* space + " ".length() */);/* 
         return this.compileType(type) + " " + name; *//* 
      */
 }
@@ -143,8 +143,43 @@ private String compileStatementOrBlock(String input) {
     return this.generatePlaceholder(input); *//* 
 }
 
-private String compileValue(String value) {
-    return this.generatePlaceholder(value); *//* 
+private String compileValue(String input) {
+    var stripped = input.strip(); *//* 
+    if (stripped.endsWith(")")) {
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var paramStart = withoutEnd.indexOf("(");
+        if (paramStart >= 0) {
+            var caller = withoutEnd.substring(0, paramStart).strip();
+            var arguments = withoutEnd.substring(paramStart + "(".length());
+            return this.compileValue(caller) + "(" + this.generatePlaceholder(arguments) + ")";
+        }
+    } *//* 
+
+    var separator = stripped.lastIndexOf("."); *//* if */(/* separator >= 0 */){
+	/* var */ parent = stripped.substring(/* 0, separator */);
+	/* var */ child = stripped.substring(/* separator + ".".length() */);/* 
+
+        return this.compileValue(parent) + "." + child; *//* 
+     */
+}
+/* 
+
+    if (this.isSymbol(stripped)) {
+        return stripped;
+    } *//* 
+
+    return this.generatePlaceholder(input); *//* 
+}
+
+private boolean isSymbol(String input) {
+    for (var i = 0; *//*  i < input.length(); *//*  i++) {
+        var c = input.charAt(i);
+        if (Character.isLetter(c)) {
+            continue;
+        }
+        return false;
+    } *//* 
+    return true; *//* 
 }
 
 private Option<String> compileStructured(String input, String infix) {
