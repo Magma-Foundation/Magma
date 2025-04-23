@@ -24,7 +24,7 @@ public class Main {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             buffer.append(c);
-            if(c == ';') {
+            if (c == ';') {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
             }
@@ -39,6 +39,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        return "/* " + input + " */";
+        var stripped = input.strip();
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+        return "/* " + stripped + " */\n";
     }
 }
