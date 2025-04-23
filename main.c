@@ -13,27 +13,27 @@
 /* import java.util.stream.Collectors; */
 /* import static magma.StandardLibrary.emptyString; */
 struct Node {
-}
+};
 struct String_ {
 	struct String_ concatChar(struct String_ this, char c);
 	char* toSlice(struct String_ this);
-}
+};
 struct State {
 	List<struct String_> segments;
 	struct String_ buffer;
 	int depth;
-}
+};
 struct Definition {
 	List<char*> modifiers;
 	char* value;
-}
+};
 struct ConstructorHeader {
 	char* value;
-}
+};
 struct Main {
 	List<char*> structs = new_ArrayList<>();
 	List<char*> methods = new_ArrayList<>();
-}
+};
 struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
 	this.segments = segments;
@@ -230,7 +230,7 @@ Optional<char*> compileStructured(char* input, char* infix){
                     .map(Main::formatStatement)
                     .collect(Collectors.joining());
 
-            String generated = "struct " + finalName + " {" + joined + outputContent + "\n}\n";
+            String generated = "struct " + finalName + " {" + joined + outputContent + "\n};\n";
             structs.add(generated);
             return Optional.of("");
         } */

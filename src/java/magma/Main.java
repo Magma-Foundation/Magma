@@ -255,7 +255,7 @@ public class Main {
                     .map(Main::formatStatement)
                     .collect(Collectors.joining());
 
-            String generated = "struct " + finalName + " {" + joined + outputContent + "\n}\n";
+            String generated = "struct " + finalName + " {" + joined + outputContent + "\n};\n";
             structs.add(generated);
             return Optional.of("");
         });
