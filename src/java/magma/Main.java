@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -17,6 +18,23 @@ import java.util.stream.Collectors;
 import static magma.StandardLibrary.emptyString;
 
 public class Main {
+    enum Primitive implements Type, BeforeName {
+        I8,
+        I32,
+        Void;
+
+        public static final Map<Primitive, String> mapper = Map.of(
+                I8, "char",
+                I32, "int",
+                Void, "void"
+        );
+
+        @Override
+        public String generate() {
+            return mapper.getOrDefault(this, "?");
+        }
+    }
+
     sealed interface Optional<T> permits Some, None {
         void ifPresent(Consumer<T> consumer);
 
@@ -35,7 +53,7 @@ public class Main {
         boolean isEmpty();
     }
 
-    sealed interface Node permits Definition, ConstructorHeader {
+    sealed interface BeforeName {
     }
 
     public interface String_ {
@@ -45,6 +63,10 @@ public class Main {
     }
 
     sealed interface Result<T, X> permits Ok, Err {
+    }
+
+    sealed interface Type {
+        String generate();
     }
 
     private static class State {
@@ -88,10 +110,10 @@ public class Main {
         }
     }
 
-    record Definition(List<String> modifiers, String value) implements Node {
+    record Definition(List<String> modifiers, String value) implements BeforeName {
     }
 
-    record ConstructorHeader(String value) implements Node {
+    record ConstructorHeader(String value) implements BeforeName {
     }
 
     record Ok<T, X>(T value) implements Result<T, X> {
@@ -183,6 +205,38 @@ public class Main {
         }
     }
 
+    private record Ref(Type type) implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    }
+
+    record Generic(String base, List<Type> arguments) implements Type {
+        @Override
+        public String generate() {
+            String joinedArguments = this.arguments.stream()
+                    .map(Type::generate)
+                    .collect(Collectors.joining(", "));
+
+            return this.base + "<" + joinedArguments + ">";
+        }
+    }
+
+    private record Struct(String name) implements Type {
+        @Override
+        public String generate() {
+            return "struct " + this.name;
+        }
+    }
+
+    private record Placeholder(String value) implements Type {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     public static final List<String> structs = new ArrayList<>();
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = Paths.get(".", "main.c");
@@ -255,7 +309,7 @@ public class Main {
                 .map(output -> generateAll(merger, output));
     }
 
-    private static Optional<List<String>> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, Optional<String>> compiler) {
+    private static <T> Optional<List<T>> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, Optional<T>> compiler) {
         State state = State.createInitial();
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -286,9 +340,9 @@ public class Main {
                 .map(string -> string.toSlice())
                 .toList();
 
-        Optional<List<String>> maybeOutput = new Some<>(new ArrayList<String>());
+        Optional<List<T>> maybeOutput = new Some<>(new ArrayList<T>());
         for (String segment : segments) {
-            Optional<String> maybeCompiled = compiler.apply(segment);
+            Optional<T> maybeCompiled = compiler.apply(segment);
             maybeOutput = maybeOutput.flatMap(output -> {
                 return maybeCompiled.map(compiled -> {
                     output.add(compiled);
@@ -417,7 +471,7 @@ public class Main {
                 .or(() -> new Some<>(generatePlaceholder(input)));
     }
 
-    private static Optional<String> generateDefinition(Node node) {
+    private static Optional<String> generateDefinition(BeforeName node) {
         if (node instanceof Definition definition) {
             return new Some<>(definition.value);
         }
@@ -511,7 +565,7 @@ public class Main {
         return parseAllValues(inputParams, Main::compileParam);
     }
 
-    private static Optional<String> compileMethodBeforeName(Node node) {
+    private static Optional<String> compileMethodBeforeName(BeforeName node) {
         if (node instanceof Definition definition) {
             return new Some<>(definition.value);
         }
@@ -533,11 +587,11 @@ public class Main {
                 .or(() -> new Some<>(generatePlaceholder(param)));
     }
 
-    private static Optional<List<String>> parseAllValues(String inputParams, Function<String, Optional<String>> compiler) {
+    private static <T> Optional<List<T>> parseAllValues(String inputParams, Function<String, Optional<T>> compiler) {
         return parseAll(inputParams, Main::foldValueChar, compiler);
     }
 
-    private static List<String> modifyMethodBody(String structName, Node beforeName, List<String> statements) {
+    private static List<String> modifyMethodBody(String structName, BeforeName beforeName, List<String> statements) {
         if (beforeName instanceof ConstructorHeader) {
             List<String> copy = new ArrayList<>();
             copy.add(formatStatement("struct " + structName + " this"));
@@ -558,7 +612,7 @@ public class Main {
         return parseAll(content, Main::foldStatementChar, Main::compileStatementOrBlock);
     }
 
-    private static Optional<Node> compileConstructorHeader(String structName, String definition) {
+    private static Optional<BeforeName> compileConstructorHeader(String structName, String definition) {
         String stripped0 = definition.strip();
         int index = stripped0.lastIndexOf(" ");
         if (index >= 0) {
@@ -598,7 +652,7 @@ public class Main {
         return cache + ", " + element;
     }
 
-    private static Optional<Node> compileDefinition(String input) {
+    private static Optional<BeforeName> compileDefinition(String input) {
         String stripped = input.strip();
         int nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -656,30 +710,37 @@ public class Main {
         return new None<>();
     }
 
-    private static Optional<String> compileType(String type) {
+    private static Optional<String> compileType(String typeString) {
+        return parseType(typeString).map(type -> {
+            return type.generate();
+        });
+    }
+
+    private static Optional<Type> parseType(String type) {
         String stripped = type.strip();
         if (stripped.equals("private") || stripped.equals("public")) {
             return new None<>();
         }
 
         if (stripped.equals("void")) {
-            return new Some<>("void");
-        }
-
-        if (stripped.equals("String")) {
-            return new Some<>("char*");
+            return new Some<>(Primitive.Void);
         }
 
         if (stripped.equals("char")) {
-            return new Some<>("char");
+            return new Some<>(Primitive.I8);
+        }
+
+        if (stripped.equals("String")) {
+            return new Some<>(new Ref(Primitive.I8));
         }
 
         if (stripped.equals("int") || stripped.equals("boolean")) {
-            return new Some<>("int");
+            return new Some<>(Primitive.I32);
         }
 
         if (stripped.endsWith("[]")) {
-            return compileType(stripped.substring(0, stripped.length() - "[]".length())).map(result -> result + "*");
+            String slice = stripped.substring(0, stripped.length() - "[]".length());
+            return parseType(slice).map(Ref::new);
         }
 
         if (stripped.endsWith(">")) {
@@ -687,16 +748,17 @@ public class Main {
             int typeArgsStart = slice.indexOf("<");
             if (typeArgsStart >= 0) {
                 String base = slice.substring(0, typeArgsStart).strip();
-                String arguments = slice.substring(typeArgsStart + "<".length()).strip();
-                return compileAllValues(arguments, Main::compileType).map(newArguments -> base + "<" + newArguments + ">");
+                String inputArguments = slice.substring(typeArgsStart + "<".length()).strip();
+                return parseAllValues(inputArguments, Main::parseType)
+                        .map(arguments -> new Generic(base, arguments));
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>("struct " + stripped);
+            return new Some<>(new Struct(stripped));
         }
 
-        return new Some<>(generatePlaceholder(stripped));
+        return new Some<>(new Placeholder(stripped));
     }
 
     private static Optional<String> compileStatementOrBlock(String input) {
