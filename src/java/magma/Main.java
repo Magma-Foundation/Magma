@@ -197,7 +197,7 @@ class Main {
         }
     }
 
-    private static final class None<T> implements Option<T> {
+    private record None<T>() implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
@@ -343,7 +343,7 @@ class Main {
         }
     }
 
-    private static class Whitespace implements Type {
+    private record Whitespace() implements Type {
         @Override
         public String generate() {
             return "";

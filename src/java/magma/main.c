@@ -50,7 +50,7 @@
 };
 /* private */struct Some {
 };
-/* private static final */struct None {
+/* private */struct None {
 };
 /* private */struct Joiner {
 };
@@ -72,7 +72,7 @@
 };
 /* private */struct Struct {
 };
-/* private static */struct Whitespace implements Type {
+/* private */struct Whitespace {
 };
 /*  */struct Main {
 };
@@ -90,55 +90,15 @@
 // case Some</* T>(var value) - */>
 // Collector<struct T, struct C>
 // List<char*>
-// Some<>
-// None<>
-// None<>
-// None<>
 // Option<char*>
-// None<>
 // Option<struct C>
-// Some<>
 // Option<List<struct T>>
-// Iterator<>
 // List<struct Type>
-// Some<>
-// None<>
-// Some<>
-// None<>
-// Some<>
-// Some<>
-// Some<>
-// None<>
-// None<>
-// Some<>
-// Some<>
 // Option<struct Whitespace>
-// Some<>
-// None<>
 // Option<struct Defined>
-// None<>
 // Option<struct Definition>
-// None<>
-// Some<>
-// None<>
 // Option<struct Type>
-// None<>
-// Some<>
-// Some<>
-// Some<>
-// Some<>
-// Some<>
-// Some<>
 // Option<List<char*>>
-// None<>
-// None<>
-// None<>
-// Some<>
-// Some<>
-// None<>
-// Some<>
-// None<>
-// None<>
 /* <R> */ Option<struct R> map_Option(struct R (*mapper)(struct T));
 struct T orElseGet_Option(struct T (*other)());
 Option<struct T> or_Option(Option<struct T> (*other)());
@@ -338,25 +298,25 @@ struct private Joiner_Joiner(){
 	return /* "struct " + this */.name;
 }
 /* @Override
-        public */ char* generate_Whitespace implements Type(){
+        public */ char* generate_Whitespace(){
 	return /* "" */;
 }
-/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Whitespace implements Type();
-/* private static final List<String> structs */ /* = */ Lists.emptyList_Whitespace implements Type();
-/* private static final List<String> methods */ /* = */ Lists.emptyList_Whitespace implements Type();
-/* private static Option<String> currentStruct = */ struct new None<>_Whitespace implements Type();
-/* private static */ char* generateAll_Whitespace implements Type(struct StringBuilder (*merger)(struct StringBuilder, char*), List<char*> parsed){
+/* public static final List<Generic> generics */ /* = */ Lists.emptyList_Whitespace();
+/* private static final List<String> structs */ /* = */ Lists.emptyList_Whitespace();
+/* private static final List<String> methods */ /* = */ Lists.emptyList_Whitespace();
+/* private static Option<String> currentStruct = */ struct new None<>_Whitespace();
+/* private static */ char* generateAll_Whitespace(struct StringBuilder (*merger)(struct StringBuilder, char*), List<char*> parsed){
 	return parsed.iter(/* )
                  */.fold(/* new StringBuilder( */), /* merger)
                  */.toString();
 }
-/* private static <T> */ Option<List<struct T>> parseAll_Whitespace implements Type(char* input, struct State (*folder)(struct State, struct Character), Option<struct T> (*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseAll_Whitespace(char* input, struct State (*folder)(struct State, struct Character), Option<struct T> (*compiler)(char*)){
 	return Main.divideAll(input, /* folder)
                  */.iter(/* )
                  */.map(/* compiler)
                  */.collect(new OptionCollector<>(new ListCollector<>()));
 }
-/* private static */ List<char*> divideAll_Whitespace implements Type(char* input, struct State (*folder)(struct State, struct Character)){
+/* private static */ List<char*> divideAll_Whitespace(char* input, struct State (*folder)(struct State, struct Character)){
 	auto current = struct State(/*  */);
 	auto queue = Iterator<>(struct RangeHead(input.length())).map(input::charAt).collect(new ListCollector<>());
 	while (queue.hasElements(/*  */)){
@@ -389,32 +349,32 @@ struct private Joiner_Joiner(){
 	}
 	return current.advance(/*  */).segments;
 }
-/* private static */ char* generateValues_Whitespace implements Type(List<char*> parserd){
+/* private static */ char* generateValues_Whitespace(List<char*> parserd){
 	return Main.generateAll(/* Main::mergeValues */, parserd);
 }
-/* private static */ struct StringBuilder mergeValues_Whitespace implements Type(struct StringBuilder cache, char* element){
+/* private static */ struct StringBuilder mergeValues_Whitespace(struct StringBuilder cache, char* element){
 	if (cache.isEmpty(/*  */)){
 		return cache.append(element);
 	}
 	return cache.append(/* ", ") */.append(element);
 }
-/* private static */ char* generatePlaceholder_Whitespace implements Type(char* input){
+/* private static */ char* generatePlaceholder_Whitespace(char* input){
 	return /* "/* " + input + " */" */;
 }
-/* private static */ char* generateValuesFromNodes_Whitespace implements Type(List<struct Type> list){
+/* private static */ char* generateValuesFromNodes_Whitespace(List<struct Type> list){
 	return list.iter(/* )
                  */.map(Type::generate).collect(new Joiner(", ")).orElse("");
 }
-/* private static */ char* compileStatementOrBlock_Whitespace implements Type(char* input, int depth){
+/* private static */ char* compileStatementOrBlock_Whitespace(char* input, int depth){
 	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
                  */.or(/* () */ -> /* compileStatement(input, Main::compileStatementValue, depth))
                 .or(() */ -> /* compileBlock(input, depth))
                 .orElseGet(() */ -> /* createIndent(depth) + generatePlaceholder(input */.strip()));
 }
-/* private static */ char* createIndent_Whitespace implements Type(int depth){
+/* private static */ char* createIndent_Whitespace(int depth){
 	return /* "\n" + "\t" */.repeat(depth);
 }
-/* private static */ Option<char*> compileBlock_Whitespace implements Type(char* input, int depth){
+/* private static */ Option<char*> compileBlock_Whitespace(char* input, int depth){
 	auto stripped = input.strip(/*  */);
 	if (stripped.endsWith(/* "}" */)){
 		auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - "}" */.length());
@@ -428,7 +388,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ char* compileBeforeBlock_Whitespace implements Type(char* input){
+/* private static */ char* compileBeforeBlock_Whitespace(char* input){
 	if (input.strip(/* ) */.equals("else")){
 		return /* "else " */;
 	}
@@ -436,7 +396,7 @@ struct private Joiner_Joiner(){
                  */.or(/*  */(/* ) */ -> /* compileConditional(input, "while"))
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()));
 }
-/* private static */ Option<char*> compileConditional_Whitespace implements Type(char* input, char* prefix){
+/* private static */ Option<char*> compileConditional_Whitespace(char* input, char* prefix){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(prefix)){
 		auto withoutKeyword = stripped.substring(prefix.length(/* ) */).strip();
@@ -447,7 +407,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<char*> compileStatementValue_Whitespace implements Type(char* input){
+/* private static */ Option<char*> compileStatementValue_Whitespace(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "return " */)){
 		auto value = stripped.substring(/* "return " */.length(/*  */));
@@ -466,7 +426,7 @@ struct private Joiner_Joiner(){
 	}
 	return Some<>(generatePlaceholder(input));
 }
-/* private static */ char* compileValue_Whitespace implements Type(char* input){
+/* private static */ char* compileValue_Whitespace(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.startsWith(/* "new " */)){
 		auto slice = stripped.substring(/* "new " */.length(/* ) */).strip();
@@ -494,10 +454,10 @@ struct private Joiner_Joiner(){
 	}
 	return generatePlaceholder(input);
 }
-/* private static */ Option<char*> compileInvocation_Whitespace implements Type(char* input){
+/* private static */ Option<char*> compileInvocation_Whitespace(char* input){
 	return compileInvokable(input, /*  Main::compileValue */);
 }
-/* private static */ Option<char*> compileInvokable_Whitespace implements Type(char* slice, char* (*beforeArgsCompiler)(char*)){
+/* private static */ Option<char*> compileInvokable_Whitespace(char* slice, char* (*beforeArgsCompiler)(char*)){
 	if (/* !slice */.endsWith(/* ")" */)){
 		return None<>(/*  */);
 	}
@@ -513,13 +473,13 @@ struct private Joiner_Joiner(){
 	auto generate = beforeArgsCompiler.apply(base);
 	return Some<>(/* generate + "(" + newArgs + ")" */);
 }
-/* private static */ char* compileConstructorCaller_Whitespace implements Type(char* base){
+/* private static */ char* compileConstructorCaller_Whitespace(char* base){
 	if (parseAndModifyType(/* base) instanceof Some<Type>(var type */)){
 		return type.generate(/*  */);
 	}
 	return generatePlaceholder(base);
 }
-/* private static */ int isSymbol_Whitespace implements Type(char* input){
+/* private static */ int isSymbol_Whitespace(char* input){
 	if (input.isEmpty(/*  */)){
 		return false;
 	}
@@ -534,13 +494,13 @@ struct private Joiner_Joiner(){
 	}
 	return true;
 }
-/* private static */ Option<struct Whitespace> parseWhitespace_Whitespace implements Type(char* input){
+/* private static */ Option<struct Whitespace> parseWhitespace_Whitespace(char* input){
 	if (input.isBlank(/*  */)){
 		return Some<>(struct Whitespace(/*  */));
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<struct Defined> parseAndModifyDefinition_Whitespace implements Type(char* input){
+/* private static */ Option<struct Defined> parseAndModifyDefinition_Whitespace(char* input){
 	/* return Main.parseDefinition(input).map(definition -> */{
 		if (definition.type instanceof Functional(/* var args */, /*  var base */)){
 			return struct FunctionalDefinition(definition.beforeType, base, definition.name, args);
@@ -549,7 +509,7 @@ struct private Joiner_Joiner(){
 	}
 	/* ) */;
 }
-/* private static */ Option<char*> compileStatement_Whitespace implements Type(char* input, Option<char*> (*compiler)(char*), int depth){
+/* private static */ Option<char*> compileStatement_Whitespace(char* input, Option<char*> (*compiler)(char*), int depth){
 	auto stripped = input.strip(/*  */);
 	if (/* !stripped */.endsWith(/* ";" */)){
 		return None<>(/*  */);
@@ -557,13 +517,13 @@ struct private Joiner_Joiner(){
 	auto withoutEnd = stripped.substring(/* 0 */, stripped.length(/* ) - ";" */.length());
 	return compiler.apply(/* withoutEnd) */.map(/* definition */ -> /*  generateStatement(definition, depth */));
 }
-/* private static */ char* generateStatement_Whitespace implements Type(char* definition, int depth){
+/* private static */ char* generateStatement_Whitespace(char* definition, int depth){
 	return /* createIndent(depth) + definition + ";" */;
 }
-/* private static <T> */ Option<List<struct T>> parseValues_Whitespace implements Type(char* input, Option<struct T> (*compiler)(char*)){
+/* private static <T> */ Option<List<struct T>> parseValues_Whitespace(char* input, Option<struct T> (*compiler)(char*)){
 	return Main.parseAll(input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ struct State foldValueChar_Whitespace implements Type(struct State state, struct char c){
+/* private static */ struct State foldValueChar_Whitespace(struct State state, struct char c){
 	if (/* c == ',' && state */.isLevel(/*  */)){
 		return state.advance(/*  */);
 	}
@@ -576,7 +536,7 @@ struct private Joiner_Joiner(){
 	}
 	return appended;
 }
-/* private static */ Option<struct Definition> parseDefinition_Whitespace implements Type(char* input){
+/* private static */ Option<struct Definition> parseDefinition_Whitespace(char* input){
 	auto stripped = input.strip(/*  */);
 	auto nameSeparator = stripped.lastIndexOf(/* " " */);
 	if (/* nameSeparator < 0 */){
@@ -595,7 +555,7 @@ struct private Joiner_Joiner(){
 	}
 	/*  */;
 }
-/* private static */ Option<int> findTypeSeparator_Whitespace implements Type(char* input){
+/* private static */ Option<int> findTypeSeparator_Whitespace(char* input){
 	auto depth = /*  0 */;
 	/* for */ /* (var */ index = input.length() - 1;
 	struct index > = /*  0 */;
@@ -613,7 +573,7 @@ struct private Joiner_Joiner(){
 	}
 	return None<>(/*  */);
 }
-/* private static */ Option<struct Type> parseAndModifyType_Whitespace implements Type(char* input){
+/* private static */ Option<struct Type> parseAndModifyType_Whitespace(char* input){
 	/* return Main.parseType(input).map(parsed -> */{
 		if (/* parsed instanceof Generic generic */){
 			auto base = generic.base;
@@ -643,7 +603,7 @@ struct private Joiner_Joiner(){
 	}
 	/* ) */;
 }
-/* private static */ Option<struct Type> parseType_Whitespace implements Type(char* input){
+/* private static */ Option<struct Type> parseType_Whitespace(char* input){
 	auto stripped = input.strip(/*  */);
 	if (stripped.equals(/* "public" */)){
 		return None<>(/*  */);
@@ -674,27 +634,27 @@ struct private Joiner_Joiner(){
 	}
 	return Some<>(struct Content(input));
 }
-/* private static */ Option<struct Type> parseGenericArgument_Whitespace implements Type(char* input1){
+/* private static */ Option<struct Type> parseGenericArgument_Whitespace(char* input1){
 	return parseWhitespace(/* input1)
                  */.<Type>map(/* whitespace */ -> /* whitespace)
                 .or(() */ -> /*  parseAndModifyType(input1 */));
 }
-/* private static */ struct StringBuilder mergeStatements_Whitespace implements Type(struct StringBuilder stringBuilder, char* str){
+/* private static */ struct StringBuilder mergeStatements_Whitespace(struct StringBuilder stringBuilder, char* str){
 	return stringBuilder.append(str);
 }
-/* private static */ char* compileStatementsOrBlocks_Whitespace implements Type(char* body, int depth){
+/* private static */ char* compileStatementsOrBlocks_Whitespace(char* body, int depth){
 	return Main.compileStatements(body, /* segment */ -> /*  new Some<> */(/* compileStatementOrBlock(segment */, /*  depth + 1) */));
 }
-/* private static */ char* compileStatements_Whitespace implements Type(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ char* compileStatements_Whitespace(char* input, Option<char*> (*compiler)(char*)){
 	return Main.parseStatements(input, /* compiler) */.map(/* Main::generateStatements */).orElse("");
 }
-/* private static */ Option<List<char*>> parseStatements_Whitespace implements Type(char* input, Option<char*> (*compiler)(char*)){
+/* private static */ Option<List<char*>> parseStatements_Whitespace(char* input, Option<char*> (*compiler)(char*)){
 	return Main.parseAll(input, /*  Main::foldStatementChar */, compiler);
 }
-/* private static */ char* generateStatements_Whitespace implements Type(List<char*> inner){
+/* private static */ char* generateStatements_Whitespace(List<char*> inner){
 	return generateAll(/* Main::mergeStatements */, inner);
 }
-/* private static */ struct State foldStatementChar_Whitespace implements Type(struct State state, struct char c){
+/* private static */ struct State foldStatementChar_Whitespace(struct State state, struct char c){
 	auto appended = state.append(c);
 	if (/* c == ';' && appended */.isLevel(/*  */)){
 		return appended.advance(/*  */);
@@ -713,10 +673,10 @@ struct private Joiner_Joiner(){
 		return appended;
 	}
 }
-/* private static */ Option<char*> compileDefinitionToString_Whitespace implements Type(char* input){
+/* private static */ Option<char*> compileDefinitionToString_Whitespace(char* input){
 	return Main.parseAndModifyDefinition(/* input) */.map(Defined::generate);
 }
-struct void main_Whitespace implements Type(){
+struct void main_Whitespace(){
 	/* try */{
 		auto source = Paths.get(/* " */.", /*  "src" */, /*  "java" */, /*  "magma" */, /* "Main */.java");
 		auto input = Files.readString(source);
@@ -728,7 +688,7 @@ struct void main_Whitespace implements Type(){
             e.printStackTrace() */;
 	}
 }
-/* private */ char* compileRoot_Whitespace implements Type(char* input){
+/* private */ char* compileRoot_Whitespace(char* input){
 	auto compiled = compileStatements(input, /* segment */ -> /*  new Some<> */(this.compileRootSegment(segment)));
 	auto joinedStructs = structs.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
 	auto joinedGenerics = generics.iter(/* )
@@ -738,14 +698,14 @@ struct void main_Whitespace implements Type(){
 	auto joinedMethods = methods.iter(/* ) */.collect(struct Joiner(/*  */)).orElse("");
 	return /* compiled + joinedStructs + joinedGenerics + joinedMethods */;
 }
-/* private */ char* compileRootSegment_Whitespace implements Type(char* input){
+/* private */ char* compileRootSegment_Whitespace(char* input){
 	return this.compileClass(/* input)
                 .orElseGet(() */ -> /* generatePlaceholder(input */.strip()) + "\n");
 }
-/* private */ Option<char*> compileClass_Whitespace implements Type(char* input){
+/* private */ Option<char*> compileClass_Whitespace(char* input){
 	return this.compileStructured(input, /*  "class " */);
 }
-/* private */ Option<char*> compileStructured_Whitespace implements Type(char* input, char* infix){
+/* private */ Option<char*> compileStructured_Whitespace(char* input, char* infix){
 	auto classIndex = input.indexOf(infix);
 	if (/* classIndex < 0 */){
 		return None<>(/*  */);
@@ -776,7 +736,7 @@ struct void main_Whitespace implements Type(){
 	/* structs.add(generated) */;
 	return Some<>(/* "" */);
 }
-/* private */ char* compileStructuredSegment_Whitespace implements Type(char* input){
+/* private */ char* compileStructuredSegment_Whitespace(char* input){
 	return parseWhitespace(/* input) */.map(/* Whitespace::generate)
                 .or(() */ -> /* this.compileStructured(input, "interface "))
                 .or(() */ -> /* this.compileStructured(input, "enum "))
@@ -786,7 +746,7 @@ struct void main_Whitespace implements Type(){
                 .or(() */ -> /* this.compileDefinitionStatement(input))
                 .orElseGet(() */ -> /*  generatePlaceholder(input */));
 }
-/* private */ Option<char*> compileMethod_Whitespace implements Type(char* input){
+/* private */ Option<char*> compileMethod_Whitespace(char* input){
 	auto paramStart = input.indexOf(/* "(" */);
 	if (/* paramStart >= 0 */){
 		auto inputDefinition = input.substring(/* 0 */, /* paramStart) */.strip();
@@ -826,11 +786,11 @@ struct void main_Whitespace implements Type(){
 	}
 	return None<>(/*  */);
 }
-/* private */ char* compileParam_Whitespace implements Type(char* param){
+/* private */ char* compileParam_Whitespace(char* param){
 	return parseWhitespace(/* param) */.map(/* Whitespace::generate)
                 .or(() */ -> /* parseAndModifyDefinition(param).map(Defined::generate))
                 .orElseGet(() */ -> /*  generatePlaceholder(param */));
 }
-/* private */ Option<char*> compileDefinitionStatement_Whitespace implements Type(char* input){
+/* private */ Option<char*> compileDefinitionStatement_Whitespace(char* input){
 	return compileStatement(input, /*  Main::compileDefinitionToString */, /*  1 */);
 }
