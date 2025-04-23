@@ -48,6 +48,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     private static final List<String> structs = new ArrayList<>();
@@ -95,6 +99,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -126,15 +133,31 @@ public class Main {
         }
 
         var name = afterKeyword.substring(0, contentStart).strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+
         var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
         }
 
         var content = withEnd.substring(0, withEnd.length() - "}".length());
-        var generated = "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "}";
+        var generated = "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
         structs.add(generated);
         return Optional.of("");
+    }
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip();
+        for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static String compileClassSegment(String input) {
