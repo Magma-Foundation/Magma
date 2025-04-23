@@ -30,7 +30,9 @@ struct Definition {
 struct ConstructorHeader {
 	char* value;
 }
-struct Main {List<char*> structs = /* new ArrayList<>(); */List<char*> methods = /* new ArrayList<>(); */
+struct Main {
+	List<char*> structs = /* new ArrayList<>(); */;
+	List<char*> methods = /* new ArrayList<>(); */;
 }
 struct State new_State(List<struct String_> segments, struct String_ buffer, int depth){
 	struct State this;
@@ -236,7 +238,7 @@ Optional<char*> compileStructured(char* input, char* infix){
 }
 Optional<char*> compileClassSegment(char* input, char* structName){
 	return compileWhitespace(/* input) */.or(/* ( */) - /* > compileClass */(/* input))
-                .or(( */) - /* > compileStructured(input */, /* "interface ")) */.or(/* ( */) - /* > compileStructured(input */, /* "record ")) */.or(/* ( */) - /* > compileMethod(input */, /* structName)) */.or((/* ) */ - /* > compileAssigner */(/* input))
+                .or(( */) - /* > compileStructured(input */, /* "interface ")) */.or(/* ( */) - /* > compileStructured(input */, /* "record ")) */.or(/* ( */) - /* > compileMethod(input */, /* structName)) */.or((/* ) */ - /* > compileAssigner */(/* input).map(Main::formatStatement))
                 .or(( */) - /* > compileDefinitionStatement */(/* input))
                 .or(( */) - /* > Optional.of(generatePlaceholder(input */)));
 }

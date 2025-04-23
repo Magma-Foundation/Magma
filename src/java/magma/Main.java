@@ -267,7 +267,7 @@ public class Main {
                 .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileMethod(input, structName))
-                .or(() -> compileAssigner(input))
+                .or(() -> compileAssigner(input).map(Main::formatStatement))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> Optional.of(generatePlaceholder(input)));
     }
