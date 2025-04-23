@@ -542,6 +542,11 @@ class Main {
 
                 return new Functional(Lists.of(argType), returnType);
             }
+
+            if (base.equals("Supplier")) {
+                var returns = arguments.get(0);
+                return new Functional(Lists.emptyList(), returns);
+            }
         }
         return parsed;
     }

@@ -21,8 +21,8 @@
 /*  */struct Main {
 };
 /* <R> */  Option</* R */> map(/*  R */(*mapper)(/* T */))/* ; */
- /* T */ orElseGet( Supplier</* T */> other)/* ; */
- Option</* T */> or( Supplier<Option</* T */>> other)/* ; */
+ /* T */ orElseGet(/* T */(*other)())/* ; */
+ Option</* T */> or(Option</* T */>(*other)())/* ; */
  /* T */ orElse( /* T */ other)/* ; */
 /* <R> */  Option</* R */> flatMap(Option</* R */>(*mapper)(/* T */))/* ; */
  Option</* T */> next(/*  */)/* ; */
@@ -475,6 +475,11 @@
                 var returnType = arguments.get(1);
 
                 return new Functional(Lists.of(argType), returnType);
+            }
+
+            if (base.equals("Supplier")) {
+                var returns = arguments.get(0);
+                return new Functional(Lists.emptyList(), returns);
             }
         }
         return parsed;
