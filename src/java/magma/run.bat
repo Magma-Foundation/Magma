@@ -1,1 +1,0 @@
-clang -o main.exe main.c
