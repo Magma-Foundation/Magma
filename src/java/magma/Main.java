@@ -394,7 +394,8 @@ class Main {
         }
     }
 
-    public static final List<String> structs = Lists.empty();
+    private static final List<String> structs = Lists.empty();
+    private static List<String> methods = Lists.empty();
 
     void main() {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -415,7 +416,9 @@ class Main {
 
     private String compile(String input) {
         var output = this.generateAll(this::mergeStatements, this.parseStatements(input));
-        return structs.iter().collect(new Joiner()).orElse("") + output;
+        var joinedStructs = structs.iter().collect(new Joiner()).orElse("");
+        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
+        return joinedStructs + joinedMethods + output;
     }
 
     private List<String> parseStatements(String input) {
@@ -517,22 +520,23 @@ class Main {
 
         List<Definable> params = this.parseValues(paramsString, input1 -> this.parseDefinition(input1).flattenDefinable());
 
+        var paramTypes = params.iter()
+                .map(Definable::findType)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+
+        var definable = this.parseDefinition(definition).flattenDefinable();
+        var definable1 = definable.withParams(paramTypes);
+        var values = "\n\t" + definable1.generate() + ";";
+
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
             var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
             var joinedParams = this.joinNodes(params, ", ");
-            return new Some<>(this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n");
+            var generated = this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n";
+            methods = methods.add(generated);
         }
-        else {
-            var paramTypes = params.iter()
-                    .map(Definable::findType)
-                    .flatMap(Iterators::fromOption)
-                    .collect(new ListCollector<>());
-
-            var definable = this.parseDefinition(definition).flattenDefinable();
-            var definable1 = definable.withParams(paramTypes);
-            return new Some<>("\n\t" + definable1.generate() + ";");
-        }
+        return new Some<>(values);
     }
 
     private <T extends Node> String joinNodes(List<T> nodes, String delimiter) {

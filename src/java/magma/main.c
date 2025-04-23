@@ -23,20 +23,14 @@
 /*  */struct Head<T> {
 	Option</* T */> (*next)();
 }
-/*  */struct Type extends Node {/* default  */ flattenType(/*  */){/* 
-            return this; *//* 
-         */
-}
-
+/*  */struct Type extends Node {
+	/* default  */ (*flattenType)();
 }
 /*  */struct Node {
 	/* String */ (*generate)();
 }
-/* sealed */struct Definable extends Node {/* default  */ flattenDefinable(/*  */){/* 
-            return this; *//* 
-         */
-}
-
+/* sealed */struct Definable extends Node {
+	/* default  */ (*flattenDefinable)();
 	Option</* Type */> (*findType)();
 	/* Definable */ (*withParams)(List</* Type */>);
 }
@@ -44,24 +38,169 @@
 }
 /*  */struct Err<T, X>(X error) implements Result<T, X> {
 }
-/*  */struct Some<T>(T value) implements Option<T> {/* @Override
-  */ orElse(/* T */ other){/* 
-            return this.value; *//* 
-         */
+/*  */struct Some<T>(T value) implements Option<T> {
+	/* @Override
+  */ (*orElse)(/* T */);
 }
-
-}
-/* static final */struct None<T> implements Option<T> {/* @Override
-  */ orElse(/* T */ other){/* 
-            return other; *//* 
-         */
-}
-
+/* static final */struct None<T> implements Option<T> {
+	/* @Override
+  */ (*orElse)(/* T */);
 }
 /* private static */struct State {
 	/* private  */ segments;
 	/* private  */ buffer;
-	/* private  */ depth;/* private */ State(List</* String */> segments, /* StringBuilder */ buffer, int depth){
+	/* private  */ depth;
+	/* private */ (*State)(List</* String */>, /* StringBuilder */, int);
+	/* public */ (*State)();
+	/* private  */ (*append)(/* char */);
+	/* private  */ (*isLevel)();
+	/* private  */ (*isShallow)();
+	/* private  */ (*enter)();
+	/* private  */ (*exit)();
+	/* private  */ (*advance)();
+}
+/* private static */struct EmptyHead<T> implements Head<T> {
+	/* @Override
+  */ (*next)();
+}
+/* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+	/* @Override
+  */ (*map)(/*  R */ (*)(/* T */));
+	/* @Override
+  */ (*fold)(/* R */, /*  R */ (*)(/* R */, /*  T */));
+	/* @Override
+  */ (*flatMap)(Iterator</* R */> (*)(/* T */));
+	/* @Override
+  */ (*concat)(Iterator</* T */>);
+	/* @Override
+  */ (*next)();
+	/* @Override
+  */ (*collect)(Collector</* T */, /*  C */>);
+}
+/* public static */struct RangeHead implements Head<Integer> {
+	/* private  */ length;
+	/* private  */ 0;
+	/* public */ (*RangeHead)(int);
+	/* @Override
+  */ (*next)();
+}
+/* private static final */struct SingleHead<T> implements Head<T> {
+	/* private  */ value;
+	/* private  */ false;
+	/* private */ (*SingleHead)(/* T */);
+	/* @Override
+  */ (*next)();
+}
+/* static */struct Iterators {
+	/* public  */ (*empty)();
+	/* public  */ (*fromOption)(Option</* T */>);
+}
+/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
+	/* private */ (*Joiner)();
+	/* @Override
+  */ (*createInitial)();
+	/* @Override
+  */ (*fold)(Option</* String */>, /* String */);
+}
+/* private */struct Generic(String base, List<Type> arguments) implements Type {
+	/* @Override
+  */ (*generate)();
+	/* @Override
+  */ (*flattenType)();
+}
+/* private */struct Content(String input) implements Type, Definable {
+	/* private  */ (*generatePlaceholder)(/* String */);
+	/* @Override
+  */ (*generate)();
+	/* @Override
+  */ (*findType)();
+	/* @Override
+  */ (*withParams)(List</* Type */>);
+}
+/* private */struct Functional(List<Type> typeParams, Type returns) implements Type {
+	/* @Override
+  */ (*generate)();
+}
+/* private static */struct ListCollector<T> implements Collector<T, List<T>> {
+	/* @Override
+  */ (*createInitial)();
+	/* @Override
+  */ (*fold)(List</* T */>, /* T */);
+}
+/* private */struct FunctionalDefinition(Functional functional, String name) implements Definable {
+	/* @Override
+  */ (*generate)();
+	/* @Override
+  */ (*findType)();
+	/* @Override
+  */ (*withParams)(List</* Type */>);
+}
+/* private */struct Definition(Type parsed, String name) implements Definable {
+	/* @Override
+  */ (*generate)();
+	/* @Override
+  */ (*flattenDefinable)();
+	/* @Override
+  */ (*findType)();
+	/* @Override
+  */ (*withParams)(List</* Type */>);
+}
+/*  */struct Main {
+	/* enum  */ (*Void)();
+	/* private  */ (*Lists.empty)();
+	/* private  */ (*Lists.empty)();
+	void (*main)();
+	/* private  */ (*run)(/* Path */, /* Path */);
+	/* private  */ (*compile)(/* String */);
+	/* private  */ (*parseStatements)(/* String */);
+	/* private  */ (*generateAll)(/*  StringBuilder */ (*)(/* StringBuilder */, /*  String */), List</* String */>);
+	/* private  */ (*parseAll)(/* String */, /*  State */ (*)(/* State */, /*  Character */), /*  T */ (*)(/* String */));
+	/* private  */ (*mergeStatements)(/* StringBuilder */, /* String */);
+	/* private  */ (*divide)(/* String */, /* State */, /*  State */ (*)(/* State */, /*  Character */));
+	/* private  */ (*foldStatementChar)(/* State */, /* char */);
+	/* '  */ (*state.isShallow)();
+	/* else */ (*if)(/* c  */);
+	/* ')  */ (*state.exit)();
+	/* return */ state;
+}
+/* default  */ flattenType(/*  */){/* 
+            return this; *//* 
+         */
+}
+/* interface  */ flattenType(/*  */){/* 
+            return this; *//* 
+        }
+     */
+}
+/* default  */ flattenDefinable(/*  */){/* 
+            return this; *//* 
+         */
+}
+/* sealed  */ flattenDefinable(/*  */){/* 
+            return this; *//* 
+        }
+
+        Option<Type> findType();
+
+        Definable withParams(List<Type> paramTypes);
+     */
+}
+/* @Override
+  */ orElse(/* T */ other){/* 
+            return this.value; *//* 
+         */
+}
+/* @Override
+  */ orElse(/* T */ other){/* 
+            return other; *//* 
+         */
+}
+/* static  */ orElse(/* T */ other){/* 
+            return other; *//* 
+        }
+     */
+}
+/* private */ State(List</* String */> segments, /* StringBuilder */ buffer, int depth){
 	/* this.segments */ = segments;
 	/* this.buffer */ = buffer;
 	/* this.depth */ = depth;/* 
@@ -100,16 +239,53 @@
             return this; *//* 
          */
 }
+/* private  */ State(List</* String */> segments, /* StringBuilder */ buffer, int depth){
+	/* this.segments */ = segments;
+	/* this.buffer */ = buffer;
+	/* this.depth */ = depth;/* 
+        }
 
+        public State() {
+            this(Lists.empty(), new StringBuilder(), 0); *//* 
+        }
+
+        private State append(char c) {
+            this.buffer.append(c); *//* 
+            return this; */
+	/* }
+
+  */ this.depth = /* = 0 */;
+	/* }
+
+  */ this.depth = /* = 1 */;
+	/* }
+
+  */ this.depth = this.depth + 1;/* 
+            return this; */
+	/* }
+
+  */ this.depth = this.depth - 1;/* 
+            return this; *//* 
+        }
+
+        private State advance() {
+            this.segments.add(this.buffer.toString()); */
+	/* this.buffer */ = /* new StringBuilder */();/* 
+            return this; *//* 
+        }
+     */
 }
-/* private static */struct EmptyHead<T> implements Head<T> {/* @Override
+/* @Override
   */ next(/*  */){/* 
             return new None<>(); *//* 
          */
 }
-
+/* private  */ next(/*  */){/* 
+            return new None<>(); *//* 
+        }
+     */
 }
-/* public */struct HeadedIterator<T>(Head<T> head) implements Iterator<T> {/* @Override
+/* @Override
   */ map(/*  R */ (*mapper)(/* T */)){/* 
             return new HeadedIterator<>(() -> switch (this.head.next()) {
                 case None<T> _ -> new None<>();
@@ -153,11 +329,7 @@
             return this.fold(collector.createInitial(), collector::fold); *//* 
          */
 }
-
-}
-/* public static */struct RangeHead implements Head<Integer> {
-	/* private  */ length;
-	/* private  */ 0;/* public */ RangeHead(int length){
+/* public */ RangeHead(int length){
 	/* this.length */ = length;/* 
          */
 }
@@ -173,11 +345,24 @@
             } *//* 
          */
 }
+/* public  */ RangeHead(int length){
+	/* this.length */ = length;/* 
+        }
 
+        @Override
+        public Option<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                this.counter++;
+                return new Some<>(value);
+            } *//* 
+            else {
+                return new None<>();
+            } *//* 
+        }
+     */
 }
-/* private static final */struct SingleHead<T> implements Head<T> {
-	/* private  */ value;
-	/* private  */ false;/* private */ SingleHead(/* T */ value){
+/* private */ SingleHead(/* T */ value){
 	/* this.value */ = value;/* 
          */
 }
@@ -190,9 +375,21 @@
             return new Some<>(this.value); *//* 
          */
 }
+/* private  */ SingleHead(/* T */ value){
+	/* this.value */ = value;/* 
+        }
 
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            } */
+	/* this.retrieved */ = true;/* 
+            return new Some<>(this.value); *//* 
+        }
+     */
 }
-/* static */struct Iterators {/* public  */ empty(/*  */){/* 
+/* public  */ empty(/*  */){/* 
             return new HeadedIterator<>(new EmptyHead<>()); *//* 
          */
 }
@@ -203,9 +400,19 @@
             } *//* ); *//* 
          */
 }
+/* static  */ empty(/*  */){/* 
+            return new HeadedIterator<>(new EmptyHead<>()); *//* 
+        }
 
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new HeadedIterator<>(switch (option) {
+                case None<T> _ -> new EmptyHead<T>();
+                case Some<T>(var value) -> new SingleHead<T>(value);
+            } *//* ); *//* 
+        }
+     */
 }
-/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {/* private */ Joiner(/*  */){/* 
+/* private */ Joiner(/*  */){/* 
             this(""); *//* 
          */
 }
@@ -222,9 +429,7 @@
             } *//* ; *//* 
          */
 }
-
-}
-/* private */struct Generic(String base, List<Type> arguments) implements Type {/* @Override
+/* @Override
   */ generate(/*  */){
 	/* var */ joined = this.arguments.iter(/* )
                      */.map(/* Type::generate */).collect(new Joiner(", "))
@@ -246,9 +451,7 @@
             return this; *//* 
          */
 }
-
-}
-/* private */struct Content(String input) implements Type, Definable {/* private  */ generatePlaceholder(/* String */ input){/* 
+/* private  */ generatePlaceholder(/* String */ input){/* 
             return "/* " + input + " */"; *//* 
          */
 }
@@ -267,9 +470,7 @@
             return this; *//* 
          */
 }
-
-}
-/* private */struct Functional(List<Type> typeParams, Type returns) implements Type {/* @Override
+/* @Override
   */ generate(/*  */){
 	/* var */ joined = this.typeParams.iter(/* )
                      */.map(/* Type::generate */).collect(new Joiner(", "))
@@ -278,9 +479,7 @@
             return this.returns.generate() + " (*)(" + joined + ")"; *//* 
          */
 }
-
-}
-/* private static */struct ListCollector<T> implements Collector<T, List<T>> {/* @Override
+/* @Override
   */ createInitial(/*  */){/* 
             return Lists.empty(); *//* 
          */
@@ -290,9 +489,17 @@
             return current.add(element); *//* 
          */
 }
+/* private  */ createInitial(/*  */){/* 
+            return Lists.empty(); *//* 
+        }
 
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element); *//* 
+        }
+     */
 }
-/* private */struct FunctionalDefinition(Functional functional, String name) implements Definable {/* @Override
+/* @Override
   */ generate(/*  */){
 	/* var */ joined = this.functional.typeParams.iter(/* )
                      */.map(/* Node::generate */).collect(new Joiner(", "))
@@ -311,9 +518,7 @@
             return new FunctionalDefinition(new Functional(paramTypes, this.functional), this.name); *//* 
          */
 }
-
-}
-/* private */struct Definition(Type parsed, String name) implements Definable {/* @Override
+/* @Override
   */ generate(/*  */){/* 
             return this.parsed().generate() + " " + this.name(); *//* 
          */
@@ -336,11 +541,7 @@
             return new FunctionalDefinition(new Functional(paramTypes, this.parsed), this.name); *//* 
          */
 }
-
-}
-/*  */struct Main {
-	/* enum  */ (*Void)();
-	/* public  */ (*Lists.empty)();void main(/*  */){
+void main(/*  */){
 	/* var */ source = Paths.get(".", "src", "java", "magma", "Main.java");
 	/* var */ target = source.resolveSibling("main.c");/* 
 
@@ -358,8 +559,10 @@
      */
 }
 /* private  */ compile(/* String */ input){
-	/* var */ output = this.generateAll(/* this::mergeStatements */, this.parseStatements(input));/* 
-        return structs.iter().collect(new Joiner()).orElse("") + output; *//* 
+	/* var */ output = this.generateAll(/* this::mergeStatements */, this.parseStatements(input));
+	/* var */ joinedStructs = structs.iter(/* ) */.collect(/* new Joiner */()).orElse("");
+	/* var */ joinedMethods = methods.iter(/* ) */.collect(/* new Joiner */()).orElse("");/* 
+        return joinedStructs + joinedMethods + output; *//* 
      */
 }
 /* private  */ parseStatements(/* String */ input){/* 
@@ -400,25 +603,12 @@
         } *//* 
         else if (c == ' */
 }
-
-	/* '  */ (*state.isShallow)();/* else */ if(/* c  */ '{'){/* 
+/* else */ if(/* c  */ '{'){/* 
             state.enter(); *//* 
         }
         else if (c == ' */
 }
-
-	/* ')  */ (*state.exit)();
-	/* return */ state;
-}
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Path; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.Arrays; *//* 
-import java.util.function.BiFunction; *//* 
-import java.util.function.Function; *//* private  */ compileRootSegment(/* String */ input0){/* 
+/* private  */ compileRootSegment(/* String */ input0){/* 
         return this.compileOr(input0, Lists.of(
                 input -> this.compileStructured(input, "interface "),
                 input -> this.compileStructured(input, "record "),
@@ -461,24 +651,22 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         } */
 	/* var */ paramsString = withParams.substring(/* 0 */, /* paramEnd) */.strip();
 	/* var */ withBraces = withParams.substring(/* paramEnd + ")" */.length(/* ) */).strip();
-	List</* Definable */> params = this.parseValues(paramsString, /* input1 -> this */.parseDefinition(/* input1) */.flattenDefinable());/* 
+	List</* Definable */> params = this.parseValues(paramsString, /* input1 -> this */.parseDefinition(/* input1) */.flattenDefinable());
+	/* var */ paramTypes = params.iter(/* )
+                 */.map(/* Definable::findType)
+                 */.flatMap(/* Iterators::fromOption */).collect(new ListCollector<>());
+	/* var */ definable = this.parseDefinition(/* definition) */.flattenDefinable();
+	/* var */ definable1 = definable.withParams(paramTypes);
+	/* var */ s = "\n\t" + definable1.generate() + ";/* "; *//* 
 
         if (withBraces.startsWith("{") && withBraces.endsWith("} *//* ")) {
             var inputContent = withBraces.substring(1, withBraces.length() - 1);
             var outputContent = this.generateAll(this::mergeStatements, this.parseAll(inputContent, this::foldStatementChar, this::compileStatementOrBlock));
             var joinedParams = this.joinNodes(params, ", ");
-            return new Some<>(this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n");
+            var generated = this.compileDefinition(definition) + "(" + joinedParams + ")" + "{" + outputContent + "\n}\n";
+            methods = methods.add(generated);
         } *//* 
-        else {
-            var paramTypes = params.iter()
-                    .map(Definable::findType)
-                    .flatMap(Iterators::fromOption)
-                    .collect(new ListCollector<>());
-
-            var definable = this.parseDefinition(definition).flattenDefinable();
-            var definable1 = definable.withParams(paramTypes);
-            return new Some<>("\n\t" + definable1.generate() + ";");
-        } *//* 
+        return new Some<>(s); *//* 
      */
 }
 /* private  */ joinNodes(List</* T */> nodes, /* String */ delimiter){/* 
@@ -700,5 +888,33 @@ import java.util.function.Function; *//* private  */ compileRootSegment(/* Strin
         } *//* 
      */
 }
-/* 
+/* package magma; *//* 
+
+import java.io.IOException; *//* 
+import java.nio.file.Files; *//* 
+import java.nio.file.Path; *//* 
+import java.nio.file.Paths; *//* 
+import java.util.Arrays; *//* 
+import java.util.function.BiFunction; *//* 
+import java.util.function.Function; */
+	/* private  */ (*compileRootSegment)(/* String */);
+	/* private  */ (*compileOr)(/* String */, List<Option</* String */> (*)(/* String */)>);
+	/* private  */ (*compileDefinitionStatement)(/* String */);
+	/* private  */ (*compileMethod)(/* String */);
+	/* private  */ (*joinNodes)(List</* T */>, /* String */);
+	/* private  */ (*compileDefinition)(/* String */);
+	/* private  */ (*parseDefinition)(/* String */);
+	/* private  */ (*findTypeSeparator)(/* String */);
+	/* private  */ (*parseType)(/* String */);
+	/* private  */ (*parseValues)(/* String */, /*  T */ (*)(/* String */));
+	/* private  */ (*compileStatementOrBlock)(/* String */);
+	/* private  */ (*compileValue)(/* String */);
+	/* private  */ (*foldValueChar)(/* State */, /* char */);
+	/* private  */ (*mergeValues)(/* StringBuilder */, /* String */);
+	/* private  */ (*isSymbol)(/* String */);
+	/* private  */ (*compileStructured)(/* String */, /* String */);
+	/* private  */ (*compileClassMember)(/* String */);
+	/* private  */ (*compileWhitespace)(/* String */);
+	/* private  */ (*writeString)(/* Path */, /* String */);
+	/* private  */ (*readString)(/* Path */);/* 
 } */
