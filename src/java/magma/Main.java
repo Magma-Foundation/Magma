@@ -54,8 +54,11 @@ private String compileRootSegment(String input) {
         var paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
             var params = withParams.substring(0, paramEnd);
-            var withBraces = withParams.substring(paramEnd + ")".length());
-            return this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(withBraces);
+            var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                var content = withBraces.substring(1, withBraces.length() - 1);
+                return this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
+            }
         }
     }
 
