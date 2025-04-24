@@ -47,5 +47,21 @@ private String compileRoot(String input) {
 }
 
 private String compileRootSegment(String input) {
+    var paramStart = input.indexOf("(");
+    if (paramStart >= 0) {
+        var definition = input.substring(0, paramStart);
+        var withParams = input.substring(paramStart + "(".length());
+        var paramEnd = withParams.indexOf(")");
+        if (paramEnd >= 0) {
+            var params = withParams.substring(0, paramEnd);
+            var withBraces = withParams.substring(paramEnd + ")".length());
+            return this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + ")" + this.generatePlaceholder(withBraces);
+        }
+    }
+
+    return this.generatePlaceholder(input);
+}
+
+private String generatePlaceholder(String input) {
     return "/* " + input + " */";
 }
