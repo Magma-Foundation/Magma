@@ -1,3 +1,48 @@
+private static class State {
+    private final List<String> segments;
+    private StringBuilder buffer;
+    private int depth;
+
+    private State(List<String> segments, StringBuilder buffer, int depth) {
+        this.segments = segments;
+        this.buffer = buffer;
+        this.depth = depth;
+    }
+
+    public State() {
+        this(new ArrayList<>(), new StringBuilder(), 0);
+    }
+
+    private State append(char c) {
+        this.buffer.append(c);
+        return this;
+    }
+
+    private State enter() {
+        this.depth = this.depth + 1;
+        return this;
+    }
+
+    private State exit() {
+        this.depth = this.depth - 1;
+        return this;
+    }
+
+    private State advance() {
+        this.segments.add(this.buffer.toString());
+        this.buffer = new StringBuilder();
+        return this;
+    }
+
+    private boolean isLevel() {
+        return this.depth == 0;
+    }
+
+    private boolean isShallow() {
+        return this.depth == 1;
+    }
+}
+
 void main() {
     try {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -11,39 +56,59 @@ void main() {
 }
 
 private String compileRoot(String input) {
-    var segments = new ArrayList<String>();
-    var buffer = new StringBuilder();
-    var depth = 0;
-    for (var i = 0; i < input.length(); i++) {
-        var c = input.charAt(i);
-        buffer.append(c);
+    return this.getString(input);
+}
 
-        if (c == ';' && depth == 0) {
-            segments.add(buffer.toString());
-            buffer = new StringBuilder();
-        }
-        else if (c == '}' && depth == 1) {
-            segments.add(buffer.toString());
-            buffer = new StringBuilder();
-            depth--;
-        }
-        else {
-            if (c == '{') {
-                depth++;
-            }
-            if (c == '}') {
-                depth--;
-            }
-        }
-    }
-    segments.add(buffer.toString());
+private String getString(String input) {
+    return this.compileAll(input, this::foldStatementChar, this::compileRootSegment, this::mergeStatements);
+}
+
+private String compileAll(
+        String input,
+        BiFunction<State, Character, State> folder,
+        Function<String, String> compiler,
+        BiFunction<StringBuilder, String, StringBuilder> merger
+) {
+    var segments = this.divideAll(input, folder);
 
     var output = new StringBuilder();
     for (var segment : segments) {
-        output.append(this.compileRootSegment(segment));
+        var compiled = compiler.apply(segment);
+        output = merger.apply(output, compiled);
     }
 
     return output.toString();
+}
+
+private StringBuilder mergeStatements(StringBuilder output, String compiled) {
+    return output.append(compiled);
+}
+
+private List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
+    var current = new State();
+    for (var i = 0; i < input.length(); i++) {
+        var c = input.charAt(i);
+        current = folder.apply(current, c);
+    }
+
+    return current.advance().segments;
+}
+
+private State foldStatementChar(State state, char c) {
+    var appended = state.append(c);
+    if (c == ';' && appended.isLevel()) {
+        return appended.advance();
+    }
+    if (c == '}' && appended.isShallow()) {
+        return appended.advance().exit();
+    }
+    if (c == '{') {
+        return appended.enter();
+    }
+    if (c == '}') {
+        return appended.exit();
+    }
+    return appended;
 }
 
 private String compileRootSegment(String input) {
@@ -53,16 +118,34 @@ private String compileRootSegment(String input) {
         var withParams = input.substring(paramStart + "(".length());
         var paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
-            var params = withParams.substring(0, paramEnd);
+            var oldParams = withParams.substring(0, paramEnd);
             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+
+            var newParams = this.compileAll(oldParams, this::foldValueChar, this::compileDefinition, this::mergeValues);
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var content = withBraces.substring(1, withBraces.length() - 1);
-                return this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
+                return this.compileDefinition(definition) + "(" + newParams + "){" + this.generatePlaceholder(content) + "\n}\n";
             }
         }
     }
 
     return this.generatePlaceholder(input);
+}
+
+private StringBuilder mergeValues(StringBuilder buffer, String element) {
+    if (buffer.isEmpty()) {
+        return buffer.append(element);
+    }
+    return buffer.append(", ").append(element);
+}
+
+private State foldValueChar(State state, char c) {
+    if (c == ',') {
+        return state.advance();
+    }
+    else {
+        return state.append(c);
+    }
 }
 
 private String compileDefinition(String input) {
@@ -87,8 +170,8 @@ private String compileDefinition(String input) {
     return this.generatePlaceholder(stripped);
 }
 
-private String compileType(String beforeName) {
-    var stripped = beforeName.strip();
+private String compileType(String input) {
+    var stripped = input.strip();
     if (stripped.equals("void")) {
         return "void";
     }
