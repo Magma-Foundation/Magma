@@ -69,10 +69,19 @@ private String compileDefinition(String input) {
     var stripped = input.strip();
     var nameSeparator = stripped.lastIndexOf(" ");
     if (nameSeparator >= 0) {
-        var beforeName = stripped.substring(0, nameSeparator);
+        var beforeName = stripped.substring(0, nameSeparator).strip();
         var name = stripped.substring(nameSeparator + " ".length());
 
-        return this.compileType(beforeName) + " " + name;
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            var beforeType = beforeName.substring(0, typeSeparator);
+            String type = this.compileType(beforeName.substring(typeSeparator + " ".length()));
+            return this.generatePlaceholder(beforeType) + " " + type + " " + name;
+        }
+        else {
+            String type = this.compileType(beforeName);
+            return type + " " + name;
+        }
     }
 
     return this.generatePlaceholder(stripped);
@@ -82,6 +91,10 @@ private String compileType(String beforeName) {
     var stripped = beforeName.strip();
     if (stripped.equals("void")) {
         return "void";
+    }
+
+    if (stripped.equals("String")) {
+        return "char*";
     }
 
     return this.generatePlaceholder(stripped);
