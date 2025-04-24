@@ -1,4 +1,4 @@
-/* void main */(/*  */){/* 
+void main(/*  */){/* 
     try {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var input = Files.readString(source);
@@ -10,9 +10,7 @@
     }
  */
 }
-/* 
-
-private String compileRoot */(/* String input */){/* 
+/* private String */ compileRoot(/* String input */){/* 
     var segments = new ArrayList<String>();
     var buffer = new StringBuilder();
     var depth = 0;
@@ -42,8 +40,7 @@ private String compileRoot */(/* String input */){/*
 /* 
     segments.add(buffer.toString()); *//* 
 
-    var output = new StringBuilder(); *//* 
-    for  */(/* var segment : segments */){/* 
+    var output = new StringBuilder(); *//* for */(/* var segment : segments */){/* 
         output.append(this.compileRootSegment(segment));
      */
 }
@@ -53,8 +50,7 @@ private String compileRoot */(/* String input */){/*
 }
 
 private String compileRootSegment(String input) {
-    var paramStart = input.indexOf("("); *//* 
-    if  */(/* paramStart >= 0 */){/* 
+    var paramStart = input.indexOf("("); *//* if */(/* paramStart >= 0 */){/* 
         var definition = input.substring(0, paramStart);
         var withParams = input.substring(paramStart + "(".length());
         var paramEnd = withParams.indexOf(")");
@@ -63,7 +59,7 @@ private String compileRootSegment(String input) {
             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var content = withBraces.substring(1, withBraces.length() - 1);
-                return this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
+                return this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
             }
         }
      */
@@ -71,6 +67,29 @@ private String compileRootSegment(String input) {
 /* 
 
     return this.generatePlaceholder(input); *//* 
+}
+
+private String compileDefinition(String input) {
+    var stripped = input.strip(); *//* 
+    var nameSeparator = stripped.lastIndexOf(" "); *//* if */(/* nameSeparator >= 0 */){/* 
+        var beforeName = stripped.substring(0, nameSeparator);
+        var name = stripped.substring(nameSeparator + " ".length());
+
+        return this.compileType(beforeName) + " " + name;
+     */
+}
+/* 
+
+    return this.generatePlaceholder(stripped); *//* 
+}
+
+private String compileType(String beforeName) {
+    var stripped = beforeName.strip(); *//* 
+    if (stripped.equals("void")) {
+        return "void";
+    } *//* 
+
+    return this.generatePlaceholder(stripped); *//* 
 }
 
 private String generatePlaceholder(String input) {

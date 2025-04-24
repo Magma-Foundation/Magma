@@ -57,12 +57,34 @@ private String compileRootSegment(String input) {
             var withBraces = withParams.substring(paramEnd + ")".length()).strip();
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var content = withBraces.substring(1, withBraces.length() - 1);
-                return this.generatePlaceholder(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
+                return this.compileDefinition(definition) + "(" + this.generatePlaceholder(params) + "){" + this.generatePlaceholder(content) + "\n}\n";
             }
         }
     }
 
     return this.generatePlaceholder(input);
+}
+
+private String compileDefinition(String input) {
+    var stripped = input.strip();
+    var nameSeparator = stripped.lastIndexOf(" ");
+    if (nameSeparator >= 0) {
+        var beforeName = stripped.substring(0, nameSeparator);
+        var name = stripped.substring(nameSeparator + " ".length());
+
+        return this.compileType(beforeName) + " " + name;
+    }
+
+    return this.generatePlaceholder(stripped);
+}
+
+private String compileType(String beforeName) {
+    var stripped = beforeName.strip();
+    if (stripped.equals("void")) {
+        return "void";
+    }
+
+    return this.generatePlaceholder(stripped);
 }
 
 private String generatePlaceholder(String input) {
