@@ -18,9 +18,9 @@ struct Main {
 	/* private static */ Optional<char*> currentStructName;
 };
 struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
-	/* this.buffer */ = buffer;
-	/* this.segments */ = segments;
-	/* this.depth */ = depth;/* 
+	this.buffer = buffer;
+	this.segments = segments;
+	this.depth = depth;/* 
          */
 }
 /* private static */ struct State createDefault(/*  */){
@@ -29,7 +29,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 }
 /* private */ struct State advance(/*  */){
 	/* this.segments.add(this.buffer.toString()) */;
-	/* this.buffer */ = /* new StringBuilder() */;
+	this.buffer = /* new StringBuilder() */;
 	struct return this;/* 
          */
 }
@@ -59,7 +59,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* public static */ struct void main(/*  */){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
-	currentStructName = /* Optional.empty() */;/* 
+	currentStructName = Optional.empty();/* 
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -74,8 +74,8 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 }
 /* private static */ char* compileRoot(char* input){
 	struct var output = /* compileStatements(input, Main::compileRootSegment) */;
-	struct var joinedStructs = /* String.join("", structs) */;
-	struct var joinedFunctions = /* String.join("", functions) */;
+	struct var joinedStructs = String.join("", structs);
+	struct var joinedFunctions = String.join("", functions);
 	/* return output + joinedStructs */ struct + joinedFunctions;/* 
      */
 }
@@ -105,7 +105,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ List<char*> divideAll(char* input, /*  BiFunction<State */, /*  Character */, struct State> folder){
-	struct var current = /* State.createDefault() */;
+	struct var current = State.createDefault();
 	/* for */ struct (var i = /* 0 */;
 	/* i */ struct < input.length();/*  i++) {
             var c = input.charAt(i);
@@ -133,7 +133,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ struct State foldStatementChar(struct State current, struct char c){
-	struct var appended = /* current.append(c) */;/* 
+	struct var appended = current.append(c);/* 
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* 
@@ -150,7 +150,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ char* compileRootSegment(char* input){
-	struct var stripped = /* input.strip() */;/* 
+	struct var stripped = input.strip();/* 
 
         if (stripped.startsWith("package ")) {
             return "";
@@ -159,7 +159,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileClass(char* stripped){
-	struct var classIndex = /* stripped.indexOf("class ") */;/* 
+	struct var classIndex = stripped.indexOf("class ");/* 
         if (classIndex >= 0) {
             var afterKeyword = stripped.substring(classIndex + "class ".length());
             var contentStart = afterKeyword.indexOf("{");
@@ -213,7 +213,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileMethod(char* input){
-	struct var paramStart = /* input.indexOf("(") */;/* 
+	struct var paramStart = input.indexOf("(");/* 
         if (paramStart >= 0) {
             var beforeParams = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
@@ -238,7 +238,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileConstructorHeader(char* beforeParams){
-	struct var nameSeparator = /* beforeParams.lastIndexOf(" ") */;/* 
+	struct var nameSeparator = beforeParams.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
             var name = beforeParams.substring(nameSeparator + " ".length());
             if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
@@ -264,7 +264,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileStatement(char* input, /*  Function<String */, struct String> compiler){
-	struct var stripped = /* input.strip() */;
+	struct var stripped = input.strip();
 	struct if (stripped.endsWith(";/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             return Optional.of("\n\t" + compiler.apply(withoutEnd) + ";");
@@ -281,7 +281,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileAssignable(char* input){
-	struct var valueSeparator = /* input.indexOf("=") */;/* 
+	struct var valueSeparator = input.indexOf("=");/* 
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
@@ -293,7 +293,14 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ char* compileValue(char* input){
-	struct var stripped = /* input.strip() */;/* 
+	struct var stripped = input.strip();
+	struct var separator = stripped.lastIndexOf(".");/* 
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            return compileValue(parent) + "." + property;
+        } *//* 
+
         if (isSymbol(stripped)) {
             return stripped;
         } */
@@ -305,19 +312,19 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileDefinition(char* input){
-	struct var stripped = /* input.strip() */;
-	struct var nameSeparator = /* stripped.lastIndexOf(" ") */;/* 
+	struct var stripped = input.strip();
+	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator < 0) {
             return Optional.empty();
         } */
-	struct var beforeName = /* stripped.substring(0, nameSeparator).strip() */;
-	struct var name = /* stripped.substring(nameSeparator + " ".length()).strip() */;
-	struct var typeSeparator = /* beforeName.lastIndexOf(" ") */;/* 
+	struct var beforeName = stripped.substring(0, nameSeparator).strip();
+	struct var name = stripped.substring(nameSeparator + " ".length()).strip();
+	struct var typeSeparator = beforeName.lastIndexOf(" ");/* 
         if (typeSeparator < 0) {
             return compileType(beforeName).map(type -> generateDefinition("", type, name));
         } */
-	struct var beforeType = /* beforeName.substring(0, typeSeparator).strip() */;
-	struct var inputType = /* beforeName.substring(typeSeparator + " ".length()).strip() */;
+	struct var beforeType = beforeName.substring(0, typeSeparator).strip();
+	struct var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
 	/* return compileType(inputType).map(
                 outputType -> generateDefinition(generatePlaceholder(beforeType) + " ", */ struct outputType, name));/* 
      */
@@ -327,7 +334,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
      */
 }
 /* private static */ Optional<char*> compileType(char* input){
-	struct var stripped = /* input.strip() */;/* 
+	struct var stripped = input.strip();/* 
         if (stripped.equals("private")) {
             return Optional.empty();
         } *//* 

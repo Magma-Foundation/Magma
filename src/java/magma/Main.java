@@ -302,6 +302,13 @@ public class Main {
 
     private static String compileValue(String input) {
         var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            return compileValue(parent) + "." + property;
+        }
+
         if (isSymbol(stripped)) {
             return stripped;
         }
