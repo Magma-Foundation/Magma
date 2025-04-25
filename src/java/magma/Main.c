@@ -104,8 +104,8 @@ struct Primitive new_Primitive(char* value){
         public */ char* generate_Primitive(struct Primitive this){
 	return this.value;
 }
-/* /* @Override
-        public  */ */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
+/* @Override
+        public  */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
 	return Some<>(mapper.apply(this.value));
 }
 /* @Override
@@ -120,16 +120,16 @@ struct Primitive new_Primitive(char* value){
         public */ Option<T> or_Some<T>(struct Some<T> this, Supplier<Option<T>> other){
 	return this;
 }
-/* /* @Override
-        public  */ */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R> (*mapper)(T)){
+/* @Override
+        public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R> (*mapper)(T)){
 	return mapper.apply(this.value);
 }
 /* @Override
         public */ Option<T> filter_Some<T>(struct Some<T> this, Predicate<T> predicate){
 	return predicate.test(/* this.value) ? this : new None<>( */);
 }
-/* /* @Override
-        public  */ */ Option<R> map_None<T, R>(struct None<T> this, R (*mapper)(T)){
+/* @Override
+        public  */ Option<R> map_None<T, R>(struct None<T> this, R (*mapper)(T)){
 	return None<>(/*  */);
 }
 /* @Override
@@ -144,8 +144,8 @@ struct Primitive new_Primitive(char* value){
         public */ Option<T> or_None<T>(struct None<T> this, Supplier<Option<T>> other){
 	return other.get(/*  */);
 }
-/* /* @Override
-        public  */ */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R> (*mapper)(T)){
+/* @Override
+        public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R> (*mapper)(T)){
 	return None<>(/*  */);
 }
 /* @Override
@@ -377,7 +377,7 @@ struct Struct new_Struct(char* name){
         } */
 	return output.toString(/*  */);
 }
-/* /* private static  */ */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, T (*compiler)(char*)){
+/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, T (*compiler)(char*)){
 	struct var segments = divide(input, folder);
 	struct var compiled = ArrayList<T>(/*  */);/* 
         for (var segment : segments) {
@@ -634,7 +634,7 @@ struct Struct new_Struct(char* name){
         } */
 	return None<>(/*  */);
 }
-/* /* private static  */ */ List<T> parseStatements_Main<T>(struct Main this, char* content, T (*compiler)(char*)){
+/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, T (*compiler)(char*)){
 	return parseAll(content, /* Main::foldStatementChar */, compiler);
 }
 /* private static */ Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
@@ -742,7 +742,7 @@ struct Struct new_Struct(char* name){
         } */
 	return struct Content(stripped);
 }
-/* /* private static  */ */ Option<struct R> compileInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
+/* private static  */ Option<struct R> compileInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
 	struct var withoutPrefix = input.strip(/*  */);/* 
         if (!withoutPrefix.endsWith(")")) {
             return new None<>();
@@ -800,7 +800,7 @@ struct Struct new_Struct(char* name){
                         var maybeOutputType = parseAndFlattenType(inputType);
 
                         yield maybeOutputType.map(outputType -> withName
-                                .withBeforeType(generatePlaceholder(withoutTypeParams))
+                                .withBeforeType(withoutTypeParams)
                                 .withTypeParams(typeParams)
                                 .withType(outputType)
                                 .complete());
@@ -872,7 +872,7 @@ struct Struct new_Struct(char* name){
         } */
 	return None<>(/*  */);
 }
-/* /* private static  */ */ List<T> parseValues_Main<T>(struct Main this, char* args, T (*compiler)(char*)){
+/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, T (*compiler)(char*)){
 	return parseAll(args, /* Main::foldValueChar */, compiler);
 }
 /* private static */ struct State foldValueChar_Main(struct Main this, struct State state, struct char c){/* 

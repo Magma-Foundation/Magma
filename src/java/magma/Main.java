@@ -959,7 +959,7 @@ public class Main {
                         var maybeOutputType = parseAndFlattenType(inputType);
 
                         yield maybeOutputType.map(outputType -> withName
-                                .withBeforeType(generatePlaceholder(withoutTypeParams))
+                                .withBeforeType(withoutTypeParams)
                                 .withTypeParams(typeParams)
                                 .withType(outputType)
                                 .complete());
