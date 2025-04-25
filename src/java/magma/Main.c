@@ -151,7 +151,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public  */ Option<Tuple<T, R>> and_Some<T, R>(struct Some<T> this, Option<R> (*supplier)()){
-	/* supplier() */ local0 = supplier();
+	Option<R> local0 = supplier();
 	return local0.map(local0, /* otherValue -> new Tuple<>(this.value, otherValue) */);
 }
 /* @Override
@@ -1001,6 +1001,13 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ struct Type resolveType_Main(struct Main this, struct Value value){
 	struct Value local0 = value;/* 
+        if (value instanceof Invocation(var base, var _)) {
+            var resolved = resolveType(base);
+            if (resolved instanceof Functional functional) {
+                return functional.returnType;
+            }
+        } *//* 
+
         if (value instanceof Symbol(var name)) {
             var maybeType = Options.fromNative(frames.stream()
                     .map(frame -> findNameInFrame(name, frame))

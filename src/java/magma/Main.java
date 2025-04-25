@@ -1070,6 +1070,13 @@ public class Main {
     }
 
     private static Type resolveType(Value value) {
+        if (value instanceof Invocation(var base, var _)) {
+            var resolved = resolveType(base);
+            if (resolved instanceof Functional functional) {
+                return functional.returnType;
+            }
+        }
+
         if (value instanceof Symbol(var name)) {
             var maybeType = Options.fromNative(frames.stream()
                     .map(frame -> findNameInFrame(name, frame))
