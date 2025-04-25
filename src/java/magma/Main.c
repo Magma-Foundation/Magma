@@ -13,9 +13,9 @@ struct State {
 	/* private */ struct StringBuilder buffer;
 };
 struct Main {
-	/* public static final List<String> structs = */ struct new ArrayList<>();
-	/* private static final List<String> functions = */ struct new ArrayList<>();
-	/* private static Optional<String> currentStructName */ struct = Optional.empty();
+	/* public static final */ List<char*> structs = /*  new ArrayList<>() */;
+	/* private static final */ List<char*> functions = /*  new ArrayList<>() */;
+	/* private static */ Optional<char*> currentStructName = /*  Optional.empty() */;
 };
 struct private State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
             this.buffer = buffer; *//* 
@@ -196,7 +196,7 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
 /* private static */ char* compileClassSegment(char* input){/* 
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
-                .or(() -> compileDefinitionStatement(input))
+                .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())); *//* 
      */
@@ -256,15 +256,38 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
         return generatePlaceholder(input); *//* 
      */
 }
-/* private static */ Optional<char*> compileDefinitionStatement(char* input){/* 
+/* private static */ Optional<char*> compileClassStatement(char* input){/* 
         var stripped = input.strip(); *//* 
         if (stripped.endsWith("; *//* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
+            return Optional.of("\n\t" + compileClassStatementValue(withoutEnd) + ";");
         } *//* 
         else {
             return Optional.empty();
         } *//* 
+     */
+}
+/* private static */ char* compileClassStatementValue(char* input){/* 
+        return compileInitialization(input)
+                .or(() -> compileDefinition(input))
+                .orElseGet(() -> generatePlaceholder(input)); *//* 
+     */
+}
+/* private static */ Optional<char*> compileInitialization(char* input){/* 
+        var valueSeparator = input.indexOf("="); *//* 
+        if(valueSeparator >= 0) {
+            var inputDefinition = input.substring(0, valueSeparator);
+            var value = input.substring(valueSeparator + "=".length());
+
+            return compileDefinition(inputDefinition).map(outputDefinition -> {
+                return outputDefinition + " = " + compileValue(value);
+            });
+        } *//* 
+        return Optional.empty(); *//* 
+     */
+}
+/* private static */ char* compileValue(char* value){/* 
+        return generatePlaceholder(value); *//* 
      */
 }
 /* private static */ char* compileDefinitionOrPlaceholder(char* input){/* 
