@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
-    private interface Type {
+    public interface Type extends Node {
         String generate();
 
         default Type flatten() {
@@ -31,20 +32,14 @@ public class Main {
         String generate();
     }
 
-    private sealed interface Option<T> {
+    public sealed interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
 
         T orElseGet(Supplier<T> other);
 
-        Option<T> or(Supplier<Option<T>> other);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
         Option<T> filter(Predicate<T> predicate);
-
-        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier);
     }
 
     private interface FunctionSegment {
@@ -55,8 +50,7 @@ public class Main {
         String generate();
     }
 
-    private interface Assignable {
-        String generate();
+    private interface Assignable extends Node {
     }
 
     private interface Value extends Assignable {
@@ -66,6 +60,24 @@ public class Main {
         String generate();
 
         Option<Definition> toDefinition();
+    }
+
+    private sealed interface Result<T, X> permits Ok, Err {
+        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+    }
+
+    private interface Rule<T> extends Function<String, Result<T, CompileError>> {
+    }
+
+    private interface Context {
+    }
+
+    private interface Node {
+        String generate();
     }
 
     private enum Primitive implements Type {
@@ -119,24 +131,10 @@ public class Main {
         }
 
         @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return this;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
         public Option<T> filter(Predicate<T> predicate) {
             return predicate.test(this.value) ? this : new None<>();
         }
 
-        @Override
-        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier) {
-            return supplier.get().map(otherValue -> new Tuple<>(this.value, otherValue));
-        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -156,24 +154,10 @@ public class Main {
         }
 
         @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<>();
-        }
-
-        @Override
         public Option<T> filter(Predicate<T> predicate) {
             return this;
         }
 
-        @Override
-        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier) {
-            return new None<>();
-        }
     }
 
     private static class State {
@@ -285,7 +269,7 @@ public class Main {
         }
     }
 
-    record Struct(String name, List<String> typeArgs, Map<String, Type> definitions) implements Type {
+    public record Struct(String name, List<String> typeArgs, Map<String, Type> definitions) implements Type {
         @Override
         public String generate() {
             var typeParamString = this.generateTypeParams();
@@ -334,23 +318,6 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Type, FunctionSegment, StatementValue, Value, Parameter {
-        @Override
-        public String generate() {
-            return generatePlaceholder(this.input);
-        }
-
-        @Override
-        public String stringify() {
-            return this.input;
-        }
-
-        @Override
-        public Option<Definition> toDefinition() {
-            return new None<>();
-        }
-    }
-
     private record Functional(List<Type> paramTypes, Type returnType) implements Type {
         @Override
         public String generate() {
@@ -389,20 +356,20 @@ public class Main {
 
         @Override
         public Type flatten() {
-            if (this.base.equals("Function")) {
-                var param = this.args.getFirst();
-                var returns = this.args.get(1);
-                return new Functional(Collections.singletonList(param), returns);
-            }
-
-            if (this.base.equals("Supplier")) {
-                var returns = this.args.getFirst();
-                return new Functional(Collections.emptyList(), returns);
-            }
-
-            if (this.base.equals("Predicate")) {
-                var param = this.args.getFirst();
-                return new Functional(Collections.singletonList(param), Primitive.Boolean);
+            switch (this.base) {
+                case "Function" -> {
+                    var param = this.args.getFirst();
+                    var returns = this.args.get(1);
+                    return new Functional(Collections.singletonList(param), returns);
+                }
+                case "Supplier" -> {
+                    var returns = this.args.getFirst();
+                    return new Functional(Collections.emptyList(), returns);
+                }
+                case "Predicate" -> {
+                    var param = this.args.getFirst();
+                    return new Functional(Collections.singletonList(param), Primitive.Boolean);
+                }
             }
 
             return this;
@@ -552,10 +519,6 @@ public class Main {
 
             return this.caller.generate() + "(" + joined + ")";
         }
-
-        private Invocation toInvocation() {
-            return this;
-        }
     }
 
     private record StructNode(String name, List<String> typeParams) {
@@ -660,6 +623,52 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return supplier.get().mapValue(otherValue -> new Tuple<>(this.value, otherValue));
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
+    }
+
+    private record StringContext(String value) implements Context {
+    }
+
+    private record CompileError(String message, Context context, List<CompileError> errors) {
+        private CompileError(String message, Context context) {
+            this(message, context, new ArrayList<>());
+        }
+    }
+
+    private record NodeContext(Node node) implements Context {
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -684,7 +693,7 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var output = compileStatements(input, input1 -> new Some<>(compileRootSegment(input1)));
+        var output = compileStatements(input, Main::compileRootSegment);
         var joinedStructs = String.join("", structs);
 
         var joinedFunctions = functions.stream()
@@ -694,19 +703,17 @@ public class Main {
         return output + joinedStructs + joinedFunctions;
     }
 
-    private static String compileStatements(String input, Function<String, Option<String>> compiler) {
+    private static Result<String, CompileError> compileStatements(String input, Function<String, Result<String, CompileError>> compiler) {
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
     }
 
-    private static String compileAll(
+    private static Result<String, CompileError> compileAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, Option<String>> compiler,
+            Function<String, Result<String, CompileError>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        return parseAll(input, folder, compiler)
-                .map(listOption -> generateAll(merger, listOption))
-                .orElse("");
+        return parseAll(input, folder, compiler).mapValue(listOption -> generateAll(merger, listOption));
     }
 
     private static String generateAll(
@@ -721,16 +728,16 @@ public class Main {
         return output.toString();
     }
 
-    private static <T> Option<List<T>> parseAll(
+    private static <T> Result<List<T>, CompileError> parseAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, Option<T>> compiler
+            Function<String, Result<T, CompileError>> compiler
     ) {
         var segments = divide(input, folder);
 
-        Option<List<T>> compiled = new Some<>(new ArrayList<T>());
+        Result<List<T>, CompileError> compiled = new Ok<>(new ArrayList<T>());
         for (var segment : segments) {
-            compiled = compiled.and(() -> compiler.apply(segment)).map(tuple -> {
+            compiled = compiled.and(() -> compiler.apply(segment)).mapValue(tuple -> {
                 tuple.left.add(tuple.right);
                 return tuple.left;
             });
@@ -817,30 +824,31 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) {
+    private static Result<String, CompileError> compileRootSegment(String input) {
         var stripped = input.strip();
 
         if (stripped.startsWith("package ")) {
-            return "";
+            return new Ok<>("");
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
+        return compileClass(stripped);
     }
 
-    private static Option<String> compileClass(String stripped) {
+    private static Result<String, CompileError> compileClass(String stripped) {
         return compileStructured(stripped, "class ");
     }
 
-    private static Option<String> compileStructured(String stripped, String infix) {
+    private static Result<String, CompileError> compileStructured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
-            return new None<>();
+            return createInfixErr(stripped, infix);
         }
         var afterKeyword = stripped.substring(classIndex + infix.length());
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
-            return new None<>();
+            return createInfixErr(afterKeyword, "{");
         }
+
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
         var withEnd = afterKeyword.substring(contentStart + "{".length());
 
@@ -860,41 +868,42 @@ public class Main {
             var withParamEnd = withoutExtends.substring(paramStart + "(".length()).strip();
             if (withParamEnd.endsWith(")")) {
                 var inputParams = withParamEnd.substring(0, withParamEnd.length() - ")".length());
-                if (parseParameters(inputParams) instanceof Some(var params)) {
-                    return getStringOption(withoutParameters, withEnd, params);
-                }
+                return parseParameters(inputParams).flatMapValue(
+                        params -> compileStructuredWithParams(withoutParameters, withEnd, params));
             }
         }
 
-        return getStringOption(withoutExtends, withEnd, new ArrayList<>());
+        return compileStructuredWithParams(withoutExtends, withEnd, new ArrayList<>());
     }
 
-    private static Option<String> getStringOption(String withoutParameters, String withEnd, List<Parameter> params) {
+    private static <T> Result<T, CompileError> createInfixErr(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
+    }
+
+    private static Result<String, CompileError> compileStructuredWithParams(String withoutParameters, String withEnd, List<Parameter> params) {
         var typeParamStart = withoutParameters.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
             var withTypeParamEnd = withoutParameters.substring(typeParamStart + "<".length()).strip();
             if (withTypeParamEnd.endsWith(">")) {
                 var typeParamsString = withTypeParamEnd.substring(0, withTypeParamEnd.length() - ">".length());
-                var maybeTypeParams = parseValues(typeParamsString, Some::new);
-                if (maybeTypeParams instanceof Some(var actualTypeParams)) {
-                    return assembleStructured(name, withEnd, actualTypeParams, params);
-                }
+                return parseValues(typeParamsString, Ok::new).flatMapValue(actualTypeParams -> assembleStructured(name, withEnd, actualTypeParams, params));
             }
         }
 
         return assembleStructured(withoutParameters, withEnd, Collections.emptyList(), params);
     }
 
-    private static Option<String> assembleStructured(String name, String input, List<String> typeParams, List<Parameter> params) {
+    private static Result<String, CompileError> assembleStructured(String name, String input, List<String> typeParams, List<Parameter> params) {
         if (!isSymbol(name)) {
-            return new None<>();
+            return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
         }
 
         String withEnd = input.strip();
         if (!withEnd.endsWith("}")) {
-            return new None<>();
+            return new Err<>(new CompileError("Suffix '}' not present", new StringContext(withEnd)));
         }
+
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
         var typeParamString = typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">";
@@ -902,8 +911,7 @@ public class Main {
         var structNode = new StructNode(name, typeParams);
         frames.addLast(new Frame(structNode));
 
-        var maybeStatements = parseAll(content, Main::foldStatementChar, input1 -> new Some<>(compileClassSegment(input1)));
-        if (maybeStatements instanceof Some(var outputStatements)) {
+        return parseAll(content, Main::foldStatementChar, Main::compileClassSegment).mapValue(outputStatements -> {
             var copy = new ArrayList<String>(params.stream()
                     .map(Statement::new)
                     .map(Statement::generate)
@@ -915,15 +923,12 @@ public class Main {
 
             frames.removeLast();
             structs.add(generated);
-            return new Some<>("");
-        }
-        else {
-            return new None<>();
-        }
+            return "";
+        });
     }
 
     private static boolean isSymbol(String input) {
-        if (input.isEmpty()) {
+        if (input.isEmpty() || input.equals("private")) {
             return false;
         }
 
@@ -937,34 +942,31 @@ public class Main {
         return true;
     }
 
-    private static String compileClassSegment(String input) {
-        return parseWhitespace(input).map(Whitespace::generate)
-                .or(() -> compileClass(input))
-                .or(() -> compileStructured(input, "enum "))
-                .or(() -> compileStructured(input, "record "))
-                .or(() -> compileStructured(input, "interface "))
-                .or(() -> parseMethod(input).map(Whitespace::generate))
-                .or(() -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).map(Statement::generate))
-                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    private static Result<String, CompileError> compileClassSegment(String input0) {
+        return Main.parseOr(input0, List.of(
+                input -> parseWhitespace(input).mapValue(Whitespace::generate),
+                Main::compileClass,
+                input -> compileStructured(input, "enum "),
+                input -> compileStructured(input, "record "),
+                input -> compileStructured(input, "interface "),
+                input -> parseMethod(input).mapValue(Whitespace::generate),
+                input -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).mapValue(Statement::generate)
+        ));
     }
 
-    private static Option<String> compileWhitespace(String input) {
-        return parseWhitespace(input).map(Whitespace::generate);
-    }
-
-    private static Option<Whitespace> parseWhitespace(String input) {
+    private static Result<Whitespace, CompileError> parseWhitespace(String input) {
         if (input.isBlank()) {
-            return new Some<>(new Whitespace());
+            return new Ok<>(new Whitespace());
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not blank", new StringContext(input)));
         }
     }
 
-    private static Option<Whitespace> parseMethod(String input) {
+    private static Result<Whitespace, CompileError> parseMethod(String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
-            return new None<>();
+            return createInfixErr(input, "(");
         }
 
         var beforeParams = input.substring(0, paramStart).strip();
@@ -976,118 +978,117 @@ public class Main {
         var currentStructTypeParams = currentStruct.typeParams;
         typeParams.addAll(currentStructTypeParams);
 
-        var maybeHeader = parseDefinition(beforeParams)
-                .<Definable>map(value -> value)
-                .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
+        var definableCompileErrorResult = parseOr(beforeParams, List.<Rule<Definable>>of(
+                input0 -> parseDefinition(input0).mapValue(value -> value),
+                input0 -> compileConstructorDefinition(input0).mapValue(value -> value)
+        ));
 
-        if (!(maybeHeader instanceof Some(var header))) {
-            return new None<>();
-        }
-
-        var paramEnd = withParams.indexOf(")");
-        if (paramEnd < 0) {
-            return new None<>();
-        }
-
-        var paramStrings = withParams.substring(0, paramEnd).strip();
-        var afterParams = withParams.substring(paramEnd + ")".length()).strip();
-        if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
-            var content = afterParams.substring(1, afterParams.length() - 1);
-
-            var maybeInputParams = parseParameters(paramStrings);
-            if (maybeInputParams instanceof Some(var inputParams)) {
-                var paramDefinitions = inputParams.stream()
-                        .map(Parameter::toDefinition)
-                        .flatMap(Options::toStream)
-                        .toList();
-
-                var params = inputParams
-                        .stream()
-                        .filter(node -> !(node instanceof Whitespace))
-                        .toList();
-
-                defineAll(paramDefinitions);
-
-                var maybeOldStatements = parseStatements(content, (String input1) -> new Some<>(parseStatement(input1)));
-                typeParams.clear();
-
-                if (maybeOldStatements instanceof Some(var oldStatements)) {
-                    var list = statements.stream()
-                            .map(Statement::new)
-                            .toList();
-                    statements.clear();
-                    localCounter = 0;
-
-                    ArrayList<FunctionSegment> newStatements;
-                    if (header instanceof ConstructorDefinition(var name)) {
-                        var copy = new ArrayList<FunctionSegment>(list);
-
-                        copy.add(new Statement(new DefinitionBuilder()
-                                .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
-                                .withName("this")
-                                .complete()));
-
-                        copy.addAll(oldStatements);
-                        copy.add(new Statement(new Return(new Symbol("this"))));
-                        newStatements = copy;
-                    }
-                    else {
-                        newStatements = new ArrayList<>(list);
-                        newStatements.addAll(oldStatements);
-                    }
-
-
-                    Definable newDefinition;
-                    var outputParams = new ArrayList<Parameter>();
-                    if (header instanceof Definition oldDefinition) {
-                        outputParams.add(new DefinitionBuilder()
-                                .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
-                                .withName("this")
-                                .complete());
-
-                        var paramTypes = paramDefinitions.stream()
-                                .map(definition -> definition.type)
-                                .toList();
-
-                        var complete = new DefinitionBuilder()
-                                .withName(oldDefinition.name)
-                                .withType(new Functional(paramTypes, oldDefinition.type))
-                                .complete();
-                        define(complete);
-
-                        newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams1 -> {
-                            ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
-                            copy.addAll(typeParams1);
-                            return copy;
-                        });
-                    }
-                    else if (header instanceof ConstructorDefinition constructorDefinition) {
-                        var definition = constructorDefinition.toDefinition();
-                        newDefinition = definition;
-
-                        define(definition);
-                    }
-                    else {
-                        newDefinition = header;
-                    }
-
-                    outputParams.addAll(params);
-
-                    var constructor = new FunctionStatement(newDefinition, outputParams, newStatements);
-                    functions.add(constructor);
-                    return new Some<>(new Whitespace());
-                }
+        return definableCompileErrorResult.flatMapValue(header -> {
+            var paramEnd = withParams.indexOf(")");
+            if (paramEnd < 0) {
+                return createInfixErr(withParams, ")");
             }
-        }
 
-        if (afterParams.equals(";")) {
-            return new Some<>(new Whitespace());
-        }
+            var paramStrings = withParams.substring(0, paramEnd).strip();
+            var afterParams = withParams.substring(paramEnd + ")".length()).strip();
+            if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
+                var content = afterParams.substring(1, afterParams.length() - 1);
 
-        return new None<>();
+                return parseParameters(paramStrings).flatMapValue(inputParams -> {
+                    var paramDefinitions = inputParams.stream()
+                            .map(Parameter::toDefinition)
+                            .flatMap(Options::toStream)
+                            .toList();
+
+                    var params = inputParams
+                            .stream()
+                            .filter(node -> !(node instanceof Whitespace))
+                            .toList();
+
+                    defineAll(paramDefinitions);
+
+                    var maybeOldStatements = parseStatements(content, Main::parseStatement);
+                    typeParams.clear();
+
+                    return maybeOldStatements.mapValue(oldStatements -> {
+                        var list = statements.stream()
+                                .map(Statement::new)
+                                .toList();
+                        statements.clear();
+                        localCounter = 0;
+
+                        ArrayList<FunctionSegment> newStatements;
+                        if (header instanceof ConstructorDefinition(var name)) {
+                            var copy = new ArrayList<FunctionSegment>(list);
+
+                            copy.add(new Statement(new DefinitionBuilder()
+                                    .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
+                                    .withName("this")
+                                    .complete()));
+
+                            copy.addAll(oldStatements);
+                            copy.add(new Statement(new Return(new Symbol("this"))));
+                            newStatements = copy;
+                        }
+                        else {
+                            newStatements = new ArrayList<>(list);
+                            newStatements.addAll(oldStatements);
+                        }
+
+
+                        Definable newDefinition;
+                        var outputParams = new ArrayList<Parameter>();
+                        if (header instanceof Definition oldDefinition) {
+                            outputParams.add(new DefinitionBuilder()
+                                    .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
+                                    .withName("this")
+                                    .complete());
+
+                            var paramTypes = paramDefinitions.stream()
+                                    .map(definition -> definition.type)
+                                    .toList();
+
+                            var complete = new DefinitionBuilder()
+                                    .withName(oldDefinition.name)
+                                    .withType(new Functional(paramTypes, oldDefinition.type))
+                                    .complete();
+                            define(complete);
+
+                            newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams1 -> {
+                                ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
+                                copy.addAll(typeParams1);
+                                return copy;
+                            });
+                        }
+                        else if (header instanceof ConstructorDefinition constructorDefinition) {
+                            var definition = constructorDefinition.toDefinition();
+                            newDefinition = definition;
+
+                            define(definition);
+                        }
+                        else {
+                            newDefinition = header;
+                        }
+
+                        outputParams.addAll(params);
+
+                        var constructor = new FunctionStatement(newDefinition, outputParams, newStatements);
+                        functions.add(constructor);
+                        return new Whitespace();
+                    });
+                });
+            }
+
+            if (afterParams.equals(";")) {
+                return new Ok<>(new Whitespace());
+            }
+
+            return new Err<>(new CompileError("Invalid body", new StringContext(afterParams)));
+        });
+
     }
 
-    private static Option<List<Parameter>> parseParameters(String paramStrings) {
+    private static Result<List<Parameter>, CompileError> parseParameters(String paramStrings) {
         return parseValues(paramStrings, Main::parseParameter);
     }
 
@@ -1101,161 +1102,190 @@ public class Main {
         frames.getLast().definitions.put(definition.name, definition.type);
     }
 
-    private static <T> Option<List<T>> parseStatements(String content, Function<String, Option<T>> compiler) {
+    private static <T> Result<List<T>, CompileError> parseStatements(String content, Function<String, Result<T, CompileError>> compiler) {
         return parseAll(content, Main::foldStatementChar, compiler);
     }
 
-    private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
-        return findConstructorDefinitionName(input).flatMap(name -> {
+    private static Result<ConstructorDefinition, CompileError> compileConstructorDefinition(String input) {
+        return findConstructorDefinitionName(input).flatMapValue(name -> {
             if (frames.getLast().node.name.equals(name)) {
-                return new Some<>(new ConstructorDefinition(name));
+                return new Ok<>(new ConstructorDefinition(name));
             }
-            return new None<>();
+            return new Err<>(new CompileError("Constructor name didn't match", new StringContext(name)));
         });
     }
 
-    private static Option<String> findConstructorDefinitionName(String input) {
+    private static Result<String, CompileError> findConstructorDefinitionName(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
-            return new Some<>(name);
+            return new Ok<>(name);
         }
+
         if (isSymbol(stripped)) {
-            return new Some<>(stripped);
+            return new Ok<>(stripped);
         }
-        return new None<>();
+
+        return createSymbolErr(stripped);
     }
 
-    private static FunctionSegment parseStatement(String input) {
-        return parseWhitespace(input)
-                .<FunctionSegment>map(value -> value)
-                .or(() -> parseStatementWithoutBraces(input, Main::parseStatementValue).map(value -> value))
-                .orElseGet(() -> new Content(input));
+    private static Result<FunctionSegment, CompileError> parseStatement(String input0) {
+        return parseOr(input0, List.of(
+                input -> parseWhitespace(input).mapValue(value -> value),
+                input -> parseStatementWithoutBraces(input, Main::parseStatementValue)
+                        .mapValue(value -> value)
+        ));
     }
 
-    private static StatementValue parseStatementValue(String input) {
-        return parseReturn(input).<StatementValue>map(value -> value)
-                .or(() -> parsePostIncrement(input).map(value -> value))
-                .or(() -> parsePostDecrement(input).map(value -> value))
-                .or(() -> parseInvocation(input).map(value -> value))
-                .or(() -> parseAssignment(input).map(value -> value))
-                .or(() -> parseDefinition(input).map(value -> value))
-                .orElseGet(() -> new Content(input));
+    private static <T> Result<T, CompileError> parseOr(String input, List<Rule<T>> rules) {
+        List<CompileError> errors = new ArrayList<>();
+        for (var rule : rules) {
+            var result = rule.apply(input);
+            switch (result) {
+                case Err<T, CompileError>(var error) -> errors.add(error);
+                case Ok<T, CompileError>(var value) -> {
+                    return new Ok<>(value);
+                }
+            }
+        }
+
+        return new Err<>(new CompileError(input, new StringContext("No valid rule present"), errors));
     }
 
-    private static Option<PostDecrement> parsePostDecrement(String input) {
+    private static Result<StatementValue, CompileError> parseStatementValue(String input0) {
+        return parseOr(input0, List.of(
+                input -> parseReturn(input).mapValue(value -> value),
+                input -> parsePostIncrement(input).mapValue(value -> value),
+                input -> parsePostDecrement(input).mapValue(value -> value),
+                input -> parseInvocation(input).mapValue(value -> value),
+                input -> parseAssignment(input).mapValue(value -> value),
+                input -> parseDefinition(input).mapValue(value -> value)
+        ));
+    }
+
+    private static Result<PostDecrement, CompileError> parsePostDecrement(String input) {
         var stripped = input.strip();
         if (stripped.endsWith("--")) {
-            return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
+            var slice = stripped.substring(0, stripped.length() - "--".length());
+            return parseValue(slice).mapValue(PostDecrement::new);
         }
         else {
-            return new None<>();
+            return createSuffixErr(stripped, "--");
         }
     }
 
-    private static Option<PostIncrement> parsePostIncrement(String input) {
+    private static Result<PostIncrement, CompileError> parsePostIncrement(String input) {
         var stripped = input.strip();
         if (stripped.endsWith("++")) {
-            return parseValue(stripped.substring(0, stripped.length() - "++".length())).map(PostIncrement::new);
+            return parseValue(stripped.substring(0, stripped.length() - "++".length())).mapValue(PostIncrement::new);
         }
         else {
-            return new None<>();
+            return createSuffixErr(stripped, "++");
         }
     }
 
-    private static Option<Return> parseReturn(String input) {
+    private static Result<Return, CompileError> parseReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return new Some<>(new Return(parseValueOrPlaceholder(stripped.substring("return ".length()))));
+            return parseValue(stripped.substring("return ".length())).mapValue(Return::new);
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Prefix 'return " + "' not present", new StringContext(stripped)));
     }
 
-    private static Option<Statement> parseStatementWithoutBraces(String input, Function<String, StatementValue> compiler) {
+    private static Result<Statement, CompileError> parseStatementWithoutBraces(
+            String input,
+            Function<String, Result<StatementValue, CompileError>> compiler
+    ) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            var content = compiler.apply(withoutEnd);
-            return new Some<>(new Statement(content));
+            return compiler.apply(withoutEnd).mapValue(Statement::new);
         }
         else {
-            return new None<>();
+            return createSuffixErr(input, ";");
         }
     }
 
-    private static StatementValue compileClassStatementValue(String input) {
-        return parseAssignment(input).<StatementValue>map(value -> value)
-                .or(() -> parseDefinition(input).map(value -> value))
-                .orElseGet(() -> new Content(input));
+    private static <T> Result<T, CompileError> createSuffixErr(String input, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
     }
 
-    private static Option<Assignment> parseAssignment(String input) {
+    private static Result<StatementValue, CompileError> compileClassStatementValue(String input0) {
+        return parseOr(input0, List.of(
+                input -> parseAssignment(input).mapValue(value -> value),
+                input -> parseDefinition(input).mapValue(value -> value)
+        ));
+    }
+
+    private static Result<Assignment, CompileError> parseAssignment(String input) {
         var valueSeparator = input.indexOf("=");
-        if (valueSeparator >= 0) {
-            var inputDefinition = input.substring(0, valueSeparator);
-            var value = input.substring(valueSeparator + "=".length());
-            var parsedValue = parseValueOrPlaceholder(value);
-
-            var destination = parseDefinition(inputDefinition)
-                    .<Assignable>map(result -> {
-                        if (result.type.equals(Primitive.Auto)) {
-                            return result.withType(resolveType(parsedValue));
-                        }
-
-                        return result;
-                    })
-                    .orElseGet(() -> parseValueOrPlaceholder(inputDefinition));
-
-            return new Some<>(new Assignment(destination, parsedValue));
+        if (valueSeparator < 0) {
+            return createInfixErr(input, "=");
         }
-        return new None<>();
+
+        var inputDefinition = input.substring(0, valueSeparator);
+        var value = input.substring(valueSeparator + "=".length());
+        return parseValue(value).flatMapValue(parsedValue -> {
+            var maybeAssignable = parseOr(inputDefinition, List.<Rule<Assignable>>of(
+                    input0 -> parseDefinition(input0).mapValue(value0 -> value0),
+                    input0 -> parseValue(input0).mapValue(value0 -> value0)
+            ));
+
+            return maybeAssignable.flatMapValue(destination -> {
+                if (destination instanceof Definition definition) {
+                    if (definition.type.equals(Primitive.Auto)) {
+                        return resolveType(parsedValue).mapValue(resolved -> {
+                            var withType = definition.withType(resolved);
+                            return new Assignment(withType, parsedValue);
+                        });
+                    }
+                }
+
+                return new Ok<>(new Assignment(destination, parsedValue));
+            });
+        });
     }
 
-    private static Value parseValueOrPlaceholder(String input) {
-        return parseValue(input).orElseGet(() -> new Content(input));
-    }
-
-    private static Option<Value> parseValue(String input) {
+    private static Result<Value, CompileError> parseValue(String input) {
         var stripped = input.strip();
         if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
             var slice = stripped.substring(1, stripped.length() - 1);
-            return new Some<>(new StringValue(slice));
+            return new Ok<>(new StringValue(slice));
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Symbol(stripped));
+            return new Ok<>(new Symbol(stripped));
         }
 
         if (isNumber(stripped)) {
-            return new Some<>(new Number(stripped));
+            return new Ok<>(new Number(stripped));
         }
 
         if (stripped.startsWith("new ")) {
             var substring = stripped.substring("new ".length());
-            var maybeInvokable = parseInvokable(substring, Main::parseType, Construction::new);
-            if (maybeInvokable instanceof Some(var invokable)) {
-                return new Some<>(invokable.toInvocation());
-            }
+            return parseInvokable(substring, Main::parseType, Construction::new)
+                    .mapValue(Construction::toInvocation);
         }
 
         var maybeInvocation = parseInvocation(stripped);
-        if (maybeInvocation instanceof Some(var invocation)) {
-            return new Some<>(invocation);
+        if (maybeInvocation instanceof Ok(var invocation)) {
+            return new Ok<>(invocation);
         }
 
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property) && parseValue(parentString) instanceof Some(var parent)) {
-                var type = resolveType(parent);
-                if (type instanceof Functional) {
-                    return new Some<>(parent);
-                }
+            if (isSymbol(property)) {
+                return parseValue(parentString).flatMapValue(parent -> resolveType(parent).mapValue(type -> {
+                    if (type instanceof Functional) {
+                        return parent;
+                    }
 
-                return new Some<>(new DataAccess(parent, property));
+                    return new DataAccess(parent, property);
+                }));
             }
         }
 
@@ -1272,43 +1302,43 @@ public class Main {
                 var maybeWhenTrue = parseValue(whenTrueString);
                 var maybeWhenFalse = parseValue(whenFalseString);
 
-                if (maybeCondition instanceof Some(var condition)
-                        && maybeWhenTrue instanceof Some(var whenTrue)
-                        && maybeWhenFalse instanceof Some(var whenFalse)) {
-                    return new Some<>(new Ternary(condition, whenTrue, whenFalse));
+                if (maybeCondition instanceof Ok(var condition)
+                        && maybeWhenTrue instanceof Ok(var whenTrue)
+                        && maybeWhenFalse instanceof Ok(var whenFalse)) {
+                    return new Ok<>(new Ternary(condition, whenTrue, whenFalse));
                 }
             }
         }
 
-        for (var operator : Operator.values()) {
-            if (parseOperator(input, operator) instanceof Some<Value> some) {
-                return some;
-            }
-        }
+        var rules = Arrays.stream(Operator.values())
+                .map(operator -> (Rule<Value>) input0 -> parseOperator(input0, operator).mapValue(value -> value))
+                .toList();
 
-        return new None<>();
+        return parseOr(input, rules);
     }
 
-    private static Option<Value> parseOperator(String input, Operator operator) {
+    private static Result<Operation, CompileError> parseOperator(String input, Operator operator) {
         var operatorIndex = input.indexOf(operator.representation);
-        if (operatorIndex >= 0) {
-            var leftString = input.substring(0, operatorIndex);
-            var rightString = input.substring(operatorIndex + operator.representation.length());
-
-            if (parseValue(leftString) instanceof Some(var left)
-                    && parseValue(rightString) instanceof Some(var right)) {
-                return new Some<>(new Operation(left, operator, right));
-            }
+        if (operatorIndex < 0) {
+            return createInfixErr(input, operator.representation);
         }
-        return new None<>();
+
+        var leftString = input.substring(0, operatorIndex);
+        var rightString = input.substring(operatorIndex + operator.representation.length());
+
+        return parseValue(leftString)
+                .and(() -> parseValue(rightString))
+                .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
     }
 
-    private static Option<Invocation> parseInvocation(String stripped) {
-        return parseInvokable(stripped, Main::parseValue, Invocation::new).map(invocation -> {
+    private static Result<Invocation, CompileError> parseInvocation(String stripped) {
+        return parseInvokable(stripped, Main::parseValue, Invocation::new).flatMapValue(invocation -> {
             var caller = invocation.caller;
-            if (caller instanceof DataAccess(var parent, var property)) {
-                var resolved = resolveType(parent);
+            if (!(caller instanceof DataAccess(var parent, var property))) {
+                return new Ok<>(invocation);
+            }
 
+            return resolveType(parent).mapValue(resolved -> {
                 Value newParent;
                 if (parent instanceof Symbol || parent instanceof DataAccess) {
                     newParent = parent;
@@ -1332,9 +1362,8 @@ public class Main {
                         .toList());
 
                 return new Invocation(new DataAccess(newParent, property), arguments);
-            }
+            });
 
-            return invocation;
         });
     }
 
@@ -1349,33 +1378,39 @@ public class Main {
         return true;
     }
 
-    private static Type resolveType(Value value) {
+    private static Result<Type, CompileError> resolveType(Value value) {
         if (value instanceof DataAccess(var parent, var property)) {
-            var type = resolveType(parent);
-            if (type instanceof Struct struct) {
+            return resolveType(parent).flatMapValue(parentType -> {
+                var context = new NodeContext(parent);
+                if (!(parentType instanceof Struct struct)) {
+                    return new Err<>(new CompileError("Not a struct", context));
+                }
                 var maybeFound = struct.find(property);
                 if (maybeFound instanceof Some(var found)) {
-                    return found;
+                    return new Ok<>(found);
                 }
-            }
-
-            return new Content(type.stringify());
+                return new Err<>(new CompileError("Property '" + property + "' not present", context));
+            });
         }
 
         if (value instanceof Invocation(var base, var _)) {
-            var resolved = resolveType(base);
-            if (resolved instanceof Functional functional) {
-                return functional.returnType;
-            }
-            else {
-                return new Content(resolved.generate());
-            }
+            return resolveType(base).flatMapValue(resolved -> {
+                if (resolved instanceof Functional functional) {
+                    return new Ok<>(functional.returnType);
+                }
+                else {
+                    return new Err<>(new CompileError("Type is not functional", new NodeContext(resolved)));
+                }
+            });
         }
 
         if (value instanceof Symbol(var name)) {
             if (name.equals("this")) {
                 var definitions = frames.getLast().definitions;
-                return new StructBuilder().withName(name).withTypeArgs(Collections.emptyList()).withDefinitions(definitions).complete();
+                return new Ok<>(new StructBuilder()
+                        .withName(name)
+                        .withDefinitions(definitions)
+                        .complete());
             }
 
             var maybeType = Options.fromNative(frames.stream()
@@ -1384,11 +1419,11 @@ public class Main {
                     .findFirst());
 
             if (maybeType instanceof Some(var type)) {
-                return type;
+                return new Ok<>(type);
             }
         }
 
-        return new Content(value.generate());
+        return new Err<>(new CompileError("Unknown value", new NodeContext(value)));
     }
 
     private static Option<Type> findNameInFrame(String name, Frame frame) {
@@ -1401,14 +1436,14 @@ public class Main {
         }
     }
 
-    private static <T, R> Option<R> parseInvokable(
+    private static <T, R> Result<R, CompileError> parseInvokable(
             String input,
-            Function<String, Option<T>> beforeArgsCaller,
+            Function<String, Result<T, CompileError>> beforeArgsCaller,
             BiFunction<T, List<Value>, R> builder
     ) {
         var withoutPrefix = input.strip();
         if (!withoutPrefix.endsWith(")")) {
-            return new None<>();
+            return createSuffixErr(withoutPrefix, ")");
         }
 
         var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
@@ -1418,23 +1453,20 @@ public class Main {
         var beforeLast = slices.subList(0, slices.size() - 1);
         var joined = String.join("", beforeLast).strip();
         if (!joined.endsWith("(")) {
-            return new None<>();
+            return createSuffixErr(joined, "(");
         }
 
         var beforeArgsStart = joined.substring(0, joined.length() - 1);
         var args = slices.getLast();
 
-        if (!(beforeArgsCaller.apply(beforeArgsStart) instanceof Some(var outputBeforeArgs))) {
-            return new None<>();
-        }
-
-        return parseValues(args, Main::parseArgument).map(values -> builder.apply(outputBeforeArgs, values));
+        return beforeArgsCaller.apply(beforeArgsStart).flatMapValue(outputBeforeArgs -> parseValues(args, Main::parseArgument).mapValue(values -> builder.apply(outputBeforeArgs, values)));
     }
 
-    private static Option<Value> parseArgument(String input1) {
-        return parseWhitespace(input1)
-                .<Value>map(arg -> arg)
-                .or(() -> parseValue(input1).map(arg -> arg));
+    private static Result<Value, CompileError> parseArgument(String input) {
+        return parseOr(input, List.of(
+                input0 -> parseWhitespace(input0).mapValue(arg -> arg),
+                input0 -> parseValue(input0).mapValue(arg -> arg)
+        ));
     }
 
     private static State foldInvocationStart(State state, char c) {
@@ -1449,61 +1481,71 @@ public class Main {
         return appended;
     }
 
-    private static Option<Parameter> parseParameter(String input) {
-        return parseWhitespace(input)
-                .<Parameter>map(result -> result)
-                .or(() -> parseDefinition(input).map(result -> result));
+    private static Result<Parameter, CompileError> parseParameter(String input) {
+        return parseOr(input, List.of(
+                input0 -> parseWhitespace(input0).mapValue(result -> result),
+                input0 -> parseDefinition(input0).mapValue(result -> result)
+        ));
     }
 
-    private static Option<Definition> parseDefinition(String input) {
+    private static Result<Definition, CompileError> parseDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
-            return new None<>();
+            return createInfixErr(stripped, " ");
         }
 
         var beforeName = stripped.substring(0, nameSeparator).strip();
         var name = stripped.substring(nameSeparator + " ".length()).strip();
         if (!isSymbol(name)) {
-            return new None<>();
+            return createSymbolErr(name);
         }
 
         var withName = new DefinitionBuilder().withName(name);
         return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
+            case None<Integer> _ -> parseAndFlattenType(beforeName).mapValue(type -> new DefinitionBuilder()
                     .withType(type)
                     .withName(name)
                     .complete());
+
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-                if (beforeType.endsWith(">")) {
-                    var withTypeParamStart = beforeType.substring(0, beforeType.length() - ">".length());
-
-                    var typeParamStart = withTypeParamStart.lastIndexOf("<");
-                    if (typeParamStart >= 0) {
-                        var withoutTypeParams = beforeType.substring(0, typeParamStart);
-                        var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
-
-                        var maybeTypeParams = parseValues(typeParamString, Some::new);
-                        if (maybeTypeParams instanceof Some(var actualTypeParams)) {
-                            Main.typeParams.addAll(actualTypeParams);
-                            var maybeOutputType = parseAndFlattenType(inputType);
-
-                            yield maybeOutputType.map(outputType -> withName
-                                    .withBeforeType(withoutTypeParams)
-                                    .withTypeParams(actualTypeParams)
-                                    .withType(outputType)
-                                    .complete());
-                        }
-                    }
-                }
-                yield parseAndFlattenType(inputType).map(outputType -> withName
-                        .withBeforeType(beforeType)
-                        .withType(outputType)
-                        .complete());
+                yield getDefinitionCompileErrorResult(beforeType, inputType, withName);
             }
         };
+    }
+
+    private static Result<Definition, CompileError> getDefinitionCompileErrorResult(String beforeType, String inputType, DefinitionBuilder withName) {
+        if (beforeType.endsWith(">")) {
+            var withTypeParamStart = beforeType.substring(0, beforeType.length() - ">".length());
+
+            var typeParamStart = withTypeParamStart.lastIndexOf("<");
+            if (typeParamStart >= 0) {
+                var withoutTypeParams = beforeType.substring(0, typeParamStart);
+                var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
+
+                return parseValues(typeParamString, Ok::new).flatMapValue(actualTypeParams -> {
+                    Main.typeParams.addAll(actualTypeParams);
+                    var maybeOutputType = parseAndFlattenType(inputType);
+
+                    return maybeOutputType.mapValue(outputType -> withName
+                            .withBeforeType(withoutTypeParams)
+                            .withTypeParams(actualTypeParams)
+                            .withType(outputType)
+                            .complete());
+                });
+            }
+        }
+
+        return parseAndFlattenType(inputType).mapValue(outputType -> withName
+                .withBeforeType(beforeType)
+                .withType(outputType)
+                .complete());
+    }
+
+    private static <T> Result<T, CompileError> createSymbolErr(String name) {
+        return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
     }
 
     private static Option<Integer> findTypeSeparator(String input) {
@@ -1524,38 +1566,32 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Type> parseAndFlattenType(String input) {
-        return parseType(input).map(Type::flatten);
+    private static Result<Type, CompileError> parseAndFlattenType(String input) {
+        return parseType(input).mapValue(Type::flatten);
     }
 
-    private static Option<Type> parseType(String input) {
+    private static Result<Type, CompileError> parseType(String input) {
         var stripped = input.strip();
-        if (stripped.equals("var")) {
-            return new Some<>(Primitive.Auto);
-        }
-
-        if (stripped.equals("int")) {
-            return new Some<>(Primitive.I32);
-        }
-
-        if (stripped.equals("char")) {
-            return new Some<>(Primitive.I8);
-        }
-
-        if (stripped.equals("String")) {
-            return new Some<>(new Ref(Primitive.I8));
-        }
-
-        if (stripped.equals("boolean")) {
-            return new Some<>(Primitive.Boolean);
-        }
-
-        if (stripped.equals("private")) {
-            return new None<>();
+        switch (stripped) {
+            case "var" -> {
+                return new Ok<>(Primitive.Auto);
+            }
+            case "int" -> {
+                return new Ok<>(Primitive.I32);
+            }
+            case "char" -> {
+                return new Ok<>(Primitive.I8);
+            }
+            case "String" -> {
+                return new Ok<>(new Ref(Primitive.I8));
+            }
+            case "boolean" -> {
+                return new Ok<>(Primitive.Boolean);
+            }
         }
 
         if (typeParams.contains(stripped)) {
-            return new Some<>(new TypeParam(stripped));
+            return new Ok<>(new TypeParam(stripped));
         }
 
         if (stripped.endsWith(">")) {
@@ -1564,23 +1600,25 @@ public class Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
-                var args = parseValues(argsString, input1 -> parseWhitespace(input1)
-                        .<Type>map(type -> type)
-                        .or(() -> parseAndFlattenType(input1)))
-                        .orElse(new ArrayList<>());
-
-                return new Some<>(new Generic(base, args));
+                return parseValues(argsString, Main::parseTypeOrBlank).mapValue(args -> new Generic(base, args));
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new StructBuilder().withName(stripped).complete());
+            return new Ok<>(new StructBuilder().withName(stripped).complete());
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("No valid type present", new StringContext(input)));
     }
 
-    private static <T> Option<List<T>> parseValues(String args, Function<String, Option<T>> compiler) {
+    private static Result<Type, CompileError> parseTypeOrBlank(String input) {
+        return parseOr(input, List.of(
+                input0 -> parseWhitespace(input0).mapValue(type -> type),
+                Main::parseAndFlattenType
+        ));
+    }
+
+    private static <T> Result<List<T>, CompileError> parseValues(String args, Function<String, Result<T, CompileError>> compiler) {
         return parseAll(args, Main::foldValueChar, compiler);
     }
 
