@@ -953,13 +953,13 @@ public class Main {
 
         if (stripped.startsWith("new ")) {
             var substring = stripped.substring("new ".length());
-            var maybeInvokable = compileInvokable(substring, Main::parseType, Construction::new);
+            var maybeInvokable = parseInvokable(substring, Main::parseType, Construction::new);
             if (maybeInvokable instanceof Some(var invokable)) {
                 return new Some<>(invokable.toInvocation());
             }
         }
 
-        var maybeInvocation = compileInvokable(stripped, Main::parseValue, Invocation::new);
+        var maybeInvocation = parseInvokable(stripped, Main::parseValue, Invocation::new);
         if (maybeInvocation instanceof Some(var invocation)) {
             return new Some<>(invocation.toInvocation());
         }
@@ -1032,7 +1032,7 @@ public class Main {
         }
     }
 
-    private static <T, R> Option<R> compileInvokable(
+    private static <T, R> Option<R> parseInvokable(
             String input,
             Function<String, Option<T>> beforeArgsCaller,
             BiFunction<T, List<Value>, R> builder
@@ -1043,22 +1043,42 @@ public class Main {
         }
 
         var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-        var argsStart = withoutEnd.indexOf("(");
-        if (argsStart < 0) {
+
+        var slices = divideAll(withoutEnd, Main::foldInvocationStart);
+
+        var beforeLast = slices.subList(0, slices.size() - 1);
+        var joined = String.join("", beforeLast).strip();
+        if (!joined.endsWith("(")) {
             return new None<>();
         }
 
-        var inputBeforeArgs = withoutEnd.substring(0, argsStart);
-        var args = withoutEnd.substring(argsStart + "(".length());
+        var beforeArgsStart = joined.substring(0, joined.length() - 1);
+        var args = slices.getLast();
 
-        if (!(beforeArgsCaller.apply(inputBeforeArgs) instanceof Some(var outputBeforeArgs))) {
+        if (!(beforeArgsCaller.apply(beforeArgsStart) instanceof Some(var outputBeforeArgs))) {
             return new None<>();
         }
 
-        return parseValues(args, input1 -> parseWhitespace(input1)
+        return parseValues(args, Main::parseArgument).map(values -> builder.apply(outputBeforeArgs, values));
+    }
+
+    private static Option<Value> parseArgument(String input1) {
+        return parseWhitespace(input1)
                 .<Value>map(arg -> arg)
-                .or(() -> parseValue(input1))
-        ).map(values -> builder.apply(outputBeforeArgs, values));
+                .or(() -> parseValue(input1).map(arg -> arg))
+                .or(() -> new Some<>(new Content(input1)));
+    }
+
+    private static State foldInvocationStart(State state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            State advanced = appended.isLevel() ? appended.advance() : appended;
+            return advanced.enter();
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Option<Parameter> parseParameter(String input) {
