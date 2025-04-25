@@ -802,6 +802,13 @@ public class Main {
         }
     }
 
+    private record If(Value condition) implements BlockHeader {
+        @Override
+        public String generate() {
+            return "if (" + this.condition.generate() + ")";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1014,7 +1021,7 @@ public class Main {
         };
     }
 
-    private static Err<RootSegment, CompileError> createPrefixErr(String stripped, String prefix) {
+    private static <T> Result<T, CompileError> createPrefixErr(String stripped, String prefix) {
         return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(stripped)));
     }
 
@@ -1365,7 +1372,22 @@ public class Main {
     }
 
     private static Result<BlockHeader, CompileError> parseBlockHeader(String input) {
-        return new Err<>(new CompileError("Invalid block header", new StringContext(input)));
+        return parseOr(input, List.of(
+                new TypeRule<>("if", Main::parseIf)
+        ));
+    }
+
+    private static Result<BlockHeader, CompileError> parseIf(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutKeyword = stripped.substring("if".length()).strip();
+            if (withoutKeyword.startsWith("(") && withoutKeyword.endsWith(")")) {
+                var conditionString = withoutKeyword.substring(1, withoutKeyword.length() - 1);
+                return parseValue(conditionString).mapValue(If::new);
+            }
+        }
+
+        return createPrefixErr(stripped, "if");
     }
 
     private static <T> Result<T, CompileError> parseOr(String input, List<Rule<T>> rules) {
