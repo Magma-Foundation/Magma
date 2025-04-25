@@ -8,15 +8,15 @@
 /* import java.util.function.Function; */
 /* import java.util.stream.Collectors; */
 /*  */
+struct Type {
+	char* generate();
+};
 struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
 	/* private */ struct StringBuilder buffer;
 };
 struct Main {
-	/* private interface Type {
-        String generate();
-    } */
 	/* private enum Primitive implements Type {
         I8("char"),
         I32("int");
@@ -210,28 +210,36 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	/* return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) */ struct + "\n");
 }
 /* private static */ Optional<char*> compileClass(char* stripped){
-	struct var classIndex = stripped.indexOf("class ");/* 
-        if (classIndex >= 0) {
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
-            var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                if (isSymbol(name)) {
-                    var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                    if (withEnd.endsWith("}")) {
-                        var content = withEnd.substring(0, withEnd.length() - "}".length());
-
-                        currentStructName = Optional.of(name);
-                        var generated = "struct " + name + " {" +
-                                compileStatements(content, Main::compileClassSegment) +
-                                "\n};\n";
-                        structs.add(generated);
-                        return Optional.of("");
-                    }
-                }
-            }
+	/* return compileStructured(stripped, */ struct "class ");
+}
+/* private static */ Optional<char*> compileStructured(char* stripped, char* infix){
+	struct var classIndex = stripped.indexOf(infix);/* 
+        if (classIndex < 0) {
+            return Optional.empty();
         } */
-	struct return Optional.empty();
+	struct var afterKeyword = stripped.substring(classIndex + infix.length());/* 
+        var contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        var name = afterKeyword.substring(0, contentStart).strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        var content = withEnd.substring(0, withEnd.length() - "} */
+	/* ".length()) */;
+	currentStructName = Optional.of(name);/* 
+        var generated = "struct " + name + " {" +
+                compileStatements(content, Main::compileClassSegment) +
+                "\n} */
+	/*  */;
+	/* \n" */;
+	/* structs.add(generated) */;
+	struct return Optional.of("");
 }
 /* private static */ struct boolean isSymbol(char* input){
 	/* for */ struct (var i = /* 0 */;
@@ -247,6 +255,8 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* private static */ char* compileClassSegment(char* input){
 	/* return compileWhitespace(input)
                 .or(() -> compileClass(input))
+                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "record "))
                 .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" */ struct + generatePlaceholder(input.strip()));

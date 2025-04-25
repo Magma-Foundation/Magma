@@ -249,28 +249,35 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped) {
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
-            var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                if (isSymbol(name)) {
-                    var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                    if (withEnd.endsWith("}")) {
-                        var content = withEnd.substring(0, withEnd.length() - "}".length());
+        return compileStructured(stripped, "class ");
+    }
 
-                        currentStructName = Optional.of(name);
-                        var generated = "struct " + name + " {" +
-                                compileStatements(content, Main::compileClassSegment) +
-                                "\n};\n";
-                        structs.add(generated);
-                        return Optional.of("");
-                    }
-                }
-            }
+    private static Optional<String> compileStructured(String stripped, String infix) {
+        var classIndex = stripped.indexOf(infix);
+        if (classIndex < 0) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        var afterKeyword = stripped.substring(classIndex + infix.length());
+        var contentStart = afterKeyword.indexOf("{");
+        if (contentStart < 0) {
+            return Optional.empty();
+        }
+        var name = afterKeyword.substring(0, contentStart).strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+        var content = withEnd.substring(0, withEnd.length() - "}".length());
+
+        currentStructName = Optional.of(name);
+        var generated = "struct " + name + " {" +
+                compileStatements(content, Main::compileClassSegment) +
+                "\n};\n";
+        structs.add(generated);
+        return Optional.of("");
     }
 
     private static boolean isSymbol(String input) {
@@ -287,6 +294,8 @@ public class Main {
     private static String compileClassSegment(String input) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
+                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "record "))
                 .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
