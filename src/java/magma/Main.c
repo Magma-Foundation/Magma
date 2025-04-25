@@ -7,7 +7,7 @@
 /* import java.util.function.Function; */
 /*  */
 struct State {
-	/* private final */ /* List<String> */ segments;
+	/* private final */ List</* String */> segments;
 	/* private */ /* int */ depth;
 	/* private */ /* StringBuilder */ buffer;
 	/* private State() {
@@ -173,8 +173,19 @@ struct Main {
 
         return generatePlaceholder(stripped);
     } */
-	/* private static String compileType(String type) {
-        return generatePlaceholder(type);
+	/* private static String compileType(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var argsStart = withoutEnd.indexOf("<");
+            if (argsStart >= 0) {
+                var base = withoutEnd.substring(0, argsStart).strip();
+                var args = withoutEnd.substring(argsStart + "<".length()).strip();
+                return base + "<" + generatePlaceholder(args) + ">";
+            }
+        }
+
+        return generatePlaceholder(input);
     } */
 	/* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
