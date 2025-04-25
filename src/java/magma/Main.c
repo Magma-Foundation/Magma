@@ -47,7 +47,9 @@ struct Main {
 	/* private static */ Optional<char*> currentStructName;
 };
 struct Primitive new_Primitive(char* value){
+    struct Primitive this;
 	this.value = value;
+	return this;
 }
 /* @Override
         public */ char* generate(/*  */){

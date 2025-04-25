@@ -453,11 +453,13 @@ public class Main {
 
         var paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
-            var params = withParams.substring(0, paramEnd).strip();
+            var inputParams = withParams.substring(0, paramEnd).strip();
             var afterParams = withParams.substring(paramEnd + ")".length()).strip();
             if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
                 var content = afterParams.substring(1, afterParams.length() - 1);
-                var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
+                var outputParams = compileValues(inputParams, Main::compileDefinitionOrPlaceholder);
+                var outputContent = compileStatements(content, Main::compileStatementOrBlock);
+                var constructor = header.toDefinition().generate() + "(" + outputParams + "){" + outputContent + "\n}\n";
                 functions.add(constructor);
                 return new Some<>("");
             }
