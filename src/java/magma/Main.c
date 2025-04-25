@@ -11,7 +11,6 @@ struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
 	/* private */ struct StringBuilder buffer;
-	/*  */
 };
 struct ");
         if (classIndex >= 0) {
@@ -37,7 +36,6 @@ struct Main {
 	/* public static final List<String> structs = */ struct new ArrayList<>();
 	/* private static final List<String> functions = */ struct new ArrayList<>();
 	/* private static Optional<String> currentStructName */ struct = Optional.empty();
-	/*  */
 };
 struct private State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
             this.buffer = buffer; *//* 
@@ -180,10 +178,20 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
      */
 }
 /* private static */ char* compileClassSegment(char* input){/* 
-        return compileClass(input)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())); *//* 
+     */
+}
+/* private static */ Optional<char*> compileWhitespace(char* input){/* 
+        if (input.isBlank()) {
+            return Optional.of("");
+        } *//* 
+        else {
+            return Optional.empty();
+        } *//* 
      */
 }
 /* private static */ Optional<char*> compileMethod(char* input){/* 

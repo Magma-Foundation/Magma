@@ -186,10 +186,20 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input))
                 .or(() -> compileDefinitionStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileMethod(String input) {
