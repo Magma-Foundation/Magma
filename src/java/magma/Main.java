@@ -297,6 +297,11 @@ public class Main {
                 return new Functional(List.of(param0), returns);
             }
 
+            if (this.base.equals("Supplier")) {
+                var returns = this.args.getFirst();
+                return new Functional(Collections.emptyList(), returns);
+            }
+
             return this;
         }
     }

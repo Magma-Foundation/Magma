@@ -113,11 +113,11 @@ struct Primitive new_Primitive(char* value){
 	return this.value;
 }
 /* @Override
-        public */ T orElseGet_Some<T>(struct Some<T> this, Supplier<T> other){
+        public */ T orElseGet_Some<T>(struct Some<T> this, T (*other)()){
 	return this.value;
 }
 /* @Override
-        public */ Option<T> or_Some<T>(struct Some<T> this, Supplier<Option<T>> other){
+        public */ Option<T> or_Some<T>(struct Some<T> this, Option<T> (*other)()){
 	return this;
 }
 /* @Override
@@ -137,11 +137,11 @@ struct Primitive new_Primitive(char* value){
 	return other;
 }
 /* @Override
-        public */ T orElseGet_None<T>(struct None<T> this, Supplier<T> other){
+        public */ T orElseGet_None<T>(struct None<T> this, T (*other)()){
 	return other.get(/*  */);
 }
 /* @Override
-        public */ Option<T> or_None<T>(struct None<T> this, Supplier<Option<T>> other){
+        public */ Option<T> or_None<T>(struct None<T> this, Option<T> (*other)()){
 	return other.get(/*  */);
 }
 /* @Override
@@ -263,6 +263,11 @@ struct Struct new_Struct(char* name){
                 var param0 = this.args.getFirst();
                 var returns = this.args.get(1);
                 return new Functional(List.of(param0), returns);
+            } *//* 
+
+            if (this.base.equals("Supplier")) {
+                var returns = this.args.getFirst();
+                return new Functional(Collections.emptyList(), returns);
             } */
 	return this;
 }
