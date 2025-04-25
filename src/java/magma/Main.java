@@ -1302,10 +1302,13 @@ public class Main {
 
     private static Result<FunctionSegment, CompileError> parseStatement(String input0) {
         return parseOr(input0, List.of(
-                input -> whitespace(input).mapValue(value -> value),
-                input -> parseStatementWithoutBraces(input, Main::parseStatementValue)
-                        .mapValue(value -> value)
+                choice(Main::whitespace),
+                choice(input -> parseStatementWithoutBraces(input, Main::parseStatementValue))
         ));
+    }
+
+    private static <S, T extends S> Rule<S> choice(Rule<T> rule) {
+        return input -> rule.apply(input).mapValue(value -> value);
     }
 
     private static <T> Result<T, CompileError> parseOr(String input, List<Rule<T>> rules) {
@@ -1325,12 +1328,12 @@ public class Main {
 
     private static Result<StatementValue, CompileError> parseStatementValue(String input0) {
         return parseOr(input0, List.of(
-                input -> parseReturn(input).mapValue(value -> value),
-                input -> parsePostIncrement(input).mapValue(value -> value),
-                input -> parsePostDecrement(input).mapValue(value -> value),
-                input -> parseInvocation(input).mapValue(value -> value),
-                input -> parseAssignment(input).mapValue(value -> value),
-                input -> parseDefinition(input).mapValue(value -> value)
+                choice(Main::parseReturn),
+                choice(Main::parsePostIncrement),
+                choice(Main::parsePostDecrement),
+                choice(Main::parseInvocation),
+                choice(Main::parseAssignment),
+                choice(Main::parseDefinition)
         ));
     }
 
