@@ -258,7 +258,9 @@ public class Main {
     }
 
     private static String compileStatementOrBlock(String input) {
-        return compileStatement(input, Main::compileStatementValue).orElseGet(() -> generatePlaceholder(input));
+        return compileWhitespace(input)
+                .or(() -> compileStatement(input, Main::compileStatementValue))
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String compileStatementValue(String input) {
