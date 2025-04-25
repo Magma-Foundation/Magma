@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -75,17 +76,35 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
-        var segments = divide(input);
+        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
+    }
+
+    private static String compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        var segments = divide(input, folder);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compiler.apply(segment));
+            var compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
         }
 
         return output.toString();
     }
 
-    private static List<String> divide(String input) {
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
+    }
+
+    private static List<String> divide(String input, BiFunction<State, Character, State> folder) {
+        return divideAll(input, folder);
+    }
+
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -107,7 +126,7 @@ public class Main {
                 continue;
             }
 
-            current = foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
         return current.advance().segments;
     }
@@ -198,17 +217,37 @@ public class Main {
 
     private static String compileType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("String")) {
+            return "char*";
+        }
+
         if (stripped.endsWith(">")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             var argsStart = withoutEnd.indexOf("<");
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                return base + "<" + generatePlaceholder(args) + ">";
+                return base + "<" + compileAll(args, Main::foldValueChar, Main::compileType, Main::mergeValues) + ">";
             }
         }
 
         return generatePlaceholder(input);
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+        else {
+            return state.append(c);
+        }
+    }
+
+    private static StringBuilder mergeValues(StringBuilder buffer, String element) {
+        if (buffer.isEmpty()) {
+            return buffer.append(element);
+        }
+        return buffer.append(", ").append(element);
     }
 
     private static String generatePlaceholder(String stripped) {
