@@ -809,6 +809,13 @@ public class Main {
         }
     }
 
+    private record InstanceOf(Value value, Definition definition) implements Value {
+        @Override
+        public String generate() {
+            return this.value.generate() + " instanceof " + this.definition.generate();
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1555,6 +1562,7 @@ public class Main {
         }
 
         var rules = new ArrayList<Rule<Value>>(List.of(
+                new TypeRule<>("instanceof", Main::parseInstanceOf),
                 new TypeRule<>("invocation", Main::parseInvocation),
                 new TypeRule<>("data-access", Main::parseDataAccess),
                 new TypeRule<>("ternary", Main::parseTernary)
@@ -1565,6 +1573,22 @@ public class Main {
                 .toList());
 
         return parseOr(input, rules);
+    }
+
+    private static Result<InstanceOf, CompileError> parseInstanceOf(String input) {
+        var index = input.indexOf("instanceof");
+        if (index < 0) {
+            return createInfixErr(input, "instanceof");
+        }
+
+        var value = input.substring(0, index);
+        var type = input.substring(index + "instanceof".length());
+
+        return parseValue(value).flatMapValue(compiledValue -> {
+            return parseDefinition(type).mapValue(compiledType -> {
+                return new InstanceOf(compiledValue, compiledType);
+            });
+        });
     }
 
     private static Result<Value, CompileError> parseDataAccess(String input) {
