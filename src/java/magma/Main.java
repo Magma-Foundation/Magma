@@ -724,14 +724,32 @@ public class Main {
             return new None<>();
         }
 
-        var typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator < 0) {
-            return parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
+        return switch (findTypeSeparator(beforeName)) {
+            case None<Integer> _ -> parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
+            case Some<Integer>(var typeSeparator) -> {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+                yield parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
+            }
+        };
+    }
+
+    private static Option<Integer> findTypeSeparator(String input) {
+        var depth = 0;
+        for (var i = input.length() - 1; i >= 0; i--) {
+            var c = input.charAt(i);
+            if (c == ' ' && depth == 0) {
+                return new Some<>(i);
+            }
+            if (c == '>') {
+                depth++;
+            }
+            if (c == '<') {
+                depth--;
+            }
         }
 
-        var beforeType = beforeName.substring(0, typeSeparator).strip();
-        var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-        return parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
+        return new None<>();
     }
 
     private static Option<Type> parseType(String input) {
