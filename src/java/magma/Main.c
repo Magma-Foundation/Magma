@@ -111,6 +111,11 @@ struct PostIncrement {
 };
 struct PostDecrement {
 };
+struct StructBuilder {
+	/* private */ char* name;
+	/* private */ List<char*> typeArgs = Collections.emptyList(Collections);
+	/* private */ Map<char*, struct Type> definitions = Collections.emptyMap(Collections);
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = new_ArrayList_Whitespace();
 	/* private static final */ List<struct StatementValue> statements = new_ArrayList_Whitespace();
@@ -280,14 +285,6 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 	char* generatedWithName = this.generatedWithName(this);
 	return beforeType + generatedWithName + joinedTypeParams;
 }
-struct Struct new_Struct(char* name){
-	struct Struct this;
-	this(name, Collections.emptyList(Collections), new_HashMap_Whitespace());
-	return this;
-}
-struct public Struct_Struct(struct Struct this, char* name, List<char*> typeParams){
-	this(name, typeParams, new_HashMap_Whitespace());
-}
 /* @Override
         public */ char* generate_Struct(struct Struct this){
 	/* /*  this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">" */ */ typeParamString = /*  this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">" */;
@@ -302,6 +299,13 @@ struct public Struct_Struct(struct Struct this, char* name, List<char*> typePara
                 return new Some<>(this.definitions.get(property));
             } */
 	return new_None_Whitespace();
+}
+/* @Override
+        public */ char* toString_Struct(struct Struct this){
+	return /* "Struct[" +
+                    "name=" + this.name + ", " +
+                    "typeArgs=" + this.typeArgs + ", " +
+                    "definitions=" + this.definitions + ']' */;
 }
 /* @Override
         public */ char* generate_Ref(struct Ref this){
@@ -385,8 +389,10 @@ struct public Struct_Struct(struct Struct this, char* name, List<char*> typePara
 	return /* this.base + "_" + joined */;
 }
 /* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
-	/* /* new_DefinitionBuilder */ */ local0 = new_DefinitionBuilder();
-	return /* new DefinitionBuilder().withType(new Struct(this.name())).withName("new_" + this.name()).complete() */;
+	/* /* new_StructBuilder */ */ local0 = new_StructBuilder();
+	/* /* local0 */ */ local1 = local0.withName(local0, this.name(this));
+	/* /* new_DefinitionBuilder */ */ local2 = new_DefinitionBuilder();
+	return /* new DefinitionBuilder().withType(new StructBuilder().withName(this.name()).complete()).withName("new_" + this.name()).complete() */;
 }
 /* @Override
         public */ char* generate_ConstructorDefinition(struct ConstructorDefinition this){
@@ -505,6 +511,21 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* @Override
         public */ char* generate_PostDecrement(struct PostDecrement this){
 	return /* this.value.generate() + "--" */;
+}
+/* public */ struct StructBuilder withName_StructBuilder(struct StructBuilder this, char* name){
+	this.name = name;
+	return this;
+}
+/* public */ struct StructBuilder withTypeArgs_StructBuilder(struct StructBuilder this, List<char*> typeArgs){
+	this.typeArgs = typeArgs;
+	return this;
+}
+/* public */ struct StructBuilder withDefinitions_StructBuilder(struct StructBuilder this, Map<char*, struct Type> definitions){
+	this.definitions = definitions;
+	return this;
+}
+/* public */ struct Struct complete_StructBuilder(struct StructBuilder this){
+	return new_Struct(this.name, this.typeArgs, this.definitions);
 }
 /* public static */ struct void main_Main(struct Main this){
 	structs = new_ArrayList_Whitespace();
@@ -777,7 +798,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                         var copy = new ArrayList<FunctionSegment>(list);
 
                         copy.add(new Statement(new DefinitionBuilder()
-                                .withType(new Struct(name, currentStructTypeParams))
+                                .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
                                 .withName("this")
                                 .complete()));
 
@@ -799,7 +820,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                     var outputParams = new ArrayList<Parameter>();
                     if (header instanceof Definition oldDefinition) {
                         outputParams.add(new DefinitionBuilder()
-                                .withType(new Struct(currentStructName, currentStructTypeParams))
+                                .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
                                 .withName("this")
                                 .complete());
 
@@ -1021,7 +1042,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } *//* 
 
         for (var operator : Operator.values()) {
-            if(parseOperator(input, operator) instanceof Some<Value> some) {
+            if (parseOperator(input, operator) instanceof Some<Value> some) {
                 return some;
             }
         } */
@@ -1112,7 +1133,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (value instanceof Symbol(var name)) {
             if (name.equals("this")) {
                 var definitions = frames.getLast().definitions;
-                return new Struct(name, Collections.emptyList(), definitions);
+                return new StructBuilder().withName(name).withTypeArgs(Collections.emptyList()).withDefinitions(definitions).complete();
             }
 
             var maybeType = Options.fromNative(frames.stream()
@@ -1288,7 +1309,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } *//* 
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Struct(stripped));
+            return new Some<>(new StructBuilder().withName(stripped).complete());
         } */
 	return new_None_Whitespace();
 }

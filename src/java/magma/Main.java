@@ -285,19 +285,7 @@ public class Main {
         }
     }
 
-    private record Struct(
-            String name,
-            List<String> typeArgs,
-            Map<String, Type> definitions
-    ) implements Type {
-        private Struct(String name) {
-            this(name, Collections.emptyList(), new HashMap<>());
-        }
-
-        public Struct(String name, List<String> typeParams) {
-            this(name, typeParams, new HashMap<>());
-        }
-
+    record Struct(String name, List<String> typeArgs, Map<String, Type> definitions) implements Type {
         @Override
         public String generate() {
             var typeParamString = this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">";
@@ -315,6 +303,15 @@ public class Main {
             }
             return new None<>();
         }
+
+        @Override
+        public String toString() {
+            return "Struct[" +
+                    "name=" + this.name + ", " +
+                    "typeArgs=" + this.typeArgs + ", " +
+                    "definitions=" + this.definitions + ']';
+        }
+
     }
 
     private record Ref(Type type) implements Type {
@@ -415,7 +412,7 @@ public class Main {
 
     private record ConstructorDefinition(String name) implements Definable {
         private Definition toDefinition() {
-            return new DefinitionBuilder().withType(new Struct(this.name())).withName("new_" + this.name()).complete();
+            return new DefinitionBuilder().withType(new StructBuilder().withName(this.name()).complete()).withName("new_" + this.name()).complete();
         }
 
         @Override
@@ -604,6 +601,31 @@ public class Main {
         @Override
         public String generate() {
             return this.value.generate() + "--";
+        }
+    }
+
+    public static class StructBuilder {
+        private String name;
+        private List<String> typeArgs = Collections.emptyList();
+        private Map<String, Type> definitions = Collections.emptyMap();
+
+        public StructBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public StructBuilder withTypeArgs(List<String> typeArgs) {
+            this.typeArgs = typeArgs;
+            return this;
+        }
+
+        public StructBuilder withDefinitions(Map<String, Type> definitions) {
+            this.definitions = definitions;
+            return this;
+        }
+
+        public Struct complete() {
+            return new Struct(this.name, this.typeArgs, this.definitions);
         }
     }
 
@@ -919,7 +941,7 @@ public class Main {
                         var copy = new ArrayList<FunctionSegment>(list);
 
                         copy.add(new Statement(new DefinitionBuilder()
-                                .withType(new Struct(name, currentStructTypeParams))
+                                .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
                                 .withName("this")
                                 .complete()));
 
@@ -941,7 +963,7 @@ public class Main {
                     var outputParams = new ArrayList<Parameter>();
                     if (header instanceof Definition oldDefinition) {
                         outputParams.add(new DefinitionBuilder()
-                                .withType(new Struct(currentStructName, currentStructTypeParams))
+                                .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
                                 .withName("this")
                                 .complete());
 
@@ -1185,7 +1207,7 @@ public class Main {
         }
 
         for (var operator : Operator.values()) {
-            if(parseOperator(input, operator) instanceof Some<Value> some) {
+            if (parseOperator(input, operator) instanceof Some<Value> some) {
                 return some;
             }
         }
@@ -1279,7 +1301,7 @@ public class Main {
         if (value instanceof Symbol(var name)) {
             if (name.equals("this")) {
                 var definitions = frames.getLast().definitions;
-                return new Struct(name, Collections.emptyList(), definitions);
+                return new StructBuilder().withName(name).withTypeArgs(Collections.emptyList()).withDefinitions(definitions).complete();
             }
 
             var maybeType = Options.fromNative(frames.stream()
@@ -1478,7 +1500,7 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Struct(stripped));
+            return new Some<>(new StructBuilder().withName(stripped).complete());
         }
 
         return new None<>();
