@@ -8,8 +8,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
+    private interface Type {
+        String generate();
+    }
+
+    private enum Primitive implements Type {
+        ,
+        I8("char"),
+        I32("int");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     private static class State {
         private final List<String> segments;
         private int depth;
@@ -62,9 +84,35 @@ public class Main {
         }
     }
 
-    private record Struct(String name) {
-        private String generate() {
+    private record Struct(String name) implements Type {
+        @Override
+        public String generate() {
             return "struct " + this.name();
+        }
+    }
+
+    private record Ref(Type type) implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    }
+
+    private record Content(String input) implements Type {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
+        }
+    }
+
+    private record Generic(String base, List<Type> args) implements Type {
+        @Override
+        public String generate() {
+            var joinedArgs = this.args().stream()
+                    .map(Type::generate)
+                    .collect(Collectors.joining(", "));
+
+            return this.base() + "<" + joinedArgs + ">";
         }
     }
 
@@ -120,14 +168,14 @@ public class Main {
         return output.toString();
     }
 
-    private static List<String> parseAll(
+    private static <T> List<T> parseAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, String> compiler
+            Function<String, T> compiler
     ) {
         var segments = divide(input, folder);
 
-        var compiled = new ArrayList<String>();
+        var compiled = new ArrayList<T>();
         for (var segment : segments) {
             compiled.add(compiler.apply(segment));
         }
@@ -375,17 +423,21 @@ public class Main {
     }
 
     private static Optional<String> compileType(String input) {
+        return parseType(input).map(Type::generate);
+    }
+
+    private static Optional<Type> parseType(String input) {
         var stripped = input.strip();
         if (stripped.equals("private")) {
             return Optional.empty();
         }
 
         if (stripped.equals("int")) {
-            return Optional.of("int");
+            return Optional.of(Primitive.I32);
         }
 
         if (stripped.equals("String")) {
-            return Optional.of("char*");
+            return Optional.of(new Ref(Primitive.I8));
         }
 
         if (stripped.endsWith(">")) {
@@ -393,17 +445,26 @@ public class Main {
             var argsStart = withoutEnd.indexOf("<");
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
-                var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                var compiledArgs = compileValues(args, input1 -> compileType(input1).orElseGet(() -> generatePlaceholder(input1)));
-                return Optional.of(base + "<" + compiledArgs + ">");
+                var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
+                var args = parseValues(argsString, input1 -> parseType(input1).orElseGet(() -> new Content(input1)));
+
+                return Optional.of(new Generic(base, args));
             }
         }
 
-        return Optional.of(new Struct(stripped).generate());
+        return Optional.of(new Struct(stripped));
     }
 
     private static String compileValues(String args, Function<String, String> compiler) {
-        return compileAll(args, Main::foldValueChar, compiler, Main::mergeValues);
+        return generateValues(parseValues(args, compiler));
+    }
+
+    private static String generateValues(List<String> values) {
+        return generateAll(Main::mergeValues, values);
+    }
+
+    private static <T> List<T> parseValues(String args, Function<String, T> compiler) {
+        return parseAll(args, Main::foldValueChar, compiler);
     }
 
     private static State foldValueChar(State state, char c) {
