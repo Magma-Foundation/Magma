@@ -89,6 +89,24 @@ public class Main {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
+
+            if (c == '\'') {
+                current.append(c);
+
+                i++;
+                var maybeSlash = input.charAt(i);
+                current.append(maybeSlash);
+
+                if (maybeSlash == '\\') {
+                    i++;
+                    current.append(input.charAt(i));
+                }
+
+                i++;
+                current.append(input.charAt(i));
+                continue;
+            }
+
             current = foldStatementChar(current, c);
         }
         return current.advance().segments;

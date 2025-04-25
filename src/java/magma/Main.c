@@ -5,22 +5,7 @@
 /* import java.util.List; */
 /* import java.util.Optional; */
 /* import java.util.function.Function; */
-/* private static String compileRootSegment(String input) {
-        var stripped = input.strip();
-
-        if (stripped.startsWith("package ")) {
-            return "";
-        }
-
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
-    } */
-/* private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
-    } */
-/* private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */";
-    } */
-/* } */
+/*  */
 struct State {/* private final List<String> segments; *//* 
         private int depth; *//* 
         private StringBuilder buffer; *//* 
@@ -65,6 +50,25 @@ struct State {/* private final List<String> segments; *//*
         } *//* 
      */
 };
+struct ");
+        if (classIndex >= 0) {/* var afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
+            var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                var name = afterKeyword.substring(0, contentStart).strip();
+                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    var content = withEnd.substring(0, withEnd.length() - "}".length());
+                    var generated = "struct " + name + " {" +
+                            compileStatements(content, Main::compileClassSegment) +
+                            "\n};\n";
+                    structs.add(generated);
+                    return Optional.of("");
+                }
+            } *//* 
+        }
+        return Optional.empty();
+     */
+};
 struct Main {/* 
 
     public static final List<String> structs = new ArrayList<>(); *//* 
@@ -102,6 +106,24 @@ struct Main {/*
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
+
+            if (c == '\'') {
+                current.append(c);
+
+                i++;
+                var maybeSlash = input.charAt(i);
+                current.append(maybeSlash);
+
+                if (maybeSlash == '\\') {
+                    i++;
+                    current.append(input.charAt(i));
+                }
+
+                i++;
+                current.append(input.charAt(i));
+                continue;
+            }
+
             current = foldStatementChar(current, c);
         }
         return current.advance().segments;
@@ -112,35 +134,35 @@ struct Main {/*
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} *//* ' && appended.isShallow()) {
+        if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
-        } *//* 
+        }
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '} *//* ') {
+        if (c == '}') {
             return appended.exit();
-        } *//* 
-
-        return appended; *//* 
-     */
-};
-struct ");
-        if (classIndex >= 0) {/* var afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
-            var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    var generated = "struct " + name + " {" +
-                            compileStatements(content, Main::compileClassSegment) +
-                            "\n};\n";
-                    structs.add(generated);
-                    return Optional.of("");
-                }
-            } *//* 
         }
-        return Optional.empty();
-     */
+
+        return appended;
+    } *//* 
+
+    private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
+    } *//* 
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+    } *//* 
+
+    private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */";
+    } *//* 
+ */
 };
