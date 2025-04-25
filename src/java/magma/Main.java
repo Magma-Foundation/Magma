@@ -178,8 +178,16 @@ public class Main {
         }
     }
 
-    private static String compileDefinition(String withoutEnd) {
-        return generatePlaceholder(withoutEnd);
+    private static String compileDefinition(String input) {
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var beforeName = stripped.substring(0, nameSeparator).strip();
+            var name = stripped.substring(nameSeparator + " ".length()).strip();
+            return generatePlaceholder(beforeName) + " " + name;
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String stripped) {
