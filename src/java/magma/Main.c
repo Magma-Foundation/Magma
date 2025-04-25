@@ -43,6 +43,7 @@ struct Operator {
 	/* private final */ char* representation;
 };
 struct Some<T> {
+	struct T value;
 };
 struct None<T> {
 };
@@ -58,28 +59,45 @@ struct Definition {
 	/* private final */ List<char*> typeParams;
 };
 struct Struct {
+	char* name;
+	List<char*> typeArgs;
+	Map<char*, struct Type> definitions;
 };
 struct Ref {
+	struct Type type;
 };
 struct Content {
+	char* input;
 };
 struct Functional {
+	List<struct Type> paramTypes;
+	struct Type returnType;
 };
 struct Generic {
+	char* base;
+	List<struct Type> args;
 };
 struct ConstructorDefinition {
+	char* name;
 };
 struct Statement {
+	struct StatementValue content;
 };
 struct Whitespace {
 };
 struct Assignment {
+	struct Assignable assignable;
+	struct Value value;
 };
 struct DataAccess {
+	struct Value parent;
+	char* property;
 };
 struct Symbol {
+	char* name;
 };
 struct Return {
+	struct Value value;
 };
 struct DefinitionBuilder {
 	/* private */ Option<char*> maybeBeforeType = new_None_I8_star();
@@ -88,28 +106,48 @@ struct DefinitionBuilder {
 	/* private */ List<char*> typeParams = new_ArrayList_Whitespace();
 };
 struct Tuple<A,  B> {
+	struct A left;
+	struct B right;
 };
 struct TypeParam {
+	char* input;
 };
 struct Construction {
+	struct Type type;
+	List<struct Value> values;
 };
 struct Invocation {
+	struct Value caller;
+	List<struct Value> arguments;
 };
 struct StructNode {
+	char* name;
+	List<char*> typeParams;
 };
 struct Frame {
+	struct StructNode node;
+	Map<char*, struct Type> definitions;
 };
 struct Options {
 };
 struct Ternary {
+	struct Value condition;
+	struct Value whenTrue;
+	struct Value whenFalse;
 };
 struct Number {
+	char* value;
 };
 struct Operation {
+	struct Value left;
+	struct Operator operator;
+	struct Value right;
 };
 struct PostIncrement {
+	struct Value value;
 };
 struct PostDecrement {
+	struct Value value;
 };
 struct StructBuilder {
 	/* private */ char* name;
@@ -117,8 +155,12 @@ struct StructBuilder {
 	/* private */ Map<char*, struct Type> definitions = Collections.emptyMap(Collections);
 };
 struct StringValue {
+	char* value;
 };
 struct FunctionStatement {
+	struct Definable definition;
+	List<struct Parameter> params;
+	List<struct FunctionSegment> content;
 };
 struct Main {
 	/* private static final */ List<char*> typeParams = new_ArrayList_Whitespace();
@@ -769,7 +811,11 @@ struct Main {
 	frames.addLast(frames, new_Frame(structNode));
 	/* /*  parseAll(content, Main::foldStatementChar, input1 -> new Some<>(compileClassSegment(input1))) */ */ maybeStatements = /*  parseAll(content, Main::foldStatementChar, input1 -> new Some<>(compileClassSegment(input1))) */;/* 
         if (maybeStatements instanceof Some(var outputStatements)) {
-            var copy = new ArrayList<String>();
+            var copy = new ArrayList<String>(params.stream()
+                    .map(Statement::new)
+                    .map(Statement::generate)
+                    .toList());
+
             copy.addAll(outputStatements);
             var generated = "struct " + name + typeParamString + " {" + generateAll(Main::mergeStatements, copy) +
                     "\n};\n";

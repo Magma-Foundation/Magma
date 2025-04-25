@@ -62,7 +62,7 @@ public class Main {
     private interface Value extends Assignable {
     }
 
-    private interface Parameter {
+    private interface Parameter extends StatementValue {
         String generate();
 
         Option<Definition> toDefinition();
@@ -904,7 +904,11 @@ public class Main {
 
         var maybeStatements = parseAll(content, Main::foldStatementChar, input1 -> new Some<>(compileClassSegment(input1)));
         if (maybeStatements instanceof Some(var outputStatements)) {
-            var copy = new ArrayList<String>();
+            var copy = new ArrayList<String>(params.stream()
+                    .map(Statement::new)
+                    .map(Statement::generate)
+                    .toList());
+
             copy.addAll(outputStatements);
             var generated = "struct " + name + typeParamString + " {" + generateAll(Main::mergeStatements, copy) +
                     "\n};\n";
