@@ -239,7 +239,7 @@ public class Main {
         }
     }
 
-    private record Constructor(String name) implements Definable {
+    private record ConstructorDefinition(String name) implements Definable {
         @Override
         public Definition toDefinition() {
             return new Definition(new Struct(this.name()), "new_" + this.name());
@@ -278,6 +278,13 @@ public class Main {
         @Override
         public String generate() {
             return this.name;
+        }
+    }
+
+    private record Return(Value value) implements StatementValue {
+        @Override
+        public String generate() {
+            return "return " + this.value.generate();
         }
     }
 
@@ -525,10 +532,11 @@ public class Main {
 
                 var oldStatements = parseStatements(content, Main::parseStatement);
                 ArrayList<FunctionSegment> newStatements;
-                if (header instanceof Constructor(var name)) {
+                if (header instanceof ConstructorDefinition(var name)) {
                     var copy = new ArrayList<FunctionSegment>();
                     copy.add(new Statement(new Definition(new Struct(name), "this")));
                     copy.addAll(oldStatements);
+                    copy.add(new Statement(new Return(new Symbol("this"))));
                     newStatements = copy;
                 }
                 else {
@@ -556,10 +564,10 @@ public class Main {
         return parseAll(content, Main::foldStatementChar, compiler);
     }
 
-    private static Optional<Constructor> compileConstructorDefinition(String input) {
+    private static Optional<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
-                return new Some<>(new Constructor(name));
+                return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
         });

@@ -47,7 +47,7 @@ struct Content {
 };
 struct Generic {
 };
-struct Constructor {
+struct ConstructorDefinition {
 };
 struct Statement {
 };
@@ -59,6 +59,8 @@ struct DataAccess {
 };
 struct Symbol {
 };
+struct Return {
+};
 struct Main {
 	/* public static */ List<char*> structs;
 	/* private static */ List<char*> functions;
@@ -67,6 +69,7 @@ struct Main {
 struct Primitive new_Primitive(char* value){
 	struct Primitive this;
 	this.value = value;
+	return this;
 }
 /* @Override
         public */ char* generate(/*  */){
@@ -133,6 +136,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.buffer = buffer;
 	this.segments = segments;
 	this.depth = depth;
+	return this;
 }
 /* private static */ struct State createDefault(/*  */){
 	/* return new State(new ArrayList<>(), new StringBuilder(), 0) */;
@@ -213,6 +217,10 @@ struct public Definition(struct Type type, char* name){
 /* @Override
         public */ char* generate(/*  */){
 	/* return this.name */;
+}
+/* @Override
+        public */ char* generate(/*  */){
+	/* return "return " + this.value.generate() */;
 }
 /* public static */ struct void main(/*  */){
 	structs = /* new ArrayList<>() */;
@@ -425,10 +433,11 @@ struct public Definition(struct Type type, char* name){
 
                 var oldStatements = parseStatements(content, Main::parseStatement);
                 ArrayList<FunctionSegment> newStatements;
-                if (header instanceof Constructor(var name)) {
+                if (header instanceof ConstructorDefinition(var name)) {
                     var copy = new ArrayList<FunctionSegment>();
                     copy.add(new Statement(new Definition(new Struct(name), "this")));
                     copy.addAll(oldStatements);
+                    copy.add(new Statement(new Return(new Symbol("this"))));
                     newStatements = copy;
                 }
                 else {
@@ -453,10 +462,10 @@ struct public Definition(struct Type type, char* name){
 /* private static <T> */ List<struct T> parseStatements(char* content, /*  Function<String */, /*  T> compiler */){
 	/* return parseAll(content, Main::foldStatementChar, compiler) */;
 }
-/* private static */ Optional<struct Constructor> compileConstructorDefinition(char* input){/* 
+/* private static */ Optional<struct ConstructorDefinition> compileConstructorDefinition(char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
-                return new Some<>(new Constructor(name));
+                return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
         } */
