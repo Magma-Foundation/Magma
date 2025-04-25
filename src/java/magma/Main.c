@@ -23,6 +23,8 @@ struct Assignable {
 };
 struct Value {
 };
+struct Parameter {
+};
 struct Primitive {
 	/* I8("char"),
         I32("int") */;
@@ -72,7 +74,7 @@ struct Primitive new_Primitive(char* value){
 	return this;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return this.value */;
 }
 /* @Override
@@ -100,7 +102,7 @@ struct Primitive new_Primitive(char* value){
 	/* return predicate.test(this.value) ? this : new None<>() */;
 }
 /* @Override
-        public */ struct boolean isPresent(/*  */){
+        public */ struct boolean isPresent(){
 	struct return true;
 }
 /* @Override
@@ -128,7 +130,7 @@ struct Primitive new_Primitive(char* value){
 	struct return this;
 }
 /* @Override
-        public */ struct boolean isPresent(/*  */){
+        public */ struct boolean isPresent(){
 	struct return false;
 }
 struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
@@ -138,10 +140,10 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.depth = depth;
 	return this;
 }
-/* private static */ struct State createDefault(/*  */){
+/* private static */ struct State createDefault(){
 	/* return new State(new ArrayList<>(), new StringBuilder(), 0) */;
 }
-/* private */ struct State advance(/*  */){
+/* private */ struct State advance(){
 	/* this.segments.add(this.buffer.toString()) */;
 	this.buffer = /* new StringBuilder() */;
 	struct return this;
@@ -150,79 +152,79 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	/* this.buffer.append(c) */;
 	struct return this;
 }
-/* public */ struct boolean isLevel(/*  */){
+/* public */ struct boolean isLevel(){
 	/* return this */.depth = /* = 0 */;
 }
-/* public */ struct State enter(/*  */){
+/* public */ struct State enter(){
 	/* this.depth++ */;
 	struct return this;
 }
-/* public */ struct State exit(/*  */){
+/* public */ struct State exit(){
 	/* this.depth-- */;
 	struct return this;
 }
-/* public */ struct boolean isShallow(/*  */){
+/* public */ struct boolean isShallow(){
 	/* return this */.depth = /* = 1 */;
 }
 struct public Definition(struct Type type, char* name){
 	/* this(new None<String>(), type, name) */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	struct var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
 	/* return beforeType + this.type().generate() + " " + this.name() */;
 }
 /* @Override
-        public */ struct Definition toDefinition(/*  */){
+        public */ struct Definition toDefinition(){
 	struct return this;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return "struct " + this.name() */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return this.type.generate() + "*" */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return generatePlaceholder(this.input) */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	struct var joinedArgs = this.args().stream().map(Type::generate).collect(Collectors.joining(", "));
 	/* return this.base() + "<" + joinedArgs + ">" */;
 }
 /* @Override
-        public */ struct Definition toDefinition(/*  */){
+        public */ struct Definition toDefinition(){
 	/* return new Definition(new Struct(this.name()), "new_" + this.name()) */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return "\n\t" + this.content.generate() + " */;
 	/* " */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return "" */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return this */.assignable.generate() + " = /* " + this */.value.generate();
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return this.parent.generate() + "." + this.property */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return this.name */;
 }
 /* @Override
-        public */ char* generate(/*  */){
+        public */ char* generate(){
 	/* return "return " + this.value.generate() */;
 }
-/* public static */ struct void main(/*  */){
+/* public static */ struct void main(){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
 	currentStructName = /* new None<>() */;/* 
@@ -425,12 +427,11 @@ struct public Definition(struct Type type, char* name){
         } */
 	struct var paramEnd = withParams.indexOf(")");/* 
         if (paramEnd >= 0) {
-            var inputParams = withParams.substring(0, paramEnd).strip();
+            var paramStrings = withParams.substring(0, paramEnd).strip();
             var afterParams = withParams.substring(paramEnd + ")".length()).strip();
             if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
                 var content = afterParams.substring(1, afterParams.length() - 1);
-                var outputParams = compileValues(inputParams, Main::compileDefinitionOrPlaceholder);
-
+                var inputParams = parseValues(paramStrings, Main::parseParameter);
                 var oldStatements = parseStatements(content, Main::parseStatement);
                 ArrayList<FunctionSegment> newStatements;
                 if (header instanceof ConstructorDefinition(var name)) {
@@ -449,7 +450,11 @@ struct public Definition(struct Type type, char* name){
                         .map(FunctionSegment::generate)
                         .collect(Collectors.joining());
 
-                var constructor = header.toDefinition().generate() + "(" + outputParams + "){" + outputContent + "\n}\n";
+                var outputParamStrings = inputParams.stream()
+                        .map(Parameter::generate)
+                        .collect(Collectors.joining(", "));
+
+                var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
                 functions.add(constructor);
                 return new Some<>("");
             }
@@ -547,8 +552,11 @@ struct public Definition(struct Type type, char* name){
         } */
 	/* return new Content(stripped) */;
 }
-/* private static */ char* compileDefinitionOrPlaceholder(char* input){
-	/* return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input)) */;
+/* private static */ struct Parameter parseParameter(char* input){
+	/* return parseWhitespace(input)
+                .<Parameter>map(result -> result)
+                .or(() -> parseDefinition(input).map(result -> result))
+                .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Optional<struct Definition> parseDefinition(char* input){
 	struct var stripped = input.strip();

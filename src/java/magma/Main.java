@@ -51,6 +51,10 @@ public class Main {
     private interface Value extends Assignable {
     }
 
+    private interface Parameter {
+        String generate();
+    }
+
     private enum Primitive implements Type {
         I8("char"),
         I32("int");
@@ -190,7 +194,7 @@ public class Main {
             Optional<String> maybeBeforeType,
             Type type,
             String name
-    ) implements Definable, StatementValue, Assignable {
+    ) implements Definable, StatementValue, Assignable, Parameter {
         public Definition(Type type, String name) {
             this(new None<String>(), type, name);
         }
@@ -221,7 +225,7 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Type, FunctionSegment, StatementValue, Value {
+    private record Content(String input) implements Type, FunctionSegment, StatementValue, Value, Parameter {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -253,7 +257,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements FunctionSegment {
+    private static class Whitespace implements FunctionSegment, Parameter {
         @Override
         public String generate() {
             return "";
@@ -524,12 +528,11 @@ public class Main {
 
         var paramEnd = withParams.indexOf(")");
         if (paramEnd >= 0) {
-            var inputParams = withParams.substring(0, paramEnd).strip();
+            var paramStrings = withParams.substring(0, paramEnd).strip();
             var afterParams = withParams.substring(paramEnd + ")".length()).strip();
             if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
                 var content = afterParams.substring(1, afterParams.length() - 1);
-                var outputParams = compileValues(inputParams, Main::compileDefinitionOrPlaceholder);
-
+                var inputParams = parseValues(paramStrings, Main::parseParameter);
                 var oldStatements = parseStatements(content, Main::parseStatement);
                 ArrayList<FunctionSegment> newStatements;
                 if (header instanceof ConstructorDefinition(var name)) {
@@ -548,7 +551,11 @@ public class Main {
                         .map(FunctionSegment::generate)
                         .collect(Collectors.joining());
 
-                var constructor = header.toDefinition().generate() + "(" + outputParams + "){" + outputContent + "\n}\n";
+                var outputParamStrings = inputParams.stream()
+                        .map(Parameter::generate)
+                        .collect(Collectors.joining(", "));
+
+                var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
                 functions.add(constructor);
                 return new Some<>("");
             }
@@ -659,8 +666,11 @@ public class Main {
         return new Content(stripped);
     }
 
-    private static String compileDefinitionOrPlaceholder(String input) {
-        return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input));
+    private static Parameter parseParameter(String input) {
+        return parseWhitespace(input)
+                .<Parameter>map(result -> result)
+                .or(() -> parseDefinition(input).map(result -> result))
+                .orElseGet(() -> new Content(input));
     }
 
     private static Optional<Definition> parseDefinition(String input) {
