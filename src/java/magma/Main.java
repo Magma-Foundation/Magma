@@ -198,26 +198,40 @@ public class Main {
             var beforeParams = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            var nameSeparator = beforeParams.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                var name = beforeParams.substring(nameSeparator + " ".length());
-                if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
-                    var paramEnd = withParams.indexOf(")");
-                    if (paramEnd >= 0) {
-                        var params = withParams.substring(0, paramEnd).strip();
-                        var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                            var content = withBraces.substring(1, withBraces.length() - 1);
-                            var constructor = "struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n";
-                            functions.add(constructor);
-                            return Optional.of("");
-                        }
-                    }
+            var header = compileDefinition(beforeParams)
+                    .or(() -> compileConstructorHeader(beforeParams))
+                    .orElseGet(() -> compileDefinitionOrPlaceholder(beforeParams));
+
+            var paramEnd = withParams.indexOf(")");
+            if (paramEnd >= 0) {
+                var params = withParams.substring(0, paramEnd).strip();
+                var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                    var content = withBraces.substring(1, withBraces.length() - 1);
+                    return assembleMethod(header, params, content);
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    private static Optional<String> compileConstructorHeader(String beforeParams) {
+        var nameSeparator = beforeParams.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var name = beforeParams.substring(nameSeparator + " ".length());
+            if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
+                var header = "struct " + name + " new_" + name;
+                return Optional.of(header);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> assembleMethod(String header, String params, String content) {
+        var constructor = header + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n";
+        functions.add(constructor);
+        return Optional.of("");
     }
 
     private static String compileStatement(String input) {
@@ -228,32 +242,35 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+            return Optional.of("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         }
         else {
             return Optional.empty();
         }
     }
 
-    private static String compileDefinition(String input) {
+    private static String compileDefinitionOrPlaceholder(String input) {
+        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            var beforeName = stripped.substring(0, nameSeparator).strip();
-            var name = stripped.substring(nameSeparator + " ".length()).strip();
-
-            var typeSeparator = beforeName.lastIndexOf(" ");
-            if (typeSeparator >= 0) {
-                var beforeType = beforeName.substring(0, typeSeparator).strip();
-                var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                return generateDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name);
-            }
-            else {
-                return generateDefinition("", compileType(beforeName), name);
-            }
+        if (nameSeparator < 0) {
+            return Optional.empty();
         }
 
-        return generatePlaceholder(stripped);
+        var beforeName = stripped.substring(0, nameSeparator).strip();
+        var name = stripped.substring(nameSeparator + " ".length()).strip();
+
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator < 0) {
+            return Optional.of(generateDefinition("", compileType(beforeName), name));
+        }
+
+        var beforeType = beforeName.substring(0, typeSeparator).strip();
+        var type = beforeName.substring(typeSeparator + " ".length()).strip();
+        return Optional.of(generateDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name));
     }
 
     private static String generateDefinition(String beforeType, String type, String name) {
