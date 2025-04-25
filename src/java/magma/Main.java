@@ -203,14 +203,21 @@ public class Main {
                     var paramEnd = withParams.indexOf(")");
                     if (paramEnd >= 0) {
                         var params = withParams.substring(0, paramEnd).strip();
-                        var withBraces = withParams.substring(paramEnd + ")".length());
-                        return Optional.of("struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + ")" + generatePlaceholder(withBraces) + "\n");
+                        var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                            var content = withBraces.substring(1, withBraces.length() - 1);
+                            return Optional.of("struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n");
+                        }
                     }
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    private static String compileStatement(String input) {
+        return generatePlaceholder(input);
     }
 
     private static Optional<String> compileDefinitionStatement(String input) {
