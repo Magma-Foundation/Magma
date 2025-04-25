@@ -10,7 +10,7 @@
 struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
-	/* private */ struct StringBuilder buffer;struct State new_State(/* List<String> segments, StringBuilder buffer, int depth) {
+	/* private */ struct StringBuilder buffer;struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth)/*  {
             this.buffer = buffer;
             this.segments = segments;
             this.depth = depth;
@@ -176,7 +176,12 @@ struct Main {
             if (nameSeparator >= 0) {
                 var name = beforeParams.substring(nameSeparator + " ".length());
                 if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
-                    return Optional.of("struct " + name + " new_" + name + "(" + generatePlaceholder(withParams) + "\n");
+                    var paramEnd = withParams.indexOf(")");
+                    if (paramEnd >= 0) {
+                        var params = withParams.substring(0, paramEnd).strip();
+                        var withBraces = withParams.substring(paramEnd + ")".length());
+                        return Optional.of("struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + ")" + generatePlaceholder(withBraces) + "\n");
+                    }
                 }
             }
         }
@@ -204,11 +209,17 @@ struct Main {
             if (typeSeparator >= 0) {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var type = beforeName.substring(typeSeparator + " ".length()).strip();
-                return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
+                return generateDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name);
+            }
+            else {
+                return generateDefinition("", compileType(beforeName), name);
             }
         }
 
         return generatePlaceholder(stripped);
+    } */
+	/* private static String generateDefinition(String beforeType, String type, String name) {
+        return beforeType + type + " " + name;
     } */
 	/* private static String compileType(String input) {
         var stripped = input.strip();
@@ -226,11 +237,14 @@ struct Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                return base + "<" + compileAll(args, Main::foldValueChar, Main::compileType, Main::mergeValues) + ">";
+                return base + "<" + compileValues(args, Main::compileType) + ">";
             }
         }
 
         return "struct " + stripped;
+    } */
+	/* private static String compileValues(String args, Function<String, String> compiler) {
+        return compileAll(args, Main::foldValueChar, compiler, Main::mergeValues);
     } */
 	/* private static State foldValueChar(State state, char c) {
         if (c == ',') {
