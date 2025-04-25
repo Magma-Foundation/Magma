@@ -63,6 +63,9 @@ struct Definition {
         } */
 };
 struct Struct {
+	/* private Struct(String name) {
+            this(name, Collections.emptyList());
+        } */
 };
 struct Ref {
 };
@@ -92,7 +95,10 @@ struct DefinitionBuilder {
 };
 struct Tuple<A,  B> {
 };
+struct TypeParam {
+};
 struct Main {
+	private static final List<char*> typeParams = /* new ArrayList<>() */;
 	public static List<char*> structs;
 	private static List<char*> functions;
 	private static List<Tuple<char*, List<char*>>> stack;
@@ -102,59 +108,59 @@ struct Main {
 	return this.value;
 }
 /* @Override
-        public  */ Option<struct R> map_Some<T, R>(struct Some this, Function<struct T, struct R> mapper){
+        public  */ Option<R> map_Some<T, R>(struct Some<T> this, Function<T, struct R> mapper){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 @Override
-        public struct T orElse_Some<T>(struct Some this, struct T other){
+        public T orElse_Some<T>(struct Some<T> this, T other){
 	return this.value;
 }
 @Override
-        public struct T orElseGet_Some<T>(struct Some this, Supplier<struct T> other){
+        public T orElseGet_Some<T>(struct Some<T> this, Supplier<T> other){
 	return this.value;
 }
 @Override
-        public Option<struct T> or_Some<T>(struct Some this, Supplier<Option<struct T>> other){
+        public Option<T> or_Some<T>(struct Some<T> this, Supplier<Option<T>> other){
 	return this;
 }
 /* @Override
-        public  */ Option<struct R> flatMap_Some<T, R>(struct Some this, Function<struct T, Option<struct R>> mapper){
+        public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Function<T, Option<R>> mapper){
 	return /* mapper.apply(this.value) */;
 }
 @Override
-        public Option<struct T> filter_Some<T>(struct Some this, Predicate<struct T> predicate){
+        public Option<T> filter_Some<T>(struct Some<T> this, Predicate<T> predicate){
 	return /* predicate.test(this.value) ? this : new None<>() */;
 }
 @Override
-        public struct boolean isPresent_Some<T>(struct Some this){
+        public struct boolean isPresent_Some<T>(struct Some<T> this){
 	return true;
 }
 /* @Override
-        public  */ Option<struct R> map_None<T, R>(struct None this, Function<struct T, struct R> mapper){
+        public  */ Option<R> map_None<T, R>(struct None<T> this, Function<T, struct R> mapper){
 	return /* new None<>() */;
 }
 @Override
-        public struct T orElse_None<T>(struct None this, struct T other){
+        public T orElse_None<T>(struct None<T> this, T other){
 	return other;
 }
 @Override
-        public struct T orElseGet_None<T>(struct None this, Supplier<struct T> other){
+        public T orElseGet_None<T>(struct None<T> this, Supplier<T> other){
 	return /* other.get() */;
 }
 @Override
-        public Option<struct T> or_None<T>(struct None this, Supplier<Option<struct T>> other){
+        public Option<T> or_None<T>(struct None<T> this, Supplier<Option<T>> other){
 	return /* other.get() */;
 }
 /* @Override
-        public  */ Option<struct R> flatMap_None<T, R>(struct None this, Function<struct T, Option<struct R>> mapper){
+        public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Function<T, Option<R>> mapper){
 	return /* new None<>() */;
 }
 @Override
-        public Option<struct T> filter_None<T>(struct None this, Predicate<struct T> predicate){
+        public Option<T> filter_None<T>(struct None<T> this, Predicate<T> predicate){
 	return this;
 }
 @Override
-        public struct boolean isPresent_None<T>(struct None this){
+        public struct boolean isPresent_None<T>(struct None<T> this){
 	return false;
 }
 private static struct State createDefault_State(struct State this){
@@ -203,7 +209,8 @@ public struct Definition mapTypeParams_Definition(struct Definition this, Functi
 }
 @Override
         public char* generate_Struct(struct Struct this){
-	return /* "struct " + this.name() */;
+	struct var typeParamString = /* this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">" */;
+	return /* "struct " + this.name + typeParamString */;
 }
 @Override
         public char* generate_Ref(struct Ref this){
@@ -275,6 +282,10 @@ public struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct Definiti
 	this.typeParams = typeParams;
 	return this;
 }
+@Override
+        public char* generate_TypeParam(struct TypeParam this){
+	return this.input;
+}
 public static struct void main_Main(struct Main this){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
@@ -309,7 +320,7 @@ private static char* generateAll_Main(struct Main this, BiFunction<struct String
         } */
 	return /* output.toString() */;
 }
-/* private static  */ List<struct T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, struct T> compiler){
 	struct var segments = /* divide(input, folder) */;
 	struct var compiled = /* new ArrayList<T>() */;/* 
         for (var segment : segments) {
@@ -480,6 +491,10 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
         } */
 	struct var beforeParams = /* input.substring(0, paramStart).strip() */;
 	struct var withParams = /* input.substring(paramStart + "(".length()) */;
+	struct var currentStruct = /* stack.getLast() */;
+	struct var currentStructName = currentStruct.left;
+	struct var currentStructTypeParams = currentStruct.right;
+	/* typeParams.addAll(currentStructTypeParams) */;
 	struct var maybeHeader = /* parseDefinition(beforeParams)
                 .<Definable>map(value -> value)
                 .or(() -> compileConstructorDefinition(beforeParams).map(value -> value)) */;/* 
@@ -498,11 +513,16 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
 
             var inputParams = parseValues(paramStrings, Main::parseParameter);
             var oldStatements = parseStatements(content, Main::parseStatement);
+            typeParams.clear();
 
             ArrayList<FunctionSegment> newStatements;
             if (header instanceof ConstructorDefinition(var name)) {
                 var copy = new ArrayList<FunctionSegment>();
-                copy.add(new Statement(new DefinitionBuilder().withType(new Struct(name)).withName("this").complete()));
+                copy.add(new Statement(new DefinitionBuilder()
+                        .withType(new Struct(name, currentStructTypeParams))
+                        .withName("this")
+                        .complete()));
+
                 copy.addAll(oldStatements);
                 copy.add(new Statement(new Return(new Symbol("this"))));
                 newStatements = copy;
@@ -516,15 +536,11 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
                     .map(FunctionSegment::generate)
                     .collect(Collectors.joining());
 
-            var currentStruct = stack.getLast();
-            var currentStructName = currentStruct.left;
-            var currentStructTypeParams = currentStruct.right;
-
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
             if (header instanceof Definition oldDefinition) {
                 outputParams.add(new DefinitionBuilder()
-                        .withType(new Struct(currentStructName))
+                        .withType(new Struct(currentStructName, currentStructTypeParams))
                         .withName("this")
                         .complete());
 
@@ -559,7 +575,7 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
         } */
 	return /* new None<>() */;
 }
-/* private static  */ List<struct T> parseStatements_Main<T>(struct Main this, char* content, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, Function<char*, struct T> compiler){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
 }
 private static Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
@@ -691,7 +707,10 @@ private static Option<struct Definition> parseDefinition_Main(struct Main this, 
                         var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
 
                         var typeParams = parseValues(typeParamString, Function.identity());
-                        yield parseType(inputType).map(outputType -> withName
+                        Main.typeParams.addAll(typeParams);
+                        var maybeOutputType = parseType(inputType);
+
+                        yield maybeOutputType.map(outputType -> withName
                                 .withBeforeType(generatePlaceholder(withoutTypeParams))
                                 .withTypeParams(typeParams)
                                 .withType(outputType)
@@ -737,6 +756,10 @@ private static Option<struct Type> parseType_Main(struct Main this, char* input)
             return new Some<>(new Ref(Primitive.I8));
         } *//* 
 
+        if (typeParams.contains(input)) {
+            return new Some<>(new TypeParam(input));
+        } *//* 
+
         if (stripped.endsWith(">")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             var argsStart = withoutEnd.indexOf("<");
@@ -760,7 +783,7 @@ private static char* compileValues_Main(struct Main this, char* args, Function<c
 private static char* generateValues_Main(struct Main this, List<char*> values){
 	return /* generateAll(Main::mergeValues, values) */;
 }
-/* private static  */ List<struct T> parseValues_Main<T>(struct Main this, char* args, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, Function<char*, struct T> compiler){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
 }
 private static struct State foldValueChar_Main(struct Main this, struct State state, struct char c){/* 

@@ -228,10 +228,15 @@ public class Main {
         }
     }
 
-    private record Struct(String name) implements Type {
+    private record Struct(String name, List<String> typeParams) implements Type {
+        private Struct(String name) {
+            this(name, Collections.emptyList());
+        }
+
         @Override
         public String generate() {
-            return "struct " + this.name();
+            var typeParamString = this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">";
+            return "struct " + this.name + typeParamString;
         }
     }
 
@@ -352,6 +357,14 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
+    private record TypeParam(String input) implements Type {
+        @Override
+        public String generate() {
+            return this.input;
+        }
+    }
+
+    private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
     private static List<Tuple<String, List<String>>> stack;
@@ -594,6 +607,12 @@ public class Main {
         var beforeParams = input.substring(0, paramStart).strip();
         var withParams = input.substring(paramStart + "(".length());
 
+
+        var currentStruct = stack.getLast();
+        var currentStructName = currentStruct.left;
+        var currentStructTypeParams = currentStruct.right;
+        typeParams.addAll(currentStructTypeParams);
+
         var maybeHeader = parseDefinition(beforeParams)
                 .<Definable>map(value -> value)
                 .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
@@ -614,11 +633,16 @@ public class Main {
 
             var inputParams = parseValues(paramStrings, Main::parseParameter);
             var oldStatements = parseStatements(content, Main::parseStatement);
+            typeParams.clear();
 
             ArrayList<FunctionSegment> newStatements;
             if (header instanceof ConstructorDefinition(var name)) {
                 var copy = new ArrayList<FunctionSegment>();
-                copy.add(new Statement(new DefinitionBuilder().withType(new Struct(name)).withName("this").complete()));
+                copy.add(new Statement(new DefinitionBuilder()
+                        .withType(new Struct(name, currentStructTypeParams))
+                        .withName("this")
+                        .complete()));
+
                 copy.addAll(oldStatements);
                 copy.add(new Statement(new Return(new Symbol("this"))));
                 newStatements = copy;
@@ -632,15 +656,11 @@ public class Main {
                     .map(FunctionSegment::generate)
                     .collect(Collectors.joining());
 
-            var currentStruct = stack.getLast();
-            var currentStructName = currentStruct.left;
-            var currentStructTypeParams = currentStruct.right;
-
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
             if (header instanceof Definition oldDefinition) {
                 outputParams.add(new DefinitionBuilder()
-                        .withType(new Struct(currentStructName))
+                        .withType(new Struct(currentStructName, currentStructTypeParams))
                         .withName("this")
                         .complete());
 
@@ -826,7 +846,10 @@ public class Main {
                         var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
 
                         var typeParams = parseValues(typeParamString, Function.identity());
-                        yield parseType(inputType).map(outputType -> withName
+                        Main.typeParams.addAll(typeParams);
+                        var maybeOutputType = parseType(inputType);
+
+                        yield maybeOutputType.map(outputType -> withName
                                 .withBeforeType(generatePlaceholder(withoutTypeParams))
                                 .withTypeParams(typeParams)
                                 .withType(outputType)
@@ -871,6 +894,10 @@ public class Main {
 
         if (stripped.equals("String")) {
             return new Some<>(new Ref(Primitive.I8));
+        }
+
+        if (typeParams.contains(input)) {
+            return new Some<>(new TypeParam(input));
         }
 
         if (stripped.endsWith(">")) {
