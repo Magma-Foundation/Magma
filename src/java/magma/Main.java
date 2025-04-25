@@ -191,21 +191,39 @@ public class Main {
         }
     }
 
-    private record Definition(
-            Option<String> maybeBeforeType,
-            Type type,
-            String name
-    ) implements Definable, StatementValue, Assignable, Parameter {
-        public Definition(Type type, String name) {
-            this(new None<String>(), type, name);
+    static final class Definition implements Definable, StatementValue, Assignable, Parameter {
+        private final Option<String> maybeBeforeType;
+        private final Type type;
+        private final String name;
+        private final List<String> typeParams;
+
+        Definition(
+                Option<String> maybeBeforeType,
+                List<String> typeParams,
+                Type type,
+                String name) {
+            this.maybeBeforeType = maybeBeforeType;
+            this.type = type;
+            this.name = name;
+            this.typeParams = typeParams;
         }
 
         @Override
         public String generate() {
-            var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
-            return beforeType + this.type().generate() + " " + this.name();
+            String joinedTypeParams;
+            if (this.typeParams.isEmpty()) {
+                joinedTypeParams = "";
+            }
+            else {
+                joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
+            }
+            var beforeType = this.maybeBeforeType.map(inner -> inner + " ").orElse("");
+            return beforeType + this.type.generate() + " " + this.name + joinedTypeParams;
         }
 
+        public Definition rename(String name) {
+            return new Definition(this.maybeBeforeType, this.typeParams, this.type, name);
+        }
     }
 
     private record Struct(String name) implements Type {
@@ -242,7 +260,7 @@ public class Main {
 
     private record ConstructorDefinition(String name) implements Definable {
         private Definition toDefinition() {
-            return new Definition(new Struct(this.name()), "new_" + this.name());
+            return new DefinitionBuilder().withType(new Struct(this.name())).withName("new_" + this.name()).complete();
         }
 
         @Override
@@ -290,6 +308,42 @@ public class Main {
         @Override
         public String generate() {
             return "return " + this.value.generate();
+        }
+    }
+
+    private static class DefinitionBuilder {
+        private Option<String> maybeBeforeType = new None<String>();
+        private Type type;
+        private String name;
+        private List<String> typeParams = new ArrayList<>();
+
+        public DefinitionBuilder withBeforeType(String beforeType) {
+            this.maybeBeforeType = new Some<>(beforeType);
+            return this;
+        }
+
+        public DefinitionBuilder withType(Type type) {
+            this.type = type;
+            return this;
+        }
+
+        public DefinitionBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Definition complete() {
+            return new Definition(this.maybeBeforeType, this.typeParams, this.type, this.name);
+        }
+
+        public DefinitionBuilder withMaybeBeforeType(Option<String> maybeBeforeType) {
+            this.maybeBeforeType = maybeBeforeType;
+            return this;
+        }
+
+        public DefinitionBuilder withTypeParams(List<String> typeParams) {
+            this.typeParams = typeParams;
+            return this;
         }
     }
 
@@ -461,14 +515,14 @@ public class Main {
             if (withTypeParamEnd.endsWith(">")) {
                 var typeParamsString = withTypeParamEnd.substring(0, withTypeParamEnd.length() - ">".length());
                 var typeParams = parseValues(typeParamsString, Function.identity());
-                return getOption(name, withEnd, typeParams);
+                return assembleStructured(name, withEnd, typeParams);
             }
         }
 
-        return getOption(withoutParameters, withEnd, Collections.emptyList());
+        return assembleStructured(withoutParameters, withEnd, Collections.emptyList());
     }
 
-    private static Option<String> getOption(String name, String input, List<String> typeParams) {
+    private static Option<String> assembleStructured(String name, String input, List<String> typeParams) {
         if (!isSymbol(name)) {
             return new None<>();
         }
@@ -559,7 +613,7 @@ public class Main {
             ArrayList<FunctionSegment> newStatements;
             if (header instanceof ConstructorDefinition(var name)) {
                 var copy = new ArrayList<FunctionSegment>();
-                copy.add(new Statement(new Definition(new Struct(name), "this")));
+                copy.add(new Statement(new DefinitionBuilder().withType(new Struct(name)).withName("this").complete()));
                 copy.addAll(oldStatements);
                 copy.add(new Statement(new Return(new Symbol("this"))));
                 newStatements = copy;
@@ -578,8 +632,8 @@ public class Main {
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
             if (header instanceof Definition oldDefinition) {
-                outputParams.add(new Definition(new Struct(currentStructName), "this"));
-                newDefinition = new Definition(oldDefinition.maybeBeforeType, oldDefinition.type, oldDefinition.name + "_" + currentStructName);
+                outputParams.add(new DefinitionBuilder().withType(new Struct(currentStructName)).withName("this").complete());
+                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName);
             }
             else if (header instanceof ConstructorDefinition constructorDefinition) {
                 newDefinition = constructorDefinition.toDefinition();
@@ -739,12 +793,35 @@ public class Main {
             return new None<>();
         }
 
+        var withName = new DefinitionBuilder().withName(name);
         return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
+            case None<Integer> _ -> parseType(beforeName).map(type -> new DefinitionBuilder()
+                    .withType(type)
+                    .withName(name)
+                    .complete());
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-                yield parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
+                if (beforeType.endsWith(">")) {
+                    var withTypeParamStart = beforeType.substring(0, beforeType.length() - ">".length());
+
+                    var typeParamStart = withTypeParamStart.lastIndexOf("<");
+                    if (typeParamStart >= 0) {
+                        var withoutTypeParams = beforeType.substring(0, typeParamStart);
+                        var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
+
+                        var typeParams = parseValues(typeParamString, Function.identity());
+                        yield parseType(inputType).map(outputType -> withName
+                                .withBeforeType(generatePlaceholder(withoutTypeParams))
+                                .withTypeParams(typeParams)
+                                .withType(outputType)
+                                .complete());
+                    }
+                }
+                yield parseType(inputType).map(outputType -> withName
+                        .withBeforeType(beforeType)
+                        .withType(outputType)
+                        .complete());
             }
         };
     }
