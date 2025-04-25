@@ -217,6 +217,10 @@ public class Main {
             this.typeParams = typeParams;
         }
 
+        Definition(Type type, String name) {
+            this(new None<>(), type, name, Collections.emptyList());
+        }
+
         @Override
         public String generate() {
             String joinedTypeParams;
@@ -499,7 +503,9 @@ public class Main {
     }
 
     private static final List<String> typeParams = new ArrayList<>();
+    private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
+    public static int localCounter = 0;
     private static List<String> functions;
     private static List<Frame> frames;
 
@@ -795,9 +801,16 @@ public class Main {
                 typeParams.clear();
 
                 if (maybeOldStatements instanceof Some(var oldStatements)) {
+                    var list = statements.stream()
+                            .map(Statement::new)
+                            .toList();
+                    statements.clear();
+                    localCounter = 0;
+
                     ArrayList<FunctionSegment> newStatements;
                     if (header instanceof ConstructorDefinition(var name)) {
-                        var copy = new ArrayList<FunctionSegment>();
+                        var copy = new ArrayList<FunctionSegment>(list);
+
                         copy.add(new Statement(new DefinitionBuilder()
                                 .withType(new Struct(name, currentStructTypeParams))
                                 .withName("this")
@@ -808,7 +821,8 @@ public class Main {
                         newStatements = copy;
                     }
                     else {
-                        newStatements = new ArrayList<>(oldStatements);
+                        newStatements = new ArrayList<>(list);
+                        newStatements.addAll(oldStatements);
                     }
 
                     var outputContent = newStatements
@@ -1021,15 +1035,23 @@ public class Main {
     private static Option<Invocation> parseInvocation(String stripped) {
         return parseInvokable(stripped, Main::parseValue, Invocation::new).map(invocation -> {
             var caller = invocation.caller;
-            if (caller instanceof DataAccess access) {
+            if (caller instanceof DataAccess(var parent, var property)) {
+                var resolved = resolveType(parent);
+
+                var name = "local" + localCounter;
+                var symbol = new Symbol(name);
+                localCounter++;
+
+                statements.add(new Assignment(new Definition(resolved, name), parent));
+
                 var arguments = new ArrayList<Value>();
-                arguments.add(access.parent);
+                arguments.add(symbol);
                 arguments.addAll(invocation.arguments
                         .stream()
                         .filter(argument -> !(argument instanceof Whitespace))
                         .toList());
 
-                return new Invocation(caller, arguments);
+                return new Invocation(new DataAccess(symbol, property), arguments);
             }
 
             return invocation;
