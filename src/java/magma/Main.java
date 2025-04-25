@@ -957,14 +957,15 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> parseClass(String stripped) {
-        return parseStructured(stripped, "class ");
+        return structured(stripped, "class ");
     }
 
-    private static Result<Whitespace, CompileError> parseStructured(String stripped, String infix) {
+    private static Result<Whitespace, CompileError> structured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return createInfixErr(stripped, infix);
         }
+
         var afterKeyword = stripped.substring(classIndex + infix.length());
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
@@ -974,10 +975,15 @@ public class Main {
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
         var withEnd = afterKeyword.substring(contentStart + "{".length());
 
-        var implementsIndex = beforeContent.indexOf(" implements ");
-        var withoutImplements = implementsIndex >= 0
-                ? beforeContent.substring(0, implementsIndex).strip()
+        var permitsIndex = beforeContent.indexOf(" permits ");
+        var withoutPermits = permitsIndex >= 0
+                ? beforeContent.substring(0, permitsIndex).strip()
                 : beforeContent;
+
+        var implementsIndex = withoutPermits.indexOf(" implements ");
+        var withoutImplements = implementsIndex >= 0
+                ? withoutPermits.substring(0, implementsIndex).strip()
+                : withoutPermits;
 
         var extendsIndex = withoutImplements.indexOf(" extends ");
         var withoutExtends = extendsIndex >= 0
@@ -1085,8 +1091,8 @@ public class Main {
         return input -> whitespace.apply(input).mapValue(value -> value);
     }
 
-    private static Rule<StructSegment> structSegmentFromStructured(String interface_) {
-        return structSegmentFrom(input -> parseStructured(input, interface_));
+    private static Rule<StructSegment> structSegmentFromStructured(String infix) {
+        return structSegmentFrom(input -> structured(input, infix));
     }
 
     private static Result<Whitespace, CompileError> whitespace(String input) {
