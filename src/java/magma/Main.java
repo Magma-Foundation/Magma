@@ -555,10 +555,13 @@ public class Main {
 
                 var currentStructName = maybeCurrentStructName.orElse("");
                 var outputParams = new ArrayList<Parameter>();
-                if(header instanceof Definition _) {
+                if (header instanceof Definition _) {
                     outputParams.add(new Definition(new Struct(currentStructName), "this"));
                 }
-                outputParams.addAll(inputParams);
+                outputParams.addAll(inputParams
+                        .stream()
+                        .filter(node -> !(node instanceof Whitespace))
+                        .toList());
 
                 var outputParamStrings = outputParams.stream()
                         .map(Parameter::generate)

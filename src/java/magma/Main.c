@@ -74,7 +74,7 @@ struct Primitive new_Primitive(char* value){
 	return this;
 }
 /* @Override
-        public */ char* generate(struct Primitive this, ){
+        public */ char* generate(struct Primitive this){
 	return this.value;
 }
 /* @Override
@@ -102,7 +102,7 @@ struct Primitive new_Primitive(char* value){
 	return predicate.test(this.value) ? this : new None<>();
 }
 /* @Override
-        public */ struct boolean isPresent(struct Some this, ){
+        public */ struct boolean isPresent(struct Some this){
 	return true;
 }
 /* @Override
@@ -130,7 +130,7 @@ struct Primitive new_Primitive(char* value){
 	return this;
 }
 /* @Override
-        public */ struct boolean isPresent(struct None this, ){
+        public */ struct boolean isPresent(struct None this){
 	return false;
 }
 struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
@@ -140,10 +140,10 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.depth = depth;
 	return this;
 }
-/* private static */ struct State createDefault(struct State this, ){
+/* private static */ struct State createDefault(struct State this){
 	return /* new State(new ArrayList<>(), new StringBuilder(), 0) */;
 }
-/* private */ struct State advance(struct State this, ){
+/* private */ struct State advance(struct State this){
 	/* this.segments.add(this.buffer.toString()) */;
 	this.buffer = /* new StringBuilder() */;
 	return this;
@@ -152,79 +152,79 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	/* this.buffer.append(c) */;
 	return this;
 }
-/* public */ struct boolean isLevel(struct State this, ){
+/* public */ struct boolean isLevel(struct State this){
 	return this.depth == 0;
 }
-/* public */ struct State enter(struct State this, ){
+/* public */ struct State enter(struct State this){
 	/* this.depth++ */;
 	return this;
 }
-/* public */ struct State exit(struct State this, ){
+/* public */ struct State exit(struct State this){
 	/* this.depth-- */;
 	return this;
 }
-/* public */ struct boolean isShallow(struct State this, ){
+/* public */ struct boolean isShallow(struct State this){
 	return this.depth == 1;
 }
 struct public Definition(struct Definition this, struct Type type, char* name){
 	/* this(new None<String>(), type, name) */;
 }
 /* @Override
-        public */ char* generate(struct Definition this, ){
+        public */ char* generate(struct Definition this){
 	struct var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
 	return /* beforeType + this */.type().generate() + " " + this.name();
 }
 /* @Override
-        public */ struct Definition toDefinition(struct Definition this, ){
+        public */ struct Definition toDefinition(struct Definition this){
 	return this;
 }
 /* @Override
-        public */ char* generate(struct Struct this, ){
+        public */ char* generate(struct Struct this){
 	return /* "struct " + this */.name();
 }
 /* @Override
-        public */ char* generate(struct Ref this, ){
+        public */ char* generate(struct Ref this){
 	return this.type.generate() + "*";
 }
 /* @Override
-        public */ char* generate(struct Content this, ){
+        public */ char* generate(struct Content this){
 	return /* generatePlaceholder(this */.input);
 }
 /* @Override
-        public */ char* generate(struct Generic this, ){
+        public */ char* generate(struct Generic this){
 	struct var joinedArgs = this.args().stream().map(Type::generate).collect(Collectors.joining(", "));
 	return this.base() + "<" + joinedArgs + ">";
 }
 /* @Override
-        public */ struct Definition toDefinition(struct ConstructorDefinition this, ){
+        public */ struct Definition toDefinition(struct ConstructorDefinition this){
 	return /* new Definition(new Struct(this */.name()), "new_" + this.name());
 }
 /* @Override
-        public */ char* generate(struct Statement this, ){
+        public */ char* generate(struct Statement this){
 	return /* "\n\t" + this */.content.generate() + ";
 	/* " */;
 }
 /* @Override
-        public */ char* generate(struct Whitespace this, ){
+        public */ char* generate(struct Whitespace this){
 	return /* "" */;
 }
 /* @Override
-        public */ char* generate(struct Assignment this, ){
+        public */ char* generate(struct Assignment this){
 	return this.assignable.generate() + " = " + this.value.generate();
 }
 /* @Override
-        public */ char* generate(struct DataAccess this, ){
+        public */ char* generate(struct DataAccess this){
 	return this.parent.generate() + "." + this.property;
 }
 /* @Override
-        public */ char* generate(struct Symbol this, ){
+        public */ char* generate(struct Symbol this){
 	return this.name;
 }
 /* @Override
-        public */ char* generate(struct Return this, ){
+        public */ char* generate(struct Return this){
 	return /* "return " + this */.value.generate();
 }
-/* public static */ struct void main(struct Return this, ){
+/* public static */ struct void main(struct Return this){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
 	maybeCurrentStructName = /* new None<>() */;/* 
@@ -447,10 +447,13 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 
                 var currentStructName = maybeCurrentStructName.orElse("");
                 var outputParams = new ArrayList<Parameter>();
-                if(header instanceof Definition _) {
+                if (header instanceof Definition _) {
                     outputParams.add(new Definition(new Struct(currentStructName), "this"));
                 }
-                outputParams.addAll(inputParams);
+                outputParams.addAll(inputParams
+                        .stream()
+                        .filter(node -> !(node instanceof Whitespace))
+                        .toList());
 
                 var outputParamStrings = outputParams.stream()
                         .map(Parameter::generate)
