@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -701,12 +703,22 @@ public class Main {
         }
 
         private String format(int depth) {
-            var joined = this.errors.stream()
+            var copy = new ArrayList<CompileError>(this.errors);
+            copy.sort(Comparator.comparingInt(CompileError::computeMaxDepth));
+
+            var joined = copy.stream()
                     .map(error -> error.format(depth + 1))
                     .map(displayed -> "\n" + "\t".repeat(depth) + displayed)
                     .collect(Collectors.joining());
 
             return this.message + ": " + this.context.display() + joined;
+        }
+
+        private int computeMaxDepth() {
+            return 1 + this.errors.stream()
+                    .mapToInt(CompileError::computeMaxDepth)
+                    .max()
+                    .orElse(0);
         }
     }
 
