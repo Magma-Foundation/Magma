@@ -71,7 +71,8 @@ public class Main {
     private enum Primitive implements Type {
         I8("char"),
         I32("int"),
-        Boolean("int");
+        Boolean("int"),
+        Auto("auto");
 
         private final String value;
 
@@ -1063,7 +1064,9 @@ public class Main {
             var value = input.substring(valueSeparator + "=".length());
 
             var destination = parseDefinition(inputDefinition)
-                    .<Assignable>map(result -> result)
+                    .<Assignable>map(result -> {
+                        return result;
+                    })
                     .orElseGet(() -> parseValueOrPlaceholder(inputDefinition));
 
             return new Some<>(new Assignment(destination, parseValueOrPlaceholder(value)));
@@ -1356,8 +1359,8 @@ public class Main {
 
     private static Option<Type> parseType(String input) {
         var stripped = input.strip();
-        if (stripped.equals("private")) {
-            return new None<>();
+        if(stripped.equals("var")) {
+            return new Some<>(Primitive.Auto);
         }
 
         if (stripped.equals("int")) {
@@ -1374,6 +1377,10 @@ public class Main {
 
         if (stripped.equals("boolean")) {
             return new Some<>(Primitive.Boolean);
+        }
+
+        if (stripped.equals("private")) {
+            return new None<>();
         }
 
         if (typeParams.contains(stripped)) {

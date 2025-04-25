@@ -33,7 +33,8 @@ struct Parameter {
 struct Primitive {
 	/* I8("char"),
         I32("int"),
-        Boolean("int") */;
+        Boolean("int"),
+        Auto("auto") */;
 	/* private final */ char* value;
 };
 struct Operator {
@@ -242,9 +243,9 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Definition(struct Definition this){
-	struct var joinedTypeParams = this.generateTypeParams(this);
-	struct var beforeType = this.generateBeforeType(this);
-	struct var generatedWithName = this.generatedWithName(this);
+	auto joinedTypeParams = this.generateTypeParams(this);
+	auto beforeType = this.generateBeforeType(this);
+	auto generatedWithName = this.generatedWithName(this);
 	return /* beforeType + generatedWithName + joinedTypeParams */;
 }
 /* private */ char* generatedWithName_Definition(struct Definition this){/* 
@@ -282,7 +283,7 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Struct(struct Struct this){
-	struct var typeParamString = /*  this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">" */;
+	auto typeParamString = /*  this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">" */;
 	return /* "struct " + this.name + typeParamString */;
 }
 /* @Override
@@ -315,13 +316,13 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* stringify_Functional(struct Functional this){
-	struct var joined = /*  this.paramTypes.stream()
+	auto joined = /*  this.paramTypes.stream()
                     .map(Type::stringify)
                     .collect(Collectors.joining("_")) */;
 	return /* "fn_" + this.returnType.stringify() + "_" + joined */;
 }
 /* public */ char* generateWithName_Functional(struct Functional this, char* name){
-	struct var joined = /*  this.paramTypes.stream()
+	auto joined = /*  this.paramTypes.stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */;
 	return /* this.returnType.generate() + " (*" +
@@ -331,7 +332,7 @@ struct Struct new_Struct(char* name){
 /* @Override
         public */ char* generate_Generic(struct Generic this){
 	/* this.args(this) */ local0 = this.args(this);
-	struct var joinedArgs = /*  this.args().stream()
+	auto joinedArgs = /*  this.args().stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */;
 	return /* this.base() + "<" + joinedArgs + ">" */;
@@ -357,7 +358,7 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* stringify_Generic(struct Generic this){
-	struct var joined = /*  this.args.stream()
+	auto joined = /*  this.args.stream()
                     .map(arg -> arg.stringify())
                     .collect(Collectors.joining("_")) */;
 	return /* this.base + "_" + joined */;
@@ -432,18 +433,18 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Construction(struct Construction this){
-	struct var joined = /*  this.values.stream()
+	auto joined = /*  this.values.stream()
                     .map(Value::generate)
                     .collect(Collectors.joining(", ")) */;
 	return /* "new " + this.type.generate() + "(" + joined + ")" */;
 }
 /* private */ struct Invocation toInvocation_Construction(struct Construction this){
-	struct var typeAsString = this.type.stringify(this.type);
+	auto typeAsString = this.type.stringify(this.type);
 	return /* new Invocation(new Symbol("new_" + typeAsString), this.values) */;
 }
 /* @Override
         public */ char* generate_Invocation(struct Invocation this){
-	struct var joined = /*  this.arguments.stream()
+	auto joined = /*  this.arguments.stream()
                     .map(Value::generate)
                     .collect(Collectors.joining(", ")) */;
 	return /* this.caller.generate() + "(" + joined + ")" */;
@@ -496,9 +497,9 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 }
 /* private static */ char* compileRoot_Main(struct Main this, char* input){
-	struct var output = /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */;
-	struct var joinedStructs = /*  String.join("", structs) */;
-	struct var joinedFunctions = /*  String.join("", functions) */;
+	auto output = /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */;
+	auto joinedStructs = /*  String.join("", structs) */;
+	auto joinedFunctions = /*  String.join("", functions) */;
 	return /* output + joinedStructs + joinedFunctions */;
 }
 /* private static */ char* compileStatements_Main(struct Main this, char* input, Option<char*> (*compiler)(char*)){
@@ -510,14 +511,14 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 .orElse("") */;
 }
 /* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
-	struct var output = new_StringBuilder();/* 
+	auto output = new_StringBuilder();/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
 	return output.toString(output);
 }
 /* private static  */ Option<List<T>> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<T> (*compiler)(char*)){
-	struct var segments = divide(input, folder);
+	auto segments = divide(input, folder);
 	Option<List<T>> compiled = new_Some_Whitespace(new_ArrayList_T());/* 
         for (var segment : segments) {
             compiled = compiled.and(() -> compiler.apply(segment)).map(tuple -> {
@@ -534,7 +535,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return divideAll(input, folder);
 }
 /* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
-	struct var current = State.createDefault(State);
+	auto current = State.createDefault(State);
 	/* for (var i  */ = 0;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
@@ -561,7 +562,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return current.advance(current).segments;
 }
 /* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, char c){
-	struct var appended = current.append(current, c);/* 
+	auto appended = current.append(current, c);/* 
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* 
@@ -577,7 +578,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return appended;
 }
 /* private static */ char* compileRootSegment_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
+	auto stripped = input.strip(input);/* 
 
         if (stripped.startsWith("package ")) {
             return "";
@@ -588,11 +589,11 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* compileStructured(stripped, "class ") */;
 }
 /* private static */ Option<char*> compileStructured_Main(struct Main this, char* stripped, char* infix){
-	struct var classIndex = stripped.indexOf(stripped, infix);/* 
+	auto classIndex = stripped.indexOf(stripped, infix);/* 
         if (classIndex < 0) {
             return new None<>();
         } */
-	struct var afterKeyword = /*  stripped.substring(classIndex + infix.length()) */;/* 
+	auto afterKeyword = /*  stripped.substring(classIndex + infix.length()) */;/* 
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return new None<>();
@@ -642,8 +643,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         }
         var content = withEnd.substring(0, withEnd.length() - "} */
 	/* ".length()) */;
-	struct var typeParamString = /*  typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
-	struct var structNode = new_StructNode(name, typeParams);
+	auto typeParamString = /*  typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
+	auto structNode = new_StructNode(name, typeParams);
 	frames.addLast(frames, new_Frame(structNode));/* 
 
         var generated = "struct " + name + typeParamString + " {" +
@@ -693,29 +694,29 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* private static */ Option<char*> compileMethod_Main(struct Main this, char* input){
 	/* input.substring(input, 0, paramStart) */ local0 = input.substring(input, 0, paramStart);
 	/* withParams.substring(withParams, 0, paramEnd) */ local1 = withParams.substring(withParams, 0, paramEnd);
-	struct var paramStart = /*  input.indexOf("(") */;/* 
+	auto paramStart = /*  input.indexOf("(") */;/* 
         if (paramStart < 0) {
             return new None<>();
         } */
-	struct var beforeParams = local0.strip(local0);
-	struct var withParams = /*  input.substring(paramStart + "(".length()) */;
-	struct var currentStruct = frames.getLast(frames).node;
-	struct var currentStructName = currentStruct.name;
-	struct var currentStructTypeParams = currentStruct.typeParams;
+	auto beforeParams = local0.strip(local0);
+	auto withParams = /*  input.substring(paramStart + "(".length()) */;
+	auto currentStruct = frames.getLast(frames).node;
+	auto currentStructName = currentStruct.name;
+	auto currentStructTypeParams = currentStruct.typeParams;
 	typeParams.addAll(typeParams, currentStructTypeParams);
-	struct var maybeHeader = /*  parseDefinition(beforeParams)
+	auto maybeHeader = /*  parseDefinition(beforeParams)
                 .<Definable>map(value -> value)
                 .or(() -> compileConstructorDefinition(beforeParams).map(value -> value)) */;/* 
 
         if (!(maybeHeader instanceof Some(var header))) {
             return new None<>();
         } */
-	struct var paramEnd = /*  withParams.indexOf(")") */;/* 
+	auto paramEnd = /*  withParams.indexOf(")") */;/* 
         if (paramEnd < 0) {
             return new None<>();
         } */
-	struct var paramStrings = local1.strip(local1);
-	struct var afterParams = /*  withParams.substring(paramEnd + ")".length()).strip() */;/* 
+	auto paramStrings = local1.strip(local1);
+	auto afterParams = /*  withParams.substring(paramEnd + ")".length()).strip() */;/* 
         if (afterParams.startsWith("{") && afterParams.endsWith("} *//* ")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
@@ -818,8 +819,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/* ) */;
 }
 /* private static */ Option<char*> findConstructorDefinitionName_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);
-	struct var nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
+	auto stripped = input.strip(input);
+	auto nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
             return new Some<>(name);
@@ -845,7 +846,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct PostDecrement> parsePostDecrement_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
+	auto stripped = input.strip(input);/* 
         if (stripped.endsWith("--")) {
             return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
         } *//* 
@@ -854,7 +855,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 }
 /* private static */ Option<struct PostIncrement> parsePostIncrement_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
+	auto stripped = input.strip(input);/* 
         if (stripped.endsWith("++")) {
             return parseValue(stripped.substring(0, stripped.length() - "++".length())).map(PostIncrement::new);
         } *//* 
@@ -863,7 +864,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 }
 /* private static */ Option<struct Return> parseReturn_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
+	auto stripped = input.strip(input);/* 
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValueOrPlaceholder(stripped.substring("return ".length()))));
         } */
@@ -876,7 +877,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* parseStatementWithoutBraces(input, compiler).map(Statement::generate) */;
 }
 /* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, struct StatementValue (*compiler)(char*)){
-	struct var stripped = input.strip(input);
+	auto stripped = input.strip(input);
 	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             var content = compiler.apply(withoutEnd);
@@ -892,13 +893,15 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct Assignment> parseAssignment_Main(struct Main this, char* input){
-	struct var valueSeparator = /*  input.indexOf("=") */;/* 
+	auto valueSeparator = /*  input.indexOf("=") */;/* 
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
 
             var destination = parseDefinition(inputDefinition)
-                    .<Assignable>map(result -> result)
+                    .<Assignable>map(result -> {
+                        return result;
+                    })
                     .orElseGet(() -> parseValueOrPlaceholder(inputDefinition));
 
             return new Some<>(new Assignment(destination, parseValueOrPlaceholder(value)));
@@ -909,7 +912,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* parseValue(input).orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct Value> parseValue_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
+	auto stripped = input.strip(input);/* 
 
         if (isSymbol(stripped)) {
             return new Some<>(new Symbol(stripped));
@@ -926,26 +929,24 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 return new Some<>(invokable.toInvocation());
             }
         } */
-	struct var maybeInvocation = parseInvocation(stripped);/* 
+	auto maybeInvocation = parseInvocation(stripped);/* 
         if (maybeInvocation instanceof Some(var invocation)) {
             return new Some<>(invocation);
         } */
-	struct var separator = /*  stripped.lastIndexOf(".") */;/* 
+	auto separator = /*  stripped.lastIndexOf(".") */;/* 
         if (separator >= 0) {
             var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                if (parseValue(parentString) instanceof Some(var parent)) {
-                    var type = resolveType(parent);
-                    if (type instanceof Functional) {
-                        return new Some<>(parent);
-                    }
-
-                    return new Some<>(new DataAccess(parent, property));
+            if (isSymbol(property) && parseValue(parentString) instanceof Some(var parent)) {
+                var type = resolveType(parent);
+                if (type instanceof Functional) {
+                    return new Some<>(parent);
                 }
+
+                return new Some<>(new DataAccess(parent, property));
             }
         } */
-	struct var conditionSeparator = /*  stripped.indexOf("?") */;/* 
+	auto conditionSeparator = /*  stripped.indexOf("?") */;/* 
         if (conditionSeparator >= 0) {
             var conditionString = stripped.substring(0, conditionSeparator);
             var afterCondition = stripped.substring(conditionSeparator + "?".length());
@@ -965,8 +966,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 }
             }
         } */
-	struct var operator = Operator.Equals;
-	struct var operatorIndex = input.indexOf(input, operator.representation);/* 
+	auto operator = Operator.Equals;
+	auto operatorIndex = input.indexOf(input, operator.representation);/* 
         if (operatorIndex >= 0) {
             var leftString = input.substring(0, operatorIndex);
             var rightString = input.substring(operatorIndex + operator.representation.length());
@@ -1045,7 +1046,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return new_Content(value.generate(value));
 }
 /* private static */ Option<struct Type> findNameInFrame_Main(struct Main this, char* name, struct Frame frame){
-	struct var definitions = frame.definitions;/* 
+	auto definitions = frame.definitions;/* 
         if (definitions.containsKey(name)) {
             return new Some<>(definitions.get(name));
         } *//* 
@@ -1054,19 +1055,19 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 }
 /* private static  */ Option<struct R> parseInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
-	struct var withoutPrefix = input.strip(input);/* 
+	auto withoutPrefix = input.strip(input);/* 
         if (!withoutPrefix.endsWith(")")) {
             return new None<>();
         } */
-	struct var withoutEnd = /*  withoutPrefix.substring(0, withoutPrefix.length() - ")".length()) */;
-	struct var slices = /*  divideAll(withoutEnd, Main::foldInvocationStart) */;
-	struct var beforeLast = /*  slices.subList(0, slices.size() - 1) */;
-	struct var joined = /*  String.join("", beforeLast).strip() */;/* 
+	auto withoutEnd = /*  withoutPrefix.substring(0, withoutPrefix.length() - ")".length()) */;
+	auto slices = /*  divideAll(withoutEnd, Main::foldInvocationStart) */;
+	auto beforeLast = /*  slices.subList(0, slices.size() - 1) */;
+	auto joined = /*  String.join("", beforeLast).strip() */;/* 
         if (!joined.endsWith("(")) {
             return new None<>();
         } */
-	struct var beforeArgsStart = /*  joined.substring(0, joined.length() - 1) */;
-	struct var args = slices.getLast(slices);/* 
+	auto beforeArgsStart = /*  joined.substring(0, joined.length() - 1) */;
+	auto args = slices.getLast(slices);/* 
 
         if (!(beforeArgsCaller.apply(beforeArgsStart) instanceof Some(var outputBeforeArgs))) {
             return new None<>();
@@ -1074,7 +1075,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* parseValues(args, Main::parseArgument).map(values -> builder.apply(outputBeforeArgs, values)) */;
 }
 /* private static */ struct State foldInvocationStart_Main(struct Main this, struct State state, char c){
-	struct var appended = state.append(state, c);/* 
+	auto appended = state.append(state, c);/* 
         if (c == '(') {
             State advanced = appended.isLevel() ? appended.advance() : appended;
             return advanced.enter();
@@ -1092,17 +1093,17 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* private static */ Option<struct Definition> parseDefinition_Main(struct Main this, char* input){
 	/* stripped.substring(stripped, 0, nameSeparator) */ local0 = stripped.substring(stripped, 0, nameSeparator);
 	/* new_DefinitionBuilder() */ local1 = new_DefinitionBuilder();
-	struct var stripped = input.strip(input);
-	struct var nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
+	auto stripped = input.strip(input);
+	auto nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
         if (nameSeparator < 0) {
             return new None<>();
         } */
-	struct var beforeName = local0.strip(local0);
-	struct var name = /*  stripped.substring(nameSeparator + " ".length()).strip() */;/* 
+	auto beforeName = local0.strip(local0);
+	auto name = /*  stripped.substring(nameSeparator + " ".length()).strip() */;/* 
         if (!isSymbol(name)) {
             return new None<>();
         } */
-	struct var withName = local1.withName(local1, name);/* 
+	auto withName = local1.withName(local1, name);/* 
         return switch (findTypeSeparator(beforeName)) {
             case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
                     .withType(type)
@@ -1141,7 +1142,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/*  */;
 }
 /* private static */ Option<struct Integer> findTypeSeparator_Main(struct Main this, char* input){
-	struct var depth = 0;
+	auto depth = 0;
 	/* for (var i  */ = /*  input.length() - 1 */;
 	/* i > */ = 0;/*  i--) {
             var c = input.charAt(i);
@@ -1161,9 +1162,9 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* parseType(input).map(Type::flatten) */;
 }
 /* private static */ Option<struct Type> parseType_Main(struct Main this, char* input){
-	struct var stripped = input.strip(input);/* 
-        if (stripped.equals("private")) {
-            return new None<>();
+	auto stripped = input.strip(input);/* 
+        if(stripped.equals("var")) {
+            return new Some<>(Primitive.Auto);
         } *//* 
 
         if (stripped.equals("int")) {
@@ -1180,6 +1181,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 
         if (stripped.equals("boolean")) {
             return new Some<>(Primitive.Boolean);
+        } *//* 
+
+        if (stripped.equals("private")) {
+            return new None<>();
         } *//* 
 
         if (typeParams.contains(stripped)) {
@@ -1213,7 +1218,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
-	struct var appended = state.append(state, c);/* 
+	auto appended = state.append(state, c);/* 
         if (c == '<') {
             return appended.enter();
         } *//* 
