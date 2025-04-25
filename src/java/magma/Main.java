@@ -17,7 +17,7 @@ public class Main {
     }
 
     private interface Definable {
-        Definition toDefinition();
+        String generate();
     }
 
     private sealed interface Option<T> {
@@ -205,10 +205,6 @@ public class Main {
             return beforeType + this.type().generate() + " " + this.name();
         }
 
-        @Override
-        public Definition toDefinition() {
-            return this;
-        }
     }
 
     private record Struct(String name) implements Type {
@@ -244,9 +240,13 @@ public class Main {
     }
 
     private record ConstructorDefinition(String name) implements Definable {
-        @Override
-        public Definition toDefinition() {
+        private Definition toDefinition() {
             return new Definition(new Struct(this.name()), "new_" + this.name());
+        }
+
+        @Override
+        public String generate() {
+            return this.name;
         }
     }
 
@@ -557,10 +557,20 @@ public class Main {
                     .collect(Collectors.joining());
 
             var currentStructName = maybeCurrentStructName.orElse("");
+
+            Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
-            if (header instanceof Definition _) {
+            if (header instanceof Definition oldDefinition) {
                 outputParams.add(new Definition(new Struct(currentStructName), "this"));
+                newDefinition = new Definition(oldDefinition.maybeBeforeType, oldDefinition.type, oldDefinition.name + "_" + currentStructName);
             }
+            else if (header instanceof ConstructorDefinition constructorDefinition) {
+                newDefinition = constructorDefinition.toDefinition();
+            }
+            else {
+                newDefinition = header;
+            }
+
             outputParams.addAll(inputParams
                     .stream()
                     .filter(node -> !(node instanceof Whitespace))
@@ -570,7 +580,7 @@ public class Main {
                     .map(Parameter::generate)
                     .collect(Collectors.joining(", "));
 
-            var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+            var constructor = newDefinition.generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
             functions.add(constructor);
             return new Some<>("");
         }
