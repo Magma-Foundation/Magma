@@ -23,6 +23,8 @@ public class Main {
         default Type flatten() {
             return this;
         }
+
+        String stringify();
     }
 
     private interface Definable {
@@ -80,6 +82,11 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public String stringify() {
+            return this.name();
         }
     }
 
@@ -269,6 +276,11 @@ public class Main {
             var typeParamString = this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">";
             return "struct " + this.name + typeParamString;
         }
+
+        @Override
+        public String stringify() {
+            return this.name;
+        }
     }
 
     private record Ref(Type type) implements Type {
@@ -276,12 +288,22 @@ public class Main {
         public String generate() {
             return this.type.generate() + "*";
         }
+
+        @Override
+        public String stringify() {
+            return this.type.stringify() + "_star";
+        }
     }
 
     private record Content(String input) implements Type, FunctionSegment, StatementValue, Value, Parameter {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public String stringify() {
+            return this.input;
         }
 
         @Override
@@ -294,6 +316,15 @@ public class Main {
         @Override
         public String generate() {
             return this.generateWithName("");
+        }
+
+        @Override
+        public String stringify() {
+            var joined = this.paramTypes.stream()
+                    .map(Type::stringify)
+                    .collect(Collectors.joining("_"));
+
+            return "fn_" + this.returnType.stringify() + "_" + joined;
         }
 
         public String generateWithName(String name) {
@@ -337,6 +368,15 @@ public class Main {
 
             return this;
         }
+
+        @Override
+        public String stringify() {
+            var joined = this.args.stream()
+                    .map(arg -> arg.stringify())
+                    .collect(Collectors.joining("_"));
+
+            return this.base + "_" + joined;
+        }
     }
 
     private record ConstructorDefinition(String name) implements Definable {
@@ -361,6 +401,11 @@ public class Main {
         @Override
         public String generate() {
             return "";
+        }
+
+        @Override
+        public String stringify() {
+            return "Whitespace";
         }
 
         @Override
@@ -437,6 +482,10 @@ public class Main {
             return this.input;
         }
 
+        @Override
+        public String stringify() {
+            return this.input;
+        }
     }
 
     private record Construction(Type type, List<Value> values) implements Value {
@@ -450,7 +499,8 @@ public class Main {
         }
 
         private Invocation toInvocation() {
-            return new Invocation(new Symbol(this.type.generate()), this.values);
+            var typeAsString = this.type.stringify();
+            return new Invocation(new Symbol("new_" + typeAsString), this.values);
         }
     }
 
