@@ -431,10 +431,15 @@ public class Main {
                 ? beforeContent.substring(0, implementsIndex).strip()
                 : beforeContent;
 
-        var paramStart = withoutImplements.indexOf("(");
-        var withoutParameters = paramStart >= 0
-                ? withoutImplements.substring(0, paramStart).strip()
+        var extendsIndex = withoutImplements.indexOf(" extends ");
+        var withoutExtends = extendsIndex >= 0
+                ? withoutImplements.substring(0, extendsIndex).strip()
                 : withoutImplements;
+
+        var paramStart = withoutExtends.indexOf("(");
+        var withoutParameters = paramStart >= 0
+                ? withoutExtends.substring(0, paramStart).strip()
+                : withoutExtends;
 
         var typeParamStart = withoutParameters.indexOf("<");
         var name = typeParamStart >= 0
