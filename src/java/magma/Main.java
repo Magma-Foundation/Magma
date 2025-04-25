@@ -213,7 +213,14 @@ public class Main {
                     .map(inner -> generatePlaceholder(inner) + " ")
                     .orElse("");
 
-            return beforeType + this.type.generate() + " " + this.name + joinedTypeParams;
+            String generatedWithName;
+            if (this.type instanceof Functional functional) {
+                generatedWithName = functional.generateWithName(this.name);
+            }
+            else {
+                generatedWithName = this.type.generate() + " " + this.name;
+            }
+            return beforeType + generatedWithName + joinedTypeParams;
         }
 
         public Definition rename(String name) {
@@ -254,16 +261,17 @@ public class Main {
     private record Functional(List<Type> paramTypes, Type returnType) implements Type {
         @Override
         public String generate() {
+            return this.generateWithName("");
+        }
+
+        public String generateWithName(String name) {
             var joined = this.paramTypes.stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", "));
 
-            return this.returnType.generate() + "(*)(" + joined + ")";
-        }
-
-        @Override
-        public Type flatten() {
-            return null;
+            return this.returnType.generate() + " (*" +
+                    name +
+                    ")(" + joined + ")";
         }
     }
 
