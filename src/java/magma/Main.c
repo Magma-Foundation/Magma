@@ -6,7 +6,6 @@
 /* import java.util.List; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
-/* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
 /*  */
@@ -136,14 +135,6 @@ default struct Type flatten_Type(struct Type this){
         public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R>(*)(T) mapper){
 	return /* mapper.apply(this.value) */;
 }
-@Override
-        public Option<T> filter_Some<T>(struct Some<T> this, Predicate<T> predicate){
-	return /* predicate.test(this.value) ? this : new None<>() */;
-}
-@Override
-        public struct boolean isPresent_Some<T>(struct Some<T> this){
-	return true;
-}
 /* @Override
         public  */ Option<R> map_None<T, R>(struct None<T> this, R(*)(T) mapper){
 	return /* new None<>() */;
@@ -163,14 +154,6 @@ default struct Type flatten_Type(struct Type this){
 /* @Override
         public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R>(*)(T) mapper){
 	return /* new None<>() */;
-}
-@Override
-        public Option<T> filter_None<T>(struct None<T> this, Predicate<T> predicate){
-	return this;
-}
-@Override
-        public struct boolean isPresent_None<T>(struct None<T> this){
-	return false;
 }
 private static struct State createDefault_State(struct State this){
 	return /* new State(new ArrayList<>(), new StringBuilder(), 0) */;
