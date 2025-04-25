@@ -220,7 +220,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.buffer.append(this.buffer, c);
 	return this;
 }
-/* public */ struct boolean isLevel_State(struct State this){
+/* public */ int isLevel_State(struct State this){
 	return this.depth == 0;
 }
 /* public */ struct State enter_State(struct State this){
@@ -231,7 +231,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.depth--;
 	return this;
 }
-/* public */ struct boolean isShallow_State(struct State this){
+/* public */ int isShallow_State(struct State this){
 	return this.depth == 1;
 }
 struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type, char* name, List<char*> typeParams){
@@ -677,7 +677,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	structs.add(structs, generated);
 	return new_Some_Whitespace(/* "" */);
 }
-/* private static */ struct boolean isSymbol_Main(struct Main this, char* input){
+/* private static */ int isSymbol_Main(struct Main this, char* input){
 	/* /* i < input */ */ local0 = /* i < input */;/* 
         if (input.isEmpty()) {
             return false;
@@ -894,7 +894,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* private static */ Option<struct PostDecrement> parsePostDecrement_Main(struct Main this, char* input){
 	/* /* var stripped = input */ */ local0 = /* var stripped = input */;
 	local0.strip(local0);/* 
-        if (stripped.endsWith("--")) {-
+        if (stripped.endsWith("--")) {
             return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
         } *//* 
         else {
@@ -1070,7 +1070,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 	/* ) */;
 }
-/* private static */ struct boolean isNumber_Main(struct Main this, char* input){
+/* private static */ int isNumber_Main(struct Main this, char* input){
 	/* /* i < input */ */ local0 = /* i < input */;
 	/* for (var i  */ = 0;
 	local0.length(local0);/*  i++) {
@@ -1256,6 +1256,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 
         if (stripped.equals("String")) {
             return new Some<>(new Ref(Primitive.I8));
+        } *//* 
+
+        if (stripped.equals("boolean")) {
+            return new Some<>(Primitive.Boolean);
         } *//* 
 
         if (typeParams.contains(stripped)) {

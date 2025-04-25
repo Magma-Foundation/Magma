@@ -1368,6 +1368,10 @@ public class Main {
             return new Some<>(new Ref(Primitive.I8));
         }
 
+        if (stripped.equals("boolean")) {
+            return new Some<>(Primitive.Boolean);
+        }
+
         if (typeParams.contains(stripped)) {
             return new Some<>(new TypeParam(stripped));
         }
