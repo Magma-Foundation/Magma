@@ -56,6 +56,7 @@ public class Main {
     }
 
     public static final List<String> structs = new ArrayList<>();
+    private static Optional<String> currentStructName = Optional.empty();
 
     public static void main() {
         try {
@@ -169,6 +170,8 @@ public class Main {
                 var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
+
+                    currentStructName = Optional.of(name);
                     var generated = "struct " + name + " {" +
                             compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
@@ -183,7 +186,26 @@ public class Main {
     private static String compileClassSegment(String input) {
         return compileClass(input)
                 .or(() -> compileDefinitionStatement(input))
+                .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        var paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            var beforeParams = input.substring(0, paramStart).strip();
+            var withParams = input.substring(paramStart + "(".length());
+
+            var nameSeparator = beforeParams.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                var name = beforeParams.substring(nameSeparator + " ".length());
+                if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
+                    return Optional.of("struct " + name + " new_" + name + "(" + generatePlaceholder(withParams) + "\n");
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileDefinitionStatement(String input) {
