@@ -919,14 +919,6 @@ public class Main {
         return new None<>();
     }
 
-    private static String compileValues(String args, Function<String, String> compiler) {
-        return generateValues(parseValues(args, compiler));
-    }
-
-    private static String generateValues(List<String> values) {
-        return generateAll(Main::mergeValues, values);
-    }
-
     private static <T> List<T> parseValues(String args, Function<String, T> compiler) {
         return parseAll(args, Main::foldValueChar, compiler);
     }
@@ -944,13 +936,6 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    }
-
-    private static StringBuilder mergeValues(StringBuilder buffer, String element) {
-        if (buffer.isEmpty()) {
-            return buffer.append(element);
-        }
-        return buffer.append(", ").append(element);
     }
 
     private static String generatePlaceholder(String stripped) {
