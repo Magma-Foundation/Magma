@@ -236,26 +236,35 @@ public class Main {
 
         @Override
         public String generate() {
-            String joinedTypeParams;
-            if (this.typeParams.isEmpty()) {
-                joinedTypeParams = "";
+            var joinedTypeParams = this.generateTypeParams();
+            var beforeType = this.generateBeforeType();
+            var generatedWithName = this.generatedWithName();
+            return beforeType + generatedWithName + joinedTypeParams;
+        }
+
+        private String generatedWithName() {
+            if (this.type instanceof Functional functional) {
+                return functional.generateWithName(this.name);
             }
-            else {
-                joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
-            }
-            var beforeType = this.maybeBeforeType
+
+            return this.type.generate() + " " + this.name;
+        }
+
+        private String generateBeforeType() {
+            return this.maybeBeforeType
                     .filter(inner -> !inner.isEmpty())
                     .map(inner -> generatePlaceholder(inner) + " ")
                     .orElse("");
+        }
 
-            String generatedWithName;
-            if (this.type instanceof Functional functional) {
-                generatedWithName = functional.generateWithName(this.name);
+        private String generateTypeParams() {
+            if (this.typeParams.isEmpty()) {
+                return "";
             }
-            else {
-                generatedWithName = this.type.generate() + " " + this.name;
-            }
-            return beforeType + generatedWithName + joinedTypeParams;
+
+            String joinedTypeParams;
+            joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
+            return joinedTypeParams;
         }
 
         @Override

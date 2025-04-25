@@ -244,25 +244,33 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Definition(struct Definition this){
-	/* /* inner -> !inner */ */ local0 = /* inner -> !inner */;
-	/* /* var beforeType = this */.maybeBeforeType.filter(/* var beforeType = this */.maybeBeforeType, local0.isEmpty(local0)) */ local1 = /* var beforeType = this */.maybeBeforeType.filter(/* var beforeType = this */.maybeBeforeType, local0.isEmpty(local0));
-	/* local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */) */ local2 = local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */);
-	char* joinedTypeParams;/* 
-            if (this.typeParams.isEmpty()) {
-                joinedTypeParams = "";
-            } *//* 
-            else {
-                joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
-            } */
-	local2.orElse(local2, /* "" */);
-	char* generatedWithName;/* 
-            if (this.type instanceof Functional functional) {
-                generatedWithName = functional.generateWithName(this.name);
-            } *//* 
-            else {
-                generatedWithName = this.type.generate() + " " + this.name;
-            } */
+	/* /* var joinedTypeParams = this */ */ local0 = /* var joinedTypeParams = this */;
+	/* /* var beforeType = this */ */ local1 = /* var beforeType = this */;
+	/* /* var generatedWithName = this */ */ local2 = /* var generatedWithName = this */;
+	local0.generateTypeParams(local0);
+	local1.generateBeforeType(local1);
+	local2.generatedWithName(local2);
 	return /* beforeType + generatedWithName + joinedTypeParams */;
+}
+/* private */ char* generatedWithName_Definition(struct Definition this){/* 
+            if (this.type instanceof Functional functional) {
+                return functional.generateWithName(this.name);
+            } */
+	return /* this.type.generate() + " " + this */.name;
+}
+/* private */ char* generateBeforeType_Definition(struct Definition this){
+	/* /* inner -> !inner */ */ local0 = /* inner -> !inner */;
+	/* this.maybeBeforeType.filter(this.maybeBeforeType, local0.isEmpty(local0)) */ local1 = this.maybeBeforeType.filter(this.maybeBeforeType, local0.isEmpty(local0));
+	/* local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */) */ local2 = local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */);
+	return local2.orElse(local2, /* "" */);
+}
+/* private */ char* generateTypeParams_Definition(struct Definition this){/* 
+            if (this.typeParams.isEmpty()) {
+                return "";
+            } */
+	char* joinedTypeParams;
+	joinedTypeParams = /*  "<" + String.join(", ", this.typeParams) + ">" */;
+	return joinedTypeParams;
 }
 /* @Override
         public */ Option<struct Definition> toDefinition_Definition(struct Definition this){
