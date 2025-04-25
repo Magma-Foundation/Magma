@@ -20,18 +20,18 @@ public class Main {
         Definition toDefinition();
     }
 
-    private sealed interface Optional<T> {
-        <R> Optional<R> map(Function<T, R> mapper);
+    private sealed interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
 
         T orElseGet(Supplier<T> other);
 
-        Optional<T> or(Supplier<Optional<T>> other);
+        Option<T> or(Supplier<Option<T>> other);
 
-        <R> Optional<R> flatMap(Function<T, Optional<R>> mapper);
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
-        Optional<T> filter(Predicate<T> predicate);
+        Option<T> filter(Predicate<T> predicate);
 
         boolean isPresent();
     }
@@ -71,9 +71,9 @@ public class Main {
         }
     }
 
-    private record Some<T>(T value) implements Optional<T> {
+    private record Some<T>(T value) implements Option<T> {
         @Override
-        public <R> Optional<R> map(Function<T, R> mapper) {
+        public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
         }
 
@@ -88,17 +88,17 @@ public class Main {
         }
 
         @Override
-        public Optional<T> or(Supplier<Optional<T>> other) {
+        public Option<T> or(Supplier<Option<T>> other) {
             return this;
         }
 
         @Override
-        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
 
         @Override
-        public Optional<T> filter(Predicate<T> predicate) {
+        public Option<T> filter(Predicate<T> predicate) {
             return predicate.test(this.value) ? this : new None<>();
         }
 
@@ -108,9 +108,9 @@ public class Main {
         }
     }
 
-    private static final class None<T> implements Optional<T> {
+    private static final class None<T> implements Option<T> {
         @Override
-        public <R> Optional<R> map(Function<T, R> mapper) {
+        public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
         }
 
@@ -125,17 +125,17 @@ public class Main {
         }
 
         @Override
-        public Optional<T> or(Supplier<Optional<T>> other) {
+        public Option<T> or(Supplier<Option<T>> other) {
             return other.get();
         }
 
         @Override
-        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
         }
 
         @Override
-        public Optional<T> filter(Predicate<T> predicate) {
+        public Option<T> filter(Predicate<T> predicate) {
             return this;
         }
 
@@ -191,7 +191,7 @@ public class Main {
     }
 
     private record Definition(
-            Optional<String> maybeBeforeType,
+            Option<String> maybeBeforeType,
             Type type,
             String name
     ) implements Definable, StatementValue, Assignable, Parameter {
@@ -294,7 +294,7 @@ public class Main {
 
     public static List<String> structs;
     private static List<String> functions;
-    private static Optional<String> currentStructName;
+    private static Option<String> currentStructName;
 
     public static void main() {
         structs = new ArrayList<>();
@@ -421,11 +421,11 @@ public class Main {
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Option<String> compileClass(String stripped) {
         return compileStructured(stripped, "class ");
     }
 
-    private static Optional<String> compileStructured(String stripped, String infix) {
+    private static Option<String> compileStructured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return new None<>();
@@ -496,11 +496,11 @@ public class Main {
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
-    private static Optional<String> compileWhitespace(String input) {
+    private static Option<String> compileWhitespace(String input) {
         return parseWhitespace(input).map(Whitespace::generate);
     }
 
-    private static Optional<Whitespace> parseWhitespace(String input) {
+    private static Option<Whitespace> parseWhitespace(String input) {
         if (input.isBlank()) {
             return new Some<>(new Whitespace());
         }
@@ -509,7 +509,7 @@ public class Main {
         }
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Option<String> compileMethod(String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return new None<>();
@@ -571,7 +571,7 @@ public class Main {
         return parseAll(content, Main::foldStatementChar, compiler);
     }
 
-    private static Optional<ConstructorDefinition> compileConstructorDefinition(String input) {
+    private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
                 return new Some<>(new ConstructorDefinition(name));
@@ -580,7 +580,7 @@ public class Main {
         });
     }
 
-    private static Optional<String> findConstructorDefinitionName(String input) {
+    private static Option<String> findConstructorDefinitionName(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -607,7 +607,7 @@ public class Main {
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Optional<Return> compileReturn(String input) {
+    private static Option<Return> compileReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValue(stripped.substring("return ".length()))));
@@ -616,15 +616,15 @@ public class Main {
         return new None<>();
     }
 
-    private static Optional<String> compileClassStatement(String input) {
+    private static Option<String> compileClassStatement(String input) {
         return compileStatement(input, Main::compileClassStatementValue);
     }
 
-    private static Optional<String> compileStatement(String input, Function<String, StatementValue> compiler) {
+    private static Option<String> compileStatement(String input, Function<String, StatementValue> compiler) {
         return parseStatementWithoutBraces(input, compiler).map(Statement::generate);
     }
 
-    private static Optional<Statement> parseStatementWithoutBraces(String input, Function<String, StatementValue> compiler) {
+    private static Option<Statement> parseStatementWithoutBraces(String input, Function<String, StatementValue> compiler) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -643,7 +643,7 @@ public class Main {
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Optional<StatementValue> compileAssignment(String input) {
+    private static Option<StatementValue> compileAssignment(String input) {
         var valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
@@ -682,7 +682,7 @@ public class Main {
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Optional<Definition> parseDefinition(String input) {
+    private static Option<Definition> parseDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -705,7 +705,7 @@ public class Main {
         return parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
     }
 
-    private static Optional<Type> parseType(String input) {
+    private static Option<Type> parseType(String input) {
         var stripped = input.strip();
         if (stripped.equals("private")) {
             return new None<>();
