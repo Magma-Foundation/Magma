@@ -64,13 +64,10 @@ public class Main {
         Option<Definition> toDefinition();
     }
 
-    private interface Invokable extends Value {
-        Invocation toInvocation();
-    }
-
     private enum Primitive implements Type {
         I8("char"),
-        I32("int");
+        I32("int"),
+        Boolean("int");
 
         private final String value;
 
@@ -308,14 +305,19 @@ public class Main {
         @Override
         public Type flatten() {
             if (this.base.equals("Function")) {
-                var param0 = this.args.getFirst();
+                var param = this.args.getFirst();
                 var returns = this.args.get(1);
-                return new Functional(List.of(param0), returns);
+                return new Functional(Collections.singletonList(param), returns);
             }
 
             if (this.base.equals("Supplier")) {
                 var returns = this.args.getFirst();
                 return new Functional(Collections.emptyList(), returns);
+            }
+
+            if (this.base.equals("Predicate")) {
+                var param = this.args.getFirst();
+                return new Functional(Collections.singletonList(param), Primitive.Boolean);
             }
 
             return this;
@@ -422,7 +424,7 @@ public class Main {
 
     }
 
-    private record Construction(Type type, List<Value> values) implements Invokable {
+    private record Construction(Type type, List<Value> values) implements Value {
         @Override
         public String generate() {
             var joined = this.values.stream()
@@ -432,13 +434,12 @@ public class Main {
             return "new " + this.type.generate() + "(" + joined + ")";
         }
 
-        @Override
-        public Invocation toInvocation() {
+        private Invocation toInvocation() {
             return new Invocation(new Symbol(this.type.generate()), this.values);
         }
     }
 
-    private record Invocation(Value caller, List<Value> args) implements Invokable {
+    private record Invocation(Value caller, List<Value> args) implements Value {
         @Override
         public String generate() {
             var joined = this.args.stream()
@@ -448,8 +449,7 @@ public class Main {
             return this.caller.generate() + "(" + joined + ")";
         }
 
-        @Override
-        public Invocation toInvocation() {
+        private Invocation toInvocation() {
             return this;
         }
     }

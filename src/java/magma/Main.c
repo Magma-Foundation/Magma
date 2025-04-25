@@ -34,7 +34,8 @@ struct Invokable {
 };
 struct Primitive {
 	/* I8("char"),
-        I32("int") */;
+        I32("int"),
+        Boolean("int") */;
 	/* private final */ char* value;
 };
 struct Some<T> {
@@ -135,7 +136,7 @@ struct Primitive new_Primitive(char* value){
 	return mapper(this.value);
 }
 /* @Override
-        public */ Option<T> filter_Some<T>(struct Some<T> this, Predicate<T> predicate){
+        public */ Option<T> filter_Some<T>(struct Some<T> this, int (*predicate)(T)){
 	return predicate.test(/* this.value) ? this : new None<>( */);
 }
 /* @Override
@@ -159,7 +160,7 @@ struct Primitive new_Primitive(char* value){
 	return None<>(/*  */);
 }
 /* @Override
-        public */ Option<T> filter_None<T>(struct None<T> this, Predicate<T> predicate){
+        public */ Option<T> filter_None<T>(struct None<T> this, int (*predicate)(T)){
 	return this;
 }
 struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
@@ -278,14 +279,19 @@ struct Struct new_Struct(char* name){
 /* @Override
         public */ struct Type flatten_Generic(struct Generic this){/* 
             if (this.base.equals("Function")) {
-                var param0 = this.args.getFirst();
+                var param = this.args.getFirst();
                 var returns = this.args.get(1);
-                return new Functional(List.of(param0), returns);
+                return new Functional(Collections.singletonList(param), returns);
             } *//* 
 
             if (this.base.equals("Supplier")) {
                 var returns = this.args.getFirst();
                 return new Functional(Collections.emptyList(), returns);
+            } *//* 
+
+            if (this.base.equals("Predicate")) {
+                var param = this.args.getFirst();
+                return new Functional(Collections.singletonList(param), Primitive.Boolean);
             } */
 	return this;
 }
@@ -355,8 +361,7 @@ struct Struct new_Struct(char* name){
                     .collect(Collectors.joining(" */, /* ") */);
 	return /* "new " + this.type.generate() + "(" + joined + ")" */;
 }
-/* @Override
-        public */ struct Invocation toInvocation_Construction(struct Construction this){
+/* private */ struct Invocation toInvocation_Construction(struct Construction this){
 	return struct Invocation(struct Symbol(this.type.generate(/*  */)), this.values);
 }
 /* @Override
@@ -366,8 +371,7 @@ struct Struct new_Struct(char* name){
                     .collect(Collectors.joining(" */, /* ") */);
 	return /* this.caller.generate() + "(" + joined + ")" */;
 }
-/* @Override
-        public */ struct Invocation toInvocation_Invocation(struct Invocation this){
+/* private */ struct Invocation toInvocation_Invocation(struct Invocation this){
 	return this;
 }
 struct public Frame_Frame(struct Frame this, struct StructNode node){
