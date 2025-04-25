@@ -15,14 +15,14 @@ public class Main {
         private int depth;
         private StringBuilder buffer;
 
-        private State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
-        }
-
         private State(List<String> segments, StringBuilder buffer, int depth) {
             this.buffer = buffer;
             this.segments = segments;
             this.depth = depth;
+        }
+
+        private static State createDefault() {
+            return new State(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State advance() {
@@ -105,7 +105,7 @@ public class Main {
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
-        var current = new State();
+        var current = State.createDefault();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
 
