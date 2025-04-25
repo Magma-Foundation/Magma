@@ -36,6 +36,21 @@ public class Main {
         boolean isPresent();
     }
 
+    private interface FunctionSegment {
+        String generate();
+    }
+
+    private interface StatementValue {
+        String generate();
+    }
+
+    private interface Assignable {
+        String generate();
+    }
+
+    private interface Value extends Assignable {
+    }
+
     private enum Primitive implements Type {
         I8("char"),
         I32("int");
@@ -171,12 +186,17 @@ public class Main {
         }
     }
 
-    private record Definition(Optional<String> maybeBeforeType, Type type, String name) implements Definable {
+    private record Definition(
+            Optional<String> maybeBeforeType,
+            Type type,
+            String name
+    ) implements Definable, StatementValue, Assignable {
         public Definition(Type type, String name) {
             this(new None<String>(), type, name);
         }
 
-        private String generate() {
+        @Override
+        public String generate() {
             var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
             return beforeType + this.type().generate() + " " + this.name();
         }
@@ -201,7 +221,7 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Type {
+    private record Content(String input) implements Type, FunctionSegment, StatementValue, Value {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -223,6 +243,41 @@ public class Main {
         @Override
         public Definition toDefinition() {
             return new Definition(new Struct(this.name()), "new_" + this.name());
+        }
+    }
+
+    private record Statement(StatementValue content) implements FunctionSegment {
+        @Override
+        public String generate() {
+            return "\n\t" + this.content.generate() + ";";
+        }
+    }
+
+    private static class Whitespace implements FunctionSegment {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
+    private record Assignment(Assignable assignable, Value value) implements StatementValue {
+        @Override
+        public String generate() {
+            return this.assignable.generate() + " = " + this.value.generate();
+        }
+    }
+
+    private record DataAccess(Value parent, String property) implements Value {
+        @Override
+        public String generate() {
+            return this.parent.generate() + "." + this.property;
+        }
+    }
+
+    private record Symbol(String name) implements Value {
+        @Override
+        public String generate() {
+            return this.name;
         }
     }
 
@@ -426,8 +481,12 @@ public class Main {
     }
 
     private static Optional<String> compileWhitespace(String input) {
+        return parseWhitespace(input).map(Whitespace::generate);
+    }
+
+    private static Optional<Whitespace> parseWhitespace(String input) {
         if (input.isBlank()) {
-            return new Some<>("");
+            return new Some<>(new Whitespace());
         }
         else {
             return new None<>();
@@ -458,7 +517,24 @@ public class Main {
             if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
                 var content = afterParams.substring(1, afterParams.length() - 1);
                 var outputParams = compileValues(inputParams, Main::compileDefinitionOrPlaceholder);
-                var outputContent = compileStatements(content, Main::compileStatementOrBlock);
+
+                var oldStatements = parseStatements(content, Main::parseStatement);
+                ArrayList<FunctionSegment> newStatements;
+                if (header instanceof Constructor(var name)) {
+                    var copy = new ArrayList<FunctionSegment>();
+                    copy.add(new Statement(new Definition(new Struct(name), "this")));
+                    copy.addAll(oldStatements);
+                    newStatements = copy;
+                }
+                else {
+                    newStatements = new ArrayList<>(oldStatements);
+                }
+
+                var outputContent = newStatements
+                        .stream()
+                        .map(FunctionSegment::generate)
+                        .collect(Collectors.joining());
+
                 var constructor = header.toDefinition().generate() + "(" + outputParams + "){" + outputContent + "\n}\n";
                 functions.add(constructor);
                 return new Some<>("");
@@ -469,6 +545,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static <T> List<T> parseStatements(String content, Function<String, T> compiler) {
+        return parseAll(content, Main::foldStatementChar, compiler);
     }
 
     private static Optional<Constructor> compileConstructorDefinition(String input) {
@@ -493,73 +573,81 @@ public class Main {
         return new None<>();
     }
 
-    private static String compileStatementOrBlock(String input) {
-        return compileWhitespace(input)
-                .or(() -> compileStatement(input, Main::compileStatementValue))
-                .orElseGet(() -> generatePlaceholder(input));
+    private static FunctionSegment parseStatement(String input) {
+        return parseWhitespace(input)
+                .<FunctionSegment>map(value -> value)
+                .or(() -> parseStatementWithoutBraces(input, Main::parseStatementValue).map(value -> value))
+                .orElseGet(() -> new Content(input));
     }
 
-    private static String compileStatementValue(String input) {
-        return compileAssignable(input)
-                .or(() -> compileDefinition(input))
-                .orElseGet(() -> generatePlaceholder(input));
+    private static StatementValue parseStatementValue(String input) {
+        return compileAssignment(input)
+                .map(value -> value)
+                .or(() -> parseDefinition(input).map(value -> value))
+                .orElseGet(() -> new Content(input));
     }
 
     private static Optional<String> compileClassStatement(String input) {
         return compileStatement(input, Main::compileClassStatementValue);
     }
 
-    private static Optional<String> compileStatement(String input, Function<String, String> compiler) {
+    private static Optional<String> compileStatement(String input, Function<String, StatementValue> compiler) {
+        return parseStatementWithoutBraces(input, compiler).map(Statement::generate);
+    }
+
+    private static Optional<Statement> parseStatementWithoutBraces(String input, Function<String, StatementValue> compiler) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return new Some<>("\n\t" + compiler.apply(withoutEnd) + ";");
+            var content = compiler.apply(withoutEnd);
+            return new Some<>(new Statement(content));
         }
         else {
             return new None<>();
         }
     }
 
-    private static String compileClassStatementValue(String input) {
-        return compileAssignable(input)
-                .or(() -> compileDefinition(input))
-                .orElseGet(() -> generatePlaceholder(input));
+    private static StatementValue compileClassStatementValue(String input) {
+        return compileAssignment(input)
+                .map(value -> value)
+                .or(() -> parseDefinition(input).map(value -> value))
+                .orElseGet(() -> new Content(input));
     }
 
-    private static Optional<String> compileAssignable(String input) {
+    private static Optional<StatementValue> compileAssignment(String input) {
         var valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
 
-            var destination = compileDefinition(inputDefinition).orElseGet(() -> compileValue(inputDefinition));
-            return new Some<>(destination + " = " + compileValue(value));
+            var destination = parseDefinition(inputDefinition)
+                    .<Assignable>map(result -> result)
+                    .orElseGet(() -> parseValue(inputDefinition));
+
+            return new Some<>(new Assignment(destination, parseValue(value)));
         }
         return new None<>();
     }
 
-    private static String compileValue(String input) {
+    private static Value parseValue(String input) {
         var stripped = input.strip();
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            return compileValue(parent) + "." + property;
+            var value = parseValue(parent);
+            return new DataAccess(value, property);
         }
 
         if (isSymbol(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         }
 
-        return generatePlaceholder(stripped);
+        return new Content(stripped);
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {
-        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
-    }
-
-    private static Optional<String> compileDefinition(String input) {
-        return parseDefinition(input).map(Definition::generate);
+        return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<Definition> parseDefinition(String input) {
