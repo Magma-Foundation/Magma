@@ -235,7 +235,7 @@ public class Main {
             }
         }
 
-        return generatePlaceholder(input);
+        return "struct " + stripped;
     }
 
     private static State foldValueChar(State state, char c) {

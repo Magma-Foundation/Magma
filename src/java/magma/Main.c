@@ -10,7 +10,7 @@
 struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
-	/* private */ /* StringBuilder */ buffer;
+	/* private */ struct StringBuilder buffer;
 	/* private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
@@ -46,7 +46,7 @@ struct State {
 };
 struct ");
         if (classIndex >= 0) {
-	/* var afterKeyword = stripped.substring(classIndex + */ /* "class */ ".length());
+	/* var afterKeyword = stripped.substring(classIndex + */ struct "class ".length());
 	/* var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
@@ -60,10 +60,10 @@ struct ");
                     return Optional.of("");
                 }
             } */
-	/* } */ /* return */ Optional.empty();
+	/* } */ struct return Optional.empty();
 };
 struct Main {
-	/* public static final List<String> structs = */ /* new */ ArrayList<>();
+	/* public static final List<String> structs = */ struct new ArrayList<>();
 	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -209,7 +209,7 @@ struct Main {
             }
         }
 
-        return generatePlaceholder(input);
+        return "struct " + stripped;
     } */
 	/* private static State foldValueChar(State state, char c) {
         if (c == ',') {
