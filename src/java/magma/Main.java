@@ -385,9 +385,14 @@ public class Main {
                 : beforeContent;
 
         var paramStart = withoutImplements.indexOf("(");
-        var name = paramStart >= 0
+        var withoutParameters = paramStart >= 0
                 ? withoutImplements.substring(0, paramStart).strip()
                 : withoutImplements;
+
+        var typeParamStart = withoutParameters.indexOf("<");
+        var name = typeParamStart >= 0
+                ? withoutParameters.substring(0, typeParamStart).strip()
+                : withoutParameters;
 
         if (!isSymbol(name)) {
             return Optional.empty();
@@ -454,7 +459,7 @@ public class Main {
                     var withBraces = withParams.substring(paramEnd + ")".length()).strip();
                     if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                         var content = withBraces.substring(1, withBraces.length() - 1);
-                        var constructor = maybeHeader + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
+                        var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
                         functions.add(constructor);
                         return Optional.of("");
                     }
