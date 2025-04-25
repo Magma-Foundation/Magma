@@ -76,6 +76,8 @@ public class Main {
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
         <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
     private interface Rule<T> extends Function<String, Result<T, CompileError>> {
@@ -668,6 +670,11 @@ public class Main {
         public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
             return mapper.apply(this.value);
         }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
@@ -684,6 +691,11 @@ public class Main {
         @Override
         public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
             return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
         }
     }
 
@@ -778,6 +790,15 @@ public class Main {
                     .collect(Collectors.joining(""));
 
             return this.header.generate() + " {" + joined + "}";
+        }
+    }
+
+    private record TypeRule<S, T extends S>(String type, Rule<T> childRule) implements Rule<S> {
+        @Override
+        public Result<S, CompileError> apply(String input) {
+            return this.childRule.apply(input)
+                    .<S>mapValue(value -> value)
+                    .mapErr(err -> new CompileError("Invalid type '" + this.type + "'", new StringContext(input), Collections.singletonList(err)));
         }
     }
 
@@ -1316,13 +1337,13 @@ public class Main {
 
     private static Result<FunctionSegment, CompileError> parseStatement(String input0) {
         return parseOr(input0, List.of(
-                choice(Main::whitespace),
-                choice(input -> parseTerminatingStatement(input, Main::parseStatementValue)),
-                choice(Main::parseBlockStatementRule)
+                new TypeRule<FunctionSegment, Whitespace>("whitespace", Main::whitespace),
+                new TypeRule<FunctionSegment, Statement>("statement", input -> parseTerminatingStatement(input, Main::parseStatementValue)),
+                new TypeRule<FunctionSegment, Block>("block", Main::parseBlockStatementRule)
         ));
     }
 
-    private static Result<FunctionSegment, CompileError> parseBlockStatementRule(String input) {
+    private static Result<Block, CompileError> parseBlockStatementRule(String input) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var slice = stripped.substring(0, stripped.length() - "}".length());
@@ -1347,10 +1368,6 @@ public class Main {
         return new Err<>(new CompileError("Invalid block header", new StringContext(input)));
     }
 
-    private static <S, T extends S> Rule<S> choice(Rule<T> rule) {
-        return input -> rule.apply(input).mapValue(value -> value);
-    }
-
     private static <T> Result<T, CompileError> parseOr(String input, List<Rule<T>> rules) {
         List<CompileError> errors = new ArrayList<>();
         for (var rule : rules) {
@@ -1368,12 +1385,12 @@ public class Main {
 
     private static Result<StatementValue, CompileError> parseStatementValue(String input) {
         return parseOr(input, List.of(
-                choice(Main::parseReturn),
-                choice(Main::parsePostIncrement),
-                choice(Main::parsePostDecrement),
-                choice(Main::parseInvocation),
-                choice(Main::parseAssignment),
-                choice(Main::parseDefinition)
+                new TypeRule<StatementValue, Return>("return", Main::parseReturn),
+                new TypeRule<StatementValue, PostIncrement>("post-increment", Main::parsePostIncrement),
+                new TypeRule<StatementValue, PostDecrement>("post-decrement", Main::parsePostDecrement),
+                new TypeRule<StatementValue, Invocation>("invocation", Main::parseInvocation),
+                new TypeRule<StatementValue, Assignment>("assignment", Main::parseAssignment),
+                new TypeRule<StatementValue, Definition>("definition", Main::parseDefinition)
         ));
     }
 
