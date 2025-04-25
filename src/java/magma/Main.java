@@ -1351,8 +1351,8 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeType = slice.substring(0, contentStart);
                 var inputContent = slice.substring(contentStart + "{".length()).strip();
-                return parseStatements(inputContent, Main::parseStatement).flatMapValue(outputContent -> {
-                    return parseBlockHeader(beforeType).mapValue(header -> {
+                return parseBlockHeader(beforeType).flatMapValue(header -> {
+                    return parseStatements(inputContent, Main::parseStatement).mapValue(outputContent -> {
                         return new Block(header, outputContent);
                     });
                 });
