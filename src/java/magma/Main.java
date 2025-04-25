@@ -428,8 +428,8 @@ public class Main {
                 .or(() -> compileStructured(input, "enum "))
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileStructured(input, "interface "))
-                .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
+                .or(() -> compileClassStatement(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
@@ -444,26 +444,33 @@ public class Main {
 
     private static Optional<String> compileMethod(String input) {
         var paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            var beforeParams = input.substring(0, paramStart).strip();
-            var withParams = input.substring(paramStart + "(".length());
+        if (paramStart < 0) {
+            return Optional.empty();
+        }
 
-            var maybeHeader = parseDefinition(beforeParams)
-                    .<Definable>map(value -> value)
-                    .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
+        var beforeParams = input.substring(0, paramStart).strip();
+        var withParams = input.substring(paramStart + "(".length());
 
-            if (maybeHeader instanceof Some(var header)) {
-                var paramEnd = withParams.indexOf(")");
-                if (paramEnd >= 0) {
-                    var params = withParams.substring(0, paramEnd).strip();
-                    var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                        var content = withBraces.substring(1, withBraces.length() - 1);
-                        var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
-                        functions.add(constructor);
-                        return Optional.of("");
-                    }
-                }
+        var maybeHeader = parseDefinition(beforeParams)
+                .<Definable>map(value -> value)
+                .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
+
+        if (!(maybeHeader instanceof Some(var header))) {
+            return Optional.empty();
+        }
+
+        var paramEnd = withParams.indexOf(")");
+        if (paramEnd >= 0) {
+            var params = withParams.substring(0, paramEnd).strip();
+            var afterParams = withParams.substring(paramEnd + ")".length()).strip();
+            if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
+                var content = afterParams.substring(1, afterParams.length() - 1);
+                var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
+                functions.add(constructor);
+                return Optional.of("");
+            }
+            if (afterParams.equals(";")) {
+                return Optional.of("");
             }
         }
 
