@@ -1532,12 +1532,8 @@ public class Main {
                     .mapValue(Construction::toInvocation);
         }
 
-        var maybeInvocation = parseInvocation(stripped);
-        if (maybeInvocation instanceof Ok(var invocation)) {
-            return new Ok<>(invocation);
-        }
-
         var rules = new ArrayList<Rule<Value>>(List.of(
+                new TypeRule<>("invocation", Main::parseInvocation),
                 new TypeRule<>("data-access", Main::parseDataAccess),
                 new TypeRule<>("ternary", Main::parseTernary)
         ));
