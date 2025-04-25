@@ -3,6 +3,7 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
+/* import java.util.function.Function; */
 struct Main {/* private static class State {
         private final List<String> segments;
         private int depth;
@@ -42,30 +43,38 @@ struct Main {/* private static class State {
             this.depth--;
             return this;
         }
-    }
 
-    public static void main(String[] args) {
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    } *//* 
+
+    public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
 
             var target = source.resolveSibling("Main.c");
-            Files.writeString(target, compile(input));
+            Files.writeString(target, compileRoot(input));
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    } *//* 
 
-    private static String compile(String input) {
+    private static String compileRoot(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    } *//* 
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         var segments = divide(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
-    }
+    } *//* 
 
     private static List<String> divide(String input) {
         var current = new State();
@@ -74,34 +83,28 @@ struct Main {/* private static class State {
             current = foldStatementChar(current, c);
         }
         return current.advance().segments;
-    }
+    } *//* 
 
     private static State foldStatementChar(State current, char c) {
         var appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-
+        if (c == '} *//* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* 
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '} *//* ') {
             return appended.exit();
-        }
+        } *//* 
 
-        return appended;
-    }
-
-    private static String compileRootSegment(String input) {
-        var stripped = input.strip();
-
-        if (stripped.startsWith("package ")) {
-            return "";
-        }
-
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
+        return appended; *//* 
+     */
+};
+struct ");
+        if (classIndex >= 0) {/* var afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
             var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
@@ -109,17 +112,19 @@ struct Main {/* private static class State {
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
                     return "struct " + name + " {" +
-                            generatePlaceholder(content) +
+                            compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
                 }
-            }
+            } *//* 
         }
 
         return generatePlaceholder(stripped) + "\n";
-    }
-
-    private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */";
-    }
- */
+     */
 };
+/* private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
+    } */
+/* private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */";
+    } */
+/* } */

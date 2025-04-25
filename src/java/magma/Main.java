@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -46,26 +47,34 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
-    public static void main(String[] args) {
+    public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
 
             var target = source.resolveSibling("Main.c");
-            Files.writeString(target, compile(input));
+            Files.writeString(target, compileRoot(input));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static String compile(String input) {
+    private static String compileRoot(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> compiler) {
         var segments = divide(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -85,7 +94,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -113,13 +124,17 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
                     return "struct " + name + " {" +
-                            generatePlaceholder(content) +
+                            compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
                 }
             }
         }
 
         return generatePlaceholder(stripped) + "\n";
+    }
+
+    private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String stripped) {
