@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -436,6 +437,7 @@ public class Main {
             return new None<>();
         }
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
+        var withEnd = afterKeyword.substring(contentStart + "{".length());
 
         var implementsIndex = beforeContent.indexOf(" implements ");
         var withoutImplements = implementsIndex >= 0
@@ -453,21 +455,34 @@ public class Main {
                 : withoutExtends;
 
         var typeParamStart = withoutParameters.indexOf("<");
-        var name = typeParamStart >= 0
-                ? withoutParameters.substring(0, typeParamStart).strip()
-                : withoutParameters;
+        if (typeParamStart >= 0) {
+            String name = withoutParameters.substring(0, typeParamStart).strip();
+            var withTypeParamEnd = withoutParameters.substring(typeParamStart + "<".length()).strip();
+            if (withTypeParamEnd.endsWith(">")) {
+                var typeParamsString = withTypeParamEnd.substring(0, withTypeParamEnd.length() - ">".length());
+                var typeParams = parseValues(typeParamsString, Function.identity());
+                return getOption(name, withEnd, typeParams);
+            }
+        }
 
+        return getOption(withoutParameters, withEnd, Collections.emptyList());
+    }
+
+    private static Option<String> getOption(String name, String input, List<String> typeParams) {
         if (!isSymbol(name)) {
             return new None<>();
         }
-        var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+
+        String withEnd = input.strip();
         if (!withEnd.endsWith("}")) {
             return new None<>();
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
+        var typeParamString = typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">";
+
         structNames.addLast(name);
-        var generated = "struct " + name + " {" +
+        var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
 
