@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
-    public interface Type extends Node {
+    public sealed interface Type extends Node permits Functional, Generic, Primitive, Ref, Struct, TypeParam, Whitespace {
         String generate();
 
         default Type flatten() {
@@ -430,7 +430,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements RootSegment, FunctionSegment, StructSegment, Parameter, Type, Value {
+    private static final class Whitespace implements RootSegment, FunctionSegment, StructSegment, Parameter, Type, Value {
         @Override
         public String generate() {
             return "";
