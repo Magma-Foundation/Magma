@@ -99,6 +99,9 @@ public class Main {
     private interface StructSegment extends Node {
     }
 
+    private interface BlockHeader extends Node {
+    }
+
     private enum Primitive implements Type {
         I8("char"),
         I32("int"),
@@ -767,6 +770,17 @@ public class Main {
         }
     }
 
+    private record Block(BlockHeader header, List<FunctionSegment> segments) implements FunctionSegment {
+        @Override
+        public String generate() {
+            var joined = this.segments.stream()
+                    .map(FunctionSegment::generate)
+                    .collect(Collectors.joining(""));
+
+            return this.header.generate() + " {" + joined + "}";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1113,7 +1127,7 @@ public class Main {
     }
 
     private static Result<Statement, CompileError> classStatement(String input) {
-        return parseStatementWithoutBraces(input, Main::compileClassStatementValue);
+        return parseTerminatingStatement(input, Main::compileClassStatementValue);
     }
 
     private static <T extends StructSegment> Rule<StructSegment> structSegmentFrom(Rule<T> whitespace) {
@@ -1303,8 +1317,34 @@ public class Main {
     private static Result<FunctionSegment, CompileError> parseStatement(String input0) {
         return parseOr(input0, List.of(
                 choice(Main::whitespace),
-                choice(input -> parseStatementWithoutBraces(input, Main::parseStatementValue))
+                choice(input -> parseTerminatingStatement(input, Main::parseStatementValue)),
+                choice(Main::parseBlockStatementRule)
         ));
+    }
+
+    private static Result<FunctionSegment, CompileError> parseBlockStatementRule(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("}")) {
+            var slice = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = slice.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeType = slice.substring(0, contentStart);
+                var inputContent = slice.substring(contentStart + "{".length()).strip();
+                return parseStatements(inputContent, Main::parseStatement).flatMapValue(outputContent -> {
+                    return parseBlockHeader(beforeType).mapValue(header -> {
+                        return new Block(header, outputContent);
+                    });
+                });
+            }
+            return createInfixErr(slice, "{");
+        }
+        else {
+            return createSuffixErr(stripped, "}");
+        }
+    }
+
+    private static Result<BlockHeader, CompileError> parseBlockHeader(String input) {
+        return new Err<>(new CompileError("Invalid block header", new StringContext(input)));
     }
 
     private static <S, T extends S> Rule<S> choice(Rule<T> rule) {
@@ -1326,8 +1366,8 @@ public class Main {
         return new Err<>(new CompileError(input, new StringContext("No valid rule present"), errors));
     }
 
-    private static Result<StatementValue, CompileError> parseStatementValue(String input0) {
-        return parseOr(input0, List.of(
+    private static Result<StatementValue, CompileError> parseStatementValue(String input) {
+        return parseOr(input, List.of(
                 choice(Main::parseReturn),
                 choice(Main::parsePostIncrement),
                 choice(Main::parsePostDecrement),
@@ -1367,7 +1407,7 @@ public class Main {
         return new Err<>(new CompileError("Prefix 'return " + "' not present", new StringContext(stripped)));
     }
 
-    private static Result<Statement, CompileError> parseStatementWithoutBraces(
+    private static Result<Statement, CompileError> parseTerminatingStatement(
             String input,
             Function<String, Result<StatementValue, CompileError>> compiler
     ) {
