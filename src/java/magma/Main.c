@@ -97,6 +97,8 @@ struct Options {
 };
 struct Ternary {
 };
+struct Number {
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = ArrayList<>();
 	/* public static */ List<char*> structs;
@@ -185,7 +187,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* private static */ struct State createDefault_State(struct State this){
-	return struct State(ArrayList<>(), struct StringBuilder(), /*  0 */);
+	return struct State(ArrayList<>(), struct StringBuilder(), 0);
 }
 /* private */ struct State advance_State(struct State this){
 	/* this.segments.add(this.buffer.toString()) */;
@@ -391,6 +393,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         public */ char* generate_Ternary(struct Ternary this){
 	return /* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this */.whenFalse.generate();
 }
+/* @Override
+        public */ char* generate_Number(struct Number this){
+	return this.value;
+}
 /* public static */ struct void main_Main(struct Main this){
 	structs = ArrayList<>();
 	functions = ArrayList<>();
@@ -444,7 +450,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	struct var current = State.createDefault();
-	/* for (var i  */ = /*  0 */;
+	/* for (var i  */ = 0;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
 
@@ -568,7 +574,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (input.isEmpty()) {
             return false;
         } */
-	/* for (var i  */ = /*  0 */;
+	/* for (var i  */ = 0;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -597,7 +603,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (paramStart < 0) {
             return new None<>();
         } */
-	struct var beforeParams = input.substring(/* 0 */, paramStart).strip();
+	struct var beforeParams = input.substring(0, paramStart).strip();
 	struct var withParams = input.substring(/* paramStart + "(".length() */);
 	struct var currentStruct = frames.getLast().node;
 	struct var currentStructName = currentStruct.name;
@@ -614,7 +620,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (paramEnd < 0) {
             return new None<>();
         } */
-	struct var paramStrings = withParams.substring(/* 0 */, paramEnd).strip();
+	struct var paramStrings = withParams.substring(0, paramEnd).strip();
 	struct var afterParams = /* withParams.substring(paramEnd + ")" */.length(/* )).strip( */);/* 
         if (afterParams.startsWith("{") && afterParams.endsWith("} *//* ")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
@@ -825,8 +831,23 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 
         if (isSymbol(stripped)) {
             return new Some<>(new Symbol(stripped));
+        } *//* 
+
+        if (isNumber(stripped)) {
+            return new Some<>(new Number(stripped));
         } */
 	return None<>();
+}
+/* private static */ struct boolean isNumber_Main(struct Main this, char* input){
+	/* for (var i  */ = 0;
+	/* i < input.length() */;/*  i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        } */
+	return true;
 }
 /* private static */ struct Type resolveType_Main(struct Main this, struct Value value){/* 
         if (value instanceof Symbol(var name)) {
@@ -857,12 +878,12 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 	struct var withoutEnd = /* withoutPrefix.substring(0, withoutPrefix.length() - ")" */.length(/* ) */);
 	struct var slices = divideAll(withoutEnd, /*  Main::foldInvocationStart */);
-	struct var beforeLast = slices.subList(/* 0 */, /*  slices.size() - 1 */);
+	struct var beforeLast = slices.subList(0, /*  slices.size() - 1 */);
 	struct var joined = String.join(/* "" */, beforeLast).strip();/* 
         if (!joined.endsWith("(")) {
             return new None<>();
         } */
-	struct var beforeArgsStart = joined.substring(/* 0 */, /*  joined.length() - 1 */);
+	struct var beforeArgsStart = joined.substring(0, /*  joined.length() - 1 */);
 	struct var args = slices.getLast();/* 
 
         if (!(beforeArgsCaller.apply(beforeArgsStart) instanceof Some(var outputBeforeArgs))) {
@@ -892,7 +913,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (nameSeparator < 0) {
             return new None<>();
         } */
-	struct var beforeName = stripped.substring(/* 0 */, nameSeparator).strip();
+	struct var beforeName = stripped.substring(0, nameSeparator).strip();
 	struct var name = stripped.substring(/* nameSeparator + " " */.length()).strip();/* 
         if (!isSymbol(name)) {
             return new None<>();
@@ -936,9 +957,9 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/*  */;
 }
 /* private static */ Option<struct Integer> findTypeSeparator_Main(struct Main this, char* input){
-	struct var depth = /*  0 */;
+	struct var depth = 0;
 	/* for (var i  */ = /*  input.length() - 1 */;
-	/* i > */ = /*  0 */;/*  i--) {
+	/* i > */ = 0;/*  i--) {
             var c = input.charAt(i);
             if (c == ' ' && depth == 0) {
                 return new Some<>(i);

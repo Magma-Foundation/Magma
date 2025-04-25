@@ -491,6 +491,12 @@ public class Main {
         }
     }
 
+    private record Number(String value) implements Value {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
     private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
@@ -1004,7 +1010,22 @@ public class Main {
             return new Some<>(new Symbol(stripped));
         }
 
+        if (isNumber(stripped)) {
+            return new Some<>(new Number(stripped));
+        }
+
         return new None<>();
+    }
+
+    private static boolean isNumber(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Type resolveType(Value value) {
