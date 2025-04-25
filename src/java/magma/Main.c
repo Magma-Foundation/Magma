@@ -6,53 +6,47 @@
 /* import java.util.Optional; */
 /* import java.util.function.Function; */
 /*  */
-struct State {/* private final List<String> segments; *//* 
-        private int depth; *//* 
-        private StringBuilder buffer; *//* 
-
-        private State() {
+struct State {
+	/* private final List<String> segments; */
+	/* private int depth; */
+	/* private StringBuilder buffer; */
+	/* private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        } *//* 
-
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        } */
+	/* private State(List<String> segments, StringBuilder buffer, int depth) {
             this.buffer = buffer;
             this.segments = segments;
             this.depth = depth;
-        } *//* 
-
-        private State advance() {
+        } */
+	/* private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        } *//* 
-
-        private State append(char c) {
+        } */
+	/* private State append(char c) {
             this.buffer.append(c);
             return this;
-        } *//* 
-
-        public boolean isLevel() {
+        } */
+	/* public boolean isLevel() {
             return this.depth == 0;
-        } *//* 
-
-        public State enter() {
+        } */
+	/* public State enter() {
             this.depth++;
             return this;
-        } *//* 
-
-        public State exit() {
+        } */
+	/* public State exit() {
             this.depth--;
             return this;
-        } *//* 
-
-        public boolean isShallow() {
+        } */
+	/* public boolean isShallow() {
             return this.depth == 1;
-        } *//* 
-     */
+        } */
+	/*  */
 };
 struct ");
-        if (classIndex >= 0) {/* var afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
-            var contentStart = afterKeyword.indexOf("{");
+        if (classIndex >= 0) {
+	/* var afterKeyword = stripped.substring(classIndex + "class ".length()); */
+	/* var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
                 var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
@@ -64,16 +58,13 @@ struct ");
                     structs.add(generated);
                     return Optional.of("");
                 }
-            } *//* 
-        }
-        return Optional.empty();
-     */
+            } */
+	/* }
+        return Optional.empty(); */
 };
-struct Main {/* 
-
-    public static final List<String> structs = new ArrayList<>(); *//* 
-
-    public static void main() {
+struct Main {
+	/* public static final List<String> structs = new ArrayList<>(); */
+	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -83,15 +74,13 @@ struct Main {/*
         } catch (IOException e) {
             e.printStackTrace();
         }
-    } *//* 
-
-    private static String compileRoot(String input) {
+    } */
+	/* private static String compileRoot(String input) {
         var output = compileStatements(input, Main::compileRootSegment);
         var joinedStructs = String.join("", structs);
         return output + joinedStructs;
-    } *//* 
-
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    } */
+	/* private static String compileStatements(String input, Function<String, String> compiler) {
         var segments = divide(input);
 
         var output = new StringBuilder();
@@ -100,9 +89,8 @@ struct Main {/*
         }
 
         return output.toString();
-    } *//* 
-
-    private static List<String> divide(String input) {
+    } */
+	/* private static List<String> divide(String input) {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -127,9 +115,8 @@ struct Main {/*
             current = foldStatementChar(current, c);
         }
         return current.advance().segments;
-    } *//* 
-
-    private static State foldStatementChar(State current, char c) {
+    } */
+	/* private static State foldStatementChar(State current, char c) {
         var appended = current.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -145,9 +132,8 @@ struct Main {/*
         }
 
         return appended;
-    } *//* 
-
-    private static String compileRootSegment(String input) {
+    } */
+	/* private static String compileRootSegment(String input) {
         var stripped = input.strip();
 
         if (stripped.startsWith("package ")) {
@@ -155,14 +141,12 @@ struct Main {/*
         }
 
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
-    } *//* 
-
-    private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
-    } *//* 
-
-    private static String generatePlaceholder(String stripped) {
+    } */
+	/* private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    } */
+	/* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
-    } *//* 
- */
+    } */
+	/*  */
 };

@@ -162,7 +162,7 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
     private static String generatePlaceholder(String stripped) {
