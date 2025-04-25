@@ -753,7 +753,7 @@ private static Option<struct Integer> findTypeSeparator_Main(struct Main this, c
 	return /* new None<>() */;
 }
 private static Option<struct Type> parseAndFlattenType_Main(struct Main this, char* input){
-	return /* parseType(input).map(type -> type.flatten()) */;
+	return /* parseType(input).map(Type::flatten) */;
 }
 private static Option<struct Type> parseType_Main(struct Main this, char* input){
 	struct var stripped = /* input.strip() */;/* 
