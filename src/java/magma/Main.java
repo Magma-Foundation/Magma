@@ -90,6 +90,16 @@ public class Main {
         }
     }
 
+    private enum Operator {
+        Equals("==");
+
+        private final String representation;
+
+        Operator(String representation) {
+            this.representation = representation;
+        }
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -549,6 +559,13 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+    }
+
+    private record Operation(Value left, Operator operator, Value right) implements Value {
+        @Override
+        public String generate() {
+            return this.left.generate() + " " + this.operator.representation + " " + this.right.generate();
         }
     }
 
@@ -1022,6 +1039,14 @@ public class Main {
     private static Option<Value> parseValue(String input) {
         var stripped = input.strip();
 
+        if (isSymbol(stripped)) {
+            return new Some<>(new Symbol(stripped));
+        }
+
+        if (isNumber(stripped)) {
+            return new Some<>(new Number(stripped));
+        }
+
         if (stripped.startsWith("new ")) {
             var substring = stripped.substring("new ".length());
             var maybeInvokable = parseInvokable(substring, Main::parseType, Construction::new);
@@ -1033,6 +1058,21 @@ public class Main {
         var maybeInvocation = parseInvocation(stripped);
         if (maybeInvocation instanceof Some(var invocation)) {
             return new Some<>(invocation);
+        }
+
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parentString = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            if (isSymbol(property)) {
+                var parent = parseValueOrPlaceholder(parentString);
+                var type = resolveType(parent);
+                if (type instanceof Functional) {
+                    return new Some<>(parent);
+                }
+
+                return new Some<>(new DataAccess(parent, property));
+            }
         }
 
         var conditionSeparator = stripped.indexOf("?");
@@ -1056,27 +1096,16 @@ public class Main {
             }
         }
 
-        var separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            var parentString = stripped.substring(0, separator);
-            var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                var parent = parseValueOrPlaceholder(parentString);
-                var type = resolveType(parent);
-                if (type instanceof Functional) {
-                    return new Some<>(parent);
-                }
+        var operator = Operator.Equals;
+        var operatorIndex = input.indexOf(operator.representation);
+        if (operatorIndex >= 0) {
+            var leftString = input.substring(0, operatorIndex);
+            var rightString = input.substring(operatorIndex + operator.representation.length());
 
-                return new Some<>(new DataAccess(parent, property));
+            if (parseValue(leftString) instanceof Some(var left)
+                    && parseValue(rightString) instanceof Some(var right)) {
+                return new Some<>(new Operation(left, operator, right));
             }
-        }
-
-        if (isSymbol(stripped)) {
-            return new Some<>(new Symbol(stripped));
-        }
-
-        if (isNumber(stripped)) {
-            return new Some<>(new Number(stripped));
         }
 
         return new None<>();

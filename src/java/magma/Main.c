@@ -36,6 +36,10 @@ struct Primitive {
         Boolean("int") */;
 	/* private final */ char* value;
 };
+struct Operator {
+	/* Equals(" */ = /* =") */;
+	/* private final */ char* representation;
+};
 struct Some<T> {
 };
 struct None<T> {
@@ -99,6 +103,8 @@ struct Ternary {
 };
 struct Number {
 };
+struct Operation {
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = new_ArrayList_Whitespace();
 	/* private static final */ List<struct StatementValue> statements = new_ArrayList_Whitespace();
@@ -128,6 +134,11 @@ struct Primitive new_Primitive(char* value){
 /* @Override
         public */ char* stringify_Primitive(struct Primitive this){
 	return this.name(this);
+}
+struct Operator new_Operator(char* representation){
+	struct Operator this;
+	this.representation = representation;
+	return this;
 }
 /* @Override
         public  */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
@@ -206,7 +217,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* public */ struct boolean isLevel_State(struct State this){
-	return /* this.depth == 0 */;
+	return this.depth == 0;
 }
 /* public */ struct State enter_State(struct State this){
 	/* this.depth++ */;
@@ -217,7 +228,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* public */ struct boolean isShallow_State(struct State this){
-	return /* this.depth == 1 */;
+	return this.depth == 1;
 }
 struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type, char* name, List<char*> typeParams){
 	struct Definition this;
@@ -463,6 +474,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* @Override
         public */ char* generate_Number(struct Number this){
 	return this.value;
+}
+/* @Override
+        public */ char* generate_Operation(struct Operation this){
+	return /* this.left.generate() + " " + this.operator.representation + " " + this */.right.generate(/* this.left.generate() + " " + this.operator.representation + " " + this */.right);
 }
 /* public static */ struct void main_Main(struct Main this){
 	structs = new_ArrayList_Whitespace();
@@ -916,9 +931,18 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ Option<struct Value> parseValue_Main(struct Main this, char* input){
 	/* /* var stripped = input */ */ local0 = /* var stripped = input */;
-	/* /* var conditionSeparator = stripped */ */ local1 = /* var conditionSeparator = stripped */;
-	/* /* var separator = stripped */ */ local2 = /* var separator = stripped */;
+	/* /* var separator = stripped */ */ local1 = /* var separator = stripped */;
+	/* /* var conditionSeparator = stripped */ */ local2 = /* var conditionSeparator = stripped */;
+	/* /* var operatorIndex = input */ */ local3 = /* var operatorIndex = input */;
 	local0.strip(local0);/* 
+
+        if (isSymbol(stripped)) {
+            return new Some<>(new Symbol(stripped));
+        } *//* 
+
+        if (isNumber(stripped)) {
+            return new Some<>(new Number(stripped));
+        } *//* 
 
         if (stripped.startsWith("new ")) {
             var substring = stripped.substring("new ".length());
@@ -931,7 +955,21 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (maybeInvocation instanceof Some(var invocation)) {
             return new Some<>(invocation);
         } */
-	local1.indexOf(local1, /* "?" */);/* 
+	local1.lastIndexOf(local1, /* "." */);/* 
+        if (separator >= 0) {
+            var parentString = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            if (isSymbol(property)) {
+                var parent = parseValueOrPlaceholder(parentString);
+                var type = resolveType(parent);
+                if (type instanceof Functional) {
+                    return new Some<>(parent);
+                }
+
+                return new Some<>(new DataAccess(parent, property));
+            }
+        } */
+	local2.indexOf(local2, /* "?" */);/* 
         if (conditionSeparator >= 0) {
             var conditionString = stripped.substring(0, conditionSeparator);
             var afterCondition = stripped.substring(conditionSeparator + "?".length());
@@ -951,27 +989,16 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 }
             }
         } */
-	local2.lastIndexOf(local2, /* "." */);/* 
-        if (separator >= 0) {
-            var parentString = stripped.substring(0, separator);
-            var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                var parent = parseValueOrPlaceholder(parentString);
-                var type = resolveType(parent);
-                if (type instanceof Functional) {
-                    return new Some<>(parent);
-                }
+	struct var operator = Operator.Equals;
+	local3.indexOf(local3, operator.representation);/* 
+        if (operatorIndex >= 0) {
+            var leftString = input.substring(0, operatorIndex);
+            var rightString = input.substring(operatorIndex + operator.representation.length());
 
-                return new Some<>(new DataAccess(parent, property));
+            if (parseValue(leftString) instanceof Some(var left)
+                    && parseValue(rightString) instanceof Some(var right)) {
+                return new Some<>(new Operation(left, operator, right));
             }
-        } *//* 
-
-        if (isSymbol(stripped)) {
-            return new Some<>(new Symbol(stripped));
-        } *//* 
-
-        if (isNumber(stripped)) {
-            return new Some<>(new Number(stripped));
         } */
 	return new_None_Whitespace();
 }
