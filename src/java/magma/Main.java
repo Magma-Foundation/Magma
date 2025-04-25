@@ -1,7 +1,10 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -40,6 +44,8 @@ public class Main {
         T orElseGet(Supplier<T> other);
 
         Option<T> filter(Predicate<T> predicate);
+
+        void ifPresent(Consumer<T> consumer);
     }
 
     private interface FunctionSegment {
@@ -74,10 +80,15 @@ public class Main {
     }
 
     private interface Context {
+        String display();
     }
 
     private interface Node {
         String generate();
+    }
+
+    private interface Error {
+        String display();
     }
 
     private enum Primitive implements Type {
@@ -135,6 +146,10 @@ public class Main {
             return predicate.test(this.value) ? this : new None<>();
         }
 
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -156,6 +171,10 @@ public class Main {
         @Override
         public Option<T> filter(Predicate<T> predicate) {
             return this;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
         }
 
     }
@@ -658,15 +677,48 @@ public class Main {
     }
 
     private record StringContext(String value) implements Context {
+        @Override
+        public String display() {
+            return this.value;
+        }
     }
 
-    private record CompileError(String message, Context context, List<CompileError> errors) {
+    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
         private CompileError(String message, Context context) {
             this(message, context, new ArrayList<>());
+        }
+
+        @Override
+        public String display() {
+            var joined = this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
+
+            return this.message + ": " + this.context.display() + joined;
         }
     }
 
     private record NodeContext(Node node) implements Context {
+        @Override
+        public String display() {
+            return this.node.generate();
+        }
+    }
+
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }
+
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
     }
 
     private static final List<String> typeParams = new ArrayList<>();
@@ -681,26 +733,52 @@ public class Main {
         functions = new ArrayList<>();
         frames = new ArrayList<>();
 
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
+        var source = Paths.get(".", "src", "java", "magma", "Main.java");
+        var target = source.resolveSibling("Main.c");
+        runWithTarget(source, target).ifPresent(error -> System.err.println(error.display()));
+    }
 
-            var target = source.resolveSibling("Main.c");
-            Files.writeString(target, compileRoot(input));
+    private static Option<ApplicationError> runWithTarget(Path source, Path target) {
+        return switch (readString(source)) {
+            case Err<String, IOException>(var error) -> new Some<>(new ApplicationError(new ThrowableError(error)));
+            case Ok<String, IOException>(var input) -> {
+                var stringCompileErrorResult = compileRoot(input);
+                yield switch (stringCompileErrorResult) {
+                    case Err<String, CompileError>(var error) -> new Some<>(new ApplicationError(error));
+                    case Ok<String, CompileError>(var output) ->
+                            writeString(target, output).map(ThrowableError::new).map(ApplicationError::new);
+                };
+            }
+        };
+    }
+
+    private static Option<IOException> writeString(Path target, String compiled) {
+        try {
+            Files.writeString(target, compiled);
+            return new None<>();
         } catch (IOException e) {
-            e.printStackTrace();
+            return new Some<>(e);
         }
     }
 
-    private static String compileRoot(String input) {
-        var output = compileStatements(input, Main::compileRootSegment);
-        var joinedStructs = String.join("", structs);
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
 
-        var joinedFunctions = functions.stream()
-                .map(FunctionStatement::generate)
-                .collect(Collectors.joining(""));
+    private static Result<String, CompileError> compileRoot(String input) {
+        return compileStatements(input, Main::compileRootSegment).mapValue(output -> {
+            var joinedStructs = String.join("", structs);
 
-        return output + joinedStructs + joinedFunctions;
+            var joinedFunctions = functions.stream()
+                    .map(FunctionStatement::generate)
+                    .collect(Collectors.joining(""));
+
+            return output + joinedStructs + joinedFunctions;
+        });
     }
 
     private static Result<String, CompileError> compileStatements(String input, Function<String, Result<String, CompileError>> compiler) {
