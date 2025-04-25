@@ -217,6 +217,10 @@ public class Main {
 
     private static String compileType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("int")) {
+            return "int";
+        }
+
         if (stripped.equals("String")) {
             return "char*";
         }

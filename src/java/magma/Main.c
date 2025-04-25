@@ -9,7 +9,7 @@
 /*  */
 struct State {
 	/* private final */ List<char*> segments;
-	/* private */ /* int */ depth;
+	/* private */ int depth;
 	/* private */ /* StringBuilder */ buffer;
 	/* private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
@@ -191,6 +191,10 @@ struct Main {
     } */
 	/* private static String compileType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("int")) {
+            return "int";
+        }
+
         if (stripped.equals("String")) {
             return "char*";
         }
