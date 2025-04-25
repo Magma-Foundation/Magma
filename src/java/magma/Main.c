@@ -46,12 +46,6 @@ struct Main {
 	/* private static */ List<char*> functions;
 	/* private static */ Optional<char*> currentStructName;
 };
-/* static <T> */ Optional<struct T> empty(/*  */){
-	/* return new None<>() */;
-}
-/* static <T> */ Optional<struct T> of(struct T name){
-	/* return new Some<>(name) */;
-}
 struct Primitive new_Primitive(char* value){
 	this.value = value;
 }
@@ -147,7 +141,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	/* return this */.depth = /* = 1 */;
 }
 struct public Definition(struct Type type, char* name){
-	/* this(Optional.empty(), type, name) */;
+	/* this(new None<String>(), type, name) */;
 }
 /* private */ char* generate(/*  */){
 	struct var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
@@ -181,7 +175,7 @@ struct public Definition(struct Type type, char* name){
 /* public static */ struct void main(/*  */){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
-	currentStructName = Optional.empty();/* 
+	currentStructName = /* new None<>() */;/* 
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -288,12 +282,12 @@ struct public Definition(struct Type type, char* name){
 /* private static */ Optional<char*> compileStructured(char* stripped, char* infix){
 	struct var classIndex = stripped.indexOf(infix);/* 
         if (classIndex < 0) {
-            return Optional.empty();
+            return new None<>();
         } */
 	struct var afterKeyword = stripped.substring(classIndex + infix.length());/* 
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
 
@@ -313,22 +307,22 @@ struct public Definition(struct Type type, char* name){
                 : withoutParameters;
 
         if (!isSymbol(name)) {
-            return Optional.empty();
+            return new None<>();
         }
         var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
-            return Optional.empty();
+            return new None<>();
         }
         var content = withEnd.substring(0, withEnd.length() - "} */
 	/* ".length()) */;
-	currentStructName = Optional.of(name);/* 
+	currentStructName = /* new Some<>(name) */;/* 
         var generated = "struct " + name + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n} */
 	/*  */;
 	/* \n" */;
 	/* structs.add(generated) */;
-	/* return Optional.of("") */;
+	/* return new Some<>("") */;
 }
 /* private static */ struct boolean isSymbol(char* input){
 	/* for (var i */ = /* 0 */;
@@ -353,23 +347,23 @@ struct public Definition(struct Type type, char* name){
 }
 /* private static */ Optional<char*> compileWhitespace(char* input){/* 
         if (input.isBlank()) {
-            return Optional.of("");
+            return new Some<>("");
         } *//* 
         else {
-            return Optional.empty();
+            return new None<>();
         } */
 }
 /* private static */ Optional<char*> compileMethod(char* input){
 	struct var paramStart = input.indexOf("(");/* 
         if (paramStart < 0) {
-            return Optional.empty();
+            return new None<>();
         } */
 	struct var beforeParams = input.substring(0, paramStart).strip();
 	struct var withParams = input.substring(paramStart + "(".length());
 	struct var maybeHeader = /* parseDefinition(beforeParams) */.<Definable>map(value -> value).or(() -> compileConstructorDefinition(beforeParams).map(value -> value));/* 
 
         if (!(maybeHeader instanceof Some(var header))) {
-            return Optional.empty();
+            return new None<>();
         } */
 	struct var paramEnd = withParams.indexOf(")");/* 
         if (paramEnd >= 0) {
@@ -379,20 +373,20 @@ struct public Definition(struct Type type, char* name){
                 var content = afterParams.substring(1, afterParams.length() - 1);
                 var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
                 functions.add(constructor);
-                return Optional.of("");
+                return new Some<>("");
             }
             if (afterParams.equals(";")) {
-                return Optional.of("");
+                return new Some<>("");
             }
         } */
-	/* return Optional.empty() */;
+	/* return new None<>() */;
 }
 /* private static */ Optional<struct Constructor> compileConstructorDefinition(char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
-                return Optional.of(new Constructor(name));
+                return new Some<>(new Constructor(name));
             }
-            return Optional.empty();
+            return new None<>();
         } */
 	/* ) */;
 }
@@ -401,12 +395,12 @@ struct public Definition(struct Type type, char* name){
 	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
-            return Optional.of(name);
+            return new Some<>(name);
         } *//* 
         if (isSymbol(stripped)) {
-            return Optional.of(stripped);
+            return new Some<>(stripped);
         } */
-	/* return Optional.empty() */;
+	/* return new None<>() */;
 }
 /* private static */ char* compileStatementOrBlock(char* input){
 	/* return compileWhitespace(input)
@@ -425,10 +419,10 @@ struct public Definition(struct Type type, char* name){
 	struct var stripped = input.strip();
 	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compiler.apply(withoutEnd) + ";");
+            return new Some<>("\n\t" + compiler.apply(withoutEnd) + ";");
         } *//* 
         else {
-            return Optional.empty();
+            return new None<>();
         } */
 }
 /* private static */ char* compileClassStatementValue(char* input){
@@ -443,9 +437,9 @@ struct public Definition(struct Type type, char* name){
             var value = input.substring(valueSeparator + "=".length());
 
             var destination = compileDefinition(inputDefinition).orElseGet(() -> compileValue(inputDefinition));
-            return Optional.of(destination + " = " + compileValue(value));
+            return new Some<>(destination + " = " + compileValue(value));
         } */
-	/* return Optional.empty() */;
+	/* return new None<>() */;
 }
 /* private static */ char* compileValue(char* input){
 	struct var stripped = input.strip();
@@ -471,33 +465,33 @@ struct public Definition(struct Type type, char* name){
 	struct var stripped = input.strip();
 	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
         if (nameSeparator < 0) {
-            return Optional.empty();
+            return new None<>();
         } */
 	struct var beforeName = stripped.substring(0, nameSeparator).strip();
 	struct var name = stripped.substring(nameSeparator + " ".length()).strip();/* 
         if (!isSymbol(name)) {
-            return Optional.empty();
+            return new None<>();
         } */
 	struct var typeSeparator = beforeName.lastIndexOf(" ");/* 
         if (typeSeparator < 0) {
-            return parseType(beforeName).map(type -> new Definition(Optional.empty(), type, name));
+            return parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
         } */
 	struct var beforeType = beforeName.substring(0, typeSeparator).strip();
 	struct var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-	/* return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name)) */;
+	/* return parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name)) */;
 }
 /* private static */ Optional<struct Type> parseType(char* input){
 	struct var stripped = input.strip();/* 
         if (stripped.equals("private")) {
-            return Optional.empty();
+            return new None<>();
         } *//* 
 
         if (stripped.equals("int")) {
-            return Optional.of(Primitive.I32);
+            return new Some<>(Primitive.I32);
         } *//* 
 
         if (stripped.equals("String")) {
-            return Optional.of(new Ref(Primitive.I8));
+            return new Some<>(new Ref(Primitive.I8));
         } *//* 
 
         if (stripped.endsWith(">")) {
@@ -508,14 +502,14 @@ struct public Definition(struct Type type, char* name){
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
                 var args = parseValues(argsString, input1 -> parseType(input1).orElseGet(() -> new Content(input1)));
 
-                return Optional.of(new Generic(base, args));
+                return new Some<>(new Generic(base, args));
             }
         } *//* 
 
         if (isSymbol(stripped)) {
-            return Optional.of(new Struct(stripped));
+            return new Some<>(new Struct(stripped));
         } */
-	/* return Optional.empty() */;
+	/* return new None<>() */;
 }
 /* private static */ char* compileValues(char* args, /*  Function<String */, /*  String> compiler */){
 	/* return generateValues(parseValues(args, compiler)) */;
