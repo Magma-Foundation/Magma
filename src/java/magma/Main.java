@@ -114,6 +114,46 @@ public class Main {
         Option<Type> find(String property);
     }
 
+    private interface CompileState {
+        List<Definition> getList();
+
+        Option<StructNode> findCurrentStruct();
+
+        void defineDefinition(Definition definition);
+
+        void defineFunction(FunctionStatement function);
+
+        void defineStruct(String content, Struct struct);
+
+        Option<Type> resolveSymbol(String name);
+
+        List<Definition> findLastDefinitions();
+
+        void moveFunctions();
+
+        void reset();
+
+        void defineTypeParameters(List<String> typeParams);
+
+        String createLocalName();
+
+        boolean isTypeParamDefined(String stripped);
+
+        List<Statement> collectStatements();
+
+        void addStatement(Assignment assignment);
+
+        String generate();
+
+        void enter();
+
+        void exit();
+
+        void setNode(StructNode structNode);
+
+        Option<Struct> findStruct(String base);
+    }
+
     private enum Primitive implements Type {
         I8("char"),
         I32("int"),
@@ -906,48 +946,6 @@ public class Main {
         }
     }
 
-    private interface CompileState {
-        List<Definition> getList();
-
-        Option<StructNode> findCurrentStruct();
-
-        void defineDefinition(Definition definition);
-
-        void defineFunction(FunctionStatement function);
-
-        Option<Type> resolveSymbol(String name);
-
-        List<Definition> findLastDefinitions();
-
-        void moveFunctions();
-
-        void reset();
-
-        void clearTypeParams();
-
-        void defineTypeParameters(List<String> currentStructTypeParams);
-
-        String createLocalName();
-
-        boolean isTypeParamDefined(String stripped);
-
-        List<Statement> collectStatements();
-
-        void addStatement(Assignment assignment);
-
-        String generate();
-
-        void enter();
-
-        void defineStruct(String content, Struct struct);
-
-        void setNode(StructNode structNode);
-
-        Option<Struct> findStruct(String base);
-
-        void exit();
-    }
-
     public static class MutableCompileState implements CompileState {
         public static final CompileState INSTANCE = new MutableCompileState();
         private final List<String> typeParams = new ArrayList<>();
@@ -1015,13 +1013,11 @@ public class Main {
             this.localCounter = 0;
         }
 
-        @Override
         public void clearTypeParams() {
             this.typeParams.clear();
         }
 
-        @Override
-        public void defineTypeParameters(List<String> currentStructTypeParams) {
+        public void defineTypeParameters0(List<String> currentStructTypeParams) {
             this.typeParams.addAll(currentStructTypeParams);
         }
 
@@ -1433,6 +1429,7 @@ public class Main {
 
         var currentStructName = currentStruct.name;
         var currentStructTypeParams = currentStruct.typeParams;
+        MutableCompileState.INSTANCE.enter();
         MutableCompileState.INSTANCE.defineTypeParameters(currentStructTypeParams);
 
         var compiledBeforeContent = parseOr(beforeParams, List.<Rule<Definable>>of(
@@ -1475,7 +1472,7 @@ public class Main {
         defineAll(paramDefinitions);
 
         var maybeOldStatements = parseStatements(content, Main::parseStatement);
-        MutableCompileState.INSTANCE.clearTypeParams();
+        MutableCompileState.INSTANCE.exit();
 
         return maybeOldStatements.flatMapValue(oldStatements -> {
             var list = MutableCompileState.INSTANCE.collectStatements();
@@ -2149,6 +2146,7 @@ public class Main {
                 var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
 
                 return parseValues(typeParamString, Ok::new).flatMapValue(actualTypeParams -> {
+                    MutableCompileState.INSTANCE.enter();
                     MutableCompileState.INSTANCE.defineTypeParameters(actualTypeParams);
                     var maybeOutputType = parseAndFlattenType(inputType);
 
