@@ -450,10 +450,10 @@ public class Main {
         }
     }
 
-    private record Invocation(Value caller, List<Value> args) implements Value, StatementValue {
+    private record Invocation(Value caller, List<Value> arguments) implements Value, StatementValue {
         @Override
         public String generate() {
-            var joined = this.args.stream()
+            var joined = this.arguments.stream()
                     .map(Value::generate)
                     .collect(Collectors.joining(", "));
 
@@ -1019,7 +1019,21 @@ public class Main {
     }
 
     private static Option<Invocation> parseInvocation(String stripped) {
-        return parseInvokable(stripped, Main::parseValue, Invocation::new);
+        return parseInvokable(stripped, Main::parseValue, Invocation::new).map(invocation -> {
+            var caller = invocation.caller;
+            if (caller instanceof DataAccess access) {
+                var arguments = new ArrayList<Value>();
+                arguments.add(access.parent);
+                arguments.addAll(invocation.arguments
+                        .stream()
+                        .filter(argument -> !(argument instanceof Whitespace))
+                        .toList());
+
+                return new Invocation(caller, arguments);
+            }
+
+            return invocation;
+        });
     }
 
     private static boolean isNumber(String input) {
