@@ -69,11 +69,6 @@ public class Main {
         public String generate() {
             return this.value;
         }
-
-        @Override
-        public Type flatten() {
-            return this;
-        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -224,11 +219,6 @@ public class Main {
             var typeParamString = this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">";
             return "struct " + this.name + typeParamString;
         }
-
-        @Override
-        public Type flatten() {
-            return this;
-        }
     }
 
     private record Ref(Type type) implements Type {
@@ -236,22 +226,12 @@ public class Main {
         public String generate() {
             return this.type.generate() + "*";
         }
-
-        @Override
-        public Type flatten() {
-            return this;
-        }
     }
 
     private record Content(String input) implements Type, FunctionSegment, StatementValue, Value, Parameter {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
-        }
-
-        @Override
-        public Type flatten() {
-            return this;
         }
     }
 
@@ -369,11 +349,6 @@ public class Main {
 
         public Definition complete() {
             return new Definition(this.maybeBeforeType, this.type, this.name, this.typeParams);
-        }
-
-        public DefinitionBuilder withMaybeBeforeType(Option<String> maybeBeforeType) {
-            this.maybeBeforeType = maybeBeforeType;
-            return this;
         }
 
         public DefinitionBuilder withTypeParams(List<String> typeParams) {
@@ -733,7 +708,7 @@ public class Main {
 
     private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (stack.getLast().equals(name)) {
+            if (stack.getLast().left.equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
@@ -912,7 +887,7 @@ public class Main {
     }
 
     private static Option<Type> parseAndFlattenType(String input) {
-        return parseType(input).map(type -> type.flatten());
+        return parseType(input).map(Type::flatten);
     }
 
     private static Option<Type> parseType(String input) {

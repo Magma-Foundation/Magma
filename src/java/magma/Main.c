@@ -29,9 +29,6 @@ struct Primitive {
 	/* I8("char"),
         I32("int") */;
 	private final char* value;
-	/* Primitive(String value) {
-            this.value = value;
-        } */
 };
 struct Some<T> {
 };
@@ -41,30 +38,14 @@ struct State {
 	private final List<char*> segments;
 	private int depth;
 	private struct StringBuilder buffer;
-	/* private State(List<String> segments, StringBuilder buffer, int depth) {
-            this.buffer = buffer;
-            this.segments = segments;
-            this.depth = depth;
-        } */
 };
 struct Definition {
 	private final Option<char*> maybeBeforeType;
 	private final struct Type type;
 	private final char* name;
 	private final List<char*> typeParams;
-	/* Definition(
-                Option<String> maybeBeforeType,
-                Type type, String name, List<String> typeParams) {
-            this.maybeBeforeType = maybeBeforeType;
-            this.type = type;
-            this.name = name;
-            this.typeParams = typeParams;
-        } */
 };
 struct Struct {
-	/* private Struct(String name) {
-            this(name, Collections.emptyList());
-        } */
 };
 struct Ref {
 };
@@ -107,13 +88,14 @@ struct Main {
 default struct Type flatten_Type(struct Type this){
 	return this;
 }
+struct Primitive new_Primitive(char* value){
+	struct Primitive this;
+	this.value = value;
+	return this;
+}
 @Override
         public char* generate_Primitive(struct Primitive this){
 	return this.value;
-}
-@Override
-        public struct Type flatten_Primitive(struct Primitive this){
-	return this;
 }
 /* @Override
         public  */ Option<R> map_Some<T, R>(struct Some<T> this, R(*)(T) mapper){
@@ -155,6 +137,13 @@ default struct Type flatten_Type(struct Type this){
         public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R>(*)(T) mapper){
 	return /* new None<>() */;
 }
+struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
+	struct State this;
+	this.buffer = buffer;
+	this.segments = segments;
+	this.depth = depth;
+	return this;
+}
 private static struct State createDefault_State(struct State this){
 	return /* new State(new ArrayList<>(), new StringBuilder(), 0) */;
 }
@@ -181,6 +170,14 @@ public struct State exit_State(struct State this){
 public struct boolean isShallow_State(struct State this){
 	return /* this.depth == 1 */;
 }
+struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type, char* name, List<char*> typeParams){
+	struct Definition this;
+	this.maybeBeforeType = maybeBeforeType;
+	this.type = type;
+	this.name = name;
+	this.typeParams = typeParams;
+	return this;
+}
 @Override
         public char* generate_Definition(struct Definition this){
 	char* joinedTypeParams;/* 
@@ -199,30 +196,23 @@ public struct Definition rename_Definition(struct Definition this, char* name){
 public struct Definition mapTypeParams_Definition(struct Definition this, List<char*>(*)(List<char*>) mapper){
 	return /* new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams)) */;
 }
+struct Struct new_Struct(char* name){
+	struct Struct this;
+	/* this(name, Collections.emptyList()) */;
+	return this;
+}
 @Override
         public char* generate_Struct(struct Struct this){
 	struct var typeParamString = /* this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">" */;
 	return /* "struct " + this.name + typeParamString */;
 }
 @Override
-        public struct Type flatten_Struct(struct Struct this){
-	return this;
-}
-@Override
         public char* generate_Ref(struct Ref this){
 	return /* this.type.generate() + "*" */;
 }
 @Override
-        public struct Type flatten_Ref(struct Ref this){
-	return this;
-}
-@Override
         public char* generate_Content(struct Content this){
 	return /* generatePlaceholder(this.input) */;
-}
-@Override
-        public struct Type flatten_Content(struct Content this){
-	return this;
 }
 @Override
         public char* generate_Functional(struct Functional this){
@@ -297,10 +287,6 @@ public struct DefinitionBuilder withName_DefinitionBuilder(struct DefinitionBuil
 }
 public struct Definition complete_DefinitionBuilder(struct DefinitionBuilder this){
 	return /* new Definition(this.maybeBeforeType, this.type, this.name, this.typeParams) */;
-}
-public struct DefinitionBuilder withMaybeBeforeType_DefinitionBuilder(struct DefinitionBuilder this, Option<char*> maybeBeforeType){
-	this.maybeBeforeType = maybeBeforeType;
-	return this;
 }
 public struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct DefinitionBuilder this, List<char*> typeParams){
 	this.typeParams = typeParams;
@@ -604,7 +590,7 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
 }
 private static Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (stack.getLast().equals(name)) {
+            if (stack.getLast().left.equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
