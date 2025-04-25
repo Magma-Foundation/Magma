@@ -1695,7 +1695,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError("Unknown value", new NodeContext(value)));
+        return new Err<>(new CompileError("Could not resolve type", new NodeContext(value)));
     }
 
     private static Option<Type> findNameInFrame(String name, Frame frame) {
