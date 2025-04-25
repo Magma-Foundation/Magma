@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,8 @@ public class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        Option<T> filter(Predicate<T> predicate);
     }
 
     private interface FunctionSegment {
@@ -97,6 +100,11 @@ public class Main {
             return mapper.apply(this.value);
         }
 
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+
     }
 
     private static final class None<T> implements Option<T> {
@@ -125,6 +133,10 @@ public class Main {
             return new None<>();
         }
 
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return this;
+        }
     }
 
     private static class State {
@@ -196,7 +208,11 @@ public class Main {
             else {
                 joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
             }
-            var beforeType = this.maybeBeforeType.map(inner -> inner + " ").orElse("");
+            var beforeType = this.maybeBeforeType
+                    .filter(inner -> !inner.isEmpty())
+                    .map(inner -> generatePlaceholder(inner) + " ")
+                    .orElse("");
+
             return beforeType + this.type.generate() + " " + this.name + joinedTypeParams;
         }
 
