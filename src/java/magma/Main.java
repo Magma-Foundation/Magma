@@ -55,6 +55,13 @@ public class Main {
         }
     }
 
+    private record Definition(Optional<String> maybeBeforeType, String type, String name) {
+        private String generate() {
+            var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
+            return beforeType + this.type() + " " + this.name();
+        }
+    }
+
     public static List<String> structs;
     private static List<String> functions;
     private static Optional<String> currentStructName;
@@ -334,17 +341,13 @@ public class Main {
 
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
-            return compileType(beforeName).map(type -> generateDefinition("", type, name));
+            return compileType(beforeName).map(type -> new Definition(Optional.empty(), type, name).generate());
         }
 
         var beforeType = beforeName.substring(0, typeSeparator).strip();
         var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
         return compileType(inputType).map(
-                outputType -> generateDefinition(generatePlaceholder(beforeType) + " ", outputType, name));
-    }
-
-    private static String generateDefinition(String beforeType, String type, String name) {
-        return beforeType + type + " " + name;
+                outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name).generate());
     }
 
     private static Optional<String> compileType(String input) {

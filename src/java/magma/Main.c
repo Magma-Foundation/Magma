@@ -48,6 +48,12 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* public */ struct boolean isShallow(/*  */){
 	struct return this.depth = /* = 1 */;
 }
+/* private */ struct record Definition(Optional<char*> maybeBeforeType, char* type, char* name){/* 
+        private String generate() {
+            var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
+            return beforeType + this.type() + " " + this.name();
+        } */
+}
 /* public static */ struct void main(/*  */){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
@@ -292,15 +298,12 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct var name = stripped.substring(nameSeparator + " ".length()).strip();
 	struct var typeSeparator = beforeName.lastIndexOf(" ");/* 
         if (typeSeparator < 0) {
-            return compileType(beforeName).map(type -> generateDefinition("", type, name));
+            return compileType(beforeName).map(type -> new Definition(Optional.empty(), type, name).generate());
         } */
 	struct var beforeType = beforeName.substring(0, typeSeparator).strip();
 	struct var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
 	/* return compileType(inputType).map(
-                outputType -> generateDefinition(generatePlaceholder(beforeType) + " ", */ struct outputType, name));
-}
-/* private static */ char* generateDefinition(char* beforeType, char* type, char* name){
-	/* return beforeType + type + " " */ struct + name;
+                outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), */ struct outputType, name).generate());
 }
 /* private static */ Optional<char*> compileType(char* input){
 	struct var stripped = input.strip();/* 
