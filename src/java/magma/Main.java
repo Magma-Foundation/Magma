@@ -949,7 +949,7 @@ public class Main {
     }
 
     public static class MutableCompileState implements CompileState {
-        public static final MutableCompileState INSTANCE = new MutableCompileState();
+        public static final CompileState INSTANCE = new MutableCompileState();
         private final List<String> typeParams = new ArrayList<>();
         private final List<StatementValue> statements = new ArrayList<>();
         private final List<FunctionStatement> functions = new ArrayList<>();
