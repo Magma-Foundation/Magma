@@ -262,7 +262,13 @@ public class Main {
         if (contentStart < 0) {
             return Optional.empty();
         }
-        var name = afterKeyword.substring(0, contentStart).strip();
+        var beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        var implementsIndex = beforeContent.lastIndexOf(" implements ");
+        var name = implementsIndex >= 0
+                ? beforeContent.substring(0, implementsIndex).strip()
+                : beforeContent;
+
         if (!isSymbol(name)) {
             return Optional.empty();
         }

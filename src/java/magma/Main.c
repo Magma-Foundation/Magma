@@ -11,27 +11,16 @@
 struct Type {
 	char* generate();
 };
+struct Primitive {
+	struct I8("char"), I32("int");
+	/* private final */ char* value;
+};
 struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
 	/* private */ struct StringBuilder buffer;
 };
 struct Main {
-	/* private enum Primitive implements Type {
-        I8("char"),
-        I32("int");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-    } */
 	/* private record Struct(String name) implements Type {
         @Override
         public String generate() {
@@ -64,6 +53,13 @@ struct Main {
 	/* private static */ List<char*> functions;
 	/* private static */ Optional<char*> currentStructName;
 };
+/* Primitive */(char* value){
+	this.value = value;
+}
+/* @Override
+        public */ char* generate(/*  */){
+	struct return this.value;
+}
 struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
 	this.buffer = buffer;
 	this.segments = segments;
@@ -222,7 +218,13 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
         if (contentStart < 0) {
             return Optional.empty();
         }
-        var name = afterKeyword.substring(0, contentStart).strip();
+        var beforeContent = afterKeyword.substring(0, contentStart).strip();
+
+        var implementsIndex = beforeContent.lastIndexOf(" implements ");
+        var name = implementsIndex >= 0
+                ? beforeContent.substring(0, implementsIndex).strip()
+                : beforeContent;
+
         if (!isSymbol(name)) {
             return Optional.empty();
         }
@@ -255,8 +257,9 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* private static */ char* compileClassSegment(char* input){
 	/* return compileWhitespace(input)
                 .or(() -> compileClass(input))
-                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "enum "))
                 .or(() -> compileStructured(input, "record "))
+                .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" */ struct + generatePlaceholder(input.strip()));
