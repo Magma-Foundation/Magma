@@ -1024,18 +1024,18 @@ public class Main {
             if (withParamEnd.endsWith(")")) {
                 var inputParams = withParamEnd.substring(0, withParamEnd.length() - ")".length());
                 return parseParameters(inputParams).flatMapValue(
-                        params -> compileStructuredWithParams(withoutParameters, withEnd, params));
+                        params -> parseStructuredWithParams(withoutParameters, withEnd, params));
             }
         }
 
-        return compileStructuredWithParams(withoutExtends, withEnd, new ArrayList<>());
+        return parseStructuredWithParams(withoutExtends, withEnd, new ArrayList<>());
     }
 
     private static <T> Result<T, CompileError> createInfixErr(String input, String infix) {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
     }
 
-    private static Result<Whitespace, CompileError> compileStructuredWithParams(String withoutParameters, String withEnd, List<Parameter> params) {
+    private static Result<Whitespace, CompileError> parseStructuredWithParams(String withoutParameters, String withEnd, List<Parameter> params) {
         var typeParamStart = withoutParameters.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
@@ -1064,9 +1064,12 @@ public class Main {
         var typeParamString = typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">";
 
         var structNode = new StructNode(name, typeParams);
-        frames.addLast(new Frame(structNode));
 
-        return parseAll(content, Main::foldStatementChar, Main::parseClassSegment).mapValue(outputStatements -> {
+        frames.addLast(new Frame(structNode));
+        var maybeOutputStatements = parseAll(content, Main::foldStatementChar, Main::parseClassSegment);
+        frames.removeLast();
+
+        return maybeOutputStatements.mapValue(outputStatements -> {
             var copy = new ArrayList<StructSegment>(params.stream()
                     .map(Statement::new)
                     .toList());
@@ -1077,7 +1080,6 @@ public class Main {
                     .collect(Collectors.joining());
 
             var generated = "struct " + name + typeParamString + " {" + joined + "\n};\n";
-            frames.removeLast();
             structs.add(generated);
             return new Whitespace();
         });
