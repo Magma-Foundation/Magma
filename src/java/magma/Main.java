@@ -62,6 +62,12 @@ public class Main {
         }
     }
 
+    private record Struct(String name) {
+        private String generate() {
+            return "struct " + this.name();
+        }
+    }
+
     public static List<String> structs;
     private static List<String> functions;
     private static Optional<String> currentStructName;
@@ -99,15 +105,33 @@ public class Main {
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        var segments = divide(input, folder);
+        return generateAll(merger, parseAll(input, folder, compiler));
+    }
 
+    private static String generateAll(
+            BiFunction<StringBuilder, String, StringBuilder> merger,
+            List<String> compiled
+    ) {
         var output = new StringBuilder();
-        for (var segment : segments) {
-            var compiled = compiler.apply(segment);
-            output = merger.apply(output, compiled);
+        for (var segment : compiled) {
+            output = merger.apply(output, segment);
         }
 
         return output.toString();
+    }
+
+    private static List<String> parseAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler
+    ) {
+        var segments = divide(input, folder);
+
+        var compiled = new ArrayList<String>();
+        for (var segment : segments) {
+            compiled.add(compiler.apply(segment));
+        }
+        return compiled;
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
@@ -233,7 +257,7 @@ public class Main {
             var withParams = input.substring(paramStart + "(".length());
 
             var header = compileDefinition(beforeParams)
-                    .or(() -> compileConstructorHeader(beforeParams))
+                    .or(() -> compileConstructorDefinition(beforeParams))
                     .orElseGet(() -> compileDefinitionOrPlaceholder(beforeParams));
 
             var paramEnd = withParams.indexOf(")");
@@ -252,7 +276,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileConstructorHeader(String beforeParams) {
+    private static Optional<String> compileConstructorDefinition(String beforeParams) {
         var nameSeparator = beforeParams.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var name = beforeParams.substring(nameSeparator + " ".length());
@@ -370,11 +394,12 @@ public class Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                return Optional.of(base + "<" + compileValues(args, input1 -> compileType(input1).orElseGet(() -> generatePlaceholder(input1))) + ">");
+                var compiledArgs = compileValues(args, input1 -> compileType(input1).orElseGet(() -> generatePlaceholder(input1)));
+                return Optional.of(base + "<" + compiledArgs + ">");
             }
         }
 
-        return Optional.of("struct " + stripped);
+        return Optional.of(new Struct(stripped).generate());
     }
 
     private static String compileValues(String args, Function<String, String> compiler) {
