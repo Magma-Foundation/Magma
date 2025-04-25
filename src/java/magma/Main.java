@@ -162,7 +162,24 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+        return compileClass(input)
+                .or(() -> compileDefinitionStatement(input))
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    }
+
+    private static Optional<String> compileDefinitionStatement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static String compileDefinition(String withoutEnd) {
+        return generatePlaceholder(withoutEnd);
     }
 
     private static String generatePlaceholder(String stripped) {

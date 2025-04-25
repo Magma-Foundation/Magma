@@ -7,9 +7,9 @@
 /* import java.util.function.Function; */
 /*  */
 struct State {
-	/* private final List<String> segments; */
-	/* private int depth; */
-	/* private StringBuilder buffer; */
+	/* private final List<String> segments */;
+	/* private int depth */;
+	/* private StringBuilder buffer */;
 	/* private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
@@ -45,7 +45,7 @@ struct State {
 };
 struct ");
         if (classIndex >= 0) {
-	/* var afterKeyword = stripped.substring(classIndex + "class ".length()); */
+	/* var afterKeyword = stripped.substring(classIndex + "class ".length()) */;
 	/* var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
@@ -60,10 +60,10 @@ struct ");
                 }
             } */
 	/* }
-        return Optional.empty(); */
+        return Optional.empty() */;
 };
 struct Main {
-	/* public static final List<String> structs = new ArrayList<>(); */
+	/* public static final List<String> structs = new ArrayList<>() */;
 	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -143,7 +143,22 @@ struct Main {
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
     } */
 	/* private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+        return compileClass(input)
+                .or(() -> compileDefinitionStatement(input))
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+    } */
+	/* private static Optional<String> compileDefinitionStatement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+        }
+        else {
+            return Optional.empty();
+        }
+    } */
+	/* private static String compileDefinition(String withoutEnd) {
+        return generatePlaceholder(withoutEnd);
     } */
 	/* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
