@@ -235,14 +235,6 @@ public class Main {
             this.typeParams = typeParams;
         }
 
-        @Override
-        public String generate() {
-            var joinedTypeParams = this.generateTypeParams();
-            var beforeType = this.generateBeforeType();
-            var generatedWithName = this.generatedWithName();
-            return beforeType + generatedWithName + joinedTypeParams;
-        }
-
         private String generatedWithName() {
             if (this.type instanceof Functional functional) {
                 return functional.generateWithName(this.name);
@@ -282,22 +274,45 @@ public class Main {
         public Definition withType(Type type) {
             return new Definition(this.maybeBeforeType, type, this.name, this.typeParams);
         }
+
+        @Override
+        public String generate() {
+            var joinedTypeParams = this.generateTypeParams();
+            var beforeType = this.generateBeforeType();
+            var generatedWithName = this.generatedWithName();
+            return beforeType + generatedWithName + joinedTypeParams;
+        }
     }
 
-    private record Struct(String name, List<String> typeParams) implements Type {
+    private record Struct(
+            String name,
+            List<String> typeArgs,
+            Map<String, Type> definitions
+    ) implements Type {
         private Struct(String name) {
-            this(name, Collections.emptyList());
+            this(name, Collections.emptyList(), new HashMap<>());
+        }
+
+        public Struct(String name, List<String> typeParams) {
+            this(name, typeParams, new HashMap<>());
         }
 
         @Override
         public String generate() {
-            var typeParamString = this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">";
+            var typeParamString = this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">";
             return "struct " + this.name + typeParamString;
         }
 
         @Override
         public String stringify() {
             return this.name;
+        }
+
+        public Option<Type> find(String property) {
+            if (this.definitions.containsKey(property)) {
+                return new Some<>(this.definitions.get(property));
+            }
+            return new None<>();
         }
     }
 
@@ -876,15 +891,17 @@ public class Main {
 
             var maybeInputParams = parseValues(paramStrings, Main::parseParameter);
             if (maybeInputParams instanceof Some(var inputParams)) {
-                var definitions = inputParams.stream()
+                var paramDefinitions = inputParams.stream()
                         .map(Parameter::toDefinition)
                         .flatMap(Options::toStream)
                         .toList();
 
-                var lastDefinitions = frames.getLast().definitions;
-                for (var definition : definitions) {
-                    lastDefinitions.put(definition.name, definition.type);
-                }
+                var params = inputParams
+                        .stream()
+                        .filter(node -> !(node instanceof Whitespace))
+                        .toList();
+
+                defineAll(paramDefinitions);
 
                 var maybeOldStatements = parseStatements(content, (String input1) -> new Some<>(parseStatement(input1)));
                 typeParams.clear();
@@ -927,23 +944,33 @@ public class Main {
                                 .withName("this")
                                 .complete());
 
-                        newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams -> {
+                        var paramTypes = paramDefinitions.stream()
+                                .map(definition -> definition.type)
+                                .toList();
+
+                        var complete = new DefinitionBuilder()
+                                .withName(oldDefinition.name)
+                                .withType(new Functional(paramTypes, oldDefinition.type))
+                                .complete();
+                        define(complete);
+
+                        newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams1 -> {
                             ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
-                            copy.addAll(typeParams);
+                            copy.addAll(typeParams1);
                             return copy;
                         });
                     }
                     else if (header instanceof ConstructorDefinition constructorDefinition) {
-                        newDefinition = constructorDefinition.toDefinition();
+                        var definition = constructorDefinition.toDefinition();
+                        newDefinition = definition;
+
+                        define(definition);
                     }
                     else {
                         newDefinition = header;
                     }
 
-                    outputParams.addAll(inputParams
-                            .stream()
-                            .filter(node -> !(node instanceof Whitespace))
-                            .toList());
+                    outputParams.addAll(params);
 
                     var outputParamStrings = outputParams.stream()
                             .map(Parameter::generate)
@@ -961,6 +988,16 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static void defineAll(List<Definition> definitions) {
+        for (var definition : definitions) {
+            define(definition);
+        }
+    }
+
+    private static void define(Definition definition) {
+        frames.getLast().definitions.put(definition.name, definition.type);
     }
 
     private static <T> Option<List<T>> parseStatements(String content, Function<String, Option<T>> compiler) {
@@ -1208,14 +1245,34 @@ public class Main {
     }
 
     private static Type resolveType(Value value) {
+        if (value instanceof DataAccess(var parent, var property)) {
+            var type = resolveType(parent);
+            if (type instanceof Struct struct) {
+                var maybeFound = struct.find(property);
+                if (maybeFound instanceof Some(var found)) {
+                    return found;
+                }
+            }
+
+            return new Content(type.stringify());
+        }
+
         if (value instanceof Invocation(var base, var _)) {
             var resolved = resolveType(base);
             if (resolved instanceof Functional functional) {
                 return functional.returnType;
             }
+            else {
+                return new Content(resolved.generate());
+            }
         }
 
         if (value instanceof Symbol(var name)) {
+            if (name.equals("this")) {
+                var definitions = frames.getLast().definitions;
+                return new Struct(name, Collections.emptyList(), definitions);
+            }
+
             var maybeType = Options.fromNative(frames.stream()
                     .map(frame -> findNameInFrame(name, frame))
                     .flatMap(Options::toStream)
