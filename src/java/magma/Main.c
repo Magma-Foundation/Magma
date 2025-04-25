@@ -30,6 +30,9 @@ struct Primitive {
 	/* I8("char"),
         I32("int") */;
 	private final char* value;
+	/* Primitive(String value) {
+            this.value = value;
+        } */
 };
 struct Some<T> {
 };
@@ -39,12 +42,25 @@ struct State {
 	private final List<char*> segments;
 	private int depth;
 	private struct StringBuilder buffer;
+	/* private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.buffer = buffer;
+            this.segments = segments;
+            this.depth = depth;
+        } */
 };
 struct Definition {
 	private final Option<char*> maybeBeforeType;
 	private final struct Type type;
 	private final char* name;
 	private final List<char*> typeParams;
+	/* Definition(
+                Option<String> maybeBeforeType,
+                Type type, String name, List<String> typeParams) {
+            this.maybeBeforeType = maybeBeforeType;
+            this.type = type;
+            this.name = name;
+            this.typeParams = typeParams;
+        } */
 };
 struct Struct {
 };
@@ -74,82 +90,72 @@ struct DefinitionBuilder {
 	private char* name;
 	private List<char*> typeParams = /* new ArrayList<>() */;
 };
+struct Tuple<A,  B> {
+};
 struct Main {
 	public static List<char*> structs;
 	private static List<char*> functions;
-	private static List<char*> structNames;
+	private static List<Tuple<char*, List<char*>>> stack;
 };
-struct Primitive new_Primitive(char* value){
-	struct Primitive this;
-	this.value = value;
-	return this;
-}
 @Override
         public char* generate_Primitive(struct Primitive this){
 	return this.value;
 }
 /* @Override
-        public  */ Option<struct R> map_Some<R>(struct Some this, Function<struct T, struct R> mapper){
+        public  */ Option<struct R> map_Some<T, R>(struct Some this, Function<struct T, struct R> mapper){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 @Override
-        public struct T orElse_Some(struct Some this, struct T other){
+        public struct T orElse_Some<T>(struct Some this, struct T other){
 	return this.value;
 }
 @Override
-        public struct T orElseGet_Some(struct Some this, Supplier<struct T> other){
+        public struct T orElseGet_Some<T>(struct Some this, Supplier<struct T> other){
 	return this.value;
 }
 @Override
-        public Option<struct T> or_Some(struct Some this, Supplier<Option<struct T>> other){
+        public Option<struct T> or_Some<T>(struct Some this, Supplier<Option<struct T>> other){
 	return this;
 }
 /* @Override
-        public  */ Option<struct R> flatMap_Some<R>(struct Some this, Function<struct T, Option<struct R>> mapper){
+        public  */ Option<struct R> flatMap_Some<T, R>(struct Some this, Function<struct T, Option<struct R>> mapper){
 	return /* mapper.apply(this.value) */;
 }
 @Override
-        public Option<struct T> filter_Some(struct Some this, Predicate<struct T> predicate){
+        public Option<struct T> filter_Some<T>(struct Some this, Predicate<struct T> predicate){
 	return /* predicate.test(this.value) ? this : new None<>() */;
 }
 @Override
-        public struct boolean isPresent_Some(struct Some this){
+        public struct boolean isPresent_Some<T>(struct Some this){
 	return true;
 }
 /* @Override
-        public  */ Option<struct R> map_None<R>(struct None this, Function<struct T, struct R> mapper){
+        public  */ Option<struct R> map_None<T, R>(struct None this, Function<struct T, struct R> mapper){
 	return /* new None<>() */;
 }
 @Override
-        public struct T orElse_None(struct None this, struct T other){
+        public struct T orElse_None<T>(struct None this, struct T other){
 	return other;
 }
 @Override
-        public struct T orElseGet_None(struct None this, Supplier<struct T> other){
+        public struct T orElseGet_None<T>(struct None this, Supplier<struct T> other){
 	return /* other.get() */;
 }
 @Override
-        public Option<struct T> or_None(struct None this, Supplier<Option<struct T>> other){
+        public Option<struct T> or_None<T>(struct None this, Supplier<Option<struct T>> other){
 	return /* other.get() */;
 }
 /* @Override
-        public  */ Option<struct R> flatMap_None<R>(struct None this, Function<struct T, Option<struct R>> mapper){
+        public  */ Option<struct R> flatMap_None<T, R>(struct None this, Function<struct T, Option<struct R>> mapper){
 	return /* new None<>() */;
 }
 @Override
-        public Option<struct T> filter_None(struct None this, Predicate<struct T> predicate){
+        public Option<struct T> filter_None<T>(struct None this, Predicate<struct T> predicate){
 	return this;
 }
 @Override
-        public struct boolean isPresent_None(struct None this){
+        public struct boolean isPresent_None<T>(struct None this){
 	return false;
-}
-struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
-	struct State this;
-	this.buffer = buffer;
-	this.segments = segments;
-	this.depth = depth;
-	return this;
 }
 private static struct State createDefault_State(struct State this){
 	return /* new State(new ArrayList<>(), new StringBuilder(), 0) */;
@@ -177,14 +183,6 @@ public struct State exit_State(struct State this){
 public struct boolean isShallow_State(struct State this){
 	return /* this.depth == 1 */;
 }
-struct Definition new_Definition(Option<char*> maybeBeforeType, List<char*> typeParams, struct Type type, char* name){
-	struct Definition this;
-	this.maybeBeforeType = maybeBeforeType;
-	this.type = type;
-	this.name = name;
-	this.typeParams = typeParams;
-	return this;
-}
 @Override
         public char* generate_Definition(struct Definition this){
 	char* joinedTypeParams;/* 
@@ -198,7 +196,10 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, List<char*> type
 	return /* beforeType + this.type.generate() + " " + this.name + joinedTypeParams */;
 }
 public struct Definition rename_Definition(struct Definition this, char* name){
-	return /* new Definition(this.maybeBeforeType, this.typeParams, this.type, name) */;
+	return /* new Definition(this.maybeBeforeType, this.type, name, this.typeParams) */;
+}
+public struct Definition mapTypeParams_Definition(struct Definition this, Function<List<char*>, List<char*>> mapper){
+	return /* new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams)) */;
 }
 @Override
         public char* generate_Struct(struct Struct this){
@@ -264,7 +265,7 @@ public struct DefinitionBuilder withName_DefinitionBuilder(struct DefinitionBuil
 	return this;
 }
 public struct Definition complete_DefinitionBuilder(struct DefinitionBuilder this){
-	return /* new Definition(this.maybeBeforeType, this.typeParams, this.type, this.name) */;
+	return /* new Definition(this.maybeBeforeType, this.type, this.name, this.typeParams) */;
 }
 public struct DefinitionBuilder withMaybeBeforeType_DefinitionBuilder(struct DefinitionBuilder this, Option<char*> maybeBeforeType){
 	this.maybeBeforeType = maybeBeforeType;
@@ -277,7 +278,7 @@ public struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct Definiti
 public static struct void main_Main(struct Main this){
 	structs = /* new ArrayList<>() */;
 	functions = /* new ArrayList<>() */;
-	structNames = /* new ArrayList<>() */;/* 
+	stack = /* new ArrayList<>() */;/* 
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -430,13 +431,13 @@ private static Option<char*> compileStructured_Main(struct Main this, char* stri
         var content = withEnd.substring(0, withEnd.length() - "} */
 	/* ".length()) */;
 	struct var typeParamString = /* typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
-	/* structNames.addLast(name) */;/* 
+	/* stack.addLast(new Tuple<>(name, typeParams)) */;/* 
         var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n} */
 	/*  */;
 	/* \n" */;
-	/* structNames.removeLast() */;
+	/* stack.removeLast() */;
 	/* structs.add(generated) */;
 	return /* new Some<>("") */;
 }
@@ -515,13 +516,23 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
                     .map(FunctionSegment::generate)
                     .collect(Collectors.joining());
 
-            var currentStructName = structNames.getLast();
+            var currentStruct = stack.getLast();
+            var currentStructName = currentStruct.left;
+            var currentStructTypeParams = currentStruct.right;
 
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
             if (header instanceof Definition oldDefinition) {
-                outputParams.add(new DefinitionBuilder().withType(new Struct(currentStructName)).withName("this").complete());
-                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName);
+                outputParams.add(new DefinitionBuilder()
+                        .withType(new Struct(currentStructName))
+                        .withName("this")
+                        .complete());
+
+                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams -> {
+                    ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
+                    copy.addAll(typeParams);
+                    return copy;
+                });
             }
             else if (header instanceof ConstructorDefinition constructorDefinition) {
                 newDefinition = constructorDefinition.toDefinition();
@@ -553,7 +564,7 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
 }
 private static Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (structNames.getLast().equals(name)) {
+            if (stack.getLast().equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();

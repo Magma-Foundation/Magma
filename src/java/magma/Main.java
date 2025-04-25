@@ -199,9 +199,7 @@ public class Main {
 
         Definition(
                 Option<String> maybeBeforeType,
-                List<String> typeParams,
-                Type type,
-                String name) {
+                Type type, String name, List<String> typeParams) {
             this.maybeBeforeType = maybeBeforeType;
             this.type = type;
             this.name = name;
@@ -222,7 +220,11 @@ public class Main {
         }
 
         public Definition rename(String name) {
-            return new Definition(this.maybeBeforeType, this.typeParams, this.type, name);
+            return new Definition(this.maybeBeforeType, this.type, name, this.typeParams);
+        }
+
+        public Definition mapTypeParams(Function<List<String>, List<String>> mapper) {
+            return new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams));
         }
     }
 
@@ -333,7 +335,7 @@ public class Main {
         }
 
         public Definition complete() {
-            return new Definition(this.maybeBeforeType, this.typeParams, this.type, this.name);
+            return new Definition(this.maybeBeforeType, this.type, this.name, this.typeParams);
         }
 
         public DefinitionBuilder withMaybeBeforeType(Option<String> maybeBeforeType) {
@@ -347,14 +349,17 @@ public class Main {
         }
     }
 
+    private record Tuple<A, B>(A left, B right) {
+    }
+
     public static List<String> structs;
     private static List<String> functions;
-    private static List<String> structNames;
+    private static List<Tuple<String, List<String>>> stack;
 
     public static void main() {
         structs = new ArrayList<>();
         functions = new ArrayList<>();
-        structNames = new ArrayList<>();
+        stack = new ArrayList<>();
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -535,12 +540,12 @@ public class Main {
 
         var typeParamString = typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">";
 
-        structNames.addLast(name);
+        stack.addLast(new Tuple<>(name, typeParams));
         var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
 
-        structNames.removeLast();
+        stack.removeLast();
         structs.add(generated);
         return new Some<>("");
     }
@@ -627,13 +632,23 @@ public class Main {
                     .map(FunctionSegment::generate)
                     .collect(Collectors.joining());
 
-            var currentStructName = structNames.getLast();
+            var currentStruct = stack.getLast();
+            var currentStructName = currentStruct.left;
+            var currentStructTypeParams = currentStruct.right;
 
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
             if (header instanceof Definition oldDefinition) {
-                outputParams.add(new DefinitionBuilder().withType(new Struct(currentStructName)).withName("this").complete());
-                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName);
+                outputParams.add(new DefinitionBuilder()
+                        .withType(new Struct(currentStructName))
+                        .withName("this")
+                        .complete());
+
+                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams -> {
+                    ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
+                    copy.addAll(typeParams);
+                    return copy;
+                });
             }
             else if (header instanceof ConstructorDefinition constructorDefinition) {
                 newDefinition = constructorDefinition.toDefinition();
@@ -669,7 +684,7 @@ public class Main {
 
     private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (structNames.getLast().equals(name)) {
+            if (stack.getLast().equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
