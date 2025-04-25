@@ -689,7 +689,7 @@ public class Main {
 
         var joinedFunctions = functions.stream()
                 .map(FunctionStatement::generate)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining(""));
 
         return output + joinedStructs + joinedFunctions;
     }

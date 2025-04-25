@@ -178,114 +178,114 @@ struct Main {
 /* default */ struct Type flatten_Type(struct Type this){
 	return this;
 }
-, struct Primitive new_Primitive(char* value){
+struct Primitive new_Primitive(char* value){
 	struct Primitive this;
 	this.value = value;
 	return this;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Primitive(struct Primitive this){
 	return this.value;
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Primitive(struct Primitive this){
 	return this.name(this);
 }
-, struct Operator new_Operator(char* representation){
+struct Operator new_Operator(char* representation){
 	struct Operator this;
 	this.representation = representation;
 	return this;
 }
-, /* @Override
+/* @Override
         public  */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
 	return new_Some_Whitespace(mapper(this.value));
 }
-, /* @Override
+/* @Override
         public */ T orElse_Some<T>(struct Some<T> this, T other){
 	return this.value;
 }
-, /* @Override
+/* @Override
         public */ T orElseGet_Some<T>(struct Some<T> this, T (*other)()){
 	return this.value;
 }
-, /* @Override
+/* @Override
         public */ Option<T> or_Some<T>(struct Some<T> this, Option<T> (*other)()){
 	return this;
 }
-, /* @Override
+/* @Override
         public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R> (*mapper)(T)){
 	return mapper(this.value);
 }
-, /* @Override
+/* @Override
         public */ Option<T> filter_Some<T>(struct Some<T> this, int (*predicate)(T)){
 	return predicate(this.value) ? this : new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public  */ Option<Tuple<T, R>> and_Some<T, R>(struct Some<T> this, Option<R> (*supplier)()){
 	return /* supplier.get().map(otherValue -> new Tuple<>(this.value, otherValue)) */;
 }
-, /* @Override
+/* @Override
         public  */ Option<R> map_None<T, R>(struct None<T> this, R (*mapper)(T)){
 	return new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public */ T orElse_None<T>(struct None<T> this, T other){
 	return other;
 }
-, /* @Override
+/* @Override
         public */ T orElseGet_None<T>(struct None<T> this, T (*other)()){
 	return other();
 }
-, /* @Override
+/* @Override
         public */ Option<T> or_None<T>(struct None<T> this, Option<T> (*other)()){
 	return other();
 }
-, /* @Override
+/* @Override
         public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R> (*mapper)(T)){
 	return new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public */ Option<T> filter_None<T>(struct None<T> this, int (*predicate)(T)){
 	return this;
 }
-, /* @Override
+/* @Override
         public  */ Option<Tuple<T, R>> and_None<T, R>(struct None<T> this, Option<R> (*supplier)()){
 	return new_None_Whitespace();
 }
-, struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
+struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){
 	struct State this;
 	this.buffer = buffer;
 	this.segments = segments;
 	this.depth = depth;
 	return this;
 }
-, /* private static */ struct State createDefault_State(struct State this){
+/* private static */ struct State createDefault_State(struct State this){
 	return new_State(new_ArrayList_Whitespace(), new_StringBuilder(), 0);
 }
-, /* private */ struct State advance_State(struct State this){
+/* private */ struct State advance_State(struct State this){
 	this.segments.add(this.segments, this.buffer.toString(this.buffer));
 	this.buffer = new_StringBuilder();
 	return this;
 }
-, /* private */ struct State append_State(struct State this, char c){
+/* private */ struct State append_State(struct State this, char c){
 	this.buffer.append(this.buffer, c);
 	return this;
 }
-, /* public */ int isLevel_State(struct State this){
+/* public */ int isLevel_State(struct State this){
 	return this.depth == 0;
 }
-, /* public */ struct State enter_State(struct State this){
+/* public */ struct State enter_State(struct State this){
 	this.depth++;
 	return this;
 }
-, /* public */ struct State exit_State(struct State this){
+/* public */ struct State exit_State(struct State this){
 	this.depth--;
 	return this;
 }
-, /* public */ int isShallow_State(struct State this){
+/* public */ int isShallow_State(struct State this){
 	return this.depth == 1;
 }
-, struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type, char* name, List<char*> typeParams){
+struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type, char* name, List<char*> typeParams){
 	struct Definition this;
 	this.maybeBeforeType = maybeBeforeType;
 	this.type = type;
@@ -293,98 +293,98 @@ struct Main {
 	this.typeParams = typeParams;
 	return this;
 }
-, /* private */ char* generatedWithName_Definition(struct Definition this){/* 
+/* private */ char* generatedWithName_Definition(struct Definition this){/* 
             if (this.type instanceof Functional functional) {
                 return functional.generateWithName(this.name);
             } */
 	return this.type.generate(this.type) + " " + this.name;
 }
-, /* private */ char* generateBeforeType_Definition(struct Definition this){
+/* private */ char* generateBeforeType_Definition(struct Definition this){
 	return /* this.maybeBeforeType
                     .filter(inner -> !inner.isEmpty())
                     .map(inner -> generatePlaceholder(inner) + " ")
                     .orElse("") */;
 }
-, /* private */ char* generateTypeParams_Definition(struct Definition this){/* 
+/* private */ char* generateTypeParams_Definition(struct Definition this){/* 
             if (this.typeParams.isEmpty()) {
                 return "";
             } */
 	return "<" + String.join(", ", this.typeParams) + ">";
 }
-, /* @Override
+/* @Override
         public */ Option<struct Definition> toDefinition_Definition(struct Definition this){
 	return new_Some_Whitespace(this);
 }
-, /* public */ struct Definition rename_Definition(struct Definition this, char* name){
+/* public */ struct Definition rename_Definition(struct Definition this, char* name){
 	return new_Definition(this.maybeBeforeType, this.type, name, this.typeParams);
 }
-, /* public */ struct Definition mapTypeParams_Definition(struct Definition this, List<char*> (*mapper)(List<char*>)){
+/* public */ struct Definition mapTypeParams_Definition(struct Definition this, List<char*> (*mapper)(List<char*>)){
 	return new_Definition(this.maybeBeforeType, this.type, this.name, mapper(this.typeParams));
 }
-, /* public */ struct Definition withType_Definition(struct Definition this, struct Type type){
+/* public */ struct Definition withType_Definition(struct Definition this, struct Type type){
 	return new_Definition(this.maybeBeforeType, type, this.name, this.typeParams);
 }
-, /* @Override
+/* @Override
         public */ char* generate_Definition(struct Definition this){
 	char* joinedTypeParams = this.generateTypeParams(this);
 	char* beforeType = this.generateBeforeType(this);
 	char* generatedWithName = this.generatedWithName(this);
 	return beforeType + generatedWithName + joinedTypeParams;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Struct(struct Struct this){
 	/* /* this */ */ typeParamString = this.generateTypeParams(this);
 	return "struct " + this.name + typeParamString;
 }
-, /* private */ char* generateTypeParams_Struct(struct Struct this){/* 
+/* private */ char* generateTypeParams_Struct(struct Struct this){/* 
             if (this.typeArgs.isEmpty()) {
                 return "";
             } */
 	/* /* String */ */ joined = String.join(String, ", ", this.typeArgs);
 	return "<" + joined + ">";
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Struct(struct Struct this){
 	return this.name;
 }
-, /* public */ Option<struct Type> find_Struct(struct Struct this, char* property){/* 
+/* public */ Option<struct Type> find_Struct(struct Struct this, char* property){/* 
             if (this.definitions.containsKey(property)) {
                 return new Some<>(this.definitions.get(property));
             } */
 	return new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public */ char* toString_Struct(struct Struct this){
 	return /* "Struct[" +
                     "name=" + this.name + ", " +
                     "typeArgs=" + this.typeArgs + ", " +
                     "definitions=" + this.definitions + ']' */;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Ref(struct Ref this){
 	return this.type.generate(this.type) + "*";
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Ref(struct Ref this){
 	return this.type.stringify(this.type) + "_star";
 }
-, /* @Override
+/* @Override
         public */ char* generate_Content(struct Content this){
 	return generatePlaceholder(this.input);
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Content(struct Content this){
 	return this.input;
 }
-, /* @Override
+/* @Override
         public */ Option<struct Definition> toDefinition_Content(struct Content this){
 	return new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public */ char* generate_Functional(struct Functional this){
 	return this.generateWithName(this, "");
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Functional(struct Functional this){
 	/* /*  this.paramTypes.stream()
                     .map(Type::stringify)
@@ -393,7 +393,7 @@ struct Main {
                     .collect(Collectors.joining("_")) */;
 	return "fn_" + this.returnType.stringify(this.returnType) + "_" + joined;
 }
-, /* public */ char* generateWithName_Functional(struct Functional this, char* name){
+/* public */ char* generateWithName_Functional(struct Functional this, char* name){
 	/* /*  this.paramTypes.stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */ */ joined = /*  this.paramTypes.stream()
@@ -403,7 +403,7 @@ struct Main {
                     name +
                     ")(" + joined + ")";
 }
-, /* @Override
+/* @Override
         public */ char* generate_Generic(struct Generic this){
 	/* /* this */ */ local0 = this.args(this);
 	/* /*  this.args().stream()
@@ -413,7 +413,7 @@ struct Main {
                     .collect(Collectors.joining(", ")) */;
 	return this.base(this) + "<" + joinedArgs + ">";
 }
-, /* @Override
+/* @Override
         public */ struct Type flatten_Generic(struct Generic this){/* 
             if (this.base.equals("Function")) {
                 var param = this.args.getFirst();
@@ -432,7 +432,7 @@ struct Main {
             } */
 	return this;
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Generic(struct Generic this){
 	/* /*  this.args.stream()
                     .map(Type::stringify)
@@ -441,7 +441,7 @@ struct Main {
                     .collect(Collectors.joining("_")) */;
 	return this.base + "_" + joined;
 }
-, /* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
+/* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
 	/* /* new_StructBuilder */ */ local0 = new_StructBuilder();
 	/* /* local0 */ */ local1 = local0.withName(local0, this.name(this));
 	/* /* new_DefinitionBuilder */ */ local2 = new_DefinitionBuilder();
@@ -450,70 +450,70 @@ struct Main {
 	/* /* local4 */ */ local5 = local4.withName(local4, local3.name(local3));
 	return local5.complete(local5);
 }
-, /* @Override
+/* @Override
         public */ char* generate_ConstructorDefinition(struct ConstructorDefinition this){
 	return this.name;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Statement(struct Statement this){
 	return "\n\t" + this.content.generate() + ";";
 }
-, /* @Override
+/* @Override
         public */ char* generate_Whitespace(struct Whitespace this){
 	return "";
 }
-, /* @Override
+/* @Override
         public */ char* stringify_Whitespace(struct Whitespace this){
 	return "Whitespace";
 }
-, /* @Override
+/* @Override
         public */ Option<struct Definition> toDefinition_Whitespace(struct Whitespace this){
 	return new_None_Whitespace();
 }
-, /* @Override
+/* @Override
         public */ char* generate_Assignment(struct Assignment this){
 	return this.assignable.generate(this.assignable) + " = " + this.value.generate(this.assignable.generate(this.assignable) + " = " + this.value);
 }
-, /* @Override
+/* @Override
         public */ char* generate_DataAccess(struct DataAccess this){
 	return this.parent.generate(this.parent) + "." + this.property;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Symbol(struct Symbol this){
 	return this.name;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Return(struct Return this){
 	return "return " + this.value.generate("return " + this.value);
 }
-, /* public */ struct DefinitionBuilder withBeforeType_DefinitionBuilder(struct DefinitionBuilder this, char* beforeType){
+/* public */ struct DefinitionBuilder withBeforeType_DefinitionBuilder(struct DefinitionBuilder this, char* beforeType){
 	this.maybeBeforeType = new_Some_Whitespace(beforeType);
 	return this;
 }
-, /* public */ struct DefinitionBuilder withType_DefinitionBuilder(struct DefinitionBuilder this, struct Type type){
+/* public */ struct DefinitionBuilder withType_DefinitionBuilder(struct DefinitionBuilder this, struct Type type){
 	this.type = type;
 	return this;
 }
-, /* public */ struct DefinitionBuilder withName_DefinitionBuilder(struct DefinitionBuilder this, char* name){
+/* public */ struct DefinitionBuilder withName_DefinitionBuilder(struct DefinitionBuilder this, char* name){
 	this.name = name;
 	return this;
 }
-, /* public */ struct Definition complete_DefinitionBuilder(struct DefinitionBuilder this){
+/* public */ struct Definition complete_DefinitionBuilder(struct DefinitionBuilder this){
 	return new_Definition(this.maybeBeforeType, this.type, this.name, this.typeParams);
 }
-, /* public */ struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct DefinitionBuilder this, List<char*> typeParams){
+/* public */ struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct DefinitionBuilder this, List<char*> typeParams){
 	this.typeParams = typeParams;
 	return this;
 }
-, /* @Override
+/* @Override
         public */ char* generate_TypeParam(struct TypeParam this){
 	return this.input;
 }
-, /* @Override
+/* @Override
         public */ char* stringify_TypeParam(struct TypeParam this){
 	return this.input;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Construction(struct Construction this){
 	/* /*  this.values.stream()
                     .map(Value::generate)
@@ -522,11 +522,11 @@ struct Main {
                     .collect(Collectors.joining(", ")) */;
 	return "new " + this.type.generate() + "(" + joined + ")";
 }
-, /* private */ struct Invocation toInvocation_Construction(struct Construction this){
+/* private */ struct Invocation toInvocation_Construction(struct Construction this){
 	/* /* this */ */ typeAsString = this.type.stringify(this.type);
 	return new_Invocation(new_Symbol("new_" + typeAsString), this.values);
 }
-, /* @Override
+/* @Override
         public */ char* generate_Invocation(struct Invocation this){
 	/* /*  this.arguments.stream()
                     .map(Value::generate)
@@ -535,58 +535,58 @@ struct Main {
                     .collect(Collectors.joining(", ")) */;
 	return this.caller.generate(this.caller) + "(" + joined + ")";
 }
-, /* private */ struct Invocation toInvocation_Invocation(struct Invocation this){
+/* private */ struct Invocation toInvocation_Invocation(struct Invocation this){
 	return this;
 }
-, struct public Frame_Frame(struct Frame this, struct StructNode node){
+struct public Frame_Frame(struct Frame this, struct StructNode node){
 	this(node, new_HashMap_Whitespace());
 }
-, /* public static  */ Stream<T> toStream_Options<T>(struct Options this, Option<T> option){
+/* public static  */ Stream<T> toStream_Options<T>(struct Options this, Option<T> option){
 	return /* option.map(Stream::of).orElseGet(Stream::empty) */;
 }
-, /* public static  */ Option<T> fromNative_Options<T>(struct Options this, Optional<T> optional){
+/* public static  */ Option<T> fromNative_Options<T>(struct Options this, Optional<T> optional){
 	return /* optional.<Option<T>>map(Some::new).orElseGet(None::new) */;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Ternary(struct Ternary this){
 	return this.condition.generate(this.condition) + " ? " + this.whenTrue.generate(this.whenTrue) + " : " + this.whenFalse.generate(this.condition.generate(this.condition) + " ? " + this.whenTrue.generate(this.whenTrue) + " : " + this.whenFalse);
 }
-, /* @Override
+/* @Override
         public */ char* generate_Number(struct Number this){
 	return this.value;
 }
-, /* @Override
+/* @Override
         public */ char* generate_Operation(struct Operation this){
 	return this.left.generate(this.left) + " " + this.operator.representation + " " + this.right.generate(this.left.generate(this.left) + " " + this.operator.representation + " " + this.right);
 }
-, /* @Override
+/* @Override
         public */ char* generate_PostIncrement(struct PostIncrement this){
 	return this.value.generate(this.value) + "++";
 }
-, /* @Override
+/* @Override
         public */ char* generate_PostDecrement(struct PostDecrement this){
 	return this.value.generate(this.value) + "--";
 }
-, /* public */ struct StructBuilder withName_StructBuilder(struct StructBuilder this, char* name){
+/* public */ struct StructBuilder withName_StructBuilder(struct StructBuilder this, char* name){
 	this.name = name;
 	return this;
 }
-, /* public */ struct StructBuilder withTypeArgs_StructBuilder(struct StructBuilder this, List<char*> typeArgs){
+/* public */ struct StructBuilder withTypeArgs_StructBuilder(struct StructBuilder this, List<char*> typeArgs){
 	this.typeArgs = typeArgs;
 	return this;
 }
-, /* public */ struct StructBuilder withDefinitions_StructBuilder(struct StructBuilder this, Map<char*, struct Type> definitions){
+/* public */ struct StructBuilder withDefinitions_StructBuilder(struct StructBuilder this, Map<char*, struct Type> definitions){
 	this.definitions = definitions;
 	return this;
 }
-, /* public */ struct Struct complete_StructBuilder(struct StructBuilder this){
+/* public */ struct Struct complete_StructBuilder(struct StructBuilder this){
 	return new_Struct(this.name, this.typeArgs, this.definitions);
 }
-, /* @Override
+/* @Override
         public */ char* generate_StringValue(struct StringValue this){
 	return "\"" + this.value + "\"";
 }
-, char* generate_FunctionStatement(struct FunctionStatement this){
+char* generate_FunctionStatement(struct FunctionStatement this){
 	/* /* this */ */ local0 = this.params(this);
 	/* /* this */ */ local1 = this.content(this);
 	/* /* this */ */ local2 = this.definition(this);
@@ -604,7 +604,7 @@ struct Main {
                     .collect(Collectors.joining()) */;
 	return local2.generate(local2) + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
 }
-, /* public static */ struct void main_Main(struct Main this){
+/* public static */ struct void main_Main(struct Main this){
 	structs = new_ArrayList_Whitespace();
 	functions = new_ArrayList_Whitespace();
 	frames = new_ArrayList_Whitespace();/* 
@@ -619,32 +619,32 @@ struct Main {
             e.printStackTrace();
         } */
 }
-, /* private static */ char* compileRoot_Main(struct Main this, char* input){
+/* private static */ char* compileRoot_Main(struct Main this, char* input){
 	/* /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */ */ output = /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */;
 	/* /* String */ */ joinedStructs = String.join(String, "", structs);
 	/* /*  functions.stream()
                 .map(FunctionStatement::generate)
-                .collect(Collectors.joining(", ")) */ */ joinedFunctions = /*  functions.stream()
+                .collect(Collectors.joining("")) */ */ joinedFunctions = /*  functions.stream()
                 .map(FunctionStatement::generate)
-                .collect(Collectors.joining(", ")) */;
+                .collect(Collectors.joining("")) */;
 	return output + joinedStructs + joinedFunctions;
 }
-, /* private static */ char* compileStatements_Main(struct Main this, char* input, Option<char*> (*compiler)(char*)){
+/* private static */ char* compileStatements_Main(struct Main this, char* input, Option<char*> (*compiler)(char*)){
 	return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 }
-, /* private static */ char* compileAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<char*> (*compiler)(char*), BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
+/* private static */ char* compileAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<char*> (*compiler)(char*), BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
 	return /* parseAll(input, folder, compiler)
                 .map(listOption -> generateAll(merger, listOption))
                 .orElse("") */;
 }
-, /* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
+/* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
 	/* /* new_StringBuilder */ */ output = new_StringBuilder();/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
 	return output.toString(output);
 }
-, /* private static  */ Option<List<T>> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<T> (*compiler)(char*)){
+/* private static  */ Option<List<T>> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<T> (*compiler)(char*)){
 	/* /* divide */ */ segments = divide(input, folder);
 	Option<List<T>> compiled = new_Some_Whitespace(new_ArrayList_T());/* 
         for (var segment : segments) {
@@ -655,13 +655,13 @@ struct Main {
         } */
 	return compiled;
 }
-, /* private static */ struct StringBuilder mergeStatements_Main(struct Main this, struct StringBuilder output, char* compiled){
+/* private static */ struct StringBuilder mergeStatements_Main(struct Main this, struct StringBuilder output, char* compiled){
 	return output.append(output, compiled);
 }
-, /* private static */ List<char*> divide_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
+/* private static */ List<char*> divide_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	return divideAll(input, folder);
 }
-, /* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
+/* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	/* /* State */ */ current = State.createDefault(State);
 	/* for (var i  */ = 0;
 	/* i < input.length() */;/*  i++) {
@@ -713,7 +713,7 @@ struct Main {
         } */
 	return current.advance(current).segments;
 }
-, /* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, char c){
+/* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, char c){
 	/* /* State */ */ appended = current.append(current, c);/* 
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -729,7 +729,7 @@ struct Main {
         } */
 	return appended;
 }
-, /* private static */ char* compileRootSegment_Main(struct Main this, char* input){
+/* private static */ char* compileRootSegment_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
 
         if (stripped.startsWith("package ")) {
@@ -737,10 +737,10 @@ struct Main {
         } */
 	return /* compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n") */;
 }
-, /* private static */ Option<char*> compileClass_Main(struct Main this, char* stripped){
+/* private static */ Option<char*> compileClass_Main(struct Main this, char* stripped){
 	return compileStructured(stripped, "class ");
 }
-, /* private static */ Option<char*> compileStructured_Main(struct Main this, char* stripped, char* infix){
+/* private static */ Option<char*> compileStructured_Main(struct Main this, char* stripped, char* infix){
 	/* classIndex + infix */ local0 = classIndex + infix;
 	/* /* afterKeyword */ */ local1 = afterKeyword.substring(afterKeyword, 0, contentStart);
 	/* contentStart + "{" */ local2 = contentStart + "{";
@@ -782,7 +782,7 @@ struct Main {
         } */
 	return getStringOption(withoutExtends, withEnd, new_ArrayList_Whitespace());
 }
-, /* private static */ Option<char*> getStringOption_Main(struct Main this, char* withoutParameters, char* withEnd, List<struct Parameter> params){
+/* private static */ Option<char*> getStringOption_Main(struct Main this, char* withoutParameters, char* withEnd, List<struct Parameter> params){
 	/* /* I8_star */ */ typeParamStart = withoutParameters.indexOf(withoutParameters, "<");/* 
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
@@ -797,7 +797,7 @@ struct Main {
         } */
 	return assembleStructured(withoutParameters, withEnd, Collections.emptyList(Collections), params);
 }
-, /* private static */ Option<char*> assembleStructured_Main(struct Main this, char* name, char* input, List<char*> typeParams, List<struct Parameter> params){/* 
+/* private static */ Option<char*> assembleStructured_Main(struct Main this, char* name, char* input, List<char*> typeParams, List<struct Parameter> params){/* 
         if (!isSymbol(name)) {
             return new None<>();
         } */
@@ -828,7 +828,7 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static */ int isSymbol_Main(struct Main this, char* input){/* 
+/* private static */ int isSymbol_Main(struct Main this, char* input){/* 
         if (input.isEmpty()) {
             return false;
         } */
@@ -842,7 +842,7 @@ struct Main {
         } */
 	return true;
 }
-, /* private static */ char* compileClassSegment_Main(struct Main this, char* input){
+/* private static */ char* compileClassSegment_Main(struct Main this, char* input){
 	return /* parseWhitespace(input).map(Whitespace::generate)
                 .or(() -> compileClass(input))
                 .or(() -> compileStructured(input, "enum "))
@@ -852,10 +852,10 @@ struct Main {
                 .or(() -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).map(Statement::generate))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())) */;
 }
-, /* private static */ Option<char*> compileWhitespace_Main(struct Main this, char* input){
+/* private static */ Option<char*> compileWhitespace_Main(struct Main this, char* input){
 	return /* parseWhitespace(input).map(Whitespace::generate) */;
 }
-, /* private static */ Option<struct Whitespace> parseWhitespace_Main(struct Main this, char* input){/* 
+/* private static */ Option<struct Whitespace> parseWhitespace_Main(struct Main this, char* input){/* 
         if (input.isBlank()) {
             return new Some<>(new Whitespace());
         } *//* 
@@ -863,7 +863,7 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static */ Option<struct Whitespace> parseMethod_Main(struct Main this, char* input){
+/* private static */ Option<struct Whitespace> parseMethod_Main(struct Main this, char* input){
 	/* /* I8_star */ */ local0 = input.substring(input, 0, paramStart);
 	/* paramStart + "(" */ local1 = paramStart + "(";
 	/* /* withParams */ */ local2 = withParams.substring(withParams, 0, paramEnd);
@@ -988,21 +988,21 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ Option<List<struct Parameter>> parseParameters_Main(struct Main this, char* paramStrings){
+/* private static */ Option<List<struct Parameter>> parseParameters_Main(struct Main this, char* paramStrings){
 	return /* parseValues(paramStrings, Main::parseParameter) */;
 }
-, /* private static */ struct void defineAll_Main(struct Main this, List<struct Definition> definitions){/* 
+/* private static */ struct void defineAll_Main(struct Main this, List<struct Definition> definitions){/* 
         for (var definition : definitions) {
             define(definition);
         } */
 }
-, /* private static */ struct void define_Main(struct Main this, struct Definition definition){
+/* private static */ struct void define_Main(struct Main this, struct Definition definition){
 	frames.getLast(frames).definitions.put(frames.getLast(frames).definitions, definition.name, definition.type);
 }
-, /* private static  */ Option<List<T>> parseStatements_Main<T>(struct Main this, char* content, Option<T> (*compiler)(char*)){
+/* private static  */ Option<List<T>> parseStatements_Main<T>(struct Main this, char* content, Option<T> (*compiler)(char*)){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
 }
-, /* private static */ Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
+/* private static */ Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (frames.getLast().node.name.equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
@@ -1011,7 +1011,7 @@ struct Main {
         } */
 	/* ) */;
 }
-, /* private static */ Option<char*> findConstructorDefinitionName_Main(struct Main this, char* input){
+/* private static */ Option<char*> findConstructorDefinitionName_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);
 	/* /* I8_star */ */ nameSeparator = stripped.lastIndexOf(stripped, " ");/* 
         if (nameSeparator >= 0) {
@@ -1023,13 +1023,13 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ struct FunctionSegment parseStatement_Main(struct Main this, char* input){
+/* private static */ struct FunctionSegment parseStatement_Main(struct Main this, char* input){
 	return /* parseWhitespace(input)
                 .<FunctionSegment>map(value -> value)
                 .or(() -> parseStatementWithoutBraces(input, Main::parseStatementValue).map(value -> value))
                 .orElseGet(() -> new Content(input)) */;
 }
-, /* private static */ struct StatementValue parseStatementValue_Main(struct Main this, char* input){
+/* private static */ struct StatementValue parseStatementValue_Main(struct Main this, char* input){
 	return /* parseReturn(input).<StatementValue>map(value -> value)
                 .or(() -> parsePostIncrement(input).map(value -> value))
                 .or(() -> parsePostDecrement(input).map(value -> value))
@@ -1038,7 +1038,7 @@ struct Main {
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input)) */;
 }
-, /* private static */ Option<struct PostDecrement> parsePostDecrement_Main(struct Main this, char* input){
+/* private static */ Option<struct PostDecrement> parsePostDecrement_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.endsWith("--")) {
             return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
@@ -1047,7 +1047,7 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static */ Option<struct PostIncrement> parsePostIncrement_Main(struct Main this, char* input){
+/* private static */ Option<struct PostIncrement> parsePostIncrement_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.endsWith("++")) {
             return parseValue(stripped.substring(0, stripped.length() - "++".length())).map(PostIncrement::new);
@@ -1056,14 +1056,14 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static */ Option<struct Return> parseReturn_Main(struct Main this, char* input){
+/* private static */ Option<struct Return> parseReturn_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValueOrPlaceholder(stripped.substring("return ".length()))));
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, struct StatementValue (*compiler)(char*)){
+/* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, struct StatementValue (*compiler)(char*)){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -1074,12 +1074,12 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static */ struct StatementValue compileClassStatementValue_Main(struct Main this, char* input){
+/* private static */ struct StatementValue compileClassStatementValue_Main(struct Main this, char* input){
 	return /* parseAssignment(input).<StatementValue>map(value -> value)
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input)) */;
 }
-, /* private static */ Option<struct Assignment> parseAssignment_Main(struct Main this, char* input){
+/* private static */ Option<struct Assignment> parseAssignment_Main(struct Main this, char* input){
 	/* /* I8_star */ */ valueSeparator = input.indexOf(input, "=");/* 
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
@@ -1100,10 +1100,10 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ struct Value parseValueOrPlaceholder_Main(struct Main this, char* input){
+/* private static */ struct Value parseValueOrPlaceholder_Main(struct Main this, char* input){
 	return /* parseValue(input).orElseGet(() -> new Content(input)) */;
 }
-, /* private static */ Option<struct Value> parseValue_Main(struct Main this, char* input){
+/* private static */ Option<struct Value> parseValue_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
             var slice = stripped.substring(1, stripped.length() - 1);
@@ -1170,7 +1170,7 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ Option<struct Value> parseOperator_Main(struct Main this, char* input, struct Operator operator){
+/* private static */ Option<struct Value> parseOperator_Main(struct Main this, char* input, struct Operator operator){
 	/* /* I8_star */ */ operatorIndex = input.indexOf(input, operator.representation);/* 
         if (operatorIndex >= 0) {
             var leftString = input.substring(0, operatorIndex);
@@ -1183,7 +1183,7 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ Option<struct Invocation> parseInvocation_Main(struct Main this, char* stripped){/* 
+/* private static */ Option<struct Invocation> parseInvocation_Main(struct Main this, char* stripped){/* 
         return parseInvokable(stripped, Main::parseValue, Invocation::new).map(invocation -> {
             var caller = invocation.caller;
             if (caller instanceof DataAccess(var parent, var property)) {
@@ -1218,7 +1218,7 @@ struct Main {
         } */
 	/* ) */;
 }
-, /* private static */ int isNumber_Main(struct Main this, char* input){
+/* private static */ int isNumber_Main(struct Main this, char* input){
 	/* for (var i  */ = 0;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
@@ -1229,7 +1229,7 @@ struct Main {
         } */
 	return true;
 }
-, /* private static */ struct Type resolveType_Main(struct Main this, struct Value value){/* 
+/* private static */ struct Type resolveType_Main(struct Main this, struct Value value){/* 
         if (value instanceof DataAccess(var parent, var property)) {
             var type = resolveType(parent);
             if (type instanceof Struct struct) {
@@ -1269,7 +1269,7 @@ struct Main {
         } */
 	return new_Content(value.generate(value));
 }
-, /* private static */ Option<struct Type> findNameInFrame_Main(struct Main this, char* name, struct Frame frame){
+/* private static */ Option<struct Type> findNameInFrame_Main(struct Main this, char* name, struct Frame frame){
 	/* Frame */ definitions = frame.definitions;/* 
         if (definitions.containsKey(name)) {
             return new Some<>(definitions.get(name));
@@ -1278,7 +1278,7 @@ struct Main {
             return new None<>();
         } */
 }
-, /* private static  */ Option<struct R> parseInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
+/* private static  */ Option<struct R> parseInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
 	/* /* String */ */ local0 = String.join(String, "", beforeLast);
 	/* /* I8_star */ */ withoutPrefix = input.strip(input);/* 
         if (!withoutPrefix.endsWith(")")) {
@@ -1299,7 +1299,7 @@ struct Main {
         } */
 	return /* parseValues(args, Main::parseArgument).map(values -> builder.apply(outputBeforeArgs, values)) */;
 }
-, /* private static */ struct State foldInvocationStart_Main(struct Main this, struct State state, char c){
+/* private static */ struct State foldInvocationStart_Main(struct Main this, struct State state, char c){
 	/* /* State */ */ appended = state.append(state, c);/* 
         if (c == '(') {
             State advanced = appended.isLevel() ? appended.advance() : appended;
@@ -1310,12 +1310,12 @@ struct Main {
         } */
 	return appended;
 }
-, /* private static */ Option<struct Parameter> parseParameter_Main(struct Main this, char* input){
+/* private static */ Option<struct Parameter> parseParameter_Main(struct Main this, char* input){
 	return /* parseWhitespace(input)
                 .<Parameter>map(result -> result)
                 .or(() -> parseDefinition(input).map(result -> result)) */;
 }
-, /* private static */ Option<struct Definition> parseDefinition_Main(struct Main this, char* input){
+/* private static */ Option<struct Definition> parseDefinition_Main(struct Main this, char* input){
 	/* /* I8_star */ */ local0 = stripped.substring(stripped, 0, nameSeparator);
 	/* nameSeparator + " " */ local1 = nameSeparator + " ";
 	/* /* I8_star */ */ local2 = stripped.substring(stripped, local1.length(local1));
@@ -1368,7 +1368,7 @@ struct Main {
         } */
 	/*  */;
 }
-, /* private static */ Option<struct Integer> findTypeSeparator_Main(struct Main this, char* input){
+/* private static */ Option<struct Integer> findTypeSeparator_Main(struct Main this, char* input){
 	/* 0 */ depth = 0;
 	/* for (var i  */ = /*  input.length() - 1 */;
 	/* i > */ = 0;/*  i--) {
@@ -1385,10 +1385,10 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static */ Option<struct Type> parseAndFlattenType_Main(struct Main this, char* input){
+/* private static */ Option<struct Type> parseAndFlattenType_Main(struct Main this, char* input){
 	return /* parseType(input).map(Type::flatten) */;
 }
-, /* private static */ Option<struct Type> parseType_Main(struct Main this, char* input){
+/* private static */ Option<struct Type> parseType_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
         if (stripped.equals("var")) {
             return new Some<>(Primitive.Auto);
@@ -1438,10 +1438,10 @@ struct Main {
         } */
 	return new_None_Whitespace();
 }
-, /* private static  */ Option<List<T>> parseValues_Main<T>(struct Main this, char* args, Option<T> (*compiler)(char*)){
+/* private static  */ Option<List<T>> parseValues_Main<T>(struct Main this, char* args, Option<T> (*compiler)(char*)){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
 }
-, /* private static */ struct State foldValueChar_Main(struct Main this, struct State state, char c){/* 
+/* private static */ struct State foldValueChar_Main(struct Main this, struct State state, char c){/* 
         if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
@@ -1454,6 +1454,6 @@ struct Main {
         } */
 	return appended;
 }
-, /* private static */ char* generatePlaceholder_Main(struct Main this, char* stripped){
+/* private static */ char* generatePlaceholder_Main(struct Main this, char* stripped){
 	return "/* " + stripped + " */";
 }
