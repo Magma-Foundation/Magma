@@ -411,7 +411,7 @@ public class Main {
         @Override
         public String stringify() {
             var joined = this.args.stream()
-                    .map(arg -> arg.stringify())
+                    .map(Type::stringify)
                     .collect(Collectors.joining("_"));
 
             return this.base + "_" + joined;
@@ -835,10 +835,21 @@ public class Main {
                 : withoutImplements;
 
         var paramStart = withoutExtends.indexOf("(");
-        var withoutParameters = paramStart >= 0
-                ? withoutExtends.substring(0, paramStart).strip()
-                : withoutExtends;
+        if (paramStart >= 0) {
+            String withoutParameters = withoutExtends.substring(0, paramStart).strip();
+            var withParamEnd = withoutExtends.substring(paramStart + "(".length()).strip();
+            if (withParamEnd.endsWith(")")) {
+                var inputParams = withParamEnd.substring(0, withParamEnd.length() - ")".length());
+                if (parseParameters(inputParams) instanceof Some(var params)) {
+                    return getStringOption(withoutParameters, withEnd, params);
+                }
+            }
+        }
 
+        return getStringOption(withoutExtends, withEnd, new ArrayList<>());
+    }
+
+    private static Option<String> getStringOption(String withoutParameters, String withEnd, List<Parameter> params) {
         var typeParamStart = withoutParameters.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
@@ -847,15 +858,15 @@ public class Main {
                 var typeParamsString = withTypeParamEnd.substring(0, withTypeParamEnd.length() - ">".length());
                 var maybeTypeParams = parseValues(typeParamsString, Some::new);
                 if (maybeTypeParams instanceof Some(var actualTypeParams)) {
-                    return assembleStructured(name, withEnd, actualTypeParams);
+                    return assembleStructured(name, withEnd, actualTypeParams, params);
                 }
             }
         }
 
-        return assembleStructured(withoutParameters, withEnd, Collections.emptyList());
+        return assembleStructured(withoutParameters, withEnd, Collections.emptyList(), params);
     }
 
-    private static Option<String> assembleStructured(String name, String input, List<String> typeParams) {
+    private static Option<String> assembleStructured(String name, String input, List<String> typeParams, List<Parameter> params) {
         if (!isSymbol(name)) {
             return new None<>();
         }
@@ -871,13 +882,20 @@ public class Main {
         var structNode = new StructNode(name, typeParams);
         frames.addLast(new Frame(structNode));
 
-        var generated = "struct " + name + typeParamString + " {" +
-                compileStatements(content, input1 -> new Some<>(compileClassSegment(input1))) +
-                "\n};\n";
+        var maybeStatements = parseAll(content, Main::foldStatementChar, input1 -> new Some<>(compileClassSegment(input1)));
+        if (maybeStatements instanceof Some(var outputStatements)) {
+            var copy = new ArrayList<String>();
+            copy.addAll(outputStatements);
+            var generated = "struct " + name + typeParamString + " {" + generateAll(Main::mergeStatements, copy) +
+                    "\n};\n";
 
-        frames.removeLast();
-        structs.add(generated);
-        return new Some<>("");
+            frames.removeLast();
+            structs.add(generated);
+            return new Some<>("");
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static boolean isSymbol(String input) {
@@ -952,7 +970,7 @@ public class Main {
         if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
-            var maybeInputParams = parseValues(paramStrings, Main::parseParameter);
+            var maybeInputParams = parseParameters(paramStrings);
             if (maybeInputParams instanceof Some(var inputParams)) {
                 var paramDefinitions = inputParams.stream()
                         .map(Parameter::toDefinition)
@@ -1051,6 +1069,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Option<List<Parameter>> parseParameters(String paramStrings) {
+        return parseValues(paramStrings, Main::parseParameter);
     }
 
     private static void defineAll(List<Definition> definitions) {
