@@ -61,7 +61,7 @@ public class Main {
     private interface Assignable extends Node {
     }
 
-    private interface Value extends Assignable {
+    private sealed interface Value extends Assignable, LambdaValue {
     }
 
     private interface Parameter extends StatementValue {
@@ -102,6 +102,9 @@ public class Main {
     }
 
     private interface BlockHeader extends Node {
+    }
+
+    private sealed interface LambdaValue extends Node permits Value, Block {
     }
 
     private enum Primitive implements Type {
@@ -782,7 +785,7 @@ public class Main {
         }
     }
 
-    private record Block(BlockHeader header, List<FunctionSegment> segments) implements FunctionSegment {
+    private record Block(BlockHeader header, List<FunctionSegment> segments) implements FunctionSegment, LambdaValue {
         @Override
         public String generate() {
             var joined = this.segments.stream()
@@ -816,6 +819,23 @@ public class Main {
         }
     }
 
+    private record Lambda(List<Definition> params, LambdaValue value) implements Value {
+        @Override
+        public String generate() {
+            var joinedParams = this.params.stream()
+                    .map(Definition::generate)
+                    .collect(Collectors.joining(", "));
+
+            String result;
+            if (this.value instanceof Value) {
+                result = " => " + this.value.generate();
+            } else {
+                result = value.generate();
+            }
+
+            return "(" + joinedParams + ")";
+        }
+    }
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1562,6 +1582,7 @@ public class Main {
         }
 
         var rules = new ArrayList<Rule<Value>>(List.of(
+                new TypeRule<>("lambda", Main::compileLambda),
                 new TypeRule<>("instanceof", Main::parseInstanceOf),
                 new TypeRule<>("invocation", Main::parseInvocation),
                 new TypeRule<>("data-access", Main::parseDataAccess),
@@ -1573,6 +1594,19 @@ public class Main {
                 .toList());
 
         return parseOr(input, rules);
+    }
+
+    private static Result<Value, CompileError> compileLambda(String input) {
+        var arrowIndex = input.indexOf("->");
+        if (arrowIndex >= 0) {
+            var left = input.substring(0, arrowIndex);
+            var right = input.substring(arrowIndex + "->".length());
+            return parseValue(right).mapValue(compiledRight -> {
+                return new Lambda(Collections.emptyList(), compiledRight);
+            });
+        }
+
+        return createInfixErr(input, "->");
     }
 
     private static Result<InstanceOf, CompileError> parseInstanceOf(String input) {
@@ -1830,12 +1864,12 @@ public class Main {
             case Some<Integer>(var typeSeparator) -> {
                 var beforeType = beforeName.substring(0, typeSeparator).strip();
                 var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-                yield getDefinitionCompileErrorResult(beforeType, inputType, withName);
+                yield assembleDefinition(beforeType, inputType, withName);
             }
         };
     }
 
-    private static Result<Definition, CompileError> getDefinitionCompileErrorResult(String beforeType, String inputType, DefinitionBuilder withName) {
+    private static Result<Definition, CompileError> assembleDefinition(String beforeType, String inputType, DefinitionBuilder withName) {
         if (beforeType.endsWith(">")) {
             var withTypeParamStart = beforeType.substring(0, beforeType.length() - ">".length());
 
