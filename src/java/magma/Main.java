@@ -635,11 +635,10 @@ public class Main {
     private record StructNode(String name, List<String> typeParams) {
     }
 
-    private record Frame(Option<StructNode> node, List<Definition> definitions) {
-        public Frame(Option<StructNode> node) {
-            this(node, new ArrayList<>());
-        }
-
+    private record Frame(
+            Option<StructNode> node,
+            List<Definition> definitions
+    ) {
         public Frame() {
             this(new None<>(), new ArrayList<>());
         }
