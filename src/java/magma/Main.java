@@ -1537,23 +1537,9 @@ public class Main {
             return new Ok<>(invocation);
         }
 
-        var separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            var parentString = stripped.substring(0, separator);
-            var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                return parseValue(parentString).flatMapValue(parent -> resolveType(parent).mapValue(type -> {
-                    if (type instanceof Functional) {
-                        return parent;
-                    }
-
-                    return new DataAccess(parent, property);
-                }));
-            }
-        }
-
         var rules = new ArrayList<Rule<Value>>(List.of(
-                new TypeRule<>("ternary", Main::compileTernary)
+                new TypeRule<>("data-access", Main::parseDataAccess),
+                new TypeRule<>("ternary", Main::parseTernary)
         ));
 
         rules.addAll(Arrays.stream(Operator.values())
@@ -1563,7 +1549,29 @@ public class Main {
         return parseOr(input, rules);
     }
 
-    private static Result<Value, CompileError> compileTernary(String stripped) {
+    private static Result<Value, CompileError> parseDataAccess(String input) {
+        var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator < 0) {
+            return createInfixErr(stripped, ".");
+        }
+
+        var parentString = stripped.substring(0, separator);
+        var property = stripped.substring(separator + ".".length()).strip();
+        if (!isSymbol(property)) {
+            return createSymbolErr(property);
+        }
+
+        return parseValue(parentString).flatMapValue(parent -> resolveType(parent).mapValue(type -> {
+            if (type instanceof Functional) {
+                return parent;
+            }
+
+            return new DataAccess(parent, property);
+        }));
+    }
+
+    private static Result<Value, CompileError> parseTernary(String stripped) {
         var conditionSeparator = stripped.indexOf("?");
         if (conditionSeparator < 0) {
             return createInfixErr(stripped, "?");
