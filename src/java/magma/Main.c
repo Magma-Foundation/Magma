@@ -105,6 +105,10 @@ struct Number {
 };
 struct Operation {
 };
+struct PostIncrement {
+};
+struct PostDecrement {
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = new_ArrayList_Whitespace();
 	/* private static final */ List<struct StatementValue> statements = new_ArrayList_Whitespace();
@@ -220,11 +224,11 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this.depth == 0;
 }
 /* public */ struct State enter_State(struct State this){
-	/* this.depth++ */;
+	this.depth++;
 	return this;
 }
 /* public */ struct State exit_State(struct State this){
-	/* this.depth-- */;
+	this.depth--;
 	return this;
 }
 /* public */ struct boolean isShallow_State(struct State this){
@@ -478,6 +482,14 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* @Override
         public */ char* generate_Operation(struct Operation this){
 	return /* this.left.generate() + " " + this.operator.representation + " " + this */.right.generate(/* this.left.generate() + " " + this.operator.representation + " " + this */.right);
+}
+/* @Override
+        public */ char* generate_PostIncrement(struct PostIncrement this){
+	return /* this.value.generate() + "++" */;
+}
+/* @Override
+        public */ char* generate_PostDecrement(struct PostDecrement this){
+	return /* this.value.generate() + "--" */;
 }
 /* public static */ struct void main_Main(struct Main this){
 	structs = new_ArrayList_Whitespace();
@@ -864,16 +876,40 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return local2.orElseGet(local2, /* () -> new Content(input) */);
 }
 /* private static */ struct StatementValue parseStatementValue_Main(struct Main this, char* input){
-	/* /* () -> parseInvocation(input) */ */ local0 = /* () -> parseInvocation(input) */;
+	/* /* () -> parsePostIncrement(input) */ */ local0 = /* () -> parsePostIncrement(input) */;
 	/* /* parseReturn(input).<StatementValue>map(value -> value)
                  */ */ local1 = /* parseReturn(input).<StatementValue>map(value -> value)
                  */;
-	/* /* () -> parseAssignment(input) */ */ local2 = /* () -> parseAssignment(input) */;
+	/* /* () -> parsePostDecrement(input) */ */ local2 = /* () -> parsePostDecrement(input) */;
 	/* local1.or(local1, local0.map(local0, /* value -> value */)) */ local3 = local1.or(local1, local0.map(local0, /* value -> value */));
-	/* /* () -> parseDefinition(input) */ */ local4 = /* () -> parseDefinition(input) */;
+	/* /* () -> parseInvocation(input) */ */ local4 = /* () -> parseInvocation(input) */;
 	/* local3.or(local3, local2.map(local2, /* value -> value */)) */ local5 = local3.or(local3, local2.map(local2, /* value -> value */));
-	/* local5.or(local5, local4.map(local4, /* value -> value */)) */ local6 = local5.or(local5, local4.map(local4, /* value -> value */));
-	return local6.orElseGet(local6, /* () -> new Content(input) */);
+	/* /* () -> parseAssignment(input) */ */ local6 = /* () -> parseAssignment(input) */;
+	/* local5.or(local5, local4.map(local4, /* value -> value */)) */ local7 = local5.or(local5, local4.map(local4, /* value -> value */));
+	/* /* () -> parseDefinition(input) */ */ local8 = /* () -> parseDefinition(input) */;
+	/* local7.or(local7, local6.map(local6, /* value -> value */)) */ local9 = local7.or(local7, local6.map(local6, /* value -> value */));
+	/* local9.or(local9, local8.map(local8, /* value -> value */)) */ local10 = local9.or(local9, local8.map(local8, /* value -> value */));
+	return local10.orElseGet(local10, /* () -> new Content(input) */);
+}
+/* private static */ Option<struct PostDecrement> parsePostDecrement_Main(struct Main this, char* input){
+	/* /* var stripped = input */ */ local0 = /* var stripped = input */;
+	local0.strip(local0);/* 
+        if (stripped.endsWith("--")) {-
+            return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
+        } *//* 
+        else {
+            return new None<>();
+        } */
+}
+/* private static */ Option<struct PostIncrement> parsePostIncrement_Main(struct Main this, char* input){
+	/* /* var stripped = input */ */ local0 = /* var stripped = input */;
+	local0.strip(local0);/* 
+        if (stripped.endsWith("++")) {
+            return parseValue(stripped.substring(0, stripped.length() - "++".length())).map(PostIncrement::new);
+        } *//* 
+        else {
+            return new None<>();
+        } */
 }
 /* private static */ Option<struct Return> parseReturn_Main(struct Main this, char* input){
 	/* /* var stripped = input */ */ local0 = /* var stripped = input */;
