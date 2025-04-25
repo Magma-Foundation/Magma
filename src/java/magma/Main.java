@@ -235,7 +235,9 @@ public class Main {
                 var withBraces = withParams.substring(paramEnd + ")".length()).strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
-                    return assembleMethod(header, params, content);
+                    var constructor = header + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
+                    functions.add(constructor);
+                    return Optional.of("");
                 }
             }
         }
@@ -255,21 +257,25 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> assembleMethod(String header, String params, String content) {
-        var constructor = header + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n";
-        functions.add(constructor);
-        return Optional.of("");
+    private static String compileStatementOrBlock(String input) {
+        return compileStatement(input, Main::compileStatementValue).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static String compileStatement(String input) {
-        return generatePlaceholder(input);
+    private static String compileStatementValue(String input) {
+        return compileAssignable(input)
+                .or(() -> compileDefinition(input))
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileClassStatement(String input) {
+        return compileStatement(input, Main::compileClassStatementValue);
+    }
+
+    private static Optional<String> compileStatement(String input, Function<String, String> compiler) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileClassStatementValue(withoutEnd) + ";");
+            return Optional.of("\n\t" + compiler.apply(withoutEnd) + ";");
         }
         else {
             return Optional.empty();
@@ -277,26 +283,30 @@ public class Main {
     }
 
     private static String compileClassStatementValue(String input) {
-        return compileInitialization(input)
+        return compileAssignable(input)
                 .or(() -> compileDefinition(input))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileInitialization(String input) {
+    private static Optional<String> compileAssignable(String input) {
         var valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
 
-            return compileDefinition(inputDefinition).map(outputDefinition -> {
-                return outputDefinition + " = " + compileValue(value);
-            });
+            var destination = compileDefinition(inputDefinition).orElseGet(() -> compileValue(inputDefinition));
+            return Optional.of(destination + " = " + compileValue(value));
         }
         return Optional.empty();
     }
 
-    private static String compileValue(String value) {
-        return generatePlaceholder(value);
+    private static String compileValue(String input) {
+        var stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {
