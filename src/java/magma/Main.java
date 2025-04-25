@@ -103,8 +103,14 @@ public class Main {
             return "";
         }
 
-        if (stripped.contains("class ")) {
-            return "struct Temp {\n};\n";
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var afterKeyword = stripped.substring(classIndex + "class ".length());
+            var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                var name = afterKeyword.substring(0, contentStart).strip();
+                return "struct " + name + " {\n};\n";
+            }
         }
 
         return "/* " + stripped + " */\n";
