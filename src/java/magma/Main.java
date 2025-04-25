@@ -55,11 +55,15 @@ public class Main {
         }
     }
 
-    public static final List<String> structs = new ArrayList<>();
-    private static final List<String> functions = new ArrayList<>();
-    private static Optional<String> currentStructName = Optional.empty();
+    public static List<String> structs;
+    private static List<String> functions;
+    private static Optional<String> currentStructName;
 
     public static void main() {
+        structs = new ArrayList<>();
+        functions = new ArrayList<>();
+        currentStructName = Optional.empty();
+
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -280,7 +284,7 @@ public class Main {
 
     private static Optional<String> compileInitialization(String input) {
         var valueSeparator = input.indexOf("=");
-        if(valueSeparator >= 0) {
+        if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
 

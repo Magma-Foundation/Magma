@@ -13,9 +13,9 @@ struct State {
 	/* private */ struct StringBuilder buffer;
 };
 struct Main {
-	/* public static final */ List<char*> structs = /*  new ArrayList<>() */;
-	/* private static final */ List<char*> functions = /*  new ArrayList<>() */;
-	/* private static */ Optional<char*> currentStructName = /*  Optional.empty() */;
+	/* public static */ List<char*> structs;
+	/* private static */ List<char*> functions;
+	/* private static */ Optional<char*> currentStructName;
 };
 struct private State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
             this.buffer = buffer; *//* 
@@ -57,6 +57,10 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
          */
 }
 /* public static */ struct void main(/*  */){/* 
+        structs = new ArrayList<>(); *//* 
+        functions = new ArrayList<>(); *//* 
+        currentStructName = Optional.empty(); *//* 
+
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -275,7 +279,7 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
 }
 /* private static */ Optional<char*> compileInitialization(char* input){/* 
         var valueSeparator = input.indexOf("="); *//* 
-        if(valueSeparator >= 0) {
+        if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
 
