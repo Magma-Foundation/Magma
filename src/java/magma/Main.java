@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -752,6 +751,22 @@ public class Main {
         }
     }
 
+    private record EnumValues(Map<String, List<Value>> map) implements StatementValue {
+        private static String generateEntry(Map.Entry<String, List<Value>> entry) {
+            return entry.getKey() + "(" + entry.getValue().stream()
+                    .map(Node::generate)
+                    .collect(Collectors.joining(", ")) + ")";
+        }
+
+        @Override
+        public String generate() {
+            return this.map.entrySet()
+                    .stream()
+                    .map(EnumValues::generateEntry)
+                    .collect(Collectors.joining(", "));
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1051,7 +1066,7 @@ public class Main {
         var structNode = new StructNode(name, typeParams);
         frames.addLast(new Frame(structNode));
 
-        return parseAll(content, Main::foldStatementChar, Main::compileClassSegment).mapValue(outputStatements -> {
+        return parseAll(content, Main::foldStatementChar, Main::parseClassSegment).mapValue(outputStatements -> {
             var copy = new ArrayList<StructSegment>(params.stream()
                     .map(Statement::new)
                     .toList());
@@ -1075,7 +1090,7 @@ public class Main {
 
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;
@@ -1083,7 +1098,7 @@ public class Main {
         return true;
     }
 
-    private static Result<StructSegment, CompileError> compileClassSegment(String input0) {
+    private static Result<StructSegment, CompileError> parseClassSegment(String input0) {
         return Main.parseOr(input0, List.of(
                 structSegmentFrom(Main::whitespace),
                 structSegmentFromStructured("enum "),
@@ -1368,8 +1383,41 @@ public class Main {
     private static Result<StatementValue, CompileError> compileClassStatementValue(String input0) {
         return parseOr(input0, List.of(
                 input -> parseAssignment(input).mapValue(value -> value),
-                input -> parseDefinition(input).mapValue(value -> value)
+                input -> parseDefinition(input).mapValue(value -> value),
+                Main::parseEnumValues
         ));
+    }
+
+    private static Result<StatementValue, CompileError> parseEnumValues(String input) {
+        var slices = input.split(Pattern.quote(","));
+        var map = new HashMap<String, List<Value>>();
+        for (var slice : slices) {
+            var stripped = slice.strip();
+            if (isSymbol(stripped)) {
+                map.put(stripped, Collections.emptyList());
+            }
+            else {
+                var result = Main.parseInvokable(stripped, Main::compileSymbol, Tuple::new);
+                switch (result) {
+                    case Err<Tuple<String, List<Value>>, CompileError>(var error) -> {
+                        return new Err<>(error);
+                    }
+                    case Ok<Tuple<String, List<Value>>, CompileError>(var tuple) -> {
+                        map.put(tuple.left, tuple.right);
+                    }
+                }
+            }
+        }
+        return new Ok<>(new EnumValues(map));
+    }
+
+    private static Result<String, CompileError> compileSymbol(String s) {
+        if (isSymbol(s)) {
+            return new Ok<>(s);
+        }
+        else {
+            return createSymbolErr(s);
+        }
     }
 
     private static Result<Assignment, CompileError> parseAssignment(String input) {
