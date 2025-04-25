@@ -21,35 +21,17 @@ struct State {
 	/* private */ int depth;
 	/* private */ struct StringBuilder buffer;
 };
+struct Definition {
+};
+struct Struct {
+};
+struct Ref {
+};
+struct Content {
+};
+struct Generic {
+};
 struct Main {
-	/* private record Struct(String name) implements Type {
-        @Override
-        public String generate() {
-            return "struct " + this.name();
-        }
-    } */
-	/* private record Ref(Type type) implements Type {
-        @Override
-        public String generate() {
-            return this.type.generate() + "*";
-        }
-    } */
-	/* private record Content(String input) implements Type {
-        @Override
-        public String generate() {
-            return generatePlaceholder(this.input);
-        }
-    } */
-	/* private record Generic(String base, List<Type> args) implements Type {
-        @Override
-        public String generate() {
-            var joinedArgs = this.args().stream()
-                    .map(Type::generate)
-                    .collect(Collectors.joining(", "));
-
-            return this.base() + "<" + joinedArgs + ">";
-        }
-    } */
 	/* public static */ List<char*> structs;
 	/* private static */ List<char*> functions;
 	/* private static */ Optional<char*> currentStructName;
@@ -92,15 +74,29 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* public */ struct boolean isShallow(/*  */){
 	struct return this.depth = /* = 1 */;
 }
-/* private */ struct record Definition(Optional<char*> maybeBeforeType, struct Type type, char* name){/* 
-        public Definition(Type type, String name) {
-            this(Optional.empty(), type, name);
-        } *//* 
-
-        private String generate() {
-            var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
-            return beforeType + this.type().generate() + " " + this.name();
-        } */
+struct public Definition(struct Type type, char* name){
+	/* this(Optional.empty(), type, name) */;
+}
+/* private */ char* generate(/*  */){
+	struct var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
+	/* return beforeType + this.type().generate() + " " + this.name() */;
+}
+/* @Override
+        public */ char* generate(/*  */){
+	/* return "struct " + this.name() */;
+}
+/* @Override
+        public */ char* generate(/*  */){
+	/* return this.type.generate() + "*" */;
+}
+/* @Override
+        public */ char* generate(/*  */){
+	struct return generatePlaceholder(this.input);
+}
+/* @Override
+        public */ char* generate(/*  */){
+	struct var joinedArgs = this.args().stream().map(Type::generate).collect(Collectors.joining(", "));
+	/* return this.base() + "<" + joinedArgs + ">" */;
 }
 /* public static */ struct void main(/*  */){
 	structs = /* new ArrayList<>() */;
@@ -221,10 +217,15 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
         }
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
 
-        var implementsIndex = beforeContent.lastIndexOf(" implements ");
-        var name = implementsIndex >= 0
+        var implementsIndex = beforeContent.indexOf(" implements ");
+        var withoutImplements = implementsIndex >= 0
                 ? beforeContent.substring(0, implementsIndex).strip()
                 : beforeContent;
+
+        var paramStart = withoutImplements.indexOf("(");
+        var name = paramStart >= 0
+                ? withoutImplements.substring(0, paramStart).strip()
+                : withoutImplements;
 
         if (!isSymbol(name)) {
             return Optional.empty();

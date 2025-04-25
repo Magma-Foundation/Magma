@@ -264,10 +264,15 @@ public class Main {
         }
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
 
-        var implementsIndex = beforeContent.lastIndexOf(" implements ");
-        var name = implementsIndex >= 0
+        var implementsIndex = beforeContent.indexOf(" implements ");
+        var withoutImplements = implementsIndex >= 0
                 ? beforeContent.substring(0, implementsIndex).strip()
                 : beforeContent;
+
+        var paramStart = withoutImplements.indexOf("(");
+        var name = paramStart >= 0
+                ? withoutImplements.substring(0, paramStart).strip()
+                : withoutImplements;
 
         if (!isSymbol(name)) {
             return Optional.empty();
