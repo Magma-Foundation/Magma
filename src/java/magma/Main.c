@@ -71,6 +71,8 @@ struct Ref {
 };
 struct Content {
 };
+struct Functional {
+};
 struct Generic {
 };
 struct ConstructorDefinition {
@@ -103,12 +105,19 @@ struct Main {
 	private static List<char*> functions;
 	private static List<Tuple<char*, List<char*>>> stack;
 };
+default struct Type flatten_Type(struct Type this){
+	return this;
+}
 @Override
         public char* generate_Primitive(struct Primitive this){
 	return this.value;
 }
+@Override
+        public struct Type flatten_Primitive(struct Primitive this){
+	return this;
+}
 /* @Override
-        public  */ Option<R> map_Some<T, R>(struct Some<T> this, Function<T, R> mapper){
+        public  */ Option<R> map_Some<T, R>(struct Some<T> this, R(*)(T) mapper){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 @Override
@@ -124,7 +133,7 @@ struct Main {
 	return this;
 }
 /* @Override
-        public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Function<T, Option<R>> mapper){
+        public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R>(*)(T) mapper){
 	return /* mapper.apply(this.value) */;
 }
 @Override
@@ -136,7 +145,7 @@ struct Main {
 	return true;
 }
 /* @Override
-        public  */ Option<R> map_None<T, R>(struct None<T> this, Function<T, R> mapper){
+        public  */ Option<R> map_None<T, R>(struct None<T> this, R(*)(T) mapper){
 	return /* new None<>() */;
 }
 @Override
@@ -152,7 +161,7 @@ struct Main {
 	return /* other.get() */;
 }
 /* @Override
-        public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Function<T, Option<R>> mapper){
+        public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R>(*)(T) mapper){
 	return /* new None<>() */;
 }
 @Override
@@ -204,7 +213,7 @@ public struct boolean isShallow_State(struct State this){
 public struct Definition rename_Definition(struct Definition this, char* name){
 	return /* new Definition(this.maybeBeforeType, this.type, name, this.typeParams) */;
 }
-public struct Definition mapTypeParams_Definition(struct Definition this, Function<List<char*>, List<char*>> mapper){
+public struct Definition mapTypeParams_Definition(struct Definition this, List<char*>(*)(List<char*>) mapper){
 	return /* new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams)) */;
 }
 @Override
@@ -213,12 +222,35 @@ public struct Definition mapTypeParams_Definition(struct Definition this, Functi
 	return /* "struct " + this.name + typeParamString */;
 }
 @Override
+        public struct Type flatten_Struct(struct Struct this){
+	return this;
+}
+@Override
         public char* generate_Ref(struct Ref this){
 	return /* this.type.generate() + "*" */;
 }
 @Override
+        public struct Type flatten_Ref(struct Ref this){
+	return this;
+}
+@Override
         public char* generate_Content(struct Content this){
 	return /* generatePlaceholder(this.input) */;
+}
+@Override
+        public struct Type flatten_Content(struct Content this){
+	return this;
+}
+@Override
+        public char* generate_Functional(struct Functional this){
+	struct var joined = /* this.paramTypes.stream()
+                    .map(Type::generate)
+                    .collect(Collectors.joining(", ")) */;
+	return /* this.returnType.generate() + "(*)(" + joined + ")" */;
+}
+@Override
+        public struct Type flatten_Functional(struct Functional this){
+	return null;
 }
 @Override
         public char* generate_Generic(struct Generic this){
@@ -226,6 +258,15 @@ public struct Definition mapTypeParams_Definition(struct Definition this, Functi
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */;
 	return /* this.base() + "<" + joinedArgs + ">" */;
+}
+@Override
+        public struct Type flatten_Generic(struct Generic this){/* 
+            if (this.base.equals("Function")) {
+                var param0 = this.args.getFirst();
+                var returns = this.args.get(1);
+                return new Functional(List.of(param0), returns);
+            } */
+	return this;
 }
 private struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
 	return /* new DefinitionBuilder().withType(new Struct(this.name())).withName("new_" + this.name()).complete() */;
@@ -307,10 +348,10 @@ private static char* compileRoot_Main(struct Main this, char* input){
 	struct var joinedFunctions = /* String.join("", functions) */;
 	return /* output + joinedStructs + joinedFunctions */;
 }
-private static char* compileStatements_Main(struct Main this, char* input, Function<char*, char*> compiler){
+private static char* compileStatements_Main(struct Main this, char* input, char*(*)(char*) compiler){
 	return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 }
-private static char* compileAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
+private static char* compileAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, char*(*)(char*) compiler, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
 	return /* generateAll(merger, parseAll(input, folder, compiler)) */;
 }
 private static char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
@@ -320,7 +361,7 @@ private static char* generateAll_Main(struct Main this, BiFunction<struct String
         } */
 	return /* output.toString() */;
 }
-/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, T> compiler){
+/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, T(*)(char*) compiler){
 	struct var segments = /* divide(input, folder) */;
 	struct var compiled = /* new ArrayList<T>() */;/* 
         for (var segment : segments) {
@@ -575,7 +616,7 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
         } */
 	return /* new None<>() */;
 }
-/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, Function<char*, T> compiler){
+/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, T(*)(char*) compiler){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
 }
 private static Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
@@ -621,10 +662,10 @@ private static Option<struct Return> compileReturn_Main(struct Main this, char* 
 private static Option<char*> compileClassStatement_Main(struct Main this, char* input){
 	return /* compileStatement(input, Main::compileClassStatementValue) */;
 }
-private static Option<char*> compileStatement_Main(struct Main this, char* input, Function<char*, struct StatementValue> compiler){
+private static Option<char*> compileStatement_Main(struct Main this, char* input, struct StatementValue(*)(char*) compiler){
 	return /* parseStatementWithoutBraces(input, compiler).map(Statement::generate) */;
 }
-private static Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, Function<char*, struct StatementValue> compiler){
+private static Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, struct StatementValue(*)(char*) compiler){
 	struct var stripped = /* input.strip() */;
 	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -691,7 +732,7 @@ private static Option<struct Definition> parseDefinition_Main(struct Main this, 
         } */
 	struct var withName = /* new DefinitionBuilder().withName(name) */;/* 
         return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> parseType(beforeName).map(type -> new DefinitionBuilder()
+            case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
                     .withType(type)
                     .withName(name)
                     .complete());
@@ -708,7 +749,7 @@ private static Option<struct Definition> parseDefinition_Main(struct Main this, 
 
                         var typeParams = parseValues(typeParamString, Function.identity());
                         Main.typeParams.addAll(typeParams);
-                        var maybeOutputType = parseType(inputType);
+                        var maybeOutputType = parseAndFlattenType(inputType);
 
                         yield maybeOutputType.map(outputType -> withName
                                 .withBeforeType(generatePlaceholder(withoutTypeParams))
@@ -717,7 +758,7 @@ private static Option<struct Definition> parseDefinition_Main(struct Main this, 
                                 .complete());
                     }
                 }
-                yield parseType(inputType).map(outputType -> withName
+                yield parseAndFlattenType(inputType).map(outputType -> withName
                         .withBeforeType(beforeType)
                         .withType(outputType)
                         .complete());
@@ -741,6 +782,9 @@ private static Option<struct Integer> findTypeSeparator_Main(struct Main this, c
             }
         } */
 	return /* new None<>() */;
+}
+private static Option<struct Type> parseAndFlattenType_Main(struct Main this, char* input){
+	return /* parseType(input).map(type -> type.flatten()) */;
 }
 private static Option<struct Type> parseType_Main(struct Main this, char* input){
 	struct var stripped = /* input.strip() */;/* 
@@ -766,7 +810,7 @@ private static Option<struct Type> parseType_Main(struct Main this, char* input)
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
-                var args = parseValues(argsString, input1 -> parseType(input1).orElseGet(() -> new Content(input1)));
+                var args = parseValues(argsString, input1 -> parseAndFlattenType(input1).orElseGet(() -> new Content(input1)));
 
                 return new Some<>(new Generic(base, args));
             }
@@ -777,7 +821,7 @@ private static Option<struct Type> parseType_Main(struct Main this, char* input)
         } */
 	return /* new None<>() */;
 }
-/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, Function<char*, T> compiler){
+/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, T(*)(char*) compiler){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
 }
 private static struct State foldValueChar_Main(struct Main this, struct State state, struct char c){/* 

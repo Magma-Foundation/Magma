@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 public class Main {
     private interface Type {
         String generate();
+
+        default Type flatten() {
+            return this;
+        }
     }
 
     private interface Definable {
@@ -69,6 +73,11 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public Type flatten() {
+            return this;
         }
     }
 
@@ -238,6 +247,11 @@ public class Main {
             var typeParamString = this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">";
             return "struct " + this.name + typeParamString;
         }
+
+        @Override
+        public Type flatten() {
+            return this;
+        }
     }
 
     private record Ref(Type type) implements Type {
@@ -245,12 +259,38 @@ public class Main {
         public String generate() {
             return this.type.generate() + "*";
         }
+
+        @Override
+        public Type flatten() {
+            return this;
+        }
     }
 
     private record Content(String input) implements Type, FunctionSegment, StatementValue, Value, Parameter {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public Type flatten() {
+            return this;
+        }
+    }
+
+    private record Functional(List<Type> paramTypes, Type returnType) implements Type {
+        @Override
+        public String generate() {
+            var joined = this.paramTypes.stream()
+                    .map(Type::generate)
+                    .collect(Collectors.joining(", "));
+
+            return this.returnType.generate() + "(*)(" + joined + ")";
+        }
+
+        @Override
+        public Type flatten() {
+            return null;
         }
     }
 
@@ -262,6 +302,17 @@ public class Main {
                     .collect(Collectors.joining(", "));
 
             return this.base() + "<" + joinedArgs + ">";
+        }
+
+        @Override
+        public Type flatten() {
+            if (this.base.equals("Function")) {
+                var param0 = this.args.getFirst();
+                var returns = this.args.get(1);
+                return new Functional(List.of(param0), returns);
+            }
+
+            return this;
         }
     }
 
@@ -362,6 +413,7 @@ public class Main {
         public String generate() {
             return this.input;
         }
+
     }
 
     private static final List<String> typeParams = new ArrayList<>();
@@ -830,7 +882,7 @@ public class Main {
 
         var withName = new DefinitionBuilder().withName(name);
         return switch (findTypeSeparator(beforeName)) {
-            case None<Integer> _ -> parseType(beforeName).map(type -> new DefinitionBuilder()
+            case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
                     .withType(type)
                     .withName(name)
                     .complete());
@@ -847,7 +899,7 @@ public class Main {
 
                         var typeParams = parseValues(typeParamString, Function.identity());
                         Main.typeParams.addAll(typeParams);
-                        var maybeOutputType = parseType(inputType);
+                        var maybeOutputType = parseAndFlattenType(inputType);
 
                         yield maybeOutputType.map(outputType -> withName
                                 .withBeforeType(generatePlaceholder(withoutTypeParams))
@@ -856,7 +908,7 @@ public class Main {
                                 .complete());
                     }
                 }
-                yield parseType(inputType).map(outputType -> withName
+                yield parseAndFlattenType(inputType).map(outputType -> withName
                         .withBeforeType(beforeType)
                         .withType(outputType)
                         .complete());
@@ -880,6 +932,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Option<Type> parseAndFlattenType(String input) {
+        return parseType(input).map(type -> type.flatten());
     }
 
     private static Option<Type> parseType(String input) {
@@ -906,7 +962,7 @@ public class Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
-                var args = parseValues(argsString, input1 -> parseType(input1).orElseGet(() -> new Content(input1)));
+                var args = parseValues(argsString, input1 -> parseAndFlattenType(input1).orElseGet(() -> new Content(input1)));
 
                 return new Some<>(new Generic(base, args));
             }
