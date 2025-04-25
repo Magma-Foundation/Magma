@@ -234,10 +234,6 @@ public class Main {
             this.typeParams = typeParams;
         }
 
-        Definition(Type type, String name) {
-            this(new None<>(), type, name, Collections.emptyList());
-        }
-
         @Override
         public String generate() {
             String joinedTypeParams;
@@ -1162,7 +1158,10 @@ public class Main {
                     newParent = new Symbol(name);
                     localCounter++;
 
-                    statements.add(new Assignment(new Definition(resolved, name), parent));
+                    statements.add(new Assignment(new DefinitionBuilder()
+                            .withType(resolved)
+                            .withName(name)
+                            .complete(), parent));
                 }
 
                 var arguments = new ArrayList<Value>();

@@ -242,11 +242,6 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 	this.typeParams = typeParams;
 	return this;
 }
-struct Definition new_Definition(struct Type type, char* name){
-	struct Definition this;
-	this(new_None_Whitespace(), type, name, Collections.emptyList(Collections));
-	return this;
-}
 /* @Override
         public */ char* generate_Definition(struct Definition this){
 	/* /* inner -> !inner */ */ local0 = /* inner -> !inner */;
@@ -1053,7 +1048,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                     newParent = new Symbol(name);
                     localCounter++;
 
-                    statements.add(new Assignment(new Definition(resolved, name), parent));
+                    statements.add(new Assignment(new DefinitionBuilder()
+                            .withType(resolved)
+                            .withName(name)
+                            .complete(), parent));
                 }
 
                 var arguments = new ArrayList<Value>();
