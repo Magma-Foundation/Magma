@@ -403,6 +403,17 @@ public class Main {
         }
     }
 
+    private record Invocation(Value caller, List<Value> args) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.args.stream()
+                    .map(Value::generate)
+                    .collect(Collectors.joining(", "));
+
+            return this.caller.generate() + "(" + joined + ")";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
@@ -834,20 +845,18 @@ public class Main {
 
     private static Value parseValue(String input) {
         var stripped = input.strip();
-        if (stripped.startsWith("new ")) {
-            var withoutPrefix = stripped.substring("new ".length()).strip();
-            if (withoutPrefix.endsWith(")")) {
-                var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
-                var argsStart = withoutEnd.indexOf("(");
-                if (argsStart >= 0) {
-                    var inputType = withoutEnd.substring(0, argsStart);
-                    var args = withoutEnd.substring(argsStart + "(".length());
 
-                    if (parseType(inputType) instanceof Some(var outputType)) {
-                        return new Construction(outputType, parseValues(args, Main::parseValue));
-                    }
-                }
+        if (stripped.startsWith("new ")) {
+            var substring = stripped.substring("new ".length());
+            var maybeInvokable = compileInvokable(substring, Main::parseType, Construction::new);
+            if (maybeInvokable instanceof Some(var invokable)) {
+                return invokable;
             }
+        }
+
+        var maybeInvocation = compileInvokable(stripped, beforeArgs -> new Some<>(parseValue(beforeArgs)), Invocation::new);
+        if (maybeInvocation instanceof Some(var invocation)) {
+            return invocation;
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -865,6 +874,33 @@ public class Main {
         }
 
         return new Content(stripped);
+    }
+
+    private static <T, R> Option<R> compileInvokable(
+            String input,
+            Function<String, Option<T>> beforeArgsCaller,
+            BiFunction<T, List<Value>, R> builder
+    ) {
+        var withoutPrefix = input.strip();
+        if (!withoutPrefix.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+        var argsStart = withoutEnd.indexOf("(");
+        if (argsStart < 0) {
+            return new None<>();
+        }
+
+        var inputBeforeArgs = withoutEnd.substring(0, argsStart);
+        var args = withoutEnd.substring(argsStart + "(".length());
+
+        if (!(beforeArgsCaller.apply(inputBeforeArgs) instanceof Some(var outputBeforeArgs))) {
+            return new None<>();
+        }
+
+        var values = parseValues(args, Main::parseValue);
+        return new Some<>(builder.apply(outputBeforeArgs, values));
     }
 
     private static Parameter parseParameter(String input) {
