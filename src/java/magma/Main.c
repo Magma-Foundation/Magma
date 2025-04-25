@@ -7,9 +7,9 @@
 /* import java.util.function.Function; */
 /*  */
 struct State {
-	/* private final List<String> */ segments;
-	/* private int */ depth;
-	/* private StringBuilder */ buffer;
+	/* private final */ /* List<String> */ segments;
+	/* private */ /* int */ depth;
+	/* private */ /* StringBuilder */ buffer;
 	/* private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         } */
@@ -45,7 +45,7 @@ struct State {
 };
 struct ");
         if (classIndex >= 0) {
-	/* var afterKeyword = stripped.substring(classIndex + "class */ ".length());
+	/* var afterKeyword = stripped.substring(classIndex + */ /* "class */ ".length());
 	/* var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
@@ -59,11 +59,10 @@ struct ");
                     return Optional.of("");
                 }
             } */
-	/* }
-        return */ Optional.empty();
+	/* } */ /* return */ Optional.empty();
 };
 struct Main {
-	/* public static final List<String> structs = new */ ArrayList<>();
+	/* public static final List<String> structs = */ /* new */ ArrayList<>();
 	/* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -163,10 +162,19 @@ struct Main {
         if (nameSeparator >= 0) {
             var beforeName = stripped.substring(0, nameSeparator).strip();
             var name = stripped.substring(nameSeparator + " ".length()).strip();
-            return generatePlaceholder(beforeName) + " " + name;
+
+            var typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
+            }
         }
 
         return generatePlaceholder(stripped);
+    } */
+	/* private static String compileType(String type) {
+        return generatePlaceholder(type);
     } */
 	/* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";

@@ -184,10 +184,20 @@ public class Main {
         if (nameSeparator >= 0) {
             var beforeName = stripped.substring(0, nameSeparator).strip();
             var name = stripped.substring(nameSeparator + " ".length()).strip();
-            return generatePlaceholder(beforeName) + " " + name;
+
+            var typeSeparator = beforeName.lastIndexOf(" ");
+            if (typeSeparator >= 0) {
+                var beforeType = beforeName.substring(0, typeSeparator).strip();
+                var type = beforeName.substring(typeSeparator + " ".length()).strip();
+                return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
+            }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileType(String type) {
+        return generatePlaceholder(type);
     }
 
     private static String generatePlaceholder(String stripped) {
