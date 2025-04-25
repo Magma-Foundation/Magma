@@ -9,15 +9,17 @@ import java.util.List;
 public class Main {
     private static class State {
         private final List<String> segments;
+        private int depth;
         private StringBuilder buffer;
 
         private State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private State(List<String> segments, StringBuilder buffer) {
+        private State(List<String> segments, StringBuilder buffer, int depth) {
             this.buffer = buffer;
             this.segments = segments;
+            this.depth = depth;
         }
 
         private State advance() {
@@ -28,6 +30,20 @@ public class Main {
 
         private State append(char c) {
             this.buffer.append(c);
+            return this;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State enter() {
+            this.depth++;
+            return this;
+        }
+
+        public State exit() {
+            this.depth--;
             return this;
         }
     }
@@ -66,19 +82,31 @@ public class Main {
 
     private static State foldStatementChar(State current, char c) {
         var appended = current.append(c);
-        if (c == ';') {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        else {
-            return appended;
+
+        if (c == '{') {
+            return appended.enter();
         }
+        if (c == '}') {
+            return appended.exit();
+        }
+
+        return appended;
     }
 
     private static String compileRootSegment(String input) {
         var stripped = input.strip();
+
         if (stripped.startsWith("package ")) {
             return "";
         }
+
+        if (stripped.contains("class ")) {
+            return "struct Temp {\n};\n";
+        }
+
         return "/* " + stripped + " */\n";
     }
 }
