@@ -450,7 +450,7 @@ public class Main {
         }
     }
 
-    private record Invocation(Value caller, List<Value> args) implements Value {
+    private record Invocation(Value caller, List<Value> args) implements Value, StatementValue {
         @Override
         public String generate() {
             var joined = this.args.stream()
@@ -497,6 +497,7 @@ public class Main {
             return this.value;
         }
     }
+
     private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
@@ -893,13 +894,14 @@ public class Main {
     }
 
     private static StatementValue parseStatementValue(String input) {
-        return compileReturn(input).<StatementValue>map(value -> value)
-                .or(() -> compileAssignment(input).map(value -> value))
+        return parseReturn(input).<StatementValue>map(value -> value)
+                .or(() -> parseInvocation(input).map(value -> value))
+                .or(() -> parseAssignment(input).map(value -> value))
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Option<Return> compileReturn(String input) {
+    private static Option<Return> parseReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValueOrPlaceholder(stripped.substring("return ".length()))));
@@ -929,13 +931,12 @@ public class Main {
     }
 
     private static StatementValue compileClassStatementValue(String input) {
-        return compileAssignment(input)
-                .map(value -> value)
+        return parseAssignment(input).<StatementValue>map(value -> value)
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Option<StatementValue> compileAssignment(String input) {
+    private static Option<Assignment> parseAssignment(String input) {
         var valueSeparator = input.indexOf("=");
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
@@ -965,9 +966,9 @@ public class Main {
             }
         }
 
-        var maybeInvocation = parseInvokable(stripped, Main::parseValue, Invocation::new);
+        var maybeInvocation = parseInvocation(stripped);
         if (maybeInvocation instanceof Some(var invocation)) {
-            return new Some<>(invocation.toInvocation());
+            return new Some<>(invocation);
         }
 
         var conditionSeparator = stripped.indexOf("?");
@@ -1015,6 +1016,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Option<Invocation> parseInvocation(String stripped) {
+        return parseInvokable(stripped, Main::parseValue, Invocation::new);
     }
 
     private static boolean isNumber(String input) {
