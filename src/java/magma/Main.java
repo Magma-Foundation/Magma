@@ -5,14 +5,43 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Main {
     private interface Type {
         String generate();
+    }
+
+    private interface Definable {
+        Definition toDefinition();
+    }
+
+    private sealed interface Optional<T> {
+        static <T> Optional<T> empty() {
+            return new None<>();
+        }
+
+        static <T> Optional<T> of(T name) {
+            return new Some<>(name);
+        }
+
+        <R> Optional<R> map(Function<T, R> mapper);
+
+        T orElse(T other);
+
+        T orElseGet(Supplier<T> other);
+
+        Optional<T> or(Supplier<Optional<T>> other);
+
+        <R> Optional<R> flatMap(Function<T, Optional<R>> mapper);
+
+        Optional<T> filter(Predicate<T> predicate);
+
+        boolean isPresent();
     }
 
     private enum Primitive implements Type {
@@ -28,6 +57,80 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+    }
+
+    private record Some<T>(T value) implements Optional<T> {
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return this;
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Optional<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+    }
+
+    private static final class None<T> implements Optional<T> {
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Optional<T> filter(Predicate<T> predicate) {
+            return this;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
         }
     }
 
@@ -76,7 +179,7 @@ public class Main {
         }
     }
 
-    private record Definition(Optional<String> maybeBeforeType, Type type, String name) {
+    private record Definition(Optional<String> maybeBeforeType, Type type, String name) implements Definable {
         public Definition(Type type, String name) {
             this(Optional.empty(), type, name);
         }
@@ -84,6 +187,11 @@ public class Main {
         private String generate() {
             var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
             return beforeType + this.type().generate() + " " + this.name();
+        }
+
+        @Override
+        public Definition toDefinition() {
+            return this;
         }
     }
 
@@ -116,6 +224,13 @@ public class Main {
                     .collect(Collectors.joining(", "));
 
             return this.base() + "<" + joinedArgs + ">";
+        }
+    }
+
+    private record Constructor(String name) implements Definable {
+        @Override
+        public Definition toDefinition() {
+            return new Definition(new Struct(this.name()), "new_" + this.name());
         }
     }
 
@@ -328,19 +443,21 @@ public class Main {
             var beforeParams = input.substring(0, paramStart).strip();
             var withParams = input.substring(paramStart + "(".length());
 
-            var header = compileDefinition(beforeParams)
-                    .or(() -> compileConstructorDefinition(beforeParams))
-                    .orElseGet(() -> compileDefinitionOrPlaceholder(beforeParams));
+            var maybeHeader = parseDefinition(beforeParams)
+                    .<Definable>map(value -> value)
+                    .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
 
-            var paramEnd = withParams.indexOf(")");
-            if (paramEnd >= 0) {
-                var params = withParams.substring(0, paramEnd).strip();
-                var withBraces = withParams.substring(paramEnd + ")".length()).strip();
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1);
-                    var constructor = header + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
-                    functions.add(constructor);
-                    return Optional.of("");
+            if (maybeHeader instanceof Some(var header)) {
+                var paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    var params = withParams.substring(0, paramEnd).strip();
+                    var withBraces = withParams.substring(paramEnd + ")".length()).strip();
+                    if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                        var content = withBraces.substring(1, withBraces.length() - 1);
+                        var constructor = maybeHeader + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
+                        functions.add(constructor);
+                        return Optional.of("");
+                    }
                 }
             }
         }
@@ -348,10 +465,10 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileConstructorDefinition(String input) {
+    private static Optional<Constructor> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
-                return Optional.of(new Definition(new Struct(name), "new_" + name).generate());
+            if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
+                return Optional.of(new Constructor(name));
             }
             return Optional.empty();
         });
@@ -436,6 +553,10 @@ public class Main {
     }
 
     private static Optional<String> compileDefinition(String input) {
+        return parseDefinition(input).map(Definition::generate);
+    }
+
+    private static Optional<Definition> parseDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -447,16 +568,12 @@ public class Main {
 
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
-            return parseType(beforeName).map(type -> new Definition(Optional.empty(), type, name).generate());
+            return parseType(beforeName).map(type -> new Definition(Optional.empty(), type, name));
         }
 
         var beforeType = beforeName.substring(0, typeSeparator).strip();
         var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-        return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name).generate());
-    }
-
-    private static Optional<String> compileType(String input) {
-        return parseType(input).map(Type::generate);
+        return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name));
     }
 
     private static Optional<Type> parseType(String input) {
