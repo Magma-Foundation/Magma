@@ -527,53 +527,56 @@ public class Main {
         }
 
         var paramEnd = withParams.indexOf(")");
-        if (paramEnd >= 0) {
-            var paramStrings = withParams.substring(0, paramEnd).strip();
-            var afterParams = withParams.substring(paramEnd + ")".length()).strip();
-            if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
-                var content = afterParams.substring(1, afterParams.length() - 1);
+        if (paramEnd < 0) {
+            return new None<>();
+        }
 
-                var inputParams = parseValues(paramStrings, Main::parseParameter);
-                var oldStatements = parseStatements(content, Main::parseStatement);
+        var paramStrings = withParams.substring(0, paramEnd).strip();
+        var afterParams = withParams.substring(paramEnd + ")".length()).strip();
+        if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
+            var content = afterParams.substring(1, afterParams.length() - 1);
 
-                ArrayList<FunctionSegment> newStatements;
-                if (header instanceof ConstructorDefinition(var name)) {
-                    var copy = new ArrayList<FunctionSegment>();
-                    copy.add(new Statement(new Definition(new Struct(name), "this")));
-                    copy.addAll(oldStatements);
-                    copy.add(new Statement(new Return(new Symbol("this"))));
-                    newStatements = copy;
-                }
-                else {
-                    newStatements = new ArrayList<>(oldStatements);
-                }
+            var inputParams = parseValues(paramStrings, Main::parseParameter);
+            var oldStatements = parseStatements(content, Main::parseStatement);
 
-                var outputContent = newStatements
-                        .stream()
-                        .map(FunctionSegment::generate)
-                        .collect(Collectors.joining());
-
-                var currentStructName = maybeCurrentStructName.orElse("");
-                var outputParams = new ArrayList<Parameter>();
-                if (header instanceof Definition _) {
-                    outputParams.add(new Definition(new Struct(currentStructName), "this"));
-                }
-                outputParams.addAll(inputParams
-                        .stream()
-                        .filter(node -> !(node instanceof Whitespace))
-                        .toList());
-
-                var outputParamStrings = outputParams.stream()
-                        .map(Parameter::generate)
-                        .collect(Collectors.joining(", "));
-
-                var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
-                functions.add(constructor);
-                return new Some<>("");
+            ArrayList<FunctionSegment> newStatements;
+            if (header instanceof ConstructorDefinition(var name)) {
+                var copy = new ArrayList<FunctionSegment>();
+                copy.add(new Statement(new Definition(new Struct(name), "this")));
+                copy.addAll(oldStatements);
+                copy.add(new Statement(new Return(new Symbol("this"))));
+                newStatements = copy;
             }
-            if (afterParams.equals(";")) {
-                return new Some<>("");
+            else {
+                newStatements = new ArrayList<>(oldStatements);
             }
+
+            var outputContent = newStatements
+                    .stream()
+                    .map(FunctionSegment::generate)
+                    .collect(Collectors.joining());
+
+            var currentStructName = maybeCurrentStructName.orElse("");
+            var outputParams = new ArrayList<Parameter>();
+            if (header instanceof Definition _) {
+                outputParams.add(new Definition(new Struct(currentStructName), "this"));
+            }
+            outputParams.addAll(inputParams
+                    .stream()
+                    .filter(node -> !(node instanceof Whitespace))
+                    .toList());
+
+            var outputParamStrings = outputParams.stream()
+                    .map(Parameter::generate)
+                    .collect(Collectors.joining(", "));
+
+            var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+            functions.add(constructor);
+            return new Some<>("");
+        }
+
+        if (afterParams.equals(";")) {
+            return new Some<>("");
         }
 
         return new None<>();
