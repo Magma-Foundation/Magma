@@ -38,7 +38,8 @@ struct Primitive {
 	/* private final */ char* value;
 };
 struct Operator {
-	/* Equals(" */ = /* =") */;
+	/* Equals(" */ = /* ="),
+        Add("+") */;
 	/* private final */ char* representation;
 };
 struct Some<T> {
@@ -277,7 +278,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 	char* joinedTypeParams = this.generateTypeParams(this);
 	char* beforeType = this.generateBeforeType(this);
 	char* generatedWithName = this.generatedWithName(this);
-	return /* beforeType + generatedWithName + joinedTypeParams */;
+	return beforeType + generatedWithName + joinedTypeParams;
 }
 struct Struct new_Struct(char* name){
 	struct Struct this;
@@ -524,7 +525,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/* /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */ */ output = /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */;
 	/* /*  String.join("", structs) */ */ joinedStructs = /*  String.join("", structs) */;
 	/* /*  String.join("", functions) */ */ joinedFunctions = /*  String.join("", functions) */;
-	return /* output + joinedStructs + joinedFunctions */;
+	return output + joinedStructs + joinedFunctions;
 }
 /* private static */ char* compileStatements_Main(struct Main this, char* input, Option<char*> (*compiler)(char*)){
 	return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
@@ -613,11 +614,12 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* compileStructured(stripped, "class ") */;
 }
 /* private static */ Option<char*> compileStructured_Main(struct Main this, char* stripped, char* infix){
+	/* classIndex + infix */ local0 = classIndex + infix;
 	/* /* I8_star */ */ classIndex = stripped.indexOf(stripped, infix);/* 
         if (classIndex < 0) {
             return new None<>();
         } */
-	/* /*  stripped.substring(classIndex + infix.length()) */ */ afterKeyword = /*  stripped.substring(classIndex + infix.length()) */;/* 
+	/* /* I8_star */ */ afterKeyword = stripped.substring(stripped, local0.length(local0));/* 
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return new None<>();
@@ -1016,8 +1018,16 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                     return new Some<>(new Ternary(condition, whenTrue, whenFalse));
                 }
             }
+        } *//* 
+
+        for (var operator : Operator.values()) {
+            if(parseOperator(input, operator) instanceof Some<Value> some) {
+                return some;
+            }
         } */
-	/* Operator */ operator = Operator.Equals;
+	return new_None_Whitespace();
+}
+/* private static */ Option<struct Value> parseOperator_Main(struct Main this, char* input, struct Operator operator){
 	/* /* I8_star */ */ operatorIndex = input.indexOf(input, operator.representation);/* 
         if (operatorIndex >= 0) {
             var leftString = input.substring(0, operatorIndex);

@@ -92,7 +92,8 @@ public class Main {
     }
 
     private enum Operator {
-        Equals("==");
+        Equals("=="),
+        Add("+");
 
         private final String representation;
 
@@ -1183,7 +1184,16 @@ public class Main {
             }
         }
 
-        var operator = Operator.Equals;
+        for (var operator : Operator.values()) {
+            if(parseOperator(input, operator) instanceof Some<Value> some) {
+                return some;
+            }
+        }
+
+        return new None<>();
+    }
+
+    private static Option<Value> parseOperator(String input, Operator operator) {
         var operatorIndex = input.indexOf(operator.representation);
         if (operatorIndex >= 0) {
             var leftString = input.substring(0, operatorIndex);
@@ -1194,7 +1204,6 @@ public class Main {
                 return new Some<>(new Operation(left, operator, right));
             }
         }
-
         return new None<>();
     }
 
