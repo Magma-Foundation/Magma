@@ -315,7 +315,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements FunctionSegment, Parameter {
+    private static class Whitespace implements FunctionSegment, Parameter, Type {
         @Override
         public String generate() {
             return "";
@@ -390,6 +390,17 @@ public class Main {
             return this.input;
         }
 
+    }
+
+    private record Construction(Type type, List<Value> values) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.values.stream()
+                    .map(Value::generate)
+                    .collect(Collectors.joining(", "));
+
+            return "new " + this.type.generate() + "(" + joined + ")";
+        }
     }
 
     private static final List<String> typeParams = new ArrayList<>();
@@ -592,6 +603,10 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.isEmpty()) {
+            return false;
+        }
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -819,6 +834,22 @@ public class Main {
 
     private static Value parseValue(String input) {
         var stripped = input.strip();
+        if (stripped.startsWith("new ")) {
+            var withoutPrefix = stripped.substring("new ".length()).strip();
+            if (withoutPrefix.endsWith(")")) {
+                var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+                var argsStart = withoutEnd.indexOf("(");
+                if (argsStart >= 0) {
+                    var inputType = withoutEnd.substring(0, argsStart);
+                    var args = withoutEnd.substring(argsStart + "(".length());
+
+                    if (parseType(inputType) instanceof Some(var outputType)) {
+                        return new Construction(outputType, parseValues(args, Main::parseValue));
+                    }
+                }
+            }
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
@@ -938,7 +969,10 @@ public class Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
-                var args = parseValues(argsString, input1 -> parseAndFlattenType(input1).orElseGet(() -> new Content(input1)));
+                var args = parseValues(argsString, input1 -> parseWhitespace(input1)
+                        .<Type>map(type -> type)
+                        .or(() -> parseAndFlattenType(input1))
+                        .orElseGet(() -> new Content(input1)));
 
                 return new Some<>(new Generic(base, args));
             }

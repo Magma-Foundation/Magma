@@ -71,17 +71,19 @@ struct Symbol {
 struct Return {
 };
 struct DefinitionBuilder {
-	/* private */ Option<char*> maybeBeforeType = /* new None<String>() */;
+	/* private */ Option<char*> maybeBeforeType = new None<char*>(/*  */);
 	/* private */ struct Type type;
 	/* private */ char* name;
-	/* private */ List<char*> typeParams = /* new ArrayList<>() */;
+	/* private */ List<char*> typeParams = new ArrayList<>(/*  */);
 };
 struct Tuple<A,  B> {
 };
 struct TypeParam {
 };
+struct Construction {
+};
 struct Main {
-	/* private static final */ List<char*> typeParams = /* new ArrayList<>() */;
+	/* private static final */ List<char*> typeParams = new ArrayList<>(/*  */);
 	/* public static */ List<char*> structs;
 	/* private static */ List<char*> functions;
 	/* private static */ List<Tuple<char*, List<char*>>> stack;
@@ -100,7 +102,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* /* @Override
         public  */ */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
-	return /* new Some<>(mapper.apply(this.value)) */;
+	return new Some<>(/* mapper.apply(this.value) */);
 }
 /* @Override
         public */ T orElse_Some<T>(struct Some<T> this, T other){
@@ -124,7 +126,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* /* @Override
         public  */ */ Option<R> map_None<T, R>(struct None<T> this, R (*mapper)(T)){
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* @Override
         public */ T orElse_None<T>(struct None<T> this, T other){
@@ -140,7 +142,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* /* @Override
         public  */ */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R> (*mapper)(T)){
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* @Override
         public */ Option<T> filter_None<T>(struct None<T> this, Predicate<T> predicate){
@@ -154,11 +156,11 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* private static */ struct State createDefault_State(struct State this){
-	return /* new State(new ArrayList<>(), new StringBuilder(), 0) */;
+	return new struct State(new ArrayList<>(/*  */), new struct StringBuilder(/*  */), /* 0 */);
 }
 /* private */ struct State advance_State(struct State this){
 	/* this.segments.add(this.buffer.toString()) */;
-	this.buffer = /* new StringBuilder() */;
+	this.buffer = new struct StringBuilder(/*  */);
 	return this;
 }
 /* private */ struct State append_State(struct State this, struct char c){
@@ -210,10 +212,10 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 	return /* beforeType + generatedWithName + joinedTypeParams */;
 }
 /* public */ struct Definition rename_Definition(struct Definition this, char* name){
-	return /* new Definition(this.maybeBeforeType, this.type, name, this.typeParams) */;
+	return new struct Definition(this.maybeBeforeType, this.type, name, this.typeParams);
 }
 /* public */ struct Definition mapTypeParams_Definition(struct Definition this, List<char*> (*mapper)(List<char*>)){
-	return /* new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams)) */;
+	return new struct Definition(this.maybeBeforeType, this.type, this.name, /* mapper.apply(this.typeParams) */);
 }
 struct Struct new_Struct(char* name){
 	struct Struct this;
@@ -262,7 +264,7 @@ struct Struct new_Struct(char* name){
 	return this;
 }
 /* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
-	return /* new DefinitionBuilder().withType(new Struct(this.name())).withName("new_" + this.name()).complete() */;
+	return new struct DefinitionBuilder(/* ).withType(new Struct(this.name())).withName("new_" + this.name()).complete( */);
 }
 /* @Override
         public */ char* generate_ConstructorDefinition(struct ConstructorDefinition this){
@@ -294,7 +296,7 @@ struct Struct new_Struct(char* name){
 	return /* "return " + this.value.generate() */;
 }
 /* public */ struct DefinitionBuilder withBeforeType_DefinitionBuilder(struct DefinitionBuilder this, char* beforeType){
-	this.maybeBeforeType = /* new Some<>(beforeType) */;
+	this.maybeBeforeType = new Some<>(beforeType);
 	return this;
 }
 /* public */ struct DefinitionBuilder withType_DefinitionBuilder(struct DefinitionBuilder this, struct Type type){
@@ -306,7 +308,7 @@ struct Struct new_Struct(char* name){
 	return this;
 }
 /* public */ struct Definition complete_DefinitionBuilder(struct DefinitionBuilder this){
-	return /* new Definition(this.maybeBeforeType, this.type, this.name, this.typeParams) */;
+	return new struct Definition(this.maybeBeforeType, this.type, this.name, this.typeParams);
 }
 /* public */ struct DefinitionBuilder withTypeParams_DefinitionBuilder(struct DefinitionBuilder this, List<char*> typeParams){
 	this.typeParams = typeParams;
@@ -316,10 +318,17 @@ struct Struct new_Struct(char* name){
         public */ char* generate_TypeParam(struct TypeParam this){
 	return this.input;
 }
+/* @Override
+        public */ char* generate_Construction(struct Construction this){
+	struct var joined = /* this.values.stream()
+                    .map(Value::generate)
+                    .collect(Collectors.joining(", ")) */;
+	return /* "new " + this.type.generate() + "(" + joined + ")" */;
+}
 /* public static */ struct void main_Main(struct Main this){
-	structs = /* new ArrayList<>() */;
-	functions = /* new ArrayList<>() */;
-	stack = /* new ArrayList<>() */;/* 
+	structs = new ArrayList<>(/*  */);
+	functions = new ArrayList<>(/*  */);
+	stack = new ArrayList<>(/*  */);/* 
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -344,7 +353,7 @@ struct Struct new_Struct(char* name){
 	return /* generateAll(merger, parseAll(input, folder, compiler)) */;
 }
 /* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
-	struct var output = /* new StringBuilder() */;/* 
+	struct var output = new struct StringBuilder(/*  */);/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
@@ -352,7 +361,7 @@ struct Struct new_Struct(char* name){
 }
 /* /* private static  */ */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, T (*compiler)(char*)){
 	struct var segments = /* divide(input, folder) */;
-	struct var compiled = /* new ArrayList<T>() */;/* 
+	struct var compiled = new ArrayList<T>(/*  */);/* 
         for (var segment : segments) {
             compiled.add(compiler.apply(segment));
         } */
@@ -480,9 +489,12 @@ struct Struct new_Struct(char* name){
 	/* \n" */;
 	/* stack.removeLast() */;
 	/* structs.add(generated) */;
-	return /* new Some<>("") */;
+	return new Some<>(/* "" */);
 }
-/* private static */ struct boolean isSymbol_Main(struct Main this, char* input){
+/* private static */ struct boolean isSymbol_Main(struct Main this, char* input){/* 
+        if (input.isEmpty()) {
+            return false;
+        } */
 	/* for (var i */ = /* 0 */;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
@@ -603,7 +615,7 @@ struct Struct new_Struct(char* name){
 	/* if (afterParams.equals(" */;/* ")) {
             return new Some<>("");
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* /* private static  */ */ List<T> parseStatements_Main<T>(struct Main this, char* content, T (*compiler)(char*)){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
@@ -627,7 +639,7 @@ struct Struct new_Struct(char* name){
         if (isSymbol(stripped)) {
             return new Some<>(stripped);
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* private static */ struct FunctionSegment parseStatement_Main(struct Main this, char* input){
 	return /* parseWhitespace(input)
@@ -646,7 +658,7 @@ struct Struct new_Struct(char* name){
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValue(stripped.substring("return ".length()))));
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* private static */ Option<char*> compileClassStatement_Main(struct Main this, char* input){
 	return /* compileStatement(input, Main::compileClassStatementValue) */;
@@ -683,10 +695,25 @@ struct Struct new_Struct(char* name){
 
             return new Some<>(new Assignment(destination, parseValue(value)));
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* private static */ struct Value parseValue_Main(struct Main this, char* input){
-	struct var stripped = /* input.strip() */;
+	struct var stripped = /* input.strip() */;/* 
+        if (stripped.startsWith("new ")) {
+            var withoutPrefix = stripped.substring("new ".length()).strip();
+            if (withoutPrefix.endsWith(")")) {
+                var withoutEnd = withoutPrefix.substring(0, withoutPrefix.length() - ")".length());
+                var argsStart = withoutEnd.indexOf("(");
+                if (argsStart >= 0) {
+                    var inputType = withoutEnd.substring(0, argsStart);
+                    var args = withoutEnd.substring(argsStart + "(".length());
+
+                    if (parseType(inputType) instanceof Some(var outputType)) {
+                        return new Construction(outputType, parseValues(args, Main::parseValue));
+                    }
+                }
+            }
+        } */
 	struct var separator = /* stripped.lastIndexOf(".") */;/* 
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
@@ -700,7 +727,7 @@ struct Struct new_Struct(char* name){
         if (isSymbol(stripped)) {
             return new Symbol(stripped);
         } */
-	return /* new Content(stripped) */;
+	return new struct Content(stripped);
 }
 /* private static */ struct Parameter parseParameter_Main(struct Main this, char* input){
 	return /* parseWhitespace(input)
@@ -719,7 +746,7 @@ struct Struct new_Struct(char* name){
         if (!isSymbol(name)) {
             return new None<>();
         } */
-	struct var withName = /* new DefinitionBuilder().withName(name) */;/* 
+	struct var withName = new struct DefinitionBuilder(/* ).withName(name */);/* 
         return switch (findTypeSeparator(beforeName)) {
             case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
                     .withType(type)
@@ -770,7 +797,7 @@ struct Struct new_Struct(char* name){
                 depth--;
             }
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* private static */ Option<struct Type> parseAndFlattenType_Main(struct Main this, char* input){
 	return /* parseType(input).map(Type::flatten) */;
@@ -799,7 +826,10 @@ struct Struct new_Struct(char* name){
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
-                var args = parseValues(argsString, input1 -> parseAndFlattenType(input1).orElseGet(() -> new Content(input1)));
+                var args = parseValues(argsString, input1 -> parseWhitespace(input1)
+                        .<Type>map(type -> type)
+                        .or(() -> parseAndFlattenType(input1))
+                        .orElseGet(() -> new Content(input1)));
 
                 return new Some<>(new Generic(base, args));
             }
@@ -808,7 +838,7 @@ struct Struct new_Struct(char* name){
         if (isSymbol(stripped)) {
             return new Some<>(new Struct(stripped));
         } */
-	return /* new None<>() */;
+	return new None<>(/*  */);
 }
 /* /* private static  */ */ List<T> parseValues_Main<T>(struct Main this, char* args, T (*compiler)(char*)){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
