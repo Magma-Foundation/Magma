@@ -829,13 +829,22 @@ public class Main {
             String result;
             if (this.value instanceof Value) {
                 result = " => " + this.value.generate();
-            } else {
-                result = value.generate();
+            }
+            else {
+                result = this.value.generate();
             }
 
             return "(" + joinedParams + ")";
         }
     }
+
+    private record Not(Value child) implements Value {
+        @Override
+        public String generate() {
+            return "!" + this.child.generate();
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -1582,6 +1591,7 @@ public class Main {
         }
 
         var rules = new ArrayList<Rule<Value>>(List.of(
+                new TypeRule<>("not", Main::compileNot),
                 new TypeRule<>("lambda", Main::compileLambda),
                 new TypeRule<>("instanceof", Main::parseInstanceOf),
                 new TypeRule<>("invocation", Main::parseInvocation),
@@ -1594,6 +1604,16 @@ public class Main {
                 .toList());
 
         return parseOr(input, rules);
+    }
+
+    private static Result<Not, CompileError> compileNot(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("!")) {
+            var slice = stripped.substring(1);
+            return parseValue(slice).mapValue(Not::new);
+        }
+
+        return createPrefixErr(stripped, "!");
     }
 
     private static Result<Value, CompileError> compileLambda(String input) {
