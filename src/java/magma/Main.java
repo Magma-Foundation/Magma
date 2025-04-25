@@ -798,12 +798,18 @@ public class Main {
     }
 
     private static State foldValueChar(State state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        else {
-            return state.append(c);
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
         }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {

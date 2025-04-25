@@ -78,7 +78,7 @@ struct Primitive new_Primitive(char* value){
 	return this.value;
 }
 /* @Override
-        public <R> */ Option<struct R> map_Some(struct Some this, /* Function<T */, /*  R> mapper */){
+        public <R> */ Option<struct R> map_Some(struct Some this, Function<struct T, struct R> mapper){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 /* @Override
@@ -94,7 +94,7 @@ struct Primitive new_Primitive(char* value){
 	return this;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap_Some(struct Some this, /* Function<T */, Option</* R> */> mapper){
+        public <R> */ Option<struct R> flatMap_Some(struct Some this, Function<struct T, Option<struct R>> mapper){
 	return /* mapper.apply(this.value) */;
 }
 /* @Override
@@ -106,7 +106,7 @@ struct Primitive new_Primitive(char* value){
 	return true;
 }
 /* @Override
-        public <R> */ Option<struct R> map_None(struct None this, /* Function<T */, /*  R> mapper */){
+        public <R> */ Option<struct R> map_None(struct None this, Function<struct T, struct R> mapper){
 	return /* new None<>() */;
 }
 /* @Override
@@ -122,7 +122,7 @@ struct Primitive new_Primitive(char* value){
 	return /* other.get() */;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap_None(struct None this, /* Function<T */, Option</* R> */> mapper){
+        public <R> */ Option<struct R> flatMap_None(struct None this, Function<struct T, Option<struct R>> mapper){
 	return /* new None<>() */;
 }
 /* @Override
@@ -246,25 +246,20 @@ struct public Definition_Definition(struct Definition this, struct Type type, ch
 	struct var joinedFunctions = /* String.join("", functions) */;
 	return /* output + joinedStructs + joinedFunctions */;
 }
-/* private static */ char* compileStatements_Main(struct Main this, char* input, /*  Function<String */, /*  String> compiler */){
+/* private static */ char* compileStatements_Main(struct Main this, char* input, Function<char*, char*> compiler){
 	return /* compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 }
-/* private static */ char* compileAll_Main(struct Main this, char* input, /* 
-            BiFunction<State */, /*  Character */, /*  State> folder */, /* 
-            Function<String */, /*  String> compiler */, /* 
-            BiFunction<StringBuilder */, /*  String */, /*  StringBuilder> merger */){
+/* private static */ char* compileAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
 	return /* generateAll(merger, parseAll(input, folder, compiler)) */;
 }
-/* private static */ char* generateAll_Main(struct Main this, /* BiFunction<StringBuilder */, /*  String */, /*  StringBuilder> merger */, List<char*> compiled){
+/* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
 	struct var output = /* new StringBuilder() */;/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
 	return /* output.toString() */;
 }
-/* private static <T> */ List<struct T> parseAll_Main(struct Main this, char* input, /* 
-            BiFunction<State */, /*  Character */, /*  State> folder */, /* 
-            Function<String */, /*  T> compiler */){
+/* private static <T> */ List<struct T> parseAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, struct T> compiler){
 	struct var segments = /* divide(input, folder) */;
 	struct var compiled = /* new ArrayList<T>() */;/* 
         for (var segment : segments) {
@@ -275,10 +270,10 @@ struct public Definition_Definition(struct Definition this, struct Type type, ch
 /* private static */ struct StringBuilder mergeStatements_Main(struct Main this, struct StringBuilder output, char* compiled){
 	return /* output.append(compiled) */;
 }
-/* private static */ List<char*> divide_Main(struct Main this, char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
+/* private static */ List<char*> divide_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	return /* divideAll(input, folder) */;
 }
-/* private static */ List<char*> divideAll_Main(struct Main this, char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
+/* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	struct var current = /* State.createDefault() */;
 	/* for (var i */ = /* 0 */;
 	/* i < input.length() */;/*  i++) {
@@ -491,7 +486,7 @@ struct public Definition_Definition(struct Definition this, struct Type type, ch
         } */
 	return /* new None<>() */;
 }
-/* private static <T> */ List<struct T> parseStatements_Main(struct Main this, char* content, /*  Function<String */, /*  T> compiler */){
+/* private static <T> */ List<struct T> parseStatements_Main(struct Main this, char* content, Function<char*, struct T> compiler){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
 }
 /* private static */ Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
@@ -537,10 +532,10 @@ struct public Definition_Definition(struct Definition this, struct Type type, ch
 /* private static */ Option<char*> compileClassStatement_Main(struct Main this, char* input){
 	return /* compileStatement(input, Main::compileClassStatementValue) */;
 }
-/* private static */ Option<char*> compileStatement_Main(struct Main this, char* input, /*  Function<String */, /*  StatementValue> compiler */){
+/* private static */ Option<char*> compileStatement_Main(struct Main this, char* input, Function<char*, struct StatementValue> compiler){
 	return /* parseStatementWithoutBraces(input, compiler).map(Statement::generate) */;
 }
-/* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, /*  Function<String */, /*  StatementValue> compiler */){
+/* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, Function<char*, struct StatementValue> compiler){
 	struct var stripped = /* input.strip() */;
 	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -664,22 +659,27 @@ struct public Definition_Definition(struct Definition this, struct Type type, ch
         } */
 	return /* new None<>() */;
 }
-/* private static */ char* compileValues_Main(struct Main this, char* args, /*  Function<String */, /*  String> compiler */){
+/* private static */ char* compileValues_Main(struct Main this, char* args, Function<char*, char*> compiler){
 	return /* generateValues(parseValues(args, compiler)) */;
 }
 /* private static */ char* generateValues_Main(struct Main this, List<char*> values){
 	return /* generateAll(Main::mergeValues, values) */;
 }
-/* private static <T> */ List<struct T> parseValues_Main(struct Main this, char* args, /*  Function<String */, /*  T> compiler */){
+/* private static <T> */ List<struct T> parseValues_Main(struct Main this, char* args, Function<char*, struct T> compiler){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
 }
 /* private static */ struct State foldValueChar_Main(struct Main this, struct State state, struct char c){/* 
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
-        } *//* 
-        else {
-            return state.append(c);
         } */
+	struct var appended = /* state.append(c) */;/* 
+        if (c == '<') {
+            return appended.enter();
+        } *//* 
+        if (c == '>') {
+            return appended.exit();
+        } */
+	return appended;
 }
 /* private static */ struct StringBuilder mergeValues_Main(struct Main this, struct StringBuilder buffer, char* element){/* 
         if (buffer.isEmpty()) {
