@@ -1363,7 +1363,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError(input, new StringContext("No valid rule present"), errors));
+        return new Err<>(new CompileError("No valid rule present", new StringContext(input), errors));
     }
 
     private static Result<StatementValue, CompileError> parseStatementValue(String input) {
