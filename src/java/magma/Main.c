@@ -12,26 +12,6 @@ struct State {
 	/* private */ int depth;
 	/* private */ struct StringBuilder buffer;
 };
-struct ");
-        if (classIndex >= 0) {
-	/* var afterKeyword = stripped.substring(classIndex + */ struct "class ".length());
-	/* var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
-
-                    currentStructName = Optional.of(name);
-                    var generated = "struct " + name + " {" +
-                            compileStatements(content, Main::compileClassSegment) +
-                            "\n};\n";
-                    structs.add(generated);
-                    return Optional.of("");
-                }
-            } */
-	/* } */ struct return Optional.empty();
-};
 struct Main {
 	/* public static final List<String> structs = */ struct new ArrayList<>();
 	/* private static final List<String> functions = */ struct new ArrayList<>();
@@ -175,6 +155,42 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
         } *//* 
 
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n"); *//* 
+     */
+}
+/* private static */ Optional<char*> compileClass(char* stripped){/* 
+        var classIndex = stripped.indexOf("class "); *//* 
+        if (classIndex >= 0) {
+            var afterKeyword = stripped.substring(classIndex + "class ".length());
+            var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                var name = afterKeyword.substring(0, contentStart).strip();
+                if (isSymbol(name)) {
+                    var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                    if (withEnd.endsWith("}")) {
+                        var content = withEnd.substring(0, withEnd.length() - "}".length());
+
+                        currentStructName = Optional.of(name);
+                        var generated = "struct " + name + " {" +
+                                compileStatements(content, Main::compileClassSegment) +
+                                "\n};\n";
+                        structs.add(generated);
+                        return Optional.of("");
+                    }
+                }
+            }
+        } *//* 
+        return Optional.empty(); *//* 
+     */
+}
+/* private static */ struct boolean isSymbol(char* input){/* 
+        for (var i = 0; *//*  i < input.length(); *//*  i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        } *//* 
+        return true; *//* 
      */
 }
 /* private static */ char* compileClassSegment(char* input){/* 

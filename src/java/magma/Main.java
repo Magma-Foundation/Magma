@@ -169,20 +169,33 @@ public class Main {
             var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
-                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
+                if (isSymbol(name)) {
+                    var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                    if (withEnd.endsWith("}")) {
+                        var content = withEnd.substring(0, withEnd.length() - "}".length());
 
-                    currentStructName = Optional.of(name);
-                    var generated = "struct " + name + " {" +
-                            compileStatements(content, Main::compileClassSegment) +
-                            "\n};\n";
-                    structs.add(generated);
-                    return Optional.of("");
+                        currentStructName = Optional.of(name);
+                        var generated = "struct " + name + " {" +
+                                compileStatements(content, Main::compileClassSegment) +
+                                "\n};\n";
+                        structs.add(generated);
+                        return Optional.of("");
+                    }
                 }
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static String compileClassSegment(String input) {
