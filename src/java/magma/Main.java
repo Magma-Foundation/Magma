@@ -278,6 +278,10 @@ public class Main {
         public Definition mapTypeParams(Function<List<String>, List<String>> mapper) {
             return new Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams));
         }
+
+        public Definition withType(Type type) {
+            return new Definition(this.maybeBeforeType, type, this.name, this.typeParams);
+        }
     }
 
     private record Struct(String name, List<String> typeParams) implements Type {
@@ -1062,14 +1066,19 @@ public class Main {
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
+            var parsedValue = parseValueOrPlaceholder(value);
 
             var destination = parseDefinition(inputDefinition)
                     .<Assignable>map(result -> {
+                        if (result.type.equals(Primitive.Auto)) {
+                            return result.withType(resolveType(parsedValue));
+                        }
+
                         return result;
                     })
                     .orElseGet(() -> parseValueOrPlaceholder(inputDefinition));
 
-            return new Some<>(new Assignment(destination, parseValueOrPlaceholder(value)));
+            return new Some<>(new Assignment(destination, parsedValue));
         }
         return new None<>();
     }
@@ -1359,7 +1368,7 @@ public class Main {
 
     private static Option<Type> parseType(String input) {
         var stripped = input.strip();
-        if(stripped.equals("var")) {
+        if (stripped.equals("var")) {
             return new Some<>(Primitive.Auto);
         }
 
