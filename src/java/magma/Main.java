@@ -109,10 +109,20 @@ public class Main {
             var contentStart = afterKeyword.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterKeyword.substring(0, contentStart).strip();
-                return "struct " + name + " {\n};\n";
+                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                if (withEnd.endsWith("}")) {
+                    var content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return "struct " + name + " {" +
+                            generatePlaceholder(content) +
+                            "\n};\n";
+                }
             }
         }
 
-        return "/* " + stripped + " */\n";
+        return generatePlaceholder(stripped) + "\n";
+    }
+
+    private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */";
     }
 }
