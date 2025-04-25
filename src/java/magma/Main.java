@@ -644,11 +644,27 @@ public class Main {
         }
     }
 
+    public record FunctionStatement(Definable definition, List<Parameter> params,
+                                    List<FunctionSegment> content) {
+        String generate() {
+            var outputParamStrings = this.params().stream()
+                    .map(Parameter::generate)
+                    .collect(Collectors.joining(", "));
+
+            var outputContent = this.content()
+                    .stream()
+                    .map(FunctionSegment::generate)
+                    .collect(Collectors.joining());
+
+            return this.definition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
     public static int localCounter = 0;
-    private static List<String> functions;
+    private static List<FunctionStatement> functions;
     private static List<Frame> frames;
 
     public static void main() {
@@ -670,7 +686,11 @@ public class Main {
     private static String compileRoot(String input) {
         var output = compileStatements(input, input1 -> new Some<>(compileRootSegment(input1)));
         var joinedStructs = String.join("", structs);
-        var joinedFunctions = String.join("", functions);
+
+        var joinedFunctions = functions.stream()
+                .map(FunctionStatement::generate)
+                .collect(Collectors.joining(", "));
+
         return output + joinedStructs + joinedFunctions;
     }
 
@@ -914,13 +934,13 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return compileWhitespace(input)
+        return parseWhitespace(input).map(Whitespace::generate)
                 .or(() -> compileClass(input))
                 .or(() -> compileStructured(input, "enum "))
                 .or(() -> compileStructured(input, "record "))
                 .or(() -> compileStructured(input, "interface "))
-                .or(() -> compileMethod(input))
-                .or(() -> compileClassStatement(input))
+                .or(() -> parseMethod(input).map(Whitespace::generate))
+                .or(() -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).map(Statement::generate))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
     }
 
@@ -937,7 +957,7 @@ public class Main {
         }
     }
 
-    private static Option<String> compileMethod(String input) {
+    private static Option<Whitespace> parseMethod(String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return new None<>();
@@ -1012,10 +1032,6 @@ public class Main {
                         newStatements.addAll(oldStatements);
                     }
 
-                    var outputContent = newStatements
-                            .stream()
-                            .map(FunctionSegment::generate)
-                            .collect(Collectors.joining());
 
                     Definable newDefinition;
                     var outputParams = new ArrayList<Parameter>();
@@ -1053,19 +1069,15 @@ public class Main {
 
                     outputParams.addAll(params);
 
-                    var outputParamStrings = outputParams.stream()
-                            .map(Parameter::generate)
-                            .collect(Collectors.joining(", "));
-
-                    var constructor = newDefinition.generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+                    var constructor = new FunctionStatement(newDefinition, outputParams, newStatements);
                     functions.add(constructor);
-                    return new Some<>("");
+                    return new Some<>(new Whitespace());
                 }
             }
         }
 
         if (afterParams.equals(";")) {
-            return new Some<>("");
+            return new Some<>(new Whitespace());
         }
 
         return new None<>();
@@ -1155,14 +1167,6 @@ public class Main {
         }
 
         return new None<>();
-    }
-
-    private static Option<String> compileClassStatement(String input) {
-        return compileStatement(input, Main::compileClassStatementValue);
-    }
-
-    private static Option<String> compileStatement(String input, Function<String, StatementValue> compiler) {
-        return parseStatementWithoutBraces(input, compiler).map(Statement::generate);
     }
 
     private static Option<Statement> parseStatementWithoutBraces(String input, Function<String, StatementValue> compiler) {
