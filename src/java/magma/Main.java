@@ -21,14 +21,6 @@ public class Main {
     }
 
     private sealed interface Optional<T> {
-        static <T> Optional<T> empty() {
-            return new None<>();
-        }
-
-        static <T> Optional<T> of(T name) {
-            return new Some<>(name);
-        }
-
         <R> Optional<R> map(Function<T, R> mapper);
 
         T orElse(T other);
@@ -181,7 +173,7 @@ public class Main {
 
     private record Definition(Optional<String> maybeBeforeType, Type type, String name) implements Definable {
         public Definition(Type type, String name) {
-            this(Optional.empty(), type, name);
+            this(new None<String>(), type, name);
         }
 
         private String generate() {
@@ -241,7 +233,7 @@ public class Main {
     public static void main() {
         structs = new ArrayList<>();
         functions = new ArrayList<>();
-        currentStructName = Optional.empty();
+        currentStructName = new None<>();
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -370,12 +362,12 @@ public class Main {
     private static Optional<String> compileStructured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         var afterKeyword = stripped.substring(classIndex + infix.length());
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
         var beforeContent = afterKeyword.substring(0, contentStart).strip();
 
@@ -395,20 +387,20 @@ public class Main {
                 : withoutParameters;
 
         if (!isSymbol(name)) {
-            return Optional.empty();
+            return new None<>();
         }
         var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
         if (!withEnd.endsWith("}")) {
-            return Optional.empty();
+            return new None<>();
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
-        currentStructName = Optional.of(name);
+        currentStructName = new Some<>(name);
         var generated = "struct " + name + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
         structs.add(generated);
-        return Optional.of("");
+        return new Some<>("");
     }
 
     private static boolean isSymbol(String input) {
@@ -435,17 +427,17 @@ public class Main {
 
     private static Optional<String> compileWhitespace(String input) {
         if (input.isBlank()) {
-            return Optional.of("");
+            return new Some<>("");
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
     private static Optional<String> compileMethod(String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var beforeParams = input.substring(0, paramStart).strip();
@@ -456,7 +448,7 @@ public class Main {
                 .or(() -> compileConstructorDefinition(beforeParams).map(value -> value));
 
         if (!(maybeHeader instanceof Some(var header))) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var paramEnd = withParams.indexOf(")");
@@ -467,22 +459,22 @@ public class Main {
                 var content = afterParams.substring(1, afterParams.length() - 1);
                 var constructor = header.toDefinition().generate() + "(" + compileValues(params, Main::compileDefinitionOrPlaceholder) + "){" + compileStatements(content, Main::compileStatementOrBlock) + "\n}\n";
                 functions.add(constructor);
-                return Optional.of("");
+                return new Some<>("");
             }
             if (afterParams.equals(";")) {
-                return Optional.of("");
+                return new Some<>("");
             }
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Optional<Constructor> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
-                return Optional.of(new Constructor(name));
+                return new Some<>(new Constructor(name));
             }
-            return Optional.empty();
+            return new None<>();
         });
     }
 
@@ -491,12 +483,12 @@ public class Main {
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
-            return Optional.of(name);
+            return new Some<>(name);
         }
         if (isSymbol(stripped)) {
-            return Optional.of(stripped);
+            return new Some<>(stripped);
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static String compileStatementOrBlock(String input) {
@@ -519,10 +511,10 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compiler.apply(withoutEnd) + ";");
+            return new Some<>("\n\t" + compiler.apply(withoutEnd) + ";");
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
@@ -539,9 +531,9 @@ public class Main {
             var value = input.substring(valueSeparator + "=".length());
 
             var destination = compileDefinition(inputDefinition).orElseGet(() -> compileValue(inputDefinition));
-            return Optional.of(destination + " = " + compileValue(value));
+            return new Some<>(destination + " = " + compileValue(value));
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static String compileValue(String input) {
@@ -572,37 +564,37 @@ public class Main {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var beforeName = stripped.substring(0, nameSeparator).strip();
         var name = stripped.substring(nameSeparator + " ".length()).strip();
         if (!isSymbol(name)) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
-            return parseType(beforeName).map(type -> new Definition(Optional.empty(), type, name));
+            return parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
         }
 
         var beforeType = beforeName.substring(0, typeSeparator).strip();
         var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-        return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name));
+        return parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
     }
 
     private static Optional<Type> parseType(String input) {
         var stripped = input.strip();
         if (stripped.equals("private")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         if (stripped.equals("int")) {
-            return Optional.of(Primitive.I32);
+            return new Some<>(Primitive.I32);
         }
 
         if (stripped.equals("String")) {
-            return Optional.of(new Ref(Primitive.I8));
+            return new Some<>(new Ref(Primitive.I8));
         }
 
         if (stripped.endsWith(">")) {
@@ -613,15 +605,15 @@ public class Main {
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
                 var args = parseValues(argsString, input1 -> parseType(input1).orElseGet(() -> new Content(input1)));
 
-                return Optional.of(new Generic(base, args));
+                return new Some<>(new Generic(base, args));
             }
         }
 
         if (isSymbol(stripped)) {
-            return Optional.of(new Struct(stripped));
+            return new Some<>(new Struct(stripped));
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
     private static String compileValues(String args, Function<String, String> compiler) {
