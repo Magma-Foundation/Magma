@@ -262,9 +262,7 @@ public class Main {
                 return "";
             }
 
-            String joinedTypeParams;
-            joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
-            return joinedTypeParams;
+            return "<" + String.join(", ", this.typeParams) + ">";
         }
 
         @Override
@@ -1105,8 +1103,7 @@ public class Main {
         if (separator >= 0) {
             var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                var parent = parseValueOrPlaceholder(parentString);
+            if (isSymbol(property) && parseValue(parentString) instanceof Some(var parent)) {
                 var type = resolveType(parent);
                 if (type instanceof Functional) {
                     return new Some<>(parent);
@@ -1263,8 +1260,7 @@ public class Main {
     private static Option<Value> parseArgument(String input1) {
         return parseWhitespace(input1)
                 .<Value>map(arg -> arg)
-                .or(() -> parseValue(input1).map(arg -> arg))
-                .or(() -> new Some<>(new Content(input1)));
+                .or(() -> parseValue(input1).map(arg -> arg));
     }
 
     private static State foldInvocationStart(State state, char c) {
