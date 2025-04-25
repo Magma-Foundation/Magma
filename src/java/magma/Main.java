@@ -906,22 +906,191 @@ public class Main {
         }
     }
 
-    private static final List<String> typeParams = new ArrayList<>();
-    private static final List<StatementValue> statements = new ArrayList<>();
-    public static Map<Struct, String> structs;
-    public static int localCounter = 0;
-    private static List<FunctionStatement> functions;
-    private static List<FunctionStatement> functionCache;
-    private static List<Frame> frames;
+    private interface CompileState {
+        List<Definition> getList();
+
+        Option<StructNode> findCurrentStruct();
+
+        void defineDefinition(Definition definition);
+
+        void defineFunction(FunctionStatement function);
+
+        Option<Type> resolveSymbol(String name);
+
+        List<Definition> findLastDefinitions();
+
+        void moveFunctions();
+
+        void reset();
+
+        void clearTypeParams();
+
+        void defineTypeParameters(List<String> currentStructTypeParams);
+
+        String createLocalName();
+
+        boolean isTypeParamDefined(String stripped);
+
+        List<Statement> collectStatements();
+
+        void addStatement(Assignment assignment);
+
+        String generate();
+
+        void enter();
+
+        void defineStruct(String content, Struct struct);
+
+        void setNode(StructNode structNode);
+
+        Option<Struct> findStruct(String base);
+
+        void exit();
+    }
+
+    public static class MutableCompileState implements CompileState {
+        public static final MutableCompileState INSTANCE = new MutableCompileState();
+        private final List<String> typeParams = new ArrayList<>();
+        private final List<StatementValue> statements = new ArrayList<>();
+        private final List<FunctionStatement> functions = new ArrayList<>();
+        private final List<FunctionStatement> functionCache = new ArrayList<>();
+        private final List<Frame> frames = new ArrayList<>();
+        private final Map<Struct, String> structs = new HashMap<>();
+        private int localCounter = 0;
+
+        private MutableCompileState() {
+        }
+
+        @Override
+        public List<Definition> getList() {
+            return this.functionCache.stream()
+                    .map(FunctionStatement::toDefinition)
+                    .toList();
+        }
+
+        @Override
+        public Option<StructNode> findCurrentStruct() {
+            for (var i = this.frames.size() - 1; i >= 0; i--) {
+                var frame = this.frames.get(i);
+                if (frame.node instanceof Some(var node)) {
+                    return new Some<>(node);
+                }
+            }
+
+            return new None<>();
+        }
+
+        @Override
+        public void defineDefinition(Definition definition) {
+            this.findLastDefinitions().add(definition);
+        }
+
+        @Override
+        public void defineFunction(FunctionStatement function) {
+            this.functionCache.add(function);
+        }
+
+        @Override
+        public Option<Type> resolveSymbol(String name) {
+            return Options.fromNative(this.frames.stream()
+                    .map(frame -> findTypeInDefinitionList(name, frame.definitions))
+                    .flatMap(Options::toStream)
+                    .findFirst());
+        }
+
+        @Override
+        public List<Definition> findLastDefinitions() {
+            return this.frames.getLast().definitions;
+        }
+
+        @Override
+        public void moveFunctions() {
+            this.functions.addAll(this.functionCache);
+            this.functionCache.clear();
+        }
+
+        @Override
+        public void reset() {
+            this.statements.clear();
+            this.localCounter = 0;
+        }
+
+        @Override
+        public void clearTypeParams() {
+            this.typeParams.clear();
+        }
+
+        @Override
+        public void defineTypeParameters(List<String> currentStructTypeParams) {
+            this.typeParams.addAll(currentStructTypeParams);
+        }
+
+        @Override
+        public String createLocalName() {
+            var name = "local" + this.localCounter;
+            this.localCounter = this.localCounter + 1;
+            return name;
+        }
+
+        @Override
+        public boolean isTypeParamDefined(String stripped) {
+            return this.typeParams.contains(stripped);
+        }
+
+        @Override
+        public List<Statement> collectStatements() {
+            return this.statements.stream()
+                    .map(Statement::new)
+                    .toList();
+        }
+
+        @Override
+        public void addStatement(Assignment assignment) {
+            this.statements.add(assignment);
+        }
+
+        @Override
+        public String generate() {
+            var joinedStructs = String.join("", this.structs.values());
+
+            var joinedFunctions = this.functions.stream()
+                    .map(FunctionStatement::generate)
+                    .collect(Collectors.joining(""));
+
+            return joinedStructs + joinedFunctions;
+        }
+
+        @Override
+        public void enter() {
+            this.frames.addLast(new Frame());
+        }
+
+        @Override
+        public void defineStruct(String content, Struct struct) {
+            this.structs.put(struct, content);
+        }
+
+        @Override
+        public void setNode(StructNode structNode) {
+            this.frames.set(this.frames.size() - 1, this.frames.getLast()
+                    .withNode(structNode));
+        }
+
+        @Override
+        public Option<Struct> findStruct(String base) {
+            return Options.fromNative(this.structs.keySet()
+                    .stream()
+                    .filter(entry -> entry.name.equals(base))
+                    .findFirst());
+        }
+
+        @Override
+        public void exit() {
+            this.frames.removeLast();
+        }
+    }
 
     public static void main() {
-        structs = new HashMap<>();
-
-        functions = new ArrayList<>();
-        functionCache = new ArrayList<>();
-
-        frames = new ArrayList<>();
-
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("Main.c");
         runWithTarget(source, target).ifPresent(error -> System.err.println(error.display()));
@@ -959,13 +1128,7 @@ public class Main {
         return parseAll(input, Main::foldStatementChar, Main::parseRootSegment)
                 .mapValue(Main::joinStatements)
                 .mapValue(output -> {
-                    var joinedStructs = String.join("", structs.values());
-
-                    var joinedFunctions = functions.stream()
-                            .map(FunctionStatement::generate)
-                            .collect(Collectors.joining(""));
-
-                    return output + joinedStructs + joinedFunctions;
+                    return output + MutableCompileState.INSTANCE.generate();
                 });
     }
 
@@ -1179,12 +1342,11 @@ public class Main {
 
         var structNode = new StructNode(name, typeParams);
 
-        frames.addLast(new Frame());
-        frames.set(frames.size() - 1, frames.getLast()
-                .withNode(structNode));
+        MutableCompileState.INSTANCE.enter();
+        MutableCompileState.INSTANCE.setNode(structNode);
 
         var maybeOutputStatements = parseAll(content, Main::foldStatementChar, Main::parseClassSegment);
-        frames.removeLast();
+        MutableCompileState.INSTANCE.exit();
 
         return maybeOutputStatements.mapValue(outputStatements -> {
             var copy = new ArrayList<StructSegment>(params.stream()
@@ -1197,15 +1359,12 @@ public class Main {
                     .collect(Collectors.joining());
 
 
-            var definitions = functionCache.stream()
-                    .map(FunctionStatement::toDefinition)
-                    .toList();
+            var definitions = MutableCompileState.INSTANCE.getList();
 
-            functions.addAll(functionCache);
-            functionCache.clear();
+            MutableCompileState.INSTANCE.moveFunctions();
 
             var generated = "struct " + name + typeParamString + " {" + joined + "\n};\n";
-            structs.put(new Struct(name, typeParams, definitions), generated);
+            MutableCompileState.INSTANCE.defineStruct(generated, new Struct(name, typeParams, definitions));
             return new Whitespace();
         });
     }
@@ -1267,14 +1426,14 @@ public class Main {
         var beforeParams = input.substring(0, paramStart).strip();
         var withParams = input.substring(paramStart + "(".length());
 
-        var maybeStruct = findCurrentStruct();
+        var maybeStruct = MutableCompileState.INSTANCE.findCurrentStruct();
         if (!(maybeStruct instanceof Some(var currentStruct))) {
             return new Err<>(new CompileError("No struct set", new StringContext(input)));
         }
 
         var currentStructName = currentStruct.name;
         var currentStructTypeParams = currentStruct.typeParams;
-        typeParams.addAll(currentStructTypeParams);
+        MutableCompileState.INSTANCE.defineTypeParameters(currentStructTypeParams);
 
         var compiledBeforeContent = parseOr(beforeParams, List.<Rule<Definable>>of(
                 input0 -> parseDefinition(input0).mapValue(value -> value),
@@ -1316,14 +1475,11 @@ public class Main {
         defineAll(paramDefinitions);
 
         var maybeOldStatements = parseStatements(content, Main::parseStatement);
-        typeParams.clear();
+        MutableCompileState.INSTANCE.clearTypeParams();
 
         return maybeOldStatements.flatMapValue(oldStatements -> {
-            var list = statements.stream()
-                    .map(Statement::new)
-                    .toList();
-            statements.clear();
-            localCounter = 0;
+            var list = MutableCompileState.INSTANCE.collectStatements();
+            MutableCompileState.INSTANCE.reset();
 
             ArrayList<FunctionSegment> newStatements;
             if (oldDefinition instanceof ConstructorDefinition(var name)) {
@@ -1354,7 +1510,7 @@ public class Main {
                 outputParams.addAll(params);
 
                 var function = new FunctionStatement(definition, outputParams, newStatements);
-                functionCache.add(function);
+                MutableCompileState.INSTANCE.defineFunction(function);
                 return new Ok<>(new Whitespace());
             });
         });
@@ -1407,29 +1563,14 @@ public class Main {
         return new Err<>(new CompileError("Not a definition", new NodeContext(header)));
     }
 
-    private static Option<StructNode> findCurrentStruct() {
-        for (var i = frames.size() - 1; i >= 0; i--) {
-            var frame = frames.get(i);
-            if (frame.node instanceof Some(var node)) {
-                return new Some<>(node);
-            }
-        }
-
-        return new None<>();
-    }
-
     private static Result<List<Parameter>, CompileError> parseParameters(String paramStrings) {
         return parseValues(paramStrings, Main::parseParameter);
     }
 
     private static void defineAll(List<Definition> definitions) {
         for (var definition : definitions) {
-            define(definition);
+            MutableCompileState.INSTANCE.defineDefinition(definition);
         }
-    }
-
-    private static void define(Definition definition) {
-        frames.getLast().definitions.add(definition);
     }
 
     private static <T> Result<List<T>, CompileError> parseStatements(String content, Function<String, Result<T, CompileError>> compiler) {
@@ -1438,7 +1579,7 @@ public class Main {
 
     private static Result<ConstructorDefinition, CompileError> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMapValue(name -> {
-            var maybeCurrentStruct = findCurrentStruct();
+            var maybeCurrentStruct = MutableCompileState.INSTANCE.findCurrentStruct();
             if (!(maybeCurrentStruct instanceof Some<StructNode>(var currentStruct))) {
                 return new Err<>(new CompileError("No struct present", new StringContext(name)));
             }
@@ -1713,11 +1854,11 @@ public class Main {
 
                 var right = input.substring(arrowIndex + "->".length());
 
-                frames.add(new Frame());
-                define(definition);
+                MutableCompileState.INSTANCE.enter();
+                MutableCompileState.INSTANCE.defineDefinition(definition);
 
                 var parsed = parseValue(right);
-                frames.removeLast();
+                MutableCompileState.INSTANCE.exit();
 
                 return parsed.mapValue(compiledRight -> {
                     return new Lambda(Collections.singletonList(definition), compiledRight);
@@ -1739,7 +1880,7 @@ public class Main {
 
         return parseValue(value).flatMapValue(compiledValue -> {
             return parseDefinition(type).mapValue(compiledDefinition -> {
-                define(compiledDefinition);
+                MutableCompileState.INSTANCE.defineDefinition(compiledDefinition);
                 return new InstanceOf(compiledValue, compiledDefinition);
             });
         });
@@ -1816,14 +1957,14 @@ public class Main {
                     newParent = parent;
                 }
                 else {
-                    var name = "local" + localCounter;
+                    var name = MutableCompileState.INSTANCE.createLocalName();
                     newParent = new Symbol(name);
-                    localCounter++;
 
-                    statements.add(new Assignment(new DefinitionBuilder()
+                    var assignment = new Assignment(new DefinitionBuilder()
                             .withType(resolved)
                             .withName(name)
-                            .complete(), parent));
+                            .complete(), parent);
+                    MutableCompileState.INSTANCE.addStatement(assignment);
                 }
 
                 var arguments = new ArrayList<Value>();
@@ -1859,11 +2000,8 @@ public class Main {
                         if (parentType instanceof Struct struct) {
                             return findPropertyInStruct(property, struct, context);
                         }
-                        else if (parentType instanceof Generic(var base, var arguments)) {
-                            var maybeStruct = Options.fromNative(structs.keySet()
-                                    .stream()
-                                    .filter(entry -> entry.name.equals(base))
-                                    .findFirst());
+                        else if (parentType instanceof Generic(var base, _)) {
+                            var maybeStruct = MutableCompileState.INSTANCE.findStruct(base);
 
                             if (maybeStruct instanceof Some(var struct)) {
                                 return findPropertyInStruct(property, struct, new NodeContext(struct));
@@ -1893,17 +2031,14 @@ public class Main {
 
         if (value instanceof Symbol(var name)) {
             if (name.equals("this")) {
-                var definitions = frames.getLast().definitions;
+                var definitions = MutableCompileState.INSTANCE.findLastDefinitions();
                 return new Ok<>(new StructBuilder()
                         .withName(name)
                         .withDefinitions(definitions)
                         .complete());
             }
 
-            var maybeType = Options.fromNative(frames.stream()
-                    .map(frame -> findTypeInDefinitionList(name, frame.definitions))
-                    .flatMap(Options::toStream)
-                    .findFirst());
+            var maybeType = MutableCompileState.INSTANCE.resolveSymbol(name);
 
             if (maybeType instanceof Some(var type)) {
                 return new Ok<>(type);
@@ -2014,7 +2149,7 @@ public class Main {
                 var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
 
                 return parseValues(typeParamString, Ok::new).flatMapValue(actualTypeParams -> {
-                    Main.typeParams.addAll(actualTypeParams);
+                    MutableCompileState.INSTANCE.defineTypeParameters(actualTypeParams);
                     var maybeOutputType = parseAndFlattenType(inputType);
 
                     return maybeOutputType.mapValue(outputType -> withName
@@ -2078,7 +2213,7 @@ public class Main {
             }
         }
 
-        if (typeParams.contains(stripped)) {
+        if (MutableCompileState.INSTANCE.isTypeParamDefined(stripped)) {
             return new Ok<>(new TypeParam(stripped));
         }
 
