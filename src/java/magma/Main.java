@@ -992,7 +992,7 @@ public class Main {
             if (isSymbol(property)) {
                 var parent = parseValueOrPlaceholder(parentString);
                 var type = resolveType(parent);
-                if (type instanceof Functional && property.equals("apply")) {
+                if (type instanceof Functional) {
                     return new Some<>(parent);
                 }
 

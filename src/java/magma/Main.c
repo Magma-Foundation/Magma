@@ -137,7 +137,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public */ Option<T> filter_Some<T>(struct Some<T> this, int (*predicate)(T)){
-	return predicate.test(this.value) ? this : None<>();
+	return predicate(this.value) ? this : None<>();
 }
 /* @Override
         public  */ Option<Tuple<T, R>> and_Some<T, R>(struct Some<T> this, Option<R> (*supplier)()){
@@ -153,11 +153,11 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public */ T orElseGet_None<T>(struct None<T> this, T (*other)()){
-	return other.get();
+	return other();
 }
 /* @Override
         public */ Option<T> or_None<T>(struct None<T> this, Option<T> (*other)()){
-	return other.get();
+	return other();
 }
 /* @Override
         public  */ Option<R> flatMap_None<T, R>(struct None<T> this, Option<R> (*mapper)(T)){
@@ -835,7 +835,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
             if (isSymbol(property)) {
                 var parent = parseValueOrPlaceholder(parentString);
                 var type = resolveType(parent);
-                if (type instanceof Functional && property.equals("apply")) {
+                if (type instanceof Functional) {
                     return new Some<>(parent);
                 }
 
