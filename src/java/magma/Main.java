@@ -941,7 +941,7 @@ public class Main {
                 return createSuffixErr(slice, ";");
             }
 
-            var inner = slice.substring(0, stripped.length() - ";".length());
+            var inner = slice.substring(0, slice.length() - ";".length());
             var array = inner.split(Pattern.quote("."));
             return new Ok<>(new Package(Arrays.asList(array)));
         };
