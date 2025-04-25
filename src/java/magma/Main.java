@@ -975,31 +975,6 @@ public class Main {
                 .collect(Collectors.joining());
     }
 
-    private static Result<String, CompileError> compileStatements(String input, Function<String, Result<String, CompileError>> compiler) {
-        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
-    }
-
-    private static Result<String, CompileError> compileAll(
-            String input,
-            BiFunction<State, Character, State> folder,
-            Function<String, Result<String, CompileError>> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
-        return parseAll(input, folder, compiler).mapValue(listOption -> generateAll(merger, listOption));
-    }
-
-    private static String generateAll(
-            BiFunction<StringBuilder, String, StringBuilder> merger,
-            List<String> compiled
-    ) {
-        var output = new StringBuilder();
-        for (var segment : compiled) {
-            output = merger.apply(output, segment);
-        }
-
-        return output.toString();
-    }
-
     private static <T> Result<List<T>, CompileError> parseAll(
             String input,
             BiFunction<State, Character, State> folder,
@@ -1016,10 +991,6 @@ public class Main {
         }
 
         return compiled;
-    }
-
-    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
-        return output.append(compiled);
     }
 
     private static List<String> divide(String input, BiFunction<State, Character, State> folder) {
@@ -1296,7 +1267,6 @@ public class Main {
         var beforeParams = input.substring(0, paramStart).strip();
         var withParams = input.substring(paramStart + "(".length());
 
-
         var maybeStruct = findCurrentStruct();
         if (!(maybeStruct instanceof Some(var currentStruct))) {
             return new Err<>(new CompileError("No struct set", new StringContext(input)));
@@ -1306,12 +1276,12 @@ public class Main {
         var currentStructTypeParams = currentStruct.typeParams;
         typeParams.addAll(currentStructTypeParams);
 
-        var definableCompileErrorResult = parseOr(beforeParams, List.<Rule<Definable>>of(
+        var compiledBeforeContent = parseOr(beforeParams, List.<Rule<Definable>>of(
                 input0 -> parseDefinition(input0).mapValue(value -> value),
                 input0 -> compileConstructorDefinition(input0).mapValue(value -> value)
         ));
 
-        return definableCompileErrorResult.flatMapValue(oldDefinition -> {
+        return compiledBeforeContent.flatMapValue(oldDefinition -> {
             var paramEnd = withParams.indexOf(")");
             if (paramEnd < 0) {
                 return createInfixErr(withParams, ")");
@@ -1323,61 +1293,7 @@ public class Main {
                 var content = afterParams.substring(1, afterParams.length() - 1);
 
                 return parseParameters(paramStrings).flatMapValue(inputParams -> {
-                    var paramDefinitions = inputParams.stream()
-                            .map(Parameter::toDefinition)
-                            .flatMap(Options::toStream)
-                            .toList();
-
-                    var params = inputParams
-                            .stream()
-                            .filter(node -> !(node instanceof Whitespace))
-                            .toList();
-
-                    defineAll(paramDefinitions);
-
-                    var maybeOldStatements = parseStatements(content, Main::parseStatement);
-                    typeParams.clear();
-
-                    return maybeOldStatements.flatMapValue(oldStatements -> {
-                        var list = statements.stream()
-                                .map(Statement::new)
-                                .toList();
-                        statements.clear();
-                        localCounter = 0;
-
-                        ArrayList<FunctionSegment> newStatements;
-                        if (oldDefinition instanceof ConstructorDefinition(var name)) {
-                            var copy = new ArrayList<FunctionSegment>(list);
-
-                            copy.add(new Statement(new DefinitionBuilder()
-                                    .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
-                                    .withName("this")
-                                    .complete()));
-
-                            copy.addAll(oldStatements);
-                            copy.add(new Statement(new Return(new Symbol("this"))));
-                            newStatements = copy;
-                        }
-                        else {
-                            newStatements = new ArrayList<>(list);
-                            newStatements.addAll(oldStatements);
-                        }
-
-
-                        var outputParams = new ArrayList<Parameter>();
-                        outputParams.add(new DefinitionBuilder()
-                                .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
-                                .withName("this")
-                                .complete());
-
-                        return flattenDefinitionToFunctional(oldDefinition, paramDefinitions).flatMapValue(definition -> {
-                            outputParams.addAll(params);
-
-                            var function = new FunctionStatement(definition, outputParams, newStatements);
-                            functionCache.add(function);
-                            return new Ok<>(new Whitespace());
-                        });
-                    });
+                    return getWhitespaceCompileErrorResult(oldDefinition, content, currentStructTypeParams, currentStructName, removeWhitespaceFromParameters(inputParams));
                 });
             }
 
@@ -1387,6 +1303,75 @@ public class Main {
 
             return new Err<>(new CompileError("Invalid body", new StringContext(afterParams)));
         });
+    }
+
+    private static Result<Whitespace, CompileError> getWhitespaceCompileErrorResult(
+            Definable oldDefinition,
+            String content,
+            List<String> currentStructTypeParams,
+            String currentStructName,
+            List<Parameter> params
+    ) {
+        var paramDefinitions = convertParametersToDefinitions(params);
+        defineAll(paramDefinitions);
+
+        var maybeOldStatements = parseStatements(content, Main::parseStatement);
+        typeParams.clear();
+
+        return maybeOldStatements.flatMapValue(oldStatements -> {
+            var list = statements.stream()
+                    .map(Statement::new)
+                    .toList();
+            statements.clear();
+            localCounter = 0;
+
+            ArrayList<FunctionSegment> newStatements;
+            if (oldDefinition instanceof ConstructorDefinition(var name)) {
+                var copy = new ArrayList<FunctionSegment>(list);
+
+                copy.add(new Statement(new DefinitionBuilder()
+                        .withType(new StructBuilder().withName(name).withTypeArgs(currentStructTypeParams).complete())
+                        .withName("this")
+                        .complete()));
+
+                copy.addAll(oldStatements);
+                copy.add(new Statement(new Return(new Symbol("this"))));
+                newStatements = copy;
+            }
+            else {
+                newStatements = new ArrayList<>(list);
+                newStatements.addAll(oldStatements);
+            }
+
+
+            var outputParams = new ArrayList<Parameter>();
+            outputParams.add(new DefinitionBuilder()
+                    .withType(new StructBuilder().withName(currentStructName).withTypeArgs(currentStructTypeParams).complete())
+                    .withName("this")
+                    .complete());
+
+            return flattenDefinitionToFunctional(oldDefinition, paramDefinitions).flatMapValue(definition -> {
+                outputParams.addAll(params);
+
+                var function = new FunctionStatement(definition, outputParams, newStatements);
+                functionCache.add(function);
+                return new Ok<>(new Whitespace());
+            });
+        });
+    }
+
+    private static List<Definition> convertParametersToDefinitions(List<Parameter> params) {
+        return params.stream()
+                .map(Parameter::toDefinition)
+                .flatMap(Options::toStream)
+                .toList();
+    }
+
+    private static List<Parameter> removeWhitespaceFromParameters(List<Parameter> inputParams) {
+        return inputParams
+                .stream()
+                .filter(node -> !(node instanceof Whitespace))
+                .toList();
     }
 
     private static Result<Definition, CompileError> flattenDefinitionToFunctional(Definable header, List<Definition> paramDefinitions) {
