@@ -697,8 +697,13 @@ public class Main {
 
         @Override
         public String display() {
+            return this.format(0);
+        }
+
+        private String format(int depth) {
             var joined = this.errors.stream()
-                    .map(CompileError::display)
+                    .map(error -> error.format(depth + 1))
+                    .map(displayed -> "\n" + "\t".repeat(depth) + displayed)
                     .collect(Collectors.joining());
 
             return this.message + ": " + this.context.display() + joined;
