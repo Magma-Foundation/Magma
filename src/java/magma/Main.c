@@ -12,7 +12,8 @@ struct Type {
 	char* generate();
 };
 struct Primitive {
-	struct I8("char"), I32("int");
+	/* I8("char"),
+        I32("int") */;
 	/* private final */ char* value;
 };
 struct State {
@@ -66,7 +67,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.depth = depth;
 }
 /* private static */ struct State createDefault(/*  */){
-	/* return new State(new ArrayList<>(), new */ struct StringBuilder(), 0);
+	/* return new State(new ArrayList<>(), new StringBuilder(), 0) */;
 }
 /* private */ struct State advance(/*  */){
 	/* this.segments.add(this.buffer.toString()) */;
@@ -120,18 +121,18 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct var output = /* compileStatements(input, Main::compileRootSegment) */;
 	struct var joinedStructs = String.join("", structs);
 	struct var joinedFunctions = String.join("", functions);
-	/* return output + joinedStructs */ struct + joinedFunctions;
+	/* return output + joinedStructs + joinedFunctions */;
 }
-/* private static */ char* compileStatements(char* input, /*  Function<String */, struct String> compiler){
-	/* return compileAll(input, Main::foldStatementChar, */ struct compiler, Main::mergeStatements);
+/* private static */ char* compileStatements(char* input, /*  Function<String */, /*  String> compiler */){
+	/* return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements) */;
 }
 /* private static */ char* compileAll(char* input, /* 
-            BiFunction<State */, /*  Character */, struct State> folder, /* 
-            Function<String */, struct String> compiler, /* 
-            BiFunction<StringBuilder */, /*  String */, struct StringBuilder> merger){
-	/* return generateAll(merger, parseAll(input, */ struct folder, compiler));
+            BiFunction<State */, /*  Character */, /*  State> folder */, /* 
+            Function<String */, /*  String> compiler */, /* 
+            BiFunction<StringBuilder */, /*  String */, /*  StringBuilder> merger */){
+	/* return generateAll(merger, parseAll(input, folder, compiler)) */;
 }
-/* private static */ char* generateAll(/* BiFunction<StringBuilder */, /*  String */, struct StringBuilder> merger, List<char*> compiled){
+/* private static */ char* generateAll(/* BiFunction<StringBuilder */, /*  String */, /*  StringBuilder> merger */, List<char*> compiled){
 	struct var output = /* new StringBuilder() */;/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
@@ -139,8 +140,8 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct return output.toString();
 }
 /* private static <T> */ List<struct T> parseAll(char* input, /* 
-            BiFunction<State */, /*  Character */, struct State> folder, /* 
-            Function<String */, struct T> compiler){
+            BiFunction<State */, /*  Character */, /*  State> folder */, /* 
+            Function<String */, /*  T> compiler */){
 	struct var segments = /* divide(input, folder) */;
 	struct var compiled = /* new ArrayList<T>() */;/* 
         for (var segment : segments) {
@@ -151,13 +152,13 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* private static */ struct StringBuilder mergeStatements(struct StringBuilder output, char* compiled){
 	struct return output.append(compiled);
 }
-/* private static */ List<char*> divide(char* input, /*  BiFunction<State */, /*  Character */, struct State> folder){
-	/* return */ struct divideAll(input, folder);
+/* private static */ List<char*> divide(char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
+	/* return divideAll(input, folder) */;
 }
-/* private static */ List<char*> divideAll(char* input, /*  BiFunction<State */, /*  Character */, struct State> folder){
+/* private static */ List<char*> divideAll(char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
 	struct var current = State.createDefault();
-	/* for */ struct (var i = /* 0 */;
-	/* i */ struct < input.length();/*  i++) {
+	/* for (var i */ = /* 0 */;
+	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
 
             if (c == '\'') {
@@ -203,10 +204,10 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
         if (stripped.startsWith("package ")) {
             return "";
         } */
-	/* return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) */ struct + "\n");
+	/* return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n") */;
 }
 /* private static */ Optional<char*> compileClass(char* stripped){
-	/* return compileStructured(stripped, */ struct "class ");
+	/* return compileStructured(stripped, "class ") */;
 }
 /* private static */ Optional<char*> compileStructured(char* stripped, char* infix){
 	struct var classIndex = stripped.indexOf(infix);/* 
@@ -244,8 +245,8 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct return Optional.of("");
 }
 /* private static */ struct boolean isSymbol(char* input){
-	/* for */ struct (var i = /* 0 */;
-	/* i */ struct < input.length();/*  i++) {
+	/* for (var i */ = /* 0 */;
+	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
@@ -262,7 +263,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
                 .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
-                .orElseGet(() -> "\n\t" */ struct + generatePlaceholder(input.strip()));
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())) */;
 }
 /* private static */ Optional<char*> compileWhitespace(char* input){/* 
         if (input.isBlank()) {
@@ -309,17 +310,17 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* private static */ char* compileStatementOrBlock(char* input){
 	/* return compileWhitespace(input)
                 .or(() -> compileStatement(input, Main::compileStatementValue))
-                .orElseGet(() */ struct -> generatePlaceholder(input));
+                .orElseGet(() -> generatePlaceholder(input)) */;
 }
 /* private static */ char* compileStatementValue(char* input){
 	/* return compileAssignable(input)
                 .or(() -> compileDefinition(input))
-                .orElseGet(() */ struct -> generatePlaceholder(input));
+                .orElseGet(() -> generatePlaceholder(input)) */;
 }
 /* private static */ Optional<char*> compileClassStatement(char* input){
-	/* return */ struct compileStatement(input, Main::compileClassStatementValue);
+	/* return compileStatement(input, Main::compileClassStatementValue) */;
 }
-/* private static */ Optional<char*> compileStatement(char* input, /*  Function<String */, struct String> compiler){
+/* private static */ Optional<char*> compileStatement(char* input, /*  Function<String */, /*  String> compiler */){
 	struct var stripped = input.strip();
 	struct if (stripped.endsWith(";/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -332,7 +333,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 /* private static */ char* compileClassStatementValue(char* input){
 	/* return compileAssignable(input)
                 .or(() -> compileDefinition(input))
-                .orElseGet(() */ struct -> generatePlaceholder(input));
+                .orElseGet(() -> generatePlaceholder(input)) */;
 }
 /* private static */ Optional<char*> compileAssignable(char* input){
 	struct var valueSeparator = input.indexOf("=");/* 
@@ -360,7 +361,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct return generatePlaceholder(stripped);
 }
 /* private static */ char* compileDefinitionOrPlaceholder(char* input){
-	/* return compileDefinition(input).orElseGet(() */ struct -> generatePlaceholder(input));
+	/* return compileDefinition(input).orElseGet(() -> generatePlaceholder(input)) */;
 }
 /* private static */ Optional<char*> compileDefinition(char* input){
 	struct var stripped = input.strip();
@@ -376,7 +377,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
         } */
 	struct var beforeType = beforeName.substring(0, typeSeparator).strip();
 	struct var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-	/* return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), */ struct outputType, name).generate());
+	/* return parseType(inputType).map(outputType -> new Definition(Optional.of(generatePlaceholder(beforeType)), outputType, name).generate()) */;
 }
 /* private static */ Optional<char*> compileType(char* input){
 	struct return parseType(input).map(Type::generate);
@@ -405,17 +406,21 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 
                 return Optional.of(new Generic(base, args));
             }
+        } *//* 
+
+        if (isSymbol(stripped)) {
+            return Optional.of(new Struct(stripped));
         } */
-	/* return */ struct Optional.of(new Struct(stripped));
+	struct return Optional.empty();
 }
-/* private static */ char* compileValues(char* args, /*  Function<String */, struct String> compiler){
-	/* return */ struct generateValues(parseValues(args, compiler));
+/* private static */ char* compileValues(char* args, /*  Function<String */, /*  String> compiler */){
+	/* return generateValues(parseValues(args, compiler)) */;
 }
 /* private static */ char* generateValues(List<char*> values){
-	/* return */ struct generateAll(Main::mergeValues, values);
+	/* return generateAll(Main::mergeValues, values) */;
 }
-/* private static <T> */ List<struct T> parseValues(char* args, /*  Function<String */, struct T> compiler){
-	/* return parseAll(args, */ struct Main::foldValueChar, compiler);
+/* private static <T> */ List<struct T> parseValues(char* args, /*  Function<String */, /*  T> compiler */){
+	/* return parseAll(args, Main::foldValueChar, compiler) */;
 }
 /* private static */ struct State foldValueChar(struct State state, struct char c){/* 
         if (c == ',') {
@@ -429,8 +434,8 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
         if (buffer.isEmpty()) {
             return buffer.append(element);
         } */
-	/* return */ struct buffer.append(", ").append(element);
+	/* return buffer.append(", ").append(element) */;
 }
 /* private static */ char* generatePlaceholder(char* stripped){
-	/* return "/* " + stripped + */ struct " */";
+	/* return "/* " + stripped + " */" */;
 }

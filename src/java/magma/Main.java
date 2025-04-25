@@ -469,7 +469,11 @@ public class Main {
             }
         }
 
-        return Optional.of(new Struct(stripped));
+        if (isSymbol(stripped)) {
+            return Optional.of(new Struct(stripped));
+        }
+
+        return Optional.empty();
     }
 
     private static String compileValues(String args, Function<String, String> compiler) {
