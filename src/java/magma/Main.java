@@ -1585,8 +1585,9 @@ public class Main {
         var type = input.substring(index + "instanceof".length());
 
         return parseValue(value).flatMapValue(compiledValue -> {
-            return parseDefinition(type).mapValue(compiledType -> {
-                return new InstanceOf(compiledValue, compiledType);
+            return parseDefinition(type).mapValue(compiledDefinition -> {
+                define(compiledDefinition);
+                return new InstanceOf(compiledValue, compiledDefinition);
             });
         });
     }
