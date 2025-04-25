@@ -569,6 +569,20 @@ public class Main {
         }
     }
 
+    private record PostIncrement(Value value) implements StatementValue {
+        @Override
+        public String generate() {
+            return this.value.generate() + "++";
+        }
+    }
+
+    private record PostDecrement(Value value) implements StatementValue {
+        @Override
+        public String generate() {
+            return this.value.generate() + "--";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -976,10 +990,32 @@ public class Main {
 
     private static StatementValue parseStatementValue(String input) {
         return parseReturn(input).<StatementValue>map(value -> value)
+                .or(() -> parsePostIncrement(input).map(value -> value))
+                .or(() -> parsePostDecrement(input).map(value -> value))
                 .or(() -> parseInvocation(input).map(value -> value))
                 .or(() -> parseAssignment(input).map(value -> value))
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input));
+    }
+
+    private static Option<PostDecrement> parsePostDecrement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("--")) {
+            return parseValue(stripped.substring(0, stripped.length() - "--".length())).map(PostDecrement::new);
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static Option<PostIncrement> parsePostIncrement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("++")) {
+            return parseValue(stripped.substring(0, stripped.length() - "++".length())).map(PostIncrement::new);
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Option<Return> parseReturn(String input) {
