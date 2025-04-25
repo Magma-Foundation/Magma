@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -35,10 +34,6 @@ public class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        Option<T> filter(Predicate<T> predicate);
-
-        boolean isPresent();
     }
 
     private interface FunctionSegment {
@@ -107,15 +102,6 @@ public class Main {
             return mapper.apply(this.value);
         }
 
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return predicate.test(this.value) ? this : new None<>();
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -144,15 +130,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return this;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
     }
 
     private static class State {
