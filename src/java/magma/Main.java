@@ -294,12 +294,12 @@ public class Main {
 
     public static List<String> structs;
     private static List<String> functions;
-    private static Option<String> maybeCurrentStructName;
+    private static List<String> structNames;
 
     public static void main() {
         structs = new ArrayList<>();
         functions = new ArrayList<>();
-        maybeCurrentStructName = new None<>();
+        structNames = new ArrayList<>();
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -466,10 +466,12 @@ public class Main {
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
-        maybeCurrentStructName = new Some<>(name);
+        structNames.addLast(name);
         var generated = "struct " + name + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
+
+        structNames.removeLast();
         structs.add(generated);
         return new Some<>("");
     }
@@ -556,7 +558,7 @@ public class Main {
                     .map(FunctionSegment::generate)
                     .collect(Collectors.joining());
 
-            var currentStructName = maybeCurrentStructName.orElse("");
+            var currentStructName = structNames.getLast();
 
             Definable newDefinition;
             var outputParams = new ArrayList<Parameter>();
@@ -598,7 +600,7 @@ public class Main {
 
     private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (maybeCurrentStructName.filter(structName -> structName.equals(name)).isPresent()) {
+            if (structNames.getLast().equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
