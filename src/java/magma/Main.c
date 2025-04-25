@@ -193,15 +193,12 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return struct State(ArrayList<>(), struct StringBuilder(), 0);
 }
 /* private */ struct State advance_State(struct State this){
-	/* this.buffer */ local0 = this.buffer;
-	/* this.segments */ local1 = this.segments;
-	local1.add(local1, local0.toString(local0));
+	this.segments.add(this.segments, this.buffer.toString(this.buffer));
 	this.buffer = struct StringBuilder();
 	return this;
 }
 /* private */ struct State append_State(struct State this, struct char c){
-	/* this.buffer */ local0 = this.buffer;
-	local0.append(local0, c);
+	this.buffer.append(this.buffer, c);
 	return this;
 }
 /* public */ struct boolean isLevel_State(struct State this){
@@ -227,17 +224,15 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 	return this;
 }
 struct Definition new_Definition(struct Type type, char* name){
-	/* Collections */ local0 = Collections;
 	struct Definition this;
-	this(None<>(), type, name, local0.emptyList(local0));
+	this(None<>(), type, name, Collections.emptyList(Collections));
 	return this;
 }
 /* @Override
         public */ char* generate_Definition(struct Definition this){
 	/* /* inner -> !inner */ */ local0 = /* inner -> !inner */;
-	/* /* var beforeType = this */.maybeBeforeType */ local1 = /* var beforeType = this */.maybeBeforeType;
-	/* local1.filter(local1, local0.isEmpty(local0)) */ local2 = local1.filter(local1, local0.isEmpty(local0));
-	/* local2.map(local2, /* inner -> generatePlaceholder(inner) + " " */) */ local3 = local2.map(local2, /* inner -> generatePlaceholder(inner) + " " */);
+	/* /* var beforeType = this */.maybeBeforeType.filter(/* var beforeType = this */.maybeBeforeType, local0.isEmpty(local0)) */ local1 = /* var beforeType = this */.maybeBeforeType.filter(/* var beforeType = this */.maybeBeforeType, local0.isEmpty(local0));
+	/* local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */) */ local2 = local1.map(local1, /* inner -> generatePlaceholder(inner) + " " */);
 	char* joinedTypeParams;/* 
             if (this.typeParams.isEmpty()) {
                 joinedTypeParams = "";
@@ -245,7 +240,7 @@ struct Definition new_Definition(struct Type type, char* name){
             else {
                 joinedTypeParams = "<" + String.join(", ", this.typeParams) + ">";
             } */
-	local3.orElse(local3, /* "" */);
+	local2.orElse(local2, /* "" */);
 	char* generatedWithName;/* 
             if (this.type instanceof Functional functional) {
                 generatedWithName = functional.generateWithName(this.name);
@@ -266,14 +261,12 @@ struct Definition new_Definition(struct Type type, char* name){
 	return struct Definition(this.maybeBeforeType, this.type, this.name, mapper(this.typeParams));
 }
 struct Struct new_Struct(char* name){
-	/* Collections */ local0 = Collections;
 	struct Struct this;
-	this(name, local0.emptyList(local0));
+	this(name, Collections.emptyList(Collections));
 	return this;
 }
 /* @Override
         public */ char* generate_Struct(struct Struct this){
-	/* this.typeParams */ local0 = this.typeParams;
 	struct var typeParamString = /*  this.typeParams.isEmpty() ? "" : "<" + String.join(", ", this.typeParams) + ">" */;
 	return /* "struct " + this.name + typeParamString */;
 }
@@ -291,14 +284,12 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Functional(struct Functional this){
-	/* this */ local0 = this;
-	return local0.generateWithName(local0, /* "" */);
+	return this.generateWithName(this, /* "" */);
 }
 /* public */ char* generateWithName_Functional(struct Functional this, char* name){
-	/* /* var joined = this */.paramTypes */ local0 = /* var joined = this */.paramTypes;
-	/* local0.stream(local0) */ local1 = local0.stream(local0);
-	/* local1.map(local1, /* Type::generate */) */ local2 = local1.map(local1, /* Type::generate */);
-	local2.collect(local2, /* Collectors.joining(" */, /*  ") */);
+	/* /* var joined = this */.paramTypes.stream(/* var joined = this */.paramTypes) */ local0 = /* var joined = this */.paramTypes.stream(/* var joined = this */.paramTypes);
+	/* local0.map(local0, /* Type::generate */) */ local1 = local0.map(local0, /* Type::generate */);
+	local1.collect(local1, /* Collectors.joining(" */, /*  ") */);
 	return /* this.returnType.generate() + " (*" +
                     name +
                     ")(" + joined + ")" */;
@@ -332,12 +323,11 @@ struct Struct new_Struct(char* name){
 	return this;
 }
 /* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
-	/* this */ local0 = this;
-	/* struct DefinitionBuilder() */ local1 = struct DefinitionBuilder();
-	/* /* "new_" + this */ */ local2 = /* "new_" + this */;
-	/* local1.withType(local1, struct Struct(local0.name(local0))) */ local3 = local1.withType(local1, struct Struct(local0.name(local0)));
-	/* local3.withName(local3, local2.name(local2)) */ local4 = local3.withName(local3, local2.name(local2));
-	return local4.complete(local4);
+	/* struct DefinitionBuilder() */ local0 = struct DefinitionBuilder();
+	/* /* "new_" + this */ */ local1 = /* "new_" + this */;
+	/* local0.withType(local0, struct Struct(this.name(this))) */ local2 = local0.withType(local0, struct Struct(this.name(this)));
+	/* local2.withName(local2, local1.name(local1)) */ local3 = local2.withName(local2, local1.name(local1));
+	return local3.complete(local3);
 }
 /* @Override
         public */ char* generate_ConstructorDefinition(struct ConstructorDefinition this){
@@ -358,8 +348,7 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Assignment(struct Assignment this){
-	/* /* this.assignable.generate() + " = " + this */.value */ local0 = /* this.assignable.generate() + " = " + this */.value;
-	return local0.generate(local0);
+	return /* this.assignable.generate() + " = " + this */.value.generate(/* this.assignable.generate() + " = " + this */.value);
 }
 /* @Override
         public */ char* generate_DataAccess(struct DataAccess this){
@@ -371,8 +360,7 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Return(struct Return this){
-	/* /* "return " + this */.value */ local0 = /* "return " + this */.value;
-	return local0.generate(local0);
+	return /* "return " + this */.value.generate(/* "return " + this */.value);
 }
 /* public */ struct DefinitionBuilder withBeforeType_DefinitionBuilder(struct DefinitionBuilder this, char* beforeType){
 	this.maybeBeforeType = Some<>(beforeType);
@@ -399,22 +387,19 @@ struct Struct new_Struct(char* name){
 }
 /* @Override
         public */ char* generate_Construction(struct Construction this){
-	/* /* var joined = this */.values */ local0 = /* var joined = this */.values;
-	/* local0.stream(local0) */ local1 = local0.stream(local0);
-	/* local1.map(local1, /* Value::generate */) */ local2 = local1.map(local1, /* Value::generate */);
-	local2.collect(local2, /* Collectors.joining(" */, /*  ") */);
+	/* /* var joined = this */.values.stream(/* var joined = this */.values) */ local0 = /* var joined = this */.values.stream(/* var joined = this */.values);
+	/* local0.map(local0, /* Value::generate */) */ local1 = local0.map(local0, /* Value::generate */);
+	local1.collect(local1, /* Collectors.joining(" */, /*  ") */);
 	return /* "new " + this.type.generate() + "(" + joined + ")" */;
 }
 /* private */ struct Invocation toInvocation_Construction(struct Construction this){
-	/* this.type */ local0 = this.type;
-	return struct Invocation(struct Symbol(local0.generate(local0)), this.values);
+	return struct Invocation(struct Symbol(this.type.generate(this.type)), this.values);
 }
 /* @Override
         public */ char* generate_Invocation(struct Invocation this){
-	/* /* var joined = this */.arguments */ local0 = /* var joined = this */.arguments;
-	/* local0.stream(local0) */ local1 = local0.stream(local0);
-	/* local1.map(local1, /* Value::generate */) */ local2 = local1.map(local1, /* Value::generate */);
-	local2.collect(local2, /* Collectors.joining(" */, /*  ") */);
+	/* /* var joined = this */.arguments.stream(/* var joined = this */.arguments) */ local0 = /* var joined = this */.arguments.stream(/* var joined = this */.arguments);
+	/* local0.map(local0, /* Value::generate */) */ local1 = local0.map(local0, /* Value::generate */);
+	local1.collect(local1, /* Collectors.joining(" */, /*  ") */);
 	return /* this.caller.generate() + "(" + joined + ")" */;
 }
 /* private */ struct Invocation toInvocation_Invocation(struct Invocation this){
@@ -424,9 +409,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	this(node, HashMap<>());
 }
 /* public static  */ Stream<T> toStream_Options<T>(struct Options this, Option<T> option){
-	Option<T> local0 = option;
-	/* local0.map(local0, /* Stream::of */) */ local1 = local0.map(local0, /* Stream::of */);
-	return local1.orElseGet(local1, /* Stream::empty */);
+	/* option.map(option, /* Stream::of */) */ local0 = option.map(option, /* Stream::of */);
+	return local0.orElseGet(local0, /* Stream::empty */);
 }
 /* public static  */ Option<T> fromNative_Options<T>(struct Options this, Optional<T> optional){
 	/* /* optional.<Option<T>>map(Some::new) */ */ local0 = /* optional.<Option<T>>map(Some::new) */;
@@ -434,8 +418,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* @Override
         public */ char* generate_Ternary(struct Ternary this){
-	/* /* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this */.whenFalse */ local0 = /* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this */.whenFalse;
-	return local0.generate(local0);
+	return /* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this */.whenFalse.generate(/* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this */.whenFalse);
 }
 /* @Override
         public */ char* generate_Number(struct Number this){
@@ -473,12 +456,11 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return local1.orElse(local1, /* "" */);
 }
 /* private static */ char* generateAll_Main(struct Main this, BiFunction<struct StringBuilder, char*, struct StringBuilder> merger, List<char*> compiled){
-	/* output */ local0 = output;
 	struct var output = struct StringBuilder();/* 
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
-	return local0.toString(local0);
+	return output.toString(output);
 }
 /* private static  */ Option<List<T>> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Option<T> (*compiler)(char*)){
 	struct var segments = divide(input, folder);
@@ -492,8 +474,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return compiled;
 }
 /* private static */ struct StringBuilder mergeStatements_Main(struct Main this, struct StringBuilder output, char* compiled){
-	struct StringBuilder local0 = output;
-	return local0.append(local0, compiled);
+	return output.append(output, compiled);
 }
 /* private static */ List<char*> divide_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	return divideAll(input, folder);
@@ -501,7 +482,6 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* private static */ List<char*> divideAll_Main(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder){
 	/* /* var current = State */ */ local0 = /* var current = State */;
 	/* /* i < input */ */ local1 = /* i < input */;
-	/* current */ local2 = current;
 	local0.createDefault(local0);
 	/* for (var i  */ = 0;
 	local1.length(local1);/*  i++) {
@@ -526,7 +506,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 
             current = folder.apply(current, c);
         } */
-	return local2.advance(local2).segments;
+	return current.advance(current).segments;
 }
 /* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, struct char c){
 	/* /* var appended = current */ */ local0 = /* var appended = current */;
@@ -563,10 +543,6 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/* /* classIndex + infix */ */ local1 = /* classIndex + infix */;
 	/* /* var afterKeyword = stripped */ */ local2 = /* var afterKeyword = stripped */;
 	/* /* " */ */ local3 = /* " */;
-	/* typeParams */ local4 = typeParams;
-	/* frames */ local5 = frames;
-	/* frames */ local6 = frames;
-	/* structs */ local7 = structs;
 	local0.indexOf(local0, infix);/* 
         if (classIndex < 0) {
             return new None<>();
@@ -623,15 +599,15 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	local3.length(local3, /* ) */);
 	struct var typeParamString = /*  typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
 	struct var structNode = struct StructNode(name, typeParams);
-	local5.addLast(local5, struct Frame(structNode));/* 
+	frames.addLast(frames, struct Frame(structNode));/* 
 
         var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, input1 -> new Some<>(compileClassSegment(input1))) +
                 "\n} */
 	/*  */;
 	/* \n" */;
-	local6.removeLast(local6);
-	local7.add(local7, generated);
+	frames.removeLast(frames);
+	structs.add(structs, generated);
 	return Some<>(/* "" */);
 }
 /* private static */ struct boolean isSymbol_Main(struct Main this, char* input){
@@ -676,39 +652,37 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/* /* var beforeParams = input */ */ local1 = /* var beforeParams = input */;
 	/* local1.substring(local1, 0, paramStart) */ local2 = local1.substring(local1, 0, paramStart);
 	/* /* var withParams = input */ */ local3 = /* var withParams = input */;
-	/* frames */ local4 = frames;
-	/* typeParams */ local5 = typeParams;
-	/* /* () -> compileConstructorDefinition(beforeParams) */ */ local6 = /* () -> compileConstructorDefinition(beforeParams) */;
+	/* /* () -> compileConstructorDefinition(beforeParams) */ */ local4 = /* () -> compileConstructorDefinition(beforeParams) */;
 	/* /* var maybeHeader = parseDefinition(beforeParams)
                 .<Definable>map(value -> value)
-                 */ */ local7 = /* var maybeHeader = parseDefinition(beforeParams)
+                 */ */ local5 = /* var maybeHeader = parseDefinition(beforeParams)
                 .<Definable>map(value -> value)
                  */;
-	/* /* var paramEnd = withParams */ */ local8 = /* var paramEnd = withParams */;
-	/* /* var paramStrings = withParams */ */ local9 = /* var paramStrings = withParams */;
-	/* local9.substring(local9, 0, paramEnd) */ local10 = local9.substring(local9, 0, paramEnd);
-	/* /* var afterParams = withParams.substring(paramEnd + ")" */ */ local11 = /* var afterParams = withParams.substring(paramEnd + ")" */;
+	/* /* var paramEnd = withParams */ */ local6 = /* var paramEnd = withParams */;
+	/* /* var paramStrings = withParams */ */ local7 = /* var paramStrings = withParams */;
+	/* local7.substring(local7, 0, paramEnd) */ local8 = local7.substring(local7, 0, paramEnd);
+	/* /* var afterParams = withParams.substring(paramEnd + ")" */ */ local9 = /* var afterParams = withParams.substring(paramEnd + ")" */;
 	local0.indexOf(local0, /* "(" */);/* 
         if (paramStart < 0) {
             return new None<>();
         } */
 	local2.strip(local2);
 	local3.substring(local3, /* paramStart + "(".length() */);
-	struct var currentStruct = local4.getLast(local4).node;
+	struct var currentStruct = frames.getLast(frames).node;
 	struct var currentStructName = currentStruct.name;
 	struct var currentStructTypeParams = currentStruct.typeParams;
-	local5.addAll(local5, currentStructTypeParams);
-	local7.or(local7, local6.map(local6, /* value -> value */));/* 
+	typeParams.addAll(typeParams, currentStructTypeParams);
+	local5.or(local5, local4.map(local4, /* value -> value */));/* 
 
         if (!(maybeHeader instanceof Some(var header))) {
             return new None<>();
         } */
-	local8.indexOf(local8, /* ")" */);/* 
+	local6.indexOf(local6, /* ")" */);/* 
         if (paramEnd < 0) {
             return new None<>();
         } */
-	local10.strip(local10);
-	local11.length(local11, /* )).strip( */);/* 
+	local8.strip(local8);
+	local9.length(local9, /* )).strip( */);/* 
         if (afterParams.startsWith("{") && afterParams.endsWith("} *//* ")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
@@ -967,20 +941,26 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
             if (caller instanceof DataAccess(var parent, var property)) {
                 var resolved = resolveType(parent);
 
-                var name = "local" + localCounter;
-                var symbol = new Symbol(name);
-                localCounter++;
+                Value newParent;
+                if (parent instanceof Symbol || parent instanceof DataAccess) {
+                    newParent = parent;
+                }
+                else {
+                    var name = "local" + localCounter;
+                    newParent = new Symbol(name);
+                    localCounter++;
 
-                statements.add(new Assignment(new Definition(resolved, name), parent));
+                    statements.add(new Assignment(new Definition(resolved, name), parent));
+                }
 
                 var arguments = new ArrayList<Value>();
-                arguments.add(symbol);
+                arguments.add(newParent);
                 arguments.addAll(invocation.arguments
                         .stream()
                         .filter(argument -> !(argument instanceof Whitespace))
                         .toList());
 
-                return new Invocation(new DataAccess(symbol, property), arguments);
+                return new Invocation(new DataAccess(newParent, property), arguments);
             }
 
             return invocation;
@@ -999,8 +979,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 	return true;
 }
-/* private static */ struct Type resolveType_Main(struct Main this, struct Value value){
-	struct Value local0 = value;/* 
+/* private static */ struct Type resolveType_Main(struct Main this, struct Value value){/* 
         if (value instanceof Invocation(var base, var _)) {
             var resolved = resolveType(base);
             if (resolved instanceof Functional functional) {
@@ -1018,7 +997,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 return type;
             }
         } */
-	return struct Content(local0.generate(local0));
+	return struct Content(value.generate(value));
 }
 /* private static */ Option<struct Type> findNameInFrame_Main(struct Main this, char* name, struct Frame frame){
 	struct var definitions = frame.definitions;/* 

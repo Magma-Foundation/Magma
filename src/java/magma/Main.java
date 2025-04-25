@@ -1038,20 +1038,26 @@ public class Main {
             if (caller instanceof DataAccess(var parent, var property)) {
                 var resolved = resolveType(parent);
 
-                var name = "local" + localCounter;
-                var symbol = new Symbol(name);
-                localCounter++;
+                Value newParent;
+                if (parent instanceof Symbol || parent instanceof DataAccess) {
+                    newParent = parent;
+                }
+                else {
+                    var name = "local" + localCounter;
+                    newParent = new Symbol(name);
+                    localCounter++;
 
-                statements.add(new Assignment(new Definition(resolved, name), parent));
+                    statements.add(new Assignment(new Definition(resolved, name), parent));
+                }
 
                 var arguments = new ArrayList<Value>();
-                arguments.add(symbol);
+                arguments.add(newParent);
                 arguments.addAll(invocation.arguments
                         .stream()
                         .filter(argument -> !(argument instanceof Whitespace))
                         .toList());
 
-                return new Invocation(new DataAccess(symbol, property), arguments);
+                return new Invocation(new DataAccess(newParent, property), arguments);
             }
 
             return invocation;
