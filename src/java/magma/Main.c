@@ -3,12 +3,16 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.Collections; */
+/* import java.util.HashMap; */
 /* import java.util.List; */
+/* import java.util.Map; */
+/* import java.util.Optional; */
 /* import java.util.function.BiFunction; */
 /* import java.util.function.Function; */
 /* import java.util.function.Predicate; */
 /* import java.util.function.Supplier; */
 /* import java.util.stream.Collectors; */
+/* import java.util.stream.Stream; */
 /*  */
 struct Type {
 };
@@ -86,11 +90,17 @@ struct Construction {
 };
 struct Invocation {
 };
+struct StructNode {
+};
+struct Frame {
+};
+struct Options {
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = ArrayList<>(/*  */);
 	/* public static */ List<char*> structs;
 	/* private static */ List<char*> functions;
-	/* private static */ List<Tuple<char*, List<char*>>> stack;
+	/* private static */ List<struct Frame> frames;
 };
 /* default */ struct Type flatten_Type(struct Type this){
 	return this;
@@ -106,7 +116,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public  */ Option<R> map_Some<T, R>(struct Some<T> this, R (*mapper)(T)){
-	return Some<>(mapper.apply(this.value));
+	return Some<>(mapper(this.value));
 }
 /* @Override
         public */ T orElse_Some<T>(struct Some<T> this, T other){
@@ -122,7 +132,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public  */ Option<R> flatMap_Some<T, R>(struct Some<T> this, Option<R> (*mapper)(T)){
-	return mapper.apply(this.value);
+	return mapper(this.value);
 }
 /* @Override
         public */ Option<T> filter_Some<T>(struct Some<T> this, Predicate<T> predicate){
@@ -214,11 +224,15 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
             } */
 	return /* beforeType + generatedWithName + joinedTypeParams */;
 }
+/* @Override
+        public */ Option<struct Definition> toDefinition_Definition(struct Definition this){
+	return Some<>(this);
+}
 /* public */ struct Definition rename_Definition(struct Definition this, char* name){
 	return struct Definition(this.maybeBeforeType, this.type, name, this.typeParams);
 }
 /* public */ struct Definition mapTypeParams_Definition(struct Definition this, List<char*> (*mapper)(List<char*>)){
-	return struct Definition(this.maybeBeforeType, this.type, this.name, mapper.apply(this.typeParams));
+	return struct Definition(this.maybeBeforeType, this.type, this.name, mapper(this.typeParams));
 }
 struct Struct new_Struct(char* name){
 	struct Struct this;
@@ -237,6 +251,10 @@ struct Struct new_Struct(char* name){
 /* @Override
         public */ char* generate_Content(struct Content this){
 	return generatePlaceholder(this.input);
+}
+/* @Override
+        public */ Option<struct Definition> toDefinition_Content(struct Content this){
+	return None<>(/*  */);
 }
 /* @Override
         public */ char* generate_Functional(struct Functional this){
@@ -286,6 +304,10 @@ struct Struct new_Struct(char* name){
 /* @Override
         public */ char* generate_Whitespace(struct Whitespace this){
 	return /* "" */;
+}
+/* @Override
+        public */ Option<struct Definition> toDefinition_Whitespace(struct Whitespace this){
+	return None<>(/*  */);
 }
 /* @Override
         public */ char* generate_Assignment(struct Assignment this){
@@ -348,10 +370,19 @@ struct Struct new_Struct(char* name){
         public */ struct Invocation toInvocation_Invocation(struct Invocation this){
 	return this;
 }
+struct public Frame_Frame(struct Frame this, struct StructNode node){
+	/* this(node, new HashMap<>()) */;
+}
+/* public static  */ Stream<T> toStream_Options<T>(struct Options this, Option<T> option){
+	return option.map(/* Stream::of).orElseGet(Stream::empty */);
+}
+/* public static  */ Option<T> fromNative_Options<T>(struct Options this, Optional<T> optional){
+	return /* optional.<Option<T>>map */(/* Some::new).orElseGet(None::new */);
+}
 /* public static */ struct void main_Main(struct Main this){
 	structs = ArrayList<>(/*  */);
 	functions = ArrayList<>(/*  */);
-	stack = ArrayList<>(/*  */);/* 
+	frames = ArrayList<>(/*  */);/* 
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -504,13 +535,15 @@ struct Struct new_Struct(char* name){
         var content = withEnd.substring(0, withEnd.length() - "} */
 	/* ".length()) */;
 	struct var typeParamString = /* typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
-	/* stack.addLast(new Tuple<>(name, typeParams)) */;/* 
+	struct var structNode = struct StructNode(name, typeParams);
+	/* frames.addLast(new Frame(structNode)) */;/* 
+
         var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n} */
 	/*  */;
 	/* \n" */;
-	/* stack.removeLast() */;
+	/* frames.removeLast() */;
 	/* structs.add(generated) */;
 	return Some<>(/* "" */);
 }
@@ -555,9 +588,9 @@ struct Struct new_Struct(char* name){
         } */
 	struct var beforeParams = input.substring(/* 0 */, /* paramStart).strip( */);
 	struct var withParams = input.substring(/* paramStart + " */(/* ".length( */));
-	struct var currentStruct = stack.getLast(/*  */);
-	struct var currentStructName = currentStruct.left;
-	struct var currentStructTypeParams = currentStruct.right;
+	struct var currentStruct = frames.getLast(/*  */).node;
+	struct var currentStructName = currentStruct.name;
+	struct var currentStructTypeParams = currentStruct.typeParams;
 	/* typeParams.addAll(currentStructTypeParams) */;
 	struct var maybeHeader = parseDefinition(/* beforeParams)
                 .<Definable>map */(/* value -> value)
@@ -576,6 +609,16 @@ struct Struct new_Struct(char* name){
             var content = afterParams.substring(1, afterParams.length() - 1);
 
             var inputParams = parseValues(paramStrings, Main::parseParameter);
+            var definitions = inputParams.stream()
+                    .map(Parameter::toDefinition)
+                    .flatMap(Options::toStream)
+                    .toList();
+
+            var lastDefinitions = frames.getLast().definitions;
+            for (var definition : definitions) {
+                lastDefinitions.put(definition.name, definition.type);
+            }
+
             var oldStatements = parseStatements(content, Main::parseStatement);
             typeParams.clear();
 
@@ -644,7 +687,7 @@ struct Struct new_Struct(char* name){
 }
 /* private static */ Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (stack.getLast().left.equals(name)) {
+            if (frames.getLast().node.name.equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
@@ -734,11 +777,16 @@ struct Struct new_Struct(char* name){
         } */
 	struct var separator = stripped.lastIndexOf(/* "." */);/* 
         if (separator >= 0) {
-            var parent = stripped.substring(0, separator);
+            var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
             if (isSymbol(property)) {
-                var value = parseValue(parent);
-                return new DataAccess(value, property);
+                var parent = parseValue(parentString);
+                var type = resolveType(parent);
+                if (type instanceof Functional && property.equals("apply")) {
+                    return parent;
+                }
+
+                return new DataAccess(parent, property);
             }
         } *//* 
 
@@ -746,6 +794,28 @@ struct Struct new_Struct(char* name){
             return new Symbol(stripped);
         } */
 	return struct Content(stripped);
+}
+/* private static */ struct Type resolveType_Main(struct Main this, struct Value value){/* 
+        if (value instanceof Symbol(var name)) {
+            var maybeType = Options.fromNative(frames.stream()
+                    .map(frame -> findNameInFrame(name, frame))
+                    .flatMap(Options::toStream)
+                    .findFirst());
+
+            if (maybeType instanceof Some(var type)) {
+                return type;
+            }
+        } */
+	return struct Content(value.generate(/*  */));
+}
+/* private static */ Option<struct Type> findNameInFrame_Main(struct Main this, char* name, struct Frame frame){
+	struct var definitions = frame.definitions;/* 
+        if (definitions.containsKey(name)) {
+            return new Some<>(definitions.get(name));
+        } *//* 
+        else {
+            return new None<>();
+        } */
 }
 /* private static  */ Option<struct R> compileInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
 	struct var withoutPrefix = input.strip(/*  */);/* 

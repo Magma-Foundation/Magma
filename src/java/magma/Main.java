@@ -5,12 +5,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     private interface Type {
@@ -56,6 +60,8 @@ public class Main {
 
     private interface Parameter {
         String generate();
+
+        Option<Definition> toDefinition();
     }
 
     private interface Invokable extends Value {
@@ -227,6 +233,11 @@ public class Main {
             return beforeType + generatedWithName + joinedTypeParams;
         }
 
+        @Override
+        public Option<Definition> toDefinition() {
+            return new Some<>(this);
+        }
+
         public Definition rename(String name) {
             return new Definition(this.maybeBeforeType, this.type, name, this.typeParams);
         }
@@ -259,6 +270,11 @@ public class Main {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public Option<Definition> toDefinition() {
+            return new None<>();
         }
     }
 
@@ -328,6 +344,11 @@ public class Main {
         @Override
         public String generate() {
             return "";
+        }
+
+        @Override
+        public Option<Definition> toDefinition() {
+            return new None<>();
         }
     }
 
@@ -433,15 +454,34 @@ public class Main {
         }
     }
 
+    private record StructNode(String name, List<String> typeParams) {
+    }
+
+    private record Frame(StructNode node, Map<String, Type> definitions) {
+        public Frame(StructNode node) {
+            this(node, new HashMap<>());
+        }
+    }
+
+    private static class Options {
+        public static <T> Stream<T> toStream(Option<T> option) {
+            return option.map(Stream::of).orElseGet(Stream::empty);
+        }
+
+        public static <T> Option<T> fromNative(Optional<T> optional) {
+            return optional.<Option<T>>map(Some::new).orElseGet(None::new);
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
-    private static List<Tuple<String, List<String>>> stack;
+    private static List<Frame> frames;
 
     public static void main() {
         structs = new ArrayList<>();
         functions = new ArrayList<>();
-        stack = new ArrayList<>();
+        frames = new ArrayList<>();
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -622,12 +662,14 @@ public class Main {
 
         var typeParamString = typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">";
 
-        stack.addLast(new Tuple<>(name, typeParams));
+        var structNode = new StructNode(name, typeParams);
+        frames.addLast(new Frame(structNode));
+
         var generated = "struct " + name + typeParamString + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
 
-        stack.removeLast();
+        frames.removeLast();
         structs.add(generated);
         return new Some<>("");
     }
@@ -681,9 +723,9 @@ public class Main {
         var withParams = input.substring(paramStart + "(".length());
 
 
-        var currentStruct = stack.getLast();
-        var currentStructName = currentStruct.left;
-        var currentStructTypeParams = currentStruct.right;
+        var currentStruct = frames.getLast().node;
+        var currentStructName = currentStruct.name;
+        var currentStructTypeParams = currentStruct.typeParams;
         typeParams.addAll(currentStructTypeParams);
 
         var maybeHeader = parseDefinition(beforeParams)
@@ -705,6 +747,16 @@ public class Main {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
             var inputParams = parseValues(paramStrings, Main::parseParameter);
+            var definitions = inputParams.stream()
+                    .map(Parameter::toDefinition)
+                    .flatMap(Options::toStream)
+                    .toList();
+
+            var lastDefinitions = frames.getLast().definitions;
+            for (var definition : definitions) {
+                lastDefinitions.put(definition.name, definition.type);
+            }
+
             var oldStatements = parseStatements(content, Main::parseStatement);
             typeParams.clear();
 
@@ -777,7 +829,7 @@ public class Main {
 
     private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (stack.getLast().left.equals(name)) {
+            if (frames.getLast().node.name.equals(name)) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
@@ -880,11 +932,16 @@ public class Main {
 
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
-            var parent = stripped.substring(0, separator);
+            var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
             if (isSymbol(property)) {
-                var value = parseValue(parent);
-                return new DataAccess(value, property);
+                var parent = parseValue(parentString);
+                var type = resolveType(parent);
+                if (type instanceof Functional && property.equals("apply")) {
+                    return parent;
+                }
+
+                return new DataAccess(parent, property);
             }
         }
 
@@ -893,6 +950,31 @@ public class Main {
         }
 
         return new Content(stripped);
+    }
+
+    private static Type resolveType(Value value) {
+        if (value instanceof Symbol(var name)) {
+            var maybeType = Options.fromNative(frames.stream()
+                    .map(frame -> findNameInFrame(name, frame))
+                    .flatMap(Options::toStream)
+                    .findFirst());
+
+            if (maybeType instanceof Some(var type)) {
+                return type;
+            }
+        }
+
+        return new Content(value.generate());
+    }
+
+    private static Option<Type> findNameInFrame(String name, Frame frame) {
+        var definitions = frame.definitions;
+        if (definitions.containsKey(name)) {
+            return new Some<>(definitions.get(name));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static <T, R> Option<R> compileInvokable(
