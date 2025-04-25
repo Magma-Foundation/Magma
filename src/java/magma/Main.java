@@ -54,6 +54,8 @@ public class Main {
         }
     }
 
+    public static final List<String> structs = new ArrayList<>();
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -67,7 +69,9 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compileStatements(input, Main::compileRootSegment);
+        var output = compileStatements(input, Main::compileRootSegment);
+        var joinedStructs = String.join("", structs);
+        return output + joinedStructs;
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -131,7 +135,8 @@ public class Main {
                     var generated = "struct " + name + " {" +
                             compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
-                    return Optional.of(generated);
+                    structs.add(generated);
+                    return Optional.of("");
                 }
             }
         }
