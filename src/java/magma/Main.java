@@ -1295,6 +1295,10 @@ public class Main {
             return new Some<>(Primitive.I32);
         }
 
+        if (stripped.equals("char")) {
+            return new Some<>(Primitive.I8);
+        }
+
         if (stripped.equals("String")) {
             return new Some<>(new Ref(Primitive.I8));
         }

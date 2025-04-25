@@ -201,7 +201,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	this.buffer = new_StringBuilder();
 	return this;
 }
-/* private */ struct State append_State(struct State this, struct char c){
+/* private */ struct State append_State(struct State this, char c){
 	this.buffer.append(this.buffer, c);
 	return this;
 }
@@ -548,7 +548,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 	return current.advance(current).segments;
 }
-/* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, struct char c){
+/* private static */ struct State foldStatementChar_Main(struct Main this, struct State current, char c){
 	/* /* var appended = current */ */ local0 = /* var appended = current */;
 	local0.append(local0, c);/* 
         if (c == ';' && appended.isLevel()) {
@@ -1077,7 +1077,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 	return local8.map(local8, local7.apply(local7, outputBeforeArgs, values));
 }
-/* private static */ struct State foldInvocationStart_Main(struct Main this, struct State state, struct char c){
+/* private static */ struct State foldInvocationStart_Main(struct Main this, struct State state, char c){
 	/* /* var appended = state */ */ local0 = /* var appended = state */;
 	local0.append(local0, c);/* 
         if (c == '(') {
@@ -1187,6 +1187,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
             return new Some<>(Primitive.I32);
         } *//* 
 
+        if (stripped.equals("char")) {
+            return new Some<>(Primitive.I8);
+        } *//* 
+
         if (stripped.equals("String")) {
             return new Some<>(new Ref(Primitive.I8));
         } *//* 
@@ -1218,7 +1222,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 /* private static  */ Option<List<T>> parseValues_Main<T>(struct Main this, char* args, Option<T> (*compiler)(char*)){
 	return parseAll(args, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ struct State foldValueChar_Main(struct Main this, struct State state, struct char c){
+/* private static */ struct State foldValueChar_Main(struct Main this, struct State state, char c){
 	/* /* var appended = state */ */ local0 = /* var appended = state */;/* 
         if (c == ',' && state.isLevel()) {
             return state.advance();
