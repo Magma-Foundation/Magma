@@ -570,6 +570,9 @@ public class Main {
 
         var beforeName = stripped.substring(0, nameSeparator).strip();
         var name = stripped.substring(nameSeparator + " ".length()).strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
 
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {

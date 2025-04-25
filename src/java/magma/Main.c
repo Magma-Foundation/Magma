@@ -10,19 +10,19 @@
 /* import java.util.stream.Collectors; */
 /*  */
 struct Type {
-	char* generate();
+	/* String generate() */;
 };
 struct Definable {
-	struct Definition toDefinition();
+	/* Definition toDefinition() */;
 };
 struct Optional {
 	/* <R> Optional<R> map(Function<T, R> mapper) */;
 	/* T orElse(T other) */;
-	/* T */ orElseGet(Supplier<struct T> other);
-	/* Optional<T> */ or(Supplier<Optional<struct T>> other);
-	/* <R> Optional<R> flatMap(Function<T, */ Optional</* R> */> mapper);
-	/* Optional<T> */ filter(Predicate<struct T> predicate);
-	struct boolean isPresent();
+	/* T orElseGet(Supplier<T> other) */;
+	/* Optional<T> or(Supplier<Optional<T>> other) */;
+	/* <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) */;
+	/* Optional<T> filter(Predicate<T> predicate) */;
+	/* boolean isPresent() */;
 };
 struct Primitive {
 	/* I8("char"),
@@ -56,29 +56,29 @@ struct Main {
 	/* private static */ Optional<char*> currentStructName;
 };
 /* static <T> */ Optional<struct T> empty(/*  */){
-	/* return */ struct new None<>();
+	/* return new None<>() */;
 }
 /* static <T> */ Optional<struct T> of(struct T name){
-	/* return */ struct new Some<>(name);
+	/* return new Some<>(name) */;
 }
 struct Primitive new_Primitive(char* value){
 	this.value = value;
 }
 /* @Override
         public */ char* generate(/*  */){
-	struct return this.value;
+	/* return this.value */;
 }
 /* @Override
         public <R> */ Optional<struct R> map(/* Function<T */, /*  R> mapper */){
-	/* return */ struct new Some<>(mapper.apply(this.value));
+	/* return new Some<>(mapper.apply(this.value)) */;
 }
 /* @Override
         public */ struct T orElse(struct T other){
-	struct return this.value;
+	/* return this.value */;
 }
 /* @Override
         public */ struct T orElseGet(Supplier<struct T> other){
-	struct return this.value;
+	/* return this.value */;
 }
 /* @Override
         public */ Optional<struct T> or(Supplier<Optional<struct T>> other){
@@ -86,11 +86,11 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public <R> */ Optional<struct R> flatMap(/* Function<T */, Optional</* R> */> mapper){
-	struct return mapper.apply(this.value);
+	/* return mapper.apply(this.value) */;
 }
 /* @Override
         public */ Optional<struct T> filter(Predicate<struct T> predicate){
-	/* return predicate.test(this.value) ? this : */ struct new None<>();
+	/* return predicate.test(this.value) ? this : new None<>() */;
 }
 /* @Override
         public */ struct boolean isPresent(/*  */){
@@ -98,7 +98,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public <R> */ Optional<struct R> map(/* Function<T */, /*  R> mapper */){
-	/* return */ struct new None<>();
+	/* return new None<>() */;
 }
 /* @Override
         public */ struct T orElse(struct T other){
@@ -106,15 +106,15 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public */ struct T orElseGet(Supplier<struct T> other){
-	struct return other.get();
+	/* return other.get() */;
 }
 /* @Override
         public */ Optional<struct T> or(Supplier<Optional<struct T>> other){
-	struct return other.get();
+	/* return other.get() */;
 }
 /* @Override
         public <R> */ Optional<struct R> flatMap(/* Function<T */, Optional</* R> */> mapper){
-	/* return */ struct new None<>();
+	/* return new None<>() */;
 }
 /* @Override
         public */ Optional<struct T> filter(Predicate<struct T> predicate){
@@ -142,7 +142,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct return this;
 }
 /* public */ struct boolean isLevel(/*  */){
-	struct return this.depth = /* = 0 */;
+	/* return this */.depth = /* = 0 */;
 }
 /* public */ struct State enter(/*  */){
 	/* this.depth++ */;
@@ -153,7 +153,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	struct return this;
 }
 /* public */ struct boolean isShallow(/*  */){
-	struct return this.depth = /* = 1 */;
+	/* return this */.depth = /* = 1 */;
 }
 struct public Definition(struct Type type, char* name){
 	/* this(Optional.empty(), type, name) */;
@@ -176,7 +176,7 @@ struct public Definition(struct Type type, char* name){
 }
 /* @Override
         public */ char* generate(/*  */){
-	struct return generatePlaceholder(this.input);
+	/* return generatePlaceholder(this.input) */;
 }
 /* @Override
         public */ char* generate(/*  */){
@@ -222,7 +222,7 @@ struct public Definition(struct Type type, char* name){
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
-	struct return output.toString();
+	/* return output.toString() */;
 }
 /* private static <T> */ List<struct T> parseAll(char* input, /* 
             BiFunction<State */, /*  Character */, /*  State> folder */, /* 
@@ -235,7 +235,7 @@ struct public Definition(struct Type type, char* name){
 	struct return compiled;
 }
 /* private static */ struct StringBuilder mergeStatements(struct StringBuilder output, char* compiled){
-	struct return output.append(compiled);
+	/* return output.append(compiled) */;
 }
 /* private static */ List<char*> divide(char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
 	/* return divideAll(input, folder) */;
@@ -265,7 +265,7 @@ struct public Definition(struct Type type, char* name){
 
             current = folder.apply(current, c);
         } */
-	struct return current.advance().segments;
+	/* return current.advance().segments */;
 }
 /* private static */ struct State foldStatementChar(struct State current, struct char c){
 	struct var appended = current.append(c);/* 
@@ -337,7 +337,7 @@ struct public Definition(struct Type type, char* name){
 	/*  */;
 	/* \n" */;
 	/* structs.add(generated) */;
-	struct return Optional.of("");
+	/* return Optional.of("") */;
 }
 /* private static */ struct boolean isSymbol(char* input){
 	/* for (var i */ = /* 0 */;
@@ -392,7 +392,7 @@ struct public Definition(struct Type type, char* name){
                 }
             }
         } */
-	struct return Optional.empty();
+	/* return Optional.empty() */;
 }
 /* private static */ Optional<struct Constructor> compileConstructorDefinition(char* input){/* 
         return findConstructorDefinitionName(input).flatMap(name -> {
@@ -413,7 +413,7 @@ struct public Definition(struct Type type, char* name){
         if (isSymbol(stripped)) {
             return Optional.of(stripped);
         } */
-	struct return Optional.empty();
+	/* return Optional.empty() */;
 }
 /* private static */ char* compileStatementOrBlock(char* input){
 	/* return compileWhitespace(input)
@@ -430,7 +430,7 @@ struct public Definition(struct Type type, char* name){
 }
 /* private static */ Optional<char*> compileStatement(char* input, /*  Function<String */, /*  String> compiler */){
 	struct var stripped = input.strip();
-	struct if (stripped.endsWith(";/* ")) {
+	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             return Optional.of("\n\t" + compiler.apply(withoutEnd) + ";");
         } *//* 
@@ -452,7 +452,7 @@ struct public Definition(struct Type type, char* name){
             var destination = compileDefinition(inputDefinition).orElseGet(() -> compileValue(inputDefinition));
             return Optional.of(destination + " = " + compileValue(value));
         } */
-	struct return Optional.empty();
+	/* return Optional.empty() */;
 }
 /* private static */ char* compileValue(char* input){
 	struct var stripped = input.strip();
@@ -466,13 +466,13 @@ struct public Definition(struct Type type, char* name){
         if (isSymbol(stripped)) {
             return stripped;
         } */
-	struct return generatePlaceholder(stripped);
+	/* return generatePlaceholder(stripped) */;
 }
 /* private static */ char* compileDefinitionOrPlaceholder(char* input){
 	/* return compileDefinition(input).orElseGet(() -> generatePlaceholder(input)) */;
 }
 /* private static */ Optional<char*> compileDefinition(char* input){
-	struct return parseDefinition(input).map(Definition::generate);
+	/* return parseDefinition(input).map(Definition::generate) */;
 }
 /* private static */ Optional<struct Definition> parseDefinition(char* input){
 	struct var stripped = input.strip();
@@ -481,7 +481,10 @@ struct public Definition(struct Type type, char* name){
             return Optional.empty();
         } */
 	struct var beforeName = stripped.substring(0, nameSeparator).strip();
-	struct var name = stripped.substring(nameSeparator + " ".length()).strip();
+	struct var name = stripped.substring(nameSeparator + " ".length()).strip();/* 
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        } */
 	struct var typeSeparator = beforeName.lastIndexOf(" ");/* 
         if (typeSeparator < 0) {
             return parseType(beforeName).map(type -> new Definition(Optional.empty(), type, name));
@@ -519,7 +522,7 @@ struct public Definition(struct Type type, char* name){
         if (isSymbol(stripped)) {
             return Optional.of(new Struct(stripped));
         } */
-	struct return Optional.empty();
+	/* return Optional.empty() */;
 }
 /* private static */ char* compileValues(char* args, /*  Function<String */, /*  String> compiler */){
 	/* return generateValues(parseValues(args, compiler)) */;
