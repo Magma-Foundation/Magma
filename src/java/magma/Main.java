@@ -925,7 +925,7 @@ public class Main {
         return parseOr(input, List.of(
                 createNamespacedRule("package "),
                 createNamespacedRule("import "),
-                input0 -> compileClass(input0).mapValue(value -> value)
+                input0 -> parseClass(input0).mapValue(value -> value)
         ));
     }
 
@@ -951,11 +951,11 @@ public class Main {
         return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(stripped)));
     }
 
-    private static Result<Whitespace, CompileError> compileClass(String stripped) {
-        return compileStructured(stripped, "class ");
+    private static Result<Whitespace, CompileError> parseClass(String stripped) {
+        return parseStructured(stripped, "class ");
     }
 
-    private static Result<Whitespace, CompileError> compileStructured(String stripped, String infix) {
+    private static Result<Whitespace, CompileError> parseStructured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return createInfixErr(stripped, infix);
@@ -1062,17 +1062,29 @@ public class Main {
 
     private static Result<StructSegment, CompileError> compileClassSegment(String input0) {
         return Main.parseOr(input0, List.of(
-                input -> parseWhitespace(input).mapValue(value -> value),
-                input -> compileStructured(input, "enum ").mapValue(value -> value),
-                input -> compileStructured(input, "class ").mapValue(value -> value),
-                input -> compileStructured(input, "record ").mapValue(value -> value),
-                input -> compileStructured(input, "interface ").mapValue(value -> value),
-                input -> parseMethod(input).mapValue(value -> value),
-                input -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).mapValue(value -> value)
+                structSegmentFrom(Main::whitespace),
+                structSegmentFromStructured("enum "),
+                structSegmentFromStructured("class "),
+                structSegmentFromStructured("record "),
+                structSegmentFromStructured("interface "),
+                structSegmentFrom(Main::method),
+                structSegmentFrom(Main::classStatement)
         ));
     }
 
-    private static Result<Whitespace, CompileError> parseWhitespace(String input) {
+    private static Result<Statement, CompileError> classStatement(String input) {
+        return parseStatementWithoutBraces(input, Main::compileClassStatementValue);
+    }
+
+    private static <T extends StructSegment> Rule<StructSegment> structSegmentFrom(Rule<T> whitespace) {
+        return input -> whitespace.apply(input).mapValue(value -> value);
+    }
+
+    private static Rule<StructSegment> structSegmentFromStructured(String interface_) {
+        return structSegmentFrom(input -> parseStructured(input, interface_));
+    }
+
+    private static Result<Whitespace, CompileError> whitespace(String input) {
         if (input.isBlank()) {
             return new Ok<>(new Whitespace());
         }
@@ -1081,7 +1093,7 @@ public class Main {
         }
     }
 
-    private static Result<Whitespace, CompileError> parseMethod(String input) {
+    private static Result<Whitespace, CompileError> method(String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return createInfixErr(input, "(");
@@ -1250,7 +1262,7 @@ public class Main {
 
     private static Result<FunctionSegment, CompileError> parseStatement(String input0) {
         return parseOr(input0, List.of(
-                input -> parseWhitespace(input).mapValue(value -> value),
+                input -> whitespace(input).mapValue(value -> value),
                 input -> parseStatementWithoutBraces(input, Main::parseStatementValue)
                         .mapValue(value -> value)
         ));
@@ -1582,7 +1594,7 @@ public class Main {
 
     private static Result<Value, CompileError> parseArgument(String input) {
         return parseOr(input, List.of(
-                input0 -> parseWhitespace(input0).mapValue(arg -> arg),
+                input0 -> whitespace(input0).mapValue(arg -> arg),
                 input0 -> parseValue(input0).mapValue(arg -> arg)
         ));
     }
@@ -1601,7 +1613,7 @@ public class Main {
 
     private static Result<Parameter, CompileError> parseParameter(String input) {
         return parseOr(input, List.of(
-                input0 -> parseWhitespace(input0).mapValue(result -> result),
+                input0 -> whitespace(input0).mapValue(result -> result),
                 input0 -> parseDefinition(input0).mapValue(result -> result)
         ));
     }
@@ -1731,7 +1743,7 @@ public class Main {
 
     private static Result<Type, CompileError> parseTypeOrBlank(String input) {
         return parseOr(input, List.of(
-                input0 -> parseWhitespace(input0).mapValue(type -> type),
+                input0 -> whitespace(input0).mapValue(type -> type),
                 Main::parseAndFlattenType
         ));
     }
