@@ -348,13 +348,24 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileConstructorDefinition(String beforeParams) {
-        var nameSeparator = beforeParams.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            var name = beforeParams.substring(nameSeparator + " ".length());
+    private static Optional<String> compileConstructorDefinition(String input) {
+        return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
                 return Optional.of(new Definition(new Struct(name), "new_" + name).generate());
             }
+            return Optional.empty();
+        });
+    }
+
+    private static Optional<String> findConstructorDefinitionName(String input) {
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var name = stripped.substring(nameSeparator + " ".length());
+            return Optional.of(name);
+        }
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
         }
         return Optional.empty();
     }

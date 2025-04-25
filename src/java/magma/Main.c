@@ -36,7 +36,7 @@ struct Main {
 	/* private static */ List<char*> functions;
 	/* private static */ Optional<char*> currentStructName;
 };
-/* Primitive */(char* value){
+struct Primitive new_Primitive(char* value){
 	this.value = value;
 }
 /* @Override
@@ -298,13 +298,24 @@ struct public Definition(struct Type type, char* name){
         } */
 	struct return Optional.empty();
 }
-/* private static */ Optional<char*> compileConstructorDefinition(char* beforeParams){
-	struct var nameSeparator = beforeParams.lastIndexOf(" ");/* 
-        if (nameSeparator >= 0) {
-            var name = beforeParams.substring(nameSeparator + " ".length());
+/* private static */ Optional<char*> compileConstructorDefinition(char* input){/* 
+        return findConstructorDefinitionName(input).flatMap(name -> {
             if (currentStructName.isPresent() && currentStructName.get().equals(name)) {
                 return Optional.of(new Definition(new Struct(name), "new_" + name).generate());
             }
+            return Optional.empty();
+        } */
+	/* ) */;
+}
+/* private static */ Optional<char*> findConstructorDefinitionName(char* input){
+	struct var stripped = input.strip();
+	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
+        if (nameSeparator >= 0) {
+            var name = stripped.substring(nameSeparator + " ".length());
+            return Optional.of(name);
+        } *//* 
+        if (isSymbol(stripped)) {
+            return Optional.of(stripped);
         } */
 	struct return Optional.empty();
 }
