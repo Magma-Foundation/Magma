@@ -116,6 +116,8 @@ struct StructBuilder {
 	/* private */ List<char*> typeArgs = Collections.emptyList(Collections);
 	/* private */ Map<char*, struct Type> definitions = Collections.emptyMap(Collections);
 };
+struct StringValue {
+};
 struct Main {
 	/* private static final */ List<char*> typeParams = new_ArrayList_Whitespace();
 	/* private static final */ List<struct StatementValue> statements = new_ArrayList_Whitespace();
@@ -251,7 +253,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
             if (this.type instanceof Functional functional) {
                 return functional.generateWithName(this.name);
             } */
-	return /* this.type.generate() + " " + this.name */;
+	return this.type.generate(this.type) + " " + this.name;
 }
 /* private */ char* generateBeforeType_Definition(struct Definition this){
 	return /* this.maybeBeforeType
@@ -263,7 +265,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
             if (this.typeParams.isEmpty()) {
                 return "";
             } */
-	return /* "<" + String.join(", ", this.typeParams) + ">" */;
+	return "<" + String.join(", ", this.typeParams) + ">";
 }
 /* @Override
         public */ Option<struct Definition> toDefinition_Definition(struct Definition this){
@@ -287,8 +289,15 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Struct(struct Struct this){
-	/* /*  this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">" */ */ typeParamString = /*  this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">" */;
-	return /* "struct " + this.name + typeParamString */;
+	/* /* this */ */ typeParamString = this.generateTypeParams(this);
+	return "struct " + this.name + typeParamString;
+}
+/* private */ char* generateTypeParams_Struct(struct Struct this){/* 
+            if (this.typeArgs.isEmpty()) {
+                return "";
+            } */
+	/* /* String */ */ joined = String.join(String, ", ", this.typeArgs);
+	return "<" + joined + ">";
 }
 /* @Override
         public */ char* stringify_Struct(struct Struct this){
@@ -309,11 +318,11 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Ref(struct Ref this){
-	return /* this.type.generate() + "*" */;
+	return this.type.generate(this.type) + "*";
 }
 /* @Override
         public */ char* stringify_Ref(struct Ref this){
-	return /* this.type.stringify() + "_star" */;
+	return this.type.stringify(this.type) + "_star";
 }
 /* @Override
         public */ char* generate_Content(struct Content this){
@@ -329,7 +338,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Functional(struct Functional this){
-	return /* this.generateWithName("") */;
+	return this.generateWithName(this, "");
 }
 /* @Override
         public */ char* stringify_Functional(struct Functional this){
@@ -338,7 +347,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining("_")) */ */ joined = /*  this.paramTypes.stream()
                     .map(Type::stringify)
                     .collect(Collectors.joining("_")) */;
-	return /* "fn_" + this.returnType.stringify() + "_" + joined */;
+	return "fn_" + this.returnType.stringify(this.returnType) + "_" + joined;
 }
 /* public */ char* generateWithName_Functional(struct Functional this, char* name){
 	/* /*  this.paramTypes.stream()
@@ -346,9 +355,9 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining(", ")) */ */ joined = /*  this.paramTypes.stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */;
-	return /* this.returnType.generate() + " (*" +
+	return this.returnType.generate(this.returnType) + " (*" +
                     name +
-                    ")(" + joined + ")" */;
+                    ")(" + joined + ")";
 }
 /* @Override
         public */ char* generate_Generic(struct Generic this){
@@ -358,7 +367,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining(", ")) */ */ joinedArgs = /*  this.args().stream()
                     .map(Type::generate)
                     .collect(Collectors.joining(", ")) */;
-	return /* this.base() + "<" + joinedArgs + ">" */;
+	return this.base(this) + "<" + joinedArgs + ">";
 }
 /* @Override
         public */ struct Type flatten_Generic(struct Generic this){/* 
@@ -386,13 +395,16 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining("_")) */ */ joined = /*  this.args.stream()
                     .map(arg -> arg.stringify())
                     .collect(Collectors.joining("_")) */;
-	return /* this.base + "_" + joined */;
+	return this.base + "_" + joined;
 }
 /* private */ struct Definition toDefinition_ConstructorDefinition(struct ConstructorDefinition this){
 	/* /* new_StructBuilder */ */ local0 = new_StructBuilder();
 	/* /* local0 */ */ local1 = local0.withName(local0, this.name(this));
 	/* /* new_DefinitionBuilder */ */ local2 = new_DefinitionBuilder();
-	return /* new DefinitionBuilder().withType(new StructBuilder().withName(this.name()).complete()).withName("new_" + this.name()).complete() */;
+	/* "new_" + this */ local3 = "new_" + this;
+	/* /* local2 */ */ local4 = local2.withType(local2, local1.complete(local1));
+	/* /* local4 */ */ local5 = local4.withName(local4, local3.name(local3));
+	return local5.complete(local5);
 }
 /* @Override
         public */ char* generate_ConstructorDefinition(struct ConstructorDefinition this){
@@ -400,16 +412,15 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Statement(struct Statement this){
-	return /* "\n\t" + this.content.generate() + " */;
-	/* " */;
+	return "\n\t" + this.content.generate() + ";";
 }
 /* @Override
         public */ char* generate_Whitespace(struct Whitespace this){
-	return /* "" */;
+	return "";
 }
 /* @Override
         public */ char* stringify_Whitespace(struct Whitespace this){
-	return /* "Whitespace" */;
+	return "Whitespace";
 }
 /* @Override
         public */ Option<struct Definition> toDefinition_Whitespace(struct Whitespace this){
@@ -417,11 +428,11 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Assignment(struct Assignment this){
-	return /* this.assignable.generate() + " = " + this.value.generate() */;
+	return this.assignable.generate(this.assignable) + " = " + this.value.generate(this.assignable.generate(this.assignable) + " = " + this.value);
 }
 /* @Override
         public */ char* generate_DataAccess(struct DataAccess this){
-	return /* this.parent.generate() + "." + this.property */;
+	return this.parent.generate(this.parent) + "." + this.property;
 }
 /* @Override
         public */ char* generate_Symbol(struct Symbol this){
@@ -429,7 +440,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
 }
 /* @Override
         public */ char* generate_Return(struct Return this){
-	return /* "return " + this.value.generate() */;
+	return "return " + this.value.generate("return " + this.value);
 }
 /* public */ struct DefinitionBuilder withBeforeType_DefinitionBuilder(struct DefinitionBuilder this, char* beforeType){
 	this.maybeBeforeType = new_Some_Whitespace(beforeType);
@@ -465,11 +476,11 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining(", ")) */ */ joined = /*  this.values.stream()
                     .map(Value::generate)
                     .collect(Collectors.joining(", ")) */;
-	return /* "new " + this.type.generate() + "(" + joined + ")" */;
+	return "new " + this.type.generate() + "(" + joined + ")";
 }
 /* private */ struct Invocation toInvocation_Construction(struct Construction this){
 	/* /* this */ */ typeAsString = this.type.stringify(this.type);
-	return /* new Invocation(new Symbol("new_" + typeAsString), this.values) */;
+	return new_Invocation(new_Symbol("new_" + typeAsString), this.values);
 }
 /* @Override
         public */ char* generate_Invocation(struct Invocation this){
@@ -478,7 +489,7 @@ struct Definition new_Definition(Option<char*> maybeBeforeType, struct Type type
                     .collect(Collectors.joining(", ")) */ */ joined = /*  this.arguments.stream()
                     .map(Value::generate)
                     .collect(Collectors.joining(", ")) */;
-	return /* this.caller.generate() + "(" + joined + ")" */;
+	return this.caller.generate(this.caller) + "(" + joined + ")";
 }
 /* private */ struct Invocation toInvocation_Invocation(struct Invocation this){
 	return this;
@@ -494,7 +505,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* @Override
         public */ char* generate_Ternary(struct Ternary this){
-	return /* this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this.whenFalse.generate() */;
+	return this.condition.generate(this.condition) + " ? " + this.whenTrue.generate(this.whenTrue) + " : " + this.whenFalse.generate(this.condition.generate(this.condition) + " ? " + this.whenTrue.generate(this.whenTrue) + " : " + this.whenFalse);
 }
 /* @Override
         public */ char* generate_Number(struct Number this){
@@ -502,15 +513,15 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* @Override
         public */ char* generate_Operation(struct Operation this){
-	return /* this.left.generate() + " " + this.operator.representation + " " + this.right.generate() */;
+	return this.left.generate(this.left) + " " + this.operator.representation + " " + this.right.generate(this.left.generate(this.left) + " " + this.operator.representation + " " + this.right);
 }
 /* @Override
         public */ char* generate_PostIncrement(struct PostIncrement this){
-	return /* this.value.generate() + "++" */;
+	return this.value.generate(this.value) + "++";
 }
 /* @Override
         public */ char* generate_PostDecrement(struct PostDecrement this){
-	return /* this.value.generate() + "--" */;
+	return this.value.generate(this.value) + "--";
 }
 /* public */ struct StructBuilder withName_StructBuilder(struct StructBuilder this, char* name){
 	this.name = name;
@@ -526,6 +537,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* public */ struct Struct complete_StructBuilder(struct StructBuilder this){
 	return new_Struct(this.name, this.typeArgs, this.definitions);
+}
+/* @Override
+        public */ char* generate_StringValue(struct StringValue this){
+	return "\"" + this.value + "\"";
 }
 /* public static */ struct void main_Main(struct Main this){
 	structs = new_ArrayList_Whitespace();
@@ -544,8 +559,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ char* compileRoot_Main(struct Main this, char* input){
 	/* /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */ */ output = /*  compileStatements(input, input1 -> new Some<>(compileRootSegment(input1))) */;
-	/* /*  String.join("", structs) */ */ joinedStructs = /*  String.join("", structs) */;
-	/* /*  String.join("", functions) */ */ joinedFunctions = /*  String.join("", functions) */;
+	/* /* String */ */ joinedStructs = String.join(String, "", structs);
+	/* /* String */ */ joinedFunctions = String.join(String, "", functions);
 	return output + joinedStructs + joinedFunctions;
 }
 /* private static */ char* compileStatements_Main(struct Main this, char* input, Option<char*> (*compiler)(char*)){
@@ -603,6 +618,31 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 continue;
             }
 
+            if (c == '\"') {
+                current.append(c);
+
+                while (true) {
+                    if (i == input.length() - 1) {
+                        break;
+                    }
+
+                    i++;
+                    var next = input.charAt(i);
+                    current.append(next);
+
+                    if (next == '\\') {
+                        i++;
+                        current.append(input.charAt(i));
+                    }
+
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
             current = folder.apply(current, c);
         } */
 	return current.advance(current).segments;
@@ -632,38 +672,45 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n") */;
 }
 /* private static */ Option<char*> compileClass_Main(struct Main this, char* stripped){
-	return /* compileStructured(stripped, "class ") */;
+	return compileStructured(stripped, "class ");
 }
 /* private static */ Option<char*> compileStructured_Main(struct Main this, char* stripped, char* infix){
 	/* classIndex + infix */ local0 = classIndex + infix;
+	/* /* afterKeyword */ */ local1 = afterKeyword.substring(afterKeyword, 0, contentStart);
+	/* contentStart + "{" */ local2 = contentStart + "{";
+	/* /* beforeContent */ */ local3 = beforeContent.substring(beforeContent, 0, implementsIndex);
+	/* /* withoutImplements */ */ local4 = withoutImplements.substring(withoutImplements, 0, extendsIndex);
+	/* /* withoutExtends */ */ local5 = withoutExtends.substring(withoutExtends, 0, paramStart);
 	/* /* I8_star */ */ classIndex = stripped.indexOf(stripped, infix);/* 
         if (classIndex < 0) {
             return new None<>();
         } */
-	/* /* I8_star */ */ afterKeyword = stripped.substring(stripped, local0.length(local0));/* 
-        var contentStart = afterKeyword.indexOf("{");
+	/* /* I8_star */ */ afterKeyword = stripped.substring(stripped, local0.length(local0));
+	/* /* afterKeyword */ */ contentStart = afterKeyword.indexOf(afterKeyword, "{");/* 
         if (contentStart < 0) {
             return new None<>();
-        }
-        var beforeContent = afterKeyword.substring(0, contentStart).strip();
-        var withEnd = afterKeyword.substring(contentStart + "{".length());
-
-        var implementsIndex = beforeContent.indexOf(" implements ");
-        var withoutImplements = implementsIndex >= 0
+        } */
+	/* /* local1 */ */ beforeContent = local1.strip(local1);
+	/* /* afterKeyword */ */ withEnd = afterKeyword.substring(afterKeyword, local2.length(local2));
+	/* /* beforeContent */ */ implementsIndex = beforeContent.indexOf(beforeContent, " implements ");
+	/* /*  implementsIndex >= 0
                 ? beforeContent.substring(0, implementsIndex).strip()
-                : beforeContent;
-
-        var extendsIndex = withoutImplements.indexOf(" extends ");
-        var withoutExtends = extendsIndex >= 0
+                : beforeContent */ */ withoutImplements = /*  implementsIndex >= 0
+                ? beforeContent.substring(0, implementsIndex).strip()
+                : beforeContent */;
+	/* /* withoutImplements */ */ extendsIndex = withoutImplements.indexOf(withoutImplements, " extends ");
+	/* /*  extendsIndex >= 0
                 ? withoutImplements.substring(0, extendsIndex).strip()
-                : withoutImplements;
-
-        var paramStart = withoutExtends.indexOf("(");
-        var withoutParameters = paramStart >= 0
+                : withoutImplements */ */ withoutExtends = /*  extendsIndex >= 0
+                ? withoutImplements.substring(0, extendsIndex).strip()
+                : withoutImplements */;
+	/* /* withoutExtends */ */ paramStart = withoutExtends.indexOf(withoutExtends, "(");
+	/* /*  paramStart >= 0
                 ? withoutExtends.substring(0, paramStart).strip()
-                : withoutExtends;
-
-        var typeParamStart = withoutParameters.indexOf("<");
+                : withoutExtends */ */ withoutParameters = /*  paramStart >= 0
+                ? withoutExtends.substring(0, paramStart).strip()
+                : withoutExtends */;
+	/* /* withoutParameters */ */ typeParamStart = withoutParameters.indexOf(withoutParameters, "<");/* 
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
             var withTypeParamEnd = withoutParameters.substring(typeParamStart + "<".length()).strip();
@@ -674,34 +721,29 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                     return assembleStructured(name, withEnd, actualTypeParams);
                 }
             }
-        }
-
-        return assembleStructured(withoutParameters, withEnd, Collections.emptyList());
-    }
-
-    private static Option<String> assembleStructured(String name, String input, List<String> typeParams) {
+        } */
+	return assembleStructured(withoutParameters, withEnd, Collections.emptyList(Collections));
+}
+/* private static */ Option<char*> assembleStructured_Main(struct Main this, char* name, char* input, List<char*> typeParams){/* 
         if (!isSymbol(name)) {
             return new None<>();
-        }
-
-        String withEnd = input.strip();
+        } */
+	char* withEnd = input.strip(input);/* 
         if (!withEnd.endsWith("}")) {
             return new None<>();
-        }
-        var content = withEnd.substring(0, withEnd.length() - "} */
-	/* ".length()) */;
-	/* /*  typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */ */ typeParamString = /*  typeParams.isEmpty() ? "" : "<" + String.join(", ", typeParams) + ">" */;
+        } */
+	/* /*  withEnd.substring(0, withEnd.length() - "}".length()) */ */ content = /*  withEnd.substring(0, withEnd.length() - "}".length()) */;
+	/* typeParams.isEmpty(typeParams) ? "" : "<" + String.join(", ", typeParams) + ">" */ typeParamString = typeParams.isEmpty(typeParams) ? "" : "<" + String.join(", ", typeParams) + ">";
 	/* /* new_StructNode */ */ structNode = new_StructNode(name, typeParams);
-	frames.addLast(frames, new_Frame(structNode));/* 
-
-        var generated = "struct " + name + typeParamString + " {" +
+	frames.addLast(frames, new_Frame(structNode));
+	/* "struct " + name + typeParamString + " {" +
                 compileStatements(content, input1 -> new Some<>(compileClassSegment(input1))) +
-                "\n} */
-	/*  */;
-	/* \n" */;
+                "\n};\n" */ generated = "struct " + name + typeParamString + " {" +
+                compileStatements(content, input1 -> new Some<>(compileClassSegment(input1))) +
+                "\n};\n";
 	frames.removeLast(frames);
 	structs.add(structs, generated);
-	return /* new Some<>("") */;
+	return new_Some_Whitespace("");
 }
 /* private static */ int isSymbol_Main(struct Main this, char* input){/* 
         if (input.isEmpty()) {
@@ -740,13 +782,16 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ Option<char*> compileMethod_Main(struct Main this, char* input){
 	/* /* I8_star */ */ local0 = input.substring(input, 0, paramStart);
-	/* /* withParams */ */ local1 = withParams.substring(withParams, 0, paramEnd);
-	/* /*  input.indexOf("(") */ */ paramStart = /*  input.indexOf("(") */;/* 
+	/* paramStart + "(" */ local1 = paramStart + "(";
+	/* /* withParams */ */ local2 = withParams.substring(withParams, 0, paramEnd);
+	/* paramEnd + ")" */ local3 = paramEnd + ")";
+	/* /* withParams */ */ local4 = withParams.substring(withParams, local3.length(local3));
+	/* /* I8_star */ */ paramStart = input.indexOf(input, "(");/* 
         if (paramStart < 0) {
             return new None<>();
         } */
 	/* /* local0 */ */ beforeParams = local0.strip(local0);
-	/* /*  input.substring(paramStart + "(".length()) */ */ withParams = /*  input.substring(paramStart + "(".length()) */;
+	/* /* I8_star */ */ withParams = input.substring(input, local1.length(local1));
 	/* /* frames */ */ currentStruct = frames.getLast(frames).node;
 	/* currentStruct */ currentStructName = currentStruct.name;
 	/* currentStruct */ currentStructTypeParams = currentStruct.typeParams;
@@ -760,13 +805,13 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (!(maybeHeader instanceof Some(var header))) {
             return new None<>();
         } */
-	/* /*  withParams.indexOf(")") */ */ paramEnd = /*  withParams.indexOf(")") */;/* 
+	/* /* withParams */ */ paramEnd = withParams.indexOf(withParams, ")");/* 
         if (paramEnd < 0) {
             return new None<>();
         } */
-	/* /* local1 */ */ paramStrings = local1.strip(local1);
-	/* /*  withParams.substring(paramEnd + ")".length()).strip() */ */ afterParams = /*  withParams.substring(paramEnd + ")".length()).strip() */;/* 
-        if (afterParams.startsWith("{") && afterParams.endsWith("} *//* ")) {
+	/* /* local2 */ */ paramStrings = local2.strip(local2);
+	/* /* local4 */ */ afterParams = local4.strip(local4);/* 
+        if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
             var maybeInputParams = parseValues(paramStrings, Main::parseParameter);
@@ -861,8 +906,9 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                     return new Some<>("");
                 }
             }
-        } */
-	/* if (afterParams.equals(" */;/* ")) {
+        } *//* 
+
+        if (afterParams.equals(";")) {
             return new Some<>("");
         } */
 	return new_None_Whitespace();
@@ -889,7 +935,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ Option<char*> findConstructorDefinitionName_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);
-	/* /*  stripped.lastIndexOf(" ") */ */ nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
+	/* /* I8_star */ */ nameSeparator = stripped.lastIndexOf(stripped, " ");/* 
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
             return new Some<>(name);
@@ -946,8 +992,8 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return /* parseStatementWithoutBraces(input, compiler).map(Statement::generate) */;
 }
 /* private static */ Option<struct Statement> parseStatementWithoutBraces_Main(struct Main this, char* input, struct StatementValue (*compiler)(char*)){
-	/* /* I8_star */ */ stripped = input.strip(input);
-	/* if (stripped.endsWith(" */;/* ")) {
+	/* /* I8_star */ */ stripped = input.strip(input);/* 
+        if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             var content = compiler.apply(withoutEnd);
             return new Some<>(new Statement(content));
@@ -962,7 +1008,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct Assignment> parseAssignment_Main(struct Main this, char* input){
-	/* /*  input.indexOf("=") */ */ valueSeparator = /*  input.indexOf("=") */;/* 
+	/* /* I8_star */ */ valueSeparator = input.indexOf(input, "=");/* 
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
@@ -987,6 +1033,10 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ Option<struct Value> parseValue_Main(struct Main this, char* input){
 	/* /* I8_star */ */ stripped = input.strip(input);/* 
+        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            var slice = stripped.substring(1, stripped.length() - 1);
+            return new Some<>(new StringValue(slice));
+        } *//* 
 
         if (isSymbol(stripped)) {
             return new Some<>(new Symbol(stripped));
@@ -1007,7 +1057,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         if (maybeInvocation instanceof Some(var invocation)) {
             return new Some<>(invocation);
         } */
-	/* /*  stripped.lastIndexOf(".") */ */ separator = /*  stripped.lastIndexOf(".") */;/* 
+	/* /* I8_star */ */ separator = stripped.lastIndexOf(stripped, ".");/* 
         if (separator >= 0) {
             var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
@@ -1020,7 +1070,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
                 return new Some<>(new DataAccess(parent, property));
             }
         } */
-	/* /*  stripped.indexOf("?") */ */ conditionSeparator = /*  stripped.indexOf("?") */;/* 
+	/* /* I8_star */ */ conditionSeparator = stripped.indexOf(stripped, "?");/* 
         if (conditionSeparator >= 0) {
             var conditionString = stripped.substring(0, conditionSeparator);
             var afterCondition = stripped.substring(conditionSeparator + "?".length());
@@ -1157,6 +1207,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
         } */
 }
 /* private static  */ Option<struct R> parseInvokable_Main<T,  R>(struct Main this, char* input, Option<T> (*beforeArgsCaller)(char*), BiFunction<T, List<struct Value>, struct R> builder){
+	/* /* String */ */ local0 = String.join(String, "", beforeLast);
 	/* /* I8_star */ */ withoutPrefix = input.strip(input);/* 
         if (!withoutPrefix.endsWith(")")) {
             return new None<>();
@@ -1164,7 +1215,7 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	/* /*  withoutPrefix.substring(0, withoutPrefix.length() - ")".length()) */ */ withoutEnd = /*  withoutPrefix.substring(0, withoutPrefix.length() - ")".length()) */;
 	/* /*  divideAll(withoutEnd, Main::foldInvocationStart) */ */ slices = /*  divideAll(withoutEnd, Main::foldInvocationStart) */;
 	/* /*  slices.subList(0, slices.size() - 1) */ */ beforeLast = /*  slices.subList(0, slices.size() - 1) */;
-	/* /*  String.join("", beforeLast).strip() */ */ joined = /*  String.join("", beforeLast).strip() */;/* 
+	/* /* local0 */ */ joined = local0.strip(local0);/* 
         if (!joined.endsWith("(")) {
             return new None<>();
         } */
@@ -1194,18 +1245,20 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 }
 /* private static */ Option<struct Definition> parseDefinition_Main(struct Main this, char* input){
 	/* /* I8_star */ */ local0 = stripped.substring(stripped, 0, nameSeparator);
-	/* /* new_DefinitionBuilder */ */ local1 = new_DefinitionBuilder();
+	/* nameSeparator + " " */ local1 = nameSeparator + " ";
+	/* /* I8_star */ */ local2 = stripped.substring(stripped, local1.length(local1));
+	/* /* new_DefinitionBuilder */ */ local3 = new_DefinitionBuilder();
 	/* /* I8_star */ */ stripped = input.strip(input);
-	/* /*  stripped.lastIndexOf(" ") */ */ nameSeparator = /*  stripped.lastIndexOf(" ") */;/* 
+	/* /* I8_star */ */ nameSeparator = stripped.lastIndexOf(stripped, " ");/* 
         if (nameSeparator < 0) {
             return new None<>();
         } */
 	/* /* local0 */ */ beforeName = local0.strip(local0);
-	/* /*  stripped.substring(nameSeparator + " ".length()).strip() */ */ name = /*  stripped.substring(nameSeparator + " ".length()).strip() */;/* 
+	/* /* local2 */ */ name = local2.strip(local2);/* 
         if (!isSymbol(name)) {
             return new None<>();
         } */
-	/* /* local1 */ */ withName = local1.withName(local1, name);/* 
+	/* /* local3 */ */ withName = local3.withName(local3, name);/* 
         return switch (findTypeSeparator(beforeName)) {
             case None<Integer> _ -> parseAndFlattenType(beforeName).map(type -> new DefinitionBuilder()
                     .withType(type)
@@ -1330,5 +1383,5 @@ struct public Frame_Frame(struct Frame this, struct StructNode node){
 	return appended;
 }
 /* private static */ char* generatePlaceholder_Main(struct Main this, char* stripped){
-	return /* "/* " + stripped + " */" */;
+	return "/* " + stripped + " */";
 }

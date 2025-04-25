@@ -288,8 +288,16 @@ public class Main {
     record Struct(String name, List<String> typeArgs, Map<String, Type> definitions) implements Type {
         @Override
         public String generate() {
-            var typeParamString = this.typeArgs.isEmpty() ? "" : "<" + String.join(", ", this.typeArgs) + ">";
+            var typeParamString = this.generateTypeParams();
             return "struct " + this.name + typeParamString;
+        }
+
+        private String generateTypeParams() {
+            if (this.typeArgs.isEmpty()) {
+                return "";
+            }
+            var joined = String.join(", ", this.typeArgs);
+            return "<" + joined + ">";
         }
 
         @Override
@@ -629,6 +637,13 @@ public class Main {
         }
     }
 
+    private record StringValue(String value) implements Value {
+        @Override
+        public String generate() {
+            return "\"" + this.value + "\"";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -731,6 +746,31 @@ public class Main {
 
                 i++;
                 current.append(input.charAt(i));
+                continue;
+            }
+
+            if (c == '\"') {
+                current.append(c);
+
+                while (true) {
+                    if (i == input.length() - 1) {
+                        break;
+                    }
+
+                    i++;
+                    var next = input.charAt(i);
+                    current.append(next);
+
+                    if (next == '\\') {
+                        i++;
+                        current.append(input.charAt(i));
+                    }
+
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
                 continue;
             }
 
@@ -1149,6 +1189,10 @@ public class Main {
 
     private static Option<Value> parseValue(String input) {
         var stripped = input.strip();
+        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            var slice = stripped.substring(1, stripped.length() - 1);
+            return new Some<>(new StringValue(slice));
+        }
 
         if (isSymbol(stripped)) {
             return new Some<>(new Symbol(stripped));
