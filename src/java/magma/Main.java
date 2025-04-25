@@ -601,10 +601,19 @@ public class Main {
     }
 
     private static StatementValue parseStatementValue(String input) {
-        return compileAssignment(input)
-                .map(value -> value)
+        return compileReturn(input).<StatementValue>map(value -> value)
+                .or(() -> compileAssignment(input).map(value -> value))
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input));
+    }
+
+    private static Optional<Return> compileReturn(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            return new Some<>(new Return(parseValue(stripped.substring("return ".length()))));
+        }
+
+        return new None<>();
     }
 
     private static Optional<String> compileClassStatement(String input) {
