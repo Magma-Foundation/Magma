@@ -679,8 +679,10 @@ public class Main {
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            var value = parseValue(parent);
-            return new DataAccess(value, property);
+            if (isSymbol(property)) {
+                var value = parseValue(parent);
+                return new DataAccess(value, property);
+            }
         }
 
         if (isSymbol(stripped)) {

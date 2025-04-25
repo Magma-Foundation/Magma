@@ -79,7 +79,7 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some this, /* Function<T */, /*  R> mapper */){
-	return /* new Some<>(mapper */.apply(this.value));
+	return /* new Some<>(mapper.apply(this.value)) */;
 }
 /* @Override
         public */ struct T orElse(struct Some this, struct T other){
@@ -95,11 +95,11 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(struct Some this, /* Function<T */, Option</* R> */> mapper){
-	return mapper.apply(this.value);
+	return /* mapper.apply(this.value) */;
 }
 /* @Override
         public */ Option<struct T> filter(struct Some this, Predicate<struct T> predicate){
-	return predicate.test(this.value) ? this : new None<>();
+	return /* predicate.test(this.value) ? this : new None<>() */;
 }
 /* @Override
         public */ struct boolean isPresent(struct Some this){
@@ -115,11 +115,11 @@ struct Primitive new_Primitive(char* value){
 }
 /* @Override
         public */ struct T orElseGet(struct None this, Supplier<struct T> other){
-	return other.get();
+	return /* other.get() */;
 }
 /* @Override
         public */ Option<struct T> or(struct None this, Supplier<Option<struct T>> other){
-	return other.get();
+	return /* other.get() */;
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(struct None this, /* Function<T */, Option</* R> */> mapper){
@@ -153,7 +153,7 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* public */ struct boolean isLevel(struct State this){
-	return this.depth == 0;
+	return /* this.depth == 0 */;
 }
 /* public */ struct State enter(struct State this){
 	/* this.depth++ */;
@@ -164,15 +164,15 @@ struct State new_State(List<char*> segments, struct StringBuilder buffer, int de
 	return this;
 }
 /* public */ struct boolean isShallow(struct State this){
-	return this.depth == 1;
+	return /* this.depth == 1 */;
 }
 struct public Definition(struct Definition this, struct Type type, char* name){
 	/* this(new None<String>(), type, name) */;
 }
 /* @Override
         public */ char* generate(struct Definition this){
-	struct var beforeType = this.maybeBeforeType().map(inner -> inner + " ").orElse("");
-	return /* beforeType + this */.type().generate() + " " + this.name();
+	struct var beforeType = /* this.maybeBeforeType().map(inner -> inner + " ").orElse("") */;
+	return /* beforeType + this.type().generate() + " " + this.name() */;
 }
 /* @Override
         public */ struct Definition toDefinition(struct Definition this){
@@ -180,28 +180,30 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 }
 /* @Override
         public */ char* generate(struct Struct this){
-	return /* "struct " + this */.name();
+	return /* "struct " + this.name() */;
 }
 /* @Override
         public */ char* generate(struct Ref this){
-	return this.type.generate() + "*";
+	return /* this.type.generate() + "*" */;
 }
 /* @Override
         public */ char* generate(struct Content this){
-	return /* generatePlaceholder(this */.input);
+	return /* generatePlaceholder(this.input) */;
 }
 /* @Override
         public */ char* generate(struct Generic this){
-	struct var joinedArgs = this.args().stream().map(Type::generate).collect(Collectors.joining(", "));
-	return this.base() + "<" + joinedArgs + ">";
+	struct var joinedArgs = /* this.args().stream()
+                    .map(Type::generate)
+                    .collect(Collectors.joining(", ")) */;
+	return /* this.base() + "<" + joinedArgs + ">" */;
 }
 /* @Override
         public */ struct Definition toDefinition(struct ConstructorDefinition this){
-	return /* new Definition(new Struct(this */.name()), "new_" + this.name());
+	return /* new Definition(new Struct(this.name()), "new_" + this.name()) */;
 }
 /* @Override
         public */ char* generate(struct Statement this){
-	return /* "\n\t" + this */.content.generate() + ";
+	return /* "\n\t" + this.content.generate() + " */;
 	/* " */;
 }
 /* @Override
@@ -210,11 +212,11 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 }
 /* @Override
         public */ char* generate(struct Assignment this){
-	return this.assignable.generate() + " = " + this.value.generate();
+	return /* this.assignable.generate() + " = " + this.value.generate() */;
 }
 /* @Override
         public */ char* generate(struct DataAccess this){
-	return this.parent.generate() + "." + this.property;
+	return /* this.parent.generate() + "." + this */.property;
 }
 /* @Override
         public */ char* generate(struct Symbol this){
@@ -222,7 +224,7 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 }
 /* @Override
         public */ char* generate(struct Return this){
-	return /* "return " + this */.value.generate();
+	return /* "return " + this.value.generate() */;
 }
 /* public static */ struct void main(struct Return this){
 	structs = /* new ArrayList<>() */;
@@ -241,8 +243,8 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 }
 /* private static */ char* compileRoot(struct Return this, char* input){
 	struct var output = /* compileStatements(input, Main::compileRootSegment) */;
-	struct var joinedStructs = String.join("", structs);
-	struct var joinedFunctions = String.join("", functions);
+	struct var joinedStructs = /* String.join("", structs) */;
+	struct var joinedFunctions = /* String.join("", functions) */;
 	return /* output + joinedStructs + joinedFunctions */;
 }
 /* private static */ char* compileStatements(struct Return this, char* input, /*  Function<String */, /*  String> compiler */){
@@ -259,7 +261,7 @@ struct public Definition(struct Definition this, struct Type type, char* name){
         for (var segment : compiled) {
             output = merger.apply(output, segment);
         } */
-	return output.toString();
+	return /* output.toString() */;
 }
 /* private static <T> */ List<struct T> parseAll(struct Return this, char* input, /* 
             BiFunction<State */, /*  Character */, /*  State> folder */, /* 
@@ -272,13 +274,13 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return compiled;
 }
 /* private static */ struct StringBuilder mergeStatements(struct Return this, struct StringBuilder output, char* compiled){
-	return output.append(compiled);
+	return /* output.append(compiled) */;
 }
 /* private static */ List<char*> divide(struct Return this, char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
 	return /* divideAll(input, folder) */;
 }
 /* private static */ List<char*> divideAll(struct Return this, char* input, /*  BiFunction<State */, /*  Character */, /*  State> folder */){
-	struct var current = State.createDefault();
+	struct var current = /* State.createDefault() */;
 	/* for (var i */ = /* 0 */;
 	/* i < input.length() */;/*  i++) {
             var c = input.charAt(i);
@@ -302,10 +304,10 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 
             current = folder.apply(current, c);
         } */
-	return current.advance().segments;
+	return /* current.advance() */.segments;
 }
 /* private static */ struct State foldStatementChar(struct Return this, struct State current, struct char c){
-	struct var appended = current.append(c);/* 
+	struct var appended = /* current.append(c) */;/* 
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* 
@@ -321,22 +323,22 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return appended;
 }
 /* private static */ char* compileRootSegment(struct Return this, char* input){
-	struct var stripped = input.strip();/* 
+	struct var stripped = /* input.strip() */;/* 
 
         if (stripped.startsWith("package ")) {
             return "";
         } */
-	return /* compileClass(stripped) */.orElseGet(() -> generatePlaceholder(stripped) + "\n");
+	return /* compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n") */;
 }
 /* private static */ Option<char*> compileClass(struct Return this, char* stripped){
 	return /* compileStructured(stripped, "class ") */;
 }
 /* private static */ Option<char*> compileStructured(struct Return this, char* stripped, char* infix){
-	struct var classIndex = stripped.indexOf(infix);/* 
+	struct var classIndex = /* stripped.indexOf(infix) */;/* 
         if (classIndex < 0) {
             return new None<>();
         } */
-	struct var afterKeyword = stripped.substring(classIndex + infix.length());/* 
+	struct var afterKeyword = /* stripped.substring(classIndex + infix.length()) */;/* 
         var contentStart = afterKeyword.indexOf("{");
         if (contentStart < 0) {
             return new None<>();
@@ -393,10 +395,17 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return true;
 }
 /* private static */ char* compileClassSegment(struct Return this, char* input){
-	return /* compileWhitespace(input) */.or(() -> compileClass(input)).or(() -> compileStructured(input, "enum ")).or(() -> compileStructured(input, "record ")).or(() -> compileStructured(input, "interface ")).or(() -> compileMethod(input)).or(() -> compileClassStatement(input)).orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
+	return /* compileWhitespace(input)
+                .or(() -> compileClass(input))
+                .or(() -> compileStructured(input, "enum "))
+                .or(() -> compileStructured(input, "record "))
+                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileMethod(input))
+                .or(() -> compileClassStatement(input))
+                .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip())) */;
 }
 /* private static */ Option<char*> compileWhitespace(struct Return this, char* input){
-	return /* parseWhitespace(input) */.map(Whitespace::generate);
+	return /* parseWhitespace(input).map(Whitespace::generate) */;
 }
 /* private static */ Option<struct Whitespace> parseWhitespace(struct Return this, char* input){/* 
         if (input.isBlank()) {
@@ -407,65 +416,68 @@ struct public Definition(struct Definition this, struct Type type, char* name){
         } */
 }
 /* private static */ Option<char*> compileMethod(struct Return this, char* input){
-	struct var paramStart = input.indexOf("(");/* 
+	struct var paramStart = /* input.indexOf("(") */;/* 
         if (paramStart < 0) {
             return new None<>();
         } */
-	struct var beforeParams = input.substring(0, paramStart).strip();
-	struct var withParams = input.substring(paramStart + "(".length());
-	struct var maybeHeader = /* parseDefinition(beforeParams) */.<Definable>map(value -> value).or(() -> compileConstructorDefinition(beforeParams).map(value -> value));/* 
+	struct var beforeParams = /* input.substring(0, paramStart).strip() */;
+	struct var withParams = /* input.substring(paramStart + "(".length()) */;
+	struct var maybeHeader = /* parseDefinition(beforeParams)
+                .<Definable>map(value -> value)
+                .or(() -> compileConstructorDefinition(beforeParams).map(value -> value)) */;/* 
 
         if (!(maybeHeader instanceof Some(var header))) {
             return new None<>();
         } */
-	struct var paramEnd = withParams.indexOf(")");/* 
-        if (paramEnd >= 0) {
-            var paramStrings = withParams.substring(0, paramEnd).strip();
-            var afterParams = withParams.substring(paramEnd + ")".length()).strip();
-            if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
-                var content = afterParams.substring(1, afterParams.length() - 1);
+	struct var paramEnd = /* withParams.indexOf(")") */;/* 
+        if (paramEnd < 0) {
+            return new None<>();
+        } */
+	struct var paramStrings = /* withParams.substring(0, paramEnd).strip() */;
+	struct var afterParams = /* withParams.substring(paramEnd + ")".length()).strip() */;/* 
+        if (afterParams.startsWith("{") && afterParams.endsWith("} *//* ")) {
+            var content = afterParams.substring(1, afterParams.length() - 1);
 
-                var inputParams = parseValues(paramStrings, Main::parseParameter);
-                var oldStatements = parseStatements(content, Main::parseStatement);
+            var inputParams = parseValues(paramStrings, Main::parseParameter);
+            var oldStatements = parseStatements(content, Main::parseStatement);
 
-                ArrayList<FunctionSegment> newStatements;
-                if (header instanceof ConstructorDefinition(var name)) {
-                    var copy = new ArrayList<FunctionSegment>();
-                    copy.add(new Statement(new Definition(new Struct(name), "this")));
-                    copy.addAll(oldStatements);
-                    copy.add(new Statement(new Return(new Symbol("this"))));
-                    newStatements = copy;
-                }
-                else {
-                    newStatements = new ArrayList<>(oldStatements);
-                }
-
-                var outputContent = newStatements
-                        .stream()
-                        .map(FunctionSegment::generate)
-                        .collect(Collectors.joining());
-
-                var currentStructName = maybeCurrentStructName.orElse("");
-                var outputParams = new ArrayList<Parameter>();
-                if (header instanceof Definition _) {
-                    outputParams.add(new Definition(new Struct(currentStructName), "this"));
-                }
-                outputParams.addAll(inputParams
-                        .stream()
-                        .filter(node -> !(node instanceof Whitespace))
-                        .toList());
-
-                var outputParamStrings = outputParams.stream()
-                        .map(Parameter::generate)
-                        .collect(Collectors.joining(", "));
-
-                var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
-                functions.add(constructor);
-                return new Some<>("");
+            ArrayList<FunctionSegment> newStatements;
+            if (header instanceof ConstructorDefinition(var name)) {
+                var copy = new ArrayList<FunctionSegment>();
+                copy.add(new Statement(new Definition(new Struct(name), "this")));
+                copy.addAll(oldStatements);
+                copy.add(new Statement(new Return(new Symbol("this"))));
+                newStatements = copy;
             }
-            if (afterParams.equals(";")) {
-                return new Some<>("");
+            else {
+                newStatements = new ArrayList<>(oldStatements);
             }
+
+            var outputContent = newStatements
+                    .stream()
+                    .map(FunctionSegment::generate)
+                    .collect(Collectors.joining());
+
+            var currentStructName = maybeCurrentStructName.orElse("");
+            var outputParams = new ArrayList<Parameter>();
+            if (header instanceof Definition _) {
+                outputParams.add(new Definition(new Struct(currentStructName), "this"));
+            }
+            outputParams.addAll(inputParams
+                    .stream()
+                    .filter(node -> !(node instanceof Whitespace))
+                    .toList());
+
+            var outputParamStrings = outputParams.stream()
+                    .map(Parameter::generate)
+                    .collect(Collectors.joining(", "));
+
+            var constructor = header.toDefinition().generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+            functions.add(constructor);
+            return new Some<>("");
+        } */
+	/* if (afterParams.equals(" */;/* ")) {
+            return new Some<>("");
         } */
 	return /* new None<>() */;
 }
@@ -482,8 +494,8 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	/* ) */;
 }
 /* private static */ Option<char*> findConstructorDefinitionName(struct Return this, char* input){
-	struct var stripped = input.strip();
-	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
+	struct var stripped = /* input.strip() */;
+	struct var nameSeparator = /* stripped.lastIndexOf(" ") */;/* 
         if (nameSeparator >= 0) {
             var name = stripped.substring(nameSeparator + " ".length());
             return new Some<>(name);
@@ -494,13 +506,19 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return /* new None<>() */;
 }
 /* private static */ struct FunctionSegment parseStatement(struct Return this, char* input){
-	return /* parseWhitespace(input) */.<FunctionSegment>map(value -> value).or(() -> parseStatementWithoutBraces(input, Main::parseStatementValue).map(value -> value)).orElseGet(() -> new Content(input));
+	return /* parseWhitespace(input)
+                .<FunctionSegment>map(value -> value)
+                .or(() -> parseStatementWithoutBraces(input, Main::parseStatementValue).map(value -> value))
+                .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ struct StatementValue parseStatementValue(struct Return this, char* input){
-	return /* compileReturn(input) */.<StatementValue>map(value -> value).or(() -> compileAssignment(input).map(value -> value)).or(() -> parseDefinition(input).map(value -> value)).orElseGet(() -> new Content(input));
+	return /* compileReturn(input).<StatementValue>map(value -> value)
+                .or(() -> compileAssignment(input).map(value -> value))
+                .or(() -> parseDefinition(input).map(value -> value))
+                .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct Return> compileReturn(struct Return this, char* input){
-	struct var stripped = input.strip();/* 
+	struct var stripped = /* input.strip() */;/* 
         if (stripped.startsWith("return ")) {
             return new Some<>(new Return(parseValue(stripped.substring("return ".length()))));
         } */
@@ -510,10 +528,10 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return /* compileStatement(input, Main::compileClassStatementValue) */;
 }
 /* private static */ Option<char*> compileStatement(struct Return this, char* input, /*  Function<String */, /*  StatementValue> compiler */){
-	return /* parseStatementWithoutBraces(input, compiler) */.map(Statement::generate);
+	return /* parseStatementWithoutBraces(input, compiler).map(Statement::generate) */;
 }
 /* private static */ Option<struct Statement> parseStatementWithoutBraces(struct Return this, char* input, /*  Function<String */, /*  StatementValue> compiler */){
-	struct var stripped = input.strip();
+	struct var stripped = /* input.strip() */;
 	/* if (stripped.endsWith(" */;/* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             var content = compiler.apply(withoutEnd);
@@ -524,10 +542,13 @@ struct public Definition(struct Definition this, struct Type type, char* name){
         } */
 }
 /* private static */ struct StatementValue compileClassStatementValue(struct Return this, char* input){
-	return /* compileAssignment(input) */.map(value -> value).or(() -> parseDefinition(input).map(value -> value)).orElseGet(() -> new Content(input));
+	return /* compileAssignment(input)
+                .map(value -> value)
+                .or(() -> parseDefinition(input).map(value -> value))
+                .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct StatementValue> compileAssignment(struct Return this, char* input){
-	struct var valueSeparator = input.indexOf("=");/* 
+	struct var valueSeparator = /* input.indexOf("=") */;/* 
         if (valueSeparator >= 0) {
             var inputDefinition = input.substring(0, valueSeparator);
             var value = input.substring(valueSeparator + "=".length());
@@ -541,13 +562,15 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return /* new None<>() */;
 }
 /* private static */ struct Value parseValue(struct Return this, char* input){
-	struct var stripped = input.strip();
-	struct var separator = stripped.lastIndexOf(".");/* 
+	struct var stripped = /* input.strip() */;
+	struct var separator = /* stripped.lastIndexOf(".") */;/* 
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            var value = parseValue(parent);
-            return new DataAccess(value, property);
+            if (isSymbol(property)) {
+                var value = parseValue(parent);
+                return new DataAccess(value, property);
+            }
         } *//* 
 
         if (isSymbol(stripped)) {
@@ -556,29 +579,32 @@ struct public Definition(struct Definition this, struct Type type, char* name){
 	return /* new Content(stripped) */;
 }
 /* private static */ struct Parameter parseParameter(struct Return this, char* input){
-	return /* parseWhitespace(input) */.<Parameter>map(result -> result).or(() -> parseDefinition(input).map(result -> result)).orElseGet(() -> new Content(input));
+	return /* parseWhitespace(input)
+                .<Parameter>map(result -> result)
+                .or(() -> parseDefinition(input).map(result -> result))
+                .orElseGet(() -> new Content(input)) */;
 }
 /* private static */ Option<struct Definition> parseDefinition(struct Return this, char* input){
-	struct var stripped = input.strip();
-	struct var nameSeparator = stripped.lastIndexOf(" ");/* 
+	struct var stripped = /* input.strip() */;
+	struct var nameSeparator = /* stripped.lastIndexOf(" ") */;/* 
         if (nameSeparator < 0) {
             return new None<>();
         } */
-	struct var beforeName = stripped.substring(0, nameSeparator).strip();
-	struct var name = stripped.substring(nameSeparator + " ".length()).strip();/* 
+	struct var beforeName = /* stripped.substring(0, nameSeparator).strip() */;
+	struct var name = /* stripped.substring(nameSeparator + " ".length()).strip() */;/* 
         if (!isSymbol(name)) {
             return new None<>();
         } */
-	struct var typeSeparator = beforeName.lastIndexOf(" ");/* 
+	struct var typeSeparator = /* beforeName.lastIndexOf(" ") */;/* 
         if (typeSeparator < 0) {
             return parseType(beforeName).map(type -> new Definition(new None<String>(), type, name));
         } */
-	struct var beforeType = beforeName.substring(0, typeSeparator).strip();
-	struct var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
-	return /* parseType(inputType) */.map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name));
+	struct var beforeType = /* beforeName.substring(0, typeSeparator).strip() */;
+	struct var inputType = /* beforeName.substring(typeSeparator + " ".length()).strip() */;
+	return /* parseType(inputType).map(outputType -> new Definition(new Some<String>(generatePlaceholder(beforeType)), outputType, name)) */;
 }
 /* private static */ Option<struct Type> parseType(struct Return this, char* input){
-	struct var stripped = input.strip();/* 
+	struct var stripped = /* input.strip() */;/* 
         if (stripped.equals("private")) {
             return new None<>();
         } *//* 
@@ -629,7 +655,7 @@ struct public Definition(struct Definition this, struct Type type, char* name){
         if (buffer.isEmpty()) {
             return buffer.append(element);
         } */
-	return buffer.append(", ").append(element);
+	return /* buffer.append(", ").append(element) */;
 }
 /* private static */ char* generatePlaceholder(struct Return this, char* stripped){
 	return /* "/* " + stripped + " */" */;
