@@ -58,6 +58,10 @@ public class Main {
         String generate();
     }
 
+    private interface Invokable extends Value {
+        Invocation toInvocation();
+    }
+
     private enum Primitive implements Type {
         I8("char"),
         I32("int");
@@ -392,7 +396,7 @@ public class Main {
 
     }
 
-    private record Construction(Type type, List<Value> values) implements Value {
+    private record Construction(Type type, List<Value> values) implements Invokable {
         @Override
         public String generate() {
             var joined = this.values.stream()
@@ -401,9 +405,14 @@ public class Main {
 
             return "new " + this.type.generate() + "(" + joined + ")";
         }
+
+        @Override
+        public Invocation toInvocation() {
+            return new Invocation(new Symbol(this.type.generate()), this.values);
+        }
     }
 
-    private record Invocation(Value caller, List<Value> args) implements Value {
+    private record Invocation(Value caller, List<Value> args) implements Invokable {
         @Override
         public String generate() {
             var joined = this.args.stream()
@@ -411,6 +420,11 @@ public class Main {
                     .collect(Collectors.joining(", "));
 
             return this.caller.generate() + "(" + joined + ")";
+        }
+
+        @Override
+        public Invocation toInvocation() {
+            return this;
         }
     }
 
@@ -850,13 +864,13 @@ public class Main {
             var substring = stripped.substring("new ".length());
             var maybeInvokable = compileInvokable(substring, Main::parseType, Construction::new);
             if (maybeInvokable instanceof Some(var invokable)) {
-                return invokable;
+                return invokable.toInvocation();
             }
         }
 
         var maybeInvocation = compileInvokable(stripped, beforeArgs -> new Some<>(parseValue(beforeArgs)), Invocation::new);
         if (maybeInvocation instanceof Some(var invocation)) {
-            return invocation;
+            return invocation.toInvocation();
         }
 
         var separator = stripped.lastIndexOf(".");
