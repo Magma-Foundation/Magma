@@ -41,6 +41,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         Option<T> filter(Predicate<T> predicate);
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier);
     }
 
     private interface FunctionSegment {
@@ -112,6 +114,10 @@ public class Main {
             return predicate.test(this.value) ? this : new None<>();
         }
 
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier) {
+            return supplier.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     private static final class None<T> implements Option<T> {
@@ -143,6 +149,11 @@ public class Main {
         @Override
         public Option<T> filter(Predicate<T> predicate) {
             return this;
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> supplier) {
+            return new None<>();
         }
     }
 
@@ -342,7 +353,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements FunctionSegment, Parameter, Type {
+    private static class Whitespace implements FunctionSegment, Parameter, Type, Value {
         @Override
         public String generate() {
             return "";
@@ -502,23 +513,25 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var output = compileStatements(input, Main::compileRootSegment);
+        var output = compileStatements(input, input1 -> new Some<>(compileRootSegment(input1)));
         var joinedStructs = String.join("", structs);
         var joinedFunctions = String.join("", functions);
         return output + joinedStructs + joinedFunctions;
     }
 
-    private static String compileStatements(String input, Function<String, String> compiler) {
+    private static String compileStatements(String input, Function<String, Option<String>> compiler) {
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
     }
 
     private static String compileAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, String> compiler,
+            Function<String, Option<String>> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        return generateAll(merger, parseAll(input, folder, compiler));
+        return parseAll(input, folder, compiler)
+                .map(listOption -> generateAll(merger, listOption))
+                .orElse("");
     }
 
     private static String generateAll(
@@ -533,17 +546,21 @@ public class Main {
         return output.toString();
     }
 
-    private static <T> List<T> parseAll(
+    private static <T> Option<List<T>> parseAll(
             String input,
             BiFunction<State, Character, State> folder,
-            Function<String, T> compiler
+            Function<String, Option<T>> compiler
     ) {
         var segments = divide(input, folder);
 
-        var compiled = new ArrayList<T>();
+        Option<List<T>> compiled = new Some<>(new ArrayList<T>());
         for (var segment : segments) {
-            compiled.add(compiler.apply(segment));
+            compiled = compiled.and(() -> compiler.apply(segment)).map(tuple -> {
+                tuple.left.add(tuple.right);
+                return tuple.left;
+            });
         }
+
         return compiled;
     }
 
@@ -648,8 +665,10 @@ public class Main {
             var withTypeParamEnd = withoutParameters.substring(typeParamStart + "<".length()).strip();
             if (withTypeParamEnd.endsWith(">")) {
                 var typeParamsString = withTypeParamEnd.substring(0, withTypeParamEnd.length() - ">".length());
-                var typeParams = parseValues(typeParamsString, Function.identity());
-                return assembleStructured(name, withEnd, typeParams);
+                var maybeTypeParams = parseValues(typeParamsString, Some::new);
+                if (maybeTypeParams instanceof Some(var actualTypeParams)) {
+                    return assembleStructured(name, withEnd, actualTypeParams);
+                }
             }
         }
 
@@ -673,7 +692,7 @@ public class Main {
         frames.addLast(new Frame(structNode));
 
         var generated = "struct " + name + typeParamString + " {" +
-                compileStatements(content, Main::compileClassSegment) +
+                compileStatements(content, input1 -> new Some<>(compileClassSegment(input1))) +
                 "\n};\n";
 
         frames.removeLast();
@@ -753,74 +772,78 @@ public class Main {
         if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
             var content = afterParams.substring(1, afterParams.length() - 1);
 
-            var inputParams = parseValues(paramStrings, Main::parseParameter);
-            var definitions = inputParams.stream()
-                    .map(Parameter::toDefinition)
-                    .flatMap(Options::toStream)
-                    .toList();
+            var maybeInputParams = parseValues(paramStrings, Main::parseParameter);
+            if (maybeInputParams instanceof Some(var inputParams)) {
+                var definitions = inputParams.stream()
+                        .map(Parameter::toDefinition)
+                        .flatMap(Options::toStream)
+                        .toList();
 
-            var lastDefinitions = frames.getLast().definitions;
-            for (var definition : definitions) {
-                lastDefinitions.put(definition.name, definition.type);
+                var lastDefinitions = frames.getLast().definitions;
+                for (var definition : definitions) {
+                    lastDefinitions.put(definition.name, definition.type);
+                }
+
+                var maybeOldStatements = parseStatements(content, (String input1) -> new Some<>(parseStatement(input1)));
+                typeParams.clear();
+
+                if (maybeOldStatements instanceof Some(var oldStatements)) {
+                    ArrayList<FunctionSegment> newStatements;
+                    if (header instanceof ConstructorDefinition(var name)) {
+                        var copy = new ArrayList<FunctionSegment>();
+                        copy.add(new Statement(new DefinitionBuilder()
+                                .withType(new Struct(name, currentStructTypeParams))
+                                .withName("this")
+                                .complete()));
+
+                        copy.addAll(oldStatements);
+                        copy.add(new Statement(new Return(new Symbol("this"))));
+                        newStatements = copy;
+                    }
+                    else {
+                        newStatements = new ArrayList<>(oldStatements);
+                    }
+
+                    var outputContent = newStatements
+                            .stream()
+                            .map(FunctionSegment::generate)
+                            .collect(Collectors.joining());
+
+                    Definable newDefinition;
+                    var outputParams = new ArrayList<Parameter>();
+                    if (header instanceof Definition oldDefinition) {
+                        outputParams.add(new DefinitionBuilder()
+                                .withType(new Struct(currentStructName, currentStructTypeParams))
+                                .withName("this")
+                                .complete());
+
+                        newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams -> {
+                            ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
+                            copy.addAll(typeParams);
+                            return copy;
+                        });
+                    }
+                    else if (header instanceof ConstructorDefinition constructorDefinition) {
+                        newDefinition = constructorDefinition.toDefinition();
+                    }
+                    else {
+                        newDefinition = header;
+                    }
+
+                    outputParams.addAll(inputParams
+                            .stream()
+                            .filter(node -> !(node instanceof Whitespace))
+                            .toList());
+
+                    var outputParamStrings = outputParams.stream()
+                            .map(Parameter::generate)
+                            .collect(Collectors.joining(", "));
+
+                    var constructor = newDefinition.generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
+                    functions.add(constructor);
+                    return new Some<>("");
+                }
             }
-
-            var oldStatements = parseStatements(content, Main::parseStatement);
-            typeParams.clear();
-
-            ArrayList<FunctionSegment> newStatements;
-            if (header instanceof ConstructorDefinition(var name)) {
-                var copy = new ArrayList<FunctionSegment>();
-                copy.add(new Statement(new DefinitionBuilder()
-                        .withType(new Struct(name, currentStructTypeParams))
-                        .withName("this")
-                        .complete()));
-
-                copy.addAll(oldStatements);
-                copy.add(new Statement(new Return(new Symbol("this"))));
-                newStatements = copy;
-            }
-            else {
-                newStatements = new ArrayList<>(oldStatements);
-            }
-
-            var outputContent = newStatements
-                    .stream()
-                    .map(FunctionSegment::generate)
-                    .collect(Collectors.joining());
-
-            Definable newDefinition;
-            var outputParams = new ArrayList<Parameter>();
-            if (header instanceof Definition oldDefinition) {
-                outputParams.add(new DefinitionBuilder()
-                        .withType(new Struct(currentStructName, currentStructTypeParams))
-                        .withName("this")
-                        .complete());
-
-                newDefinition = oldDefinition.rename(oldDefinition.name + "_" + currentStructName).mapTypeParams(typeParams -> {
-                    ArrayList<String> copy = new ArrayList<>(currentStructTypeParams);
-                    copy.addAll(typeParams);
-                    return copy;
-                });
-            }
-            else if (header instanceof ConstructorDefinition constructorDefinition) {
-                newDefinition = constructorDefinition.toDefinition();
-            }
-            else {
-                newDefinition = header;
-            }
-
-            outputParams.addAll(inputParams
-                    .stream()
-                    .filter(node -> !(node instanceof Whitespace))
-                    .toList());
-
-            var outputParamStrings = outputParams.stream()
-                    .map(Parameter::generate)
-                    .collect(Collectors.joining(", "));
-
-            var constructor = newDefinition.generate() + "(" + outputParamStrings + "){" + outputContent + "\n}\n";
-            functions.add(constructor);
-            return new Some<>("");
         }
 
         if (afterParams.equals(";")) {
@@ -830,7 +853,7 @@ public class Main {
         return new None<>();
     }
 
-    private static <T> List<T> parseStatements(String content, Function<String, T> compiler) {
+    private static <T> Option<List<T>> parseStatements(String content, Function<String, Option<T>> compiler) {
         return parseAll(content, Main::foldStatementChar, compiler);
     }
 
@@ -943,13 +966,22 @@ public class Main {
 
         var conditionSeparator = stripped.indexOf("?");
         if (conditionSeparator >= 0) {
-            var condition = stripped.substring(0, conditionSeparator);
+            var conditionString = stripped.substring(0, conditionSeparator);
             var afterCondition = stripped.substring(conditionSeparator + "?".length());
             var actionSeparator = afterCondition.indexOf(":");
             if (actionSeparator >= 0) {
-                var whenTrue = afterCondition.substring(0, actionSeparator);
-                var whenFalse = afterCondition.substring(actionSeparator + ":".length());
-                return new Some<>(new Ternary(parseValueOrPlaceholder(condition), parseValueOrPlaceholder(whenTrue), parseValueOrPlaceholder(whenFalse)));
+                var whenTrueString = afterCondition.substring(0, actionSeparator);
+                var whenFalseString = afterCondition.substring(actionSeparator + ":".length());
+
+                var maybeCondition = parseValue(conditionString);
+                var maybeWhenTrue = parseValue(whenTrueString);
+                var maybeWhenFalse = parseValue(whenFalseString);
+
+                if (maybeCondition instanceof Some(var condition)
+                        && maybeWhenTrue instanceof Some(var whenTrue)
+                        && maybeWhenFalse instanceof Some(var whenFalse)) {
+                    return new Some<>(new Ternary(condition, whenTrue, whenFalse));
+                }
             }
         }
 
@@ -1023,15 +1055,16 @@ public class Main {
             return new None<>();
         }
 
-        var values = parseValues(args, Main::parseValueOrPlaceholder);
-        return new Some<>(builder.apply(outputBeforeArgs, values));
+        return parseValues(args, input1 -> parseWhitespace(input1)
+                .<Value>map(arg -> arg)
+                .or(() -> parseValue(input1))
+        ).map(values -> builder.apply(outputBeforeArgs, values));
     }
 
-    private static Parameter parseParameter(String input) {
+    private static Option<Parameter> parseParameter(String input) {
         return parseWhitespace(input)
                 .<Parameter>map(result -> result)
-                .or(() -> parseDefinition(input).map(result -> result))
-                .orElseGet(() -> new Content(input));
+                .or(() -> parseDefinition(input).map(result -> result));
     }
 
     private static Option<Definition> parseDefinition(String input) {
@@ -1064,15 +1097,17 @@ public class Main {
                         var withoutTypeParams = beforeType.substring(0, typeParamStart);
                         var typeParamString = withTypeParamStart.substring(typeParamStart + "<".length());
 
-                        var typeParams = parseValues(typeParamString, Function.identity());
-                        Main.typeParams.addAll(typeParams);
-                        var maybeOutputType = parseAndFlattenType(inputType);
+                        var maybeTypeParams = parseValues(typeParamString, Some::new);
+                        if (maybeTypeParams instanceof Some(var actualTypeParams)) {
+                            Main.typeParams.addAll(actualTypeParams);
+                            var maybeOutputType = parseAndFlattenType(inputType);
 
-                        yield maybeOutputType.map(outputType -> withName
-                                .withBeforeType(withoutTypeParams)
-                                .withTypeParams(typeParams)
-                                .withType(outputType)
-                                .complete());
+                            yield maybeOutputType.map(outputType -> withName
+                                    .withBeforeType(withoutTypeParams)
+                                    .withTypeParams(actualTypeParams)
+                                    .withType(outputType)
+                                    .complete());
+                        }
                     }
                 }
                 yield parseAndFlattenType(inputType).map(outputType -> withName
@@ -1131,8 +1166,8 @@ public class Main {
                 var argsString = withoutEnd.substring(argsStart + "<".length()).strip();
                 var args = parseValues(argsString, input1 -> parseWhitespace(input1)
                         .<Type>map(type -> type)
-                        .or(() -> parseAndFlattenType(input1))
-                        .orElseGet(() -> new Content(input1)));
+                        .or(() -> parseAndFlattenType(input1)))
+                        .orElse(new ArrayList<>());
 
                 return new Some<>(new Generic(base, args));
             }
@@ -1145,7 +1180,7 @@ public class Main {
         return new None<>();
     }
 
-    private static <T> List<T> parseValues(String args, Function<String, T> compiler) {
+    private static <T> Option<List<T>> parseValues(String args, Function<String, Option<T>> compiler) {
         return parseAll(args, Main::foldValueChar, compiler);
     }
 
