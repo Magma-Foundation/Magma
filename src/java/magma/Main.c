@@ -3,51 +3,53 @@
 /* import java.nio.file.Paths; */
 /* import java.util.ArrayList; */
 /* import java.util.List; */
+/* import java.util.Optional; */
 /* import java.util.function.Function; */
-struct Main {/* private static class State {
-        private final List<String> segments;
-        private int depth;
-        private StringBuilder buffer;
+struct Main {struct State {/* private final List<String> segments; *//* 
+        private int depth; *//* 
+        private StringBuilder buffer; *//* 
 
         private State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        }
+        } *//* 
 
         private State(List<String> segments, StringBuilder buffer, int depth) {
             this.buffer = buffer;
             this.segments = segments;
             this.depth = depth;
-        }
+        } *//* 
 
         private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        }
+        } *//* 
 
         private State append(char c) {
             this.buffer.append(c);
             return this;
-        }
+        } *//* 
 
         public boolean isLevel() {
             return this.depth == 0;
-        }
+        } *//* 
 
         public State enter() {
             this.depth++;
             return this;
-        }
+        } *//* 
 
         public State exit() {
             this.depth--;
             return this;
-        }
+        } *//* 
 
         public boolean isShallow() {
             return this.depth == 1;
-        }
-    } *//* 
+        } *//* 
+     */
+};
+/* 
 
     public static void main() {
         try {
@@ -103,6 +105,15 @@ struct Main {/* private static class State {
         return appended; *//* 
      */
 };
+/* private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
+
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
+    } */
 struct ");
         if (classIndex >= 0) {/* var afterKeyword = stripped.substring(classIndex + "class ".length()); *//* 
             var contentStart = afterKeyword.indexOf("{");
@@ -111,18 +122,18 @@ struct ");
                 var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return "struct " + name + " {" +
+                    var generated = "struct " + name + " {" +
                             compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
+                    return Optional.of(generated);
                 }
             } *//* 
         }
-
-        return generatePlaceholder(stripped) + "\n";
+        return Optional.empty();
      */
 };
 /* private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     } */
 /* private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";

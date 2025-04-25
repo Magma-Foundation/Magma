@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
@@ -114,6 +115,10 @@ public class Main {
             return "";
         }
 
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped) + "\n");
+    }
+
+    private static Optional<String> compileClass(String stripped) {
         var classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
             var afterKeyword = stripped.substring(classIndex + "class ".length());
@@ -123,18 +128,18 @@ public class Main {
                 var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return "struct " + name + " {" +
+                    var generated = "struct " + name + " {" +
                             compileStatements(content, Main::compileClassSegment) +
                             "\n};\n";
+                    return Optional.of(generated);
                 }
             }
         }
-
-        return generatePlaceholder(stripped) + "\n";
+        return Optional.empty();
     }
 
     private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String stripped) {
