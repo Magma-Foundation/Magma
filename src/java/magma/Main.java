@@ -294,8 +294,9 @@ public class Main {
     private static String compileClassSegment(String input) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input))
-                .or(() -> compileStructured(input, "interface "))
+                .or(() -> compileStructured(input, "enum "))
                 .or(() -> compileStructured(input, "record "))
+                .or(() -> compileStructured(input, "interface "))
                 .or(() -> compileClassStatement(input))
                 .or(() -> compileMethod(input))
                 .orElseGet(() -> "\n\t" + generatePlaceholder(input.strip()));
