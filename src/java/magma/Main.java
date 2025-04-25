@@ -741,14 +741,11 @@ public class Main {
     private static Option<ApplicationError> runWithTarget(Path source, Path target) {
         return switch (readString(source)) {
             case Err<String, IOException>(var error) -> new Some<>(new ApplicationError(new ThrowableError(error)));
-            case Ok<String, IOException>(var input) -> {
-                var stringCompileErrorResult = compileRoot(input);
-                yield switch (stringCompileErrorResult) {
-                    case Err<String, CompileError>(var error) -> new Some<>(new ApplicationError(error));
-                    case Ok<String, CompileError>(var output) ->
-                            writeString(target, output).map(ThrowableError::new).map(ApplicationError::new);
-                };
-            }
+            case Ok<String, IOException>(var input) -> switch (compileRoot(input)) {
+                case Err<String, CompileError>(var error) -> new Some<>(new ApplicationError(error));
+                case Ok<String, CompileError>(var output) ->
+                        writeString(target, output).map(ThrowableError::new).map(ApplicationError::new);
+            };
         };
     }
 
