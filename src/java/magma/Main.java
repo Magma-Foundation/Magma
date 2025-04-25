@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -89,6 +90,12 @@ public class Main {
 
     private interface Error {
         String display();
+    }
+
+    private interface RootSegment extends Node {
+    }
+
+    private interface StructSegment extends Node {
     }
 
     private enum Primitive implements Type {
@@ -415,14 +422,14 @@ public class Main {
         }
     }
 
-    private record Statement(StatementValue content) implements FunctionSegment {
+    private record Statement(StatementValue content) implements FunctionSegment, StructSegment {
         @Override
         public String generate() {
             return "\n\t" + this.content.generate() + ";";
         }
     }
 
-    private static class Whitespace implements FunctionSegment, Parameter, Type, Value {
+    private static class Whitespace implements RootSegment, FunctionSegment, StructSegment, Parameter, Type, Value {
         @Override
         public String generate() {
             return "";
@@ -721,6 +728,13 @@ public class Main {
         }
     }
 
+    private record Package(List<String> segments) implements RootSegment {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     private static final List<StatementValue> statements = new ArrayList<>();
     public static List<String> structs;
@@ -767,15 +781,23 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRoot(String input) {
-        return compileStatements(input, Main::compileRootSegment).mapValue(output -> {
-            var joinedStructs = String.join("", structs);
+        return parseAll(input, Main::foldStatementChar, Main::parseRootSegment)
+                .mapValue(Main::joinStatements)
+                .mapValue(output -> {
+                    var joinedStructs = String.join("", structs);
 
-            var joinedFunctions = functions.stream()
-                    .map(FunctionStatement::generate)
-                    .collect(Collectors.joining(""));
+                    var joinedFunctions = functions.stream()
+                            .map(FunctionStatement::generate)
+                            .collect(Collectors.joining(""));
 
-            return output + joinedStructs + joinedFunctions;
-        });
+                    return output + joinedStructs + joinedFunctions;
+                });
+    }
+
+    private static String joinStatements(List<RootSegment> rootSegments) {
+        return rootSegments.stream()
+                .map(Node::generate)
+                .collect(Collectors.joining());
     }
 
     private static Result<String, CompileError> compileStatements(String input, Function<String, Result<String, CompileError>> compiler) {
@@ -899,21 +921,41 @@ public class Main {
         return appended;
     }
 
-    private static Result<String, CompileError> compileRootSegment(String input) {
-        var stripped = input.strip();
-
-        if (stripped.startsWith("package ")) {
-            return new Ok<>("");
-        }
-
-        return compileClass(stripped);
+    private static Result<RootSegment, CompileError> parseRootSegment(String input) {
+        return parseOr(input, List.of(
+                createNamespacedRule("package "),
+                createNamespacedRule("import "),
+                input0 -> compileClass(input0).mapValue(value -> value)
+        ));
     }
 
-    private static Result<String, CompileError> compileClass(String stripped) {
+    private static Rule<RootSegment> createNamespacedRule(String prefix) {
+        return input -> {
+            var stripped = input.strip();
+            if (!stripped.startsWith(prefix)) {
+                return createPrefixErr(stripped, prefix);
+            }
+
+            var slice = stripped.substring(prefix.length()).strip();
+            if (!slice.endsWith(";")) {
+                return createSuffixErr(slice, ";");
+            }
+
+            var inner = slice.substring(0, stripped.length() - ";".length());
+            var array = inner.split(Pattern.quote("."));
+            return new Ok<>(new Package(Arrays.asList(array)));
+        };
+    }
+
+    private static Err<RootSegment, CompileError> createPrefixErr(String stripped, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(stripped)));
+    }
+
+    private static Result<Whitespace, CompileError> compileClass(String stripped) {
         return compileStructured(stripped, "class ");
     }
 
-    private static Result<String, CompileError> compileStructured(String stripped, String infix) {
+    private static Result<Whitespace, CompileError> compileStructured(String stripped, String infix) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex < 0) {
             return createInfixErr(stripped, infix);
@@ -955,7 +997,7 @@ public class Main {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
     }
 
-    private static Result<String, CompileError> compileStructuredWithParams(String withoutParameters, String withEnd, List<Parameter> params) {
+    private static Result<Whitespace, CompileError> compileStructuredWithParams(String withoutParameters, String withEnd, List<Parameter> params) {
         var typeParamStart = withoutParameters.indexOf("<");
         if (typeParamStart >= 0) {
             String name = withoutParameters.substring(0, typeParamStart).strip();
@@ -969,7 +1011,7 @@ public class Main {
         return assembleStructured(withoutParameters, withEnd, Collections.emptyList(), params);
     }
 
-    private static Result<String, CompileError> assembleStructured(String name, String input, List<String> typeParams, List<Parameter> params) {
+    private static Result<Whitespace, CompileError> assembleStructured(String name, String input, List<String> typeParams, List<Parameter> params) {
         if (!isSymbol(name)) {
             return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
         }
@@ -987,18 +1029,19 @@ public class Main {
         frames.addLast(new Frame(structNode));
 
         return parseAll(content, Main::foldStatementChar, Main::compileClassSegment).mapValue(outputStatements -> {
-            var copy = new ArrayList<String>(params.stream()
+            var copy = new ArrayList<StructSegment>(params.stream()
                     .map(Statement::new)
-                    .map(Statement::generate)
                     .toList());
 
             copy.addAll(outputStatements);
-            var generated = "struct " + name + typeParamString + " {" + generateAll(Main::mergeStatements, copy) +
-                    "\n};\n";
+            var joined = copy.stream()
+                    .map(Node::generate)
+                    .collect(Collectors.joining());
 
+            var generated = "struct " + name + typeParamString + " {" + joined + "\n};\n";
             frames.removeLast();
             structs.add(generated);
-            return "";
+            return new Whitespace();
         });
     }
 
@@ -1017,15 +1060,15 @@ public class Main {
         return true;
     }
 
-    private static Result<String, CompileError> compileClassSegment(String input0) {
+    private static Result<StructSegment, CompileError> compileClassSegment(String input0) {
         return Main.parseOr(input0, List.of(
-                input -> parseWhitespace(input).mapValue(Whitespace::generate),
-                Main::compileClass,
-                input -> compileStructured(input, "enum "),
-                input -> compileStructured(input, "record "),
-                input -> compileStructured(input, "interface "),
-                input -> parseMethod(input).mapValue(Whitespace::generate),
-                input -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).mapValue(Statement::generate)
+                input -> parseWhitespace(input).mapValue(value -> value),
+                input -> compileStructured(input, "enum ").mapValue(value -> value),
+                input -> compileStructured(input, "class ").mapValue(value -> value),
+                input -> compileStructured(input, "record ").mapValue(value -> value),
+                input -> compileStructured(input, "interface ").mapValue(value -> value),
+                input -> parseMethod(input).mapValue(value -> value),
+                input -> parseStatementWithoutBraces(input, Main::compileClassStatementValue).mapValue(value -> value)
         ));
     }
 
