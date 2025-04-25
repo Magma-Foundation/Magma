@@ -56,6 +56,7 @@ public class Main {
     }
 
     public static final List<String> structs = new ArrayList<>();
+    private static final List<String> functions = new ArrayList<>();
     private static Optional<String> currentStructName = Optional.empty();
 
     public static void main() {
@@ -73,7 +74,8 @@ public class Main {
     private static String compileRoot(String input) {
         var output = compileStatements(input, Main::compileRootSegment);
         var joinedStructs = String.join("", structs);
-        return output + joinedStructs;
+        var joinedFunctions = String.join("", functions);
+        return output + joinedStructs + joinedFunctions;
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -206,7 +208,9 @@ public class Main {
                         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                             var content = withBraces.substring(1, withBraces.length() - 1);
-                            return Optional.of("struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n");
+                            var constructor = "struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n";
+                            functions.add(constructor);
+                            return Optional.of("");
                         }
                     }
                 }

@@ -10,13 +10,7 @@
 struct State {
 	/* private final */ List<char*> segments;
 	/* private */ int depth;
-	/* private */ struct StringBuilder buffer;struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
-            this.buffer = buffer; *//* 
-            this.segments = segments; *//* 
-            this.depth = depth; *//* 
-         */
-}
-
+	/* private */ struct StringBuilder buffer;
 	/* private static State createDefault() {
             return new State(new ArrayList<>(), new StringBuilder(), 0);
         } */
@@ -67,6 +61,7 @@ struct ");
 };
 struct Main {
 	/* public static final List<String> structs = */ struct new ArrayList<>();
+	/* private static final List<String> functions = */ struct new ArrayList<>();
 	/* private static Optional<String> currentStructName */ struct = Optional.empty();
 	/* public static void main() {
         try {
@@ -82,7 +77,8 @@ struct Main {
 	/* private static String compileRoot(String input) {
         var output = compileStatements(input, Main::compileRootSegment);
         var joinedStructs = String.join("", structs);
-        return output + joinedStructs;
+        var joinedFunctions = String.join("", functions);
+        return output + joinedStructs + joinedFunctions;
     } */
 	/* private static String compileStatements(String input, Function<String, String> compiler) {
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
@@ -183,7 +179,9 @@ struct Main {
                         var withBraces = withParams.substring(paramEnd + ")".length()).strip();
                         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                             var content = withBraces.substring(1, withBraces.length() - 1);
-                            return Optional.of("struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n");
+                            var constructor = "struct " + name + " new_" + name + "(" + compileValues(params, Main::compileDefinition) + "){" + compileStatements(content, Main::compileStatement) + "\n}\n";
+                            functions.add(constructor);
+                            return Optional.of("");
                         }
                     }
                 }
@@ -272,3 +270,9 @@ struct Main {
     } */
 	/*  */
 };
+struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
+            this.buffer = buffer; *//* 
+            this.segments = segments; *//* 
+            this.depth = depth; *//* 
+         */
+}
