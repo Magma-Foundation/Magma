@@ -728,7 +728,7 @@ public class Main {
         }
     }
 
-    private record Package(List<String> segments) implements RootSegment {
+    private record Namespaced(List<String> segments) implements RootSegment {
         @Override
         public String generate() {
             return "";
@@ -943,7 +943,7 @@ public class Main {
 
             var inner = slice.substring(0, slice.length() - ";".length());
             var array = inner.split(Pattern.quote("."));
-            return new Ok<>(new Package(Arrays.asList(array)));
+            return new Ok<>(new Namespaced(Arrays.asList(array)));
         };
     }
 
