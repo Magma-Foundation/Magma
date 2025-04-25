@@ -1552,32 +1552,37 @@ public class Main {
             }
         }
 
-        var conditionSeparator = stripped.indexOf("?");
-        if (conditionSeparator >= 0) {
-            var conditionString = stripped.substring(0, conditionSeparator);
-            var afterCondition = stripped.substring(conditionSeparator + "?".length());
-            var actionSeparator = afterCondition.indexOf(":");
-            if (actionSeparator >= 0) {
-                var whenTrueString = afterCondition.substring(0, actionSeparator);
-                var whenFalseString = afterCondition.substring(actionSeparator + ":".length());
+        var rules = new ArrayList<Rule<Value>>(List.of(
+                new TypeRule<>("ternary", Main::compileTernary)
+        ));
 
-                var maybeCondition = parseValue(conditionString);
-                var maybeWhenTrue = parseValue(whenTrueString);
-                var maybeWhenFalse = parseValue(whenFalseString);
-
-                if (maybeCondition instanceof Ok(var condition)
-                        && maybeWhenTrue instanceof Ok(var whenTrue)
-                        && maybeWhenFalse instanceof Ok(var whenFalse)) {
-                    return new Ok<>(new Ternary(condition, whenTrue, whenFalse));
-                }
-            }
-        }
-
-        var rules = Arrays.stream(Operator.values())
-                .map(operator -> (Rule<Value>) input0 -> parseOperator(input0, operator).mapValue(value -> value))
-                .toList();
+        rules.addAll(Arrays.stream(Operator.values())
+                .map(operator -> new TypeRule<Value, Operation>(operator.name().toLowerCase(), input0 -> parseOperator(input0, operator)))
+                .toList());
 
         return parseOr(input, rules);
+    }
+
+    private static Result<Value, CompileError> compileTernary(String stripped) {
+        var conditionSeparator = stripped.indexOf("?");
+        if (conditionSeparator < 0) {
+            return createInfixErr(stripped, "?");
+        }
+
+        var conditionString = stripped.substring(0, conditionSeparator);
+        var afterCondition = stripped.substring(conditionSeparator + "?".length());
+        var actionSeparator = afterCondition.indexOf(":");
+        if (actionSeparator < 0) {
+            return createInfixErr(afterCondition, ":");
+        }
+
+        var whenTrueString = afterCondition.substring(0, actionSeparator);
+        var whenFalseString = afterCondition.substring(actionSeparator + ":".length());
+
+        return parseValue(conditionString)
+                .and(() -> parseValue(whenTrueString))
+                .and(() -> parseValue(whenFalseString))
+                .mapValue(tuple -> new Ternary(tuple.left.left, tuple.left.right, tuple.right));
     }
 
     private static Result<Operation, CompileError> parseOperator(String input, Operator operator) {
