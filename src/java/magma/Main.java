@@ -294,12 +294,12 @@ public class Main {
 
     public static List<String> structs;
     private static List<String> functions;
-    private static Option<String> currentStructName;
+    private static Option<String> maybeCurrentStructName;
 
     public static void main() {
         structs = new ArrayList<>();
         functions = new ArrayList<>();
-        currentStructName = new None<>();
+        maybeCurrentStructName = new None<>();
 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -466,7 +466,7 @@ public class Main {
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
-        currentStructName = new Some<>(name);
+        maybeCurrentStructName = new Some<>(name);
         var generated = "struct " + name + " {" +
                 compileStatements(content, Main::compileClassSegment) +
                 "\n};\n";
@@ -532,8 +532,10 @@ public class Main {
             var afterParams = withParams.substring(paramEnd + ")".length()).strip();
             if (afterParams.startsWith("{") && afterParams.endsWith("}")) {
                 var content = afterParams.substring(1, afterParams.length() - 1);
+
                 var inputParams = parseValues(paramStrings, Main::parseParameter);
                 var oldStatements = parseStatements(content, Main::parseStatement);
+
                 ArrayList<FunctionSegment> newStatements;
                 if (header instanceof ConstructorDefinition(var name)) {
                     var copy = new ArrayList<FunctionSegment>();
@@ -551,7 +553,14 @@ public class Main {
                         .map(FunctionSegment::generate)
                         .collect(Collectors.joining());
 
-                var outputParamStrings = inputParams.stream()
+                var currentStructName = maybeCurrentStructName.orElse("");
+                var outputParams = new ArrayList<Parameter>();
+                if(header instanceof Definition _) {
+                    outputParams.add(new Definition(new Struct(currentStructName), "this"));
+                }
+                outputParams.addAll(inputParams);
+
+                var outputParamStrings = outputParams.stream()
                         .map(Parameter::generate)
                         .collect(Collectors.joining(", "));
 
@@ -573,7 +582,7 @@ public class Main {
 
     private static Option<ConstructorDefinition> compileConstructorDefinition(String input) {
         return findConstructorDefinitionName(input).flatMap(name -> {
-            if (currentStructName.filter(structName -> structName.equals(name)).isPresent()) {
+            if (maybeCurrentStructName.filter(structName -> structName.equals(name)).isPresent()) {
                 return new Some<>(new ConstructorDefinition(name));
             }
             return new None<>();
