@@ -473,6 +473,13 @@ public class Main {
         }
     }
 
+    private record Ternary(Value condition, Value whenTrue, Value whenFalse) implements Value {
+        @Override
+        public String generate() {
+            return this.condition.generate() + " ? " + this.whenTrue.generate() + " : " + this.whenFalse.generate();
+        }
+    }
+
     private static final List<String> typeParams = new ArrayList<>();
     public static List<String> structs;
     private static List<String> functions;
@@ -866,7 +873,7 @@ public class Main {
     private static Option<Return> compileReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return new Some<>(new Return(parseValue(stripped.substring("return ".length()))));
+            return new Some<>(new Return(parseValueOrPlaceholder(stripped.substring("return ".length()))));
         }
 
         return new None<>();
@@ -907,27 +914,43 @@ public class Main {
 
             var destination = parseDefinition(inputDefinition)
                     .<Assignable>map(result -> result)
-                    .orElseGet(() -> parseValue(inputDefinition));
+                    .orElseGet(() -> parseValueOrPlaceholder(inputDefinition));
 
-            return new Some<>(new Assignment(destination, parseValue(value)));
+            return new Some<>(new Assignment(destination, parseValueOrPlaceholder(value)));
         }
         return new None<>();
     }
 
-    private static Value parseValue(String input) {
+    private static Value parseValueOrPlaceholder(String input) {
+        return parseValue(input).orElseGet(() -> new Content(input));
+    }
+
+    private static Option<Value> parseValue(String input) {
         var stripped = input.strip();
 
         if (stripped.startsWith("new ")) {
             var substring = stripped.substring("new ".length());
             var maybeInvokable = compileInvokable(substring, Main::parseType, Construction::new);
             if (maybeInvokable instanceof Some(var invokable)) {
-                return invokable.toInvocation();
+                return new Some<>(invokable.toInvocation());
             }
         }
 
-        var maybeInvocation = compileInvokable(stripped, beforeArgs -> new Some<>(parseValue(beforeArgs)), Invocation::new);
+        var maybeInvocation = compileInvokable(stripped, Main::parseValue, Invocation::new);
         if (maybeInvocation instanceof Some(var invocation)) {
-            return invocation.toInvocation();
+            return new Some<>(invocation.toInvocation());
+        }
+
+        var conditionSeparator = stripped.indexOf("?");
+        if (conditionSeparator >= 0) {
+            var condition = stripped.substring(0, conditionSeparator);
+            var afterCondition = stripped.substring(conditionSeparator + "?".length());
+            var actionSeparator = afterCondition.indexOf(":");
+            if (actionSeparator >= 0) {
+                var whenTrue = afterCondition.substring(0, actionSeparator);
+                var whenFalse = afterCondition.substring(actionSeparator + ":".length());
+                return new Some<>(new Ternary(parseValueOrPlaceholder(condition), parseValueOrPlaceholder(whenTrue), parseValueOrPlaceholder(whenFalse)));
+            }
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -935,21 +958,21 @@ public class Main {
             var parentString = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
             if (isSymbol(property)) {
-                var parent = parseValue(parentString);
+                var parent = parseValueOrPlaceholder(parentString);
                 var type = resolveType(parent);
                 if (type instanceof Functional && property.equals("apply")) {
-                    return parent;
+                    return new Some<>(parent);
                 }
 
-                return new DataAccess(parent, property);
+                return new Some<>(new DataAccess(parent, property));
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Symbol(stripped);
+            return new Some<>(new Symbol(stripped));
         }
 
-        return new Content(stripped);
+        return new None<>();
     }
 
     private static Type resolveType(Value value) {
@@ -1000,7 +1023,7 @@ public class Main {
             return new None<>();
         }
 
-        var values = parseValues(args, Main::parseValue);
+        var values = parseValues(args, Main::parseValueOrPlaceholder);
         return new Some<>(builder.apply(outputBeforeArgs, values));
     }
 
