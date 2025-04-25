@@ -315,26 +315,31 @@ public class Main {
 
         var typeSeparator = beforeName.lastIndexOf(" ");
         if (typeSeparator < 0) {
-            return Optional.of(generateDefinition("", compileType(beforeName), name));
+            return compileType(beforeName).map(type -> generateDefinition("", type, name));
         }
 
         var beforeType = beforeName.substring(0, typeSeparator).strip();
-        var type = beforeName.substring(typeSeparator + " ".length()).strip();
-        return Optional.of(generateDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name));
+        var inputType = beforeName.substring(typeSeparator + " ".length()).strip();
+        return compileType(inputType).map(
+                outputType -> generateDefinition(generatePlaceholder(beforeType) + " ", outputType, name));
     }
 
     private static String generateDefinition(String beforeType, String type, String name) {
         return beforeType + type + " " + name;
     }
 
-    private static String compileType(String input) {
+    private static Optional<String> compileType(String input) {
         var stripped = input.strip();
+        if (stripped.equals("private")) {
+            return Optional.empty();
+        }
+
         if (stripped.equals("int")) {
-            return "int";
+            return Optional.of("int");
         }
 
         if (stripped.equals("String")) {
-            return "char*";
+            return Optional.of("char*");
         }
 
         if (stripped.endsWith(">")) {
@@ -343,11 +348,11 @@ public class Main {
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                return base + "<" + compileValues(args, Main::compileType) + ">";
+                return Optional.of(base + "<" + compileValues(args, input1 -> compileType(input1).orElseGet(() -> generatePlaceholder(input1))) + ">");
             }
         }
 
-        return "struct " + stripped;
+        return Optional.of("struct " + stripped);
     }
 
     private static String compileValues(String args, Function<String, String> compiler) {

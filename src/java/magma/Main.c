@@ -17,7 +17,7 @@ struct Main {
 	/* private static */ List<char*> functions;
 	/* private static */ Optional<char*> currentStructName;
 };
-struct private State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
+struct State new_State(List<char*> segments, struct StringBuilder buffer, int depth){/* 
             this.buffer = buffer; *//* 
             this.segments = segments; *//* 
             this.depth = depth; *//* 
@@ -310,26 +310,31 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
 
         var typeSeparator = beforeName.lastIndexOf(" "); *//* 
         if (typeSeparator < 0) {
-            return Optional.of(generateDefinition("", compileType(beforeName), name));
+            return compileType(beforeName).map(type -> generateDefinition("", type, name));
         } *//* 
 
         var beforeType = beforeName.substring(0, typeSeparator).strip(); *//* 
-        var type = beforeName.substring(typeSeparator + " ".length()).strip(); *//* 
-        return Optional.of(generateDefinition(generatePlaceholder(beforeType) + " ", compileType(type), name)); *//* 
+        var inputType = beforeName.substring(typeSeparator + " ".length()).strip(); *//* 
+        return compileType(inputType).map(
+                outputType -> generateDefinition(generatePlaceholder(beforeType) + " ", outputType, name)); *//* 
      */
 }
 /* private static */ char* generateDefinition(char* beforeType, char* type, char* name){/* 
         return beforeType + type + " " + name; *//* 
      */
 }
-/* private static */ char* compileType(char* input){/* 
+/* private static */ Optional<char*> compileType(char* input){/* 
         var stripped = input.strip(); *//* 
+        if (stripped.equals("private")) {
+            return Optional.empty();
+        } *//* 
+
         if (stripped.equals("int")) {
-            return "int";
+            return Optional.of("int");
         } *//* 
 
         if (stripped.equals("String")) {
-            return "char*";
+            return Optional.of("char*");
         } *//* 
 
         if (stripped.endsWith(">")) {
@@ -338,11 +343,11 @@ struct private State(List<char*> segments, struct StringBuilder buffer, int dept
             if (argsStart >= 0) {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "<".length()).strip();
-                return base + "<" + compileValues(args, Main::compileType) + ">";
+                return Optional.of(base + "<" + compileValues(args, input1 -> compileType(input1).orElseGet(() -> generatePlaceholder(input1))) + ">");
             }
         } *//* 
 
-        return "struct " + stripped; *//* 
+        return Optional.of("struct " + stripped); *//* 
      */
 }
 /* private static */ char* compileValues(char* args, /*  Function<String */, struct String> compiler){/* 
