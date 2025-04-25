@@ -896,8 +896,8 @@ public class Main {
             return new Some<>(new Ref(Primitive.I8));
         }
 
-        if (typeParams.contains(input)) {
-            return new Some<>(new TypeParam(input));
+        if (typeParams.contains(stripped)) {
+            return new Some<>(new TypeParam(stripped));
         }
 
         if (stripped.endsWith(">")) {

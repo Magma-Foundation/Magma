@@ -108,7 +108,7 @@ struct Main {
 	return this.value;
 }
 /* @Override
-        public  */ Option<R> map_Some<T, R>(struct Some<T> this, Function<T, struct R> mapper){
+        public  */ Option<R> map_Some<T, R>(struct Some<T> this, Function<T, R> mapper){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 @Override
@@ -136,7 +136,7 @@ struct Main {
 	return true;
 }
 /* @Override
-        public  */ Option<R> map_None<T, R>(struct None<T> this, Function<T, struct R> mapper){
+        public  */ Option<R> map_None<T, R>(struct None<T> this, Function<T, R> mapper){
 	return /* new None<>() */;
 }
 @Override
@@ -320,7 +320,7 @@ private static char* generateAll_Main(struct Main this, BiFunction<struct String
         } */
 	return /* output.toString() */;
 }
-/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseAll_Main<T>(struct Main this, char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, T> compiler){
 	struct var segments = /* divide(input, folder) */;
 	struct var compiled = /* new ArrayList<T>() */;/* 
         for (var segment : segments) {
@@ -575,7 +575,7 @@ private static Option<char*> compileMethod_Main(struct Main this, char* input){
         } */
 	return /* new None<>() */;
 }
-/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseStatements_Main<T>(struct Main this, char* content, Function<char*, T> compiler){
 	return /* parseAll(content, Main::foldStatementChar, compiler) */;
 }
 private static Option<struct ConstructorDefinition> compileConstructorDefinition_Main(struct Main this, char* input){/* 
@@ -756,8 +756,8 @@ private static Option<struct Type> parseType_Main(struct Main this, char* input)
             return new Some<>(new Ref(Primitive.I8));
         } *//* 
 
-        if (typeParams.contains(input)) {
-            return new Some<>(new TypeParam(input));
+        if (typeParams.contains(stripped)) {
+            return new Some<>(new TypeParam(stripped));
         } *//* 
 
         if (stripped.endsWith(">")) {
@@ -777,13 +777,7 @@ private static Option<struct Type> parseType_Main(struct Main this, char* input)
         } */
 	return /* new None<>() */;
 }
-private static char* compileValues_Main(struct Main this, char* args, Function<char*, char*> compiler){
-	return /* generateValues(parseValues(args, compiler)) */;
-}
-private static char* generateValues_Main(struct Main this, List<char*> values){
-	return /* generateAll(Main::mergeValues, values) */;
-}
-/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, Function<char*, struct T> compiler){
+/* private static  */ List<T> parseValues_Main<T>(struct Main this, char* args, Function<char*, T> compiler){
 	return /* parseAll(args, Main::foldValueChar, compiler) */;
 }
 private static struct State foldValueChar_Main(struct Main this, struct State state, struct char c){/* 
@@ -798,12 +792,6 @@ private static struct State foldValueChar_Main(struct Main this, struct State st
             return appended.exit();
         } */
 	return appended;
-}
-private static struct StringBuilder mergeValues_Main(struct Main this, struct StringBuilder buffer, char* element){/* 
-        if (buffer.isEmpty()) {
-            return buffer.append(element);
-        } */
-	return /* buffer.append(", ").append(element) */;
 }
 private static char* generatePlaceholder_Main(struct Main this, char* stripped){
 	return /* "/* " + stripped + " */" */;
