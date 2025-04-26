@@ -15,6 +15,15 @@ public class Main {
         Optional<Tuple<CompileState, String>> parse(CompileState state, String s);
     }
 
+    private interface Splitter {
+        Optional<Tuple<String, String>> split(String input);
+    }
+
+    private interface Locator {
+
+        Optional<Integer> locate(String input, String infix);
+    }
+
     private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
         public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
@@ -79,7 +88,7 @@ public class Main {
     private record DivideRule(Rule compiler) implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
-            var segments = divide(input);
+            var segments = divideStatements(input);
 
             var maybeOutput = Optional.of(new Tuple<>(state, new StringBuilder()));
             for (var segment : segments) {
@@ -113,6 +122,37 @@ public class Main {
         }
     }
 
+    private static class FirstLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            var index = input.indexOf(infix);
+            return index < 0 ? Optional.empty() : Optional.of(index);
+        }
+    }
+
+    private record InfixSplitter(String infix, Locator locator) implements Splitter {
+        public InfixSplitter(String infix) {
+            this(infix, new FirstLocator());
+        }
+
+        @Override
+        public Optional<Tuple<String, String>> split(String input) {
+            return this.locator.locate(input, this.infix).map(index -> {
+                var left = input.substring(0, index);
+                var right = input.substring(index + this.infix().length());
+                return new Tuple<String, String>(left, right);
+            });
+        }
+    }
+
+    private static class LastLocator implements Locator {
+        @Override
+        public Optional<Integer> locate(String input, String infix) {
+            var index = input.lastIndexOf(infix);
+            return index < 0 ? Optional.empty() : Optional.of(index);
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -136,11 +176,15 @@ public class Main {
         return joinedStructs + output;
     }
 
-    private static List<String> divide(String input) {
+    private static List<String> divideStatements(String input) {
+        return divideAll(input, Main::foldStatementChar);
+    }
+
+    private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            current = foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
 
         return current.advance().segments;
@@ -187,14 +231,14 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
-        return compileInfix(state, input, infix, (state0, tuple0) -> {
+        return compileSplitter(state, input, new InfixSplitter(infix), (state0, tuple0) -> {
             var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .toList();
 
             var afterKeyword = tuple0.right;
-            return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
+            return compileSplitter(state0, afterKeyword, new InfixSplitter("{"), (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
                 return new SuffixRule("}", (state2, inputContent1) -> {
@@ -222,9 +266,9 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileInfix(state, input, "(", (state0, tuple0) -> {
+        return compileSplitter(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
-            return compileInfix(state0, right, ")", (state1, tuple1) -> {
+            return compileSplitter(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
                 return compileDefinition(state1, tuple0.left).map(definition -> {
                     return new Tuple<CompileState, String>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
                 });
@@ -233,7 +277,37 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
-        return compileInfix(state, input.strip(), " ", (state1, tuple) -> Optional.of(new Tuple<>(state1, generatePlaceholder(tuple.left) + " " + generatePlaceholder(tuple.right))));
+        return compileSplitter(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
+            return Optional.of(new Tuple<>(state1, generatePlaceholder(tuple.left) + " " + tuple.right));
+        });
+    }
+
+    private static Optional<Tuple<String, String>> findTypeSeparator(String input) {
+        var slices = divideAll(input, Main::foldTypeSeparator);
+        if (slices.size() >= 2) {
+            var before = slices.subList(0, slices.size() - 1);
+            var last = slices.getLast();
+
+            return Optional.of(new Tuple<>(String.join(" ", before), last));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static DivideState foldTypeSeparator(DivideState state, Character c) {
+        var appended = state.append(c);
+        if (c == ' ' && appended.isLevel()) {
+            return appended.advance();
+        }
+
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Rule structStatement() {
@@ -242,16 +316,13 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
-        var index = input.indexOf(infix);
-        if (index < 0) {
-            return Optional.empty();
-        }
-
-        var left = input.substring(0, index);
-        var right = input.substring(index + infix.length());
-
-        return rule.apply(state, new Tuple<>(left, right));
+    private static Optional<Tuple<CompileState, String>> compileSplitter(
+            CompileState state,
+            String input,
+            Splitter splitter,
+            BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule
+    ) {
+        return splitter.split(input).flatMap(tuple -> rule.apply(state, tuple));
     }
 
     private static String generatePlaceholder(String stripped) {
