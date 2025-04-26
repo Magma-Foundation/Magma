@@ -1,4 +1,4 @@
-/* private static  */struct DivideState {/* private final List<String> segments; *//* 
+/* private */ /* static */ struct DivideState {/* private final List<String> segments; *//* 
         private int depth; *//* 
         private StringBuilder buffer; *//* 
 
@@ -42,7 +42,7 @@
         } *//* 
      */
 };
-/* public  */struct Main {/* 
+/* public */ struct Main {/* 
 
     private record Tuple<A, B>(A left, B right) {
     } *//* 
@@ -118,8 +118,11 @@
         return appended; *//* 
      */
 };
-/* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileInfix(state, input, " */struct ", (state0, tuple0) -> {/* var beforeKeyword = tuple0.left; *//* 
+/* private */ /* static */ /* Optional<Tuple<CompileState, */ /* String>> */ /* compileClass(CompileState */ /* state, */ /* String */ /* input) */ /* { */ /* return */ /* compileInfix(state, */ /* input, */ /* " */ struct ", (state0, tuple0) -> {/* var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList(); *//* 
+
             var afterKeyword = tuple0.right; *//* 
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
@@ -127,7 +130,12 @@
                 if (withEnd.endsWith("}")) {
                     var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent.right + "\n};\n";
+
+                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                            .map(Main::generatePlaceholder)
+                            .collect(Collectors.joining(" ")) + " ";
+
+                    var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
                     return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
                 } *//* 
                 else {

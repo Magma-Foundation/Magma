@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public class Main {
     private static class DivideState {
@@ -139,7 +141,11 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         return compileInfix(state, input, "class ", (state0, tuple0) -> {
-            var beforeKeyword = tuple0.left;
+            var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
+
             var afterKeyword = tuple0.right;
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
@@ -147,7 +153,12 @@ public class Main {
                 if (withEnd.endsWith("}")) {
                     var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
                     var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + outputContent.right + "\n};\n";
+
+                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                            .map(Main::generatePlaceholder)
+                            .collect(Collectors.joining(" ")) + " ";
+
+                    var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
                     return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
                 }
                 else {
