@@ -1,1 +1,0 @@
-Err[error=CompileError[message=Infix 'class ' not present, context=StringContext[value=import java.io.IOException;], errors=[]]]
