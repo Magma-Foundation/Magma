@@ -1,40 +1,40 @@
 /* private */ struct CompileState {
-	char* join(/*  */)/* ; */
-	/* CompileState */ addStruct(/* String struct */)/* ; *//* 
+	/* String join() */;
+	/* CompileState */ addStruct(char* struct)/* ; *//* 
      */
 };
 /* private */ struct Rule {
-	Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/* ; *//* 
+	Optional<Tuple</* CompileState */, char*>> parse(/* CompileState */ state, char* input)/* ; *//* 
      */
 };
 /* private */ struct Splitter {
-	Optional<Tuple<char*, char*>> split(/* String input */)/* ; *//* 
+	Optional<Tuple<char*, char*>> split(char* input)/* ; *//* 
      */
 };
 /* private */ struct Locator {
-	Optional</* Integer */> locate(/* String input, String infix */)/* ; *//* 
+	Optional</* Integer */> locate(char* input, char* infix)/* ; *//* 
      */
 };
 /* private */ struct Divider {
-	List<char*> divideAll(/* String input */)/* ; *//* 
+	List<char*> divideAll(char* input)/* ; *//* 
      */
 };
 /* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {/*  */
 };
 /* private */ struct Merger {
-	/* StringBuilder */ merge(/* StringBuilder currentCache, String right */)/* ; *//* 
+	/* StringBuilder */ merge(/* StringBuilder */ currentCache, char* right)/* ; *//* 
      */
 };
 /* public */ /* static */ struct StatementMerger implements Merger {
 	/* @Override
-        public StringBuilder */ merge(/* StringBuilder currentCache, String right */)/*  {
+        public StringBuilder */ merge(/* StringBuilder */ currentCache, char* right)/*  {
             return currentCache.append(right);
         } *//* 
      */
 };
 /* private */ /* static */ struct FirstLocator implements Locator {
 	@Override
-        public Optional</* Integer */> locate(/* String input, String infix */)/*  {
+        public Optional</* Integer */> locate(char* input, char* infix)/*  {
             var index = input.indexOf(infix);
             return index < 0 ? Optional.empty() : Optional.of(index);
         } *//* 
@@ -42,7 +42,7 @@
 };
 /* private */ /* static */ struct LastLocator implements Locator {
 	@Override
-        public Optional</* Integer */> locate(/* String input, String infix */)/*  {
+        public Optional</* Integer */> locate(char* input, char* infix)/*  {
             var index = input.lastIndexOf(infix);
             return index < 0 ? Optional.empty() : Optional.of(index);
         } *//* 
@@ -50,27 +50,25 @@
 };
 /* private */ /* static */ struct StatementFolder implements Folder {
 	/* @Override
-        public DivideState */ apply(/* DivideState state, Character c */)/*  {
+        public DivideState */ apply(/* DivideState */ state, /* Character */ c)/*  {
             var appended = state.append(c);
             if (c == ';' && appended.isLevel()) {
                 return appended.advance();
             }
-            if (c == '} */
-	/* ' && */ appended.isShallow(/*  */)/* ) {
+            if (c == '} *//* ' && appended.isShallow()) {
                 return appended.advance().exit();
             } *//* 
             if (c == '{') {
                 return appended.enter();
             }
-            if (c == '} */
-	/* ') {
-                return */ appended.exit(/*  */)/* ;
+            if (c == '} *//* ') {
+                return appended.exit();
             } */
 	/* return appended */;/* 
          */
 };
 /* public */ struct Main {
-	/* private record */ DivideState(/* List<String> segments, StringBuilder buffer, int depth */)/*  {
+	/* private record */ DivideState(List<char*> segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
         public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
@@ -101,9 +99,9 @@
             return this.depth == 1;
         }
     } */
-	/* private record Tuple<A, */ B>(/* A left, B right */)/*  {
+	/* private record Tuple<A, */ B>(/* A */ left, /* B */ right)/*  {
     } */
-	/* private record */ MutableCompileState(/* List<String> structs */)/*  implements CompileState {
+	/* private record */ MutableCompileState(List<char*> structs)/*  implements CompileState {
         public MutableCompileState() {
             this(new ArrayList<>());
         }
@@ -119,7 +117,7 @@
             return String.join("", this.structs);
         }
     } */
-	/* private record */ SuffixRule(/* String suffix, Rule rule */)/*  implements Rule {
+	/* private record */ SuffixRule(char* suffix, /* Rule */ rule)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(
                 CompileState state,
@@ -133,7 +131,7 @@
             return this.rule().parse(state, slice);
         }
     } */
-	/* private record */ DivideRule(/* Rule compiler, Divider divider, Merger merger */)/*  implements Rule {
+	/* private record */ DivideRule(/* Rule */ compiler, /* Divider */ divider, /* Merger */ merger)/*  implements Rule {
         private DivideRule(Rule compiler, Folder folder) {
             this(compiler, new FoldingDivider(folder), new StatementMerger());
         }
@@ -159,7 +157,7 @@
             return maybeOutput.map(output -> new Tuple<>(output.left, output.right.toString()));
         }
     } */
-	/* private record */ OrRule(/* List<Rule> rules */)/*  implements Rule {
+	/* private record */ OrRule(List</* Rule */> rules)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             for (var rule : this.rules()) {
@@ -172,7 +170,7 @@
             return Optional.empty();
         }
     } */
-	/* private record */ InfixSplitter(/* String infix, Locator locator */)/*  implements Splitter {
+	/* private record */ InfixSplitter(char* infix, /* Locator */ locator)/*  implements Splitter {
         public InfixSplitter(String infix) {
             this(infix, new FirstLocator());
         }
@@ -186,7 +184,7 @@
             });
         }
     } */
-	/* private record */ StripRule(/* Rule rule */)/*  implements Rule {
+	/* private record */ StripRule(/* Rule */ rule)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             return this.rule.parse(state, input.strip());
@@ -196,7 +194,7 @@
 };
 /* private */ /* static */ struct ValueFolder implements Folder {
 	/* @Override
-        public DivideState */ apply(/* DivideState state, Character c */)/*  {
+        public DivideState */ apply(/* DivideState */ state, /* Character */ c)/*  {
             if (c == ',' && state.isLevel()) {
                 return state.advance();
             }
@@ -212,19 +210,19 @@
      */
 };
 /* private */ /* static */ struct LazyRule implements Rule {
-	/* private Optional<Rule> maybeChildRule = */ Optional.empty(/*  */)/* ; */
+	/* private Optional<Rule> maybeChildRule = Optional.empty() */;
 	@Override
-        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/*  {
+        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState */ state, char* input)/*  {
             return this.maybeChildRule.flatMap(childRule -> childRule.parse(state, input));
         } */
-	/* public void */ set(/* Rule rule */)/*  {
+	/* public void */ set(/* Rule */ rule)/*  {
             this.maybeChildRule = Optional.of(rule);
         } *//* 
      */
 };
 /* public */ /* static */ struct ValueMerger implements Merger {
 	/* @Override
-        public StringBuilder */ merge(/* StringBuilder currentCache, String right */)/*  {
+        public StringBuilder */ merge(/* StringBuilder */ currentCache, char* right)/*  {
             if (currentCache.isEmpty()) {
                 return currentCache.append(right);
             }
@@ -233,14 +231,14 @@
      */
 };
 /* private */ /* static */ struct PrimitiveRule implements Rule {
-	/* private final Map<String, String> mappings = */ Map.of(/* 
+	/* private final Map<String, String> mappings = Map.of(
                 "String", "char*"
-         */)/* ; */
+        ) */;
 	@Override
-        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/*  {
+        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState */ state, char* input)/*  {
             return this.findMapping(input.strip()).map(result -> new Tuple<>(state, result));
         } */
-	private Optional<char*> findMapping(/* String input */)/*  {
+	private Optional<char*> findMapping(char* input)/*  {
             if (this.mappings.containsKey(input)) {
                 return Optional.of(this.mappings.get(input));
             }
@@ -350,8 +348,11 @@
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
-                return compileDefinition(state1, tuple0.left).map(definition -> {
-                    return new Tuple<>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
+                return compileDefinition(state1, tuple0.left).flatMap(definition -> {
+                    var inputParams = tuple1.left;
+                    return values(Main::compileDefinition).parse(definition.left, inputParams).map(outputParams -> {
+                        return new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ")" + generatePlaceholder(tuple1.right));
+                    });
                 });
             });
         });
@@ -378,10 +379,14 @@
     private static StripRule generic(Rule type) {
         return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
             var base = tuple.left.strip();
-            return new DivideRule(type, new FoldingDivider(new ValueFolder()), new ValueMerger())
+            return values(type)
                     .parse(state1, tuple.right)
                     .map(result -> new Tuple<>(result.left, base + "<" + result.right + ">"));
         })));
+    } *//* 
+
+    private static DivideRule values(Rule childRule) {
+        return new DivideRule(childRule, new FoldingDivider(new ValueFolder()), new ValueMerger());
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> parseInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {

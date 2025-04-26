@@ -372,8 +372,11 @@ public class Main {
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
-                return compileDefinition(state1, tuple0.left).map(definition -> {
-                    return new Tuple<>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
+                return compileDefinition(state1, tuple0.left).flatMap(definition -> {
+                    var inputParams = tuple1.left;
+                    return values(Main::compileDefinition).parse(definition.left, inputParams).map(outputParams -> {
+                        return new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ")" + generatePlaceholder(tuple1.right));
+                    });
                 });
             });
         });
@@ -400,10 +403,14 @@ public class Main {
     private static StripRule generic(Rule type) {
         return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
             var base = tuple.left.strip();
-            return new DivideRule(type, new FoldingDivider(new ValueFolder()), new ValueMerger())
+            return values(type)
                     .parse(state1, tuple.right)
                     .map(result -> new Tuple<>(result.left, base + "<" + result.right + ">"));
         })));
+    }
+
+    private static DivideRule values(Rule childRule) {
+        return new DivideRule(childRule, new FoldingDivider(new ValueFolder()), new ValueMerger());
     }
 
     private static Optional<Tuple<CompileState, String>> parseInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
