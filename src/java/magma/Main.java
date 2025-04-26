@@ -436,7 +436,8 @@ public class Main {
                     var inputParams = pair1.left();
                     return values(parameter()).parse(definition.left(), inputParams).flatMap(outputParams -> {
                         if (pair1.right().strip().equals(";")) {
-                            return new Some<>(new Tuple<>(outputParams.left(), "\n\t" + definition.right() + "(" + outputParams.right() + ");"));
+                            var s = "\n\t" + definition.right() + "(" + outputParams.right() + ");";
+                            return new Some<>(new Tuple<>(outputParams.left(), ""));
                         }
                         else {
                             return new None<>();

@@ -1,33 +1,20 @@
 /* private */ struct CompileState {
-	char* join();
-	struct CompileState addStruct(char* structString);
 };
 /* private */ struct Pair<A, B> {
-	struct A left();
-	struct B right();
 };
 /* private */ struct Option<T> {
-	/* <R>  */ Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper);
-	/* <R>  */ Option<struct R> map(Function<struct T, struct  R> mapper);
-	struct boolean isPresent();
-	struct T orElseGet(Supplier<struct T> other);
 };
 /* private */ struct Rule {
-	Option<Pair<struct CompileState, char*>> parse(struct CompileState state, char* input);
 };
 /* private */ struct Splitter {
-	Option<Pair<char*, char*>> split(char* input);
 };
 /* private */ struct Locator {
-	Option<struct Integer> locate(char* input, char* infix);
 };
 /* private */ struct Divider {
-	List<char*> divideAll(char* input);
 };
 /* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {
 };
 /* private */ struct Merger {
-	struct StringBuilder merge(struct StringBuilder currentCache, char* right);
 };
 /* private */ /* static */ struct None<T> implements Option<T> {/* @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
@@ -252,8 +239,7 @@
             return appended;
         } */
 };
-/* private */ /* static */ struct LazyRule implements Rule {
-	/* private  Option<Rule>  maybeChildRule  =  */ struct new None<>();/* 
+/* private */ /* static */ struct LazyRule implements Rule {/* 
 
         @Override
         public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
@@ -394,7 +380,8 @@
                     var inputParams = pair1.left();
                     return values(parameter()).parse(definition.left(), inputParams).flatMap(outputParams -> {
                         if (pair1.right().strip().equals(";")) {
-                            return new Some<>(new Tuple<>(outputParams.left(), "\n\t" + definition.right() + "(" + outputParams.right() + ");"));
+                            var s = "\n\t" + definition.right() + "(" + outputParams.right() + ");";
+                            return new Some<>(new Tuple<>(outputParams.left(), ""));
                         }
                         else {
                             return new None<>();
