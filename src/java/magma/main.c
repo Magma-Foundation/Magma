@@ -1,49 +1,40 @@
 /* private */ struct CompileState {
 	char* join();
-	struct CompileState addStruct(char* structString);/* 
-     */
+	struct CompileState addStruct(char* structString);
 };
 /* private */ struct Rule {
-	Optional<Tuple<struct CompileState, char*>> parse(struct CompileState state, char* input);/* 
-     */
+	Optional<Tuple<struct CompileState, char*>> parse(struct CompileState state, char* input);
 };
 /* private */ struct Splitter {
-	Optional<Tuple<char*, char*>> split(char* input);/* 
-     */
+	Optional<Tuple<char*, char*>> split(char* input);
 };
 /* private */ struct Locator {
-	Optional<struct Integer> locate(char* input, char* infix);/* 
-     */
+	Optional<struct Integer> locate(char* input, char* infix);
 };
 /* private */ struct Divider {
-	List<char*> divideAll(char* input);/* 
-     */
+	List<char*> divideAll(char* input);
 };
-/* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {/*  */
+/* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {
 };
 /* private */ struct Merger {
-	struct StringBuilder merge(struct StringBuilder currentCache, char* right);/* 
-     */
+	struct StringBuilder merge(struct StringBuilder currentCache, char* right);
 };
 /* public */ /* static */ struct StatementMerger implements Merger {/* @Override
         public StringBuilder merge(StringBuilder currentCache, String right) {
             return currentCache.append(right);
-        } *//* 
-     */
+        } */
 };
 /* private */ /* static */ struct FirstLocator implements Locator {/* @Override
         public Optional<Integer> locate(String input, String infix) {
             var index = input.indexOf(infix);
             return index < 0 ? Optional.empty() : Optional.of(index);
-        } *//* 
-     */
+        } */
 };
 /* private */ /* static */ struct LastLocator implements Locator {/* @Override
         public Optional<Integer> locate(String input, String infix) {
             var index = input.lastIndexOf(infix);
             return index < 0 ? Optional.empty() : Optional.of(index);
-        } *//* 
-     */
+        } */
 };
 /* private */ /* static */ struct StatementFolder implements Folder {/* @Override
         public DivideState apply(DivideState state, Character c) {
@@ -60,8 +51,7 @@
             if (c == '} *//* ') {
                 return appended.exit();
             } */
-	/* return appended */;/* 
-         */
+	/* return appended */;
 };
 /* public */ struct Main {/* 
 
@@ -193,8 +183,7 @@
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             return this.rule.parse(state, input.strip());
         }
-    } *//* 
-     */
+    } */
 };
 /* private */ /* static */ struct ValueFolder implements Folder {/* @Override
         public DivideState apply(DivideState state, Character c) {
@@ -209,8 +198,7 @@
                 return appended.exit();
             }
             return appended;
-        } *//* 
-     */
+        } */
 };
 /* private */ /* static */ struct LazyRule implements Rule {
 	struct private Optional<Rule> maybeChildRule = Optional.empty();/* 
@@ -222,8 +210,7 @@
 
         public void set(Rule rule) {
             this.maybeChildRule = Optional.of(rule);
-        } *//* 
-     */
+        } */
 };
 /* public */ /* static */ struct ValueMerger implements Merger {/* @Override
         public StringBuilder merge(StringBuilder currentCache, String right) {
@@ -231,8 +218,7 @@
                 return currentCache.append(right);
             }
             return currentCache.append(", ").append(right);
-        } *//* 
-     */
+        } */
 };
 /* private */ /* static */ struct PrimitiveRule implements Rule {
 	/* private final Map<String, String> mappings = Map.of(
@@ -251,8 +237,7 @@
             else {
                 return Optional.empty();
             }
-        } *//* 
-     */
+        } */
 };
 /* 
 
@@ -295,7 +280,7 @@
     private static OrRule rootSegment() {
         return new OrRule(List.of(
                 Main::compileNamespaced,
-                Main::compileClass,
+                Main::parseClass,
                 Main::parsePlaceholder
         ));
     } *//* 
@@ -311,11 +296,11 @@
         return Optional.empty();
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileStructured(state, input, "class ");
+    private static Optional<Tuple<CompileState, String>> parseClass(CompileState state, String input) {
+        return parseStructured(state, input, "class ");
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
+    private static Optional<Tuple<CompileState, String>> parseStructured(CompileState state, String input, String infix) {
         return parseInfix(state, input, new InfixSplitter(infix), (state0, tuple0) -> {
             var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
                     .map(String::strip)
@@ -342,15 +327,16 @@
 
     private static OrRule structSegment() {
         return new OrRule(List.of(
-                Main::compileClass,
-                (state, input) -> compileStructured(state, input, "interface "),
-                Main::compileMethod,
+                Main::parseWhitespace,
+                Main::parseClass,
+                (state, input) -> parseStructured(state, input, "interface "),
+                Main::parseMethod,
                 structStatement(),
                 Main::parsePlaceholder
         ));
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> parseMethod(CompileState state, String input) {
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {

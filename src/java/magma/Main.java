@@ -313,7 +313,7 @@ public class Main {
     private static OrRule rootSegment() {
         return new OrRule(List.of(
                 Main::compileNamespaced,
-                Main::compileClass,
+                Main::parseClass,
                 Main::parsePlaceholder
         ));
     }
@@ -329,11 +329,11 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileStructured(state, input, "class ");
+    private static Optional<Tuple<CompileState, String>> parseClass(CompileState state, String input) {
+        return parseStructured(state, input, "class ");
     }
 
-    private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
+    private static Optional<Tuple<CompileState, String>> parseStructured(CompileState state, String input, String infix) {
         return parseInfix(state, input, new InfixSplitter(infix), (state0, tuple0) -> {
             var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
                     .map(String::strip)
@@ -360,15 +360,16 @@ public class Main {
 
     private static OrRule structSegment() {
         return new OrRule(List.of(
-                Main::compileClass,
-                (state, input) -> compileStructured(state, input, "interface "),
-                Main::compileMethod,
+                Main::parseWhitespace,
+                Main::parseClass,
+                (state, input) -> parseStructured(state, input, "interface "),
+                Main::parseMethod,
                 structStatement(),
                 Main::parsePlaceholder
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> parseMethod(CompileState state, String input) {
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
