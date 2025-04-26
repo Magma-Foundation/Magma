@@ -20,6 +20,11 @@
 	/* StringBuilder */ merge(/* StringBuilder currentCache, String right */)/* ; *//* 
      */
 };
+/* private */ struct CompileState {
+	/* String */ join(/*  */)/* ; */
+	/* CompileState */ addStruct(/* String struct */)/* ; *//* 
+     */
+};
 /* public */ /* static */ struct StatementMerger implements Merger {
 	/* @Override
         public StringBuilder */ merge(/* StringBuilder currentCache, String right */)/*  {
@@ -98,14 +103,20 @@
     } */
 	/* private record Tuple<A, */ B>(/* A left, B right */)/*  {
     } */
-	/* private record */ CompileState(/* List<String> structs */)/*  {
-        public CompileState() {
+	/* private record */ MutableCompileState(/* List<String> structs */)/*  implements CompileState {
+        public MutableCompileState() {
             this(new ArrayList<>());
         }
 
+        @Override
         public CompileState addStruct(String struct) {
             this.structs.add(struct);
             return this;
+        }
+
+        @Override
+        public String join() {
+            return String.join("", this.structs);
         }
     } */
 	/* private record */ SuffixRule(/* String suffix, Rule rule */)/*  implements Rule {
@@ -249,13 +260,13 @@
     } *//* 
 
     private static String compileRoot(String input) {
-        var state = new CompileState();
+        var state = new MutableCompileState();
         var tuple = new DivideRule((state1, input1) -> rootSegment().parse(state1, input1), new StatementFolder())
                 .parse(state, input)
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
 
         var output = tuple.right;
-        var joinedStructs = String.join("", tuple.left().structs);
+        var joinedStructs = tuple.left().join();
         return joinedStructs + output;
     } *//* 
 
@@ -322,7 +333,7 @@
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
                 return compileDefinition(state1, tuple0.left).map(definition -> {
-                    return new Tuple<CompileState, String>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
+                    return new Tuple<>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
                 });
             });
         });
