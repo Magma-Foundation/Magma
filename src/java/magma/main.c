@@ -92,19 +92,27 @@
             return "";
         }
 
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var beforeKeyword = stripped.substring(0, classIndex);
-            var right = stripped.substring(classIndex + "class ".length());
-            var contentStart = right.indexOf("{");
-            if (contentStart >= 0) {
-                var name = right.substring(0, contentStart).strip();
-                var withEnd = right.substring(contentStart + "{".length()).strip();
-                return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + generatePlaceholder(withEnd);
-            }
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped) {
+        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (left, right) -> {
+                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + left.strip() + " {" + generatePlaceholder(right.strip()));
+            });
+        });
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> rule) {
+        var index = input.indexOf(infix);
+        if (index < 0) {
+            return Optional.empty();
         }
 
-        return generatePlaceholder(stripped);
+        var left = input.substring(0, index);
+        var right = input.substring(index + infix.length());
+
+        return rule.apply(left, right);
     }
 
     private static String generatePlaceholder(String stripped) {
