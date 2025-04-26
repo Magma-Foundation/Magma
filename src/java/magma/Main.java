@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     private interface Rule {
-        Optional<Tuple<CompileState, String>> parse(CompileState state, String s);
+        Optional<Tuple<CompileState, String>> parse(CompileState state, String input);
     }
 
     private interface Splitter {
@@ -22,6 +22,17 @@ public class Main {
     private interface Locator {
 
         Optional<Integer> locate(String input, String infix);
+    }
+
+    private interface Divider {
+        List<String> divideAll(String input);
+    }
+
+    private interface Folder extends BiFunction<DivideState, Character, DivideState> {
+    }
+
+    private interface Merger {
+        StringBuilder merge(StringBuilder currentCache, String right);
     }
 
     private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
@@ -85,10 +96,14 @@ public class Main {
         }
     }
 
-    private record DivideRule(Rule compiler) implements Rule {
+    private record DivideRule(Rule compiler, Divider divider) implements Rule {
+        private DivideRule(Rule compiler, StatementFolder folder) {
+            this(compiler, new FoldingDivider(folder));
+        }
+
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
-            var segments = divideStatements(input);
+            var segments = this.divider.divideAll(input);
 
             var maybeOutput = Optional.of(new Tuple<>(state, new StringBuilder()));
             for (var segment : segments) {
@@ -96,15 +111,22 @@ public class Main {
                     var currentState = output.left;
                     var currentCache = output.right;
 
-                    return this.compiler().parse(currentState, segment).map(result -> {
+                    return this.compiler.parse(currentState, segment).map(result -> {
                         var left = result.left;
                         var right = result.right;
-                        return new Tuple<>(left, currentCache.append(right));
+                        return new Tuple<>(left, new StatementMerger().merge(currentCache, right));
                     });
                 });
             }
 
             return maybeOutput.map(output -> new Tuple<>(output.left, output.right.toString()));
+        }
+    }
+
+    public static class StatementMerger implements Merger {
+        @Override
+        public StringBuilder merge(StringBuilder currentCache, String right) {
+            return currentCache.append(right);
         }
     }
 
@@ -153,6 +175,79 @@ public class Main {
         }
     }
 
+    private record StripRule(Rule rule) implements Rule {
+        @Override
+        public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
+            return this.rule.parse(state, input.strip());
+        }
+    }
+
+    private static class StatementFolder implements Folder {
+        @Override
+        public DivideState apply(DivideState state, Character c) {
+            var appended = state.append(c);
+            if (c == ';' && appended.isLevel()) {
+                return appended.advance();
+            }
+            if (c == '}' && appended.isShallow()) {
+                return appended.advance().exit();
+            }
+            if (c == '{') {
+                return appended.enter();
+            }
+            if (c == '}') {
+                return appended.exit();
+            }
+            return appended;
+        }
+    }
+
+    private record FoldingDivider(Folder folder) implements Divider {
+        @Override
+        public List<String> divideAll(String input) {
+            var current = new DivideState();
+            for (var i = 0; i < input.length(); i++) {
+                var c = input.charAt(i);
+                current = this.folder().apply(current, c);
+            }
+
+            return current.advance().segments;
+        }
+    }
+
+    private static class ValueFolder implements Folder {
+        @Override
+        public DivideState apply(DivideState state, Character c) {
+            if (c == ',') {
+                return state.advance();
+            }
+            return state.append(c);
+        }
+    }
+
+    private static class LazyRule implements Rule {
+        private Optional<Rule> maybeChildRule = Optional.empty();
+
+        @Override
+        public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
+            return this.maybeChildRule.flatMap(childRule -> childRule.parse(state, input));
+        }
+
+        public void set(Rule rule) {
+            this.maybeChildRule = Optional.of(rule);
+        }
+    }
+
+    public class ValueMerger implements Merger {
+        @Override
+        public StringBuilder merge(StringBuilder currentCache, String right) {
+            if (currentCache.isEmpty()) {
+                return currentCache.append(right);
+            }
+            return currentCache.append(", ").append(right);
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -167,44 +262,13 @@ public class Main {
 
     private static String compileRoot(String input) {
         var state = new CompileState();
-        var tuple = new DivideRule((state1, input1) -> rootSegment().parse(state1, input1))
+        var tuple = new DivideRule((state1, input1) -> rootSegment().parse(state1, input1), new StatementFolder())
                 .parse(state, input)
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
 
         var output = tuple.right;
         var joinedStructs = String.join("", tuple.left().structs);
         return joinedStructs + output;
-    }
-
-    private static List<String> divideStatements(String input) {
-        return divideAll(input, Main::foldStatementChar);
-    }
-
-    private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState();
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = folder.apply(current, c);
-        }
-
-        return current.advance().segments;
-    }
-
-    private static DivideState foldStatementChar(DivideState state, char c) {
-        var appended = state.append(c);
-        if (c == ';' && appended.isLevel()) {
-            return appended.advance();
-        }
-        if (c == '}' && appended.isShallow()) {
-            return appended.advance().exit();
-        }
-        if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '}') {
-            return appended.exit();
-        }
-        return appended;
     }
 
     private static OrRule rootSegment() {
@@ -231,18 +295,18 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
-        return compileSplitter(state, input, new InfixSplitter(infix), (state0, tuple0) -> {
+        return parseInfix(state, input, new InfixSplitter(infix), (state0, tuple0) -> {
             var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .toList();
 
             var afterKeyword = tuple0.right;
-            return compileSplitter(state0, afterKeyword, new InfixSplitter("{"), (state1, tuple1) -> {
+            return parseInfix(state0, afterKeyword, new InfixSplitter("{"), (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
                 return new SuffixRule("}", (state2, inputContent1) -> {
-                    return new DivideRule((state3, input1) -> structSegment().parse(state3, input1)).parse(state2, inputContent1).map(outputContent -> {
+                    return new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
                         var joined = modifiers.isEmpty() ? "" : modifiers.stream()
                                 .map(Main::generatePlaceholder)
                                 .collect(Collectors.joining(" ")) + " ";
@@ -266,9 +330,9 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileSplitter(state, input, new InfixSplitter("("), (state0, tuple0) -> {
+        return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
-            return compileSplitter(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
+            return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
                 return compileDefinition(state1, tuple0.left).map(definition -> {
                     return new Tuple<CompileState, String>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
                 });
@@ -277,7 +341,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
-        return compileSplitter(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
+        return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
             return compileType().parse(state1, tuple.left).map(parse -> {
                 return new Tuple<>(parse.left, parse.right + " " + tuple.right);
             });
@@ -285,13 +349,28 @@ public class Main {
     }
 
     private static Rule compileType() {
-        return new OrRule(List.of(
-                Main::parsePlaceholder
-        ));
+        var type = new LazyRule();
+        type.set(new OrRule(List.of(parseGeneric(type), Main::parsePlaceholder)));
+        return type;
+    }
+
+    private static StripRule parseGeneric(Rule type) {
+        return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
+            var base = tuple.left.strip();
+            return new DivideRule(type, new FoldingDivider(new ValueFolder()))
+                    .parse(state1, tuple.right)
+                    .map(result -> {
+                        return new Tuple<>(result.left, base + "<" + result.right + ">");
+                    });
+        })));
+    }
+
+    private static Optional<Tuple<CompileState, String>> parseInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
+        return parseInfix(state, input, new InfixSplitter(infix), rule);
     }
 
     private static Optional<Tuple<String, String>> findTypeSeparator(String input) {
-        var slices = divideAll(input, Main::foldTypeSeparator);
+        var slices = new FoldingDivider(Main::foldTypeSeparator).divideAll(input);
         if (slices.size() >= 2) {
             var before = slices.subList(0, slices.size() - 1);
             var last = slices.getLast();
@@ -324,7 +403,7 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileSplitter(
+    private static Optional<Tuple<CompileState, String>> parseInfix(
             CompileState state,
             String input,
             Splitter splitter,
@@ -336,4 +415,5 @@ public class Main {
     private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
     }
+
 }
