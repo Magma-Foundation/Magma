@@ -303,7 +303,15 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRootSegment(String input) {
-        return compileOr(input, List.of(Main::compileNamespaced, Main::compileClass));
+        return compileOr(input, List.of(Main::compileNamespaced, createClassRule()));
+    }
+
+    private static Function<String, Result<String, CompileError>> createClassRule() {
+        return createStructuredRule("class");
+    }
+
+    private static Function<String, Result<String, CompileError>> createStructuredRule(String infix) {
+        return stripped -> compileClass(stripped, infix);
     }
 
     private static Result<String, CompileError> compileOr(String input, List<Function<String, Result<String, CompileError>>> rules) {
@@ -330,8 +338,8 @@ public class Main {
         }
     }
 
-    private static Result<String, CompileError> compileClass(String stripped) {
-        return compileInfix(stripped, "class", tuple -> compileInfix(tuple.right, "{", tuple0 -> {
+    private static Result<String, CompileError> compileClass(String stripped, String infix) {
+        return compileInfix(stripped, infix, tuple -> compileInfix(tuple.right, "{", tuple0 -> {
             return compileSuffix(tuple0.right.strip(), "}", content -> {
                 return compileAll(content, Main::compileStructuredSegment).mapValue(outputContent -> {
                     return "struct %s {%s\n};\n".formatted(tuple0.left.strip(), outputContent);
@@ -342,7 +350,10 @@ public class Main {
 
     private static Result<String, CompileError> compileStructuredSegment(String input) {
         return compileOr(input, List.of(
-
+                createClassRule(),
+                createStructuredRule("enum "),
+                createStructuredRule("record "),
+                createStructuredRule("interface ")
         ));
     }
 
