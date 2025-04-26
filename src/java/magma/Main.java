@@ -108,6 +108,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -280,6 +284,9 @@ public class Main {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
         }
         if (c == '{') {
             return appended.enter();
