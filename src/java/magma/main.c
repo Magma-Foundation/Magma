@@ -1,4 +1,4 @@
-package magma;
+/* package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,3 +17,4 @@ public class Main {
         }
     }
 }
+ */
