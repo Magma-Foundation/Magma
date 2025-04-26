@@ -43,7 +43,8 @@
         } *//* 
      */
 };
-/* public */ struct Main {/* 
+/* public */ struct Main {/* private interface Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {
+    } *//* 
 
     private record Tuple<A, B>(A left, B right) {
     } *//* 
@@ -56,6 +57,58 @@
         public CompileState addStruct(String struct) {
             this.structs.add(struct);
             return this;
+        }
+    } *//* 
+
+    private record SuffixRule(String suffix, Rule rule) implements Rule {
+        @Override
+        public Optional<Tuple<CompileState, String>> apply(
+                CompileState state,
+                String input
+        ) {
+            if (!input.endsWith(this.suffix())) {
+                return Optional.empty();
+            }
+
+            var slice = input.substring(0, input.length() - this.suffix().length());
+            return this.rule().apply(state, slice);
+        }
+    } *//* 
+
+    private record DivideRule(Rule compiler) implements Rule {
+        @Override
+        public Optional<Tuple<CompileState, String>> apply(CompileState state, String input) {
+            var segments = divide(input);
+
+            var maybeOutput = Optional.of(new Tuple<>(state, new StringBuilder()));
+            for (var segment : segments) {
+                maybeOutput = maybeOutput.flatMap(output -> {
+                    var currentState = output.left;
+                    var currentCache = output.right;
+
+                    return this.compiler().apply(currentState, segment).map(result -> {
+                        var left = result.left;
+                        var right = result.right;
+                        return new Tuple<>(left, currentCache.append(right));
+                    });
+                });
+            }
+
+            return maybeOutput.map(output -> new Tuple<>(output.left, output.right.toString()));
+        }
+    } *//* 
+
+    private record OrRule(List<Rule> rules) implements Rule {
+        @Override
+        public Optional<Tuple<CompileState, String>> apply(CompileState state, String input) {
+            for (var rule : this.rules()) {
+                var result = rule.apply(state, input);
+                if (result.isPresent()) {
+                    return result;
+                }
+            }
+
+            return Optional.empty();
         }
     } *//* 
 
@@ -72,24 +125,14 @@
     } *//* 
 
     private static String compileRoot(String input) {
-        var tuple = compileAll(new CompileState(), input, Main::compileRootSegment);
+        var state = new CompileState();
+        var tuple = new DivideRule((state1, input1) -> rootSegment().apply(state1, input1))
+                .apply(state, input)
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+
         var output = tuple.right;
         var joinedStructs = String.join("", tuple.left().structs);
         return joinedStructs + output;
-    } *//* 
-
-    private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        var segments = divide(input);
-
-        var current = state;
-        var output = new StringBuilder();
-        for (var segment : segments) {
-            var result = compiler.apply(current, segment);
-            current = result.left;
-            output.append(result.right);
-        }
-
-        return new Tuple<>(current, output.toString());
     } *//* 
 
     private static List<String> divide(String input) {
@@ -128,35 +171,33 @@
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
-                return compileSuffix(state1, withEnd, "}", (state2, inputContent1) -> {
-                    return getCompileStateStringTuple(state2, inputContent1, modifiers, name);
-                });
+                return new SuffixRule("}", (state2, inputContent1) -> {
+                    return new DivideRule((state3, input1) -> structSegment().apply(state3, input1)).apply(state2, inputContent1).map(outputContent -> {
+                        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                                .map(Main::generatePlaceholder)
+                                .collect(Collectors.joining(" ")) + " ";
+
+                        var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
+                        return new Tuple<>(outputContent.left.addStruct(generated), "");
+                    });
+                }).apply(state1, withEnd);
             } */
-	/* ) */;
-	/* }) */;
+	/* ) */;/* 
+        });
+     */
 };
 /* 
 
-    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+    private static OrRule rootSegment() {
+        return new OrRule(List.of(
                 Main::compileNamespaced,
-                Main::compileClass
+                Main::compileClass,
+                Main::compilePlaceholder
         ));
     } *//* 
 
-    private static Tuple<CompileState, String> compileOr(
-            CompileState state,
-            String input,
-            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
-    ) {
-        for (var rule : rules) {
-            var result = rule.apply(state, input);
-            if (result.isPresent()) {
-                return result.get();
-            }
-        }
-
-        return new Tuple<>(state, generatePlaceholder(input));
+    private static Optional<Tuple<CompileState, String>> compilePlaceholder(CompileState state, String input) {
+        return Optional.of(new Tuple<>(state, generatePlaceholder(input)));
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
@@ -166,41 +207,16 @@
         return Optional.empty();
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileSuffix(
-            CompileState state,
-            String input,
-            String suffix, BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> rule
-    ) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-
-        var slice = input.substring(0, input.length() - suffix.length());
-        return rule.apply(state, slice);
-    } *//* 
-
-    private static Optional<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state1, String inputContent, List<String> modifiers, String name) {
-        var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-
-        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                .map(Main::generatePlaceholder)
-                .collect(Collectors.joining(" ")) + " ";
-
-        var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
-        return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
-    } *//* 
-
-    private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+    private static OrRule structSegment() {
+        return new OrRule(List.of(
                 Main::compileClass,
-                Main::compileStructStatement
+                structStatement(),
+                Main::compilePlaceholder
         ));
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileStructStatement(CompileState state, String input) {
-        return compileSuffix(state, input.strip(), ";", (state0, input0) -> {
-            return Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0) + ";"));
-        });
+    private static SuffixRule structStatement() {
+        return new SuffixRule(";", (state0, input0) -> Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0.strip()) + ";")));
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
