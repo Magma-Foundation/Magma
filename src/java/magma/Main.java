@@ -47,7 +47,7 @@ public class Main {
 
     private static String compileRootSegment(String input) throws CompileException {
         var stripped = input.strip();
-        if (stripped.startsWith("package ")) {
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
 
