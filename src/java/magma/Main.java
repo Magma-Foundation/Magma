@@ -11,7 +11,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class Main {
-    private interface Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {
+    private interface Rule {
+        Optional<Tuple<CompileState, String>> parse(CompileState state, String s);
     }
 
     private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
@@ -62,7 +63,7 @@ public class Main {
 
     private record SuffixRule(String suffix, Rule rule) implements Rule {
         @Override
-        public Optional<Tuple<CompileState, String>> apply(
+        public Optional<Tuple<CompileState, String>> parse(
                 CompileState state,
                 String input
         ) {
@@ -71,13 +72,13 @@ public class Main {
             }
 
             var slice = input.substring(0, input.length() - this.suffix().length());
-            return this.rule().apply(state, slice);
+            return this.rule().parse(state, slice);
         }
     }
 
     private record DivideRule(Rule compiler) implements Rule {
         @Override
-        public Optional<Tuple<CompileState, String>> apply(CompileState state, String input) {
+        public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             var segments = divide(input);
 
             var maybeOutput = Optional.of(new Tuple<>(state, new StringBuilder()));
@@ -86,7 +87,7 @@ public class Main {
                     var currentState = output.left;
                     var currentCache = output.right;
 
-                    return this.compiler().apply(currentState, segment).map(result -> {
+                    return this.compiler().parse(currentState, segment).map(result -> {
                         var left = result.left;
                         var right = result.right;
                         return new Tuple<>(left, currentCache.append(right));
@@ -100,9 +101,9 @@ public class Main {
 
     private record OrRule(List<Rule> rules) implements Rule {
         @Override
-        public Optional<Tuple<CompileState, String>> apply(CompileState state, String input) {
+        public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             for (var rule : this.rules()) {
-                var result = rule.apply(state, input);
+                var result = rule.parse(state, input);
                 if (result.isPresent()) {
                     return result;
                 }
@@ -126,8 +127,8 @@ public class Main {
 
     private static String compileRoot(String input) {
         var state = new CompileState();
-        var tuple = new DivideRule((state1, input1) -> rootSegment().apply(state1, input1))
-                .apply(state, input)
+        var tuple = new DivideRule((state1, input1) -> rootSegment().parse(state1, input1))
+                .parse(state, input)
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
 
         var output = tuple.right;
@@ -197,7 +198,7 @@ public class Main {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
                 return new SuffixRule("}", (state2, inputContent1) -> {
-                    return new DivideRule((state3, input1) -> structSegment().apply(state3, input1)).apply(state2, inputContent1).map(outputContent -> {
+                    return new DivideRule((state3, input1) -> structSegment().parse(state3, input1)).parse(state2, inputContent1).map(outputContent -> {
                         var joined = modifiers.isEmpty() ? "" : modifiers.stream()
                                 .map(Main::generatePlaceholder)
                                 .collect(Collectors.joining(" ")) + " ";
@@ -205,7 +206,7 @@ public class Main {
                         var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
                         return new Tuple<>(outputContent.left.addStruct(generated), "");
                     });
-                }).apply(state1, withEnd);
+                }).parse(state1, withEnd);
             });
         });
     }
