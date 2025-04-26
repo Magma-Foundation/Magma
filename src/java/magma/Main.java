@@ -96,9 +96,9 @@ public class Main {
         }
     }
 
-    private record DivideRule(Rule compiler, Divider divider) implements Rule {
-        private DivideRule(Rule compiler, StatementFolder folder) {
-            this(compiler, new FoldingDivider(folder));
+    private record DivideRule(Rule compiler, Divider divider, Merger merger) implements Rule {
+        private DivideRule(Rule compiler, Folder folder) {
+            this(compiler, new FoldingDivider(folder), new StatementMerger());
         }
 
         @Override
@@ -114,7 +114,7 @@ public class Main {
                     return this.compiler.parse(currentState, segment).map(result -> {
                         var left = result.left;
                         var right = result.right;
-                        return new Tuple<>(left, new StatementMerger().merge(currentCache, right));
+                        return new Tuple<>(left, this.merger.merge(currentCache, right));
                     });
                 });
             }
@@ -218,10 +218,17 @@ public class Main {
     private static class ValueFolder implements Folder {
         @Override
         public DivideState apply(DivideState state, Character c) {
-            if (c == ',') {
+            if (c == ',' && state.isLevel()) {
                 return state.advance();
             }
-            return state.append(c);
+            var appended = state.append(c);
+            if (c == '<') {
+                return appended.enter();
+            }
+            if (c == '>') {
+                return appended.exit();
+            }
+            return appended;
         }
     }
 
@@ -238,7 +245,7 @@ public class Main {
         }
     }
 
-    public class ValueMerger implements Merger {
+    public static class ValueMerger implements Merger {
         @Override
         public StringBuilder merge(StringBuilder currentCache, String right) {
             if (currentCache.isEmpty()) {
@@ -350,18 +357,19 @@ public class Main {
 
     private static Rule compileType() {
         var type = new LazyRule();
-        type.set(new OrRule(List.of(parseGeneric(type), Main::parsePlaceholder)));
+        type.set(new OrRule(List.of(
+                parseGeneric(type),
+                Main::parsePlaceholder
+        )));
         return type;
     }
 
     private static StripRule parseGeneric(Rule type) {
         return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
             var base = tuple.left.strip();
-            return new DivideRule(type, new FoldingDivider(new ValueFolder()))
+            return new DivideRule(type, new FoldingDivider(new ValueFolder()), new ValueMerger())
                     .parse(state1, tuple.right)
-                    .map(result -> {
-                        return new Tuple<>(result.left, base + "<" + result.right + ">");
-                    });
+                    .map(result -> new Tuple<>(result.left, base + "<" + result.right + ">"));
         })));
     }
 
