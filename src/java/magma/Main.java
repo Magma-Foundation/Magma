@@ -170,27 +170,48 @@ public class Main {
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
-                if (!withEnd.endsWith("}")) {
-                    return Optional.empty();
-                }
-
-                var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-
-                var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                        .map(Main::generatePlaceholder)
-                        .collect(Collectors.joining(" ")) + " ";
-
-                var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
-                return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
+                return compileSuffix(state1, withEnd, "}", (state2, inputContent1) -> {
+                    return getCompileStateStringTuple(state2, inputContent1, modifiers, name);
+                });
             });
         });
     }
 
+    private static Optional<Tuple<CompileState, String>> compileSuffix(
+            CompileState state,
+            String input,
+            String suffix, BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> rule
+    ) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+
+        var slice = input.substring(0, input.length() - suffix.length());
+        return rule.apply(state, slice);
+    }
+
+    private static Optional<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state1, String inputContent, List<String> modifiers, String name) {
+        var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
+
+        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                .map(Main::generatePlaceholder)
+                .collect(Collectors.joining(" ")) + " ";
+
+        var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
+        return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
+    }
+
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                Main::compileClass
+                Main::compileClass,
+                Main::compileStructStatement
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileStructStatement(CompileState state, String input) {
+        return compileSuffix(state, input.strip(), ";", (state0, input0) -> {
+            return Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0) + ";"));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
