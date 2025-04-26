@@ -1,49 +1,36 @@
-/* private */ /* static */ struct DivideState {
-	/* private final List<String> segments */;
-	/* private int depth */;
-	/* private StringBuilder buffer */;/* 
+/* public */ struct Main {/* private interface Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {
+    } *//* 
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-        } *//* 
-
+    private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
         public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        } *//* 
+        }
 
         private DivideState advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        } *//* 
+            var copy = new ArrayList<>(this.segments);
+            copy.add(this.buffer.toString());
+            return new DivideState(copy, new StringBuilder(), this.depth);
+        }
 
         private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
-        } *//* 
+            return new DivideState(this.segments, this.buffer.append(c), this.depth);
+        }
 
         public boolean isLevel() {
             return this.depth == 0;
-        } *//* 
+        }
 
         public DivideState enter() {
-            this.depth++;
-            return this;
-        } *//* 
+            return new DivideState(this.segments, this.buffer, this.depth + 1);
+        }
 
         public DivideState exit() {
-            this.depth--;
-            return this;
-        } *//* 
+            return new DivideState(this.segments, this.buffer, this.depth - 1);
+        }
 
         public boolean isShallow() {
             return this.depth == 1;
-        } *//* 
-     */
-};
-/* public */ struct Main {/* private interface Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {
+        }
     } *//* 
 
     private record Tuple<A, B>(A left, B right) {
