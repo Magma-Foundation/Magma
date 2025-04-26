@@ -1,15 +1,71 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Main {
-    private static class CompileException extends Exception {
-        public CompileException(String message, String context) {
-            super(message + ": " + context);
+    private sealed interface Result<T, X> permits Ok, Err {
+        <R> R match(Function<T, R> whenPresent, Function<X, R> whenErr);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+    }
+
+    private sealed interface Option<T> permits Some, None {
+        boolean isPresent();
+
+        <R> Option<R> map(Function<T, R> mapper);
+
+        void ifPresent(Consumer<T> consumer);
+    }
+
+    private interface Error {
+        String display();
+    }
+
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+    }
+
+    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
+        public CompileError(String message, String context) {
+            this(message, context, Collections.emptyList());
+        }
+
+        @Override
+        public String display() {
+            var joined = this.errors.stream()
+                    .map(CompileError::display)
+                    .collect(Collectors.joining());
+
+            return this.message + ": " + this.context + joined;
         }
     }
 
@@ -54,27 +110,156 @@ public class Main {
         }
     }
 
-    public static void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var input = Files.readString(source);
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenPresent, Function<X, R> whenErr) {
+            return whenPresent.apply(this.value);
+        }
 
-            var target = source.resolveSibling("Main.c");
-            Files.writeString(target, compile(input));
-        } catch (IOException | CompileException e) {
-            e.printStackTrace();
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
+            return other.get().mapValue(otherValue -> new Tuple<>(this.value, otherValue));
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
         }
     }
 
-    private static String compile(String input) throws CompileException {
-        var extracted = divide(input);
-
-        var output = new StringBuilder();
-        for (var segment : extracted) {
-            output.append(compileRootSegment(segment));
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenPresent, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
         }
 
-        return output.toString();
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> other) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
+    }
+
+    private record None<T>() implements Option<T> {
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+    }
+
+    private record OrState(Option<String> maybeValue, List<CompileError> errors) {
+        public OrState() {
+            this(new None<String>(), new ArrayList<>());
+        }
+
+        public OrState withValue(String value) {
+            return new OrState(new Some<String>(value), this.errors);
+        }
+
+        public OrState withError(CompileError error) {
+            var copy = new ArrayList<CompileError>(this.errors);
+            copy.add(error);
+            return new OrState(this.maybeValue, copy);
+        }
+
+        public Result<String, List<CompileError>> toResult() {
+            return switch (this.maybeValue) {
+                case None<String> _ -> new Err<>(this.errors);
+                case Some(var value) -> new Ok<>(value);
+            };
+        }
+    }
+
+    private record ThrowableError(Throwable error) implements Error {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.error.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }
+
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    public static final Path TARGET = SOURCE.resolveSibling("Main.c");
+
+    public static void main() {
+        run().ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Option<ApplicationError> run() {
+        var maybeInput = readString();
+        return switch (maybeInput) {
+            case Err<String, IOException>(var error) -> new Some<>(new ApplicationError(new ThrowableError(error)));
+            case Ok<String, IOException>(var input) -> switch (compile(input)) {
+                case Err<String, CompileError>(var error) -> new Some<>(new ApplicationError(error));
+                case Ok<String, CompileError>(var value) -> writeString(value)
+                        .map(ThrowableError::new)
+                        .map(ApplicationError::new);
+            };
+        };
+    }
+
+    private static Option<IOException> writeString(String output) {
+        try {
+            Files.writeString(Main.TARGET, output);
+            return new None<>();
+        } catch (IOException e) {
+            return new Some<>(e);
+        }
+    }
+
+    private static Result<String, IOException> readString() {
+        try {
+            return new Ok<>(Files.readString(Main.SOURCE));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
+
+    private static Result<String, CompileError> compile(String input) {
+        var extracted = divide(input);
+
+        Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
+        for (var segment : extracted) {
+            output = output
+                    .and(() -> compileRootSegment(segment))
+                    .mapValue(tuple -> tuple.left().append(tuple.right()));
+        }
+
+        return output.mapValue(StringBuilder::toString);
     }
 
     private static List<String> divide(String input) {
@@ -101,23 +286,51 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) throws CompileException {
+    private static Result<String, CompileError> compileRootSegment(String input) {
+        return compileOr(input, List.of(Main::compileNamespaced, Main::compileClass));
+    }
+
+    private static Result<String, CompileError> compileOr(String input, List<Function<String, Result<String, CompileError>>> rules) {
+        return rules.stream()
+                .reduce(new OrState(), (orState, mapper) -> foldElement(input, orState, mapper), (_, next) -> next)
+                .toResult()
+                .mapErr(errs -> new CompileError("No valid rule", input, errs));
+    }
+
+    private static OrState foldElement(String input, OrState orState, Function<String, Result<String, CompileError>> mapper) {
+        if (orState.maybeValue.isPresent()) {
+            return orState;
+        }
+        return mapper.apply(input).match(orState::withValue, orState::withError);
+    }
+
+    private static Result<String, CompileError> compileNamespaced(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
+            return new Ok<>("");
         }
-
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
-            var contentStart = afterKeyword.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = afterKeyword.substring(0, contentStart).strip();
-                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
-                return "struct " + beforeContent + " {\n};\n";
-            }
+        else {
+            return new Err<>(new CompileError("Neither a package nor an import", input));
         }
+    }
 
-        throw new CompileException("Invalid input", input);
+    private static Result<String, CompileError> compileClass(String stripped) {
+        return compileInfix(stripped, "class",
+                tuple -> compileInfix(tuple.right, "{",
+                        tuple0 -> new Ok<>("struct " + tuple0.left + " {\n};\n")));
+    }
+
+    private static Result<String, CompileError> compileInfix(
+            String input,
+            String infix,
+            Function<Tuple<String, String>, Result<String, CompileError>> mapper
+    ) {
+        var index = input.indexOf(infix);
+        if (index >= 0) {
+            var left = input.substring(0, index);
+            var right = input.substring(index + infix.length());
+            return mapper.apply(new Tuple<>(left, right));
+        }
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 }

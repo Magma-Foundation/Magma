@@ -1,2 +1,2 @@
-struct Main {
+struct  Main  {
 };
