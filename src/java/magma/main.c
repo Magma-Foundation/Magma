@@ -1,9 +1,14 @@
+/* private */ struct CompileState {
+	char* join(/*  */)/* ; */
+	/* CompileState */ addStruct(/* String struct */)/* ; *//* 
+     */
+};
 /* private */ struct Rule {
-	Optional<Tuple</* CompileState */, /*  String */>> parse(/* CompileState state, String input */)/* ; *//* 
+	Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/* ; *//* 
      */
 };
 /* private */ struct Splitter {
-	Optional<Tuple</* String */, /*  String */>> split(/* String input */)/* ; *//* 
+	Optional<Tuple<char*, char*>> split(/* String input */)/* ; *//* 
      */
 };
 /* private */ struct Locator {
@@ -11,18 +16,13 @@
      */
 };
 /* private */ struct Divider {
-	List</* String */> divideAll(/* String input */)/* ; *//* 
+	List<char*> divideAll(/* String input */)/* ; *//* 
      */
 };
 /* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {/*  */
 };
 /* private */ struct Merger {
 	/* StringBuilder */ merge(/* StringBuilder currentCache, String right */)/* ; *//* 
-     */
-};
-/* private */ struct CompileState {
-	/* String */ join(/*  */)/* ; */
-	/* CompileState */ addStruct(/* String struct */)/* ; *//* 
      */
 };
 /* public */ /* static */ struct StatementMerger implements Merger {
@@ -214,7 +214,7 @@
 /* private */ /* static */ struct LazyRule implements Rule {
 	/* private Optional<Rule> maybeChildRule = */ Optional.empty(/*  */)/* ; */
 	@Override
-        public Optional<Tuple</* CompileState */, /*  String */>> parse(/* CompileState state, String input */)/*  {
+        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/*  {
             return this.maybeChildRule.flatMap(childRule -> childRule.parse(state, input));
         } */
 	/* public void */ set(/* Rule rule */)/*  {
@@ -229,6 +229,24 @@
                 return currentCache.append(right);
             }
             return currentCache.append(", ").append(right);
+        } *//* 
+     */
+};
+/* private */ /* static */ struct PrimitiveRule implements Rule {
+	/* private final Map<String, String> mappings = */ Map.of(/* 
+                "String", "char*"
+         */)/* ; */
+	@Override
+        public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState state, String input */)/*  {
+            return this.findMapping(input.strip()).map(result -> new Tuple<>(state, result));
+        } */
+	private Optional<char*> findMapping(/* String input */)/*  {
+            if (this.mappings.containsKey(input)) {
+                return Optional.of(this.mappings.get(input));
+            }
+            else {
+                return Optional.empty();
+            }
         } *//* 
      */
 };
@@ -341,22 +359,23 @@
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
-            return compileType().parse(state1, tuple.left).map(parse -> {
+            return type().parse(state1, tuple.left).map(parse -> {
                 return new Tuple<>(parse.left, parse.right + " " + tuple.right);
             });
         });
     } *//* 
 
-    private static Rule compileType() {
+    private static Rule type() {
         var type = new LazyRule();
         type.set(new OrRule(List.of(
-                parseGeneric(type),
+                new PrimitiveRule(),
+                generic(type),
                 Main::parsePlaceholder
         )));
         return type;
     } *//* 
 
-    private static StripRule parseGeneric(Rule type) {
+    private static StripRule generic(Rule type) {
         return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
             var base = tuple.left.strip();
             return new DivideRule(type, new FoldingDivider(new ValueFolder()), new ValueMerger())

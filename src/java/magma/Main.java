@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -266,6 +267,26 @@ public class Main {
         }
     }
 
+    private static class PrimitiveRule implements Rule {
+        private final Map<String, String> mappings = Map.of(
+                "String", "char*"
+        );
+
+        @Override
+        public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
+            return this.findMapping(input.strip()).map(result -> new Tuple<>(state, result));
+        }
+
+        private Optional<String> findMapping(String input) {
+            if (this.mappings.containsKey(input)) {
+                return Optional.of(this.mappings.get(input));
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -360,22 +381,23 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
-            return compileType().parse(state1, tuple.left).map(parse -> {
+            return type().parse(state1, tuple.left).map(parse -> {
                 return new Tuple<>(parse.left, parse.right + " " + tuple.right);
             });
         });
     }
 
-    private static Rule compileType() {
+    private static Rule type() {
         var type = new LazyRule();
         type.set(new OrRule(List.of(
-                parseGeneric(type),
+                new PrimitiveRule(),
+                generic(type),
                 Main::parsePlaceholder
         )));
         return type;
     }
 
-    private static StripRule parseGeneric(Rule type) {
+    private static StripRule generic(Rule type) {
         return new StripRule(new SuffixRule(">", (state, input) -> parseInfix(state, input, "<", (state1, tuple) -> {
             var base = tuple.left.strip();
             return new DivideRule(type, new FoldingDivider(new ValueFolder()), new ValueMerger())
