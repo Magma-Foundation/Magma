@@ -374,8 +374,13 @@ public class Main {
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
                 return parseDefinition(state1, tuple0.left).flatMap(definition -> {
                     var inputParams = tuple1.left;
-                    return values(parameter()).parse(definition.left, inputParams).map(outputParams -> {
-                        return new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ")" + generatePlaceholder(tuple1.right));
+                    return values(parameter()).parse(definition.left, inputParams).flatMap(outputParams -> {
+                        if (tuple1.right.strip().equals(";")) {
+                            return Optional.of(new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ");"));
+                        }
+                        else {
+                            return Optional.empty();
+                        }
                     });
                 });
             });
