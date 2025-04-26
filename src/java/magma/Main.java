@@ -107,6 +107,17 @@ public class Main {
             return "";
         }
 
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var afterKeyword = stripped.substring(classIndex + "class ".length());
+            var contentStart = afterKeyword.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeContent = afterKeyword.substring(0, contentStart).strip();
+                var withEnd = afterKeyword.substring(contentStart + "{".length()).strip();
+                return "struct " + beforeContent + " {\n};\n";
+            }
+        }
+
         throw new CompileException("Invalid input", input);
     }
 }
