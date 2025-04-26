@@ -101,6 +101,17 @@ public class Main {
             return "";
         }
 
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var left = stripped.substring(0, classIndex);
+            var right = stripped.substring(classIndex + "class ".length());
+            return generatePlaceholder(left) + "struct " + generatePlaceholder(right);
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
     }
 }
