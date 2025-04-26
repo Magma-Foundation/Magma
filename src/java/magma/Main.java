@@ -103,9 +103,14 @@ public class Main {
 
         var classIndex = stripped.indexOf("class ");
         if (classIndex >= 0) {
-            var left = stripped.substring(0, classIndex);
+            var beforeKeyword = stripped.substring(0, classIndex);
             var right = stripped.substring(classIndex + "class ".length());
-            return generatePlaceholder(left) + "struct " + generatePlaceholder(right);
+            var contentStart = right.indexOf("{");
+            if (contentStart >= 0) {
+                var name = right.substring(0, contentStart).strip();
+                var withEnd = right.substring(contentStart + "{".length()).strip();
+                return generatePlaceholder(beforeKeyword) + "struct " + name + " {" + generatePlaceholder(withEnd);
+            }
         }
 
         return generatePlaceholder(stripped);
