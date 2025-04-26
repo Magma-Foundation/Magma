@@ -1,5 +1,6 @@
-/* public */ struct Main {/* private interface Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {
-    } *//* 
+/* private */ struct Rule extends BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> {/*  */
+};
+/* public */ struct Main {/* 
 
     private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
         public DivideState() {
@@ -149,30 +150,6 @@
 	/* return appended */;/* 
      */
 };
-/* private */ /* static */ /* Optional<Tuple<CompileState, */ /* String>> */ /* compileClass(CompileState */ /* state, */ /* String */ /* input) */ /* { */ /* return */ /* compileInfix(state, */ /* input, */ /* " */ struct ", (state0, tuple0) -> {
-	/* var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
-                    .map(String::strip)
-                    .filter(value -> !value.isEmpty())
-                    .toList() */;
-	/* var afterKeyword = tuple0.right */;/* 
-            return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
-                var name = tuple1.left.strip();
-                var withEnd = tuple1.right.strip();
-                return new SuffixRule("}", (state2, inputContent1) -> {
-                    return new DivideRule((state3, input1) -> structSegment().apply(state3, input1)).apply(state2, inputContent1).map(outputContent -> {
-                        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                                .map(Main::generatePlaceholder)
-                                .collect(Collectors.joining(" ")) + " ";
-
-                        var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
-                        return new Tuple<>(outputContent.left.addStruct(generated), "");
-                    });
-                }).apply(state1, withEnd);
-            } */
-	/* ) */;/* 
-        });
-     */
-};
 /* 
 
     private static OrRule rootSegment() {
@@ -194,9 +171,39 @@
         return Optional.empty();
     } *//* 
 
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
+        return compileStructured(state, input, "class ");
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
+        return compileInfix(state, input, infix, (state0, tuple0) -> {
+            var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
+
+            var afterKeyword = tuple0.right;
+            return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
+                var name = tuple1.left.strip();
+                var withEnd = tuple1.right.strip();
+                return new SuffixRule("}", (state2, inputContent1) -> {
+                    return new DivideRule((state3, input1) -> structSegment().apply(state3, input1)).apply(state2, inputContent1).map(outputContent -> {
+                        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                                .map(Main::generatePlaceholder)
+                                .collect(Collectors.joining(" ")) + " ";
+
+                        var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
+                        return new Tuple<>(outputContent.left.addStruct(generated), "");
+                    });
+                }).apply(state1, withEnd);
+            });
+        });
+    } *//* 
+
     private static OrRule structSegment() {
         return new OrRule(List.of(
                 Main::compileClass,
+                (state, input) -> compileStructured(state, input, "interface "),
                 structStatement(),
                 Main::compilePlaceholder
         ));

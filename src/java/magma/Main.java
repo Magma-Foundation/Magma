@@ -182,7 +182,11 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileInfix(state, input, "class ", (state0, tuple0) -> {
+        return compileStructured(state, input, "class ");
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileStructured(CompileState state, String input, String infix) {
+        return compileInfix(state, input, infix, (state0, tuple0) -> {
             var modifiers = Arrays.stream(tuple0.left.strip().split(" "))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
@@ -209,6 +213,7 @@ public class Main {
     private static OrRule structSegment() {
         return new OrRule(List.of(
                 Main::compileClass,
+                (state, input) -> compileStructured(state, input, "interface "),
                 structStatement(),
                 Main::compilePlaceholder
         ));
