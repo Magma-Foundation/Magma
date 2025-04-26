@@ -46,7 +46,10 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) throws CompileException {
-
+        var stripped = input.strip();
+        if (stripped.startsWith("package ")) {
+            return "";
+        }
 
         throw new CompileException("Invalid input", input);
     }
