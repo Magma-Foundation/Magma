@@ -131,12 +131,32 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Tuple<>(state, "");
+        return compileOr(state, input, List.of(
+                Main::compileNamespaced,
+                Main::compileClass
+        ));
+    }
+
+    private static Tuple<CompileState, String> compileOr(
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+    ) {
+        for (var rule : rules) {
+            var result = rule.apply(state, input);
+            if (result.isPresent()) {
+                return result.get();
+            }
         }
 
-        return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+        return new Tuple<>(state, generatePlaceholder(input));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
+        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
@@ -168,8 +188,9 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
-        return compileClass(state, input)
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileOr(state, input, List.of(
+                Main::compileClass
+        ));
     }
 
     private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {

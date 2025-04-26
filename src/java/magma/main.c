@@ -127,41 +127,74 @@
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
-                if (withEnd.endsWith("}")) {
-                    var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-
-                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                            .map(Main::generatePlaceholder)
-                            .collect(Collectors.joining(" ")) + " ";
-
-                    var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
-                    return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
-                } *//* 
-                else {
+                if (!withEnd.endsWith("}")) {
                     return Optional.empty();
-                } *//* 
+                }
+
+                var inputContent = withEnd.substring(0, withEnd.length() - "} *//* ".length()); *//* 
+                var outputContent = compileAll(state1, inputContent, Main::compileStructSegment); *//* 
+
+                var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                        .map(Main::generatePlaceholder)
+                        .collect(Collectors.joining(" ")) + " "; *//* 
+
+                var generated = joined + "struct " + name + " {" + outputContent.right + "\n} *//* ; *//* \n"; *//* 
+                return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), "")); *//* 
             });
          */
 };
-/* private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Tuple<>(state, "");
+/* 
+
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
+        return compileOr(state, input, List.of(
+                Main::compileNamespaced,
+                Main::compileClass
+        ));
+    } *//* 
+
+    private static Tuple<CompileState, String> compileOr(
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+    ) {
+        for (var rule : rules) {
+            var result = rule.apply(state, input);
+            if (result.isPresent()) {
+                return result.get();
+            }
         }
 
-        return compileClass(state, stripped).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
-    } *//* ); *//* }
+        return new Tuple<>(state, generatePlaceholder(input));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
+        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
+    } *//* ); *//* 
+    }
 
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
-        return compileClass(state, input)
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+        return compileOr(state, input, List.of(
+                Main::compileClass
+        )); *//* 
+    }
 
     private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
-        var index = input.indexOf(infix); *//* if (index < 0) {
+        var index = input.indexOf(infix); *//* 
+        if (index < 0) {
             return Optional.empty();
-        } *//* var left = input.substring(0, index); *//* var right = input.substring(index + infix.length()); *//* return rule.apply(state, new Tuple<>(left, right)); *//* }
+        } *//* 
+
+        var left = input.substring(0, index); *//* 
+        var right = input.substring(index + infix.length()); *//* 
+
+        return rule.apply(state, new Tuple<>(left, right)); *//* 
+    }
 
     private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */"; *//* }
-} */
+        return "/* " + stripped + " */"; *//* 
+    }
+}
+ */
