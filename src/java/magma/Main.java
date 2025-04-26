@@ -340,12 +340,34 @@ public class Main {
 
     private static Result<String, CompileError> compileClass(String stripped, String infix) {
         return compileInfix(stripped, infix, tuple -> compileInfix(tuple.right, "{", tuple0 -> {
-            return compileSuffix(tuple0.right.strip(), "}", content -> {
-                return compileAll(content, Main::compileStructuredSegment).mapValue(outputContent -> {
-                    return "struct %s {%s\n};\n".formatted(tuple0.left.strip(), outputContent);
+            return compileSymbol(tuple0.left.strip(), name -> {
+                return compileSuffix(tuple0.right.strip(), "}", content -> {
+                    return compileAll(content, Main::compileStructuredSegment).mapValue(outputContent -> {
+                        return "struct %s {%s\n};\n".formatted(name, outputContent);
+                    });
                 });
             });
         }));
+    }
+
+    private static Result<String, CompileError> compileSymbol(String input, Function<String, Result<String, CompileError>> rule) {
+        if (isSymbol(input)) {
+            return rule.apply(input);
+        }
+        else {
+            return new Err<>(new CompileError("Not a symbol", input));
+        }
+    }
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Result<String, CompileError> compileStructuredSegment(String input) {
