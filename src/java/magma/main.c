@@ -6,14 +6,20 @@
 	struct A left();
 	struct B right();
 };
+/* private */ struct Option<T> {
+	<struct R> Option<R> flatMap(Function<struct T, Option<struct R>> mapper);
+	<struct R> Option<R> map(Function<struct T, struct  R> mapper);
+	struct boolean isPresent();
+	struct T orElseGet(Supplier<struct T> other);
+};
 /* private */ struct Rule {
-	Optional<Pair<struct CompileState, char*>> parse(struct CompileState state, char* input);
+	Option<Pair<struct CompileState, char*>> parse(struct CompileState state, char* input);
 };
 /* private */ struct Splitter {
-	Optional<Pair<char*, char*>> split(char* input);
+	Option<Pair<char*, char*>> split(char* input);
 };
 /* private */ struct Locator {
-	Optional<struct Integer> locate(char* input, char* infix);
+	Option<struct Integer> locate(char* input, char* infix);
 };
 /* private */ struct Divider {
 	List<char*> divideAll(char* input);
@@ -23,21 +29,41 @@
 /* private */ struct Merger {
 	struct StringBuilder merge(struct StringBuilder currentCache, char* right);
 };
+/* private */ /* static */ struct None<T> implements Option<T> {/* @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        } *//* 
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        } *//* 
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        } *//* 
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        } */
+};
 /* public */ /* static */ struct StatementMerger implements Merger {/* @Override
         public StringBuilder merge(StringBuilder currentCache, String right) {
             return currentCache.append(right);
         } */
 };
 /* private */ /* static */ struct FirstLocator implements Locator {/* @Override
-        public Optional<Integer> locate(String input, String infix) {
+        public Option<Integer> locate(String input, String infix) {
             var index = input.indexOf(infix);
-            return index < 0 ? Optional.empty() : Optional.of(index);
+            return index < 0 ? new None<Integer>() : new Some<>(index);
         } */
 };
 /* private */ /* static */ struct LastLocator implements Locator {/* @Override
-        public Optional<Integer> locate(String input, String infix) {
+        public Option<Integer> locate(String input, String infix) {
             var index = input.lastIndexOf(infix);
-            return index < 0 ? Optional.empty() : Optional.of(index);
+            return index < 0 ? new None<Integer>() : new Some<>(index);
         } */
 };
 /* private */ /* static */ struct StatementFolder implements Folder {/* @Override
@@ -58,6 +84,28 @@
 	/* return appended */;
 };
 /* public */ struct Main {/* 
+
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+    } *//* 
 
     private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
         public DivideState() {
@@ -113,12 +161,12 @@
 
     private record SuffixRule(String suffix, Rule rule) implements Rule {
         @Override
-        public Optional<Pair<CompileState, String>> parse(
+        public Option<Pair<CompileState, String>> parse(
                 CompileState state,
                 String input
         ) {
             if (!input.endsWith(this.suffix())) {
-                return Optional.empty();
+                return new None<>();
             }
 
             var slice = input.substring(0, input.length() - this.suffix().length());
@@ -132,10 +180,10 @@
         }
 
         @Override
-        public Optional<Pair<CompileState, String>> parse(CompileState state, String input) {
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             var segments = this.divider.divideAll(input);
 
-            var maybeOutput = Optional.of(new Tuple<>(state, new StringBuilder()));
+            var maybeOutput = (Option<Tuple<CompileState, StringBuilder>>) new Some<>(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()));
             for (var segment : segments) {
                 maybeOutput = maybeOutput.flatMap(output -> {
                     var currentState = output.left();
@@ -155,7 +203,7 @@
 
     private record OrRule(List<Rule> rules) implements Rule {
         @Override
-        public Optional<Pair<CompileState, String>> parse(CompileState state, String input) {
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             for (var rule : this.rules()) {
                 var result = rule.parse(state, input);
                 if (result.isPresent()) {
@@ -163,7 +211,7 @@
                 }
             }
 
-            return Optional.empty();
+            return new None<>();
         }
     } *//* 
 
@@ -173,7 +221,7 @@
         }
 
         @Override
-        public Optional<Pair<String, String>> split(String input) {
+        public Option<Pair<String, String>> split(String input) {
             return this.locator.locate(input, this.infix).map(index -> {
                 var left = input.substring(0, index);
                 var right = input.substring(index + this.infix().length());
@@ -184,7 +232,7 @@
 
     private record StripRule(Rule rule) implements Rule {
         @Override
-        public Optional<Pair<CompileState, String>> parse(CompileState state, String input) {
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             return this.rule.parse(state, input.strip());
         }
     } */
@@ -205,15 +253,15 @@
         } */
 };
 /* private */ /* static */ struct LazyRule implements Rule {
-	struct private Optional<Rule> maybeChildRule = Optional.empty();/* 
+	struct private Option<Rule> maybeChildRule = new None<>();/* 
 
         @Override
-        public Optional<Pair<CompileState, String>> parse(CompileState state, String input) {
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             return this.maybeChildRule.flatMap(childRule -> childRule.parse(state, input));
         } *//* 
 
         public void set(Rule rule) {
-            this.maybeChildRule = Optional.of(rule);
+            this.maybeChildRule = new Some<>(rule);
         } */
 };
 /* public */ /* static */ struct ValueMerger implements Merger {/* @Override
@@ -230,16 +278,16 @@
         ) */;/* 
 
         @Override
-        public Optional<Pair<CompileState, String>> parse(CompileState state, String input) {
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             return this.findMapping(input.strip()).map(result -> new Tuple<>(state, result));
         } *//* 
 
-        private Optional<String> findMapping(String input) {
+        private Option<String> findMapping(String input) {
             if (this.mappings.containsKey(input)) {
-                return Optional.of(this.mappings.get(input));
+                return new Some<>(this.mappings.get(input));
             }
             else {
-                return Optional.empty();
+                return new None<>();
             }
         } */
 };
@@ -289,22 +337,22 @@
         ));
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parsePlaceholder(CompileState state, String input) {
-        return Optional.of(new Tuple<>(state, generatePlaceholder(input)));
+    private static Option<Pair<CompileState, String>> parsePlaceholder(CompileState state, String input) {
+        return new Some<>(new Tuple<CompileState, String>(state, generatePlaceholder(input)));
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> compileNamespaced(CompileState state, String input) {
+    private static Option<Pair<CompileState, String>> compileNamespaced(CompileState state, String input) {
         if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
-            return Optional.of(new Tuple<>(state, ""));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         }
-        return Optional.empty();
+        return new None<>();
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseClass(CompileState state, String input) {
+    private static Option<Pair<CompileState, String>> parseClass(CompileState state, String input) {
         return parseStructured(state, input, "class ");
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseStructured(CompileState state, String input, String infix) {
+    private static Option<Pair<CompileState, String>> parseStructured(CompileState state, String input, String infix) {
         return parseInfix(state, input, new InfixSplitter(infix), (state0, pair0) -> {
             var modifiers = Arrays.stream(pair0.left().strip().split(" "))
                     .map(String::strip)
@@ -315,16 +363,14 @@
             return parseInfix(state0, afterKeyword, new InfixSplitter("{"), (state1, pair1) -> {
                 var name = pair1.left().strip();
                 var withEnd = pair1.right().strip();
-                return new SuffixRule("}", (state2, inputContent1) -> {
-                    return new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
-                        var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                                .map(Main::generatePlaceholder)
-                                .collect(Collectors.joining(" ")) + " ";
+                return new SuffixRule("}", (state2, inputContent1) -> new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
+                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                            .map(Main::generatePlaceholder)
+                            .collect(Collectors.joining(" ")) + " ";
 
-                        var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
-                        return new Tuple<>(outputContent.left().addStruct(generated), "");
-                    });
-                }).parse(state1, withEnd);
+                    var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
+                    return new Tuple<>(outputContent.left().addStruct(generated), "");
+                })).parse(state1, withEnd);
             });
         });
     } *//* 
@@ -340,7 +386,7 @@
         ));
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseMethod(CompileState state, String input) {
+    private static Option<Pair<CompileState, String>> parseMethod(CompileState state, String input) {
         return parseInfix(state, input, new InfixSplitter("("), (state0, pair0) -> {
             var right = pair0.right();
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, pair1) -> {
@@ -348,10 +394,10 @@
                     var inputParams = pair1.left();
                     return values(parameter()).parse(definition.left(), inputParams).flatMap(outputParams -> {
                         if (pair1.right().strip().equals(";")) {
-                            return Optional.of(new Tuple<>(outputParams.left(), "\n\t" + definition.right() + "(" + outputParams.right() + ");"));
+                            return new Some<>(new Tuple<>(outputParams.left(), "\n\t" + definition.right() + "(" + outputParams.right() + ");"));
                         }
                         else {
-                            return Optional.empty();
+                            return new None<>();
                         }
                     });
                 });
@@ -366,14 +412,14 @@
         ));
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseWhitespace(CompileState state, String input) {
+    private static Option<Pair<CompileState, String>> parseWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Optional.of(new Tuple<>(state, ""));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         }
-        return Optional.empty();
+        return new None<>();
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseDefinition(CompileState state, String input) {
+    private static Option<Pair<CompileState, String>> parseDefinition(CompileState state, String input) {
         return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, pair) -> {
             return type().parse(state1, pair.left()).map(parse -> {
                 return new Tuple<>(parse.left(), parse.right() + " " + pair.right());
@@ -391,8 +437,8 @@
         return type;
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseStruct(CompileState state, String input) {
-        return Optional.of(new Tuple<>(state, "struct " + input));
+    private static Option<Pair<CompileState, String>> parseStruct(CompileState state, String input) {
+        return new Some<>(new Tuple<CompileState, String>(state, "struct " + input));
     } *//* 
 
     private static StripRule generic(Rule type) {
@@ -408,20 +454,20 @@
         return new DivideRule(childRule, new FoldingDivider(new ValueFolder()), new ValueMerger());
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseInfix(CompileState state, String input, String infix, BiFunction<CompileState, Pair<String, String>, Optional<Pair<CompileState, String>>> rule) {
+    private static Option<Pair<CompileState, String>> parseInfix(CompileState state, String input, String infix, BiFunction<CompileState, Pair<String, String>, Option<Pair<CompileState, String>>> rule) {
         return parseInfix(state, input, new InfixSplitter(infix), rule);
     } *//* 
 
-    private static Optional<Pair<String, String>> findTypeSeparator(String input) {
+    private static Option<Pair<String, String>> findTypeSeparator(String input) {
         var slices = new FoldingDivider(Main::foldTypeSeparator).divideAll(input);
         if (slices.size() >= 2) {
             var before = slices.subList(0, slices.size() - 1);
             var last = slices.getLast();
 
-            return Optional.of(new Tuple<>(String.join(" ", before), last));
+            return new Some<>(new Tuple<String, String>(String.join(" ", before), last));
         }
         else {
-            return Optional.empty();
+            return new None<>();
         }
     } *//* 
 
@@ -442,15 +488,15 @@
 
     private static Rule structStatement() {
         return new SuffixRule(";", (state0, input0) -> {
-            return Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0.strip()) + ";"));
+            return new Some<>(new Tuple<CompileState, String>(state0, "\n\t" + generatePlaceholder(input0.strip()) + ";"));
         });
     } *//* 
 
-    private static Optional<Pair<CompileState, String>> parseInfix(
+    private static Option<Pair<CompileState, String>> parseInfix(
             CompileState state,
             String input,
             Splitter splitter,
-            BiFunction<CompileState, Pair<String, String>, Optional<Pair<CompileState, String>>> rule
+            BiFunction<CompileState, Pair<String, String>, Option<Pair<CompileState, String>>> rule
     ) {
         return splitter.split(input).flatMap(pair -> rule.apply(state, pair));
     } *//* 
