@@ -372,9 +372,9 @@ public class Main {
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
-                return compileDefinition(state1, tuple0.left).flatMap(definition -> {
+                return parseDefinition(state1, tuple0.left).flatMap(definition -> {
                     var inputParams = tuple1.left;
-                    return values(Main::compileDefinition).parse(definition.left, inputParams).map(outputParams -> {
+                    return values(parameter()).parse(definition.left, inputParams).map(outputParams -> {
                         return new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ")" + generatePlaceholder(tuple1.right));
                     });
                 });
@@ -382,7 +382,21 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static OrRule parameter() {
+        return new OrRule(List.of(
+                Main::parseWhitespace,
+                Main::parseDefinition
+        ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> parseWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Tuple<CompileState, String>> parseDefinition(CompileState state, String input) {
         return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
             return type().parse(state1, tuple.left).map(parse -> {
                 return new Tuple<>(parse.left, parse.right + " " + tuple.right);

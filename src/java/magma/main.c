@@ -1,5 +1,5 @@
 /* private */ struct CompileState {
-	/* String join() */;
+	char* join()/* ; */
 	/* CompileState */ addStruct(char* struct)/* ; *//* 
      */
 };
@@ -55,14 +55,16 @@
             if (c == ';' && appended.isLevel()) {
                 return appended.advance();
             }
-            if (c == '} *//* ' && appended.isShallow()) {
+            if (c == '} */
+	/* ' && */ appended.isShallow()/* ) {
                 return appended.advance().exit();
             } *//* 
             if (c == '{') {
                 return appended.enter();
             }
-            if (c == '} *//* ') {
-                return appended.exit();
+            if (c == '} */
+	/* ') {
+                return */ appended.exit()/* ;
             } */
 	/* return appended */;/* 
          */
@@ -210,7 +212,7 @@
      */
 };
 /* private */ /* static */ struct LazyRule implements Rule {
-	/* private Optional<Rule> maybeChildRule = Optional.empty() */;
+	/* private Optional<Rule> maybeChildRule = */ Optional.empty()/* ; */
 	@Override
         public Optional<Tuple</* CompileState */, char*>> parse(/* CompileState */ state, char* input)/*  {
             return this.maybeChildRule.flatMap(childRule -> childRule.parse(state, input));
@@ -348,9 +350,9 @@
         return parseInfix(state, input, new InfixSplitter("("), (state0, tuple0) -> {
             var right = tuple0.right;
             return parseInfix(state0, right, new InfixSplitter(")"), (state1, tuple1) -> {
-                return compileDefinition(state1, tuple0.left).flatMap(definition -> {
+                return parseDefinition(state1, tuple0.left).flatMap(definition -> {
                     var inputParams = tuple1.left;
-                    return values(Main::compileDefinition).parse(definition.left, inputParams).map(outputParams -> {
+                    return values(parameter()).parse(definition.left, inputParams).map(outputParams -> {
                         return new Tuple<>(outputParams.left, "\n\t" + definition.right + "(" + outputParams.right + ")" + generatePlaceholder(tuple1.right));
                     });
                 });
@@ -358,7 +360,21 @@
         });
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static OrRule parameter() {
+        return new OrRule(List.of(
+                Main::parseWhitespace,
+                Main::parseDefinition
+        ));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> parseWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> parseDefinition(CompileState state, String input) {
         return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
             return type().parse(state1, tuple.left).map(parse -> {
                 return new Tuple<>(parse.left, parse.right + " " + tuple.right);
