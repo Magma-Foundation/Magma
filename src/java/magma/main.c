@@ -1,11 +1,9 @@
 /* private */ struct Rule {
-	/* Optional<Tuple<CompileState, String>> parse */(/* CompileState state, String s */)/* ; *//* 
+	/* Optional<Tuple<CompileState, */ /* String>> parse */(/* CompileState state, String s */)/* ; *//* 
      */
 };
 /* public */ struct Main {
-	/* 
-
-    private record DivideState */(/* List<String> segments, StringBuilder buffer, int depth */)/*  {
+	/* private */ /* record DivideState */(/* List<String> segments, StringBuilder buffer, int depth */)/*  {
         public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
@@ -36,13 +34,9 @@
             return this.depth == 1;
         }
     } */
-	/* 
-
-    private record Tuple<A, B> */(/* A left, B right */)/*  {
+	/* private */ /* record Tuple<A, B> */(/* A left, B right */)/*  {
     } */
-	/* 
-
-    private record CompileState */(/* List<String> structs */)/*  {
+	/* private */ /* record CompileState */(/* List<String> structs */)/*  {
         public CompileState() {
             this(new ArrayList<>());
         }
@@ -52,9 +46,7 @@
             return this;
         }
     } */
-	/* 
-
-    private record SuffixRule */(/* String suffix, Rule rule */)/*  implements Rule {
+	/* private */ /* record SuffixRule */(/* String suffix, Rule rule */)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(
                 CompileState state,
@@ -68,9 +60,7 @@
             return this.rule().parse(state, slice);
         }
     } */
-	/* 
-
-    private record DivideRule */(/* Rule compiler */)/*  implements Rule {
+	/* private */ /* record DivideRule */(/* Rule compiler */)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             var segments = divide(input);
@@ -92,9 +82,7 @@
             return maybeOutput.map(output -> new Tuple<>(output.left, output.right.toString()));
         }
     } */
-	/* 
-
-    private record OrRule */(/* List<Rule> rules */)/*  implements Rule {
+	/* private */ /* record OrRule */(/* List<Rule> rules */)/*  implements Rule {
         @Override
         public Optional<Tuple<CompileState, String>> parse(CompileState state, String input) {
             for (var rule : this.rules()) {
@@ -107,9 +95,7 @@
             return Optional.empty();
         }
     } */
-	/* 
-
-    public static void main */(/*  */)/*  {
+	/* public */ /* static void main */(/*  */)/*  {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var input = Files.readString(source);
@@ -120,9 +106,7 @@
             e.printStackTrace();
         }
     } */
-	/* 
-
-    private static String compileRoot */(/* String input */)/*  {
+	/* private */ /* static String compileRoot */(/* String input */)/*  {
         var state = new CompileState();
         var tuple = new DivideRule((state1, input1) -> rootSegment().parse(state1, input1))
                 .parse(state, input)
@@ -132,9 +116,7 @@
         var joinedStructs = String.join("", tuple.left().structs);
         return joinedStructs + output;
     } */
-	/* 
-
-    private static List<String> divide */(/* String input */)/*  {
+	/* private */ /* static List<String> divide */(/* String input */)/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -143,23 +125,20 @@
 
         return current.advance().segments;
     } */
-	/* 
-
-    private static DivideState foldStatementChar */(/* DivideState state, char c */)/*  {
+	/* private */ /* static DivideState foldStatementChar */(/* DivideState state, char c */)/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
         if (c == '} */
-	/* ' && appended.isShallow */(/*  */)/* ) {
+	/* ' */ /* && appended.isShallow */(/*  */)/* ) {
             return appended.advance().exit();
-        } */
-	/* 
-        if  */(/* c == '{' */)/*  {
+        } *//* 
+        if (c == '{') {
             return appended.enter();
         }
         if (c == '} */
-	/* ') {
+	/* ') */ /* {
             return appended.exit */(/*  */)/* ;
         } */
 	/* return appended */;/* 
@@ -229,9 +208,15 @@
         return compileInfix(state, input, "(", (state0, tuple0) -> {
             var right = tuple0.right;
             return compileInfix(state0, right, ")", (state1, tuple1) -> {
-                return Optional.of(new Tuple<>(state1, "\n\t" + generatePlaceholder(tuple0.left) + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right)));
+                return compileDefinition(state1, tuple0.left).map(definition -> {
+                    return new Tuple<CompileState, String>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
+                });
             });
         });
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        return compileInfix(state, input.strip(), " ", (state1, tuple) -> Optional.of(new Tuple<>(state1, generatePlaceholder(tuple.left) + " " + generatePlaceholder(tuple.right))));
     } *//* 
 
     private static Rule structStatement() {

@@ -225,9 +225,15 @@ public class Main {
         return compileInfix(state, input, "(", (state0, tuple0) -> {
             var right = tuple0.right;
             return compileInfix(state0, right, ")", (state1, tuple1) -> {
-                return Optional.of(new Tuple<>(state1, "\n\t" + generatePlaceholder(tuple0.left) + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right)));
+                return compileDefinition(state1, tuple0.left).map(definition -> {
+                    return new Tuple<CompileState, String>(definition.left, "\n\t" + definition.right + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right));
+                });
             });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        return compileInfix(state, input.strip(), " ", (state1, tuple) -> Optional.of(new Tuple<>(state1, generatePlaceholder(tuple.left) + " " + generatePlaceholder(tuple.right))));
     }
 
     private static Rule structStatement() {
