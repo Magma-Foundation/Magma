@@ -150,20 +150,19 @@ public class Main {
             return compileInfix(state0, afterKeyword, "{", (state1, tuple1) -> {
                 var name = tuple1.left.strip();
                 var withEnd = tuple1.right.strip();
-                if (withEnd.endsWith("}")) {
-                    var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
-                    var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
-
-                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                            .map(Main::generatePlaceholder)
-                            .collect(Collectors.joining(" ")) + " ";
-
-                    var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
-                    return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
-                }
-                else {
+                if (!withEnd.endsWith("}")) {
                     return Optional.empty();
                 }
+
+                var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                var outputContent = compileAll(state1, inputContent, Main::compileStructSegment);
+
+                var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                        .map(Main::generatePlaceholder)
+                        .collect(Collectors.joining(" ")) + " ";
+
+                var generated = joined + "struct " + name + " {" + outputContent.right + "\n};\n";
+                return Optional.of(new Tuple<>(outputContent.left.addStruct(generated), ""));
             });
         });
     }
