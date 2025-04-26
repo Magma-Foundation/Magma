@@ -250,12 +250,16 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        var extracted = divide(input);
+        return compileAll(input, Main::compileRootSegment);
+    }
+
+    private static Result<String, CompileError> compileAll(String input, Function<String, Result<String, CompileError>> compiler) {
+        var segments = divide(input);
 
         Result<StringBuilder, CompileError> output = new Ok<>(new StringBuilder());
-        for (var segment : extracted) {
+        for (var segment : segments) {
             output = output
-                    .and(() -> compileRootSegment(segment))
+                    .and(() -> compiler.apply(segment))
                     .mapValue(tuple -> tuple.left().append(tuple.right()));
         }
 
@@ -315,9 +319,27 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileClass(String stripped) {
-        return compileInfix(stripped, "class",
-                tuple -> compileInfix(tuple.right, "{",
-                        tuple0 -> new Ok<>("struct " + tuple0.left + " {\n};\n")));
+        return compileInfix(stripped, "class", tuple -> compileInfix(tuple.right, "{", tuple0 -> {
+            return compileSuffix(tuple0.right.strip(), "}", content -> {
+                return compileAll(content, Main::compileStructuredSegment).mapValue(outputContent -> {
+                    return "struct %s {%s\n};\n".formatted(tuple0.left.strip(), outputContent);
+                });
+            });
+        }));
+    }
+
+    private static Result<String, CompileError> compileStructuredSegment(String input) {
+        return compileOr(input, List.of(
+
+        ));
+    }
+
+    private static Result<String, CompileError> compileSuffix(String input, String suffix, Function<String, Result<String, CompileError>> mapper) {
+        if (input.endsWith(suffix)) {
+            return mapper.apply(input.substring(0, input.length() - suffix.length()));
+        }
+
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
     }
 
     private static Result<String, CompileError> compileInfix(
