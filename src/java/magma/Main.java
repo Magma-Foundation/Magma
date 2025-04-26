@@ -215,13 +215,25 @@ public class Main {
         return new OrRule(List.of(
                 Main::compileClass,
                 (state, input) -> compileStructured(state, input, "interface "),
+                Main::compileMethod,
                 structStatement(),
                 Main::compilePlaceholder
         ));
     }
 
-    private static SuffixRule structStatement() {
-        return new SuffixRule(";", (state0, input0) -> Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0.strip()) + ";")));
+    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+        return compileInfix(state, input, "(", (state0, tuple0) -> {
+            var right = tuple0.right;
+            return compileInfix(state0, right, ")", (state1, tuple1) -> {
+                return Optional.of(new Tuple<>(state1, "\n\t" + generatePlaceholder(tuple0.left) + "(" + generatePlaceholder(tuple1.left) + ")" + generatePlaceholder(tuple1.right)));
+            });
+        });
+    }
+
+    private static Rule structStatement() {
+        return new SuffixRule(";", (state0, input0) -> {
+            return Optional.of(new Tuple<>(state0, "\n\t" + generatePlaceholder(input0.strip()) + ";"));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileInfix(CompileState state, String input, String infix, BiFunction<CompileState, Tuple<String, String>, Optional<Tuple<CompileState, String>>> rule) {
