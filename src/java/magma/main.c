@@ -191,11 +191,11 @@
         return new OrRule(List.of(
                 Main::compileNamespaced,
                 Main::compileClass,
-                Main::compilePlaceholder
+                Main::parsePlaceholder
         ));
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compilePlaceholder(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> parsePlaceholder(CompileState state, String input) {
         return Optional.of(new Tuple<>(state, generatePlaceholder(input)));
     } *//* 
 
@@ -241,7 +241,7 @@
                 (state, input) -> compileStructured(state, input, "interface "),
                 Main::compileMethod,
                 structStatement(),
-                Main::compilePlaceholder
+                Main::parsePlaceholder
         ));
     } *//* 
 
@@ -258,8 +258,16 @@
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return compileSplitter(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, tuple) -> {
-            return Optional.of(new Tuple<>(state1, generatePlaceholder(tuple.left) + " " + tuple.right));
+            return compileType().parse(state1, tuple.left).map(parse -> {
+                return new Tuple<>(parse.left, parse.right + " " + tuple.right);
+            });
         });
+    } *//* 
+
+    private static Rule compileType() {
+        return new OrRule(List.of(
+                Main::parsePlaceholder
+        ));
     } *//* 
 
     private static Optional<Tuple<String, String>> findTypeSeparator(String input) {
