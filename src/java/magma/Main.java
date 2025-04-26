@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -48,6 +49,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     public static void main() {
@@ -56,18 +61,22 @@ public class Main {
             var input = Files.readString(source);
 
             var target = source.resolveSibling("main.c");
-            Files.writeString(target, compile(input));
+            Files.writeString(target, compileRoot(input));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static String compile(String input) {
+    private static String compileRoot(String input) {
+        return compileAll(input, Main::compileRootSegment);
+    }
+
+    private static String compileAll(String input, Function<String, String> compiler) {
         var segments = divide(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegments(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -88,6 +97,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -97,7 +109,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegments(String input) {
+    private static String compileRootSegment(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
@@ -106,12 +118,25 @@ public class Main {
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
     }
 
-    private static Optional<String> compileClass(String stripped) {
-        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+    private static Optional<String> compileClass(String input) {
+        return compileInfix(input, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (left, right) -> {
-                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + left.strip() + " {" + generatePlaceholder(right.strip()));
+                var withEnd = right.strip();
+                if (withEnd.endsWith("}")) {
+                    var inputContent = withEnd.substring(0, withEnd.length() - "}".length());
+                    var outputContent = compileAll(inputContent, Main::compileStructSegment);
+                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + left.strip() + " {" + outputContent + "\n};\n");
+                }
+                else {
+                    return Optional.empty();
+                }
             });
         });
+    }
+
+    private static String compileStructSegment(String input) {
+        return compileClass(input)
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> rule) {
