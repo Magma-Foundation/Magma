@@ -15,7 +15,7 @@ public class Main {
     private interface CompileState {
         String join();
 
-        CompileState addStruct(String struct);
+        CompileState addStruct(String structString);
     }
 
     private interface Rule {
@@ -82,8 +82,8 @@ public class Main {
         }
 
         @Override
-        public CompileState addStruct(String struct) {
-            this.structs.add(struct);
+        public CompileState addStruct(String structString) {
+            this.structs.add(structString);
             return this;
         }
 
@@ -409,9 +409,13 @@ public class Main {
         type.set(new OrRule(List.of(
                 new PrimitiveRule(),
                 generic(type),
-                Main::parsePlaceholder
+                Main::parseStruct
         )));
         return type;
+    }
+
+    private static Optional<Tuple<CompileState, String>> parseStruct(CompileState state, String input) {
+        return Optional.of(new Tuple<>(state, "struct " + input));
     }
 
     private static StripRule generic(Rule type) {
