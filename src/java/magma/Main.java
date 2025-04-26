@@ -461,10 +461,23 @@ public class Main {
         return new None<>();
     }
 
+    private static Option<Pair<CompileState, String>> getPairOption(CompileState state, String input) {
+        return parseInfix(state, input, Main::findTypeSeparator, (state2, pair) -> {
+            var beforeType = pair.left();
+            var type = pair.right();
+            return type().parse(state2, type).map(compileStateStringPair -> new Tuple<>(compileStateStringPair.left(), generatePlaceholder(beforeType) + " " + compileStateStringPair.right()));
+        });
+    }
+
     private static Option<Pair<CompileState, String>> parseDefinition(CompileState state, String input) {
-        return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, pair) -> {
-            return type().parse(state1, pair.left()).map(parse -> {
-                return new Tuple<>(parse.left(), parse.right() + " " + pair.right());
+        return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, namePair) -> {
+            var rule = new OrRule(List.of(
+                    Main::getPairOption,
+                    type()
+            ));
+
+            return rule.parse(state1, namePair.left()).map(typePair -> {
+                return new Tuple<>(typePair.left(), typePair.right() + " " + namePair.right());
             });
         });
     }

@@ -7,8 +7,8 @@
 	struct B right();
 };
 /* private */ struct Option<T> {
-	<struct R> Option<R> flatMap(Function<struct T, Option<struct R>> mapper);
-	<struct R> Option<R> map(Function<struct T, struct  R> mapper);
+	/* <R>  */ Option<struct R> flatMap(Function<struct T, Option<struct R>> mapper);
+	/* <R>  */ Option<struct R> map(Function<struct T, struct  R> mapper);
 	struct boolean isPresent();
 	struct T orElseGet(Supplier<struct T> other);
 };
@@ -253,7 +253,7 @@
         } */
 };
 /* private */ /* static */ struct LazyRule implements Rule {
-	struct private Option<Rule> maybeChildRule = new None<>();/* 
+	/* private  Option<Rule>  maybeChildRule  =  */ struct new None<>();/* 
 
         @Override
         public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
@@ -419,10 +419,23 @@
         return new None<>();
     } *//* 
 
+    private static Option<Pair<CompileState, String>> getPairOption(CompileState state, String input) {
+        return parseInfix(state, input, Main::findTypeSeparator, (state2, pair) -> {
+            var beforeType = pair.left();
+            var type = pair.right();
+            return type().parse(state2, type).map(compileStateStringPair -> new Tuple<>(compileStateStringPair.left(), generatePlaceholder(beforeType) + " " + compileStateStringPair.right()));
+        });
+    } *//* 
+
     private static Option<Pair<CompileState, String>> parseDefinition(CompileState state, String input) {
-        return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, pair) -> {
-            return type().parse(state1, pair.left()).map(parse -> {
-                return new Tuple<>(parse.left(), parse.right() + " " + pair.right());
+        return parseInfix(state, input.strip(), new InfixSplitter(" ", new LastLocator()), (state1, namePair) -> {
+            var rule = new OrRule(List.of(
+                    Main::getPairOption,
+                    type()
+            ));
+
+            return rule.parse(state1, namePair.left()).map(typePair -> {
+                return new Tuple<>(typePair.left(), typePair.right() + " " + namePair.right());
             });
         });
     } *//* 
