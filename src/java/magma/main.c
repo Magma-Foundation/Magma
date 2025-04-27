@@ -1,9 +1,5 @@
 /* private */ struct CompileState {
 };
-/* private */ struct Pair<A, B> {
-};
-/* private */ struct Option<T> {
-};
 /* private */ struct Rule {
 };
 /* private */ struct Splitter {
@@ -12,29 +8,7 @@
 };
 /* private */ struct Divider {
 };
-/* private */ struct Folder extends BiFunction<DivideState, Character, DivideState> {
-};
 /* private */ struct Merger {
-};
-/* private */ /* static */ struct None<T> implements Option<T> {/* @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<>();
-        } *//* 
-
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<>();
-        } *//* 
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        } *//* 
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return other.get();
-        } */
 };
 /* public */ /* static */ struct StatementMerger implements Merger {/* @Override
         public StringBuilder merge(StringBuilder currentCache, String right) {
@@ -292,6 +266,13 @@
         }
     } *//* 
 
+    private record StringRule() implements Rule {
+        @Override
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
+            return new Some<>(new Tuple<>(state, input));
+        }
+    } *//* 
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -349,16 +330,35 @@
             return parseInfix(state0, afterKeyword, new InfixSplitter("{"), (state1, pair1) -> {
                 var name = pair1.left().strip();
                 var withEnd = pair1.right().strip();
-                return new SuffixRule("}", (state2, inputContent1) -> new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
-                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                            .map(Main::generatePlaceholder)
-                            .collect(Collectors.joining(" ")) + " ";
 
-                    var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
-                    return new Tuple<>(outputContent.left().addStruct(generated), "");
-                })).parse(state1, withEnd);
+                return new OrRule(List.of(
+                        new StripRule(new SuffixRule(">", (state2, input1) -> parseInfix(state2, input1, "<", (state3, pair) -> {
+                            var typeParams = Arrays.stream(pair.right().strip().split(Pattern.quote(",")))
+                                    .map(String::strip)
+                                    .filter(value -> !value.isEmpty())
+                                    .toList();
+
+                            return getParse(state3, modifiers, pair.left(), withEnd, typeParams);
+                        }))),
+                        (state4, input2) -> getParse(state4, modifiers, input2, withEnd, Collections.emptyList())
+                )).parse(state1, name);
             });
         });
+    }
+
+    private static Option<Pair<CompileState, String>> getParse(CompileState state1, List<String> modifiers, String name, String withEnd, List<String> typeParams) {
+        return new SuffixRule("}", (state2, inputContent1) -> new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
+            if (!typeParams.isEmpty()) {
+                return new Tuple<>(outputContent.left(), "");
+            }
+
+            var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                    .map(Main::generatePlaceholder)
+                    .collect(Collectors.joining(" ")) + " ";
+
+            var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
+            return new Tuple<>(outputContent.left().addStruct(generated), "");
+        })).parse(state1, withEnd);
     } *//* 
 
     private static OrRule structSegment() {

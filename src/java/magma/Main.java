@@ -5,11 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -348,6 +350,13 @@ public class Main {
         }
     }
 
+    private record StringRule() implements Rule {
+        @Override
+        public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
+            return new Some<>(new Tuple<>(state, input));
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -405,16 +414,35 @@ public class Main {
             return parseInfix(state0, afterKeyword, new InfixSplitter("{"), (state1, pair1) -> {
                 var name = pair1.left().strip();
                 var withEnd = pair1.right().strip();
-                return new SuffixRule("}", (state2, inputContent1) -> new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
-                    var joined = modifiers.isEmpty() ? "" : modifiers.stream()
-                            .map(Main::generatePlaceholder)
-                            .collect(Collectors.joining(" ")) + " ";
 
-                    var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
-                    return new Tuple<>(outputContent.left().addStruct(generated), "");
-                })).parse(state1, withEnd);
+                return new OrRule(List.of(
+                        new StripRule(new SuffixRule(">", (state2, input1) -> parseInfix(state2, input1, "<", (state3, pair) -> {
+                            var typeParams = Arrays.stream(pair.right().strip().split(Pattern.quote(",")))
+                                    .map(String::strip)
+                                    .filter(value -> !value.isEmpty())
+                                    .toList();
+
+                            return getParse(state3, modifiers, pair.left(), withEnd, typeParams);
+                        }))),
+                        (state4, input2) -> getParse(state4, modifiers, input2, withEnd, Collections.emptyList())
+                )).parse(state1, name);
             });
         });
+    }
+
+    private static Option<Pair<CompileState, String>> getParse(CompileState state1, List<String> modifiers, String name, String withEnd, List<String> typeParams) {
+        return new SuffixRule("}", (state2, inputContent1) -> new DivideRule((state3, input1) -> structSegment().parse(state3, input1), new StatementFolder()).parse(state2, inputContent1).map(outputContent -> {
+            if (!typeParams.isEmpty()) {
+                return new Tuple<>(outputContent.left(), "");
+            }
+
+            var joined = modifiers.isEmpty() ? "" : modifiers.stream()
+                    .map(Main::generatePlaceholder)
+                    .collect(Collectors.joining(" ")) + " ";
+
+            var generated = joined + "struct " + name + " {" + outputContent.right() + "\n};\n";
+            return new Tuple<>(outputContent.left().addStruct(generated), "");
+        })).parse(state1, withEnd);
     }
 
     private static OrRule structSegment() {
