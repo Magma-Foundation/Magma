@@ -10,118 +10,52 @@
 };
 /* private */ struct Merger {
 };
-/* public */ /* static */ struct StatementMerger implements Merger {/* @Override
-        public StringBuilder merge(StringBuilder currentCache, String right) {
-            return currentCache.append(right);
-        } */
-};
-/* private */ /* static */ struct FirstLocator implements Locator {/* @Override
-        public Option<Integer> locate(String input, String infix) {
-            var index = input.indexOf(infix);
-            return index < 0 ? new None<Integer>() : new Some<>(index);
-        } */
-};
-/* private */ /* static */ struct LastLocator implements Locator {/* @Override
-        public Option<Integer> locate(String input, String infix) {
-            var index = input.lastIndexOf(infix);
-            return index < 0 ? new None<Integer>() : new Some<>(index);
-        } */
-};
-/* private */ /* static */ struct StatementFolder implements Folder {/* @Override
-        public DivideState apply(DivideState state, Character c) {
-            var appended = state.append(c);
-            if (c == ';' && appended.isLevel()) {
-                return appended.advance();
-            }
-            if (c == '} *//* ' && appended.isShallow()) {
-                return appended.advance().exit();
-            } *//* 
-            if (c == '{') {
-                return appended.enter();
-            }
-            if (c == '} *//* ') {
-                return appended.exit();
-            } */
-	/* return appended */;
-};
-/* public */ struct Main {/* 
-
-    private record Some<T>(T value) implements Option<T> {
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return this.value;
-        }
-    } *//* 
-
-    private record DivideState(List<String> segments, StringBuilder buffer, int depth) {
-        public DivideState() {
+/* private */ struct DivideState(List<String> segments, StringBuilder buffer, int depth) {/* public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        }
+        } *//* 
 
         private DivideState advance() {
             var copy = new ArrayList<>(this.segments);
             copy.add(this.buffer.toString());
             return new DivideState(copy, new StringBuilder(), this.depth);
-        }
+        } *//* 
 
         private DivideState append(char c) {
             return new DivideState(this.segments, this.buffer.append(c), this.depth);
-        }
+        } *//* 
 
         public boolean isLevel() {
             return this.depth == 0;
-        }
+        } *//* 
 
         public DivideState enter() {
             return new DivideState(this.segments, this.buffer, this.depth + 1);
-        }
+        } *//* 
 
         public DivideState exit() {
             return new DivideState(this.segments, this.buffer, this.depth - 1);
-        }
+        } *//* 
 
         public boolean isShallow() {
             return this.depth == 1;
-        }
-    } *//* 
-
-    private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
-    } *//* 
-
-    private record MutableCompileState(List<String> structs) implements CompileState {
-        public MutableCompileState() {
+        } */
+};
+/* private */ struct MutableCompileState(List<String> structs) implements CompileState {/* public MutableCompileState() {
             this(new ArrayList<>());
-        }
+        } *//* 
 
         @Override
         public CompileState addStruct(String structString) {
             this.structs.add(structString);
             return this;
-        }
+        } *//* 
 
         @Override
         public String join() {
             return String.join("", this.structs);
-        }
-    } *//* 
-
-    private record SuffixRule(String suffix, Rule rule) implements Rule {
-        @Override
+        } */
+};
+/* private */ struct SuffixRule(String suffix, Rule rule) implements Rule {/* @Override
         public Option<Pair<CompileState, String>> parse(
                 CompileState state,
                 String input
@@ -132,13 +66,11 @@
 
             var slice = input.substring(0, input.length() - this.suffix().length());
             return this.rule().parse(state, slice);
-        }
-    } *//* 
-
-    private record DivideRule(Rule compiler, Divider divider, Merger merger) implements Rule {
-        private DivideRule(Rule compiler, Folder folder) {
+        } */
+};
+/* private */ struct DivideRule(Rule compiler, Divider divider, Merger merger) implements Rule {/* private DivideRule(Rule compiler, Folder folder) {
             this(compiler, new FoldingDivider(folder), new StatementMerger());
-        }
+        } *//* 
 
         @Override
         public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
@@ -159,11 +91,14 @@
             }
 
             return maybeOutput.map(output -> new Tuple<>(output.left(), output.right().toString()));
-        }
-    } *//* 
-
-    private record OrRule(List<Rule> rules) implements Rule {
-        @Override
+        } */
+};
+/* public */ /* static */ struct StatementMerger implements Merger {/* @Override
+        public StringBuilder merge(StringBuilder currentCache, String right) {
+            return currentCache.append(right);
+        } */
+};
+/* private */ struct OrRule(List<Rule> rules) implements Rule {/* @Override
         public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             for (var rule : this.rules()) {
                 var result = rule.parse(state, input);
@@ -173,13 +108,17 @@
             }
 
             return new None<>();
-        }
-    } *//* 
-
-    private record InfixSplitter(String infix, Locator locator) implements Splitter {
-        public InfixSplitter(String infix) {
+        } */
+};
+/* private */ /* static */ struct FirstLocator implements Locator {/* @Override
+        public Option<Integer> locate(String input, String infix) {
+            var index = input.indexOf(infix);
+            return index < 0 ? new None<Integer>() : new Some<>(index);
+        } */
+};
+/* private */ struct InfixSplitter(String infix, Locator locator) implements Splitter {/* public InfixSplitter(String infix) {
             this(infix, new FirstLocator());
-        }
+        } *//* 
 
         @Override
         public Option<Pair<String, String>> split(String input) {
@@ -188,15 +127,37 @@
                 var right = input.substring(index + this.infix().length());
                 return new Tuple<String, String>(left, right);
             });
-        }
-    } *//* 
-
-    private record StripRule(Rule rule) implements Rule {
-        @Override
+        } */
+};
+/* private */ /* static */ struct LastLocator implements Locator {/* @Override
+        public Option<Integer> locate(String input, String infix) {
+            var index = input.lastIndexOf(infix);
+            return index < 0 ? new None<Integer>() : new Some<>(index);
+        } */
+};
+/* private */ struct StripRule(Rule rule) implements Rule {/* @Override
         public Option<Pair<CompileState, String>> parse(CompileState state, String input) {
             return this.rule.parse(state, input.strip());
-        }
-    } */
+        } */
+};
+/* private */ /* static */ struct StatementFolder implements Folder {/* @Override
+        public DivideState apply(DivideState state, Character c) {
+            var appended = state.append(c);
+            if (c == ';' && appended.isLevel()) {
+                return appended.advance();
+            }
+            if (c == '} *//* ' && appended.isShallow()) {
+                return appended.advance().exit();
+            } *//* 
+            if (c == '{') {
+                return appended.enter();
+            }
+            if (c == '} *//* ') {
+                return appended.exit();
+            } */
+	/* return appended */;
+};
+/* public */ struct Main {
 };
 /* private */ /* static */ struct ValueFolder implements Folder {/* @Override
         public DivideState apply(DivideState state, Character c) {
@@ -366,6 +327,7 @@
                 Main::parseWhitespace,
                 Main::parseClass,
                 (state, input) -> parseStructured(state, input, "interface "),
+                (state, input) -> parseStructured(state, input, "record "),
                 Main::parseMethod,
                 structStatement(),
                 Main::parsePlaceholder

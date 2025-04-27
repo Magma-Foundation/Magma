@@ -450,6 +450,7 @@ public class Main {
                 Main::parseWhitespace,
                 Main::parseClass,
                 (state, input) -> parseStructured(state, input, "interface "),
+                (state, input) -> parseStructured(state, input, "record "),
                 Main::parseMethod,
                 structStatement(),
                 Main::parsePlaceholder
