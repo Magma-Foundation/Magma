@@ -85,7 +85,8 @@ public class Main {
         ADD("+"),
         AND("&&"),
         EQUALS("=="),
-        NOT_EQUALS("!=");
+        NOT_EQUALS("!="),
+        GREATER_THAN_OR_EQUALS_TO(">=");
 
         private final String representation;
 
