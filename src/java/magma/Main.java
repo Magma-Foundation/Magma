@@ -695,7 +695,7 @@ public class Main {
     }
 
     private static Some<String> assembleMethod(String definition, String outputParams, String content) {
-        var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
+        var generated = definition + "(" + outputParams + "){" + compileStatements(content, input -> compileFunctionSegment(input, 1)) + "\n}\n";
         methods.addLast(generated);
         return new Some<>("");
     }
@@ -715,17 +715,18 @@ public class Main {
         }
     }
 
-    private static String compileFunctionSegment(String input) {
+    private static String compileFunctionSegment(String input, int depth) {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
         }
 
+        var indent = "\n" + "\t".repeat(depth);
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
             if (withoutEnd.startsWith("return ")) {
                 var value = withoutEnd.substring("return ".length());
-                return "\n\treturn " + compileValue(value) + ";";
+                return indent + "return " + compileValue(value) + ";";
             }
         }
 
@@ -735,12 +736,12 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var outputContent = compileStatements(content, Main::compileFunctionSegment);
-                return "\n\t" + generatePlaceholder(beforeBlock) + "{" + outputContent + "\n\t}";
+                var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1));
+                return indent + generatePlaceholder(beforeBlock) + "{" + outputContent + "\n\t}";
             }
         }
 
-        return "\n\t" + generatePlaceholder(stripped);
+        return indent + generatePlaceholder(stripped);
     }
 
     private static String compileValue(String input) {
