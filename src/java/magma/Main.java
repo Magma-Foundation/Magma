@@ -330,15 +330,10 @@ public class Main {
         }
     }
 
-    private record Definition(Option<String> beforeType, String type, String name) implements Defined {
-        public Definition(String type, String name) {
-            this(new None<>(), type, name);
-        }
-
+    private record Definition(String type, String name) implements Defined {
         @Override
         public String generate() {
-            var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
-            return joined + this.type() + " " + this.name();
+            return this.type() + " " + this.name();
         }
     }
 
@@ -984,13 +979,13 @@ public class Main {
 
         var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
         if (divisions.size() == 1) {
-            return new Some<>(new Definition(new None<>(), compileType(beforeName), name));
+            return new Some<>(new Definition(compileType(beforeName), name));
         }
 
         var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
         var type = divisions.last();
 
-        return new Some<>(new Definition(new Some<>(beforeType), compileType(type), name));
+        return new Some<>(new Definition(compileType(type), name));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
