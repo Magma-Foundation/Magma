@@ -475,10 +475,6 @@ public class Main {
     private static List<String> typeArguments = listEmpty();
     private static int functionLocalCounter = 0;
 
-    public static void main() {
-        run().ifPresent(Throwable::printStackTrace);
-    }
-
     private static Option<IOException> run() {
         return switch (readString(SOURCE)) {
             case Err<String, IOException>(var error) -> new Some<>(error);
@@ -487,6 +483,10 @@ public class Main {
                 yield writeTarget(TARGET, output);
             }
         };
+    }
+
+    public static void main() {
+        run().ifPresent(Throwable::printStackTrace);
     }
 
     private static Option<IOException> writeTarget(Path target, String csq) {

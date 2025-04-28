@@ -173,10 +173,6 @@ char* generate(struct CharValue this){
 char* generate(struct Not this){
 	return "!" + this.value.generate("!" + this.value);
 }
-void main(struct Main this){
-	auto main_local0 = run();
-	main_local0.ifPresent(main_local0, /* Throwable::printStackTrace */);
-}
 auto run_local0(auto var error){
 	return /* /* new Some */ */;
 }
@@ -189,6 +185,10 @@ Option<struct IOException> run(struct Main this){
 		}
 	}
 	/* ; */
+}
+void main(struct Main this){
+	auto main_local0 = run();
+	main_local0.ifPresent(main_local0, /* Throwable::printStackTrace */);
 }
 Option<struct IOException> writeTarget(struct Main this, struct Path target, char* csq){
 	/* try */{
