@@ -40,8 +40,14 @@ public class Main {
         return output.toString();
     }
 
-    private static String compileRootSegment(String segment) {
-        return generatePlaceholder(segment);
+    private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return "";
+        }
+
+
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String input) {
