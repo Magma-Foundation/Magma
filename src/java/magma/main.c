@@ -6,8 +6,6 @@
 };
 /* private */struct Node {
 };
-/* private */struct Type extends Node {
-};
 /* private */struct State {
 };
 /* private */struct Joiner {
@@ -27,7 +25,6 @@
 /* private */struct DataAccess {
 };
 /* public */struct Main {
-	/* private static String structName = "" */;
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
 };
@@ -77,7 +74,7 @@
 	return struct State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
 }
 /* private */ struct State advance(struct State this){
-	return struct State(this.input, this.segments.add(this.segments, this.buffer), "", this.depth, this.index);
+	return struct State(this.input, this.segments.addLast(this.segments, this.buffer), "", this.depth, this.index);
 }
 /* private */ int isShallow(struct State this){
 	return this.depth == 1;
@@ -138,7 +135,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         public */ char* generate(struct DataAccess this){
 	return this.parent.generate() + "." + this.property;
 }
-/* public static */ void main(struct DataAccess this){
+/* public static */ void main(struct Main this){
 	/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -150,7 +147,7 @@ struct public Definition(struct Definition this, char* type, char* name){
             e.printStackTrace();
         } */
 }
-/* private static */ char* compileRoot(struct DataAccess this, char* input){
+/* private static */ char* compileRoot(struct Main this, char* input){
 	/* var compiled = compileStatements(input, Main::compileRootSegment); */
 	/* var joinedExpansions = expansions.iter()
                 .map(tuple -> {
@@ -166,28 +163,28 @@ struct public Definition(struct Definition this, char* type, char* name){
                 .orElse(""); */
 	return /* compiled + join(structs) + joinedExpansions + join */(methods);
 }
-/* private static */ char* join(struct DataAccess this, List<char*> list){
+/* private static */ char* join(struct Main this, List<char*> list){
 	return join(list, "");
 }
-/* private static */ char* join(struct DataAccess this, List<char*> list, char* delimiter){
+/* private static */ char* join(struct Main this, List<char*> list, char* delimiter){
 	return list.iter(list).collect(list.iter(list), struct Joiner(delimiter)).orElse(list.iter(list).collect(list.iter(list), struct Joiner(delimiter)), "");
 }
-/* private static */ char* compileStatements(struct DataAccess this, char* input, Function<char*, char*> compiler){
+/* private static */ char* compileStatements(struct Main this, char* input, Function<char*, char*> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
+/* private static */ char* compileAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
 	return generateAll(merger, parseAll(input, folder, compiler));
 }
-/* private static */ char* generateAll(struct DataAccess this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
+/* private static */ char* generateAll(struct Main this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return parsed.iter(parsed).fold(parsed.iter(parsed), "", merger);
 }
-/* private static <T> */ List<struct T> parseAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
+/* private static <T> */ List<struct T> parseAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
 	return divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler).collect(divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler), ListCollector</*  */>());
 }
-/* private static */ char* mergeStatements(struct DataAccess this, char* buffer, char* element){
+/* private static */ char* mergeStatements(struct Main this, char* buffer, char* element){
 	return /* buffer + element */;
 }
-/* private static */ List<char*> divideAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder){
+/* private static */ List<char*> divideAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder){
 	/* State state = State.fromInput(input); */
 	/* while (true) {
             var maybeNextTuple = state.pop();
@@ -205,7 +202,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return state.advance(state).segments;
 }
-/* private static */ Option<struct State> foldDoubleQuotes(struct DataAccess this, struct State withoutNext, struct char c){
+/* private static */ Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext, struct char c){
 	/* if (c != '\"') {
             return new None<>();
         } */
@@ -226,14 +223,14 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return Some</*  */>(current);
 }
-/* private static */ Option<struct State> foldSingleQuotes(struct DataAccess this, struct State state, struct char next){
+/* private static */ Option<struct State> foldSingleQuotes(struct Main this, struct State state, struct char next){
 	/* if (next != '\'') {
             return new None<>();
         } */
 	/* var appended = state.append(next); */
 	return appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)).flatMap(appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)), /* State::popAndAppend */);
 }
-/* private static */ struct State foldStatementChar(struct DataAccess this, struct State state, struct char c){
+/* private static */ struct State foldStatementChar(struct Main this, struct State state, struct char c){
 	/* var appended = state.append(c); */
 	/* if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -249,7 +246,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return appended;
 }
-/* private static */ char* compileRootSegment(struct DataAccess this, char* input){
+/* private static */ char* compileRootSegment(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return "";
@@ -259,10 +256,10 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return compileClass(stripped).orElseGet(compileClass(stripped), /* () -> generatePlaceholder */(stripped));
 }
-/* private static */ Option<char*> compileClass(struct DataAccess this, char* stripped){
+/* private static */ Option<char*> compileClass(struct Main this, char* stripped){
 	return compileStructure(stripped, "class ");
 }
-/* private static */ Option<char*> compileStructure(struct DataAccess this, char* input, char* infix){
+/* private static */ Option<char*> compileStructure(struct Main this, char* input, char* infix){
 	/* var classIndex = input.indexOf(infix); */
 	/* if (classIndex >= 0) {
             var beforeClass = input.substring(0, classIndex).strip();
@@ -284,7 +281,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return None</*  */>();
 }
-/* private static */ Option<char*> getString(struct DataAccess this, char* beforeContent, char* beforeClass, char* withEnd){
+/* private static */ Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass, char* withEnd){
 	/* if (!withEnd.endsWith("}")) {
             return new None<>();
         } */
@@ -302,7 +299,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
 }
-/* private static */ Option<char*> assembleStructure(struct DataAccess this, List<char*> typeParams, char* name, char* beforeClass, char* content){
+/* private static */ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* beforeClass, char* content){
 	/* if (!typeParams.isEmpty()) {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
@@ -316,21 +313,22 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return generateStructure(name, beforeClass, content);
 }
-/* private static */ Option<char*> generateStructure(struct DataAccess this, char* name, char* beforeClass, char* content){
-	/* structName = name; */
+/* private static */ Option<char*> generateStructure(struct Main this, char* name, char* beforeClass, char* content){
+	/* structNames = structNames.addLast(name); */
 	/* var compiled = compileStatements(content, Main::compileClassSegment); */
+	/* structNames = structNames.removeLast(); */
 	/* var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n"; */
-	/* structs.add(generated); */
+	/* structs.addLast(generated); */
 	return Some</*  */>("");
 }
-/* private static */ char* compileClassSegment(struct DataAccess this, char* input){
+/* private static */ char* compileClassSegment(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return "";
         } */
 	return compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)).orElseGet(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)), /* () -> generatePlaceholder */(stripped));
 }
-/* private static */ Option<char*> compileDefinitionStatement(struct DataAccess this, char* input){
+/* private static */ Option<char*> compileDefinitionStatement(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -338,7 +336,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return None</*  */>();
 }
-/* private static */ Option<char*> compileMethod(struct DataAccess this, char* stripped){
+/* private static */ Option<char*> compileMethod(struct Main this, char* stripped){
 	/* var paramStart = stripped.indexOf("("); */
 	/* if (paramStart < 0) {
             return new None<>();
@@ -366,23 +364,23 @@ struct public Definition(struct Definition this, char* type, char* name){
                 .filter(parameter -> !(parameter instanceof Whitespace))
                 .collect(new ListCollector<>()); */
 	/* var copy = Lists.<Defined>listEmpty()
-                .add(new Definition("struct " + structName, "this"))
+                .addLast(new Definition("struct " + structNames.last(), "this"))
                 .addAll(newParams); */
 	/* var outputParams = generateValueList(copy); */
 	return assembleMethod(outputDefinition, outputParams, content);
 }
-/* private static <T extends Node> */ char* generateValueList(struct DataAccess this, List<struct T> copy){
+/* private static <T extends Node> */ char* generateValueList(struct Main this, List<struct T> copy){
 	return copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")).orElse(copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")), "");
 }
-/* private static */ Some<char*> assembleMethod(struct DataAccess this, char* definition, char* outputParams, char* content){
+/* private static */ Some<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
 	/* var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n"; */
-	/* methods.add(generated); */
+	/* methods.addLast(generated); */
 	return Some</*  */>("");
 }
-/* private static */ struct Defined parseParameter(struct DataAccess this, char* input){
+/* private static */ struct Defined parseParameter(struct Main this, char* input){
 	return parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */).or(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */), /* () -> parseDefinition */(input).map(/* () -> parseDefinition */(input), /* value -> value */)).orElseGet(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */).or(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */), /* () -> parseDefinition */(input).map(/* () -> parseDefinition */(input), /* value -> value */)), /* () -> new Content */(input));
 }
-/* private static */ Option<struct Whitespace> parseWhitespace(struct DataAccess this, char* input){
+/* private static */ Option<struct Whitespace> parseWhitespace(struct Main this, char* input){
 	/* if (input.isBlank()) {
             return new Some<>(new Whitespace());
         } */
@@ -390,7 +388,7 @@ struct public Definition(struct Definition this, char* type, char* name){
             return new None<>();
         } */
 }
-/* private static */ char* compileFunctionSegment(struct DataAccess this, char* input){
+/* private static */ char* compileFunctionSegment(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return "";
@@ -404,10 +402,10 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return /* "\n\t" + generatePlaceholder */(stripped);
 }
-/* private static */ char* compileValue(struct DataAccess this, char* input){
+/* private static */ char* compileValue(struct Main this, char* input){
 	return parseValue(input).generate(parseValue(input));
 }
-/* private static */ struct Value parseValue(struct DataAccess this, char* input){
+/* private static */ struct Value parseValue(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return new Whitespace();
@@ -439,7 +437,7 @@ struct public Definition(struct Definition this, char* type, char* name){
                 List<Value> newArgs;
                 if (parsedCaller instanceof DataAccess(var parent, _)) {
                     newArgs = Lists.<Value>listEmpty()
-                            .add(parent)
+                            .addLast(parent)
                             .addAll(parsedArgs);
                 }
                 else {
@@ -477,7 +475,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return struct Content(stripped);
 }
-/* private static */ struct State foldInvokableStart(struct DataAccess this, struct State state, char c){
+/* private static */ struct State foldInvokableStart(struct Main this, struct State state, char c){
 	/* var appended = state.append(c); */
 	/* if (c == '(') {
             var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
@@ -488,7 +486,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return appended;
 }
-/* private static */ int isNumber(struct DataAccess this, char* input){
+/* private static */ int isNumber(struct Main this, char* input){
 	/* if (input.isEmpty()) {
             return false;
         } */
@@ -501,13 +499,13 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return true;
 }
-/* private static */ char* compileDefinitionOrPlaceholder(struct DataAccess this, char* input){
+/* private static */ char* compileDefinitionOrPlaceholder(struct Main this, char* input){
 	return parseDefinitionOrPlaceholder(input).generate(parseDefinitionOrPlaceholder(input));
 }
-/* private static */ struct Defined parseDefinitionOrPlaceholder(struct DataAccess this, char* input){
+/* private static */ struct Defined parseDefinitionOrPlaceholder(struct Main this, char* input){
 	return parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */).orElseGet(parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */), /* () -> new Content */(input));
 }
-/* private static */ Option<struct Definition> parseDefinition(struct DataAccess this, char* input){
+/* private static */ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* var nameSeparator = stripped.lastIndexOf(" "); */
 	/* if (nameSeparator < 0) {
@@ -526,7 +524,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	/* var type = divisions.last(); */
 	return Some</*  */>(struct Definition(Some</*  */>(beforeType), compileType(type), name));
 }
-/* private static */ struct State foldByTypeSeparator(struct DataAccess this, struct State state, struct char c){
+/* private static */ struct State foldByTypeSeparator(struct Main this, struct State state, struct char c){
 	/* if (c == ' ' && state.isLevel()) {
             return state.advance();
         } */
@@ -539,7 +537,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return appended;
 }
-/* private static */ char* compileType(struct DataAccess this, char* input){
+/* private static */ char* compileType(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* var maybeTypeParamIndex = typeParameters.indexOf(stripped); */
 	/* if (maybeTypeParamIndex.isPresent()) {
@@ -569,7 +567,7 @@ struct public Definition(struct Definition this, char* type, char* name){
                 var parsed = parseValues(substring, Main::compileType);
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
-                    expansions = expansions.add(new Tuple<>(base, parsed));
+                    expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }
 
                 return base + "<" + generateValues(parsed) + ">";
@@ -580,19 +578,19 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return generatePlaceholder(stripped);
 }
-/* private static */ char* generateValues(struct DataAccess this, List<char*> values){
+/* private static */ char* generateValues(struct Main this, List<char*> values){
 	return generateAll(/* Main::mergeValues */, values);
 }
-/* private static <T> */ List<struct T> parseValues(struct DataAccess this, char* input, Function<char*, struct T> compiler){
+/* private static <T> */ List<struct T> parseValues(struct Main this, char* input, Function<char*, struct T> compiler){
 	return parseAll(input, /* Main::foldValueChar */, compiler);
 }
-/* private static */ char* mergeValues(struct DataAccess this, char* builder, char* element){
+/* private static */ char* mergeValues(struct Main this, char* builder, char* element){
 	/* if (builder.isEmpty()) {
             return builder + element;
         } */
 	return /* builder + ", " + element */;
 }
-/* private static */ struct State foldValueChar(struct DataAccess this, struct State state, struct char c){
+/* private static */ struct State foldValueChar(struct Main this, struct State state, struct char c){
 	/* if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
@@ -605,7 +603,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return appended;
 }
-/* private static */ int isSymbol(struct DataAccess this, char* input){
+/* private static */ int isSymbol(struct Main this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return false;
@@ -619,7 +617,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return true;
 }
-/* private static */ char* generatePlaceholder(struct DataAccess this, char* input){
+/* private static */ char* generatePlaceholder(struct Main this, char* input){
 	return "/* " + input + " */";
 }
 /* @Override
@@ -684,7 +682,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public */ List<struct T> fold(struct ListCollector</*  */> this, List<struct T> current, struct T element){
-	return current.add(current, element);
+	return current.addLast(current, element);
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some<char*> this, Function<char*, struct R> mapper){

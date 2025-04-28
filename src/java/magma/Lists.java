@@ -10,8 +10,8 @@ class Lists {
         }
 
         @Override
-        public Main.List<T> add(T element) {
-            this.elements.add(element);
+        public Main.List<T> addLast(T element) {
+            this.elements.addLast(element);
             return this;
         }
 
@@ -58,7 +58,12 @@ class Lists {
 
         @Override
         public Main.List<T> addAll(Main.List<T> elements) {
-            return elements.iter().<Main.List<T>>fold(this, Main.List::add);
+            return elements.iter().<Main.List<T>>fold(this, Main.List::addLast);
+        }
+
+        @Override
+        public Main.List<T> removeLast() {
+            return new JavaList<>(this.elements.subList(0, this.elements.size() - 1));
         }
     }
 

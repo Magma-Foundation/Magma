@@ -32,7 +32,7 @@ public class Main {
     }
 
     public interface List<T> {
-        List<T> add(T element);
+        List<T> addLast(T element);
 
         Iterator<T> iter();
 
@@ -51,6 +51,8 @@ public class Main {
         T last();
 
         List<T> addAll(List<T> elements);
+
+        List<T> removeLast();
     }
 
     private interface Head<T> {
@@ -72,9 +74,6 @@ public class Main {
 
     private interface Node {
         String generate();
-    }
-
-    private interface Type extends Node {
     }
 
     public record Some<T>(T value) implements Option<T> {
@@ -257,7 +256,7 @@ public class Main {
         }
 
         private State advance() {
-            return new State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
+            return new State(this.input, this.segments.addLast(this.buffer), "", this.depth, this.index);
         }
 
         private boolean isShallow() {
@@ -306,7 +305,7 @@ public class Main {
 
         @Override
         public List<T> fold(List<T> current, T element) {
-            return current.add(element);
+            return current.addLast(element);
         }
     }
 
@@ -374,7 +373,7 @@ public class Main {
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-    private static String structName = "";
+    private static List<String> structNames = Lists.listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<String>>> expansions = listEmpty();
@@ -599,11 +598,12 @@ public class Main {
     }
 
     private static Option<String> generateStructure(String name, String beforeClass, String content) {
-        structName = name;
-
+        structNames = structNames.addLast(name);
         var compiled = compileStatements(content, Main::compileClassSegment);
+        structNames = structNames.removeLast();
+
         var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n";
-        structs.add(generated);
+        structs.addLast(generated);
         return new Some<>("");
     }
 
@@ -666,7 +666,7 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var copy = Lists.<Defined>listEmpty()
-                .add(new Definition("struct " + structName, "this"))
+                .addLast(new Definition("struct " + structNames.last(), "this"))
                 .addAll(newParams);
 
         var outputParams = generateValueList(copy);
@@ -682,7 +682,7 @@ public class Main {
 
     private static Some<String> assembleMethod(String definition, String outputParams, String content) {
         var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
-        methods.add(generated);
+        methods.addLast(generated);
         return new Some<>("");
     }
 
@@ -756,7 +756,7 @@ public class Main {
                 List<Value> newArgs;
                 if (parsedCaller instanceof DataAccess(var parent, _)) {
                     newArgs = Lists.<Value>listEmpty()
-                            .add(parent)
+                            .addLast(parent)
                             .addAll(parsedArgs);
                 }
                 else {
@@ -907,7 +907,7 @@ public class Main {
                 var parsed = parseValues(substring, Main::compileType);
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
-                    expansions = expansions.add(new Tuple<>(base, parsed));
+                    expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }
 
                 return base + "<" + generateValues(parsed) + ">";
