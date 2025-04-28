@@ -126,10 +126,14 @@ public class Main {
             if (paramEnd >= 0) {
                 var params = afterParams.substring(0, paramEnd);
                 var withoutParams = afterParams.substring(paramEnd + ")".length());
+                var withBraces = withoutParams.strip();
 
-                var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withoutParams.strip()) + "\n";
-                methods.add(generated);
-                return "";
+                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                    var content = withBraces.substring(1, withBraces.length() - 1);
+                    var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
+                    methods.add(generated);
+                    return "";
+                }
             }
         }
 
