@@ -68,7 +68,7 @@ class Lists {
 
         @Override
         public T removeAndGetLast() {
-            return elements.removeLast();
+            return this.elements.removeLast();
         }
     }
 
@@ -78,5 +78,9 @@ class Lists {
 
     public static <T> Main.List<T> listFromArray(T[] array) {
         return new JavaList<>(Arrays.asList(array));
+    }
+
+    public static <T> Main.List<T> listFrom(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
     }
 }

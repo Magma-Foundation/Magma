@@ -393,6 +393,12 @@ public class Main {
         }
     }
 
+    private static class Iterators {
+        public static <T> Iterator<T> fromArray(T[] array) {
+            return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
+        }
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
@@ -881,20 +887,17 @@ public class Main {
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
             if (isSymbol(beforeArrow)) {
-                var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-                if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
-                    var content = afterArrow.substring(1, afterArrow.length() - 1);
-                    var name = generateName();
-                    assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                    return new Symbol(name);
-                } else {
-                    var newValue = compileValue(afterArrow);
+                return getSymbol(afterArrow, Lists.listFrom(beforeArrow));
+            }
+            if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+                var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+                        .map(String::strip)
+                        .filter(value -> !value.isEmpty())
+                        .collect(new ListCollector<>());
 
-                    var name = generateName();
-                    assembleMethod("auto " + name, "auto " + beforeArrow, "\n\treturn " + newValue + ";");
-                    return new Symbol(name);
-                }
+                return getSymbol(afterArrow, args);
             }
         }
 
@@ -920,6 +923,27 @@ public class Main {
 
 
         return new Content(stripped);
+    }
+
+    private static Symbol getSymbol(String afterArrow, List<String> names) {
+        var params = names.iter()
+                .map(name -> "auto " + name)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+            var content = afterArrow.substring(1, afterArrow.length() - 1);
+            var name = generateName();
+            assembleMethod("auto " + name, params, content);
+            return new Symbol(name);
+        }
+        else {
+            var newValue = compileValue(afterArrow);
+
+            var name = generateName();
+            assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
+            return new Symbol(name);
+        }
     }
 
     private static String generateName() {
