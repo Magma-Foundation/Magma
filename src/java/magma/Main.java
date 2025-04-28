@@ -5,9 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
+    private record Tuple<A, B>(A left, B right) {
+    }
+
     private static class State {
         private final String input;
         private final List<String> segments;
@@ -15,7 +19,7 @@ public class Main {
         private StringBuilder buffer;
         private int depth;
 
-        private State(String input, int index, StringBuilder buffer, int depth, List<String> segments) {
+        private State(String input, List<String> segments, StringBuilder buffer, int depth, int index) {
             this.input = input;
             this.index = index;
             this.buffer = buffer;
@@ -23,71 +27,55 @@ public class Main {
             this.segments = segments;
         }
 
+        public State(String input) {
+            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
+        }
+
+        private Optional<Tuple<Character, State>> popAndAppendToTuple() {
+            return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
+        }
+
+        private boolean isLevel() {
+            return this.depth == 0;
+        }
+
         private State enter() {
-            this.setDepth(this.getDepth() + 1);
+            this.depth = this.depth + 1;
             return this;
         }
 
         private State exit() {
-            this.setDepth(this.getDepth() - 1);
+            this.depth = this.depth - 1;
             return this;
         }
 
         private State advance() {
-            this.segments().add(this.getBuffer().toString());
-            this.setBuffer(new StringBuilder());
+            this.segments.add(this.buffer.toString());
+            this.buffer = new StringBuilder();
             return this;
         }
 
         private boolean isShallow() {
-            return this.getDepth() == 1;
+            return this.depth == 1;
         }
 
-        private char currentChar() {
-            return this.input().charAt(this.getIndex());
-        }
+        private Optional<Tuple<Character, State>> pop() {
+            if (this.index >= this.input.length()) {
+                return Optional.empty();
+            }
 
-        private char pop() {
-            var escaped = this.currentChar();
-            next(this);
-            return escaped;
+            var escaped = this.input.charAt(this.index);
+            this.index = this.index + 1;
+            return Optional.of(new Tuple<>(escaped, this));
         }
 
         private State append(char c) {
-            this.getBuffer().append(c);
+            this.buffer.append(c);
             return this;
         }
 
-        public int getIndex() {
-            return this.index;
-        }
-
-        public void setIndex(int index) {
-            this.index = index;
-        }
-
-        public StringBuilder getBuffer() {
-            return this.buffer;
-        }
-
-        public void setBuffer(StringBuilder buffer) {
-            this.buffer = buffer;
-        }
-
-        public int getDepth() {
-            return this.depth;
-        }
-
-        public void setDepth(int depth) {
-            this.depth = depth;
-        }
-
-        public String input() {
-            return this.input;
-        }
-
-        public List<String> segments() {
-            return this.segments;
+        public Optional<State> popAndAppend() {
+            return this.popAndAppendToTuple().map(Tuple::right);
         }
     }
 
@@ -110,15 +98,7 @@ public class Main {
     }
 
     private static String compileAll(String input, Function<String, String> compiler) {
-        return divideAll(input, compiler);
-    }
-
-    private static String divideAll(String input, Function<String, String> compiler) {
-        var segments = new ArrayList<String>();
-        var buffer = new StringBuilder();
-        var depth = 0;
-        var index = 0;
-        extracted(new State(input, index, buffer, depth, segments));
+        var segments = divideAll(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
@@ -128,30 +108,40 @@ public class Main {
         return output.toString();
     }
 
-    private static void extracted(State state) {
-        while (state.getIndex() < state.input().length()) {
-            var c = state.pop();
-            if (c == '\'') {
-                state.append(c);
-                var maybeSlash = popAndAppend(state);
-
-                if (maybeSlash == '\\') {
-                    popAndAppend(state);
-                }
-
-                popAndAppend(state);
-                continue;
+    private static List<String> divideAll(String input) {
+        State state = new State(input);
+        while (true) {
+            var maybeNextTuple = state.pop();
+            if (maybeNextTuple.isEmpty()) {
+                break;
             }
 
-            state = foldStatementChar(state, c);
+            var nextTuple = maybeNextTuple.get();
+            var next = nextTuple.left;
+            var withoutNext = nextTuple.right;
+
+            state = foldSingleQuotes(withoutNext, next)
+                    .orElseGet(() -> foldStatementChar(withoutNext, next));
         }
 
-        state.advance();
+        return state.advance().segments;
+    }
+
+    private static Optional<State> foldSingleQuotes(State state, char next) {
+        if (next != '\'') {
+            return Optional.empty();
+        }
+
+        var appended = state.append(next);
+        return appended.popAndAppendToTuple()
+                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : Optional.of(maybeSlash.right))
+                .flatMap(State::popAndAppend);
     }
 
     private static State foldStatementChar(State state, char c) {
         var appended = state.append(c);
-        if (c == ';' && isLevel(state)) {
+
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
         if (c == '}' && appended.isShallow()) {
@@ -164,20 +154,6 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    }
-
-    private static char popAndAppend(State state) {
-        var escaped = state.pop();
-        state.append(escaped);
-        return escaped;
-    }
-
-    private static boolean isLevel(State state) {
-        return state.getDepth() == 0;
-    }
-
-    private static void next(State state) {
-        state.setIndex(state.getIndex() + 1);
     }
 
     private static String compileRootSegment(String input) {
