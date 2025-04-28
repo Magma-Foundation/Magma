@@ -593,7 +593,14 @@ public class Main {
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+            if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+                var content = afterArrow.substring(1, afterArrow.length() - 1);
+                var outputContent = compileStatements(content, Main::compileFunctionSegment);
+
+                return "(auto " +
+                        beforeArrow +
+                        ")" + " -> {" + outputContent + "}";
+            }
         }
 
         var separator = stripped.lastIndexOf(".");

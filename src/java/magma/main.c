@@ -5,7 +5,14 @@
         } *//* var arrowIndex = stripped.indexOf("->"); *//* if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+            if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+                var content = afterArrow.substring(1, afterArrow.length() - 1);
+                var outputContent = compileStatements(content, Main::compileFunctionSegment);
+
+                return "(auto " +
+                        beforeArrow +
+                        ")" + " -> {" + outputContent + "\n\t}";
+            }
         } *//* var separator = stripped.lastIndexOf("."); *//* if (separator >= 0) {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
@@ -203,6 +210,8 @@
 };
 /* public */struct Option<Tuple<char, struct State>> {
 };
+/* private */struct Tuple</*  */> {
+};
 /* public */struct Some</*  */> {
 };
 /* public */struct Option<struct State> {
@@ -222,12 +231,12 @@
 	return struct State(input, listEmpty(), "", 0, 0);
 }
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(){
-	return this.pop().map(/* tuple */ -> /* {
-                var poppedChar = tuple.left;
-                var poppedState = tuple.right;
-                var appended = poppedState.append(poppedChar);
-                return new Tuple<>(poppedChar, appended);
-            } */);
+	return this.pop().map((auto tuple) -> {
+	/* var poppedChar = tuple.left; */
+	/* var poppedState = tuple.right; */
+	/* var appended = poppedState.append(poppedChar); */
+	return Tuple</*  */>(poppedChar, appended);
+	});
 }
 /* private */ struct boolean isLevel(){
 	return this.depth == 0;
@@ -266,7 +275,7 @@ struct private Joiner(){
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
-	return Some</*  */>(/* current.map(inner */ -> /* inner + this.delimiter + element).orElse */(element));
+	return Some</*  */>(current.map(/* inner -> inner + this */.delimiter + element).orElse(element));
 }
 /* public static */ void main(){
 	/* try {
@@ -339,9 +348,7 @@ struct private Joiner(){
             return new None<>();
         } */
 	/* var appended = state.append(next); */
-	return /* appended.popAndAppendToTuple()
-                .flatMap(maybeSlash */ -> /* maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right))
-                .flatMap */(/* State::popAndAppend */);
+	return appended.popAndAppendToTuple().flatMap(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right)).flatMap(/* State::popAndAppend */);
 }
 /* private static */ struct State foldStatementChar(struct State state, struct char c){
 	/* var appended = state.append(c); */
@@ -367,7 +374,7 @@ struct private Joiner(){
 	/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         } */
-	return compileClass(stripped).orElseGet(/* () */ -> /* generatePlaceholder */(stripped));
+	return compileClass(stripped).orElseGet(/* () -> generatePlaceholder */(stripped));
 }
 /* private static */ Option<char*> compileClass(char* stripped){
 	return compileStructure(stripped, "class ");
