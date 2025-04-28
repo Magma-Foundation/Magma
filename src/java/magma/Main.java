@@ -910,49 +910,8 @@ public class Main {
             }
         }
 
-        if (stripped.endsWith(")")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
-            var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
-            if (divisions.size() >= 2) {
-                var joined = join(divisions.subList(0, divisions.size() - 1), "");
-                var caller = joined.substring(0, joined.length() - ")".length());
-                var arguments = divisions.last();
-
-                Value parsedCaller;
-                if (caller.startsWith("new ")) {
-                    parsedCaller = new Symbol(compileType(caller.substring("new ".length())));
-                }
-                else {
-                    parsedCaller = parseValue(caller);
-                }
-
-                var parsedArgs = parseValues(arguments, Main::parseValue)
-                        .iter()
-                        .filter(value -> !(value instanceof Whitespace))
-                        .collect(new ListCollector<>());
-
-                if (!(parsedCaller instanceof DataAccess(var parent, var property))) {
-                    return new Invocation(parsedCaller, parsedArgs);
-                }
-
-                var name = generateName();
-
-                Value symbol;
-                if (parent instanceof Symbol || parent instanceof DataAccess) {
-                    symbol = parent;
-                }
-                else {
-                    var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
-                    statements.last().addLast(statement);
-                    symbol = new Symbol(name);
-                }
-
-                var newArgs = Lists.<Value>listEmpty()
-                        .addLast(symbol)
-                        .addAll(parsedArgs);
-
-                return new Invocation(new DataAccess(symbol, property), newArgs);
-            }
+        if(compileInvokable(stripped) instanceof Some(var invokable)) {
+            return invokable;
         }
 
         if (isSymbol(stripped)) {
@@ -993,6 +952,57 @@ public class Main {
 
 
         return new Content(stripped);
+    }
+
+    private static Option<Invocation> compileInvokable(String stripped) {
+        if (!stripped.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
+        var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
+        if (divisions.size() < 2) {
+            return new None<>();
+        }
+
+        var joined = join(divisions.subList(0, divisions.size() - 1), "");
+        var caller = joined.substring(0, joined.length() - ")".length());
+        var arguments = divisions.last();
+
+        Value parsedCaller;
+        if (caller.startsWith("new ")) {
+            parsedCaller = new Symbol(compileType(caller.substring("new ".length())));
+        }
+        else {
+            parsedCaller = parseValue(caller);
+        }
+
+        var parsedArgs = parseValues(arguments, Main::parseValue)
+                .iter()
+                .filter(value -> !(value instanceof Whitespace))
+                .collect(new ListCollector<>());
+
+        if (!(parsedCaller instanceof DataAccess(var parent, var property))) {
+            return new Some<>(new Invocation(parsedCaller, parsedArgs));
+        }
+
+        var name = generateName();
+
+        Value symbol;
+        if (parent instanceof Symbol || parent instanceof DataAccess) {
+            symbol = parent;
+        }
+        else {
+            var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
+            statements.last().addLast(statement);
+            symbol = new Symbol(name);
+        }
+
+        var newArgs = Lists.<Value>listEmpty()
+                .addLast(symbol)
+                .addAll(parsedArgs);
+
+        return new Some<>(new Invocation(new DataAccess(symbol, property), newArgs));
     }
 
     private static Symbol assembleLambda(String afterArrow, List<String> names) {

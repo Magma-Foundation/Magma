@@ -62,6 +62,8 @@
 };
 /* public sealed */struct Option<struct Whitespace> {
 };
+/* public sealed */struct Option<struct Invocation> {
+};
 /* public sealed */struct Option<struct Definition> {
 };
 struct State fromInput(struct State this, char* input){
@@ -612,9 +614,6 @@ char* compileValue(struct Main this, char* input){
 auto parseValue_local17(auto value){
 	return parseValue_local16.isEmpty(parseValue_local16, parseValue_local16);
 }
-auto parseValue_local33(auto value){
-	return !(/* /* value instanceof Whitespace */ */);
-}
 struct Value parseValue(struct Main this, char* input){
 	auto stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
@@ -646,44 +645,8 @@ struct Value parseValue(struct Main this, char* input){
 			return assembleLambda(afterArrow, args);
 		}
 	}
-	if (stripped.endsWith(stripped, ")")){
-	auto parseValue_local24 = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")"));
-		auto withoutEnd = parseValue_local24.strip(parseValue_local24);
-		auto divisions = divideAll(withoutEnd, /* Main::foldInvokableStart */);
-		if (divisions.size() >= 2){
-	auto parseValue_local32 = parseValues(arguments, /* Main::parseValue */);
-	auto parseValue_local34 = parseValue_local32.iter(parseValue_local32);
-	auto parseValue_local35 = parseValue_local34.filter(parseValue_local34, parseValue_local33);
-	auto parseValue_local37 = Lists.<Value>listEmpty(Lists);
-	auto parseValue_local38 = parseValue_local37.addLast(parseValue_local37, symbol);
-			auto joined = join(divisions.subList(divisions, 0, divisions.size() - 1), "");
-			auto caller = joined.substring(joined, 0, joined.length() - ")".length(joined.length() - ")"));
-			auto arguments = divisions.last(divisions);
-			/* Value parsedCaller; */
-			if (caller.startsWith(caller, "new ")){
-	auto parseValue_local29 = "new ";
-				parsedCaller = struct Symbol(compileType(caller.substring(caller, parseValue_local29.length(parseValue_local29))));
-			}
-			else {
-				parsedCaller = parseValue(caller);
-			}
-			auto parsedArgs = parseValue_local35.collect(parseValue_local35, ListCollector</*  */>());
-			if (!(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
-				return struct Invocation(parsedCaller, parsedArgs);
-			}
-			auto name = generateName();
-			/* Value symbol; */
-			if (/* parent instanceof Symbol */ || /* parent instanceof DataAccess */){
-				symbol = parent;
-			}
-			else {
-				auto statement = "\n\tauto " + name + " = " + parent.generate() + ";";
-				/* statements.last().addLast(statement); */
-				symbol = struct Symbol(name);
-			}
-			auto newArgs = parseValue_local38.addAll(parseValue_local38, parsedArgs);
-			return struct Invocation(struct DataAccess(symbol, property), newArgs);
-		}
+	if (/* compileInvokable(stripped) instanceof Some */(/* var invokable */)){
+		return invokable;
 	}
 	if (isSymbol(stripped)){
 		return struct Symbol(stripped);
@@ -693,9 +656,9 @@ struct Value parseValue(struct Main this, char* input){
 	}
 	auto separator = stripped.lastIndexOf(stripped, /* " */.");
 	if (separator > /* = 0 */){
-	auto parseValue_local44 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
+	auto parseValue_local26 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
 		auto value = stripped.substring(stripped, 0, separator);
-		auto property = parseValue_local44.strip(parseValue_local44);
+		auto property = parseValue_local26.strip(parseValue_local26);
 		return struct DataAccess(parseValue(value), property);
 	}
 	if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("\"") && stripped, "\"")){
@@ -716,6 +679,53 @@ struct Value parseValue(struct Main this, char* input){
 		}
 	}
 	return struct Content(stripped);
+}
+auto compileInvokable_local12(auto value){
+	return !(/* /* value instanceof Whitespace */ */);
+}
+Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
+	auto compileInvokable_local0 = !stripped;
+	auto compileInvokable_local3 = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")"));
+	auto compileInvokable_local11 = parseValues(arguments, /* Main::parseValue */);
+	auto compileInvokable_local13 = compileInvokable_local11.iter(compileInvokable_local11);
+	auto compileInvokable_local14 = compileInvokable_local13.filter(compileInvokable_local13, compileInvokable_local12);
+	auto compileInvokable_local16 = Lists.<Value>listEmpty(Lists);
+	auto compileInvokable_local17 = compileInvokable_local16.addLast(compileInvokable_local16, symbol);
+	if (compileInvokable_local0.endsWith(compileInvokable_local0, ")")){
+		return None</*  */>();
+	}
+	auto withoutEnd = compileInvokable_local3.strip(compileInvokable_local3);
+	auto divisions = divideAll(withoutEnd, /* Main::foldInvokableStart */);
+	if (divisions.size() < 2){
+		return None</*  */>();
+	}
+	auto joined = join(divisions.subList(divisions, 0, divisions.size() - 1), "");
+	auto caller = joined.substring(joined, 0, joined.length() - ")".length(joined.length() - ")"));
+	auto arguments = divisions.last(divisions);
+	/* Value parsedCaller; */
+	if (caller.startsWith(caller, "new ")){
+	auto compileInvokable_local8 = "new ";
+		parsedCaller = struct Symbol(compileType(caller.substring(caller, compileInvokable_local8.length(compileInvokable_local8))));
+	}
+	else {
+		parsedCaller = parseValue(caller);
+	}
+	auto parsedArgs = compileInvokable_local14.collect(compileInvokable_local14, ListCollector</*  */>());
+	if (!(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
+		return Some</*  */>(struct Invocation(parsedCaller, parsedArgs));
+	}
+	auto name = generateName();
+	/* Value symbol; */
+	if (/* parent instanceof Symbol */ || /* parent instanceof DataAccess */){
+		symbol = parent;
+	}
+	else {
+		auto statement = "\n\tauto " + name + " = " + parent.generate() + ";";
+		/* statements.last().addLast(statement); */
+		symbol = struct Symbol(name);
+	}
+	auto newArgs = compileInvokable_local17.addAll(compileInvokable_local17, parsedArgs);
+	return Some</*  */>(struct Invocation(struct DataAccess(symbol, property), newArgs));
 }
 auto assembleLambda_local1(auto name){
 	return "auto " + name;
