@@ -88,6 +88,10 @@ public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
     }
 
+    private interface Type extends Node {
+        String stringify();
+    }
+
     private enum Operator {
         ADD("+"),
         AND("&&"),
@@ -119,6 +123,28 @@ public class Main {
         @Override
         public String generate() {
             return String.valueOf(this.value);
+        }
+    }
+
+    private enum Primitive implements Type {
+        I32("int"),
+        I8("char"),
+        Void("void"),
+        Auto("auto");
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String stringify() {
+            return this.name().toLowerCase();
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
         }
     }
 
@@ -373,16 +399,21 @@ public class Main {
         }
     }
 
-    private record Definition(String type, String name) implements Defined {
+    private record Definition(Type type, String name) implements Defined {
         @Override
         public String generate() {
-            return this.type() + " " + this.name();
+            return this.type.generate() + " " + this.name();
         }
     }
 
-    private record Content(String input) implements Defined, Value {
+    private record Content(String input) implements Defined, Value, Type {
         @Override
         public String generate() {
+            return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public String stringify() {
             return generatePlaceholder(this.input);
         }
     }
@@ -462,7 +493,59 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
     }
 
-    public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
+    private record StructType(String name) implements Type {
+        @Override
+        public String generate() {
+            return "struct " + this.name;
+        }
+
+        @Override
+        public String stringify() {
+            return this.name;
+        }
+    }
+
+    private record Generic(String base, List<Type> args) implements Type {
+        @Override
+        public String generate() {
+            return this.base + "<" + generateValueList(this.args) + ">";
+        }
+
+        @Override
+        public String stringify() {
+            return this.base + "_" + this.args.iter()
+                    .map(Node::generate)
+                    .collect(new Joiner("_"))
+                    .orElse("");
+        }
+    }
+
+    private record Ref(Type type) implements Type {
+        @Override
+        public String stringify() {
+            return this.type.stringify() + "_star";
+        }
+
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    }
+
+    private record Functional(List<Type> paramTypes, Type returns) implements Type {
+        @Override
+        public String generate() {
+            var generated = generateValueList(this.paramTypes());
+            return this.returns.generate() + " (*)(" + generated + ")";
+        }
+
+        @Override
+        public String stringify() {
+            return "_Func_" + generateValueList(this.paramTypes) + "_" + this.returns.stringify() + "_";
+        }
+    }
+
+    public static final Map<String, Function<List<Type>, Option<String>>> expandables = new HashMap<>();
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
@@ -471,8 +554,8 @@ public class Main {
     private static List<String> structNames = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
-    private static List<Tuple<String, List<String>>> expansions = listEmpty();
-    private static List<String> typeArguments = listEmpty();
+    private static List<Tuple<String, List<Type>>> expansions = listEmpty();
+    private static List<Type> typeArguments = listEmpty();
     private static int functionLocalCounter = 0;
 
     private static Option<IOException> run() {
@@ -515,7 +598,8 @@ public class Main {
                         return expandable.apply(tuple.right).orElse("");
                     }
                     else {
-                        return "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n";
+                        var generated = new Generic(tuple.left, tuple.right).generate();
+                        return "// " + generated + ">\n";
                     }
                 })
                 .collect(new Joiner())
@@ -662,7 +746,6 @@ public class Main {
     private static Option<String> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            var beforeClass = input.substring(0, classIndex).strip();
             var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
@@ -714,7 +797,7 @@ public class Main {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
-                var newName = name + "<" + join(typeArgs, ", ") + ">";
+                var newName = new Generic(name, typeArgs).generate();
                 return generateStructure(newName, content);
             });
 
@@ -794,7 +877,7 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var copy = Lists.<Defined>listEmpty()
-                .addLast(new Definition("struct " + structNames.last(), "this"))
+                .addLast(new Definition(new StructType(structNames.last()), "this"))
                 .addAll(newParams);
 
         var outputParams = generateValueList(copy);
@@ -802,8 +885,12 @@ public class Main {
     }
 
     private static <T extends Node> String generateValueList(List<T> copy) {
+        return generateValueList(copy, Node::generate);
+    }
+
+    private static <T extends Node> String generateValueList(List<T> copy, Function<T, String> generate) {
         return copy.iter()
-                .map(Node::generate)
+                .map(generate)
                 .collect(new Joiner(", "))
                 .orElse("");
     }
@@ -883,11 +970,23 @@ public class Main {
 
         var valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            var definition = stripped.substring(0, valueSeparator);
-            var value = stripped.substring(valueSeparator + "=".length());
+            var assignableString = stripped.substring(0, valueSeparator);
+            var valueString = stripped.substring(valueSeparator + "=".length());
 
-            var assignable = parseAssignable(definition);
-            return new Some<>(assignable.generate() + " = " + compileValue(value));
+            var assignable = parseAssignable(assignableString);
+            var value = parseValue(valueString);
+
+            var type = resolveValue(value);
+
+            Assignable newAssignable;
+            if (assignable instanceof Definition definition) {
+                newAssignable = new Definition(type, definition.name);
+            }
+            else {
+                newAssignable = assignable;
+            }
+
+            return new Some<>(newAssignable.generate() + " = " + value.generate());
         }
 
         if (compileInvokable(input) instanceof Some(var invokable)) {
@@ -895,6 +994,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Type resolveValue(Value value) {
+        return new Content(value.generate());
     }
 
     private static Assignable parseAssignable(String definition) {
@@ -1018,7 +1121,7 @@ public class Main {
 
         Value parsedCaller;
         if (caller.startsWith("new ")) {
-            parsedCaller = new Symbol(compileType(caller.substring("new ".length())));
+            parsedCaller = new Symbol(parseType(caller.substring("new ".length())).stringify());
         }
         else {
             parsedCaller = parseValue(caller);
@@ -1129,13 +1232,13 @@ public class Main {
 
         var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
         if (divisions.size() == 1) {
-            return new Some<>(new Definition(compileType(beforeName), name));
+            return new Some<>(new Definition(parseType(beforeName), name));
         }
 
         var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
         var type = divisions.last();
 
-        return new Some<>(new Definition(compileType(type), name));
+        return new Some<>(new Definition(parseType(type), name));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
@@ -1153,7 +1256,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileType(String input) {
+    private static Type parseType(String input) {
         var stripped = input.strip();
         var maybeTypeParamIndex = typeParameters.indexOf(stripped);
         if (maybeTypeParamIndex.isPresent()) {
@@ -1163,20 +1266,21 @@ public class Main {
 
         switch (stripped) {
             case "int", "boolean" -> {
-                return "int";
+                return Primitive.I32;
             }
             case "Character" -> {
-                return "char";
+                return Primitive.I8;
             }
             case "void" -> {
-                return "void";
-            }
-            case "String" -> {
-                return "char*";
+                return Primitive.Void;
             }
             case "var" -> {
-                return "auto";
+                return Primitive.Auto;
             }
+        }
+
+        if (stripped.equals("String")) {
+            return new Ref(Primitive.I8);
         }
 
         if (stripped.endsWith(">")) {
@@ -1185,50 +1289,38 @@ public class Main {
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
                 var substring = withoutEnd.substring(index + "<".length());
-                var parsed = parseValues(substring, Main::compileType);
+                var parsed = parseValues(substring, Main::parseType);
 
                 if (base.equals("Function")) {
                     var arg0 = parsed.get(0);
                     var returns = parsed.get(1);
-                    return returns + " (*)(" + arg0 + ")";
+                    return new Functional(Lists.listFrom(arg0), returns);
                 }
 
                 if (base.equals("BiFunction")) {
                     var arg0 = parsed.get(0);
                     var arg1 = parsed.get(1);
                     var returns = parsed.get(2);
-                    return returns + " (*)(" + arg0 + ", " + arg1 + ")";
+                    return new Functional(Lists.listFrom(arg0, arg1), returns);
                 }
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }
 
-                return base + "<" + generateValues(parsed) + ">";
+                return new Generic(base, parsed);
             }
         }
 
         if (isSymbol(stripped)) {
-            return "struct " + stripped;
+            return new StructType(stripped);
         }
 
-        return generatePlaceholder(stripped);
-    }
-
-    private static String generateValues(List<String> values) {
-        return generateAll(Main::mergeValues, values);
+        return new Content(stripped);
     }
 
     private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
         return parseAll(input, Main::foldValueChar, compiler);
-    }
-
-    private static String mergeValues(String builder, String element) {
-        if (builder.isEmpty()) {
-            return builder + element;
-        }
-
-        return builder + ", " + element;
     }
 
     private static State foldValueChar(State state, char c) {
