@@ -58,9 +58,9 @@
 	return struct State(input, listEmpty(), "", 0, 0);
 }
 auto popAndAppendToTuple_local0(auto tuple){
-	/* var poppedChar = tuple.left; */
-	/* var poppedState = tuple.right; */
-	/* var appended = poppedState.append(poppedChar); */
+	struct var poppedChar = tuple.left;
+	struct var poppedState = tuple.right;
+	struct var appended = poppedState.append(poppedState, poppedChar);
 	return Tuple</*  */>(poppedChar, appended);
 }
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
@@ -85,7 +85,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 	if (this.index >= this.input.length(this.index >= this.input)){
 		return None</*  */>();
 	}
-	/* var escaped = this.input.charAt(this.index); */
+	struct var escaped = this.input.charAt(this.input, this.index);
 	return Some</*  */>(Tuple<char, struct State>(escaped, struct State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
 /* private */ struct State append(struct State this, struct char c){
@@ -118,7 +118,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public */ char* generate(struct Definition this){
-	/* var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse(""); */
+	struct var joined = this.beforeType(this).map(this.beforeType(this), /* Main::generatePlaceholder */).map(this.beforeType(this).map(this.beforeType(this), /* Main::generatePlaceholder */), /* inner -> inner + " " */).orElse(this.beforeType(this).map(this.beforeType(this), /* Main::generatePlaceholder */).map(this.beforeType(this).map(this.beforeType(this), /* Main::generatePlaceholder */), /* inner -> inner + " " */), "");
 	return /* joined + this */.type() + " " + this.name(/* joined + this */.type() + " " + this);
 }
 /* @Override
@@ -147,29 +147,27 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* public static */ void main(struct Main this){
 	/* try */{
-		/* var source = Paths.get(".", "src", "java", "magma", "Main.java"); */
-		/* var target = source.resolveSibling("main.c"); */
-		/* var input = Files.readString(source); */
+		struct var source = Paths.get(Paths, ".", "src", "java", "magma", "Main.java");
+		struct var target = source.resolveSibling(source, "main.c");
+		struct var input = Files.readString(Files, source);
 		/* Files.writeString(target, compileRoot(input)); */
 	}
 	/* catch (IOException e) */{
 		/* e.printStackTrace(); */
 	}
 }
+auto compileRoot_local1(auto tuple){
+	if (expandables.containsKey(expandables, tuple.left)){
+		struct var expandable = expandables.get(expandables, tuple.left);
+		return expandable.apply(expandable, tuple.right).orElse(expandable.apply(expandable, tuple.right), "");
+	}
+	/* else */{
+		return "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n";
+	}
+}
 /* private static */ char* compileRoot(struct Main this, char* input){
-	/* var compiled = compileStatements(input, Main::compileRootSegment); */
-	/* var joinedExpansions = expansions.iter()
-                .map(tuple -> {
-                    if (expandables.containsKey(tuple.left)) {
-                        var expandable = expandables.get(tuple.left);
-                        return expandable.apply(tuple.right).orElse("");
-                    }
-                    else {
-                        return "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n";
-                    }
-                })
-                .collect(new Joiner())
-                .orElse(""); */
+	struct var compiled = compileStatements(input, /* Main::compileRootSegment */);
+	struct var joinedExpansions = expansions.iter(expansions).map(expansions.iter(expansions), compileRoot_local1).collect(expansions.iter(expansions).map(expansions.iter(expansions), compileRoot_local1), struct Joiner()).orElse(expansions.iter(expansions).map(expansions.iter(expansions), compileRoot_local1).collect(expansions.iter(expansions).map(expansions.iter(expansions), compileRoot_local1), struct Joiner()), "");
 	return /* compiled + join(structs) + joinedExpansions + join */(methods);
 }
 /* private static */ char* join(struct Main this, List<char*> list){
@@ -194,18 +192,16 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return /* buffer + element */;
 }
 /* private static */ List<char*> divideAll(struct Main this, char* input, struct State (*)(struct State, char) folder){
-	/* State state = State.fromInput(input); */
+	struct State state = State.fromInput(State, input);
 	/* while (true) */{
-		/* var maybeNextTuple = state.pop(); */
+		struct var maybeNextTuple = state.pop(state);
 		if (maybeNextTuple.isEmpty(maybeNextTuple)){
 			/* break; */
 		}
-		/* var nextTuple = maybeNextTuple.orElse(null); */
-		/* var next = nextTuple.left; */
-		/* var withoutNext = nextTuple.right; */
-		/* state = foldSingleQuotes(withoutNext, next)
-                    .or(() -> foldDoubleQuotes(withoutNext, next))
-                    .orElseGet(() -> folder.apply(withoutNext, next)); */
+		struct var nextTuple = maybeNextTuple.orElse(maybeNextTuple, null);
+		struct var next = nextTuple.left;
+		struct var withoutNext = nextTuple.right;
+		/* state  */ = foldSingleQuotes(withoutNext, next).or(foldSingleQuotes(withoutNext, next), /* () -> foldDoubleQuotes */(withoutNext, next)).orElseGet(foldSingleQuotes(withoutNext, next).or(foldSingleQuotes(withoutNext, next), /* () -> foldDoubleQuotes */(withoutNext, next)), /* () -> folder */.apply(/* () -> folder */, withoutNext, next));
 	}
 	return state.advance(state).segments;
 }
@@ -213,18 +209,18 @@ struct public Definition(struct Definition this, char* type, char* name){
 	if (/* c != '\"' */){
 		return None</*  */>();
 	}
-	/* var current = withoutNext.append(c); */
+	struct var current = withoutNext.append(withoutNext, c);
 	/* while (true) */{
-		/* var maybeNext = current.popAndAppendToTuple(); */
+		struct var maybeNext = current.popAndAppendToTuple(current);
 		if (/* ! */(/* maybeNext instanceof Some */(/* var next */))){
 			/* break; */
 		}
-		/* current = next.right; */
+		/* current  */ = next.right;
 		if (next.left == '"'){
 			/* break; */
 		}
 		if (next.left == '\\'){
-			/* current = current.popAndAppend().orElse(current); */
+			/* current  */ = current.popAndAppend(current).orElse(current.popAndAppend(current), current);
 		}
 	}
 	return Some</*  */>(current);
@@ -233,11 +229,11 @@ struct public Definition(struct Definition this, char* type, char* name){
 	if (/* next != '\'' */){
 		return None</*  */>();
 	}
-	/* var appended = state.append(next); */
+	struct var appended = state.append(state, next);
 	return appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)).flatMap(appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)), /* State::popAndAppend */);
 }
 /* private static */ struct State foldStatementChar(struct Main this, struct State state, struct char c){
-	/* var appended = state.append(c); */
+	struct var appended = state.append(state, c);
 	if (/* c == ';' && appended */.isLevel(/* c == ';' && appended */)){
 		return appended.advance(appended);
 	}
@@ -245,8 +241,8 @@ struct public Definition(struct Definition this, char* type, char* name){
 		return appended.advance(appended).exit(appended.advance(appended));
 	}
 	/* if (c == ' */{
-		/* ' || c == '(') {
-            return appended.enter(); */
+		/* ' || */ c = /* = '(') {
+            return appended */.enter();
 	}
 	if (/* c == '}' || c == ')' */){
 		return appended.exit(appended);
@@ -254,7 +250,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return appended;
 }
 /* private static */ char* compileRootSegment(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return "";
 	}
@@ -267,21 +263,22 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return compileStructure(stripped, "class ");
 }
 /* private static */ Option<char*> compileStructure(struct Main this, char* input, char* infix){
-	/* var classIndex = input.indexOf(infix); */
+	struct var classIndex = input.indexOf(input, infix);
 	if (/* classIndex >= 0 */){
-		/* var beforeClass = input.substring(0, classIndex).strip(); */
-		/* var afterClass = input.substring(classIndex + infix.length()); */
-		/* var contentStart = afterClass.indexOf("{"); */
+		struct var beforeClass = input.substring(input, 0, classIndex).strip(input.substring(input, 0, classIndex));
+		struct var afterClass = input.substring(input, /* classIndex + infix */.length(/* classIndex + infix */));
+		struct var contentStart = afterClass.indexOf(afterClass, "{");
 		if (/* contentStart >= 0 */){
-			/* var beforeContent = afterClass.substring(0, contentStart).strip(); */
-			/* var permitsIndex = beforeContent.indexOf(" permits"); */
-			/* var withoutPermits = permitsIndex >= 0
-                        ? beforeContent.substring(0, permitsIndex).strip()
-                        : beforeContent; */
-			/* var paramStart = withoutPermits.indexOf("("); */
-			/* var withEnd = afterClass.substring(contentStart + "{".length()).strip(); */
+			struct var beforeContent = afterClass.substring(afterClass, 0, contentStart).strip(afterClass.substring(afterClass, 0, contentStart));
+			struct var permitsIndex = beforeContent.indexOf(beforeContent, " permits");
+			struct var withoutPermits = /* permitsIndex >= 0
+                        ? beforeContent */.substring(/* permitsIndex >= 0
+                        ? beforeContent */, 0, permitsIndex).strip()
+                        : beforeContent;
+			struct var paramStart = withoutPermits.indexOf(withoutPermits, "(");
+			struct var withEnd = afterClass.substring(afterClass, /* contentStart + "{" */.length(/* contentStart + "{" */)).strip(afterClass.substring(afterClass, /* contentStart + "{" */.length(/* contentStart + "{" */)));
 			if (/* paramStart >= 0 */){
-				/* String withoutParams = withoutPermits.substring(0, paramStart).strip(); */
+				char* withoutParams = withoutPermits.substring(withoutPermits, 0, paramStart).strip(withoutPermits.substring(withoutPermits, 0, paramStart));
 				return getString(withoutParams, beforeClass, withEnd);
 			}
 			/* else */{
@@ -295,15 +292,15 @@ struct public Definition(struct Definition this, char* type, char* name){
 	if (/* !withEnd */.endsWith(/* !withEnd */, "}")){
 		return None</*  */>();
 	}
-	/* var content = withEnd.substring(0, withEnd.length() - "}".length()); */
-	/* var strippedBeforeContent = beforeContent.strip(); */
+	struct var content = withEnd.substring(withEnd, 0, withEnd.length() - "}".length(withEnd.length() - "}"));
+	struct var strippedBeforeContent = beforeContent.strip(beforeContent);
 	if (strippedBeforeContent.endsWith(strippedBeforeContent, ">")){
-		/* var withoutEnd = strippedBeforeContent.substring(0, strippedBeforeContent.length() - ">".length()); */
-		/* var typeParamStart = withoutEnd.indexOf("<"); */
+		struct var withoutEnd = strippedBeforeContent.substring(strippedBeforeContent, 0, strippedBeforeContent.length() - ">".length(strippedBeforeContent.length() - ">"));
+		struct var typeParamStart = withoutEnd.indexOf(withoutEnd, "<");
 		if (/* typeParamStart >= 0 */){
-			/* var name = withoutEnd.substring(0, typeParamStart).strip(); */
-			/* var substring = withoutEnd.substring(typeParamStart + "<".length()); */
-			/* var typeParameters = listFromArray(substring.split(Pattern.quote(","))); */
+			struct var name = withoutEnd.substring(withoutEnd, 0, typeParamStart).strip(withoutEnd.substring(withoutEnd, 0, typeParamStart));
+			struct var substring = withoutEnd.substring(withoutEnd, /* typeParamStart + "<" */.length(/* typeParamStart + "<" */));
+			struct var typeParameters = listFromArray(substring.split(substring, Pattern.quote(Pattern, ",")));
 			return assembleStructure(typeParameters, name, beforeClass, content);
 		}
 	}
@@ -311,79 +308,73 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* private static */ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* beforeClass, char* content){
 	if (/* !typeParams */.isEmpty(/* !typeParams */)){
-		/* expandables.put(name, typeArgs -> {
-                typeParameters = typeParams;
+		/* expandables.put(name, typeArgs */ /* -> { */ typeParameters = /* typeParams;
                 typeArguments = typeArgs;
 
                 var newName = name + "<" + join(typeArgs, ", ") + ">";
-                return generateStructure(newName, beforeClass, content);
-            }); */
+                return generateStructure */(newName, beforeClass, /* content);
+            } */);
 		return Some</*  */>("");
 	}
 	return generateStructure(name, beforeClass, content);
 }
 /* private static */ Option<char*> generateStructure(struct Main this, char* name, char* beforeClass, char* content){
-	/* structNames = structNames.addLast(name); */
-	/* var compiled = compileStatements(content, Main::compileClassSegment); */
-	/* structNames = structNames.removeLast(); */
-	/* var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n"; */
+	/* structNames  */ = structNames.addLast(structNames, name);
+	struct var compiled = compileStatements(content, /* Main::compileClassSegment */);
+	/* structNames  */ = structNames.removeLast(structNames);
+	struct var generated = /* generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n" */;
 	/* structs.addLast(generated); */
 	return Some</*  */>("");
 }
 /* private static */ char* compileClassSegment(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return "";
 	}
 	return compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)).orElseGet(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)), /* () -> generatePlaceholder */(stripped));
 }
 /* private static */ Option<char*> compileDefinitionStatement(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.endsWith(stripped, ";")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - ";".length()); */
+		struct var withoutEnd = stripped.substring(stripped, 0, stripped.length() - ";".length(stripped.length() - ";"));
 		return Some</*  */>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
 	}
 	return None</*  */>();
 }
 /* private static */ Option<char*> compileMethod(struct Main this, char* stripped){
-	/* var paramStart = stripped.indexOf("("); */
+	struct var paramStart = stripped.indexOf(stripped, "(");
 	if (/* paramStart < 0 */){
 		return None</*  */>();
 	}
-	/* var inputDefinition = stripped.substring(0, paramStart); */
-	/* var defined = parseDefinitionOrPlaceholder(inputDefinition); */
+	struct var inputDefinition = stripped.substring(stripped, 0, paramStart);
+	struct var defined = parseDefinitionOrPlaceholder(inputDefinition);
 	if (/* defined instanceof Definition definition */){
-		/* functionName = definition.name; */
+		/* functionName  */ = definition.name;
 	}
-	/* var outputDefinition = defined.generate(); */
-	/* var afterParams = stripped.substring(paramStart + "(".length()); */
-	/* var paramEnd = afterParams.indexOf(")"); */
+	struct var outputDefinition = defined.generate(defined);
+	struct var afterParams = stripped.substring(stripped, /* paramStart + "(" */.length(/* paramStart + "(" */));
+	struct var paramEnd = afterParams.indexOf(afterParams, ")");
 	if (/* paramEnd < 0 */){
 		return None</*  */>();
 	}
-	/* var params = afterParams.substring(0, paramEnd); */
-	/* var withoutParams = afterParams.substring(paramEnd + ")".length()); */
-	/* var withBraces = withoutParams.strip(); */
+	struct var params = afterParams.substring(afterParams, 0, paramEnd);
+	struct var withoutParams = afterParams.substring(afterParams, /* paramEnd + ")" */.length(/* paramEnd + ")" */));
+	struct var withBraces = withoutParams.strip(withoutParams);
 	/* if (!withBraces.startsWith(" */{
 		/* ") || !withBraces.endsWith("}")) {
             return new Some<>(""); */
 	}
-	/* var content = withBraces.substring(1, withBraces.length() - 1); */
-	/* var newParams = parseValues(params, Main::parseParameter)
-                .iter()
-                .filter(parameter -> !(parameter instanceof Whitespace))
-                .collect(new ListCollector<>()); */
-	/* var copy = Lists.<Defined>listEmpty()
-                .addLast(new Definition("struct " + structNames.last(), "this"))
-                .addAll(newParams); */
-	/* var outputParams = generateValueList(copy); */
+	struct var content = withBraces.substring(withBraces, 1, withBraces.length() - 1);
+	struct var newParams = parseValues(params, /* Main::parseParameter */).iter(parseValues(params, /* Main::parseParameter */)).filter(parseValues(params, /* Main::parseParameter */).iter(parseValues(params, /* Main::parseParameter */)), /* parameter -> ! */(/* parameter instanceof Whitespace */)).collect(parseValues(params, /* Main::parseParameter */).iter(parseValues(params, /* Main::parseParameter */)).filter(parseValues(params, /* Main::parseParameter */).iter(parseValues(params, /* Main::parseParameter */)), /* parameter -> ! */(/* parameter instanceof Whitespace */)), ListCollector</*  */>());
+	struct var copy = Lists.<Defined>listEmpty(Lists).addLast(Lists.<Defined>listEmpty(Lists), struct Definition(/* "struct " + structNames */.last(/* "struct " + structNames */), "this")).addAll(Lists.<Defined>listEmpty(Lists).addLast(Lists.<Defined>listEmpty(Lists), struct Definition(/* "struct " + structNames */.last(/* "struct " + structNames */), "this")), newParams);
+	struct var outputParams = generateValueList(copy);
 	return assembleMethod(outputDefinition, outputParams, content);
 }
 /* private static <T extends Node> */ char* generateValueList(struct Main this, List<struct T> copy){
 	return copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")).orElse(copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")), "");
 }
 /* private static */ Some<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
-	/* var generated = definition + "(" + outputParams + "){" + compileStatements(content, input -> compileFunctionSegment(input, 1)) + "\n}\n"; */
+	struct var generated = /* definition + "(" + outputParams + "){" + compileStatements(content, input -> compileFunctionSegment(input, 1)) + "\n}\n" */;
 	/* methods.addLast(generated); */
 	return Some</*  */>("");
 }
@@ -399,36 +390,49 @@ struct public Definition(struct Definition this, char* type, char* name){
 	}
 }
 /* private static */ char* compileFunctionSegment(struct Main this, char* input, int depth){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return "";
 	}
-	/* var indent = "\n" + "\t".repeat(depth); */
+	struct var indent = "\n" + "\t".repeat("\n" + "\t", depth);
 	if (stripped.endsWith(stripped, ";")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip(); */
-		if (withoutEnd.startsWith(withoutEnd, "return ")){
-			/* var value = withoutEnd.substring("return ".length()); */
-			return /* indent + "return " + compileValue(value) + ";" */;
+		struct var withoutEnd = stripped.substring(stripped, 0, stripped.length() - ";".length(stripped.length() - ";")).strip(stripped.substring(stripped, 0, stripped.length() - ";".length(stripped.length() - ";")));
+		struct var maybeStatementValue = compileStatementValue(withoutEnd);
+		if (/* maybeStatementValue instanceof Some */(/* var statementValue */)){
+			return /* indent + statementValue + ";" */;
 		}
 	}
 	if (stripped.endsWith(stripped, "}")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
-		/* var contentStart = withoutEnd.indexOf("{"); */
+		struct var withoutEnd = stripped.substring(stripped, 0, stripped.length() - "}".length(stripped.length() - "}"));
+		struct var contentStart = withoutEnd.indexOf(withoutEnd, "{");
 		if (/* contentStart >= 0 */){
-			/* var beforeBlock = withoutEnd.substring(0, contentStart); */
-			/* var content = withoutEnd.substring(contentStart + "{".length()); */
-			/* var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1)); */
+			struct var beforeBlock = withoutEnd.substring(withoutEnd, 0, contentStart);
+			struct var content = withoutEnd.substring(withoutEnd, /* contentStart + "{" */.length(/* contentStart + "{" */));
+			struct var outputContent = compileStatements(content, /* input1 -> compileFunctionSegment */(/* input1 */, /* depth + 1 */));
 			return /* indent + compileBeforeBlock(beforeBlock) + "{" + outputContent + indent + "}" */;
 		}
 	}
 	return /* indent + generatePlaceholder */(stripped);
 }
+/* private static */ Option<char*> compileStatementValue(struct Main this, char* input){
+	if (input.startsWith(input, "return ")){
+		struct var value = input.substring(input, "return ".length("return "));
+		return Some</*  */>(/* "return " + compileValue */(value));
+	}
+	struct var valueSeparator = input.indexOf(input, "=");
+	if (/* valueSeparator >= 0 */){
+		struct var definition = input.substring(input, 0, valueSeparator);
+		struct var value = input.substring(input, /* valueSeparator + "=" */.length(/* valueSeparator + "=" */));
+		return Some</*  */>(parseDefinitionOrPlaceholder(definition).generate() + " = " + compileValue(parseDefinitionOrPlaceholder(definition), value));
+	}
+	return None</*  */>();
+}
 /* private static */ char* compileBeforeBlock(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.startsWith(stripped, "if")){
-		/* var withoutPrefix = stripped.substring("if".length()).strip(); */
+		struct var withoutPrefix = stripped.substring(stripped, "if".length("if")).strip(stripped.substring(stripped, "if".length("if")));
 		if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(withoutPrefix.startsWith("(") && withoutPrefix, ")")){
-			/* var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1); */
+			struct var condition = withoutPrefix.substring(withoutPrefix, 1, withoutPrefix.length() - 1);
 			return "if (" + compileValue(condition) + ")";
 		}
 	}
@@ -438,7 +442,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return parseValue(input).generate(parseValue(input));
 }
 /* private static */ struct Value parseValue(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return struct Whitespace();
 	}
@@ -446,31 +450,26 @@ struct public Definition(struct Definition this, char* type, char* name){
 		return struct StringValue(stripped.substring(stripped, 1, stripped.length() - 1));
 	}
 	if (stripped.endsWith(stripped, ")")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip(); */
-		/* var divisions = divideAll(withoutEnd, Main::foldInvokableStart); */
+		struct var withoutEnd = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")")).strip(stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")")));
+		struct var divisions = divideAll(withoutEnd, /* Main::foldInvokableStart */);
 		if (divisions.size() >= 2){
-			/* var joined = join(divisions.subList(0, divisions.size() - 1), ""); */
-			/* var caller = joined.substring(0, joined.length() - ")".length()); */
-			/* var arguments = divisions.last(); */
+			struct var joined = join(divisions.subList(divisions, 0, divisions.size() - 1), "");
+			struct var caller = joined.substring(joined, 0, joined.length() - ")".length(joined.length() - ")"));
+			struct var arguments = divisions.last(divisions);
 			/* Value parsedCaller; */
 			if (caller.startsWith(caller, "new ")){
-				/* parsedCaller = new Symbol(compileType(caller.substring("new ".length()))); */
+				/* parsedCaller  */ = struct Symbol(compileType(caller.substring(caller, "new ".length("new "))));
 			}
 			/* else */{
-				/* parsedCaller = parseValue(caller); */
+				/* parsedCaller  */ = parseValue(caller);
 			}
-			/* var parsedArgs = parseValues(arguments, Main::parseValue)
-                        .iter()
-                        .filter(value -> !(value instanceof Whitespace))
-                        .collect(new ListCollector<>()); */
+			struct var parsedArgs = parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)).filter(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)), /* value -> ! */(/* value instanceof Whitespace */)).collect(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)).filter(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)), /* value -> ! */(/* value instanceof Whitespace */)), ListCollector</*  */>());
 			/* List<Value> newArgs; */
 			if (/* parsedCaller instanceof DataAccess */(/* var parent */, /* _ */)){
-				/* newArgs = Lists.<Value>listEmpty()
-                            .addLast(parent)
-                            .addAll(parsedArgs); */
+				/* newArgs  */ = Lists.<Value>listEmpty(Lists).addLast(Lists.<Value>listEmpty(Lists), parent).addAll(Lists.<Value>listEmpty(Lists).addLast(Lists.<Value>listEmpty(Lists), parent), parsedArgs);
 			}
 			/* else */{
-				/* newArgs = parsedArgs; */
+				/* newArgs  */ = parsedArgs;
 			}
 			return struct Invocation(parsedCaller, newArgs);
 		}
@@ -481,33 +480,33 @@ struct public Definition(struct Definition this, char* type, char* name){
 	if (isNumber(stripped)){
 		return struct Symbol(stripped);
 	}
-	/* var arrowIndex = stripped.indexOf("->"); */
+	struct var arrowIndex = stripped.indexOf(stripped, "->");
 	if (/* arrowIndex >= 0 */){
-		/* var beforeArrow = stripped.substring(0, arrowIndex).strip(); */
-		/* var afterArrow = stripped.substring(arrowIndex + "->".length()).strip(); */
+		struct var beforeArrow = stripped.substring(stripped, 0, arrowIndex).strip(stripped.substring(stripped, 0, arrowIndex));
+		struct var afterArrow = stripped.substring(stripped, /* arrowIndex + "->" */.length(/* arrowIndex + "->" */)).strip(stripped.substring(stripped, /* arrowIndex + "->" */.length(/* arrowIndex + "->" */)));
 		/* if (afterArrow.startsWith(" */{
 			/* ") && afterArrow.endsWith("}")) {
-                var content = afterArrow.substring(1, afterArrow.length() - 1);
+                var */ content = afterArrow.substring(1, afterArrow.length() - 1);
 
                 var name = functionName + "_local" + functionLocalCounter;
                 functionLocalCounter++;
 
                 assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return new Symbol(name); */
+                return new Symbol(afterArrow.substring(1, afterArrow, name);
 		}
 	}
-	/* var separator = stripped.lastIndexOf("."); */
+	struct var separator = stripped.lastIndexOf(stripped, ".");
 	if (/* separator >= 0 */){
-		/* var value = stripped.substring(0, separator); */
-		/* var property = stripped.substring(separator + ".".length()).strip(); */
+		struct var value = stripped.substring(stripped, 0, separator);
+		struct var property = stripped.substring(stripped, /* separator + " */.".length(/* separator + " */.")).strip(stripped.substring(stripped, /* separator + " */.".length(/* separator + " */.")));
 		return struct DataAccess(parseValue(value), property);
 	}
 	return struct Content(stripped);
 }
 /* private static */ struct State foldInvokableStart(struct Main this, struct State state, char c){
-	/* var appended = state.append(c); */
+	struct var appended = state.append(state, c);
 	if (/* c == '(' */){
-		/* var maybeAdvanced = appended.isLevel() ? appended.advance() : appended; */
+		struct var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
 		return maybeAdvanced.enter(maybeAdvanced);
 	}
 	if (/* c == ')' */){
@@ -520,7 +519,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 		return false;
 	}
 	/* for (var i = 0; i < input.length(); i++) */{
-		/* var c = input.charAt(i); */
+		struct var c = input.charAt(input, i);
 		if (Character.isDigit(Character, c)){
 			/* continue; */
 		}
@@ -535,29 +534,29 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */).orElseGet(parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */), /* () -> new Content */(input));
 }
 /* private static */ Option<struct Definition> parseDefinition(struct Main this, char* input){
-	/* var stripped = input.strip(); */
-	/* var nameSeparator = stripped.lastIndexOf(" "); */
+	struct var stripped = input.strip(input);
+	struct var nameSeparator = stripped.lastIndexOf(stripped, " ");
 	if (/* nameSeparator < 0 */){
 		return None</*  */>();
 	}
-	/* var beforeName = stripped.substring(0, nameSeparator); */
-	/* var name = stripped.substring(nameSeparator + " ".length()); */
+	struct var beforeName = stripped.substring(stripped, 0, nameSeparator);
+	struct var name = stripped.substring(stripped, /* nameSeparator + " " */.length(/* nameSeparator + " " */));
 	if (/* !isSymbol */(name)){
 		return None</*  */>();
 	}
-	/* var divisions = divideAll(beforeName, Main::foldByTypeSeparator); */
+	struct var divisions = divideAll(beforeName, /* Main::foldByTypeSeparator */);
 	if (divisions.size() == 1){
 		return Some</*  */>(struct Definition(None</*  */>(), compileType(beforeName), name));
 	}
-	/* var beforeType = join(divisions.subList(0, divisions.size() - 1), " "); */
-	/* var type = divisions.last(); */
+	struct var beforeType = join(divisions.subList(divisions, 0, divisions.size() - 1), " ");
+	struct var type = divisions.last(divisions);
 	return Some</*  */>(struct Definition(Some</*  */>(beforeType), compileType(type), name));
 }
 /* private static */ struct State foldByTypeSeparator(struct Main this, struct State state, struct char c){
 	if (/* c == ' ' && state */.isLevel(/* c == ' ' && state */)){
 		return state.advance(state);
 	}
-	/* var appended = state.append(c); */
+	struct var appended = state.append(state, c);
 	if (/* c == '<' */){
 		return appended.enter(appended);
 	}
@@ -567,10 +566,10 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return appended;
 }
 /* private static */ char* compileType(struct Main this, char* input){
-	/* var stripped = input.strip(); */
-	/* var maybeTypeParamIndex = typeParameters.indexOf(stripped); */
+	struct var stripped = input.strip(input);
+	struct var maybeTypeParamIndex = typeParameters.indexOf(typeParameters, stripped);
 	if (maybeTypeParamIndex.isPresent(maybeTypeParamIndex)){
-		/* var typeParamIndex = maybeTypeParamIndex.orElse(null); */
+		struct var typeParamIndex = maybeTypeParamIndex.orElse(maybeTypeParamIndex, null);
 		return typeArguments.get(typeArguments, typeParamIndex);
 	}
 	/* switch (stripped) */{
@@ -588,25 +587,25 @@ struct public Definition(struct Definition this, char* type, char* name){
 		}
 	}
 	if (stripped.endsWith(stripped, ">")){
-		/* var withoutEnd = stripped.substring(0, stripped.length() - ">".length()); */
-		/* var index = withoutEnd.indexOf("<"); */
+		struct var withoutEnd = stripped.substring(stripped, 0, stripped.length() - ">".length(stripped.length() - ">"));
+		struct var index = withoutEnd.indexOf(withoutEnd, "<");
 		if (/* index >= 0 */){
-			/* var base = withoutEnd.substring(0, index).strip(); */
-			/* var substring = withoutEnd.substring(index + "<".length()); */
-			/* var parsed = parseValues(substring, Main::compileType); */
+			struct var base = withoutEnd.substring(withoutEnd, 0, index).strip(withoutEnd.substring(withoutEnd, 0, index));
+			struct var substring = withoutEnd.substring(withoutEnd, /* index + "<" */.length(/* index + "<" */));
+			struct var parsed = parseValues(substring, /* Main::compileType */);
 			if (base.equals(base, "Function")){
-				/* var arg0 = parsed.get(0); */
-				/* var returns = parsed.get(1); */
+				/* var arg0  */ = parsed.get(parsed, 0);
+				struct var returns = parsed.get(parsed, 1);
 				return /* returns + " (*)(" + arg0 + ")" */;
 			}
 			if (base.equals(base, "BiFunction")){
-				/* var arg0 = parsed.get(0); */
-				/* var arg1 = parsed.get(1); */
-				/* var returns = parsed.get(2); */
+				/* var arg0  */ = parsed.get(parsed, 0);
+				/* var arg1  */ = parsed.get(parsed, 1);
+				struct var returns = parsed.get(parsed, 2);
 				return /* returns + " (*)(" + arg0 + ", " + arg1 + ")" */;
 			}
 			if (/* !expansions */.contains(/* !expansions */, Tuple</*  */>(base, parsed))){
-				/* expansions = expansions.addLast(new Tuple<>(base, parsed)); */
+				/* expansions  */ = expansions.addLast(expansions, Tuple</*  */>(base, parsed));
 			}
 			return /* base + "<" + generateValues(parsed) + ">" */;
 		}
@@ -632,7 +631,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	if (/* c == ',' && state */.isLevel(/* c == ',' && state */)){
 		return state.advance(state);
 	}
-	/* var appended = state.append(c); */
+	struct var appended = state.append(state, c);
 	if (/* c == '-' */){
 		if (appended.peek() instanceof Some(appended, /* var maybeArrow */)){
 			if (/* maybeArrow == '>' */){
@@ -649,12 +648,12 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return appended;
 }
 /* private static */ int isSymbol(struct Main this, char* input){
-	/* var stripped = input.strip(); */
+	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return false;
 	}
 	/* for (var i = 0; i < stripped.length(); i++) */{
-		/* var c = stripped.charAt(i); */
+		struct var c = stripped.charAt(stripped, i);
 		if (Character.isLetter(Character, c)){
 			/* continue; */
 		}

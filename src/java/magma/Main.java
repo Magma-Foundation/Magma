@@ -724,9 +724,9 @@ public class Main {
         var indent = "\n" + "\t".repeat(depth);
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            if (withoutEnd.startsWith("return ")) {
-                var value = withoutEnd.substring("return ".length());
-                return indent + "return " + compileValue(value) + ";";
+            var maybeStatementValue = compileStatementValue(withoutEnd);
+            if (maybeStatementValue instanceof Some(var statementValue)) {
+                return indent + statementValue + ";";
             }
         }
 
@@ -742,6 +742,22 @@ public class Main {
         }
 
         return indent + generatePlaceholder(stripped);
+    }
+
+    private static Option<String> compileStatementValue(String input) {
+        if (input.startsWith("return ")) {
+            var value = input.substring("return ".length());
+            return new Some<>("return " + compileValue(value));
+        }
+
+        var valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            var definition = input.substring(0, valueSeparator);
+            var value = input.substring(valueSeparator + "=".length());
+            return new Some<>(parseDefinitionOrPlaceholder(definition).generate() + " = " + compileValue(value));
+        }
+
+        return new None<>();
     }
 
     private static String compileBeforeBlock(String input) {
