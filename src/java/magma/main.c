@@ -199,7 +199,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* var maybeNextTuple = state.pop(); */
 		/* if (maybeNextTuple.isEmpty())  */{
 			/* break; */
-	}
+		}
 		/* var nextTuple = maybeNextTuple.orElse(null); */
 		/* var next = nextTuple.left; */
 		/* var withoutNext = nextTuple.right; */
@@ -218,14 +218,14 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* var maybeNext = current.popAndAppendToTuple(); */
 		/* if (!(maybeNext instanceof Some(var next)))  */{
 			/* break; */
-	}
+		}
 		/* current = next.right; */
 		/* if (next.left == '"')  */{
 			/* break; */
-	}
+		}
 		/* if (next.left == '\\')  */{
 			/* current = current.popAndAppend().orElse(current); */
-	}
+		}
 	}
 	return Some</*  */>(current);
 }
@@ -283,11 +283,11 @@ struct public Definition(struct Definition this, char* type, char* name){
 			/* if (paramStart >= 0)  */{
 				/* String withoutParams = withoutPermits.substring(0, paramStart).strip(); */
 				return getString(withoutParams, beforeClass, withEnd);
-	}
+			}
 			/* else  */{
 				return getString(withoutPermits, beforeClass, withEnd);
-	}
-	}
+			}
+		}
 	}
 	return None</*  */>();
 }
@@ -305,7 +305,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 			/* var substring = withoutEnd.substring(typeParamStart + "<".length()); */
 			/* var typeParameters = listFromArray(substring.split(Pattern.quote(","))); */
 			return assembleStructure(typeParameters, name, beforeClass, content);
-	}
+		}
 	}
 	return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
 }
@@ -409,7 +409,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* if (withoutEnd.startsWith("return "))  */{
 			/* var value = withoutEnd.substring("return ".length()); */
 			return /* indent + "return " + compileValue(value) + ";" */;
-	}
+		}
 	}
 	/* if (stripped.endsWith("}"))  */{
 		/* var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
@@ -418,8 +418,8 @@ struct public Definition(struct Definition this, char* type, char* name){
 			/* var beforeBlock = withoutEnd.substring(0, contentStart); */
 			/* var content = withoutEnd.substring(contentStart + "{".length()); */
 			/* var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1)); */
-			return /* indent + generatePlaceholder(beforeBlock) + "{" + outputContent + "\n\t}" */;
-	}
+			return /* indent + generatePlaceholder(beforeBlock) + "{" + outputContent + indent + "}" */;
+		}
 	}
 	return /* indent + generatePlaceholder */(stripped);
 }
@@ -444,10 +444,10 @@ struct public Definition(struct Definition this, char* type, char* name){
 			/* Value parsedCaller; */
 			/* if (caller.startsWith("new "))  */{
 				/* parsedCaller = new Symbol(compileType(caller.substring("new ".length()))); */
-	}
+			}
 			/* else  */{
 				/* parsedCaller = parseValue(caller); */
-	}
+			}
 			/* var parsedArgs = parseValues(arguments, Main::parseValue)
                         .iter()
                         .filter(value -> !(value instanceof Whitespace))
@@ -457,12 +457,12 @@ struct public Definition(struct Definition this, char* type, char* name){
 				/* newArgs = Lists.<Value>listEmpty()
                             .addLast(parent)
                             .addAll(parsedArgs); */
-	}
+			}
 			/* else  */{
 				/* newArgs = parsedArgs; */
-	}
+			}
 			return struct Invocation(parsedCaller, newArgs);
-	}
+		}
 	}
 	/* if (isSymbol(stripped))  */{
 		return struct Symbol(stripped);
@@ -483,7 +483,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 
                 assembleMethod("auto " + name, "auto " + beforeArrow, content);
                 return new Symbol(name); */
-	}
+		}
 	}
 	/* var separator = stripped.lastIndexOf("."); */
 	/* if (separator >= 0)  */{
@@ -512,7 +512,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* var c = input.charAt(i); */
 		/* if (Character.isDigit(c))  */{
 			/* continue; */
-	}
+		}
 		return false;
 	}
 	return true;
@@ -565,16 +565,16 @@ struct public Definition(struct Definition this, char* type, char* name){
 	/* switch (stripped)  */{
 		/* case "int", "boolean" ->  */{
 			return "int";
-	}
+		}
 		/* case "Character" ->  */{
 			return "char";
-	}
+		}
 		/* case "void" ->  */{
 			return "void";
-	}
+		}
 		/* case "String" ->  */{
 			return "char*";
-	}
+		}
 	}
 	/* if (stripped.endsWith(">"))  */{
 		/* var withoutEnd = stripped.substring(0, stripped.length() - ">".length()); */
@@ -587,18 +587,18 @@ struct public Definition(struct Definition this, char* type, char* name){
 				/* var arg0 = parsed.get(0); */
 				/* var returns = parsed.get(1); */
 				return /* returns + " (*)(" + arg0 + ")" */;
-	}
+			}
 			/* if (base.equals("BiFunction"))  */{
 				/* var arg0 = parsed.get(0); */
 				/* var arg1 = parsed.get(1); */
 				/* var returns = parsed.get(2); */
 				return /* returns + " (*)(" + arg0 + ", " + arg1 + ")" */;
-	}
+			}
 			/* if (!expansions.contains(new Tuple<>(base, parsed)))  */{
 				/* expansions = expansions.addLast(new Tuple<>(base, parsed)); */
-	}
+			}
 			return /* base + "<" + generateValues(parsed) + ">" */;
-	}
+		}
 	}
 	/* if (isSymbol(stripped))  */{
 		return /* "struct " + stripped */;
@@ -626,8 +626,8 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* if (appended.peek() instanceof Some(var maybeArrow))  */{
 			/* if (maybeArrow == '>')  */{
 				return appended.popAndAppend(appended).orElse(appended.popAndAppend(appended), appended);
-	}
-	}
+			}
+		}
 	}
 	/* if (c == '<' || c == '(')  */{
 		return appended.enter(appended);
@@ -646,7 +646,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 		/* var c = stripped.charAt(i); */
 		/* if (Character.isLetter(c))  */{
 			/* continue; */
-	}
+		}
 		return false;
 	}
 	return true;

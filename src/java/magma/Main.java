@@ -737,7 +737,7 @@ public class Main {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
                 var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1));
-                return indent + generatePlaceholder(beforeBlock) + "{" + outputContent + "\n\t}";
+                return indent + generatePlaceholder(beforeBlock) + "{" + outputContent + indent + "}";
             }
         }
 
