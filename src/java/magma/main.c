@@ -8,13 +8,13 @@
 };
 /* public */struct Option<Tuple<struct Character, struct State>> {
 };
-/* public */struct Some<struct > {
+/* public */struct Some</*  */> {
 };
 /* public */struct Option<struct State> {
 };
 /* public */struct Option<char*> {
 };
-/* public */struct None<struct > {
+/* public */struct None</*  */> {
 };
 /* public */struct List<char*> {
 };
@@ -47,7 +47,7 @@
                 return new None<>();
             } */
 	/* var escaped = this.input.charAt(this.index); */
-	return Some<struct >(/* new Tuple<Character, State>(escaped */, /* new State(this.input */, /* this.segments */, /* this.buffer */, /* this.depth */, /* this.index + 1)) */);
+	return Some</*  */>(/* new Tuple<Character, State>(escaped */, /* new State(this.input */, /* this.segments */, /* this.buffer */, /* this.depth */, /* this.index + 1)) */);
 }
 /* private */ struct State append(struct char c){
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer + c */, /* this.depth */, /* this.index */);
@@ -60,11 +60,11 @@ struct private Joiner(/*  */){
 }
 /* @Override
         public */ Option<char*> createInitial(/*  */){
-	return None<struct >();
+	return None</*  */>();
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
-	return Some<struct >(/* current.map */(/* inner -> inner + this.delimiter + element).orElse(element */));
+	return Some</*  */>(/* current.map */(/* inner -> inner + this.delimiter + element).orElse(element */));
 }
 /* public static */ void main(/*  */){
 	/* try {
@@ -236,7 +236,7 @@ struct private Joiner(/*  */){
 	/* ; */
 	/* \n"; */
 	/* structs.add(generated); */
-	return Some<struct >("");
+	return Some</*  */>("");
 }
 /* private static */ char* compileClassSegment(char* input){
 	/* var stripped = input.strip(); */
@@ -257,7 +257,7 @@ struct private Joiner(/*  */){
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             return new Some<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         } */
-	return None<struct >();
+	return None</*  */>();
 }
 /* private static */ Option<char*> compileMethod(char* stripped){
 	/* var paramStart = stripped.indexOf("("); */
@@ -282,7 +282,7 @@ struct private Joiner(/*  */){
                 }
             }
         } */
-	return None<struct >();
+	return None</*  */>();
 }
 /* private static */ char* compileFunctionSegment(char* input){
 	/* var stripped = input.strip(); */
@@ -447,6 +447,9 @@ struct private Joiner(/*  */){
 }
 /* private static */ struct boolean isSymbol(char* input){
 	/* var stripped = input.strip(); */
+	/* if (stripped.isEmpty()) {
+            return false;
+        } */
 	/* for (var i = 0; */
 	/* i < stripped.length(); */
 	/* i++) {
@@ -462,15 +465,15 @@ struct private Joiner(/*  */){
 	return "/* " + input + " */";
 }
 /* @Override
-        public <R> */ Option<struct R> map(Function<struct , struct R> mapper){
-	return Some<struct >(/* mapper.apply */(/* this.value */));
+        public <R> */ Option<struct R> map(Function</*  */, struct R> mapper){
+	return Some</*  */>(/* mapper.apply */(/* this.value */));
 }
 /* @Override
         public */ struct boolean isPresent(/*  */){
 	return true;
 }
 /* @Override
-        public */ struct  orElse(struct  other){
+        public */ /*  */ orElse(/*  */ other){
 	return /* this.value */;
 }
 /* @Override
@@ -478,27 +481,27 @@ struct private Joiner(/*  */){
 	return false;
 }
 /* @Override
-        public */ struct  orElseGet(Supplier<struct > supplier){
+        public */ /*  */ orElseGet(Supplier</*  */> supplier){
 	return /* this.value */;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(Function<struct , Option<struct R>> mapper){
+        public <R> */ Option<struct R> flatMap(Function</*  */, Option<struct R>> mapper){
 	return /* mapper.apply */(/* this.value */);
 }
 /* @Override
-        public */ Option<struct > or(Supplier<Option<struct >> supplier){
+        public */ Option</*  */> or(Supplier<Option</*  */>> supplier){
 	return this;
 }
 /* @Override
-        public <R> */ Option<struct R> map(Function<struct , struct R> mapper){
-	return None<struct >();
+        public <R> */ Option<struct R> map(Function</*  */, struct R> mapper){
+	return None</*  */>();
 }
 /* @Override
         public */ struct boolean isPresent(/*  */){
 	return false;
 }
 /* @Override
-        public */ struct  orElse(struct  other){
+        public */ /*  */ orElse(/*  */ other){
 	return other;
 }
 /* @Override
@@ -506,14 +509,14 @@ struct private Joiner(/*  */){
 	return true;
 }
 /* @Override
-        public */ struct  orElseGet(Supplier<struct > supplier){
+        public */ /*  */ orElseGet(Supplier</*  */> supplier){
 	return /* supplier.get */();
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(Function<struct , Option<struct R>> mapper){
-	return None<struct >();
+        public <R> */ Option<struct R> flatMap(Function</*  */, Option<struct R>> mapper){
+	return None</*  */>();
 }
 /* @Override
-        public */ Option<struct > or(Supplier<Option<struct >> supplier){
+        public */ Option</*  */> or(Supplier<Option</*  */>> supplier){
 	return /* supplier.get */();
 }

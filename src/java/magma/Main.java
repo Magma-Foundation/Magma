@@ -697,6 +697,10 @@ public class Main {
 
     private static boolean isSymbol(String input) {
         var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return false;
+        }
+
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
             if (Character.isLetter(c)) {
