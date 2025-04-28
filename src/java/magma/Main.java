@@ -399,6 +399,7 @@ public class Main {
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
+    public static List<String> statements = Lists.listEmpty();
     private static List<String> structNames = Lists.listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
@@ -445,7 +446,15 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
-        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
+        return generateStatements(parseStatements(input, compiler));
+    }
+
+    private static String generateStatements(List<String> parsed) {
+        return generateAll(Main::mergeStatements, parsed);
+    }
+
+    private static List<String> parseStatements(String input, Function<String, String> compiler) {
+        return parseAll(input, Main::foldStatementChar, compiler);
     }
 
     private static String compileAll(
@@ -672,6 +681,7 @@ public class Main {
         var defined = parseDefinitionOrPlaceholder(inputDefinition);
         if (defined instanceof Definition definition) {
             functionName = definition.name;
+            functionLocalCounter = 0;
         }
 
         var outputDefinition = defined.generate();
@@ -712,7 +722,14 @@ public class Main {
     }
 
     private static Some<String> assembleMethod(String definition, String outputParams, String content) {
-        var generated = definition + "(" + outputParams + "){" + compileStatements(content, input -> compileFunctionSegment(input, 1)) + "\n}\n";
+        var parsed1 = parseStatements(content, input -> compileFunctionSegment(input, 1));
+
+        var parsed = Lists.<String>listEmpty()
+                .addAll(statements)
+                .addAll(parsed1);
+        statements = Lists.listEmpty();
+
+        var generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
         methods.addLast(generated);
         return new Some<>("");
     }
@@ -827,8 +844,11 @@ public class Main {
 
                 List<Value> newArgs;
                 if (parsedCaller instanceof DataAccess(var parent, _)) {
+                    var name = generateName();
+                    statements = statements.addLast("\n\tauto " + name + " = " + parent.generate() + ";");
+
                     newArgs = Lists.<Value>listEmpty()
-                            .addLast(parent)
+                            .addLast(new Symbol(name))
                             .addAll(parsedArgs);
                 }
                 else {
@@ -853,10 +873,7 @@ public class Main {
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
             if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
                 var content = afterArrow.substring(1, afterArrow.length() - 1);
-
-                var name = functionName + "_local" + functionLocalCounter;
-                functionLocalCounter++;
-
+                var name = generateName();
                 assembleMethod("auto " + name, "auto " + beforeArrow, content);
                 return new Symbol(name);
             }
@@ -869,7 +886,7 @@ public class Main {
             return new DataAccess(parseValue(value), property);
         }
 
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return new StringValue(stripped.substring(1, stripped.length() - 1));
         }
 
@@ -884,6 +901,12 @@ public class Main {
 
 
         return new Content(stripped);
+    }
+
+    private static String generateName() {
+        var name = functionName + "_local" + functionLocalCounter;
+        functionLocalCounter++;
+        return name;
     }
 
     private static State foldInvokableStart(State state, Character c) {
