@@ -120,11 +120,23 @@ public class Main {
 
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
-            var beforeParams = stripped.substring(0, paramStart);
+            var definition = stripped.substring(0, paramStart);
             var afterParams = stripped.substring(paramStart + "(".length());
-            var generated = generatePlaceholder(beforeParams) + "(" + generatePlaceholder(afterParams) + "\n";
+            var generated = compileDefinition(definition) + "(" + generatePlaceholder(afterParams) + "\n";
             methods.add(generated);
             return "";
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String compileDefinition(String input) {
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
+        if(nameSeparator >= 0) {
+            var beforeName = stripped.substring(0, nameSeparator);
+            var name = stripped.substring(nameSeparator + " ".length());
+            return generatePlaceholder(beforeName) + " " + name;
         }
 
         return generatePlaceholder(stripped);
