@@ -172,21 +172,7 @@ public class Main {
         }
     }
 
-    private static class State {
-        private final String input;
-        private List<String> segments;
-        private int index;
-        private String buffer;
-        private int depth;
-
-        private State(String input, List<String> segments, String buffer, int depth, int index) {
-            this.input = input;
-            this.index = index;
-            this.buffer = buffer;
-            this.depth = depth;
-            this.segments = segments;
-        }
-
+    private record State(String input, List<String> segments, String buffer, int depth, int index) {
         public State(String input) {
             this(input, Lists.empty(), "", 0, 0);
         }
@@ -200,19 +186,15 @@ public class Main {
         }
 
         private State enter() {
-            this.depth = this.depth + 1;
-            return this;
+            return new State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
         }
 
         private State exit() {
-            this.depth = this.depth - 1;
-            return this;
+            return new State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
         }
 
         private State advance() {
-            this.segments = this.segments.add(this.buffer);
-            this.buffer = "";
-            return this;
+            return new State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
         }
 
         private boolean isShallow() {
@@ -225,13 +207,11 @@ public class Main {
             }
 
             var escaped = this.input.charAt(this.index);
-            this.index = this.index + 1;
-            return new Some<>(new Tuple<Character, State>(escaped, this));
+            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
         }
 
         private State append(char c) {
-            this.buffer = this.buffer + c;
-            return this;
+            return new State(this.input, this.segments, this.buffer + c, this.depth, this.index);
         }
 
         public Option<State> popAndAppend() {

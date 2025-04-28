@@ -1,28 +1,15 @@
-/* private static */struct State {
-	/* private final */ char* input;
-	/* private */ List<char*> segments;
-	/* private */ int index;
-	/* private */ char* buffer;
-	/* private */ int depth;
+/* private */struct State {
 };
 /* private */struct Joiner {
 };
 /* public */struct Main {
 };
-/* public */struct List<char*> {
-};
 /* public */struct Option<struct State> {
 };
 /* public */struct Option<char*> {
 };
-/* private State */(/* String input, List<String> segments, String buffer, int depth, int index */){/* 
-            this.input = input;
-            this.index = index;
-            this.buffer = buffer;
-            this.depth = depth;
-            this.segments = segments;
-         */
-}
+/* public */struct List<char*> {
+};
 /* public State */(/* String input */){/* 
             this(input, Lists.empty(), "", 0, 0);
          */
@@ -36,19 +23,15 @@
          */
 }
 /* private */ struct State enter(/*  */){/* 
-            this.depth = this.depth + 1;
-            return this;
+            return new State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
          */
 }
 /* private */ struct State exit(/*  */){/* 
-            this.depth = this.depth - 1;
-            return this;
+            return new State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
          */
 }
 /* private */ struct State advance(/*  */){/* 
-            this.segments = this.segments.add(this.buffer);
-            this.buffer = "";
-            return this;
+            return new State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
          */
 }
 /* private */ struct boolean isShallow(/*  */){/* 
@@ -61,13 +44,11 @@
             }
 
             var escaped = this.input.charAt(this.index);
-            this.index = this.index + 1;
-            return new Some<>(new Tuple<Character, State>(escaped, this));
+            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
          */
 }
 /* private */ struct State append(/* char c */){/* 
-            this.buffer = this.buffer + c;
-            return this;
+            return new State(this.input, this.segments, this.buffer + c, this.depth, this.index);
          */
 }
 /* public */ Option<struct State> popAndAppend(/*  */){/* 
