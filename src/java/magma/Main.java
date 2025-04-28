@@ -316,6 +316,15 @@ public class Main {
             return new State(input, listEmpty(), "", 0, 0);
         }
 
+        private Option<Tuple<Character, State>> pop() {
+            if (this.index >= this.input.length()) {
+                return new None<>();
+            }
+
+            var escaped = this.input.charAt(this.index);
+            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
+        }
+
         private Option<Tuple<Character, State>> popAndAppendToTuple() {
             return this.pop().map(tuple -> {
                 var poppedChar = tuple.left;
@@ -343,15 +352,6 @@ public class Main {
 
         private boolean isShallow() {
             return this.depth == 1;
-        }
-
-        private Option<Tuple<Character, State>> pop() {
-            if (this.index >= this.input.length()) {
-                return new None<>();
-            }
-
-            var escaped = this.input.charAt(this.index);
-            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
         }
 
         private State append(char c) {

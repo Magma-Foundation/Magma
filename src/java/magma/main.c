@@ -50,11 +50,11 @@ struct Tuple_i8_State {
 };
 struct Option_Tuple_i8_State {
 };
-struct Tuple_/*  */ {
-};
 struct None_/*  */ {
 };
 struct Some_/*  */ {
+};
+struct Tuple_/*  */ {
 };
 struct Option_State {
 };
@@ -90,6 +90,13 @@ struct Option_Definition {
 struct State fromInput(struct State this, char* input){
 	return State(input, listEmpty(), "", 0, 0);
 }
+Option<Tuple<char, struct State>> pop(struct State this){
+	if (this.index >= this.input.length(this.index >= this.input)){
+		return None_/*  */();
+	}
+	/* this.input.charAt(this.input, this.index) */ escaped = this.input.charAt(this.input, this.index);
+	return Some_/*  */(Tuple_i8_State(escaped, State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
+}
 auto popAndAppendToTuple_local1(auto tuple){
 	/* tuple.left */ poppedChar = tuple.left;
 	/* tuple.right */ poppedState = tuple.right;
@@ -114,13 +121,6 @@ struct State advance(struct State this){
 }
 int isShallow(struct State this){
 	return this.depth == 1;
-}
-Option<Tuple<char, struct State>> pop(struct State this){
-	if (this.index >= this.input.length(this.index >= this.input)){
-		return None_/*  */();
-	}
-	/* this.input.charAt(this.input, this.index) */ escaped = this.input.charAt(this.input, this.index);
-	return Some_/*  */(Tuple_i8_State(escaped, State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
 struct State append(struct State this, struct char c){
 	return State(this.input, this.segments, this.buffer + c, this.depth, this.index);
