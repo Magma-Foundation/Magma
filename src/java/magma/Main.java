@@ -265,11 +265,21 @@ public class Main {
             var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
-                var name = afterClass.substring(0, contentStart).strip();
+                var beforeContent = afterClass.substring(0, contentStart).strip();
+
+                var paramStart = beforeContent.indexOf("(");
+                var withoutParams = paramStart >= 0
+                        ? beforeContent.substring(0, paramStart).strip()
+                        : beforeContent;
+
+                if (withoutParams.endsWith(">")) {
+                    return Optional.of("");
+                }
+
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+                    var generated = generatePlaceholder(beforeClass) + "struct " + withoutParams + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
                     structs.add(generated);
                     return Optional.of("");
                 }

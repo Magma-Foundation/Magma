@@ -1,22 +1,3 @@
-/* public */struct List<T> {
-	/* List<T> add(T element) */;
-	/* Iterator<T> iter() */;
-};
-/* private */struct Head<T> {
-	/* Optional<T> next() */;
-};
-/* private */struct Collector<T, C> {
-	/* C createInitial() */;
-	/* C fold(C current, T element) */;
-};
-/* public */struct Iterator<T>(Head<T> head) {
-};
-/* private */struct Tuple<A, B>(A left, B right) {
-};
-/* public static */struct RangeHead implements Head<Integer> {
-	/* private final */ int length;
-	/* private int counter = 0 */;
-};
 /* private static */struct State {
 	/* private final */ char* input;
 	/* private */ List<char*> segments;
@@ -24,49 +5,12 @@
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ int depth;
 };
-/* private */struct Joiner() implements Collector<String, Optional<String>> {
+/* private */struct Joiner {
 };
 /* public */struct Main {
 	/* private static final List<String> methods = Lists.empty() */;
 	/* private static final List<String> structs = Lists.empty() */;
 };
-/* public <R> */ Iterator</* R */> map(/* Function<T, R> mapper */){/* 
-            return new Iterator<>(() -> this.head.next().map(mapper));
-         */
-}
-/* public <C> */ /* C */ collect(/* Collector<T, C> collector */){/* 
-            return this.foldRight(collector.createInitial(), collector::fold);
-         */
-}
-/* private <R> */ /* R */ foldRight(/* R initial, BiFunction<R, T, R> folder */){/* 
-            var current = initial;
-            while (true) {
-                R finalCurrent = current;
-                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (optional.isPresent()) {
-                    current = optional.get();
-                }
-                else {
-                    return current;
-                }
-            }
-         */
-}
-/* public RangeHead */(/* int length */){/* 
-            this.length = length;
-         */
-}
-/* @Override
-        public */ Optional</* Integer */> next(/*  */){/* 
-            if (this.counter >= this.length) {
-                return Optional.empty();
-            }
-
-            var value = this.counter;
-            this.counter++;
-            return Optional.of(value);
-         */
-}
 /* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
             this.input = input;
             this.index = index;
@@ -248,11 +192,21 @@
             var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
-                var name = afterClass.substring(0, contentStart).strip();
+                var beforeContent = afterClass.substring(0, contentStart).strip();
+
+                var paramStart = beforeContent.indexOf("(");
+                var withoutParams = paramStart >= 0
+                        ? beforeContent.substring(0, paramStart).strip()
+                        : beforeContent;
+
+                if (withoutParams.endsWith(">")) {
+                    return Optional.of("");
+                }
+
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+                    var generated = generatePlaceholder(beforeClass) + "struct " + withoutParams + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
                     structs.add(generated);
                     return Optional.of("");
                 }
