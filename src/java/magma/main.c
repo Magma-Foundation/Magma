@@ -46,6 +46,10 @@ struct Main {
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
 };
+struct Option_Type {
+};
+struct Option_i8_star {
+};
 struct Tuple_i8_State {
 };
 struct Option_Tuple_i8_State {
@@ -60,11 +64,11 @@ struct Option_State {
 };
 struct Option_i8 {
 };
-struct Option_i8_star {
-};
 struct Iterator_T {
 };
-struct Option_Type {
+struct Option_T {
+};
+struct Iterator_/*  */ {
 };
 struct Option_IOException {
 };
@@ -86,7 +90,6 @@ struct Option_Invocation {
 };
 struct Option_Definition {
 };
-// HashMap</*  */>>
 struct State fromInput(struct State this, char* input){
 	return State(input, listEmpty(), "", 0, 0);
 }
@@ -104,7 +107,7 @@ auto popAndAppendToTuple_local1(auto tuple){
 	return Tuple_/*  */(poppedChar, appended);
 }
 Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
-	/* this.pop(this) */ popAndAppendToTuple_local3 = this.pop(this);
+	Option<Tuple<char, struct State>> popAndAppendToTuple_local3 = this.pop(this);
 	return popAndAppendToTuple_local3.map(popAndAppendToTuple_local3, popAndAppendToTuple_local1);
 }
 int isLevel(struct State this){
@@ -126,7 +129,7 @@ struct State append(struct State this, struct char c){
 	return State(this.input, this.segments, this.buffer + c, this.depth, this.index);
 }
 Option<struct State> popAndAppend(struct State this){
-	/* this.popAndAppendToTuple(this) */ popAndAppend_local1 = this.popAndAppendToTuple(this);
+	Option<Tuple<char, struct State>> popAndAppend_local1 = this.popAndAppendToTuple(this);
 	return popAndAppend_local1.map(popAndAppend_local1, /* Tuple::right */);
 }
 Option<char> peek(struct State this){
@@ -153,14 +156,32 @@ Option<char*> fold(struct Joiner this, Option<char*> current, char* element){
 char* generate(struct Definition this){
 	return this.type.generate() + " " + this.name(this.type.generate() + " " + this);
 }
+Option<struct Type> findType(struct Definition this){
+	return Some_/*  */(this.type);
+}
+Option<char*> findName(struct Definition this){
+	return Some_/*  */(this.name);
+}
 char* generate(struct Content this){
 	return generatePlaceholder(this.input);
+}
+Option<struct Type> findType(struct Content this){
+	return None_/*  */();
+}
+Option<char*> findName(struct Content this){
+	return None_/*  */();
 }
 char* stringify(struct Content this){
 	return generatePlaceholder(this.input);
 }
 char* generate(struct Whitespace implements Defined, Value this){
 	return "";
+}
+Option<struct Type> findType(struct Whitespace implements Defined, Value this){
+	return None_/*  */();
+}
+Option<char*> findName(struct Whitespace implements Defined, Value this){
+	return None_/*  */();
 }
 char* generate(struct StringValue this){
 	return "\"" + this.value + "\"";
@@ -183,6 +204,18 @@ auto fromArray_local0(auto index){
 Iterator<struct T> fromArray(struct Iterators this, /* T[] */ array){
 	return /* Iterator<>(new RangeHead(array.length)).map */(fromArray_local0);
 }
+auto fromOption_local0(auto _){
+	return /* /* new EmptyHead */ */;
+}
+auto fromOption_local1(auto var value){
+	return /* /* new SingleHead */ */;
+}
+Iterator<struct T> fromOption(struct Iterators this, Option<struct T> option){
+	return Iterator_/*  */(/* switch (option) {
+                case None */ < T > fromOption_local0 < T > /* ();
+                case Some */ < T > fromOption_local1 <  > /* (value);
+            } */);
+}
 char* generate(struct CharValue this){
 	return "'" + this.slice + "'";
 }
@@ -190,7 +223,7 @@ char* generate(struct Not this){
 	return "!" + this.value.generate("!" + this.value);
 }
 struct public StructType(struct StructType this, char* name){
-	this(name, HashMap_/*  */());
+	this(name, Lists.listEmpty(Lists));
 }
 char* generate(struct StructType this){
 	return "struct " + this.name;
@@ -198,13 +231,21 @@ char* generate(struct StructType this){
 char* stringify(struct StructType this){
 	return this.name;
 }
-Option<struct Type> find(struct StructType this, char* property){
-	if (this.properties.containsKey(this.properties, property)){
-		return Some_/*  */(this.properties.get(this.properties, property));
-	}
-	else {
-		return None_/*  */();
-	}
+auto find_local2(auto definition){
+	return definition.name.equals(definition.name, definition.name, name);
+}
+auto find_local6(auto definition){
+	return definition.findType(definition, definition);
+}
+Option<struct Type> find(struct StructType this, char* name){
+	/* this.properties.iter(this.properties) */ find_local4 = this.properties.iter(this.properties);
+	/* find_local4.filter(find_local4, find_local2) */ find_local8 = find_local4.filter(find_local4, find_local2);
+	/* find_local8.map(find_local8, find_local6) */ find_local9 = find_local8.map(find_local8, find_local6);
+	/* find_local9.flatMap(find_local9, /* Iterators::fromOption */) */ find_local10 = find_local9.flatMap(find_local9, /* Iterators::fromOption */);
+	return find_local10.next(find_local10);
+}
+struct StructType define(struct StructType this, struct Definition definition){
+	return StructType(this.name, this.properties.addLast(this.properties, definition));
 }
 char* generate(struct Generic this){
 	return this.base + "<" + generateValueList(this.args) + ">";
@@ -479,9 +520,9 @@ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* 
 	return generateStructure(name, content);
 }
 Option<char*> generateStructure(struct Main this, char* name, char* content){
-	structNames = structNames.addLast(structNames, StructType(name));
+	structStack = structStack.addLast(structStack, StructType(name));
 	/* compileStatements(content, /* Main::compileClassSegment */) */ compiled = compileStatements(content, /* Main::compileClassSegment */);
-	structNames = structNames.removeLast(structNames);
+	structStack = structStack.removeLast(structStack);
 	char* generated = "struct " + name + " {" + compiled + "\n};\n";
 	structs.addLast(structs, generated);
 	return Some_/*  */("");
@@ -521,17 +562,33 @@ Option<char*> compileDefinitionStatement(struct Main this, char* input){
 	}
 	return None_/*  */();
 }
-auto compileMethod_local12(auto parameter){
+auto compileMethod_local11(auto parameter){
 	return !(/* /* parameter instanceof Whitespace */ */);
 }
+auto compileMethod_local19(auto last){
+	/* newParams.iter(newParams) */ compileMethod_local21 = newParams.iter(newParams);
+	/* compileMethod_local21.map(compileMethod_local21, /* Defined::findType */) */ compileMethod_local22 = compileMethod_local21.map(compileMethod_local21, /* Defined::findType */);
+	/* compileMethod_local22.flatMap(compileMethod_local22, /* Iterators::fromOption */) */ compileMethod_local23 = compileMethod_local22.flatMap(compileMethod_local22, /* Iterators::fromOption */);
+	/* defined.findName(defined) */ compileMethod_local25 = defined.findName(defined);
+	/* defined.findType(defined) */ compileMethod_local27 = defined.findType(defined);
+	/* compileMethod_local23.collect(compileMethod_local23, ListCollector_/*  */()) */ paramTypes = compileMethod_local23.collect(compileMethod_local23, ListCollector_/*  */());
+	/* compileMethod_local25.orElse(compileMethod_local25, "?") */ name = compileMethod_local25.orElse(compileMethod_local25, "?");
+	/* compileMethod_local27.orElse(compileMethod_local27, Primitive.Auto) */ type = compileMethod_local27.orElse(compileMethod_local27, Primitive.Auto);
+	return last.define(last, Definition(Functional(paramTypes, type), name));
+}
+auto compileMethod_local18(auto method){
+	structStack = structStack.mapLast(structStack, compileMethod_local19);
+	return method;
+}
 Option<char*> compileMethod(struct Main this, char* stripped){
-	/* paramStart */ compileMethod_local3 = paramStart + "(";
-	/* paramEnd */ compileMethod_local7 = paramEnd + ")";
-	/* parseValues(params, /* Main::parseParameter */) */ compileMethod_local11 = parseValues(params, /* Main::parseParameter */);
-	/* compileMethod_local11.iter(compileMethod_local11) */ compileMethod_local13 = compileMethod_local11.iter(compileMethod_local11);
-	/* compileMethod_local13.filter(compileMethod_local13, compileMethod_local12) */ compileMethod_local14 = compileMethod_local13.filter(compileMethod_local13, compileMethod_local12);
-	/* Lists.<Defined>listEmpty(Lists) */ compileMethod_local17 = Lists.<Defined>listEmpty(Lists);
-	/* compileMethod_local17.addLast(compileMethod_local17, Definition(structNames.last(structNames), "this")) */ compileMethod_local18 = compileMethod_local17.addLast(compileMethod_local17, Definition(structNames.last(structNames), "this"));
+	/* paramStart */ compileMethod_local2 = paramStart + "(";
+	/* paramEnd */ compileMethod_local6 = paramEnd + ")";
+	/* parseValues(params, /* Main::parseParameter */) */ compileMethod_local10 = parseValues(params, /* Main::parseParameter */);
+	/* compileMethod_local10.iter(compileMethod_local10) */ compileMethod_local12 = compileMethod_local10.iter(compileMethod_local10);
+	/* compileMethod_local12.filter(compileMethod_local12, compileMethod_local11) */ compileMethod_local13 = compileMethod_local12.filter(compileMethod_local12, compileMethod_local11);
+	/* Lists.<Defined>listEmpty(Lists) */ compileMethod_local16 = Lists.<Defined>listEmpty(Lists);
+	/* compileMethod_local16.addLast(compileMethod_local16, Definition(structStack.last(structStack), "this")) */ compileMethod_local17 = compileMethod_local16.addLast(compileMethod_local16, Definition(structStack.last(structStack), "this"));
+	/* assembleMethod(defined, outputParams, content) */ compileMethod_local30 = assembleMethod(defined, outputParams, content);
 	/* stripped.indexOf(stripped, "(") */ paramStart = stripped.indexOf(stripped, "(");
 	if (paramStart < 0){
 		return None_/*  */();
@@ -542,24 +599,23 @@ Option<char*> compileMethod(struct Main this, char* stripped){
 		functionName = definition.name;
 		functionLocalCounter = 0;
 	}
-	/* defined.generate(defined) */ outputDefinition = defined.generate(defined);
-	/* stripped.substring(stripped, compileMethod_local3.length(compileMethod_local3)) */ afterParams = stripped.substring(stripped, compileMethod_local3.length(compileMethod_local3));
+	/* stripped.substring(stripped, compileMethod_local2.length(compileMethod_local2)) */ afterParams = stripped.substring(stripped, compileMethod_local2.length(compileMethod_local2));
 	/* afterParams.indexOf(afterParams, ")") */ paramEnd = afterParams.indexOf(afterParams, ")");
 	if (paramEnd < 0){
 		return None_/*  */();
 	}
 	/* afterParams.substring(afterParams, 0, paramEnd) */ params = afterParams.substring(afterParams, 0, paramEnd);
-	/* afterParams.substring(afterParams, compileMethod_local7.length(compileMethod_local7)) */ withoutParams = afterParams.substring(afterParams, compileMethod_local7.length(compileMethod_local7));
+	/* afterParams.substring(afterParams, compileMethod_local6.length(compileMethod_local6)) */ withoutParams = afterParams.substring(afterParams, compileMethod_local6.length(compileMethod_local6));
 	/* withoutParams.strip(withoutParams) */ withBraces = withoutParams.strip(withoutParams);
 	/* if (!withBraces.startsWith(" */{
 		/* ") || !withBraces.endsWith("}")) {
             return new Some<>(""); */
 	}
 	/* withBraces.substring(withBraces, 1, withBraces.length() - 1) */ content = withBraces.substring(withBraces, 1, withBraces.length() - 1);
-	/* compileMethod_local14.collect(compileMethod_local14, ListCollector_/*  */()) */ newParams = compileMethod_local14.collect(compileMethod_local14, ListCollector_/*  */());
-	/* compileMethod_local18.addAll(compileMethod_local18, newParams) */ copy = compileMethod_local18.addAll(compileMethod_local18, newParams);
-	/* generateValueList(copy) */ outputParams = generateValueList(copy);
-	return assembleMethod(outputDefinition, outputParams, content);
+	/* compileMethod_local13.collect(compileMethod_local13, ListCollector_/*  */()) */ oldParams = compileMethod_local13.collect(compileMethod_local13, ListCollector_/*  */());
+	/* compileMethod_local17.addAll(compileMethod_local17, oldParams) */ newParams = compileMethod_local17.addAll(compileMethod_local17, oldParams);
+	/* generateValueList(newParams) */ outputParams = generateValueList(newParams);
+	return compileMethod_local30.map(compileMethod_local30, compileMethod_local18);
 }
 char* generateValueList(struct Main this, List<struct T> copy){
 	return generateValueList(copy, /* Node::generate */);
@@ -573,9 +629,9 @@ char* generateValueList(struct Main this, List<struct T> copy, char* (*)(struct 
 auto assembleMethod_local0(auto input){
 	return compileFunctionSegment(input, 1);
 }
-Option<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
+Option<char*> assembleMethod(struct Main this, struct Defined definition, char* outputParams, char* content){
 	/* parseStatementsWithLocals(content, assembleMethod_local0) */ parsed = parseStatementsWithLocals(content, assembleMethod_local0);
-	/* definition */ generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
+	/* definition.generate() + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n" */ generated = definition.generate() + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
 	methods.addLast(methods, generated);
 	return Some_/*  */("");
 }
@@ -679,20 +735,23 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 }
 struct Type resolve(struct Main this, struct Value value){
 	/* return switch (value) */{
-		/* case BooleanValue booleanValue -> Primitive.Bool; */
-		/* case CharValue charValue -> Primitive.I8; */
+		/* case BooleanValue _ -> Primitive.Bool; */
+		/* case CharValue _ -> Primitive.I8; */
 		/* case Content content -> content; */
 		/* case DataAccess dataAccess - */ > resolveDataAccess(dataAccess);
 		/* case Invocation invocation - */ > resolveInvocation(invocation);
-		/* case Not not -> Primitive.Bool; */
+		/* case Not _ -> Primitive.Bool; */
 		/* case Operation operation - */ > resolve(operation.left);
-		/* case StringValue stringValue - */ > /* new Ref */(Primitive.I8);
+		/* case StringValue _ - */ > /* new Ref */(Primitive.I8);
 		/* case Symbol symbol - */ > resolveSymbol(symbol);
-		/* case Whitespace whitespace -> Primitive.Void; */
+		/* case Whitespace _ -> Primitive.Void; */
 	}
 	/* ; */
 }
-struct Content resolveSymbol(struct Main this, struct Symbol symbol){
+struct Type resolveSymbol(struct Main this, struct Symbol symbol){
+	if (symbol.value.equals(symbol.value, "this")){
+		return structStack.last(structStack);
+	}
 	return Content(symbol.value);
 }
 struct Type resolveInvocation(struct Main this, struct Invocation invocation){
@@ -887,15 +946,19 @@ struct Symbol assembleLambda(struct Main this, char* afterArrow, List<char*> nam
 	/* if (afterArrow.startsWith(" */{
 		/* afterArrow.substring(1, afterArrow.length() - 1);
             var name = generateName();
-            assembleMethod("auto " + name, params, content);
-            return new Symbol(afterArrow.substring(1, afterArrow, name) */ content = afterArrow.substring(1, afterArrow.length() - 1);
+            assembleMethod(new Definition(Primitive.Auto, name), params, content);
+            return new Symbol(afterArrow.substring(1, afterArrow.length() - 1);
             var name = generateName();
-            assembleMethod("auto " + name, params, content);
-            return new Symbol(afterArrow.substring(1, afterArrow, name);
+            assembleMethod(new Definition(Primitive, name) */ content = afterArrow.substring(1, afterArrow.length() - 1);
+            var name = generateName();
+            assembleMethod(new Definition(Primitive.Auto, name), params, content);
+            return new Symbol(afterArrow.substring(1, afterArrow.length() - 1);
+            var name = generateName();
+            assembleMethod(new Definition(Primitive, name);
 	}
 	/* compileValue(afterArrow) */ newValue = compileValue(afterArrow);
 	/* generateName() */ name = generateName();
-	assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
+	assembleMethod(Definition(Primitive.Auto, name), params, "\n\treturn " + newValue + ";");
 	return Symbol(name);
 }
 char* generateName(struct Main this){
@@ -958,7 +1021,6 @@ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	if (divisions.size() == 1){
 		return Some_/*  */(Definition(parseType(beforeName), name));
 	}
-	/* join(divisions.subList(divisions, 0, divisions.size() - 1), " ") */ beforeType = join(divisions.subList(divisions, 0, divisions.size() - 1), " ");
 	/* divisions.last(divisions) */ type = divisions.last(divisions);
 	return Some_/*  */(Definition(parseType(type), name));
 }
@@ -1155,15 +1217,65 @@ Iterator<struct T> filter(struct Iterator_T this, Predicate<struct T> predicate)
 	return this.flatMap(this, filter_local1);
 }
 Iterator<struct R> flatMap(struct Iterator_T this, Iterator<struct R> (*)(struct T) mapper){
-	/* this.map(this, mapper) */ flatMap_local1 = this.map(this, mapper);
+	Iterator<struct R> flatMap_local1 = this.map(this, mapper);
 	return flatMap_local1.fold(flatMap_local1, Iterator_/*  */(EmptyHead_/*  */()), /* Iterator::concat */);
 }
 auto concat_local2(){
-	return concat_local1.or(concat_local1, concat_local1, other.head::next);
+	return concat_local1.or(concat_local1, concat_local1, /* /* other::next */ */);
 }
 Iterator<struct T> concat(struct Iterator_T this, Iterator<struct T> other){
 	/* this.head.next(this.head) */ concat_local1 = this.head.next(this.head);
 	return Iterator_/*  */(concat_local2);
+}
+Option<struct T> next(struct Iterator_T this){
+	return this.head.next(this.head);
+}
+auto map_local2(){
+	return map_local1.map(map_local1, map_local1, mapper);
+}
+Iterator<struct R> map(struct Iterator_/*  */ this, struct R (*)(/*  */) mapper){
+	/* this.head.next(this.head) */ map_local1 = this.head.next(this.head);
+	return Iterator_/*  */(map_local2);
+}
+struct C collect(struct Iterator_/*  */ this, Collector</*  */, struct C> collector){
+	return this.fold(this, collector.createInitial(collector), /* collector::fold */);
+}
+auto fold_local2(auto next){
+	return folder.apply(folder, folder, finalCurrent, next);
+}
+struct R fold(struct Iterator_/*  */ this, struct R initial, struct R (*)(struct R, /*  */) folder){
+	/* initial */ current = initial;
+	while (1){
+	/* this.head.next(this.head) */ fold_local4 = this.head.next(this.head);
+		/* current */ finalCurrent = current;
+		/* fold_local4.map(fold_local4, fold_local2) */ optional = fold_local4.map(fold_local4, fold_local2);
+		if (optional.isPresent(optional)){
+			current = optional.orElse(optional, null);
+		}
+		else {
+			return current;
+		}
+	}
+}
+auto filter_local1(auto element){
+	return /* Iterator_/*  */ */(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>(predicate, predicate));
+}
+Iterator</*  */> filter(struct Iterator_/*  */ this, Predicate</*  */> predicate){
+	return this.flatMap(this, filter_local1);
+}
+Iterator<struct R> flatMap(struct Iterator_/*  */ this, Iterator<struct R> (*)(/*  */) mapper){
+	Iterator<struct R> flatMap_local1 = this.map(this, mapper);
+	return flatMap_local1.fold(flatMap_local1, Iterator_/*  */(EmptyHead_/*  */()), /* Iterator::concat */);
+}
+auto concat_local2(){
+	return concat_local1.or(concat_local1, concat_local1, /* /* other::next */ */);
+}
+Iterator</*  */> concat(struct Iterator_/*  */ this, Iterator</*  */> other){
+	/* this.head.next(this.head) */ concat_local1 = this.head.next(this.head);
+	return Iterator_/*  */(concat_local2);
+}
+Option</*  */> next(struct Iterator_/*  */ this){
+	return this.head.next(this.head);
 }
 List<struct T> createInitial(struct ListCollector_/*  */ this){
 	return listEmpty();

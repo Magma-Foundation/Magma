@@ -59,6 +59,8 @@ public class Main {
         List<T> removeLast();
 
         T removeAndGetLast();
+
+        List<T> mapLast(Function<T, T> mapper);
     }
 
     private interface Head<T> {
@@ -73,6 +75,10 @@ public class Main {
 
     private interface Defined extends Assignable {
         String generate();
+
+        Option<Type> findType();
+
+        Option<String> findName();
     }
 
     private sealed interface Value extends Assignable {
@@ -284,7 +290,11 @@ public class Main {
         }
 
         private Iterator<T> concat(Iterator<T> other) {
-            return new Iterator<>(() -> this.head.next().or(other.head::next));
+            return new Iterator<>(() -> this.head.next().or(other::next));
+        }
+
+        public Option<T> next() {
+            return this.head.next();
         }
     }
 
@@ -405,12 +415,32 @@ public class Main {
         public String generate() {
             return this.type.generate() + " " + this.name();
         }
+
+        @Override
+        public Option<Type> findType() {
+            return new Some<>(this.type);
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new Some<>(this.name);
+        }
     }
 
     private record Content(String input) implements Defined, Value, Type {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public Option<Type> findType() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
 
         @Override
@@ -423,6 +453,16 @@ public class Main {
         @Override
         public String generate() {
             return "";
+        }
+
+        @Override
+        public Option<Type> findType() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
     }
 
@@ -472,6 +512,13 @@ public class Main {
         public static <T> Iterator<T> fromArray(T[] array) {
             return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
         }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new Iterator<>(switch (option) {
+                case None<T> _ -> new EmptyHead<T>();
+                case Some<T>(var value) -> new SingleHead<>(value);
+            });
+        }
     }
 
     private record CharValue(String slice) implements Value {
@@ -494,9 +541,9 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
     }
 
-    private record StructType(String name, Map<String, Type> properties) implements Type {
+    private record StructType(String name, List<Definition> properties) implements Type {
         public StructType(String name) {
-            this(name, new HashMap<>());
+            this(name, Lists.listEmpty());
         }
 
         @Override
@@ -509,13 +556,16 @@ public class Main {
             return this.name;
         }
 
-        public Option<Type> find(String property) {
-            if (this.properties.containsKey(property)) {
-                return new Some<>(this.properties.get(property));
-            }
-            else {
-                return new None<>();
-            }
+        public Option<Type> find(String name) {
+            return this.properties.iter()
+                    .filter(definition -> definition.name.equals(name))
+                    .map(definition -> definition.findType())
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        public StructType define(Definition definition) {
+            return new StructType(this.name, this.properties.addLast(definition));
         }
     }
 
@@ -566,7 +616,7 @@ public class Main {
     private static final List<String> structs = listEmpty();
     public static List<List<String>> statements = listEmpty();
 
-    private static List<StructType> structNames = listEmpty();
+    private static List<StructType> structStack = listEmpty();
 
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
@@ -824,11 +874,11 @@ public class Main {
     }
 
     private static Option<String> generateStructure(String name, String content) {
-        structNames = structNames.addLast(new StructType(name));
+        structStack = structStack.addLast(new StructType(name));
         var compiled = compileStatements(content, Main::compileClassSegment);
 
 
-        structNames = structNames.removeLast();
+        structStack = structStack.removeLast();
 
         var generated = "struct " + name + " {" + compiled + "\n};\n";
         structs.addLast(generated);
@@ -872,8 +922,6 @@ public class Main {
             functionLocalCounter = 0;
         }
 
-        var outputDefinition = defined.generate();
-
         var afterParams = stripped.substring(paramStart + "(".length());
         var paramEnd = afterParams.indexOf(")");
         if (paramEnd < 0) {
@@ -889,17 +937,30 @@ public class Main {
         }
 
         var content = withBraces.substring(1, withBraces.length() - 1);
-        var newParams = parseValues(params, Main::parseParameter)
+        var oldParams = parseValues(params, Main::parseParameter)
                 .iter()
                 .filter(parameter -> !(parameter instanceof Whitespace))
                 .collect(new ListCollector<>());
 
-        var copy = Lists.<Defined>listEmpty()
-                .addLast(new Definition(structNames.last(), "this"))
-                .addAll(newParams);
+        var newParams = Lists.<Defined>listEmpty()
+                .addLast(new Definition(structStack.last(), "this"))
+                .addAll(oldParams);
 
-        var outputParams = generateValueList(copy);
-        return assembleMethod(outputDefinition, outputParams, content);
+        var outputParams = generateValueList(newParams);
+        return assembleMethod(defined, outputParams, content).map(method -> {
+            structStack = structStack.mapLast(last -> {
+                var paramTypes = newParams.iter()
+                        .map(Defined::findType)
+                        .flatMap(Iterators::fromOption)
+                        .collect(new ListCollector<>());
+
+                var name = defined.findName().orElse("?");
+                var type = defined.findType().orElse(Primitive.Auto);
+
+                return last.define(new Definition(new Functional(paramTypes, type), name));
+            });
+            return method;
+        });
     }
 
     private static <T extends Node> String generateValueList(List<T> copy) {
@@ -913,10 +974,10 @@ public class Main {
                 .orElse("");
     }
 
-    private static Option<String> assembleMethod(String definition, String outputParams, String content) {
+    private static Option<String> assembleMethod(Defined definition, String outputParams, String content) {
         var parsed = parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1));
 
-        var generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
+        var generated = definition.generate() + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
         methods.addLast(generated);
         return new Some<>("");
     }
@@ -1016,20 +1077,24 @@ public class Main {
 
     private static Type resolve(Value value) {
         return switch (value) {
-            case BooleanValue booleanValue -> Primitive.Bool;
-            case CharValue charValue -> Primitive.I8;
+            case BooleanValue _ -> Primitive.Bool;
+            case CharValue _ -> Primitive.I8;
             case Content content -> content;
             case DataAccess dataAccess -> resolveDataAccess(dataAccess);
             case Invocation invocation -> resolveInvocation(invocation);
-            case Not not -> Primitive.Bool;
+            case Not _ -> Primitive.Bool;
             case Operation operation -> resolve(operation.left);
-            case StringValue stringValue -> new Ref(Primitive.I8);
+            case StringValue _ -> new Ref(Primitive.I8);
             case Symbol symbol -> resolveSymbol(symbol);
-            case Whitespace whitespace -> Primitive.Void;
+            case Whitespace _ -> Primitive.Void;
         };
     }
 
-    private static Content resolveSymbol(Symbol symbol) {
+    private static Type resolveSymbol(Symbol symbol) {
+        if (symbol.value.equals("this")) {
+            return structStack.last();
+        }
+
         return new Content(symbol.value);
     }
 
@@ -1222,14 +1287,14 @@ public class Main {
         if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
             var content = afterArrow.substring(1, afterArrow.length() - 1);
             var name = generateName();
-            assembleMethod("auto " + name, params, content);
+            assembleMethod(new Definition(Primitive.Auto, name), params, content);
             return new Symbol(name);
         }
 
         var newValue = compileValue(afterArrow);
 
         var name = generateName();
-        assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
+        assembleMethod(new Definition(Primitive.Auto, name), params, "\n\treturn " + newValue + ";");
         return new Symbol(name);
     }
 
@@ -1293,9 +1358,7 @@ public class Main {
             return new Some<>(new Definition(parseType(beforeName), name));
         }
 
-        var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
         var type = divisions.last();
-
         return new Some<>(new Definition(parseType(type), name));
     }
 

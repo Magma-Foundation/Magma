@@ -2,6 +2,7 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 
 class Lists {
     public record JavaList<T>(java.util.List<T> elements) implements Main.List<T> {
@@ -69,6 +70,12 @@ class Lists {
         @Override
         public T removeAndGetLast() {
             return this.elements.removeLast();
+        }
+
+        @Override
+        public Main.List<T> mapLast(Function<T, T> mapper) {
+            this.elements.set(this.elements.size() - 1, mapper.apply(this.elements.getLast()));
+            return this;
         }
     }
 
