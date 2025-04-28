@@ -543,9 +543,27 @@ public class Main {
 
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
-            var argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                var caller = withoutEnd.substring(0, argsStart);
+
+            var divisions = divideAll(withoutEnd, new BiFunction<State, Character, State>() {
+                @Override
+                public State apply(State state, Character c) {
+                    var appended = state.append(c);
+                    if (c == '(') {
+                        var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
+                        return maybeAdvanced.enter();
+                    }
+                    if (c == ')') {
+                        return appended.exit();
+                    }
+                    return appended;
+                }
+            });
+
+            if (divisions.size() >= 2) {
+                var joined = join(divisions.subList(0, divisions.size() - 1), "");
+                var caller = joined.substring(0, joined.length() - ")".length());
+                var arguments = divisions.last();
+
                 String compiled;
                 if (caller.startsWith("new ")) {
                     compiled = compileType(caller.substring("new ".length()));
@@ -554,7 +572,6 @@ public class Main {
                     compiled = compileValue(caller);
                 }
 
-                var arguments = withoutEnd.substring(argsStart + "(".length());
                 return compiled + "(" + compileValues(arguments) + ")";
             }
         }
