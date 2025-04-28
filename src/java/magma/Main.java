@@ -592,13 +592,11 @@ public class Main {
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
+    private static List<Type> visitedExpansions = listEmpty();
     public static List<List<String>> statements = listEmpty();
-
     private static List<StructType> structStack = listEmpty();
-
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
-    private static List<Tuple<String, List<Type>>> expansions = listEmpty();
     private static List<Type> typeArguments = listEmpty();
     private static int functionLocalCounter = 0;
     private static List<Type> typeStack = Lists.listEmpty();
@@ -636,21 +634,7 @@ public class Main {
 
     private static String compileRoot(String input) {
         var compiled = compileStatements(input, Main::compileRootSegment);
-        var joinedExpansions = expansions.iter()
-                .map(tuple -> {
-                    if (expandables.containsKey(tuple.left)) {
-                        var expandable = expandables.get(tuple.left);
-                        return expandable.apply(tuple.right).orElse("");
-                    }
-                    else {
-                        var generated = new Generic(tuple.left, tuple.right).generate();
-                        return "// " + generated + ">\n";
-                    }
-                })
-                .collect(new Joiner())
-                .orElse("");
-
-        return compiled + join(structs) + joinedExpansions + join(methods);
+        return compiled + join(structs) + join(methods);
     }
 
     private static String join(List<String> list) {
@@ -1432,11 +1416,13 @@ public class Main {
                     return new Functional(Lists.listFrom(arg0, arg1), returns);
                 }
 
-                if (!expansions.contains(new Tuple<>(base, parsed))) {
-                    expansions = expansions.addLast(new Tuple<>(base, parsed));
+                var generic = new Generic(base, parsed);
+                if (!visitedExpansions.contains(generic) && expandables.containsKey(base)) {
+                    visitedExpansions = visitedExpansions.addLast(generic);
+                    expandables.get(base).apply(parsed);
                 }
 
-                return new Generic(base, parsed);
+                return generic;
             }
         }
 
