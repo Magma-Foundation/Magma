@@ -1143,7 +1143,8 @@ public class Main {
             symbol = parent;
         }
         else {
-            var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
+            var type = resolveValue(parent);
+            var statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
             statements.last().addLast(statement);
             symbol = new Symbol(name);
         }
