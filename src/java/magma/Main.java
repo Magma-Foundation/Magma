@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class Main {
     public static void main() {
@@ -19,6 +20,10 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
+        return compileAll(input, Main::compileRootSegment);
+    }
+
+    private static String compileAll(String input, Function<String, String> compiler) {
         var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -29,6 +34,11 @@ public class Main {
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else if (c == '}' && depth == 1) {
+                segments.add(buffer.toString());
+                buffer = new StringBuilder();
+                depth--;
             }
             else {
                 if (c == '{') {
@@ -43,7 +53,7 @@ public class Main {
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(compiler.apply(segment));
         }
 
         return output.toString();
@@ -65,12 +75,16 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return generatePlaceholder(beforeClass) + "struct " + name + " { " + generatePlaceholder(content) + "}";
+                    return generatePlaceholder(beforeClass) + "struct " + name + " { " + compileAll(content, Main::compileClassSegment) + "}";
                 }
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileClassSegment(String classSegment) {
+        return generatePlaceholder(classSegment);
     }
 
     private static String generatePlaceholder(String input) {
