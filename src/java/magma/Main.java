@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class Main {
+    public static final List<String> methods = new ArrayList<>();
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -20,7 +23,7 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compileAll(input, Main::compileRootSegment);
+        return compileAll(input, Main::compileRootSegment) + String.join("", methods);
     }
 
     private static String compileAll(String input, Function<String, String> compiler) {
@@ -83,8 +86,17 @@ public class Main {
         return generatePlaceholder(stripped);
     }
 
-    private static String compileClassSegment(String classSegment) {
-        return generatePlaceholder(classSegment);
+    private static String compileClassSegment(String input) {
+        var paramStart = input.indexOf("(");
+        if (paramStart >= 0) {
+            var beforeParams = input.substring(0, paramStart);
+            var afterParams = input.substring(paramStart + "(".length());
+            var generated = generatePlaceholder(beforeParams) + "(" + generatePlaceholder(afterParams);
+            methods.add(generated);
+            return "";
+        }
+
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String input) {
