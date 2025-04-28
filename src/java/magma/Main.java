@@ -133,13 +133,27 @@ public class Main {
     private static String compileDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
-        if(nameSeparator >= 0) {
+        if (nameSeparator >= 0) {
             var beforeName = stripped.substring(0, nameSeparator);
             var name = stripped.substring(nameSeparator + " ".length());
-            return generatePlaceholder(beforeName) + " " + name;
+            if (isSymbol(name)) {
+                return generatePlaceholder(beforeName) + " " + name;
+            }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip();
+        for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static String generatePlaceholder(String input) {
