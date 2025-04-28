@@ -1377,10 +1377,10 @@ public class Main {
         }
 
         switch (stripped) {
-            case "int", "boolean" -> {
+            case "int", "Integer", "boolean", "Boolean" -> {
                 return Primitive.I32;
             }
-            case "Character" -> {
+            case "char", "Character" -> {
                 return Primitive.I8;
             }
             case "void" -> {
