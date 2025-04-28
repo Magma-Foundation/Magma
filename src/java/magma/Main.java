@@ -836,7 +836,7 @@ public class Main {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
             if (isSymbol(beforeArrow)) {
-                return getSymbol(afterArrow, Lists.listFrom(beforeArrow));
+                return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
             }
             if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
                 var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
@@ -844,7 +844,7 @@ public class Main {
                         .filter(value -> !value.isEmpty())
                         .collect(new ListCollector<>());
 
-                return getSymbol(afterArrow, args);
+                return assembleLambda(afterArrow, args);
             }
         }
 
@@ -925,7 +925,7 @@ public class Main {
         return new Content(stripped);
     }
 
-    private static Symbol getSymbol(String afterArrow, List<String> names) {
+    private static Symbol assembleLambda(String afterArrow, List<String> names) {
         var params = names.iter()
                 .map(name -> "auto " + name)
                 .collect(new Joiner(", "))
@@ -937,13 +937,12 @@ public class Main {
             assembleMethod("auto " + name, params, content);
             return new Symbol(name);
         }
-        else {
-            var newValue = compileValue(afterArrow);
 
-            var name = generateName();
-            assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
-            return new Symbol(name);
-        }
+        var newValue = compileValue(afterArrow);
+
+        var name = generateName();
+        assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
+        return new Symbol(name);
     }
 
     private static String generateName() {
@@ -1047,6 +1046,9 @@ public class Main {
             }
             case "String" -> {
                 return "char*";
+            }
+            case "var" -> {
+                return "auto";
             }
         }
 
