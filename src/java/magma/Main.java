@@ -498,7 +498,7 @@ public class Main {
 
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
-                    var outputParams = generateValues(parseValues(params, Main::compileDefinitionOrPlaceholder));
+                    var outputParams = generateValues(parseValues(params, Main::compileParameter));
                     var generated = compileDefinitionOrPlaceholder(definition) + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
                     methods.add(generated);
                     return new Some<>("");
@@ -509,6 +509,13 @@ public class Main {
             }
         }
         return new None<>();
+    }
+
+    private static String compileParameter(String input) {
+        if (input.isBlank()) {
+            return "";
+        }
+        return compileDefinitionOrPlaceholder(input);
     }
 
     private static String compileFunctionSegment(String input) {

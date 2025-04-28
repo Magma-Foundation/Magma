@@ -24,25 +24,25 @@
 /* private static */ struct State fromInput(char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
-/* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(/*  */){
+/* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(){
 	return /* this.pop */(/* ).map */(/* tuple -> new Tuple<> */(/* tuple.left */, /* tuple.right.append(tuple.left */)));
 }
-/* private */ struct boolean isLevel(/*  */){
+/* private */ struct boolean isLevel(){
 	return /* this.depth == 0 */;
 }
-/* private */ struct State enter(/*  */){
+/* private */ struct State enter(){
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer */, /* this.depth + 1 */, /* this.index */);
 }
-/* private */ struct State exit(/*  */){
+/* private */ struct State exit(){
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer */, /* this.depth - 1 */, /* this.index */);
 }
-/* private */ struct State advance(/*  */){
+/* private */ struct State advance(){
 	return struct State(/* this.input */, /* this.segments.add */(/* this.buffer */), "", /* this.depth */, /* this.index */);
 }
-/* private */ struct boolean isShallow(/*  */){
+/* private */ struct boolean isShallow(){
 	return /* this.depth == 1 */;
 }
-/* private */ Option<Tuple<char, struct State>> pop(/*  */){
+/* private */ Option<Tuple<char, struct State>> pop(){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
@@ -52,21 +52,21 @@
 /* private */ struct State append(struct char c){
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer + c */, /* this.depth */, /* this.index */);
 }
-/* public */ Option<struct State> popAndAppend(/*  */){
+/* public */ Option<struct State> popAndAppend(){
 	return /* this.popAndAppendToTuple */(/* ).map(Tuple::right */);
 }
-struct private Joiner(/*  */){
+struct private Joiner(){
 	/* this(""); */
 }
 /* @Override
-        public */ Option<char*> createInitial(/*  */){
+        public */ Option<char*> createInitial(){
 	return None</*  */>();
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
 	return Some</*  */>(/* current.map */(/* inner -> inner + this.delimiter + element).orElse(element */));
 }
-/* public static */ void main(/*  */){
+/* public static */ void main(){
 	/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -272,7 +272,7 @@ struct private Joiner(/*  */){
 
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
-                    var outputParams = generateValues(parseValues(params, Main::compileDefinitionOrPlaceholder));
+                    var outputParams = generateValues(parseValues(params, Main::compileParameter));
                     var generated = compileDefinitionOrPlaceholder(definition) + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
                     methods.add(generated);
                     return new Some<>("");
@@ -283,6 +283,12 @@ struct private Joiner(/*  */){
             }
         } */
 	return None</*  */>();
+}
+/* private static */ char* compileParameter(char* input){
+	/* if (input.isBlank()) {
+            return "";
+        } */
+	return compileDefinitionOrPlaceholder(input);
 }
 /* private static */ char* compileFunctionSegment(char* input){
 	/* var stripped = input.strip(); */
@@ -472,7 +478,7 @@ struct private Joiner(/*  */){
 	return Some</*  */>(/* mapper.apply */(/* this.value */));
 }
 /* @Override
-        public */ struct boolean isPresent(/*  */){
+        public */ struct boolean isPresent(){
 	return true;
 }
 /* @Override
@@ -480,7 +486,7 @@ struct private Joiner(/*  */){
 	return /* this.value */;
 }
 /* @Override
-        public */ struct boolean isEmpty(/*  */){
+        public */ struct boolean isEmpty(){
 	return false;
 }
 /* @Override
@@ -500,7 +506,7 @@ struct private Joiner(/*  */){
 	return None</*  */>();
 }
 /* @Override
-        public */ struct boolean isPresent(/*  */){
+        public */ struct boolean isPresent(){
 	return false;
 }
 /* @Override
@@ -508,7 +514,7 @@ struct private Joiner(/*  */){
 	return other;
 }
 /* @Override
-        public */ struct boolean isEmpty(/*  */){
+        public */ struct boolean isEmpty(){
 	return true;
 }
 /* @Override
