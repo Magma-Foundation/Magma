@@ -27,35 +27,35 @@
 	return struct State(input, listEmpty(), "", 0, 0);
 }
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(){
-	return /* this.pop().map */(/* tuple -> new Tuple<> */(/* tuple.left */, /* tuple.right.append */(/* tuple.left */)));
+	return this.pop().map(/* tuple -> new Tuple<> */(tuple.left, tuple.right.append(tuple.left)));
 }
 /* private */ struct boolean isLevel(){
-	return /* this.depth == 0 */;
+	return this.depth == 0;
 }
 /* private */ struct State enter(){
-	return struct State(/* this.input */, /* this.segments */, /* this.buffer */, /* this.depth + 1 */, /* this.index */);
+	return struct State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
 }
 /* private */ struct State exit(){
-	return struct State(/* this.input */, /* this.segments */, /* this.buffer */, /* this.depth - 1 */, /* this.index */);
+	return struct State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
 }
 /* private */ struct State advance(){
-	return struct State(/* this.input */, /* this.segments.add */(/* this.buffer */), "", /* this.depth */, /* this.index */);
+	return struct State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
 }
 /* private */ struct boolean isShallow(){
-	return /* this.depth == 1 */;
+	return this.depth == 1;
 }
 /* private */ Option<Tuple<char, struct State>> pop(){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
 	/* var escaped = this.input.charAt(this.index); */
-	return Some</*  */>(/* new Tuple<Character, State>(escaped */, /* new State(this.input */, /* this.segments */, /* this.buffer */, /* this.depth */, /* this.index + 1)) */);
+	return Some</*  */>(/* new Tuple<Character, State>(escaped */, /* new State(this */.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
 /* private */ struct State append(struct char c){
-	return struct State(/* this.input */, /* this.segments */, /* this.buffer + c */, /* this.depth */, /* this.index */);
+	return struct State(this.input, this.segments, this.buffer + c, this.depth, this.index);
 }
 /* public */ Option<struct State> popAndAppend(){
-	return /* this.popAndAppendToTuple().map */(/* Tuple::right */);
+	return this.popAndAppendToTuple().map(/* Tuple::right */);
 }
 struct private Joiner(){
 	/* this(""); */
@@ -66,7 +66,7 @@ struct private Joiner(){
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
-	return Some</*  */>(/* current.map(inner -> inner + this.delimiter + element).orElse */(element));
+	return Some</*  */>(current.map(/* inner -> inner + this */.delimiter + element).orElse(element));
 }
 /* public static */ void main(){
 	/* try {
@@ -101,7 +101,7 @@ struct private Joiner(){
 	return join(list, "");
 }
 /* private static */ char* join(List<char*> list, char* delimiter){
-	return /* list.iter().collect(new Joiner(delimiter)).orElse */("");
+	return list.iter().collect(struct Joiner(delimiter)).orElse("");
 }
 /* private static */ char* compileStatements(char* input, Function<char*, char*> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
@@ -110,14 +110,10 @@ struct private Joiner(){
 	return generateAll(merger, /* parseAll(input */, folder, /* compiler) */);
 }
 /* private static */ char* generateAll(BiFunction<char*, char*, char*> merger, List<char*> parsed){
-	return /* parsed.iter()
-                .foldRight */("", merger);
+	return parsed.iter().foldRight("", merger);
 }
 /* private static */ List<char*> parseAll(char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler){
-	return /* divideAll(input, folder)
-                .iter()
-                .map(compiler)
-                .collect */(ListCollector</*  */>());
+	return divideAll(input, folder).iter().map(compiler).collect(ListCollector</*  */>());
 }
 /* private static */ char* mergeStatements(char* buffer, char* element){
 	return /* buffer + element */;
@@ -137,16 +133,14 @@ struct private Joiner(){
             state = foldSingleQuotes(withoutNext, next)
                     .orElseGet(() -> folder.apply(withoutNext, next));
         } */
-	return /* state.advance().segments */;
+	return state.advance().segments;
 }
 /* private static */ Option<struct State> foldSingleQuotes(struct State state, struct char next){
 	/* if (next != '\'') {
             return new None<>();
         } */
 	/* var appended = state.append(next); */
-	return /* appended.popAndAppendToTuple()
-                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right))
-                .flatMap */(/* State::popAndAppend */);
+	return appended.popAndAppendToTuple().flatMap(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right)).flatMap(/* State::popAndAppend */);
 }
 /* private static */ struct State foldStatementChar(struct State state, struct char c){
 	/* var appended = state.append(c); */
@@ -172,7 +166,7 @@ struct private Joiner(){
 	/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         } */
-	return /* compileClass(stripped).orElseGet */(/* () -> generatePlaceholder */(stripped));
+	return compileClass(stripped).orElseGet(/* () -> generatePlaceholder */(stripped));
 }
 /* private static */ Option<char*> compileClass(char* stripped){
 	return compileStructure(stripped, "class ");
@@ -245,12 +239,7 @@ struct private Joiner(){
 	/* if (stripped.isEmpty()) {
             return "";
         } */
-	return /* compileStructure(stripped, "record ")
-                .or(() -> compileStructure(stripped, "interface "))
-                .or(() -> compileClass(stripped))
-                .or(() -> compileMethod(stripped))
-                .or(() -> compileDefinitionStatement(stripped))
-                .orElseGet */(/* () -> generatePlaceholder */(stripped));
+	return compileStructure(stripped, "record ").or(/* () -> compileStructure */(stripped, "interface ")).or(/* () -> compileClass */(stripped)).or(/* () -> compileMethod */(stripped)).or(/* () -> compileDefinitionStatement */(stripped)).orElseGet(/* () -> generatePlaceholder */(stripped));
 }
 /* private static */ Option<char*> compileDefinitionStatement(char* input){
 	/* var stripped = input.strip(); */
@@ -352,6 +341,12 @@ struct private Joiner(){
 	/* if (isNumber(stripped)) {
             return stripped;
         } */
+	/* var separator = stripped.lastIndexOf("."); */
+	/* if(separator >= 0) {
+            var value = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            return compileValue(value) + "." + property;
+        } */
 	return generatePlaceholder(stripped);
 }
 /* private static */ struct boolean isNumber(char* input){
@@ -370,7 +365,7 @@ struct private Joiner(){
 	return generateValues(/* parseValues(input */, /* Main::compileValue) */);
 }
 /* private static */ char* compileDefinitionOrPlaceholder(char* input){
-	return /* compileDefinition(input).orElseGet */(/* () -> generatePlaceholder */(input));
+	return compileDefinition(input).orElseGet(/* () -> generatePlaceholder */(input));
 }
 /* private static */ Option<char*> compileDefinition(char* input){
 	/* var stripped = input.strip(); */
@@ -494,7 +489,7 @@ struct private Joiner(){
 }
 /* @Override
         public <R> */ Option<struct R> map(Function</*  */, struct R> mapper){
-	return Some</*  */>(/* mapper.apply */(/* this.value */));
+	return Some</*  */>(mapper.apply(this.value));
 }
 /* @Override
         public */ struct boolean isPresent(){
@@ -502,7 +497,7 @@ struct private Joiner(){
 }
 /* @Override
         public */ /*  */ orElse(/*  */ other){
-	return /* this.value */;
+	return this.value;
 }
 /* @Override
         public */ struct boolean isEmpty(){
@@ -510,11 +505,11 @@ struct private Joiner(){
 }
 /* @Override
         public */ /*  */ orElseGet(Supplier</*  */> supplier){
-	return /* this.value */;
+	return this.value;
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(Function</*  */, Option<struct R>> mapper){
-	return /* mapper.apply */(/* this.value */);
+	return mapper.apply(this.value);
 }
 /* @Override
         public */ Option</*  */> or(Supplier<Option</*  */>> supplier){
@@ -538,7 +533,7 @@ struct private Joiner(){
 }
 /* @Override
         public */ /*  */ orElseGet(Supplier</*  */> supplier){
-	return /* supplier.get */();
+	return supplier.get();
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(Function</*  */, Option<struct R>> mapper){
@@ -546,7 +541,7 @@ struct private Joiner(){
 }
 /* @Override
         public */ Option</*  */> or(Supplier<Option</*  */>> supplier){
-	return /* supplier.get */();
+	return supplier.get();
 }
 /* @Override
         public */ List<struct T> createInitial(){
@@ -554,5 +549,5 @@ struct private Joiner(){
 }
 /* @Override
         public */ List<struct T> fold(List<struct T> current, struct T element){
-	return /* current.add */(element);
+	return current.add(element);
 }

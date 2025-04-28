@@ -584,6 +584,13 @@ public class Main {
             return stripped;
         }
 
+        var separator = stripped.lastIndexOf(".");
+        if(separator >= 0) {
+            var value = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            return compileValue(value) + "." + property;
+        }
+
         return generatePlaceholder(stripped);
     }
 
