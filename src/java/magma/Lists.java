@@ -55,6 +55,11 @@ class Lists {
         public T last() {
             return this.elements.getLast();
         }
+
+        @Override
+        public Main.List<T> addAll(Main.List<T> elements) {
+            return elements.iter().<Main.List<T>>fold(this, Main.List::add);
+        }
     }
 
     public static <T> Main.List<T> listEmpty() {

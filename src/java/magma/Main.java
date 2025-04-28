@@ -48,6 +48,8 @@ public class Main {
         List<T> subList(int startInclusive, int endExclusive);
 
         T last();
+
+        List<T> addAll(List<T> elements);
     }
 
     private interface Head<T> {
@@ -144,10 +146,10 @@ public class Main {
         }
 
         public <C> C collect(Collector<T, C> collector) {
-            return this.foldRight(collector.createInitial(), collector::fold);
+            return this.fold(collector.createInitial(), collector::fold);
         }
 
-        private <R> R foldRight(R initial, BiFunction<R, T, R> folder) {
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
             while (true) {
                 R finalCurrent = current;
@@ -269,7 +271,7 @@ public class Main {
         @Override
         public String generate() {
             var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
-            return joined + " " + this.type() + " " + this.name();
+            return joined + this.type() + " " + this.name();
         }
     }
 
@@ -290,7 +292,10 @@ public class Main {
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
+
+    private static String structName = "";
     private static String functionName = "";
+
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<String>>> expansions = listEmpty();
     private static List<String> typeArguments = listEmpty();
@@ -349,7 +354,7 @@ public class Main {
 
     private static String generateAll(BiFunction<String, String, String> merger, List<String> parsed) {
         return parsed.iter()
-                .foldRight("", merger);
+                .fold("", merger);
     }
 
     private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
@@ -489,7 +494,10 @@ public class Main {
     }
 
     private static Option<String> generateStructure(String name, String beforeClass, String content) {
-        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+        structName = name;
+
+        var compiled = compileStatements(content, Main::compileClassSegment);
+        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n";
         structs.add(generated);
         return new Some<>("");
     }
@@ -547,7 +555,13 @@ public class Main {
         }
 
         var content = withBraces.substring(1, withBraces.length() - 1);
-        var outputParams = generateValues(parseValues(params, Main::compileParameter));
+        var newParams = parseValues(params, Main::compileParameter);
+
+        var copy = Lists.<String>listEmpty()
+                .add("struct " + structName + " this")
+                .addAll(newParams);
+
+        var outputParams = generateValues(copy);
 
         return assembleMethod(outputDefinition, outputParams, content);
     }
