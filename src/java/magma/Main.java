@@ -394,7 +394,7 @@ public class Main {
     private record Operation(Value left, Operator operator, Value right) implements Value {
         @Override
         public String generate() {
-            return this.left.generate() + " " + this.operator.representation + " " + this.right;
+            return this.left.generate() + " " + this.operator.representation + " " + this.right.generate();
         }
     }
 
