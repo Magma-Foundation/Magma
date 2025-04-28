@@ -511,9 +511,9 @@ public class Main {
             return "";
         }
 
-        if(stripped.endsWith(";")) {
+        if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            if(withoutEnd.startsWith("return ")) {
+            if (withoutEnd.startsWith("return ")) {
                 var value = withoutEnd.substring("return ".length());
                 return "\n\treturn " + compileValue(value) + ";";
             }
@@ -522,8 +522,31 @@ public class Main {
         return "\n\t" + generatePlaceholder(stripped);
     }
 
-    private static String compileValue(String value) {
-        return generatePlaceholder(value);
+    private static String compileValue(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
+            var argsStart = withoutEnd.indexOf("(");
+            if (argsStart >= 0) {
+                var caller = withoutEnd.substring(0, argsStart);
+                String compiled;
+                if (caller.startsWith("new ")) {
+                    compiled = compileType(caller.substring("new ".length()));
+                }
+                else {
+                    compiled = compileValue(caller);
+                }
+
+                var arguments = withoutEnd.substring(argsStart + "(".length());
+                return compiled + "(" + compileValues(arguments) + ")";
+            }
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String compileValues(String input) {
+        return generateValues(parseValues(input, Main::compileValue));
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {
