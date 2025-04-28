@@ -86,6 +86,9 @@ public class Main {
         AND("&&"),
         EQUALS("=="),
         NOT_EQUALS("!="),
+        LESS_THAN("<"),
+        LESS_THAN_OR_EQUALS_TO("<="),
+        GREATER_THAN(">"),
         GREATER_THAN_OR_EQUALS_TO(">=");
 
         private final String representation;

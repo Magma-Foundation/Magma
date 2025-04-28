@@ -319,15 +319,15 @@ Option<char*> compileClass(struct Main this, char* stripped){
 }
 Option<char*> compileStructure(struct Main this, char* input, char* infix){
 	auto classIndex = input.indexOf(input, infix);
-	if (classIndex >= 0){
+	if (classIndex > /* = 0 */){
 	auto compileStructure_local2 = input.substring(input, 0, classIndex);
 	auto compileStructure_local3 = classIndex + infix;
 		auto beforeClass = compileStructure_local2.strip(compileStructure_local2);
 		auto afterClass = input.substring(input, compileStructure_local3.length(compileStructure_local3));
 		auto contentStart = afterClass.indexOf(afterClass, "{");
-		if (contentStart >= 0){
+		if (contentStart > /* = 0 */){
 	auto compileStructure_local7 = afterClass.substring(afterClass, 0, contentStart);
-	auto compileStructure_local9 = permitsIndex >= /* 0
+	auto compileStructure_local9 = permitsIndex > /* = 0
                         ? beforeContent */;
 	auto compileStructure_local11 = contentStart + "{";
 	auto compileStructure_local13 = afterClass.substring(afterClass, compileStructure_local11.length(compileStructure_local11));
@@ -337,7 +337,7 @@ Option<char*> compileStructure(struct Main this, char* input, char* infix){
                         : beforeContent;
 			auto paramStart = withoutPermits.indexOf(withoutPermits, "(");
 			auto withEnd = compileStructure_local13.strip(compileStructure_local13);
-			if (paramStart >= 0){
+			if (paramStart > /* = 0 */){
 	auto compileStructure_local15 = withoutPermits.substring(withoutPermits, 0, paramStart);
 				char* withoutParams = compileStructure_local15.strip(compileStructure_local15);
 				return getString(withoutParams, beforeClass, withEnd);
@@ -359,7 +359,7 @@ Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass
 	if (strippedBeforeContent.endsWith(strippedBeforeContent, ">")){
 		auto withoutEnd = strippedBeforeContent.substring(strippedBeforeContent, 0, strippedBeforeContent.length() - ">".length(strippedBeforeContent.length() - ">"));
 		auto typeParamStart = withoutEnd.indexOf(withoutEnd, "<");
-		if (typeParamStart >= 0){
+		if (typeParamStart > /* = 0 */){
 	auto getString_local8 = withoutEnd.substring(withoutEnd, 0, typeParamStart);
 	auto getString_local9 = typeParamStart + "<";
 			auto name = getString_local8.strip(getString_local8);
@@ -376,7 +376,7 @@ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* 
 		/* -> { */ typeParameters = /* typeParams;
                 typeArguments = typeArgs;
 
-                var newName = name */ + "<" + join(typeArgs, ", ") + /* ">";
+                var newName = name */ + "<" + join(typeArgs, ", ") + /* " */ > /* ";
                 return generateStructure */(newName, beforeClass, /* content);
             } */);
 		return Some</*  */>("");
@@ -439,7 +439,7 @@ Option<char*> compileMethod(struct Main this, char* stripped){
 	auto compileMethod_local17 = Lists.<Defined>listEmpty(Lists);
 	auto compileMethod_local18 = compileMethod_local17.addLast(compileMethod_local17, struct Definition(compileMethod_local16.last(compileMethod_local16), "this"));
 	auto paramStart = stripped.indexOf(stripped, "(");
-	if (/* paramStart < 0 */){
+	if (paramStart < 0){
 		return None</*  */>();
 	}
 	auto inputDefinition = stripped.substring(stripped, 0, paramStart);
@@ -451,7 +451,7 @@ Option<char*> compileMethod(struct Main this, char* stripped){
 	auto outputDefinition = defined.generate(defined);
 	auto afterParams = stripped.substring(stripped, compileMethod_local3.length(compileMethod_local3));
 	auto paramEnd = afterParams.indexOf(afterParams, ")");
-	if (/* paramEnd < 0 */){
+	if (paramEnd < 0){
 		return None</*  */>();
 	}
 	auto params = afterParams.substring(afterParams, 0, paramEnd);
@@ -536,11 +536,11 @@ char* compileFunctionSegment(struct Main this, char* input, int depth){
 	if (stripped.endsWith(stripped, "}")){
 		auto withoutEnd = stripped.substring(stripped, 0, stripped.length() - "}".length(stripped.length() - "}"));
 		auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
-		if (contentStart >= 0){
+		if (contentStart > /* = 0 */){
 	auto compileFunctionSegment_local11 = contentStart + "{";
 			auto beforeBlock = withoutEnd.substring(withoutEnd, 0, contentStart);
 			auto content = withoutEnd.substring(withoutEnd, compileFunctionSegment_local11.length(compileFunctionSegment_local11));
-			auto outputContent = parseStatementsWithLocals(content, /* input1 -> compileFunctionSegment */(/* input1 */, depth + 1));
+			auto outputContent = parseStatementsWithLocals(content, /* input1 - */ > compileFunctionSegment(/* input1 */, depth + 1));
 			return indent + compileBeforeBlock(beforeBlock) + "{" + join(outputContent) + indent + "}";
 		}
 	}
@@ -557,7 +557,7 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 		return Some</*  */>("return " + compileValue(value));
 	}
 	auto valueSeparator = stripped.indexOf(stripped, "=");
-	if (valueSeparator >= 0){
+	if (valueSeparator > /* = 0 */){
 	auto compileStatementValue_local7 = valueSeparator + "=";
 		auto definition = stripped.substring(stripped, 0, valueSeparator);
 		auto value = stripped.substring(stripped, compileStatementValue_local7.length(compileStatementValue_local7));
@@ -571,7 +571,7 @@ auto parseAssignable_local1(){
 }
 struct Assignable parseAssignable(struct Main this, char* definition){
 	auto parseAssignable_local0 = parseDefinition(definition);
-	auto parseAssignable_local2 = parseAssignable_local0.<Assignable>map(parseAssignable_local0, /* value1 -> value1 */);
+	auto parseAssignable_local2 = parseAssignable_local0.<Assignable>map(parseAssignable_local0, /* value1 - */ > /* value1 */);
 	return parseAssignable_local2.orElseGet(parseAssignable_local2, parseAssignable_local1);
 }
 auto compileBeforeBlock_local2(){
@@ -623,7 +623,7 @@ struct Value parseValue(struct Main this, char* input){
 		return BooleanValue.True;
 	}
 	auto arrowIndex = stripped.indexOf(stripped, "->");
-	if (arrowIndex >= 0){
+	if (arrowIndex > /* = 0 */){
 	auto parseValue_local6 = stripped.substring(stripped, 0, arrowIndex);
 	auto parseValue_local7 = arrowIndex + "->";
 	auto parseValue_local9 = stripped.substring(stripped, parseValue_local7.length(parseValue_local7));
@@ -688,7 +688,7 @@ struct Value parseValue(struct Main this, char* input){
 		return struct Symbol(stripped);
 	}
 	auto separator = stripped.lastIndexOf(stripped, /* " */.");
-	if (separator >= 0){
+	if (separator > /* = 0 */){
 	auto parseValue_local44 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
 		auto value = stripped.substring(stripped, 0, separator);
 		auto property = parseValue_local44.strip(parseValue_local44);
@@ -705,7 +705,7 @@ struct Value parseValue(struct Main this, char* input){
 	}
 	/* for (var operator : Operator.values()) */{
 		auto operatorIndex = stripped.indexOf(stripped, operator.representation);
-		if (operatorIndex >= 0){
+		if (operatorIndex > /* = 0 */){
 			auto left = stripped.substring(stripped, 0, operatorIndex);
 			auto right = stripped.substring(stripped, operatorIndex + operator.representation.length(operatorIndex + operator.representation));
 			return struct Operation(parseValue(left), operator, parseValue(right));
@@ -781,7 +781,7 @@ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	auto parseDefinition_local3 = nameSeparator + " ";
 	auto stripped = input.strip(input);
 	auto nameSeparator = stripped.lastIndexOf(stripped, " ");
-	if (/* nameSeparator < 0 */){
+	if (nameSeparator < 0){
 		return None</*  */>();
 	}
 	auto beforeName = stripped.substring(stripped, 0, nameSeparator);
@@ -838,7 +838,7 @@ char* compileType(struct Main this, char* input){
 	if (stripped.endsWith(stripped, ">")){
 		auto withoutEnd = stripped.substring(stripped, 0, stripped.length() - ">".length(stripped.length() - ">"));
 		auto index = withoutEnd.indexOf(withoutEnd, "<");
-		if (index >= 0){
+		if (index > /* = 0 */){
 	auto compileType_local9 = withoutEnd.substring(withoutEnd, 0, index);
 	auto compileType_local10 = index + "<";
 	auto compileType_local20 = !expansions;
@@ -989,7 +989,7 @@ struct R fold(struct Iterator<struct T> this, struct R initial, struct R (*)(str
 	}
 }
 auto filter_local1(auto element){
-	return /* Iterator</*  */> */(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>(predicate, predicate));
+	return Iterator < /* /*  */ */ > (predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>(predicate, predicate));
 }
 Iterator<struct T> filter(struct Iterator<struct T> this, Predicate<struct T> predicate){
 	return this.flatMap(this, filter_local1);
