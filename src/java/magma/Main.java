@@ -75,7 +75,7 @@ public class Main {
         String generate();
     }
 
-    private interface Value extends Assignable {
+    private sealed interface Value extends Assignable {
     }
 
     private interface Node {
@@ -130,7 +130,8 @@ public class Main {
         I32("int"),
         I8("char"),
         Void("void"),
-        Auto("auto");
+        Auto("auto"),
+        Bool("int");
         private final String value;
 
         Primitive(String value) {
@@ -418,7 +419,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Defined, Value {
+    private static final class Whitespace implements Defined, Value {
         @Override
         public String generate() {
             return "";
@@ -493,7 +494,11 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
     }
 
-    private record StructType(String name) implements Type {
+    private record StructType(String name, Map<String, Type> properties) implements Type {
+        public StructType(String name) {
+            this(name, new HashMap<>());
+        }
+
         @Override
         public String generate() {
             return "struct " + this.name;
@@ -502,6 +507,15 @@ public class Main {
         @Override
         public String stringify() {
             return this.name;
+        }
+
+        public Option<Type> find(String property) {
+            if (this.properties.containsKey(property)) {
+                return new Some<>(this.properties.get(property));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -551,7 +565,9 @@ public class Main {
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
     public static List<List<String>> statements = listEmpty();
-    private static List<String> structNames = listEmpty();
+
+    private static List<StructType> structNames = listEmpty();
+
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<Type>>> expansions = listEmpty();
@@ -808,8 +824,10 @@ public class Main {
     }
 
     private static Option<String> generateStructure(String name, String content) {
-        structNames = structNames.addLast(name);
+        structNames = structNames.addLast(new StructType(name));
         var compiled = compileStatements(content, Main::compileClassSegment);
+
+
         structNames = structNames.removeLast();
 
         var generated = "struct " + name + " {" + compiled + "\n};\n";
@@ -877,7 +895,7 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var copy = Lists.<Defined>listEmpty()
-                .addLast(new Definition(new StructType(structNames.last()), "this"))
+                .addLast(new Definition(structNames.last(), "this"))
                 .addAll(newParams);
 
         var outputParams = generateValueList(copy);
@@ -976,7 +994,7 @@ public class Main {
             var assignable = parseAssignable(assignableString);
             var value = parseValue(valueString);
 
-            var type = resolveValue(value);
+            var type = resolve(value);
 
             Assignable newAssignable;
             if (assignable instanceof Definition definition) {
@@ -996,8 +1014,47 @@ public class Main {
         return new None<>();
     }
 
-    private static Type resolveValue(Value value) {
-        return new Content(value.generate());
+    private static Type resolve(Value value) {
+        return switch (value) {
+            case BooleanValue booleanValue -> Primitive.Bool;
+            case CharValue charValue -> Primitive.I8;
+            case Content content -> content;
+            case DataAccess dataAccess -> resolveDataAccess(dataAccess);
+            case Invocation invocation -> resolveInvocation(invocation);
+            case Not not -> Primitive.Bool;
+            case Operation operation -> resolve(operation.left);
+            case StringValue stringValue -> new Ref(Primitive.I8);
+            case Symbol symbol -> resolveSymbol(symbol);
+            case Whitespace whitespace -> Primitive.Void;
+        };
+    }
+
+    private static Content resolveSymbol(Symbol symbol) {
+        return new Content(symbol.value);
+    }
+
+    private static Type resolveInvocation(Invocation invocation) {
+        var caller = invocation.caller;
+        var resolvedCaller = resolve(caller);
+        if (resolvedCaller instanceof Functional functional) {
+            return functional.returns;
+        }
+        else {
+            return new Content(invocation.generate());
+        }
+    }
+
+    private static Type resolveDataAccess(DataAccess dataAccess) {
+        var parent = dataAccess.parent;
+        var resolved = resolve(parent);
+        if (resolved instanceof StructType structType) {
+            Option<Type> typeOption = structType.find(dataAccess.property);
+            if (typeOption instanceof Some<Type>(var propertyType)) {
+                return propertyType;
+            }
+        }
+
+        return new Content(dataAccess.generate());
     }
 
     private static Assignable parseAssignable(String definition) {
@@ -1143,7 +1200,7 @@ public class Main {
             symbol = parent;
         }
         else {
-            var type = resolveValue(parent);
+            var type = resolve(parent);
             var statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
             statements.last().addLast(statement);
             symbol = new Symbol(name);

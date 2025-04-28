@@ -64,6 +64,8 @@ struct Option_i8_star {
 };
 struct Iterator_T {
 };
+struct Option_Type {
+};
 struct Option_IOException {
 };
 struct Result_i8_star_IOException {
@@ -84,6 +86,7 @@ struct Option_Invocation {
 };
 struct Option_Definition {
 };
+// HashMap</*  */>>
 struct State fromInput(struct State this, char* input){
 	return State(input, listEmpty(), "", 0, 0);
 }
@@ -186,11 +189,22 @@ char* generate(struct CharValue this){
 char* generate(struct Not this){
 	return "!" + this.value.generate("!" + this.value);
 }
+struct public StructType(struct StructType this, char* name){
+	this(name, HashMap_/*  */());
+}
 char* generate(struct StructType this){
 	return "struct " + this.name;
 }
 char* stringify(struct StructType this){
 	return this.name;
+}
+Option<struct Type> find(struct StructType this, char* property){
+	if (this.properties.containsKey(this.properties, property)){
+		return Some_/*  */(this.properties.get(this.properties, property));
+	}
+	else {
+		return None_/*  */();
+	}
 }
 char* generate(struct Generic this){
 	return this.base + "<" + generateValueList(this.args) + ">";
@@ -356,8 +370,8 @@ Option<struct State> foldSingleQuotes(struct Main this, struct State state, stru
 	return foldSingleQuotes_local6.flatMap(foldSingleQuotes_local6, /* State::popAndAppend */);
 }
 struct State foldStatementChar(struct Main this, struct State state, struct char c){
-	/* c == ';' && appended */ foldStatementChar_local2 = c == ';' && appended;
-	/* c == '}' && appended */ foldStatementChar_local5 = c == '}' && appended;
+	/* c */ foldStatementChar_local2 = c == ';' && appended;
+	/* c */ foldStatementChar_local5 = c == '}' && appended;
 	/* state.append(state, c) */ appended = state.append(state, c);
 	if (foldStatementChar_local2.isLevel(foldStatementChar_local2)){
 		return appended.advance(appended);
@@ -396,15 +410,14 @@ Option<char*> compileClass(struct Main this, char* stripped){
 Option<char*> compileStructure(struct Main this, char* input, char* infix){
 	/* input.indexOf(input, infix) */ classIndex = input.indexOf(input, infix);
 	if (classIndex >= 0){
-	/* classIndex + infix */ compileStructure_local1 = classIndex + infix;
+	/* classIndex */ compileStructure_local1 = classIndex + infix;
 		/* input.substring(input, compileStructure_local1.length(compileStructure_local1)) */ afterClass = input.substring(input, compileStructure_local1.length(compileStructure_local1));
 		/* afterClass.indexOf(afterClass, "{") */ contentStart = afterClass.indexOf(afterClass, "{");
 		if (contentStart >= 0){
 	/* afterClass.substring(afterClass, 0, contentStart) */ compileStructure_local5 = afterClass.substring(afterClass, 0, contentStart);
-	/* permitsIndex >= /* 0
-                        ? beforeContent */ */ compileStructure_local7 = permitsIndex >= /* 0
+	/* permitsIndex */ compileStructure_local7 = permitsIndex >= /* 0
                         ? beforeContent */;
-	/* contentStart + "{" */ compileStructure_local9 = contentStart + "{";
+	/* contentStart */ compileStructure_local9 = contentStart + "{";
 	/* afterClass.substring(afterClass, compileStructure_local9.length(compileStructure_local9)) */ compileStructure_local11 = afterClass.substring(afterClass, compileStructure_local9.length(compileStructure_local9));
 			/* compileStructure_local5.strip(compileStructure_local5) */ beforeContent = compileStructure_local5.strip(compileStructure_local5);
 			/* beforeContent.indexOf(beforeContent, " permits") */ permitsIndex = beforeContent.indexOf(beforeContent, " permits");
@@ -426,7 +439,7 @@ Option<char*> compileStructure(struct Main this, char* input, char* infix){
 	return None_/*  */();
 }
 Option<char*> getString(struct Main this, char* beforeContent, char* withEnd){
-	/* !withEnd */ getString_local0 = !withEnd;
+	int getString_local0 = !withEnd;
 	if (getString_local0.endsWith(getString_local0, "}")){
 		return None_/*  */();
 	}
@@ -437,7 +450,7 @@ Option<char*> getString(struct Main this, char* beforeContent, char* withEnd){
 		/* withoutEnd.indexOf(withoutEnd, "<") */ typeParamStart = withoutEnd.indexOf(withoutEnd, "<");
 		if (typeParamStart >= 0){
 	/* withoutEnd.substring(withoutEnd, 0, typeParamStart) */ getString_local8 = withoutEnd.substring(withoutEnd, 0, typeParamStart);
-	/* typeParamStart + "<" */ getString_local9 = typeParamStart + "<";
+	/* typeParamStart */ getString_local9 = typeParamStart + "<";
 			/* getString_local8.strip(getString_local8) */ name = getString_local8.strip(getString_local8);
 			/* withoutEnd.substring(withoutEnd, getString_local9.length(getString_local9)) */ substring = withoutEnd.substring(withoutEnd, getString_local9.length(getString_local9));
 			/* listFromArray(substring.split(substring, Pattern.quote(Pattern, ","))) */ typeParameters = listFromArray(substring.split(substring, Pattern.quote(Pattern, ",")));
@@ -447,7 +460,7 @@ Option<char*> getString(struct Main this, char* beforeContent, char* withEnd){
 	return assembleStructure(listEmpty(), strippedBeforeContent, content);
 }
 Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* content){
-	/* !typeParams */ assembleStructure_local1 = !typeParams;
+	int assembleStructure_local1 = !typeParams;
 	if (assembleStructure_local1.isEmpty(assembleStructure_local1)){
 	/* /* typeParams;
                 typeArguments = typeArgs;
@@ -466,10 +479,10 @@ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* 
 	return generateStructure(name, content);
 }
 Option<char*> generateStructure(struct Main this, char* name, char* content){
-	structNames = structNames.addLast(structNames, name);
+	structNames = structNames.addLast(structNames, StructType(name));
 	/* compileStatements(content, /* Main::compileClassSegment */) */ compiled = compileStatements(content, /* Main::compileClassSegment */);
 	structNames = structNames.removeLast(structNames);
-	/* "struct " + name + " {" + compiled + "\n};\n" */ generated = "struct " + name + " {" + compiled + "\n};\n";
+	char* generated = "struct " + name + " {" + compiled + "\n};\n";
 	structs.addLast(structs, generated);
 	return Some_/*  */("");
 }
@@ -512,13 +525,13 @@ auto compileMethod_local12(auto parameter){
 	return !(/* /* parameter instanceof Whitespace */ */);
 }
 Option<char*> compileMethod(struct Main this, char* stripped){
-	/* paramStart + "(" */ compileMethod_local3 = paramStart + "(";
-	/* paramEnd + ")" */ compileMethod_local7 = paramEnd + ")";
+	/* paramStart */ compileMethod_local3 = paramStart + "(";
+	/* paramEnd */ compileMethod_local7 = paramEnd + ")";
 	/* parseValues(params, /* Main::parseParameter */) */ compileMethod_local11 = parseValues(params, /* Main::parseParameter */);
 	/* compileMethod_local11.iter(compileMethod_local11) */ compileMethod_local13 = compileMethod_local11.iter(compileMethod_local11);
 	/* compileMethod_local13.filter(compileMethod_local13, compileMethod_local12) */ compileMethod_local14 = compileMethod_local13.filter(compileMethod_local13, compileMethod_local12);
 	/* Lists.<Defined>listEmpty(Lists) */ compileMethod_local17 = Lists.<Defined>listEmpty(Lists);
-	/* compileMethod_local17.addLast(compileMethod_local17, Definition(StructType(structNames.last(structNames)), "this")) */ compileMethod_local18 = compileMethod_local17.addLast(compileMethod_local17, Definition(StructType(structNames.last(structNames)), "this"));
+	/* compileMethod_local17.addLast(compileMethod_local17, Definition(structNames.last(structNames), "this")) */ compileMethod_local18 = compileMethod_local17.addLast(compileMethod_local17, Definition(structNames.last(structNames), "this"));
 	/* stripped.indexOf(stripped, "(") */ paramStart = stripped.indexOf(stripped, "(");
 	if (paramStart < 0){
 		return None_/*  */();
@@ -562,7 +575,7 @@ auto assembleMethod_local0(auto input){
 }
 Option<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
 	/* parseStatementsWithLocals(content, assembleMethod_local0) */ parsed = parseStatementsWithLocals(content, assembleMethod_local0);
-	/* definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n" */ generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
+	/* definition */ generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
 	methods.addLast(methods, generated);
 	return Some_/*  */("");
 }
@@ -605,7 +618,7 @@ auto compileFunctionSegment_local13(auto input1){
 	return compileFunctionSegment(input1, depth + 1);
 }
 char* compileFunctionSegment(struct Main this, char* input, int depth){
-	/* "\n" + "\t" */ compileFunctionSegment_local2 = "\n" + "\t";
+	char* compileFunctionSegment_local2 = "\n" + "\t";
 	/* input.strip(input) */ stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
 		return "";
@@ -623,7 +636,7 @@ char* compileFunctionSegment(struct Main this, char* input, int depth){
 		/* stripped.substring(stripped, 0, stripped.length() - "}".length(stripped.length() - "}")) */ withoutEnd = stripped.substring(stripped, 0, stripped.length() - "}".length(stripped.length() - "}"));
 		/* withoutEnd.indexOf(withoutEnd, "{") */ contentStart = withoutEnd.indexOf(withoutEnd, "{");
 		if (contentStart >= 0){
-	/* contentStart + "{" */ compileFunctionSegment_local11 = contentStart + "{";
+	/* contentStart */ compileFunctionSegment_local11 = contentStart + "{";
 			/* withoutEnd.substring(withoutEnd, 0, contentStart) */ beforeBlock = withoutEnd.substring(withoutEnd, 0, contentStart);
 			/* withoutEnd.substring(withoutEnd, compileFunctionSegment_local11.length(compileFunctionSegment_local11)) */ content = withoutEnd.substring(withoutEnd, compileFunctionSegment_local11.length(compileFunctionSegment_local11));
 			/* parseStatementsWithLocals(content, compileFunctionSegment_local13) */ outputContent = parseStatementsWithLocals(content, compileFunctionSegment_local13);
@@ -638,18 +651,18 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 		return Some_/*  */("break");
 	}
 	if (stripped.startsWith(stripped, "return ")){
-	/* "return " */ compileStatementValue_local2 = "return ";
+	char* compileStatementValue_local2 = "return ";
 		/* stripped.substring(stripped, compileStatementValue_local2.length(compileStatementValue_local2)) */ value = stripped.substring(stripped, compileStatementValue_local2.length(compileStatementValue_local2));
 		return Some_/*  */("return " + compileValue(value));
 	}
 	/* stripped.indexOf(stripped, "=") */ valueSeparator = stripped.indexOf(stripped, "=");
 	if (valueSeparator >= 0){
-	/* valueSeparator + "=" */ compileStatementValue_local7 = valueSeparator + "=";
+	/* valueSeparator */ compileStatementValue_local7 = valueSeparator + "=";
 		/* stripped.substring(stripped, 0, valueSeparator) */ assignableString = stripped.substring(stripped, 0, valueSeparator);
 		/* stripped.substring(stripped, compileStatementValue_local7.length(compileStatementValue_local7)) */ valueString = stripped.substring(stripped, compileStatementValue_local7.length(compileStatementValue_local7));
 		/* parseAssignable(assignableString) */ assignable = parseAssignable(assignableString);
 		/* parseValue(valueString) */ value = parseValue(valueString);
-		/* resolveValue(value) */ type = resolveValue(value);
+		/* resolve(value) */ type = resolve(value);
 		/* Assignable newAssignable; */
 		if (/* assignable instanceof Definition definition */){
 			newAssignable = Definition(type, definition.name);
@@ -664,8 +677,44 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 	}
 	return None_/*  */();
 }
-struct Type resolveValue(struct Main this, struct Value value){
-	return Content(value.generate(value));
+struct Type resolve(struct Main this, struct Value value){
+	/* return switch (value) */{
+		/* case BooleanValue booleanValue -> Primitive.Bool; */
+		/* case CharValue charValue -> Primitive.I8; */
+		/* case Content content -> content; */
+		/* case DataAccess dataAccess - */ > resolveDataAccess(dataAccess);
+		/* case Invocation invocation - */ > resolveInvocation(invocation);
+		/* case Not not -> Primitive.Bool; */
+		/* case Operation operation - */ > resolve(operation.left);
+		/* case StringValue stringValue - */ > /* new Ref */(Primitive.I8);
+		/* case Symbol symbol - */ > resolveSymbol(symbol);
+		/* case Whitespace whitespace -> Primitive.Void; */
+	}
+	/* ; */
+}
+struct Content resolveSymbol(struct Main this, struct Symbol symbol){
+	return Content(symbol.value);
+}
+struct Type resolveInvocation(struct Main this, struct Invocation invocation){
+	/* invocation.caller */ caller = invocation.caller;
+	/* resolve(caller) */ resolvedCaller = resolve(caller);
+	if (/* resolvedCaller instanceof Functional functional */){
+		return functional.returns;
+	}
+	else {
+		return Content(invocation.generate(invocation));
+	}
+}
+struct Type resolveDataAccess(struct Main this, struct DataAccess dataAccess){
+	/* dataAccess.parent */ parent = dataAccess.parent;
+	/* resolve(parent) */ resolved = resolve(parent);
+	if (/* resolved instanceof StructType structType */){
+		/* structType.find(structType, dataAccess.property) */ typeOption = structType.find(structType, dataAccess.property);
+		if (/* typeOption instanceof Some */ < Type > (/* var propertyType */)){
+			return propertyType;
+		}
+	}
+	return Content(dataAccess.generate(dataAccess));
 }
 auto parseAssignable_local0(auto value1){
 	return value1;
@@ -725,7 +774,7 @@ struct Value parseValue(struct Main this, char* input){
 	/* stripped.indexOf(stripped, "->") */ arrowIndex = stripped.indexOf(stripped, "->");
 	if (arrowIndex >= 0){
 	/* stripped.substring(stripped, 0, arrowIndex) */ parseValue_local6 = stripped.substring(stripped, 0, arrowIndex);
-	/* arrowIndex + "->" */ parseValue_local7 = arrowIndex + "->";
+	/* arrowIndex */ parseValue_local7 = arrowIndex + "->";
 	/* stripped.substring(stripped, parseValue_local7.length(parseValue_local7)) */ parseValue_local9 = stripped.substring(stripped, parseValue_local7.length(parseValue_local7));
 		/* parseValue_local6.strip(parseValue_local6) */ beforeArrow = parseValue_local6.strip(parseValue_local6);
 		/* parseValue_local9.strip(parseValue_local9) */ afterArrow = parseValue_local9.strip(parseValue_local9);
@@ -735,7 +784,7 @@ struct Value parseValue(struct Main this, char* input){
 		if (beforeArrow.startsWith("(") && beforeArrow.endsWith(beforeArrow.startsWith("(") && beforeArrow, ")")){
 	/* beforeArrow.substring(beforeArrow, 1, beforeArrow.length() - 1) */ parseValue_local13 = beforeArrow.substring(beforeArrow, 1, beforeArrow.length() - 1);
 	/* Iterators.fromArray(Iterators, parseValue_local13.split(parseValue_local13, Pattern.quote(Pattern, ","))) */ parseValue_local15 = Iterators.fromArray(Iterators, parseValue_local13.split(parseValue_local13, Pattern.quote(Pattern, ",")));
-	/* !value */ parseValue_local16 = !value;
+	int parseValue_local16 = !value;
 	/* parseValue_local15.map(parseValue_local15, /* String::strip */) */ parseValue_local19 = parseValue_local15.map(parseValue_local15, /* String::strip */);
 	/* parseValue_local19.filter(parseValue_local19, parseValue_local17) */ parseValue_local20 = parseValue_local19.filter(parseValue_local19, parseValue_local17);
 			/* parseValue_local20.collect(parseValue_local20, ListCollector_/*  */()) */ args = parseValue_local20.collect(parseValue_local20, ListCollector_/*  */());
@@ -781,7 +830,7 @@ auto compileInvokable_local13(auto value){
 	return !(/* /* value instanceof Whitespace */ */);
 }
 Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
-	/* !stripped */ compileInvokable_local0 = !stripped;
+	int compileInvokable_local0 = !stripped;
 	/* stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")")) */ compileInvokable_local3 = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")"));
 	/* parseValues(arguments, /* Main::parseValue */) */ compileInvokable_local12 = parseValues(arguments, /* Main::parseValue */);
 	/* compileInvokable_local12.iter(compileInvokable_local12) */ compileInvokable_local14 = compileInvokable_local12.iter(compileInvokable_local12);
@@ -801,7 +850,7 @@ Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
 	/* divisions.last(divisions) */ arguments = divisions.last(divisions);
 	/* Value parsedCaller; */
 	if (caller.startsWith(caller, "new ")){
-	/* "new " */ compileInvokable_local8 = "new ";
+	char* compileInvokable_local8 = "new ";
 	/* parseType(caller.substring(caller, compileInvokable_local8.length(compileInvokable_local8))) */ compileInvokable_local10 = parseType(caller.substring(caller, compileInvokable_local8.length(compileInvokable_local8)));
 		parsedCaller = Symbol(compileInvokable_local10.stringify(compileInvokable_local10));
 	}
@@ -819,7 +868,7 @@ Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
 	}
 	else {
 	/* statements.last(statements) */ compileInvokable_local17 = statements.last(statements);
-		/* resolveValue(parent) */ type = resolveValue(parent);
+		/* resolve(parent) */ type = resolve(parent);
 		/* "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";" */ statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
 		compileInvokable_local17.addLast(compileInvokable_local17, statement);
 		symbol = Symbol(name);
@@ -850,7 +899,7 @@ struct Symbol assembleLambda(struct Main this, char* afterArrow, List<char*> nam
 	return Symbol(name);
 }
 char* generateName(struct Main this){
-	/* functionName + "_local" + functionLocalCounter */ name = functionName + "_local" + functionLocalCounter;
+	/* functionName */ name = functionName + "_local" + functionLocalCounter;
 	/* functionLocalCounter++; */
 	return name;
 }
@@ -894,7 +943,7 @@ struct Defined parseDefinitionOrPlaceholder(struct Main this, char* input){
 	return parseDefinitionOrPlaceholder_local3.orElseGet(parseDefinitionOrPlaceholder_local3, parseDefinitionOrPlaceholder_local2);
 }
 Option<struct Definition> parseDefinition(struct Main this, char* input){
-	/* nameSeparator + " " */ parseDefinition_local3 = nameSeparator + " ";
+	/* nameSeparator */ parseDefinition_local3 = nameSeparator + " ";
 	/* input.strip(input) */ stripped = input.strip(input);
 	/* stripped.lastIndexOf(stripped, " ") */ nameSeparator = stripped.lastIndexOf(stripped, " ");
 	if (nameSeparator < 0){
@@ -914,7 +963,7 @@ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	return Some_/*  */(Definition(parseType(type), name));
 }
 struct State foldByTypeSeparator(struct Main this, struct State state, struct char c){
-	/* c == ' ' && state */ foldByTypeSeparator_local1 = c == ' ' && state;
+	/* c */ foldByTypeSeparator_local1 = c == ' ' && state;
 	if (foldByTypeSeparator_local1.isLevel(foldByTypeSeparator_local1)){
 		return state.advance(state);
 	}
@@ -956,8 +1005,8 @@ struct Type parseType(struct Main this, char* input){
 		/* withoutEnd.indexOf(withoutEnd, "<") */ index = withoutEnd.indexOf(withoutEnd, "<");
 		if (index >= 0){
 	/* withoutEnd.substring(withoutEnd, 0, index) */ parseType_local10 = withoutEnd.substring(withoutEnd, 0, index);
-	/* index + "<" */ parseType_local11 = index + "<";
-	/* !expansions */ parseType_local23 = !expansions;
+	/* index */ parseType_local11 = index + "<";
+	int parseType_local23 = !expansions;
 			/* parseType_local10.strip(parseType_local10) */ base = parseType_local10.strip(parseType_local10);
 			/* withoutEnd.substring(withoutEnd, parseType_local11.length(parseType_local11)) */ substring = withoutEnd.substring(withoutEnd, parseType_local11.length(parseType_local11));
 			/* parseValues(substring, /* Main::parseType */) */ parsed = parseValues(substring, /* Main::parseType */);
@@ -987,7 +1036,7 @@ List<struct T> parseValues(struct Main this, char* input, struct T (*)(char*) co
 	return parseAll(input, /* Main::foldValueChar */, compiler);
 }
 struct State foldValueChar(struct Main this, struct State state, struct char c){
-	/* c == ',' && state */ foldValueChar_local1 = c == ',' && state;
+	/* c */ foldValueChar_local1 = c == ',' && state;
 	if (foldValueChar_local1.isLevel(foldValueChar_local1)){
 		return state.advance(state);
 	}
