@@ -21,13 +21,22 @@ public class Main {
     private static String compileRoot(String input) {
         var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
+        var depth = 0;
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             buffer.append(c);
 
-            if (c == ';') {
+            if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
+            }
+            else {
+                if (c == '{') {
+                    depth++;
+                }
+                if (c == '}') {
+                    depth--;
+                }
             }
         }
         segments.add(buffer.toString());
@@ -54,7 +63,10 @@ public class Main {
             if (contentStart >= 0) {
                 var name = afterClass.substring(0, contentStart).strip();
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
-                return generatePlaceholder(beforeClass) + "struct " + name + " { " + generatePlaceholder(withEnd);
+                if (withEnd.endsWith("}")) {
+                    var content = withEnd.substring(0, withEnd.length() - "}".length());
+                    return generatePlaceholder(beforeClass) + "struct " + name + " { " + generatePlaceholder(content) + "}";
+                }
             }
         }
 
