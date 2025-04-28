@@ -24,6 +24,11 @@ class Lists {
         public boolean isEmpty() {
             return this.list.isEmpty();
         }
+
+        @Override
+        public boolean contains(T element) {
+            return this.list.contains(element);
+        }
     }
 
     public static <T> Main.List<T> empty() {

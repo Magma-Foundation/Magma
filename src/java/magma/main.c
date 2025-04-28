@@ -94,15 +94,23 @@
             var index = withoutEnd.indexOf("<");
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
-                var arguments = compileValues(withoutEnd.substring(index + "<".length()), Main::compileType);
-                return base + "<" + arguments + ">";
+                var parsed = parseValues(withoutEnd.substring(index + "<".length()), Main::compileType);
+                if (!expansions.contains(new Tuple<>(base, parsed))) {
+                    expansions = expansions.add(new Tuple<>(base, parsed));
+                }
+
+                return base + "<" + generateValues(parsed) + ">";
             }
         } */
 	/* return generatePlaceholder(stripped) */;
 	/* }
 
-    private static String compileValues(String input, Function<String, String> compiler) {
-        return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues) */;
+    private static String generateValues(List<String> values) {
+        return generateAll(Main::mergeValues, values) */;
+	/* }
+
+    private static List<String> parseValues(String input, Function<String, String> compiler) {
+        return parseAll(input, Main::foldValueChar, compiler) */;
 	/* return builder.append(", ").append(element) */;
 	/* return state.append(c) */;
 	/* }
@@ -126,7 +134,11 @@
 /* public */struct Main {
 	/* private static final List<String> methods = Lists.empty() */;
 	/* private static final List<String> structs = Lists.empty() */;
+	/* private static List<Tuple<String, List<String>>> expansions = Lists.empty() */;
 };
+// List<char*>
+// Optional</* State */>
+// Optional<char*>
 /* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
             this.input = input;
             this.index = index;
@@ -186,6 +198,10 @@
             return this.popAndAppendToTuple().map(Tuple::right);
          */
 }
+/* private Joiner */(/*  */){/* 
+            this("");
+         */
+}
 /* @Override
         public */ Optional<char*> createInitial(/*  */){/* 
             return Optional.empty();
@@ -209,11 +225,21 @@
      */
 }
 /* private static */ char* compileRoot(/* String input */){/* 
-        return compileStatements(input, Main::compileRootSegment) + join(structs) + join(methods);
+        var compiled = compileStatements(input, Main::compileRootSegment);
+        var joinedExpansions = expansions.iter()
+                .map(tuple -> "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n")
+                .collect(new Joiner())
+                .orElse("");
+
+        return compiled + join(structs) + joinedExpansions + join(methods);
      */
 }
 /* private static */ char* join(/* List<String> list */){/* 
-        return list.iter().collect(new Joiner()).orElse("");
+        return join(list, "");
+     */
+}
+/* private static */ char* join(/* List<String> list, String delimiter */){/* 
+        return list.iter().collect(new Joiner(delimiter)).orElse("");
      */
 }
 /* private static */ char* compileStatements(/* String input, Function<String, String> compiler */){/* 
@@ -226,10 +252,20 @@
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
      */){/* 
+        return generateAll(merger, parseAll(input, folder, compiler));
+     */
+}
+/* private static */ char* generateAll(/* BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed */){/* 
+        return parsed.iter()
+                .foldRight(new StringBuilder(), merger)
+                .toString();
+     */
+}
+/* private static */ List<char*> parseAll(/* String input, BiFunction<State, Character, State> folder, Function<String, String> compiler */){/* 
         return divideAll(input, folder)
                 .iter()
-                .foldRight(new StringBuilder(), (output, segment) -> merger.apply(output, compiler.apply(segment)))
-                .toString();
+                .map(compiler)
+                .collect(new ListCollector<>());
      */
 }
 /* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
