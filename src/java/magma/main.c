@@ -46,43 +46,43 @@ struct Main {
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
 };
-struct Tuple<char, struct State> {
+struct Tuple_i8_State {
 };
-struct Option<Tuple<char, struct State>> {
+struct Option_Tuple_i8_State {
 };
-struct Tuple</*  */> {
+struct Tuple_/*  */ {
 };
-struct None</*  */> {
+struct None_/*  */ {
 };
-struct Some</*  */> {
+struct Some_/*  */ {
 };
-struct Option<struct State> {
+struct Option_State {
 };
-struct Option<char> {
+struct Option_i8 {
 };
-struct Option<char*> {
+struct Option_i8_star {
 };
-struct Iterator<struct T> {
+struct Iterator_T {
 };
-struct Option<struct IOException> {
+struct Option_IOException {
 };
-struct Result<char*, struct IOException> {
+struct Result_i8_star_IOException {
 };
-struct Ok</*  */> {
+struct Ok_/*  */ {
 };
-struct Err</*  */> {
+struct Err_/*  */ {
 };
-struct List<char*> {
+struct List_i8_star {
 };
-struct List<struct T> {
+struct List_T {
 };
-struct ListCollector</*  */> {
+struct ListCollector_/*  */ {
 };
-struct Option<struct Whitespace> {
+struct Option_Whitespace {
 };
-struct Option<struct Invocation> {
+struct Option_Invocation {
 };
-struct Option<struct Definition> {
+struct Option_Definition {
 };
 struct State fromInput(struct State this, char* input){
 	return State(input, listEmpty(), "", 0, 0);
@@ -117,7 +117,7 @@ Option<Tuple<char, struct State>> pop(struct State this){
 		return None_/*  */();
 	}
 	/* this.input.charAt(this.input, this.index) */ escaped = this.input.charAt(this.input, this.index);
-	return Some_/*  */(Tuple_char_struct State(escaped, State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
+	return Some_/*  */(Tuple_i8_State(escaped, State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
 struct State append(struct State this, struct char c){
 	return State(this.input, this.segments, this.buffer + c, this.depth, this.index);
@@ -197,7 +197,7 @@ char* generate(struct Generic this){
 }
 char* stringify(struct Generic this){
 	auto stringify_local1 = this.base + "_" + this.args.iter(this.base + "_" + this.args);
-	auto stringify_local2 = stringify_local1.map(stringify_local1, /* Node::generate */);
+	auto stringify_local2 = stringify_local1.map(stringify_local1, /* Type::stringify */);
 	auto stringify_local3 = stringify_local2.collect(stringify_local2, Joiner("_"));
 	return stringify_local3.orElse(stringify_local3, "");
 }
@@ -452,9 +452,9 @@ Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* 
                 typeArguments = typeArgs;
 
                 var newName = new Generic */(name, typeArgs);
-		/* assembleStructure_local0.generate();
+		/* assembleStructure_local0.stringify();
                 return generateStructure(assembleStructure_local0, newName, /* content);
-            } */) */ typeParameters = assembleStructure_local0.generate();
+            } */) */ typeParameters = assembleStructure_local0.stringify();
                 return generateStructure(assembleStructure_local0, newName, /* content);
             } */);
 		return Some_/*  */("");
@@ -1020,67 +1020,67 @@ int isSymbol(struct Main this, char* input){
 char* generatePlaceholder(struct Main this, char* input){
 	return "/* " + input + " */";
 }
-Option<struct R> map(struct None</*  */> this, struct R (*)(/*  */) mapper){
+Option<struct R> map(struct None_/*  */ this, struct R (*)(/*  */) mapper){
 	return None_/*  */();
 }
-int isPresent(struct None</*  */> this){
+int isPresent(struct None_/*  */ this){
 	return 0;
 }
-/*  */ orElse(struct None</*  */> this, /*  */ other){
+/*  */ orElse(struct None_/*  */ this, /*  */ other){
 	return other;
 }
-int isEmpty(struct None</*  */> this){
+int isEmpty(struct None_/*  */ this){
 	return 1;
 }
-/*  */ orElseGet(struct None</*  */> this, Supplier</*  */> supplier){
+/*  */ orElseGet(struct None_/*  */ this, Supplier</*  */> supplier){
 	return supplier.get(supplier);
 }
-Option<struct R> flatMap(struct None</*  */> this, Option<struct R> (*)(/*  */) mapper){
+Option<struct R> flatMap(struct None_/*  */ this, Option<struct R> (*)(/*  */) mapper){
 	return None_/*  */();
 }
-Option</*  */> or(struct None</*  */> this, Supplier<Option</*  */>> supplier){
+Option</*  */> or(struct None_/*  */ this, Supplier<Option</*  */>> supplier){
 	return supplier.get(supplier);
 }
-void ifPresent(struct None</*  */> this, Consumer</*  */> consumer){
+void ifPresent(struct None_/*  */ this, Consumer</*  */> consumer){
 }
-Option<struct R> map(struct Some</*  */> this, struct R (*)(/*  */) mapper){
+Option<struct R> map(struct Some_/*  */ this, struct R (*)(/*  */) mapper){
 	return Some_/*  */(mapper.apply(mapper, this.value));
 }
-int isPresent(struct Some</*  */> this){
+int isPresent(struct Some_/*  */ this){
 	return 1;
 }
-/*  */ orElse(struct Some</*  */> this, /*  */ other){
+/*  */ orElse(struct Some_/*  */ this, /*  */ other){
 	return this.value;
 }
-int isEmpty(struct Some</*  */> this){
+int isEmpty(struct Some_/*  */ this){
 	return 0;
 }
-/*  */ orElseGet(struct Some</*  */> this, Supplier</*  */> supplier){
+/*  */ orElseGet(struct Some_/*  */ this, Supplier</*  */> supplier){
 	return this.value;
 }
-Option<struct R> flatMap(struct Some</*  */> this, Option<struct R> (*)(/*  */) mapper){
+Option<struct R> flatMap(struct Some_/*  */ this, Option<struct R> (*)(/*  */) mapper){
 	return mapper.apply(mapper, this.value);
 }
-Option</*  */> or(struct Some</*  */> this, Supplier<Option</*  */>> supplier){
+Option</*  */> or(struct Some_/*  */ this, Supplier<Option</*  */>> supplier){
 	return this;
 }
-void ifPresent(struct Some</*  */> this, Consumer</*  */> consumer){
+void ifPresent(struct Some_/*  */ this, Consumer</*  */> consumer){
 	consumer.accept(consumer, this.value);
 }
 auto map_local2(){
 	return map_local1.map(map_local1, map_local1, mapper);
 }
-Iterator<struct R> map(struct Iterator<struct T> this, struct R (*)(struct T) mapper){
+Iterator<struct R> map(struct Iterator_T this, struct R (*)(struct T) mapper){
 	auto map_local1 = this.head.next(this.head);
 	return Iterator_/*  */(map_local2);
 }
-struct C collect(struct Iterator<struct T> this, Collector<struct T, struct C> collector){
+struct C collect(struct Iterator_T this, Collector<struct T, struct C> collector){
 	return this.fold(this, collector.createInitial(collector), /* collector::fold */);
 }
 auto fold_local2(auto next){
 	return folder.apply(folder, folder, finalCurrent, next);
 }
-struct R fold(struct Iterator<struct T> this, struct R initial, struct R (*)(struct R, struct T) folder){
+struct R fold(struct Iterator_T this, struct R initial, struct R (*)(struct R, struct T) folder){
 	/* initial */ current = initial;
 	while (1){
 	auto fold_local4 = this.head.next(this.head);
@@ -1097,23 +1097,23 @@ struct R fold(struct Iterator<struct T> this, struct R initial, struct R (*)(str
 auto filter_local1(auto element){
 	return /* Iterator_/*  */ */(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>(predicate, predicate));
 }
-Iterator<struct T> filter(struct Iterator<struct T> this, Predicate<struct T> predicate){
+Iterator<struct T> filter(struct Iterator_T this, Predicate<struct T> predicate){
 	return this.flatMap(this, filter_local1);
 }
-Iterator<struct R> flatMap(struct Iterator<struct T> this, Iterator<struct R> (*)(struct T) mapper){
+Iterator<struct R> flatMap(struct Iterator_T this, Iterator<struct R> (*)(struct T) mapper){
 	auto flatMap_local1 = this.map(this, mapper);
 	return flatMap_local1.fold(flatMap_local1, Iterator_/*  */(EmptyHead_/*  */()), /* Iterator::concat */);
 }
 auto concat_local2(){
 	return concat_local1.or(concat_local1, concat_local1, other.head::next);
 }
-Iterator<struct T> concat(struct Iterator<struct T> this, Iterator<struct T> other){
+Iterator<struct T> concat(struct Iterator_T this, Iterator<struct T> other){
 	auto concat_local1 = this.head.next(this.head);
 	return Iterator_/*  */(concat_local2);
 }
-List<struct T> createInitial(struct ListCollector</*  */> this){
+List<struct T> createInitial(struct ListCollector_/*  */ this){
 	return listEmpty();
 }
-List<struct T> fold(struct ListCollector</*  */> this, List<struct T> current, struct T element){
+List<struct T> fold(struct ListCollector_/*  */ this, List<struct T> current, struct T element){
 	return current.addLast(current, element);
 }

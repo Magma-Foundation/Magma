@@ -514,7 +514,7 @@ public class Main {
         @Override
         public String stringify() {
             return this.base + "_" + this.args.iter()
-                    .map(Node::generate)
+                    .map(Type::stringify)
                     .collect(new Joiner("_"))
                     .orElse("");
         }
@@ -797,7 +797,7 @@ public class Main {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
-                var newName = new Generic(name, typeArgs).generate();
+                var newName = new Generic(name, typeArgs).stringify();
                 return generateStructure(newName, content);
             });
 
