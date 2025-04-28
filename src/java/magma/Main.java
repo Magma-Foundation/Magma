@@ -82,7 +82,8 @@ public class Main {
     }
 
     private enum Operator {
-        ADD("+");
+        ADD("+"),
+        NOT_EQUALS("!=");
 
         private final String representation;
 

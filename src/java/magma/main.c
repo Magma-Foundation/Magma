@@ -238,7 +238,7 @@ List<char*> divideAll(struct Main this, char* input, struct State (*)(struct Sta
 	return state.advance(state).segments;
 }
 Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext, struct char c){
-	if (/* c != '\"' */){
+	if (c != /* '\"' */){
 		return None</*  */>();
 	}
 	auto current = withoutNext.append(withoutNext, c);
@@ -264,7 +264,7 @@ auto foldSingleQuotes_local3(auto maybeSlash){
 Option<struct State> foldSingleQuotes(struct Main this, struct State state, struct char next){
 	auto foldSingleQuotes_local5 = appended.popAndAppendToTuple(appended);
 	auto foldSingleQuotes_local6 = foldSingleQuotes_local5.flatMap(foldSingleQuotes_local5, foldSingleQuotes_local3);
-	if (/* next != '\'' */){
+	if (next != /* '\'' */){
 		return None</*  */>();
 	}
 	auto appended = state.append(state, next);
