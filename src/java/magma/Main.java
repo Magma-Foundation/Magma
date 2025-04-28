@@ -842,20 +842,19 @@ public class Main {
                         .filter(value -> !(value instanceof Whitespace))
                         .collect(new ListCollector<>());
 
-                List<Value> newArgs;
-                if (parsedCaller instanceof DataAccess(var parent, _)) {
-                    var name = generateName();
-                    statements = statements.addLast("\n\tauto " + name + " = " + parent.generate() + ";");
-
-                    newArgs = Lists.<Value>listEmpty()
-                            .addLast(new Symbol(name))
-                            .addAll(parsedArgs);
-                }
-                else {
-                    newArgs = parsedArgs;
+                if (!(parsedCaller instanceof DataAccess(var parent, var property))) {
+                    return new Invocation(parsedCaller, parsedArgs);
                 }
 
-                return new Invocation(parsedCaller, newArgs);
+                var name = generateName();
+                statements = statements.addLast("\n\tauto " + name + " = " + parent.generate() + ";");
+
+                var symbol = new Symbol(name);
+                var newArgs = Lists.<Value>listEmpty()
+                        .addLast(symbol)
+                        .addAll(parsedArgs);
+
+                return new Invocation(new DataAccess(symbol, property), newArgs);
             }
         }
 
