@@ -811,19 +811,24 @@ public class Main {
 
     private static String compileBeforeBlock(String input) {
         var stripped = input.strip();
-        if (stripped.startsWith("if")) {
-            var withoutPrefix = stripped.substring("if".length()).strip();
-            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
-                var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
-                return "if (" + compileValue(condition) + ")";
-            }
-        }
-
         if (stripped.equals("else")) {
             return "else ";
         }
 
-        return generatePlaceholder(stripped);
+        return compileConditional(stripped, "if")
+                .or(() -> compileConditional(stripped, "while"))
+                .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Option<String> compileConditional(String stripped, String prefix) {
+        if (stripped.startsWith(prefix)) {
+            var withoutPrefix = stripped.substring(prefix.length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                return new Some<>(prefix + " (" + compileValue(condition) + ")");
+            }
+        }
+        return new None<>();
     }
 
     private static String compileValue(String input) {

@@ -221,7 +221,7 @@ auto divideAll_local7(){
 }
 List<char*> divideAll(struct Main this, char* input, struct State (*)(struct State, char) folder){
 	struct State state = State.fromInput(State, input);
-	/* while (true) */{
+	while (true){
 	auto divideAll_local5 = foldSingleQuotes(withoutNext, next);
 	auto divideAll_local9 = divideAll_local5.or(divideAll_local5, divideAll_local4);
 		auto maybeNextTuple = state.pop(state);
@@ -240,7 +240,7 @@ Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext
 		return None</*  */>();
 	}
 	auto current = withoutNext.append(withoutNext, c);
-	/* while (true) */{
+	while (true){
 		auto maybeNext = current.popAndAppendToTuple(current);
 		if (/* ! */(/* maybeNext instanceof Some */(/* var next */))){
 			break;
@@ -554,21 +554,31 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 	}
 	return None</*  */>();
 }
+auto compileBeforeBlock_local2(){
+	return compileConditional(stripped, "while");
+}
+auto compileBeforeBlock_local4(){
+	return generatePlaceholder(stripped);
+}
 char* compileBeforeBlock(struct Main this, char* input){
+	auto compileBeforeBlock_local3 = compileConditional(stripped, "if");
+	auto compileBeforeBlock_local5 = compileBeforeBlock_local3.or(compileBeforeBlock_local3, compileBeforeBlock_local2);
 	auto stripped = input.strip(input);
-	if (stripped.startsWith(stripped, "if")){
-	auto compileBeforeBlock_local1 = "if";
-	auto compileBeforeBlock_local3 = stripped.substring(stripped, compileBeforeBlock_local1.length(compileBeforeBlock_local1));
-		auto withoutPrefix = compileBeforeBlock_local3.strip(compileBeforeBlock_local3);
-		if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(withoutPrefix.startsWith("(") && withoutPrefix, ")")){
-			auto condition = withoutPrefix.substring(withoutPrefix, 1, withoutPrefix.length() - 1);
-			return "if (" + compileValue(condition) + ")";
-		}
-	}
 	if (stripped.equals(stripped, "else")){
 		return "else ";
 	}
-	return generatePlaceholder(stripped);
+	return compileBeforeBlock_local5.orElseGet(compileBeforeBlock_local5, compileBeforeBlock_local4);
+}
+Option<char*> compileConditional(struct Main this, char* stripped, char* prefix){
+	if (stripped.startsWith(stripped, prefix)){
+	auto compileConditional_local2 = stripped.substring(stripped, prefix.length(prefix));
+		auto withoutPrefix = compileConditional_local2.strip(compileConditional_local2);
+		if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(withoutPrefix.startsWith("(") && withoutPrefix, ")")){
+			auto condition = withoutPrefix.substring(withoutPrefix, 1, withoutPrefix.length() - 1);
+			return Some</*  */>(prefix + " (" + compileValue(condition) + ")");
+		}
+	}
+	return None</*  */>();
 }
 char* compileValue(struct Main this, char* input){
 	auto compileValue_local0 = parseValue(input);
@@ -934,7 +944,7 @@ auto fold_local2(auto next){
 }
 struct R fold(struct Iterator<struct T> this, struct R initial, struct R (*)(struct R, struct T) folder){
 	auto current = initial;
-	/* while (true) */{
+	while (true){
 	auto fold_local4 = this.head.next(this.head);
 		struct R finalCurrent = current;
 		auto optional = fold_local4.map(fold_local4, fold_local2);
