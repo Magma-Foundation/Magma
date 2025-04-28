@@ -122,9 +122,15 @@ public class Main {
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
             var afterParams = stripped.substring(paramStart + "(".length());
-            var generated = compileDefinition(definition) + "(" + generatePlaceholder(afterParams) + "\n";
-            methods.add(generated);
-            return "";
+            var paramEnd = afterParams.indexOf(")");
+            if (paramEnd >= 0) {
+                var params = afterParams.substring(0, paramEnd);
+                var withoutParams = afterParams.substring(paramEnd + ")".length());
+
+                var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withoutParams.strip()) + "\n";
+                methods.add(generated);
+                return "";
+            }
         }
 
         return generatePlaceholder(stripped);

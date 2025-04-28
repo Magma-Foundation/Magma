@@ -1,7 +1,7 @@
 /* public  */struct Main {
 };
-/* public static final List<String> methods = new ArrayList<> */(/* ); */
-/* public static */ void main(/* ) {
+/* public static final List<String> methods = new ArrayList<> */(/*  */)/* ; */
+/* public static */ void main(/*  */)/* {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -12,10 +12,10 @@
             e.printStackTrace();
         }
     } */
-/* private static */ /* String */ compileRoot(/* String input) {
+/* private static */ /* String */ compileRoot(/* String input */)/* {
         return compileAll(input, Main::compileRootSegment) + String.join("", methods);
     } */
-/* private static */ /* String */ compileAll(/* String input, Function<String, String> compiler) {
+/* private static */ /* String */ compileAll(/* String input, Function<String, String> compiler */)/* {
         var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -72,7 +72,7 @@
 
         return output.toString();
     } */
-/* private static */ /* String */ compileRootSegment(/* String input) {
+/* private static */ /* String */ compileRootSegment(/* String input */)/* {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -99,7 +99,7 @@
 
         return generatePlaceholder(stripped);
     } */
-/* private static */ /* String */ compileClassSegment(/* String input) {
+/* private static */ /* String */ compileClassSegment(/* String input */)/* {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -109,14 +109,20 @@
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
             var afterParams = stripped.substring(paramStart + "(".length());
-            var generated = compileDefinition(definition) + "(" + generatePlaceholder(afterParams) + "\n";
-            methods.add(generated);
-            return "";
+            var paramEnd = afterParams.indexOf(")");
+            if (paramEnd >= 0) {
+                var params = afterParams.substring(0, paramEnd);
+                var withoutParams = afterParams.substring(paramEnd + ")".length());
+
+                var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(withoutParams.strip()) + "\n";
+                methods.add(generated);
+                return "";
+            }
         }
 
         return generatePlaceholder(stripped);
     } */
-/* private static */ /* String */ compileDefinition(/* String input) {
+/* private static */ /* String */ compileDefinition(/* String input */)/* {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -134,7 +140,7 @@
 
         return generatePlaceholder(stripped);
     } */
-/* private static */ /* String */ compileType(/* String input) {
+/* private static */ /* String */ compileType(/* String input */)/* {
         var stripped = input.strip();
         if (stripped.equals("void")) {
             return "void";
@@ -142,7 +148,7 @@
 
         return generatePlaceholder(stripped);
     } */
-/* private static */ /* boolean */ isSymbol(/* String input) {
+/* private static */ /* boolean */ isSymbol(/* String input */)/* {
         var stripped = input.strip();
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
@@ -153,6 +159,6 @@
         }
         return true;
     } */
-/* private static */ /* String */ generatePlaceholder(/* String input) {
+/* private static */ /* String */ generatePlaceholder(/* String input */)/* {
         return "/* " + input + " */";
     } */
