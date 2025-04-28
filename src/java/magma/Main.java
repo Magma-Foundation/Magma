@@ -76,6 +76,16 @@ public class Main {
         String generate();
     }
 
+    private enum Operator {
+        ADD("+");
+
+        private final String representation;
+
+        Operator(String value) {
+            this.representation = value;
+        }
+    }
+
     public record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -376,6 +386,13 @@ public class Main {
         @Override
         public String generate() {
             return this.parent.generate() + "." + this.property;
+        }
+    }
+
+    private record Operation(Value left, Operator operator, Value right) implements Value {
+        @Override
+        public String generate() {
+            return this.left.generate() + " " + this.operator.representation + " " + this.right;
         }
     }
 
@@ -787,10 +804,6 @@ public class Main {
             return new Whitespace();
         }
 
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new StringValue(stripped.substring(1, stripped.length() - 1));
-        }
-
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
             var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
@@ -855,6 +868,20 @@ public class Main {
             var property = stripped.substring(separator + ".".length()).strip();
             return new DataAccess(parseValue(value), property);
         }
+
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new StringValue(stripped.substring(1, stripped.length() - 1));
+        }
+
+        for (var operator : Operator.values()) {
+            var operatorIndex = stripped.indexOf(operator.representation);
+            if (operatorIndex >= 0) {
+                var left = stripped.substring(0, operatorIndex);
+                var right = stripped.substring(operatorIndex + operator.representation.length());
+                return new Operation(parseValue(left), operator, parseValue(right));
+            }
+        }
+
 
         return new Content(stripped);
     }
