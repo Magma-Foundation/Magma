@@ -2,7 +2,6 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 
 class Lists {
     public record JavaList<T>(java.util.List<T> elements) implements Main.List<T> {
@@ -32,9 +31,9 @@ class Lists {
         }
 
         @Override
-        public Optional<Integer> indexOf(T element) {
+        public Main.Option<Integer> indexOf(T element) {
             var index = this.elements.indexOf(element);
-            return index == -1 ? Optional.empty() : Optional.of(index);
+            return index == -1 ? new Main.None<>() : new Main.Some<>(index);
         }
 
         @Override

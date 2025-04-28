@@ -5,12 +5,28 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Main {
+    public interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        boolean isPresent();
+
+        T orElse(T other);
+
+        boolean isEmpty();
+
+        T orElseGet(Supplier<T> supplier);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        Option<T> or(Supplier<Option<T>> supplier);
+    }
+
     public interface List<T> {
         List<T> add(T element);
 
@@ -20,19 +36,93 @@ public class Main {
 
         boolean contains(T element);
 
-        Optional<Integer> indexOf(T element);
+        Option<Integer> indexOf(T element);
 
         T get(int index);
     }
 
     private interface Head<T> {
-        Optional<T> next();
+        Option<T> next();
     }
 
     public interface Collector<T, C> {
         C createInitial();
 
         C fold(C current, T element);
+    }
+
+    public record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return value;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> supplier) {
+            return this;
+        }
+    }
+
+    public record None<T>() implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> supplier) {
+            return supplier.get();
+        }
     }
 
     public record Iterator<T>(Head<T> head) {
@@ -50,7 +140,7 @@ public class Main {
                 R finalCurrent = current;
                 var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (optional.isPresent()) {
-                    current = optional.get();
+                    current = optional.orElse(null);
                 }
                 else {
                     return current;
@@ -71,14 +161,14 @@ public class Main {
         }
 
         @Override
-        public Optional<Integer> next() {
+        public Option<Integer> next() {
             if (this.counter >= this.length) {
-                return Optional.empty();
+                return new None<>();
             }
 
             var value = this.counter;
             this.counter++;
-            return Optional.of(value);
+            return new Some<>(value);
         }
     }
 
@@ -101,7 +191,7 @@ public class Main {
             this(input, Lists.empty(), "", 0, 0);
         }
 
-        private Optional<Tuple<Character, State>> popAndAppendToTuple() {
+        private Option<Tuple<Character, State>> popAndAppendToTuple() {
             return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
         }
 
@@ -129,14 +219,14 @@ public class Main {
             return this.depth == 1;
         }
 
-        private Optional<Tuple<Character, State>> pop() {
+        private Option<Tuple<Character, State>> pop() {
             if (this.index >= this.input.length()) {
-                return Optional.empty();
+                return new None<>();
             }
 
             var escaped = this.input.charAt(this.index);
             this.index = this.index + 1;
-            return Optional.of(new Tuple<>(escaped, this));
+            return new Some<>(new Tuple<Character, State>(escaped, this));
         }
 
         private State append(char c) {
@@ -144,24 +234,24 @@ public class Main {
             return this;
         }
 
-        public Optional<State> popAndAppend() {
+        public Option<State> popAndAppend() {
             return this.popAndAppendToTuple().map(Tuple::right);
         }
     }
 
-    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
         private Joiner() {
             this("");
         }
 
         @Override
-        public Optional<String> createInitial() {
-            return Optional.empty();
+        public Option<String> createInitial() {
+            return new None<>();
         }
 
         @Override
-        public Optional<String> fold(Optional<String> current, String element) {
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + element).orElse(element));
         }
     }
 
@@ -177,7 +267,7 @@ public class Main {
         }
     }
 
-    public static final Map<String, Function<List<String>, Optional<String>>> expandables = new HashMap<>();
+    public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = Lists.empty();
     private static final List<String> structs = Lists.empty();
     private static List<String> typeParameters = Lists.empty();
@@ -259,7 +349,7 @@ public class Main {
                 break;
             }
 
-            var nextTuple = maybeNextTuple.get();
+            var nextTuple = maybeNextTuple.orElse(null);
             var next = nextTuple.left;
             var withoutNext = nextTuple.right;
 
@@ -270,14 +360,14 @@ public class Main {
         return state.advance().segments;
     }
 
-    private static Optional<State> foldSingleQuotes(State state, char next) {
+    private static Option<State> foldSingleQuotes(State state, char next) {
         if (next != '\'') {
-            return Optional.empty();
+            return new None<>();
         }
 
         var appended = state.append(next);
         return appended.popAndAppendToTuple()
-                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : Optional.of(maybeSlash.right))
+                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right))
                 .flatMap(State::popAndAppend);
     }
 
@@ -312,11 +402,11 @@ public class Main {
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Option<String> compileClass(String stripped) {
         return compileStructure(stripped, "class ");
     }
 
-    private static Optional<String> compileStructure(String input, String infix) {
+    private static Option<String> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var beforeClass = input.substring(0, classIndex).strip();
@@ -336,12 +426,12 @@ public class Main {
                 }
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<String> getString(String beforeContent, String beforeClass, String withEnd) {
+    private static Option<String> getString(String beforeContent, String beforeClass, String withEnd) {
         if (!withEnd.endsWith("}")) {
-            return Optional.empty();
+            return new None<>();
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
@@ -360,7 +450,7 @@ public class Main {
         return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content);
     }
 
-    private static Optional<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
+    private static Option<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
         if (!typeParams.isEmpty()) {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
@@ -370,16 +460,16 @@ public class Main {
                 return generateStructure(newName, beforeClass, content);
             });
 
-            return Optional.of("");
+            return new Some<>("");
         }
 
         return generateStructure(name, beforeClass, content);
     }
 
-    private static Optional<String> generateStructure(String name, String beforeClass, String content) {
+    private static Option<String> generateStructure(String name, String beforeClass, String content) {
         var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
         structs.add(generated);
-        return Optional.of("");
+        return new Some<>("");
     }
 
     private static String compileClassSegment(String input) {
@@ -396,17 +486,17 @@ public class Main {
                 .orElseGet(() -> generatePlaceholder(stripped));
     }
 
-    private static Optional<String> compileDefinitionStatement(String input) {
+    private static Option<String> compileDefinitionStatement(String input) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+            return new Some<>("\n\t" + compileDefinition(withoutEnd) + ";");
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<String> compileMethod(String stripped) {
+    private static Option<String> compileMethod(String stripped) {
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -421,14 +511,14 @@ public class Main {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
-                    return Optional.of("");
+                    return new Some<>("");
                 }
                 else {
-                    return Optional.of("");
+                    return new Some<>("");
                 }
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static String compileDefinition(String input) {
@@ -454,7 +544,7 @@ public class Main {
         var stripped = input.strip();
         var maybeTypeParamIndex = typeParameters.indexOf(stripped);
         if (maybeTypeParamIndex.isPresent()) {
-            var typeParamIndex = maybeTypeParamIndex.get();
+            var typeParamIndex = maybeTypeParamIndex.orElse(null);
             return typeArguments.get(typeParamIndex);
         }
 

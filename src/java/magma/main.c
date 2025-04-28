@@ -11,8 +11,10 @@
 };
 /* public */struct List<char*> {
 };
-// Optional</* State */>
-// Optional<char*>
+/* public */struct Option</* State */> {
+};
+/* public */struct Option<char*> {
+};
 /* private State */(/* String input, List<String> segments, String buffer, int depth, int index */){/* 
             this.input = input;
             this.index = index;
@@ -25,7 +27,7 @@
             this(input, Lists.empty(), "", 0, 0);
          */
 }
-/* private Optional<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){/* 
+/* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){/* 
             return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
          */
 }
@@ -53,14 +55,14 @@
             return this.depth == 1;
          */
 }
-/* private Optional<Tuple<Character, */ /* State>> */ pop(/*  */){/* 
+/* private Option<Tuple<Character, */ /* State>> */ pop(/*  */){/* 
             if (this.index >= this.input.length()) {
-                return Optional.empty();
+                return new None<>();
             }
 
             var escaped = this.input.charAt(this.index);
             this.index = this.index + 1;
-            return Optional.of(new Tuple<>(escaped, this));
+            return new Some<>(new Tuple<Character, State>(escaped, this));
          */
 }
 /* private */ /* State */ append(/* char c */){/* 
@@ -68,7 +70,7 @@
             return this;
          */
 }
-/* public */ Optional</* State */> popAndAppend(/*  */){/* 
+/* public */ Option</* State */> popAndAppend(/*  */){/* 
             return this.popAndAppendToTuple().map(Tuple::right);
          */
 }
@@ -77,13 +79,13 @@
          */
 }
 /* @Override
-        public */ Optional<char*> createInitial(/*  */){/* 
-            return Optional.empty();
+        public */ Option<char*> createInitial(/*  */){/* 
+            return new None<>();
          */
 }
 /* @Override
-        public */ Optional<char*> fold(/* Optional<String> current, String element */){/* 
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        public */ Option<char*> fold(/* Option<String> current, String element */){/* 
+            return new Some<>(current.map(inner -> inner + element).orElse(element));
          */
 }
 /* public static */ void main(/*  */){/* 
@@ -161,7 +163,7 @@
                 break;
             }
 
-            var nextTuple = maybeNextTuple.get();
+            var nextTuple = maybeNextTuple.orElse(null);
             var next = nextTuple.left;
             var withoutNext = nextTuple.right;
 
@@ -172,14 +174,14 @@
         return state.advance().segments;
      */
 }
-/* private static */ Optional</* State */> foldSingleQuotes(/* State state, char next */){/* 
+/* private static */ Option</* State */> foldSingleQuotes(/* State state, char next */){/* 
         if (next != '\'') {
-            return Optional.empty();
+            return new None<>();
         }
 
         var appended = state.append(next);
         return appended.popAndAppendToTuple()
-                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : Optional.of(maybeSlash.right))
+                .flatMap(maybeSlash -> maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right))
                 .flatMap(State::popAndAppend);
      */
 }
@@ -214,11 +216,11 @@
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ Optional<char*> compileClass(/* String stripped */){/* 
+/* private static */ Option<char*> compileClass(/* String stripped */){/* 
         return compileStructure(stripped, "class ");
      */
 }
-/* private static */ Optional<char*> compileStructure(/* String input, String infix */){/* 
+/* private static */ Option<char*> compileStructure(/* String input, String infix */){/* 
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var beforeClass = input.substring(0, classIndex).strip();
@@ -238,12 +240,12 @@
                 }
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<String> getString(String beforeContent, String beforeClass, String withEnd) {
+    private static Option<String> getString(String beforeContent, String beforeClass, String withEnd) {
         if (!withEnd.endsWith("}")) {
-            return Optional.empty();
+            return new None<>();
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
@@ -262,7 +264,7 @@
         return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content);
      */
 }
-/* private static */ Optional<char*> assembleStructure(/* List<String> typeParams, String name, String beforeClass, String content */){/* 
+/* private static */ Option<char*> assembleStructure(/* List<String> typeParams, String name, String beforeClass, String content */){/* 
         if (!typeParams.isEmpty()) {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
@@ -272,16 +274,16 @@
                 return generateStructure(newName, beforeClass, content);
             });
 
-            return Optional.of("");
+            return new Some<>("");
         }
 
         return generateStructure(name, beforeClass, content);
      */
 }
-/* private static */ Optional<char*> generateStructure(/* String name, String beforeClass, String content */){/* 
+/* private static */ Option<char*> generateStructure(/* String name, String beforeClass, String content */){/* 
         var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
         structs.add(generated);
-        return Optional.of("");
+        return new Some<>("");
      */
 }
 /* private static */ char* compileClassSegment(/* String input */){/* 
@@ -298,17 +300,17 @@
                 .orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ Optional<char*> compileDefinitionStatement(/* String input */){/* 
+/* private static */ Option<char*> compileDefinitionStatement(/* String input */){/* 
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+            return new Some<>("\n\t" + compileDefinition(withoutEnd) + ";");
         }
 
-        return Optional.empty();
+        return new None<>();
      */
 }
-/* private static */ Optional<char*> compileMethod(/* String stripped */){/* 
+/* private static */ Option<char*> compileMethod(/* String stripped */){/* 
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -323,14 +325,14 @@
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
-                    return Optional.of("");
+                    return new Some<>("");
                 }
                 else {
-                    return Optional.of("");
+                    return new Some<>("");
                 }
             }
         }
-        return Optional.empty();
+        return new None<>();
      */
 }
 /* private static */ char* compileDefinition(/* String input */){/* 
@@ -356,7 +358,7 @@
         var stripped = input.strip();
         var maybeTypeParamIndex = typeParameters.indexOf(stripped);
         if (maybeTypeParamIndex.isPresent()) {
-            var typeParamIndex = maybeTypeParamIndex.get();
+            var typeParamIndex = maybeTypeParamIndex.orElse(null);
             return typeArguments.get(typeParamIndex);
         }
 
