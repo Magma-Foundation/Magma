@@ -917,10 +917,10 @@ public class Main {
             return state.advance();
         }
         var appended = state.append(c);
-        if (c == '<') {
+        if (c == '<' || c == '(') {
             return appended.enter();
         }
-        if (c == '>') {
+        if (c == '>' || c == ')') {
             return appended.exit();
         }
         return appended;

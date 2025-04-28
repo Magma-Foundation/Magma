@@ -113,9 +113,9 @@
     private static State foldValueChar(State state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
-        } *//* var appended = state.append(c); *//* if (c == '<') {
+        } *//* var appended = state.append(c); *//* if (c == '<' || c == '(') {
             return appended.enter();
-        } *//* if (c == '>') {
+        } *//* if (c == '>' || c == ')') {
             return appended.exit();
         } *//* return appended; *//* }
 
@@ -249,8 +249,6 @@
 };
 /* public */struct Option<Tuple<char, struct State>> {
 };
-/* private */struct Tuple</*  */> {
-};
 /* public */struct Some</*  */> {
 };
 /* public */struct Option<struct State> {
@@ -276,14 +274,13 @@
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
-auto popAndAppendToTuple_local0(auto tuple){
-	/* var poppedChar = tuple.left; */
-	/* var poppedState = tuple.right; */
-	/* var appended = poppedState.append(poppedChar); */
-	return Tuple</*  */>(poppedChar, appended);
-}
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
-	return this.pop(this).map(this.pop(this), popAndAppendToTuple_local0);
+	return this.pop(this).map(this.pop(this), /* tuple -> {
+                var poppedChar = tuple */.left;
+                var poppedState = tuple.right;
+                var appended = poppedState.append(poppedChar);
+                return new Tuple<>(poppedChar, /* appended);
+            } */);
 }
 /* private */ int isLevel(struct State this){
 	return this.depth == 0;
@@ -305,7 +302,7 @@ auto popAndAppendToTuple_local0(auto tuple){
                 return new None<>();
             } */
 	/* var escaped = this.input.charAt(this.index); */
-	return Some</*  */>(/* new Tuple<Character, State>(escaped */, /* new State(this */.input, this.segments, this.buffer, this.depth, this.index + 1)));
+	return Some</*  */>(Tuple<char, struct State>(escaped, struct State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
 /* private */ struct State append(struct State this, struct char c){
 	return struct State(this.input, this.segments, this.buffer + c, this.depth, this.index);
@@ -394,7 +391,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
 /* private static */ char* compileAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
-	return generateAll(merger, /* parseAll(input */, folder, /* compiler) */);
+	return generateAll(merger, parseAll(input, folder, compiler));
 }
 /* private static */ char* generateAll(struct DataAccess this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return parsed.iter(parsed).fold(parsed.iter(parsed), "", merger);
