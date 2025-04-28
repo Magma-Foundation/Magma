@@ -173,8 +173,8 @@ public class Main {
     }
 
     private record State(String input, List<String> segments, String buffer, int depth, int index) {
-        public State(String input) {
-            this(input, Lists.empty(), "", 0, 0);
+        private static State fromInput(String input) {
+            return new State(input, Lists.empty(), "", 0, 0);
         }
 
         private Option<Tuple<Character, State>> popAndAppendToTuple() {
@@ -322,7 +322,7 @@ public class Main {
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
-        State state = new State(input);
+        State state = State.fromInput(input);
         while (true) {
             var maybeNextTuple = state.pop();
             if (maybeNextTuple.isEmpty()) {
@@ -470,7 +470,7 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return new Some<>("\n\t" + compileDefinition(withoutEnd) + ";");
+            return new Some<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         }
 
         return new None<>();
@@ -489,7 +489,8 @@ public class Main {
 
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
-                    var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
+                    var outputParams = generateValues(parseValues(params, Main::compileDefinitionOrPlaceholder));
+                    var generated = compileDefinitionOrPlaceholder(definition) + "(" + outputParams + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -501,23 +502,31 @@ public class Main {
         return new None<>();
     }
 
-    private static String compileDefinition(String input) {
+    private static String compileDefinitionOrPlaceholder(String input) {
+        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Option<String> compileDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            var beforeName = stripped.substring(0, nameSeparator);
-            var name = stripped.substring(nameSeparator + " ".length());
-            if (isSymbol(name)) {
-                var typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator).strip();
-                    var type = beforeName.substring(typeSeparator + " ".length());
-                    return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
-                }
-            }
+        if (nameSeparator < 0) {
+            return new None<>();
         }
 
-        return generatePlaceholder(stripped);
+        var beforeName = stripped.substring(0, nameSeparator);
+        var name = stripped.substring(nameSeparator + " ".length());
+        if (!isSymbol(name)) {
+            return new None<>();
+        }
+
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            var beforeType = beforeName.substring(0, typeSeparator).strip();
+            var type = beforeName.substring(typeSeparator + " ".length());
+            return new Some<>(generatePlaceholder(beforeType) + " " + compileType(type) + " " + name);
+        }
+
+        return new Some<>(compileType(beforeName) + " " + name);
     }
 
     private static String compileType(String input) {

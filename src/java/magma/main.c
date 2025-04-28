@@ -10,8 +10,8 @@
 };
 /* public */struct List<char*> {
 };
-/* public State */(/* String input */){/* 
-            this(input, Lists.empty(), "", 0, 0);
+/* private static */ struct State fromInput(char* input){/* 
+            return new State(input, Lists.empty(), "", 0, 0);
          */
 }
 /* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){/* 
@@ -47,7 +47,7 @@
             return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
          */
 }
-/* private */ struct State append(/* char c */){/* 
+/* private */ struct State append(struct char c){/* 
             return new State(this.input, this.segments, this.buffer + c, this.depth, this.index);
          */
 }
@@ -55,7 +55,7 @@
             return this.popAndAppendToTuple().map(Tuple::right);
          */
 }
-/* private Joiner */(/*  */){/* 
+struct private Joiner(/*  */){/* 
             this("");
          */
 }
@@ -65,7 +65,7 @@
          */
 }
 /* @Override
-        public */ Option<char*> fold(/* Option<String> current, String element */){/* 
+        public */ Option<char*> fold(Option<char*> current, char* element){/* 
             return new Some<>(current.map(inner -> inner + element).orElse(element));
          */
 }
@@ -81,7 +81,7 @@
         }
      */
 }
-/* private static */ char* compileRoot(/* String input */){/* 
+/* private static */ char* compileRoot(char* input){/* 
         var compiled = compileStatements(input, Main::compileRootSegment);
         var joinedExpansions = expansions.iter()
                 .map(tuple -> {
@@ -99,45 +99,43 @@
         return compiled + join(structs) + joinedExpansions + join(methods);
      */
 }
-/* private static */ char* join(/* List<String> list */){/* 
+/* private static */ char* join(List<char*> list){/* 
         return join(list, "");
      */
 }
-/* private static */ char* join(/* List<String> list, String delimiter */){/* 
+/* private static */ char* join(List<char*> list, char* delimiter){/* 
         return list.iter().collect(new Joiner(delimiter)).orElse("");
      */
 }
-/* private static */ char* compileStatements(/* String input, Function<String, String> compiler */){/* 
+/* private static */ char* compileStatements(char* input, /*  Function<String */, /* String> */ compiler){/* 
         return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
      */
 }
-/* private static */ char* compileAll(/* 
-            String input,
-            BiFunction<State, Character, State> folder,
-            Function<String, String> compiler,
-            BiFunction<String, String, String> merger
-     */){/* 
+/* private static */ char* compileAll(char* input, /* 
+            BiFunction<State */, /*  Character */, /* State> */ folder, /* 
+            Function<String */, /* String> */ compiler, /* 
+            BiFunction<String */, /*  String */, /* String> */ merger){/* 
         return generateAll(merger, parseAll(input, folder, compiler));
      */
 }
-/* private static */ char* generateAll(/* BiFunction<String, String, String> merger, List<String> parsed */){/* 
+/* private static */ char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, List<char*> parsed){/* 
         return parsed.iter()
                 .foldRight("", merger);
      */
 }
-/* private static */ List<char*> parseAll(/* String input, BiFunction<State, Character, State> folder, Function<String, String> compiler */){/* 
+/* private static */ List<char*> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compiler){/* 
         return divideAll(input, folder)
                 .iter()
                 .map(compiler)
                 .collect(new ListCollector<>());
      */
 }
-/* private static */ char* mergeStatements(/* String buffer, String element */){/* 
+/* private static */ char* mergeStatements(char* buffer, char* element){/* 
         return buffer + element;
      */
 }
-/* private static */ List<char*> divideAll(/* String input, BiFunction<State, Character, State> folder */){/* 
-        State state = new State(input);
+/* private static */ List<char*> divideAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder){/* 
+        State state = State.fromInput(input);
         while (true) {
             var maybeNextTuple = state.pop();
             if (maybeNextTuple.isEmpty()) {
@@ -155,7 +153,7 @@
         return state.advance().segments;
      */
 }
-/* private static */ Option<struct State> foldSingleQuotes(/* State state, char next */){/* 
+/* private static */ Option<struct State> foldSingleQuotes(struct State state, struct char next){/* 
         if (next != '\'') {
             return new None<>();
         }
@@ -166,7 +164,7 @@
                 .flatMap(State::popAndAppend);
      */
 }
-/* private static */ struct State foldStatementChar(/* State state, char c */){/* 
+/* private static */ struct State foldStatementChar(struct State state, struct char c){/* 
         var appended = state.append(c);
 
         if (c == ';' && appended.isLevel()) {
@@ -184,7 +182,7 @@
         return appended;
      */
 }
-/* private static */ char* compileRootSegment(/* String input */){/* 
+/* private static */ char* compileRootSegment(char* input){/* 
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -197,11 +195,11 @@
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ Option<char*> compileClass(/* String stripped */){/* 
+/* private static */ Option<char*> compileClass(char* stripped){/* 
         return compileStructure(stripped, "class ");
      */
 }
-/* private static */ Option<char*> compileStructure(/* String input, String infix */){/* 
+/* private static */ Option<char*> compileStructure(char* input, char* infix){/* 
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var beforeClass = input.substring(0, classIndex).strip();
@@ -245,7 +243,7 @@
         return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content);
      */
 }
-/* private static */ Option<char*> assembleStructure(/* List<String> typeParams, String name, String beforeClass, String content */){/* 
+/* private static */ Option<char*> assembleStructure(List<char*> typeParams, char* name, char* beforeClass, char* content){/* 
         if (!typeParams.isEmpty()) {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
@@ -261,13 +259,13 @@
         return generateStructure(name, beforeClass, content);
      */
 }
-/* private static */ Option<char*> generateStructure(/* String name, String beforeClass, String content */){/* 
+/* private static */ Option<char*> generateStructure(char* name, char* beforeClass, char* content){/* 
         var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
         structs.add(generated);
         return new Some<>("");
      */
 }
-/* private static */ char* compileClassSegment(/* String input */){/* 
+/* private static */ char* compileClassSegment(char* input){/* 
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -281,17 +279,17 @@
                 .orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ Option<char*> compileDefinitionStatement(/* String input */){/* 
+/* private static */ Option<char*> compileDefinitionStatement(char* input){/* 
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return new Some<>("\n\t" + compileDefinition(withoutEnd) + ";");
+            return new Some<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         }
 
         return new None<>();
      */
 }
-/* private static */ Option<char*> compileMethod(/* String stripped */){/* 
+/* private static */ Option<char*> compileMethod(char* stripped){/* 
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -304,7 +302,8 @@
 
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
-                    var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
+                    var outputParams = generateValues(parseValues(params, Main::compileDefinitionOrPlaceholder));
+                    var generated = compileDefinitionOrPlaceholder(definition) + "(" + outputParams + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
                     return new Some<>("");
                 }
@@ -316,26 +315,34 @@
         return new None<>();
      */
 }
-/* private static */ char* compileDefinition(/* String input */){/* 
-        var stripped = input.strip();
-        var nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            var beforeName = stripped.substring(0, nameSeparator);
-            var name = stripped.substring(nameSeparator + " ".length());
-            if (isSymbol(name)) {
-                var typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator).strip();
-                    var type = beforeName.substring(typeSeparator + " ".length());
-                    return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
-                }
-            }
-        }
-
-        return generatePlaceholder(stripped);
+/* private static */ char* compileDefinitionOrPlaceholder(char* input){/* 
+        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
      */
 }
-/* private static */ char* compileType(/* String input */){/* 
+/* private static */ Option<char*> compileDefinition(char* input){/* 
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
+        if (nameSeparator < 0) {
+            return new None<>();
+        }
+
+        var beforeName = stripped.substring(0, nameSeparator);
+        var name = stripped.substring(nameSeparator + " ".length());
+        if (!isSymbol(name)) {
+            return new None<>();
+        }
+
+        var typeSeparator = beforeName.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            var beforeType = beforeName.substring(0, typeSeparator).strip();
+            var type = beforeName.substring(typeSeparator + " ".length());
+            return new Some<>(generatePlaceholder(beforeType) + " " + compileType(type) + " " + name);
+        }
+
+        return new Some<>(compileType(beforeName) + " " + name);
+     */
+}
+/* private static */ char* compileType(char* input){/* 
         var stripped = input.strip();
         var maybeTypeParamIndex = typeParameters.indexOf(stripped);
         if (maybeTypeParamIndex.isPresent()) {
@@ -377,15 +384,15 @@
         return generatePlaceholder(stripped);
      */
 }
-/* private static */ char* generateValues(/* List<String> values */){/* 
+/* private static */ char* generateValues(List<char*> values){/* 
         return generateAll(Main::mergeValues, values);
      */
 }
-/* private static */ List<char*> parseValues(/* String input, Function<String, String> compiler */){/* 
+/* private static */ List<char*> parseValues(char* input, /*  Function<String */, /* String> */ compiler){/* 
         return parseAll(input, Main::foldValueChar, compiler);
      */
 }
-/* private static */ char* mergeValues(/* String builder, String element */){/* 
+/* private static */ char* mergeValues(char* builder, char* element){/* 
         if (builder.isEmpty()) {
             return builder + element;
         }
@@ -393,14 +400,14 @@
         return builder + ", " + element;
      */
 }
-/* private static */ struct State foldValueChar(/* State state, char c */){/* 
+/* private static */ struct State foldValueChar(struct State state, struct char c){/* 
         if (c == ',') {
             return state.advance();
         }
         return state.append(c);
      */
 }
-/* private static */ struct boolean isSymbol(/* String input */){/* 
+/* private static */ struct boolean isSymbol(char* input){/* 
         var stripped = input.strip();
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
@@ -412,7 +419,7 @@
         return true;
      */
 }
-/* private static */ char* generatePlaceholder(/* String input */){/* 
+/* private static */ char* generatePlaceholder(char* input){/* 
         return "/* " + input + " */";
      */
 }
