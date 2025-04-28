@@ -98,19 +98,29 @@ public class Main {
 
     private enum Operator {
         ADD("+"),
-        AND("&&"),
-        OR("||"),
-        EQUALS("=="),
-        NOT_EQUALS("!="),
-        LESS_THAN_OR_EQUALS_TO("<="),
-        LESS_THAN("<"),
-        GREATER_THAN_OR_EQUALS_TO(">="),
-        GREATER_THAN(">");
+        AND("&&", Primitive.Bool),
+        OR("||", Primitive.Bool),
+        EQUALS("==", Primitive.Bool),
+        NOT_EQUALS("!=", Primitive.Bool),
+        LESS_THAN_OR_EQUALS_TO("<=", Primitive.Bool),
+        LESS_THAN("<", Primitive.Bool),
+        GREATER_THAN_OR_EQUALS_TO(">=", Primitive.Bool),
+        GREATER_THAN(">", Primitive.Bool);
 
         private final String representation;
+        private final Option<Type> type;
 
         Operator(String value) {
+            this(value, new None<>());
+        }
+
+        Operator(String value, Option<Type> type) {
             this.representation = value;
+            this.type = type;
+        }
+
+        Operator(String value, Type type) {
+            this(value, new Some<>(type));
         }
     }
 
@@ -521,7 +531,7 @@ public class Main {
 
     private record StructType(String name, List<Definition> properties) implements Type {
         public StructType(String name) {
-            this(name, Lists.listEmpty());
+            this(name, listEmpty());
         }
 
         @Override
@@ -592,14 +602,14 @@ public class Main {
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-    private static List<Type> visitedExpansions = listEmpty();
     public static List<List<String>> statements = listEmpty();
+    private static List<Type> visitedExpansions = listEmpty();
     private static List<StructType> structStack = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Type> typeArguments = listEmpty();
     private static int functionLocalCounter = 0;
-    private static List<Type> typeStack = Lists.listEmpty();
+    private static List<Type> typeStack = listEmpty();
 
     private static Option<IOException> run() {
         return switch (readString(SOURCE)) {
@@ -1046,11 +1056,15 @@ public class Main {
             case DataAccess dataAccess -> resolveDataAccess(dataAccess);
             case Invocation invocation -> resolveInvocation(invocation);
             case Not _ -> Primitive.Bool;
-            case Operation operation -> resolve(operation.left);
+            case Operation operation -> resolveOperation(operation);
             case StringValue _ -> new Ref(Primitive.I8);
             case Symbol symbol -> resolveSymbol(symbol);
             case Whitespace _ -> Primitive.Void;
         };
+    }
+
+    private static Type resolveOperation(Operation operation) {
+        return operation.operator.type.orElseGet(() -> resolve(operation.left));
     }
 
     private static Type resolveSymbol(Symbol symbol) {
@@ -1068,7 +1082,7 @@ public class Main {
             return functional.returns;
         }
 
-        return resolvedCaller;
+        return new Content(invocation.generate());
     }
 
     private static Type resolveDataAccess(DataAccess dataAccess) {
@@ -1081,7 +1095,7 @@ public class Main {
             }
         }
 
-        return resolved;
+        return new Content(dataAccess.generate());
     }
 
     private static Assignable parseAssignable(String definition) {
@@ -1208,7 +1222,7 @@ public class Main {
         if (caller.startsWith("new ")) {
             var type = parseType(caller.substring("new ".length()));
             var parsedCaller = new Symbol("new_" + type.stringify());
-            return assembleInvokable(parsedCaller, arguments, Lists.listEmpty());
+            return assembleInvokable(parsedCaller, arguments, listEmpty());
         }
 
         Value parsedCaller = parseValue(caller);
@@ -1216,7 +1230,7 @@ public class Main {
             return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
         }
         else {
-            return assembleInvokable(parsedCaller, arguments, Lists.listEmpty());
+            return assembleInvokable(parsedCaller, arguments, listEmpty());
         }
     }
 
