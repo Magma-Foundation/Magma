@@ -1,5 +1,3 @@
-/* public sealed */struct Option<T> permits Some, None {
-};
 /* private */struct Defined extends Node {
 };
 /* private */struct Value extends Node {
@@ -30,7 +28,13 @@
 };
 /* private */struct Tuple<char, struct State> {
 };
+/* public sealed */struct Option<Tuple<char, struct State>> {
+};
 /* public */struct Some</*  */> {
+};
+/* public sealed */struct Option<struct State> {
+};
+/* public sealed */struct Option<char*> {
 };
 /* public */struct None</*  */> {
 };
@@ -42,17 +46,14 @@
 };
 /* public */struct Some<char*> {
 };
-// Option<struct R>
-// Option<struct T>
-// Option<Tuple<char, struct State>>
-// Option<struct State>
-// Option<char*>
+/* public sealed */struct Option<struct Whitespace> {
+};
+/* public sealed */struct Option<struct Definition> {
+};
 // Function<char*, char*>
 // BiFunction<struct State, char, struct State>
 // BiFunction<char*, char*, char*>
 // Function<char*, struct T>
-// Option<struct Whitespace>
-// Option<struct Definition>
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
@@ -268,14 +269,19 @@ struct public Definition(struct Definition this, char* type, char* name){
             if (contentStart >= 0) {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
 
-                var paramStart = beforeContent.indexOf("(");
+                var permitsIndex = beforeContent.indexOf(" permits");
+                var withoutPermits = permitsIndex >= 0
+                        ? beforeContent.substring(0, permitsIndex).strip()
+                        : beforeContent;
+
+                var paramStart = withoutPermits.indexOf("(");
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
-                    String withoutParams = beforeContent.substring(0, paramStart).strip();
+                    String withoutParams = withoutPermits.substring(0, paramStart).strip();
                     return getString(withoutParams, beforeClass, withEnd);
                 }
                 else {
-                    return getString(beforeContent, beforeClass, withEnd);
+                    return getString(withoutPermits, beforeClass, withEnd);
                 }
             }
         } */

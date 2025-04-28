@@ -546,14 +546,19 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
 
-                var paramStart = beforeContent.indexOf("(");
+                var permitsIndex = beforeContent.indexOf(" permits");
+                var withoutPermits = permitsIndex >= 0
+                        ? beforeContent.substring(0, permitsIndex).strip()
+                        : beforeContent;
+
+                var paramStart = withoutPermits.indexOf("(");
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
-                    String withoutParams = beforeContent.substring(0, paramStart).strip();
+                    String withoutParams = withoutPermits.substring(0, paramStart).strip();
                     return getString(withoutParams, beforeClass, withEnd);
                 }
                 else {
-                    return getString(beforeContent, beforeClass, withEnd);
+                    return getString(withoutPermits, beforeClass, withEnd);
                 }
             }
         }
