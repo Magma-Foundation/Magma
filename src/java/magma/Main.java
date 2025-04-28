@@ -737,11 +737,24 @@ public class Main {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
                 var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1));
-                return indent + generatePlaceholder(beforeBlock) + "{" + outputContent + indent + "}";
+                return indent + compileBeforeBlock(beforeBlock) + "{" + outputContent + indent + "}";
             }
         }
 
         return indent + generatePlaceholder(stripped);
+    }
+
+    private static String compileBeforeBlock(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutPrefix = stripped.substring("if".length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                return "if (" + compileValue(condition) + ")";
+            }
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static String compileValue(String input) {
