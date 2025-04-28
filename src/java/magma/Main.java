@@ -63,8 +63,18 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private interface Defined {
+    private interface Defined extends Node {
         String generate();
+    }
+
+    private interface Value extends Node {
+    }
+
+    private interface Node {
+        String generate();
+    }
+
+    private interface Type extends Node {
     }
 
     public record Some<T>(T value) implements Option<T> {
@@ -312,14 +322,14 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Defined {
+    private record Content(String input) implements Defined, Value {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
         }
     }
 
-    private static class Whitespace implements Defined {
+    private static class Whitespace implements Defined, Value {
         @Override
         public String generate() {
             return "";
@@ -333,13 +343,39 @@ public class Main {
         }
     }
 
+    private record StringValue(String value) implements Value {
+        @Override
+        public String generate() {
+            return "\"" + this.value + "\"";
+        }
+    }
+
+    private record Symbol(String value) implements Value {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
+    private record Invocation(Value caller, List<Value> args) implements Value {
+        @Override
+        public String generate() {
+            return this.caller.generate() + "(" + generateValueList(this.args) + ")";
+        }
+    }
+
+    private record DataAccess(Value parent, String property) implements Value {
+        @Override
+        public String generate() {
+            return this.parent.generate() + "." + this.property;
+        }
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-
     private static String structName = "";
     private static String functionName = "";
-
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<String>>> expansions = listEmpty();
     private static List<String> typeArguments = listEmpty();
@@ -612,9 +648,9 @@ public class Main {
         return assembleMethod(outputDefinition, outputParams, content);
     }
 
-    private static String generateValueList(List<Defined> copy) {
+    private static <T extends Node> String generateValueList(List<T> copy) {
         return copy.iter()
-                .map(Defined::generate)
+                .map(Node::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
     }
@@ -658,52 +694,60 @@ public class Main {
     }
 
     private static String compileValue(String input) {
+        return parseValue(input).generate();
+    }
+
+    private static Value parseValue(String input) {
         var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return new Whitespace();
+        }
+
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return stripped;
+            return new StringValue(stripped.substring(1, stripped.length() - 1));
         }
 
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
-
-            var divisions = divideAll(withoutEnd, new BiFunction<State, Character, State>() {
-                @Override
-                public State apply(State state, Character c) {
-                    var appended = state.append(c);
-                    if (c == '(') {
-                        var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
-                        return maybeAdvanced.enter();
-                    }
-                    if (c == ')') {
-                        return appended.exit();
-                    }
-                    return appended;
-                }
-            });
-
+            var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
             if (divisions.size() >= 2) {
                 var joined = join(divisions.subList(0, divisions.size() - 1), "");
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.last();
 
-                String compiled;
+                Value parsedCaller;
                 if (caller.startsWith("new ")) {
-                    compiled = compileType(caller.substring("new ".length()));
+                    parsedCaller = new Symbol(compileType(caller.substring("new ".length())));
                 }
                 else {
-                    compiled = compileValue(caller);
+                    parsedCaller = parseValue(caller);
                 }
 
-                return compiled + "(" + compileValues(arguments) + ")";
+                var parsedArgs = parseValues(arguments, Main::parseValue)
+                        .iter()
+                        .filter(value -> !(value instanceof Whitespace))
+                        .collect(new ListCollector<>());
+
+                List<Value> newArgs;
+                if (parsedCaller instanceof DataAccess(var parent, _)) {
+                    newArgs = Lists.<Value>listEmpty()
+                            .add(parent)
+                            .addAll(parsedArgs);
+                }
+                else {
+                    newArgs = parsedArgs;
+                }
+
+                return new Invocation(parsedCaller, newArgs);
             }
         }
 
         if (isSymbol(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         }
 
         if (isNumber(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         }
 
         var arrowIndex = stripped.indexOf("->");
@@ -717,7 +761,7 @@ public class Main {
                 functionLocalCounter++;
 
                 assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return name;
+                return new Symbol(name);
             }
         }
 
@@ -725,13 +769,29 @@ public class Main {
         if (separator >= 0) {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            return compileValue(value) + "." + property;
+            return new DataAccess(parseValue(value), property);
         }
 
-        return generatePlaceholder(stripped);
+        return new Content(stripped);
+    }
+
+    private static State foldInvokableStart(State state, Character c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
+            return maybeAdvanced.enter();
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static boolean isNumber(String input) {
+        if (input.isEmpty()) {
+            return false;
+        }
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isDigit(c)) {
@@ -740,10 +800,6 @@ public class Main {
             return false;
         }
         return true;
-    }
-
-    private static String compileValues(String input) {
-        return generateValues(parseValues(input, Main::compileValue));
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {

@@ -1,7 +1,7 @@
 /* if (isSymbol(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         } *//* if (isNumber(stripped)) {
-            return stripped;
+            return new Symbol(stripped);
         } *//* var arrowIndex = stripped.indexOf("->"); *//* if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
@@ -12,25 +12,32 @@
                 functionLocalCounter++;
 
                 assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return name;
+                return new Symbol(name);
             }
         } *//* var separator = stripped.lastIndexOf("."); *//* if (separator >= 0) {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            return compileValue(value) + "." + property;
-        } *//* return generatePlaceholder(stripped); *//* }
+            return new DataAccess(parseValue(value), property);
+        } *//* return new Content(stripped); *//* }
+
+    private static State foldInvokableStart(State state, Character c) {
+        var appended = state.append(c); *//* if (c == '(') {
+            var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
+            return maybeAdvanced.enter();
+        } *//* if (c == ')') {
+            return appended.exit();
+        } *//* return appended; *//* }
 
     private static boolean isNumber(String input) {
-        for (var i = 0; i < input.length(); i++) {
+        if (input.isEmpty()) {
+            return false;
+        } *//* for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isDigit(c)) {
                 continue;
             }
             return false;
         } *//* return true; *//* }
-
-    private static String compileValues(String input) {
-        return generateValues(parseValues(input, Main::compileValue)); *//* }
 
     private static String compileDefinitionOrPlaceholder(String input) {
         return parseDefinitionOrPlaceholder(input).generate(); *//* }
@@ -125,7 +132,13 @@
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */"; *//* }
-} *//* private */struct Defined {
+} *//* private */struct Defined extends Node {
+};
+/* private */struct Value extends Node {
+};
+/* private */struct Node {
+};
+/* private */struct Type extends Node {
 };
 /* private */struct State {
 };
@@ -135,7 +148,15 @@
 };
 /* private */struct Content {
 };
-/* private static */struct Whitespace implements Defined {
+/* private static */struct Whitespace implements Defined, Value {
+};
+/* private */struct StringValue {
+};
+/* private */struct Symbol {
+};
+/* private */struct Invocation {
+};
+/* private */struct DataAccess {
 };
 /* private static Option<String> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
@@ -215,6 +236,9 @@
         return compileStructure(stripped, " */struct ")
                 .or {
 	/* \n" */;
+	/* }
+                else {
+                    newArgs */ /* = */ parsedArgs;
 };
 /* public */struct Main {
 	/* private static String structName = "" */;
@@ -259,7 +283,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 	return Tuple</*  */>(poppedChar, appended);
 }
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
-	return this.pop().map(popAndAppendToTuple_local0);
+	return this.pop(this).map(this.pop(this), popAndAppendToTuple_local0);
 }
 /* private */ struct boolean isLevel(struct State this){
 	return this.depth == 0;
@@ -271,7 +295,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 	return struct State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
 }
 /* private */ struct State advance(struct State this){
-	return struct State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
+	return struct State(this.input, this.segments.add(this.segments, this.buffer), "", this.depth, this.index);
 }
 /* private */ struct boolean isShallow(struct State this){
 	return this.depth == 1;
@@ -287,7 +311,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 	return struct State(this.input, this.segments, this.buffer + c, this.depth, this.index);
 }
 /* public */ Option<struct State> popAndAppend(struct State this){
-	return this.popAndAppendToTuple().map(/* Tuple::right */);
+	return this.popAndAppendToTuple(this).map(this.popAndAppendToTuple(this), /* Tuple::right */);
 }
 struct private Joiner(struct Joiner this){
 	/* this(""); */
@@ -298,7 +322,7 @@ struct private Joiner(struct Joiner this){
 }
 /* @Override
         public */ Option<char*> fold(struct Joiner this, Option<char*> current, char* element){
-	return Some</*  */>(current.map(/* inner -> inner + this */.delimiter + element).orElse(element));
+	return Some</*  */>(current.map(current, /* inner -> inner + this */.delimiter + element).orElse(current.map(current, /* inner -> inner + this */.delimiter + element), element));
 }
 struct public Definition(struct Definition this, char* type, char* name){
 	/* this(new None<>(), type, name); */
@@ -306,17 +330,33 @@ struct public Definition(struct Definition this, char* type, char* name){
 /* @Override
         public */ char* generate(struct Definition this){
 	/* var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse(""); */
-	return /* joined + this */.type() + " " + this.name();
+	return /* joined + this */.type() + " " + this.name(/* joined + this */.type() + " " + this);
 }
 /* @Override
         public */ char* generate(struct Content this){
 	return generatePlaceholder(this.input);
 }
 /* @Override
-        public */ char* generate(struct Whitespace implements Defined this){
+        public */ char* generate(struct Whitespace implements Defined, Value this){
 	return "";
 }
-/* public static */ void main(struct Whitespace implements Defined this){
+/* @Override
+        public */ char* generate(struct StringValue this){
+	return "\"" + this.value + "\"";
+}
+/* @Override
+        public */ char* generate(struct Symbol this){
+	return this.value;
+}
+/* @Override
+        public */ char* generate(struct Invocation this){
+	return this.caller.generate() + "(" + generateValueList(this.args) + ")";
+}
+/* @Override
+        public */ char* generate(struct DataAccess this){
+	return this.parent.generate() + "." + this.property;
+}
+/* public static */ void main(struct DataAccess this){
 	/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -328,7 +368,7 @@ struct public Definition(struct Definition this, char* type, char* name){
             e.printStackTrace();
         } */
 }
-/* private static */ char* compileRoot(struct Whitespace implements Defined this, char* input){
+/* private static */ char* compileRoot(struct DataAccess this, char* input){
 	/* var compiled = compileStatements(input, Main::compileRootSegment); */
 	/* var joinedExpansions = expansions.iter()
                 .map(tuple -> {
@@ -344,28 +384,28 @@ struct public Definition(struct Definition this, char* type, char* name){
                 .orElse(""); */
 	return /* compiled + join(structs) + joinedExpansions + join */(methods);
 }
-/* private static */ char* join(struct Whitespace implements Defined this, List<char*> list){
+/* private static */ char* join(struct DataAccess this, List<char*> list){
 	return join(list, "");
 }
-/* private static */ char* join(struct Whitespace implements Defined this, List<char*> list, char* delimiter){
-	return list.iter().collect(struct Joiner(delimiter)).orElse("");
+/* private static */ char* join(struct DataAccess this, List<char*> list, char* delimiter){
+	return list.iter(list).collect(list.iter(list), struct Joiner(delimiter)).orElse(list.iter(list).collect(list.iter(list), struct Joiner(delimiter)), "");
 }
-/* private static */ char* compileStatements(struct Whitespace implements Defined this, char* input, Function<char*, char*> compiler){
+/* private static */ char* compileStatements(struct DataAccess this, char* input, Function<char*, char*> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(struct Whitespace implements Defined this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
+/* private static */ char* compileAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
 	return generateAll(merger, /* parseAll(input */, folder, /* compiler) */);
 }
-/* private static */ char* generateAll(struct Whitespace implements Defined this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
-	return parsed.iter().fold("", merger);
+/* private static */ char* generateAll(struct DataAccess this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
+	return parsed.iter(parsed).fold(parsed.iter(parsed), "", merger);
 }
-/* private static <T> */ List<struct T> parseAll(struct Whitespace implements Defined this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
-	return divideAll(input, folder).iter().map(compiler).collect(ListCollector</*  */>());
+/* private static <T> */ List<struct T> parseAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
+	return divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler).collect(divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler), ListCollector</*  */>());
 }
-/* private static */ char* mergeStatements(struct Whitespace implements Defined this, char* buffer, char* element){
+/* private static */ char* mergeStatements(struct DataAccess this, char* buffer, char* element){
 	return /* buffer + element */;
 }
-/* private static */ List<char*> divideAll(struct Whitespace implements Defined this, char* input, BiFunction<struct State, char, struct State> folder){
+/* private static */ List<char*> divideAll(struct DataAccess this, char* input, BiFunction<struct State, char, struct State> folder){
 	/* State state = State.fromInput(input); */
 	/* while (true) {
             var maybeNextTuple = state.pop();
@@ -380,16 +420,16 @@ struct public Definition(struct Definition this, char* type, char* name){
             state = foldSingleQuotes(withoutNext, next)
                     .orElseGet(() -> folder.apply(withoutNext, next));
         } */
-	return state.advance().segments;
+	return state.advance(state).segments;
 }
-/* private static */ Option<struct State> foldSingleQuotes(struct Whitespace implements Defined this, struct State state, struct char next){
+/* private static */ Option<struct State> foldSingleQuotes(struct DataAccess this, struct State state, struct char next){
 	/* if (next != '\'') {
             return new None<>();
         } */
 	/* var appended = state.append(next); */
-	return appended.popAndAppendToTuple().flatMap(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(maybeSlash.right)).flatMap(/* State::popAndAppend */);
+	return appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)).flatMap(appended.popAndAppendToTuple(appended).flatMap(appended.popAndAppendToTuple(appended), /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right)), /* State::popAndAppend */);
 }
-/* private static */ struct State foldStatementChar(struct Whitespace implements Defined this, struct State state, struct char c){
+/* private static */ struct State foldStatementChar(struct DataAccess this, struct State state, struct char c){
 	/* var appended = state.append(c); */
 	/* if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -405,7 +445,7 @@ struct public Definition(struct Definition this, char* type, char* name){
         } */
 	return appended;
 }
-/* private static */ char* compileRootSegment(struct Whitespace implements Defined this, char* input){
+/* private static */ char* compileRootSegment(struct DataAccess this, char* input){
 	/* var stripped = input.strip(); */
 	/* if (stripped.isEmpty()) {
             return "";
@@ -413,9 +453,9 @@ struct public Definition(struct Definition this, char* type, char* name){
 	/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         } */
-	return compileClass(stripped).orElseGet(/* () -> generatePlaceholder */(stripped));
+	return compileClass(stripped).orElseGet(compileClass(stripped), /* () -> generatePlaceholder */(stripped));
 }
-/* private static */ Option<char*> compileClass(struct Whitespace implements Defined this, char* stripped){
+/* private static */ Option<char*> compileClass(struct DataAccess this, char* stripped){
 	return compileStructure(stripped, "class ");
 }
 /* }
@@ -433,7 +473,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some</*  */> this, Function</*  */, struct R> mapper){
-	return Some</*  */>(mapper.apply(this.value));
+	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
         public */ struct boolean isPresent(struct Some</*  */> this){
@@ -453,7 +493,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(struct Some</*  */> this, Function</*  */, Option<struct R>> mapper){
-	return mapper.apply(this.value);
+	return mapper.apply(mapper, this.value);
 }
 /* @Override
         public */ Option</*  */> or(struct Some</*  */> this, Supplier<Option</*  */>> supplier){
@@ -477,7 +517,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public */ /*  */ orElseGet(struct None</*  */> this, Supplier</*  */> supplier){
-	return supplier.get();
+	return supplier.get(supplier);
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(struct None</*  */> this, Function</*  */, Option<struct R>> mapper){
@@ -485,7 +525,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public */ Option</*  */> or(struct None</*  */> this, Supplier<Option</*  */>> supplier){
-	return supplier.get();
+	return supplier.get(supplier);
 }
 /* @Override
         public */ List<struct T> createInitial(struct ListCollector</*  */> this){
@@ -493,11 +533,11 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public */ List<struct T> fold(struct ListCollector</*  */> this, List<struct T> current, struct T element){
-	return current.add(element);
+	return current.add(current, element);
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some<char*> this, Function<char*, struct R> mapper){
-	return Some</*  */>(mapper.apply(this.value));
+	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
         public */ struct boolean isPresent(struct Some<char*> this){
@@ -517,7 +557,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 }
 /* @Override
         public <R> */ Option<struct R> flatMap(struct Some<char*> this, Function<char*, Option<struct R>> mapper){
-	return mapper.apply(this.value);
+	return mapper.apply(mapper, this.value);
 }
 /* @Override
         public */ Option<char*> or(struct Some<char*> this, Supplier<Option<char*>> supplier){
