@@ -1,14 +1,15 @@
-/* public */struct Main {/* private interface List<T> {
-        List<T> add(T element);
-
-        Iterator<T> iter();
-    } *//* private interface Head<T> {
-        Optional<T> next();
-    } *//* private interface Collector<T, C> {
-        C createInitial();
-
-        C fold(C current, T element);
-    } *//* private */struct Iterator<T>(Head<T> head) {
+/* public */struct Main {/* private */struct List<T> {
+	/* List<T> add(T element) */;
+	/* Iterator<T> iter() */;
+};
+/* private */struct Head<T> {
+	/* Optional<T> next() */;
+};
+/* private */struct Collector<T, C> {
+	/* C createInitial() */;
+	/* C fold(C current, T element) */;
+};
+/* private */struct Iterator<T>(Head<T> head) {
 };
 /* private */struct Tuple<A, B>(A left, B right) {
 };

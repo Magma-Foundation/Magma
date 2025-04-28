@@ -303,6 +303,7 @@ public class Main {
         }
 
         return compileStructure(stripped, "record ")
+                .or(() -> compileStructure(stripped, "interface "))
                 .or(() -> compileClass(stripped))
                 .or(() -> compileMethod(stripped))
                 .or(() -> compileDefinitionStatement(stripped))
