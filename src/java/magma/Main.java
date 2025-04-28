@@ -831,6 +831,23 @@ public class Main {
             return new Whitespace();
         }
 
+        var arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+            if (isSymbol(beforeArrow)) {
+                return getSymbol(afterArrow, Lists.listFrom(beforeArrow));
+            }
+            if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+                var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+                        .map(String::strip)
+                        .filter(value -> !value.isEmpty())
+                        .collect(new ListCollector<>());
+
+                return getSymbol(afterArrow, args);
+            }
+        }
+
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
             var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
@@ -882,23 +899,6 @@ public class Main {
 
         if (isNumber(stripped)) {
             return new Symbol(stripped);
-        }
-
-        var arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            var beforeArrow = stripped.substring(0, arrowIndex).strip();
-            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            if (isSymbol(beforeArrow)) {
-                return getSymbol(afterArrow, Lists.listFrom(beforeArrow));
-            }
-            if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-                var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
-                        .map(String::strip)
-                        .filter(value -> !value.isEmpty())
-                        .collect(new ListCollector<>());
-
-                return getSymbol(afterArrow, args);
-            }
         }
 
         var separator = stripped.lastIndexOf(".");
