@@ -30,6 +30,8 @@
 };
 /* private */struct CharValue {
 };
+/* private */struct Not {
+};
 /* public */struct Main {
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
@@ -158,6 +160,9 @@ Iterator<struct T> fromArray(struct Iterators this, /* T[] */ array){
 char* generate(struct CharValue this){
 	return "'" + this.slice + "'";
 }
+char* generate(struct Not this){
+	return "!" + this.value.generate("!" + this.value);
+}
 void main(struct Main this){
 	/* try */{
 		auto source = Paths.get(Paths, /* " */.", "src", "java", "magma", /* "Main */.java");
@@ -249,7 +254,7 @@ Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext
 	auto current = withoutNext.append(withoutNext, c);
 	while (1){
 		auto maybeNext = current.popAndAppendToTuple(current);
-		if (/* ! */(/* maybeNext instanceof Some */(/* var next */))){
+		if (!(/* maybeNext instanceof Some */(/* var next */))){
 			break;
 		}
 		current = next.right;
@@ -345,7 +350,7 @@ Option<char*> compileStructure(struct Main this, char* input, char* infix){
 	return None</*  */>();
 }
 Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass, char* withEnd){
-	auto getString_local0 = /* !withEnd */;
+	auto getString_local0 = !withEnd;
 	if (getString_local0.endsWith(getString_local0, "}")){
 		return None</*  */>();
 	}
@@ -366,7 +371,7 @@ Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass
 	return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
 }
 Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* beforeClass, char* content){
-	auto assembleStructure_local0 = /* !typeParams */;
+	auto assembleStructure_local0 = !typeParams;
 	if (assembleStructure_local0.isEmpty(assembleStructure_local0)){
 		/* -> { */ typeParameters = /* typeParams;
                 typeArguments = typeArgs;
@@ -422,7 +427,7 @@ Option<char*> compileDefinitionStatement(struct Main this, char* input){
 	return None</*  */>();
 }
 auto compileMethod_local12(auto parameter){
-	return /* /* ! */ */(/* /* parameter instanceof Whitespace */ */);
+	return !(/* /* parameter instanceof Whitespace */ */);
 }
 Option<char*> compileMethod(struct Main this, char* stripped){
 	auto compileMethod_local3 = paramStart + "(";
@@ -604,7 +609,7 @@ auto parseValue_local17(auto value){
 	return parseValue_local18.isEmpty(parseValue_local18, /* parseValue_local16 */);
 }
 auto parseValue_local33(auto value){
-	return /* /* ! */ */(/* /* value instanceof Whitespace */ */);
+	return !(/* /* value instanceof Whitespace */ */);
 }
 struct Value parseValue(struct Main this, char* input){
 	auto stripped = input.strip(input);
@@ -630,7 +635,7 @@ struct Value parseValue(struct Main this, char* input){
 		if (beforeArrow.startsWith("(") && beforeArrow.endsWith(beforeArrow.startsWith("(") && beforeArrow, ")")){
 	auto parseValue_local13 = beforeArrow.substring(beforeArrow, 1, beforeArrow.length() - 1);
 	auto parseValue_local15 = Iterators.fromArray(Iterators, parseValue_local13.split(parseValue_local13, Pattern.quote(Pattern, ",")));
-	auto parseValue_local16 = /* !value */;
+	auto parseValue_local16 = !value;
 	auto parseValue_local19 = parseValue_local15.map(parseValue_local15, /* String::strip */);
 	auto parseValue_local20 = parseValue_local19.filter(parseValue_local19, parseValue_local17);
 			auto args = parseValue_local20.collect(parseValue_local20, ListCollector</*  */>());
@@ -659,7 +664,7 @@ struct Value parseValue(struct Main this, char* input){
 				parsedCaller = parseValue(caller);
 			}
 			auto parsedArgs = parseValue_local35.collect(parseValue_local35, ListCollector</*  */>());
-			if (/* ! */(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
+			if (!(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
 				return struct Invocation(parsedCaller, parsedArgs);
 			}
 			auto name = generateName();
@@ -694,6 +699,9 @@ struct Value parseValue(struct Main this, char* input){
 	}
 	if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("'") && stripped, "'")){
 		return struct CharValue(stripped.substring(stripped, 1, stripped.length() - 1));
+	}
+	if (stripped.startsWith(stripped, "!")){
+		return struct Not(parseValue(input.substring(input, 1)));
 	}
 	/* for (var operator : Operator.values()) */{
 		auto operatorIndex = stripped.indexOf(stripped, operator.representation);
@@ -778,7 +786,7 @@ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	}
 	auto beforeName = stripped.substring(stripped, 0, nameSeparator);
 	auto name = stripped.substring(stripped, parseDefinition_local3.length(parseDefinition_local3));
-	if (/* !isSymbol */(name)){
+	if (!isSymbol(name)){
 		return None</*  */>();
 	}
 	auto divisions = divideAll(beforeName, /* Main::foldByTypeSeparator */);
@@ -833,7 +841,7 @@ char* compileType(struct Main this, char* input){
 		if (/* index >= 0 */){
 	auto compileType_local9 = withoutEnd.substring(withoutEnd, 0, index);
 	auto compileType_local10 = index + "<";
-	auto compileType_local20 = /* !expansions */;
+	auto compileType_local20 = !expansions;
 			auto base = compileType_local9.strip(compileType_local9);
 			auto substring = withoutEnd.substring(withoutEnd, compileType_local10.length(compileType_local10));
 			auto parsed = parseValues(substring, /* Main::compileType */);

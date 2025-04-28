@@ -426,6 +426,13 @@ public class Main {
         }
     }
 
+    private record Not(Value value) implements Value {
+        @Override
+        public String generate() {
+            return "!" + this.value.generate();
+        }
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
@@ -964,6 +971,9 @@ public class Main {
             return new CharValue(stripped.substring(1, stripped.length() - 1));
         }
 
+        if (stripped.startsWith("!")) {
+            return new Not(parseValue(input.substring(1)));
+        }
 
         for (var operator : Operator.values()) {
             var operatorIndex = stripped.indexOf(operator.representation);
