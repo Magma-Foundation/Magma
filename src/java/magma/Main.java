@@ -647,7 +647,8 @@ public class Main {
             var index = withoutEnd.indexOf("<");
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
-                var parsed = parseValues(withoutEnd.substring(index + "<".length()), Main::compileType);
+                var substring = withoutEnd.substring(index + "<".length());
+                var parsed = parseValues(substring, Main::compileType);
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.add(new Tuple<>(base, parsed));
@@ -681,10 +682,17 @@ public class Main {
     }
 
     private static State foldValueChar(State state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static boolean isSymbol(String input) {

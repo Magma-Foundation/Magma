@@ -4,7 +4,9 @@
 };
 /* public */struct Main {
 };
-/* public */struct Option</* Tuple<Character */, /* State> */> {
+/* private */struct Tuple<struct Character, struct State> {
+};
+/* public */struct Option<Tuple<struct Character, struct State>> {
 };
 /* public */struct Some<struct > {
 };
@@ -16,11 +18,14 @@
 };
 /* public */struct List<char*> {
 };
+// Function<char*, char*>
+// BiFunction<struct State, struct Character, struct State>
+// BiFunction<char*, char*, char*>
 /* private static */ struct State fromInput(char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
-/* private */ Option</* Tuple<Character */, /* State> */> popAndAppendToTuple(/*  */){
-	return /* this.pop */(/* ).map(tuple -> new Tuple<>(tuple.left */, /* tuple.right.append */(/* tuple.left) */));
+/* private */ Option<Tuple<struct Character, struct State>> popAndAppendToTuple(/*  */){
+	return /* this.pop */(/* ).map */(/* tuple -> new Tuple<> */(/* tuple.left */, /* tuple.right.append(tuple.left */)));
 }
 /* private */ struct boolean isLevel(/*  */){
 	return /* this.depth == 0 */;
@@ -37,12 +42,12 @@
 /* private */ struct boolean isShallow(/*  */){
 	return /* this.depth == 1 */;
 }
-/* private */ Option</* Tuple<Character */, /* State> */> pop(/*  */){
+/* private */ Option<Tuple<struct Character, struct State>> pop(/*  */){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
 	/* var escaped = this.input.charAt(this.index); */
-	return Some<struct >(/* new Tuple<Character */, /* State>(escaped */, /* new State(this.input */, /* this.segments */, /* this.buffer */, /* this.depth */, /* this.index + 1)) */);
+	return Some<struct >(/* new Tuple<Character, State>(escaped */, /* new State(this.input */, /* this.segments */, /* this.buffer */, /* this.depth */, /* this.index + 1)) */);
 }
 /* private */ struct State append(struct char c){
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer + c */, /* this.depth */, /* this.index */);
@@ -59,7 +64,7 @@ struct private Joiner(/*  */){
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
-	return Some<struct >(/* current.map */(/* inner -> inner + delimiter + element).orElse(element */));
+	return Some<struct >(/* current.map */(/* inner -> inner + this.delimiter + element).orElse(element */));
 }
 /* public static */ void main(/*  */){
 	/* try {
@@ -96,20 +101,17 @@ struct private Joiner(/*  */){
 /* private static */ char* join(List<char*> list, char* delimiter){
 	return /* list.iter */(/* ).collect(new Joiner(delimiter)).orElse("" */);
 }
-/* private static */ char* compileStatements(char* input, /*  Function<String */, /* String> */ compiler){
+/* private static */ char* compileStatements(char* input, Function<char*, char*> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(char* input, /* 
-            BiFunction<State */, /*  Character */, /* State> */ folder, /* 
-            Function<String */, /* String> */ compiler, /* 
-            BiFunction<String */, /*  String */, /* String> */ merger){
+/* private static */ char* compileAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
 	return generateAll(merger, /* parseAll(input */, folder, /* compiler) */);
 }
-/* private static */ char* generateAll(/* BiFunction<String */, /*  String */, /* String> */ merger, List<char*> parsed){
+/* private static */ char* generateAll(BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return /* parsed.iter */(/* )
                 .foldRight("" */, merger);
 }
-/* private static */ List<char*> parseAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder, /*  Function<String */, /* String> */ compiler){
+/* private static */ List<char*> parseAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler){
 	return divideAll(input, /* folder)
                 .iter */(/* )
                 .map(compiler)
@@ -118,7 +120,7 @@ struct private Joiner(/*  */){
 /* private static */ char* mergeStatements(char* buffer, char* element){
 	return /* buffer + element */;
 }
-/* private static */ List<char*> divideAll(char* input, /*  BiFunction<State */, /*  Character */, /* State> */ folder){
+/* private static */ List<char*> divideAll(char* input, BiFunction<struct State, struct Character, struct State> folder){
 	/* State state = State.fromInput(input); */
 	/* while (true) {
             var maybeNextTuple = state.pop();
@@ -242,8 +244,8 @@ struct private Joiner(/*  */){
             return "";
         } */
 	return compileStructure(stripped, /* "record ")
-                .or(() -> compileStructure(stripped */, /* "interface "))
-                .or */(/* () -> compileClass(stripped))
+                .or */(/* () -> compileStructure(stripped, "interface "))
+                .or(() -> compileClass(stripped))
                 .or(() -> compileMethod(stripped))
                 .or(() -> compileDefinitionStatement(stripped))
                 .orElseGet(() -> generatePlaceholder(stripped */));
@@ -357,7 +359,7 @@ struct private Joiner(/*  */){
             return new None<>();
         } */
 	/* var divisions = divideAll(beforeName, Main::foldByTypeSeparator); */
-	/* if(divisions.size() == 1) {
+	/* if (divisions.size() == 1) {
             return new Some<>(compileType(beforeName) + " " + name);
         } */
 	/* else {
@@ -403,7 +405,8 @@ struct private Joiner(/*  */){
             var index = withoutEnd.indexOf("<");
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
-                var parsed = parseValues(withoutEnd.substring(index + "<".length()), Main::compileType);
+                var substring = withoutEnd.substring(index + "<".length());
+                var parsed = parseValues(substring, Main::compileType);
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.add(new Tuple<>(base, parsed));
@@ -420,7 +423,7 @@ struct private Joiner(/*  */){
 /* private static */ char* generateValues(List<char*> values){
 	return generateAll(/* Main::mergeValues */, values);
 }
-/* private static */ List<char*> parseValues(char* input, /*  Function<String */, /* String> */ compiler){
+/* private static */ List<char*> parseValues(char* input, Function<char*, char*> compiler){
 	return parseAll(input, /* Main::foldValueChar */, compiler);
 }
 /* private static */ char* mergeValues(char* builder, char* element){
@@ -430,10 +433,17 @@ struct private Joiner(/*  */){
 	return /* builder + ", " + element */;
 }
 /* private static */ struct State foldValueChar(struct State state, struct char c){
-	/* if (c == ',') {
+	/* if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
-	return /* state.append */(c);
+	/* var appended = state.append(c); */
+	/* if (c == '<') {
+            return appended.enter();
+        } */
+	/* if (c == '>') {
+            return appended.exit();
+        } */
+	return appended;
 }
 /* private static */ struct boolean isSymbol(char* input){
 	/* var stripped = input.strip(); */
@@ -452,7 +462,7 @@ struct private Joiner(/*  */){
 	return "/* " + input + " */";
 }
 /* @Override
-        public <R> */ Option<struct R> map(/* Function<T */, /* R> */ mapper){
+        public <R> */ Option<struct R> map(Function<struct , struct R> mapper){
 	return Some<struct >(/* mapper.apply */(/* this.value */));
 }
 /* @Override
@@ -472,7 +482,7 @@ struct private Joiner(/*  */){
 	return /* this.value */;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(/* Function<T */, Option</* R> */> mapper){
+        public <R> */ Option<struct R> flatMap(Function<struct , Option<struct R>> mapper){
 	return /* mapper.apply */(/* this.value */);
 }
 /* @Override
@@ -480,7 +490,7 @@ struct private Joiner(/*  */){
 	return this;
 }
 /* @Override
-        public <R> */ Option<struct R> map(/* Function<T */, /* R> */ mapper){
+        public <R> */ Option<struct R> map(Function<struct , struct R> mapper){
 	return None<struct >();
 }
 /* @Override
@@ -500,7 +510,7 @@ struct private Joiner(/*  */){
 	return /* supplier.get */();
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(/* Function<T */, Option</* R> */> mapper){
+        public <R> */ Option<struct R> flatMap(Function<struct , Option<struct R>> mapper){
 	return None<struct >();
 }
 /* @Override
