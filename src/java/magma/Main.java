@@ -53,6 +53,8 @@ public class Main {
         List<T> addAll(List<T> elements);
 
         List<T> removeLast();
+
+        T removeAndGetLast();
     }
 
     private interface Head<T> {
@@ -399,7 +401,9 @@ public class Main {
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-    public static List<String> statements = Lists.listEmpty();
+
+    public static List<List<String>> statements = Lists.listEmpty();
+
     private static List<String> structNames = Lists.listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
@@ -721,17 +725,22 @@ public class Main {
                 .orElse("");
     }
 
-    private static Some<String> assembleMethod(String definition, String outputParams, String content) {
-        var parsed1 = parseStatements(content, input -> compileFunctionSegment(input, 1));
-
-        var parsed = Lists.<String>listEmpty()
-                .addAll(statements)
-                .addAll(parsed1);
-        statements = Lists.listEmpty();
+    private static Option<String> assembleMethod(String definition, String outputParams, String content) {
+        var parsed = parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1));
 
         var generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
         methods.addLast(generated);
         return new Some<>("");
+    }
+
+    private static List<String> parseStatementsWithLocals(String content, Function<String, String> compiler) {
+        statements = statements.addLast(Lists.listEmpty());
+        var parsed1 = parseStatements(content, compiler);
+
+        var elements = statements.removeAndGetLast();
+        return Lists.<String>listEmpty()
+                .addAll(elements)
+                .addAll(parsed1);
     }
 
     private static Defined parseParameter(String input) {
@@ -770,8 +779,8 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var outputContent = compileStatements(content, input1 -> compileFunctionSegment(input1, depth + 1));
-                return indent + compileBeforeBlock(beforeBlock) + "{" + outputContent + indent + "}";
+                var outputContent = parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1));
+                return indent + compileBeforeBlock(beforeBlock) + "{" + join(outputContent) + indent + "}";
             }
         }
 
@@ -847,7 +856,8 @@ public class Main {
                 }
 
                 var name = generateName();
-                statements = statements.addLast("\n\tauto " + name + " = " + parent.generate() + ";");
+                var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
+                statements.last().addLast(statement);
 
                 var symbol = new Symbol(name);
                 var newArgs = Lists.<Value>listEmpty()

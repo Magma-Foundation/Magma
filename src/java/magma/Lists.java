@@ -65,6 +65,11 @@ class Lists {
         public Main.List<T> removeLast() {
             return new JavaList<>(this.elements.subList(0, this.elements.size() - 1));
         }
+
+        @Override
+        public T removeAndGetLast() {
+            return elements.removeLast();
+        }
     }
 
     public static <T> Main.List<T> listEmpty() {
