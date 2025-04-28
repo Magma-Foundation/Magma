@@ -859,7 +859,7 @@ public class Main {
         }
 
         switch (stripped) {
-            case "int" -> {
+            case "int", "boolean" -> {
                 return "int";
             }
             case "Character" -> {

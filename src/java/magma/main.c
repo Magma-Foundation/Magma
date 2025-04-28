@@ -69,7 +69,7 @@
             var typeParamIndex = maybeTypeParamIndex.orElse(null);
             return typeArguments.get(typeParamIndex);
         } *//* switch (stripped) {
-            case "int" -> {
+            case "int", "boolean" -> {
                 return "int";
             }
             case "Character" -> {
@@ -285,7 +285,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
 	return this.pop(this).map(this.pop(this), popAndAppendToTuple_local0);
 }
-/* private */ struct boolean isLevel(struct State this){
+/* private */ int isLevel(struct State this){
 	return this.depth == 0;
 }
 /* private */ struct State enter(struct State this){
@@ -297,7 +297,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 /* private */ struct State advance(struct State this){
 	return struct State(this.input, this.segments.add(this.segments, this.buffer), "", this.depth, this.index);
 }
-/* private */ struct boolean isShallow(struct State this){
+/* private */ int isShallow(struct State this){
 	return this.depth == 1;
 }
 /* private */ Option<Tuple<char, struct State>> pop(struct State this){
@@ -476,7 +476,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
-        public */ struct boolean isPresent(struct Some</*  */> this){
+        public */ int isPresent(struct Some</*  */> this){
 	return true;
 }
 /* @Override
@@ -484,7 +484,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return this.value;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct Some</*  */> this){
+        public */ int isEmpty(struct Some</*  */> this){
 	return false;
 }
 /* @Override
@@ -504,7 +504,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return None</*  */>();
 }
 /* @Override
-        public */ struct boolean isPresent(struct None</*  */> this){
+        public */ int isPresent(struct None</*  */> this){
 	return false;
 }
 /* @Override
@@ -512,7 +512,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return other;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct None</*  */> this){
+        public */ int isEmpty(struct None</*  */> this){
 	return true;
 }
 /* @Override
@@ -540,7 +540,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
-        public */ struct boolean isPresent(struct Some<char*> this){
+        public */ int isPresent(struct Some<char*> this){
 	return true;
 }
 /* @Override
@@ -548,7 +548,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return this.value;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct Some<char*> this){
+        public */ int isEmpty(struct Some<char*> this){
 	return false;
 }
 /* @Override
