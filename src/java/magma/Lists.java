@@ -58,8 +58,13 @@ class Lists {
         }
 
         @Override
-        public T last() {
-            return this.elements.getLast();
+        public Main.Option<T> findLast() {
+            if (this.isEmpty()) {
+                return new Main.None<>();
+            }
+            else {
+                return new Main.Some<>(this.elements.getLast());
+            }
         }
 
         @Override

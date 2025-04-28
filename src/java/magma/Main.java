@@ -48,7 +48,7 @@ public class Main {
 
         List<T> subList(int startInclusive, int endExclusive);
 
-        T last();
+        Option<T> findLast();
 
         List<T> addAll(List<T> elements);
 
@@ -916,7 +916,7 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var newParams = Lists.<Defined>listEmpty()
-                .addLast(new Definition(structStack.last(), "this"))
+                .addLast(new Definition(structStack.findLast().orElse(null), "this"))
                 .addAll(oldParams);
 
         var outputParams = generateValueList(newParams);
@@ -1069,7 +1069,7 @@ public class Main {
 
     private static Type resolveSymbol(Symbol symbol) {
         if (symbol.value.equals("this")) {
-            return structStack.last();
+            return structStack.findLast().orElse(null);
         }
 
         return new Content(symbol.value);
@@ -1217,7 +1217,7 @@ public class Main {
 
         var joined = join(divisions.subList(0, divisions.size() - 1), "");
         var caller = joined.substring(0, joined.length() - ")".length());
-        var arguments = divisions.last();
+        var arguments = divisions.findLast().orElse(null);
 
         if (caller.startsWith("new ")) {
             var type = parseType(caller.substring("new ".length()));
@@ -1272,7 +1272,7 @@ public class Main {
         else {
             var type = resolve(parent);
             var statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
-            statements.last().addLast(statement);
+            statements.findLast().orElse(null).addLast(statement);
             symbol = new Symbol(name);
         }
 
@@ -1284,8 +1284,10 @@ public class Main {
     }
 
     private static Symbol assembleLambda(String afterArrow, List<String> names) {
+        var last = typeStack.findLast().orElse(null);
+
         var params = names.iter()
-                .map(name -> "auto " + name)
+                .map(name -> last.generate() + " " + name)
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -1365,7 +1367,7 @@ public class Main {
             return new Some<>(new Definition(parseType(beforeName), name));
         }
 
-        var type = divisions.last();
+        var type = divisions.findLast().orElse(null);
         return new Some<>(new Definition(parseType(type), name));
     }
 
