@@ -1,8 +1,8 @@
 /* public */struct Main {/* private */struct Tuple<A, B>(A left, B right) {
 };
 /* private static */struct State {
-	/* private final */ /* String */ input;
-	/* private final */ /* List<String> */ segments;
+	/* private final */ char* input;
+	/* private final */ List<char*> segments;
 	/* private */ /* int */ index;
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ /* int */ depth;
@@ -65,7 +65,7 @@
             return this;
          */
 }
-/* public */ /* Optional<State> */ popAndAppend(/*  */){/* 
+/* public */ Optional</* State */> popAndAppend(/*  */){/* 
             return this.popAndAppendToTuple().map(Tuple::right);
          */
 }
@@ -81,22 +81,36 @@
         }
      */
 }
-/* private static */ /* String */ compileRoot(/* String input */){/* 
-        return compileAll(input, Main::compileRootSegment) + String.join("", methods);
+/* private static */ char* compileRoot(/* String input */){/* 
+        return compileStatements(input, Main::compileRootSegment) + String.join("", methods);
      */
 }
-/* private static */ /* String */ compileAll(/* String input, Function<String, String> compiler */){/* 
-        var segments = divideAll(input);
+/* private static */ char* compileStatements(/* String input, Function<String, String> compiler */){/* 
+        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
+     */
+}
+/* private static */ char* compileAll(/* 
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+     */){/* 
+        var segments = divideAll(input, folder);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compiler.apply(segment));
+            var compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
         }
 
         return output.toString();
      */
 }
-/* private static */ /* List<String> */ divideAll(/* String input */){/* 
+/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
+        return output.append(compiled);
+     */
+}
+/* private static */ List<char*> divideAll(/* String input, BiFunction<State, Character, State> folder */){/* 
         State state = new State(input);
         while (true) {
             var maybeNextTuple = state.pop();
@@ -109,13 +123,13 @@
             var withoutNext = nextTuple.right;
 
             state = foldSingleQuotes(withoutNext, next)
-                    .orElseGet(() -> foldStatementChar(withoutNext, next));
+                    .orElseGet(() -> folder.apply(withoutNext, next));
         }
 
         return state.advance().segments;
      */
 }
-/* private static */ /* Optional<State> */ foldSingleQuotes(/* State state, char next */){/* 
+/* private static */ Optional</* State */> foldSingleQuotes(/* State state, char next */){/* 
         if (next != '\'') {
             return Optional.empty();
         }
@@ -144,7 +158,7 @@
         return appended;
      */
 }
-/* private static */ /* String */ compileRootSegment(/* String input */){/* 
+/* private static */ char* compileRootSegment(/* String input */){/* 
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -157,11 +171,11 @@
         return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ /* Optional<String> */ compileClass(/* String stripped */){/* 
+/* private static */ Optional<char*> compileClass(/* String stripped */){/* 
         return compileStructure(stripped, "class ");
      */
 }
-/* private static */ /* Optional<String> */ compileStructure(/* String input, String infix */){/* 
+/* private static */ Optional<char*> compileStructure(/* String input, String infix */){/* 
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var beforeClass = input.substring(0, classIndex).strip();
@@ -172,14 +186,14 @@
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n");
+                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n");
                 }
             }
         }
         return Optional.empty();
      */
 }
-/* private static */ /* String */ compileClassSegment(/* String input */){/* 
+/* private static */ char* compileClassSegment(/* String input */){/* 
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return "";
@@ -192,7 +206,7 @@
                 .orElseGet(() -> generatePlaceholder(stripped));
      */
 }
-/* private static */ /* Optional<String> */ compileDefinitionStatement(/* String input */){/* 
+/* private static */ Optional<char*> compileDefinitionStatement(/* String input */){/* 
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
@@ -202,7 +216,7 @@
         return Optional.empty();
      */
 }
-/* private static */ /* Optional<String> */ compileMethod(/* String stripped */){/* 
+/* private static */ Optional<char*> compileMethod(/* String stripped */){/* 
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -224,7 +238,7 @@
         return Optional.empty();
      */
 }
-/* private static */ /* String */ compileDefinition(/* String input */){/* 
+/* private static */ char* compileDefinition(/* String input */){/* 
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator >= 0) {
@@ -233,7 +247,7 @@
             if (isSymbol(name)) {
                 var typeSeparator = beforeName.lastIndexOf(" ");
                 if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator);
+                    var beforeType = beforeName.substring(0, typeSeparator).strip();
                     var type = beforeName.substring(typeSeparator + " ".length());
                     return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
                 }
@@ -243,13 +257,41 @@
         return generatePlaceholder(stripped);
      */
 }
-/* private static */ /* String */ compileType(/* String input */){/* 
+/* private static */ char* compileType(/* String input */){/* 
         var stripped = input.strip();
         if (stripped.equals("void")) {
             return "void";
         }
 
+        if (stripped.equals("String")) {
+            return "char*";
+        }
+
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var index = withoutEnd.indexOf("<");
+            if (index >= 0) {
+                var base = withoutEnd.substring(0, index).strip();
+                var arguments = compileAll(withoutEnd.substring(index + "<".length()), Main::foldValueChar, Main::compileType, Main::mergeValues);
+                return base + "<" + arguments + ">";
+            }
+        }
+
         return generatePlaceholder(stripped);
+     */
+}
+/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder builder, String element */){/* 
+        if (builder.isEmpty()) {
+            return builder.append(element);
+        }
+        return builder.append(", ").append(element);
+     */
+}
+/* private static */ /* State */ foldValueChar(/* State state, char c */){/* 
+        if (c == ',') {
+            return state.advance();
+        }
+        return state.append(c);
      */
 }
 /* private static */ /* boolean */ isSymbol(/* String input */){/* 
@@ -264,7 +306,7 @@
         return true;
      */
 }
-/* private static */ /* String */ generatePlaceholder(/* String input */){/* 
+/* private static */ char* generatePlaceholder(/* String input */){/* 
         return "/* " + input + " */";
      */
 }

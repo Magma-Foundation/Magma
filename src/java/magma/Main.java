@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
@@ -94,21 +95,35 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compileAll(input, Main::compileRootSegment) + String.join("", methods);
+        return compileStatements(input, Main::compileRootSegment) + String.join("", methods);
     }
 
-    private static String compileAll(String input, Function<String, String> compiler) {
-        var segments = divideAll(input);
+    private static String compileStatements(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::foldStatementChar, compiler, Main::mergeStatements);
+    }
+
+    private static String compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> compiler,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        var segments = divideAll(input, folder);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compiler.apply(segment));
+            var compiled = compiler.apply(segment);
+            output = merger.apply(output, compiled);
         }
 
         return output.toString();
     }
 
-    private static List<String> divideAll(String input) {
+    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
+        return output.append(compiled);
+    }
+
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
         State state = new State(input);
         while (true) {
             var maybeNextTuple = state.pop();
@@ -121,7 +136,7 @@ public class Main {
             var withoutNext = nextTuple.right;
 
             state = foldSingleQuotes(withoutNext, next)
-                    .orElseGet(() -> foldStatementChar(withoutNext, next));
+                    .orElseGet(() -> folder.apply(withoutNext, next));
         }
 
         return state.advance().segments;
@@ -184,7 +199,7 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n");
+                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n");
                 }
             }
         }
@@ -245,7 +260,7 @@ public class Main {
             if (isSymbol(name)) {
                 var typeSeparator = beforeName.lastIndexOf(" ");
                 if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator);
+                    var beforeType = beforeName.substring(0, typeSeparator).strip();
                     var type = beforeName.substring(typeSeparator + " ".length());
                     return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
                 }
@@ -261,7 +276,35 @@ public class Main {
             return "void";
         }
 
+        if (stripped.equals("String")) {
+            return "char*";
+        }
+
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var index = withoutEnd.indexOf("<");
+            if (index >= 0) {
+                var base = withoutEnd.substring(0, index).strip();
+                var arguments = compileAll(withoutEnd.substring(index + "<".length()), Main::foldValueChar, Main::compileType, Main::mergeValues);
+                return base + "<" + arguments + ">";
+            }
+        }
+
         return generatePlaceholder(stripped);
+    }
+
+    private static StringBuilder mergeValues(StringBuilder builder, String element) {
+        if (builder.isEmpty()) {
+            return builder.append(element);
+        }
+        return builder.append(", ").append(element);
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+        return state.append(c);
     }
 
     private static boolean isSymbol(String input) {
