@@ -4,18 +4,94 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
+    private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iter();
+    }
+
+    private interface Head<T> {
+        Optional<T> next();
+    }
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private record Iterator<T>(Head<T> head) {
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+
+        public <C> C collect(Collector<T, C> collector) {
+            return this.foldRight(collector.createInitial(), collector::fold);
+        }
+
+        private <R> R foldRight(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                R finalCurrent = current;
+                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (optional.isPresent()) {
+                    current = optional.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+    }
+
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            }
+
+            var value = this.counter;
+            this.counter++;
+            return Optional.of(value);
+        }
+    }
+
+    private record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        @Override
+        public List<T> add(T element) {
+            this.list.add(element);
+            return this;
+        }
+
+        @Override
+        public Iterator<T> iter() {
+            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
+        }
     }
 
     private static class State {
         private final String input;
-        private final List<String> segments;
+        private List<String> segments;
         private int index;
         private StringBuilder buffer;
         private int depth;
@@ -29,7 +105,7 @@ public class Main {
         }
 
         public State(String input) {
-            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
+            this(input, Lists.empty(), new StringBuilder(), 0, 0);
         }
 
         private Optional<Tuple<Character, State>> popAndAppendToTuple() {
@@ -51,7 +127,7 @@ public class Main {
         }
 
         private State advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -80,7 +156,25 @@ public class Main {
         }
     }
 
-    public static final List<String> methods = new ArrayList<>();
+    private record Joiner() implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        }
+    }
+
+    private static class Lists {
+        public static <T> List<T> empty() {
+            return new JavaList<>();
+        }
+    }
+
+    private static final List<String> methods = Lists.empty();
 
     public static void main() {
         try {
@@ -95,7 +189,8 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        return compileStatements(input, Main::compileRootSegment) + String.join("", methods);
+        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
+        return compileStatements(input, Main::compileRootSegment) + joinedMethods;
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -108,15 +203,10 @@ public class Main {
             Function<String, String> compiler,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        var segments = divideAll(input, folder);
-
-        var output = new StringBuilder();
-        for (var segment : segments) {
-            var compiled = compiler.apply(segment);
-            output = merger.apply(output, compiled);
-        }
-
-        return output.toString();
+        return divideAll(input, folder)
+                .iter()
+                .foldRight(new StringBuilder(), (output, segment) -> merger.apply(output, compiler.apply(segment)))
+                .toString();
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
@@ -272,16 +362,16 @@ public class Main {
 
     private static String compileType(String input) {
         var stripped = input.strip();
-        if (stripped.equals("int")) {
-            return "int";
-        }
-
-        if (stripped.equals("void")) {
-            return "void";
-        }
-
-        if (stripped.equals("String")) {
-            return "char*";
+        switch (stripped) {
+            case "int" -> {
+                return "int";
+            }
+            case "void" -> {
+                return "void";
+            }
+            case "String" -> {
+                return "char*";
+            }
         }
 
         if (stripped.endsWith(">")) {
