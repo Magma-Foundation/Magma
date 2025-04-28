@@ -78,7 +78,7 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return generatePlaceholder(beforeClass) + "struct " + name + " { " + compileAll(content, Main::compileClassSegment) + "}";
+                    return generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n";
                 }
             }
         }
@@ -87,16 +87,21 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        var paramStart = input.indexOf("(");
+        var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return "";
+        }
+
+        var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
-            var beforeParams = input.substring(0, paramStart);
-            var afterParams = input.substring(paramStart + "(".length());
+            var beforeParams = stripped.substring(0, paramStart);
+            var afterParams = stripped.substring(paramStart + "(".length());
             var generated = generatePlaceholder(beforeParams) + "(" + generatePlaceholder(afterParams);
             methods.add(generated);
             return "";
         }
 
-        return generatePlaceholder(input);
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String input) {
