@@ -634,6 +634,9 @@ public class Main {
             case "int" -> {
                 return "int";
             }
+            case "Character" -> {
+                return "char";
+            }
             case "void" -> {
                 return "void";
             }

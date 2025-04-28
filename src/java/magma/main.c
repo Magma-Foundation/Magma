@@ -4,9 +4,9 @@
 };
 /* public */struct Main {
 };
-/* private */struct Tuple<struct Character, struct State> {
+/* private */struct Tuple<char, struct State> {
 };
-/* public */struct Option<Tuple<struct Character, struct State>> {
+/* public */struct Option<Tuple<char, struct State>> {
 };
 /* public */struct Some</*  */> {
 };
@@ -19,12 +19,12 @@
 /* public */struct List<char*> {
 };
 // Function<char*, char*>
-// BiFunction<struct State, struct Character, struct State>
+// BiFunction<struct State, char, struct State>
 // BiFunction<char*, char*, char*>
 /* private static */ struct State fromInput(char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
-/* private */ Option<Tuple<struct Character, struct State>> popAndAppendToTuple(/*  */){
+/* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(/*  */){
 	return /* this.pop */(/* ).map */(/* tuple -> new Tuple<> */(/* tuple.left */, /* tuple.right.append(tuple.left */)));
 }
 /* private */ struct boolean isLevel(/*  */){
@@ -42,7 +42,7 @@
 /* private */ struct boolean isShallow(/*  */){
 	return /* this.depth == 1 */;
 }
-/* private */ Option<Tuple<struct Character, struct State>> pop(/*  */){
+/* private */ Option<Tuple<char, struct State>> pop(/*  */){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
@@ -104,14 +104,14 @@ struct private Joiner(/*  */){
 /* private static */ char* compileStatements(char* input, Function<char*, char*> compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
+/* private static */ char* compileAll(char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
 	return generateAll(merger, /* parseAll(input */, folder, /* compiler) */);
 }
 /* private static */ char* generateAll(BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return /* parsed.iter */(/* )
                 .foldRight("" */, merger);
 }
-/* private static */ List<char*> parseAll(char* input, BiFunction<struct State, struct Character, struct State> folder, Function<char*, char*> compiler){
+/* private static */ List<char*> parseAll(char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler){
 	return divideAll(input, /* folder)
                 .iter */(/* )
                 .map(compiler)
@@ -120,7 +120,7 @@ struct private Joiner(/*  */){
 /* private static */ char* mergeStatements(char* buffer, char* element){
 	return /* buffer + element */;
 }
-/* private static */ List<char*> divideAll(char* input, BiFunction<struct State, struct Character, struct State> folder){
+/* private static */ List<char*> divideAll(char* input, BiFunction<struct State, char, struct State> folder){
 	/* State state = State.fromInput(input); */
 	/* while (true) {
             var maybeNextTuple = state.pop();
@@ -392,6 +392,9 @@ struct private Joiner(/*  */){
 	/* switch (stripped) {
             case "int" -> {
                 return "int";
+            }
+            case "Character" -> {
+                return "char";
             }
             case "void" -> {
                 return "void";
