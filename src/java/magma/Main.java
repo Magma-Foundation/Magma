@@ -3,6 +3,8 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -17,6 +19,10 @@ public class Main {
         boolean isEmpty();
 
         boolean contains(T element);
+
+        Optional<Integer> indexOf(T element);
+
+        T get(int index);
     }
 
     private interface Head<T> {
@@ -171,9 +177,12 @@ public class Main {
         }
     }
 
+    public static final Map<String, Function<List<String>, Optional<String>>> expandables = new HashMap<>();
     private static final List<String> methods = Lists.empty();
     private static final List<String> structs = Lists.empty();
+    private static List<String> typeParameters = Lists.empty();
     private static List<Tuple<String, List<String>>> expansions = Lists.empty();
+    private static List<String> typeArguments = Lists.empty();
 
     public static void main() {
         try {
@@ -190,7 +199,15 @@ public class Main {
     private static String compileRoot(String input) {
         var compiled = compileStatements(input, Main::compileRootSegment);
         var joinedExpansions = expansions.iter()
-                .map(tuple -> "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n")
+                .map(tuple -> {
+                    if (expandables.containsKey(tuple.left)) {
+                        var expandable = expandables.get(tuple.left);
+                        return expandable.apply(tuple.right).orElse("");
+                    }
+                    else {
+                        return "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n";
+                    }
+                })
                 .collect(new Joiner())
                 .orElse("");
 
@@ -310,13 +327,13 @@ public class Main {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
 
                 var paramStart = beforeContent.indexOf("(");
-
+                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
                     String withoutParams = beforeContent.substring(0, paramStart).strip();
-                    return getString(withoutParams, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
+                    return getString(withoutParams, beforeClass, withEnd);
                 }
                 else {
-                    return getString(beforeContent, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
+                    return getString(beforeContent, beforeClass, withEnd);
                 }
             }
         }
@@ -327,28 +344,38 @@ public class Main {
         if (!withEnd.endsWith("}")) {
             return Optional.empty();
         }
-
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
         var strippedBeforeContent = beforeContent.strip();
         if (strippedBeforeContent.endsWith(">")) {
-            var typeParamStart = strippedBeforeContent.indexOf("<");
+            var withoutEnd = strippedBeforeContent.substring(0, strippedBeforeContent.length() - ">".length());
+            var typeParamStart = withoutEnd.indexOf("<");
             if (typeParamStart >= 0) {
-                var name = strippedBeforeContent.substring(0, typeParamStart).strip();
-                var substring = strippedBeforeContent.substring(typeParamStart + "<".length());
+                var name = withoutEnd.substring(0, typeParamStart).strip();
+                var substring = withoutEnd.substring(typeParamStart + "<".length());
                 var typeParameters = Lists.fromArray(substring.split(Pattern.quote(",")));
-                return assemble(typeParameters, name, beforeClass, content);
+                return assembleStructure(typeParameters, name, beforeClass, content);
             }
         }
 
-        return assemble(Lists.empty(), strippedBeforeContent, beforeClass, content);
+        return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content);
     }
 
-    private static Optional<String> assemble(List<String> typeParams, String name, String beforeClass, String content) {
+    private static Optional<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
         if (!typeParams.isEmpty()) {
+            expandables.put(name, typeArgs -> {
+                typeParameters = typeParams;
+                typeArguments = typeArgs;
+                return generateStructure(name, beforeClass, content);
+            });
+
             return Optional.of("");
         }
 
+        return generateStructure(name, beforeClass, content);
+    }
+
+    private static Optional<String> generateStructure(String name, String beforeClass, String content) {
         var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
         structs.add(generated);
         return Optional.of("");
@@ -421,6 +448,12 @@ public class Main {
 
     private static String compileType(String input) {
         var stripped = input.strip();
+        var maybeTypeParamIndex = typeParameters.indexOf(stripped);
+        if (maybeTypeParamIndex.isPresent()) {
+            var typeParamIndex = maybeTypeParamIndex.get();
+            return typeArguments.get(typeParamIndex);
+        }
+
         switch (stripped) {
             case "int" -> {
                 return "int";
@@ -439,6 +472,7 @@ public class Main {
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
                 var parsed = parseValues(withoutEnd.substring(index + "<".length()), Main::compileType);
+
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.add(new Tuple<>(base, parsed));
                 }
