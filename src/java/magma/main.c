@@ -100,6 +100,9 @@ Option<Tuple<char, struct State>> pop(struct State this){
 	/* this.input.charAt(this.input, this.index) */ escaped = this.input.charAt(this.input, this.index);
 	return Some_/*  */(Tuple_i8_State(escaped, State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
 }
+struct State append(struct State this, struct char c){
+	return State(this.input, this.segments, this.buffer + c, this.depth, this.index);
+}
 auto popAndAppendToTuple_local1(auto tuple){
 	/* tuple.left */ poppedChar = tuple.left;
 	/* tuple.right */ poppedState = tuple.right;
@@ -124,9 +127,6 @@ struct State advance(struct State this){
 }
 int isShallow(struct State this){
 	return this.depth == 1;
-}
-struct State append(struct State this, struct char c){
-	return State(this.input, this.segments, this.buffer + c, this.depth, this.index);
 }
 Option<struct State> popAndAppend(struct State this){
 	Option<Tuple<char, struct State>> popAndAppend_local1 = this.popAndAppendToTuple(this);

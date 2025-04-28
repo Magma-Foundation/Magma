@@ -335,6 +335,10 @@ public class Main {
             return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
         }
 
+        private State append(char c) {
+            return new State(this.input, this.segments, this.buffer + c, this.depth, this.index);
+        }
+
         private Option<Tuple<Character, State>> popAndAppendToTuple() {
             return this.pop().map(tuple -> {
                 var poppedChar = tuple.left;
@@ -362,10 +366,6 @@ public class Main {
 
         private boolean isShallow() {
             return this.depth == 1;
-        }
-
-        private State append(char c) {
-            return new State(this.input, this.segments, this.buffer + c, this.depth, this.index);
         }
 
         public Option<State> popAndAppend() {
