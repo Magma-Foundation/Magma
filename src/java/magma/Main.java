@@ -1238,18 +1238,20 @@ public class Main {
         var parsedArgs = divideAll(arguments, Main::foldValueChar)
                 .iterWithIndices()
                 .map((Tuple<Integer, String> input) -> {
-                    var maybeFound = expectedArgumentsType.find(input.left);
+                    var index = input.left;
+                    var maybeFound = expectedArgumentsType.find(index);
 
-                    Value parsed;
+                    Type expectedType;
                     if (maybeFound instanceof Some(var found)) {
-                        typeStack = typeStack.addLast(found);
-                        parsed = parseValue(input.right);
-                        typeStack = typeStack.removeLast();
+                        expectedType = found;
                     }
                     else {
-                        parsed = parseValue(input.right);
+                        expectedType = new Content(input.right);
                     }
 
+                    typeStack = typeStack.addLast(expectedType);
+                    Value parsed = parseValue(input.right);
+                    typeStack = typeStack.removeLast();
                     return parsed;
                 })
                 .collect(new ListCollector<>())
@@ -1294,10 +1296,12 @@ public class Main {
             return new Symbol(name);
         }
 
-        var newValue = compileValue(afterArrow);
+        var value = parseValue(afterArrow);
+        var newValue = value.generate();
+        var resolved = resolve(value);
 
         var name = generateName();
-        assembleMethod(new Definition(Primitive.Auto, name), params, "\n\treturn " + newValue + ";");
+        assembleMethod(new Definition(resolved, name), params, "\n\treturn " + newValue + ";");
         return new Symbol(name);
     }
 
