@@ -1,8 +1,14 @@
 /* public */struct Main {/* private */struct Tuple<A, B>(A left, B right) {
 };
-/* private static */struct State {/* private final String input; *//* private final List<String> segments; *//* private int index; *//* private StringBuilder buffer; *//* private int depth; */
+/* private static */struct State {
+	/* private final */ /* String */ input;
+	/* private final */ /* List<String> */ segments;
+	/* private */ /* int */ index;
+	/* private */ /* StringBuilder */ buffer;
+	/* private */ /* int */ depth;
 };
-/* public static final List<String> methods = new ArrayList<>(); */
+
+	/* public static final List<String> methods = new ArrayList<>() */;
 };
 /* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
             this.input = input;
@@ -182,7 +188,18 @@
         return compileStructure(stripped, "record ")
                 .or(() -> compileClass(stripped))
                 .or(() -> compileMethod(stripped))
+                .or(() -> compileDefinitionStatement(stripped))
                 .orElseGet(() -> generatePlaceholder(stripped));
+     */
+}
+/* private static */ /* Optional<String> */ compileDefinitionStatement(/* String input */){/* 
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+        }
+
+        return Optional.empty();
      */
 }
 /* private static */ /* Optional<String> */ compileMethod(/* String stripped */){/* 

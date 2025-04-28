@@ -200,7 +200,18 @@ public class Main {
         return compileStructure(stripped, "record ")
                 .or(() -> compileClass(stripped))
                 .or(() -> compileMethod(stripped))
+                .or(() -> compileDefinitionStatement(stripped))
                 .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileDefinitionStatement(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileMethod(String stripped) {
