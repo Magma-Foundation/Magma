@@ -7,6 +7,122 @@
 };
 /* private */struct Joiner {
 };
+/* private static Optional<String> compileStructure(String input, String infix) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeClass = input.substring(0, classIndex).strip();
+            var afterClass = input.substring(classIndex + infix.length());
+            var contentStart = afterClass.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeContent = afterClass.substring(0, contentStart).strip();
+
+                var paramStart = beforeContent.indexOf("(");
+
+                if (paramStart >= 0) {
+                    String withoutParams = beforeContent.substring(0, paramStart).strip();
+                    return getString(withoutParams, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
+                }
+                else {
+                    return getString(beforeContent, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> getString(String beforeContent, String beforeClass, String withEnd) {
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        var content = withEnd.substring(0, withEnd.length() - "}".length());
+
+        var strippedBeforeContent = beforeContent.strip();
+        if (strippedBeforeContent.endsWith(">")) {
+            var typeParamStart = strippedBeforeContent.indexOf("<");
+            if (typeParamStart >= 0) {
+                var name = strippedBeforeContent.substring(0, typeParamStart).strip();
+                var substring = strippedBeforeContent.substring(typeParamStart + "<".length());
+                var typeParameters = Lists.fromArray(substring.split(Pattern.quote(",")));
+                return assemble(typeParameters, name, beforeClass, content);
+            }
+        }
+
+        return assemble(Lists.empty(), strippedBeforeContent, beforeClass, content);
+    }
+
+    private static Optional<String> assemble(List<String> typeParams, String name, String beforeClass, String content) {
+        if (!typeParams.isEmpty()) {
+            return Optional.of("");
+        }
+
+        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+        structs.add(generated);
+        return Optional.of("");
+    }
+
+    private static String compileClassSegment(String input) {
+        var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return "";
+        }
+
+        return compileStructure(stripped, " */struct ")
+                .or {
+	/* var stripped = input.strip() */;
+	/* if (stripped.endsWith(" */;/* ")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
+        } */
+	/* return Optional.empty() */;
+	/* }
+
+    private static Optional<String> compileMethod(String stripped) {
+        var paramStart = stripped.indexOf("(") */;
+	/* return Optional.empty() */;
+	/* }
+
+    private static String compileDefinition(String input) {
+        var stripped = input.strip() */;
+	/* var nameSeparator = stripped.lastIndexOf(" ") */;
+	/* return generatePlaceholder(stripped) */;
+	/* }
+
+    private static String compileType(String input) {
+        var stripped = input.strip() */;/* if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var index = withoutEnd.indexOf("<");
+            if (index >= 0) {
+                var base = withoutEnd.substring(0, index).strip();
+                var arguments = compileValues(withoutEnd.substring(index + "<".length()), Main::compileType);
+                return base + "<" + arguments + ">";
+            }
+        } */
+	/* return generatePlaceholder(stripped) */;
+	/* }
+
+    private static String compileValues(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues) */;
+	/* return builder.append(", ").append(element) */;
+	/* return state.append(c) */;
+	/* }
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip() */;
+	/* for (var i = 0 */;
+	/* i < stripped.length() */;/* i++) {
+            var c = stripped.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        } */
+	/* return true */;
+	/* }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */" */;
+};
 /* public */struct Main {
 	/* private static final List<String> methods = Lists.empty() */;
 	/* private static final List<String> structs = Lists.empty() */;
@@ -185,63 +301,7 @@
         return compileStructure(stripped, "class ");
      */
 }
-/* private static */ Optional<char*> compileStructure(/* String input, String infix */){/* 
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeClass = input.substring(0, classIndex).strip();
-            var afterClass = input.substring(classIndex + infix.length());
-            var contentStart = afterClass.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = afterClass.substring(0, contentStart).strip();
-
-                var paramStart = beforeContent.indexOf("(");
-                var withoutParams = paramStart >= 0
-                        ? beforeContent.substring(0, paramStart).strip()
-                        : beforeContent;
-
-                if (withoutParams.endsWith(">")) {
-                    return Optional.of("");
-                }
-
-                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    var generated = generatePlaceholder(beforeClass) + "struct " + withoutParams + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
-                    structs.add(generated);
-                    return Optional.of("");
-                }
-            }
-        }
-        return Optional.empty();
-     */
-}
-/* private static */ char* compileClassSegment(/* String input */){/* 
-        var stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return "";
-        }
-
-        return compileStructure(stripped, "record ")
-                .or(() -> compileStructure(stripped, "interface "))
-                .or(() -> compileClass(stripped))
-                .or(() -> compileMethod(stripped))
-                .or(() -> compileDefinitionStatement(stripped))
-                .orElseGet(() -> generatePlaceholder(stripped));
-     */
-}
-/* private static */ Optional<char*> compileDefinitionStatement(/* String input */){/* 
-        var stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return Optional.of("\n\t" + compileDefinition(withoutEnd) + ";");
-        }
-
-        return Optional.empty();
-     */
-}
-/* private static */ Optional<char*> compileMethod(/* String stripped */){/* 
-        var paramStart = stripped.indexOf("(");
-        if (paramStart >= 0) {
+/* if */(/* paramStart >= 0 */){/* 
             var definition = stripped.substring(0, paramStart);
             var afterParams = stripped.substring(paramStart + "(".length());
             var paramEnd = afterParams.indexOf(")");
@@ -257,14 +317,9 @@
                     return Optional.of("");
                 }
             }
-        }
-        return Optional.empty();
-     */
+         */
 }
-/* private static */ char* compileDefinition(/* String input */){/* 
-        var stripped = input.strip();
-        var nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
+/* if */(/* nameSeparator >= 0 */){/* 
             var beforeName = stripped.substring(0, nameSeparator);
             var name = stripped.substring(nameSeparator + " ".length());
             if (isSymbol(name)) {
@@ -275,14 +330,9 @@
                     return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
                 }
             }
-        }
-
-        return generatePlaceholder(stripped);
-     */
+         */
 }
-/* private static */ char* compileType(/* String input */){/* 
-        var stripped = input.strip();
-        switch (stripped) {
+/* switch */(/* stripped */){/* 
             case "int" -> {
                 return "int";
             }
@@ -292,48 +342,19 @@
             case "String" -> {
                 return "char*";
             }
-        }
-
-        if (stripped.endsWith(">")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-            var index = withoutEnd.indexOf("<");
-            if (index >= 0) {
-                var base = withoutEnd.substring(0, index).strip();
-                var arguments = compileAll(withoutEnd.substring(index + "<".length()), Main::foldValueChar, Main::compileType, Main::mergeValues);
-                return base + "<" + arguments + ">";
-            }
-        }
-
-        return generatePlaceholder(stripped);
-     */
+         */
 }
-/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder builder, String element */){/* 
+/* }
+
+    private static */ /* StringBuilder */ mergeValues(/* StringBuilder builder, String element */){/* 
         if (builder.isEmpty()) {
             return builder.append(element);
-        }
-        return builder.append(", ").append(element);
-     */
+         */
 }
-/* private static */ /* State */ foldValueChar(/* State state, char c */){/* 
+/* }
+
+    private static */ /* State */ foldValueChar(/* State state, char c */){/* 
         if (c == ',') {
             return state.advance();
-        }
-        return state.append(c);
-     */
-}
-/* private static */ /* boolean */ isSymbol(/* String input */){/* 
-        var stripped = input.strip();
-        for (var i = 0; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-     */
-}
-/* private static */ char* generatePlaceholder(/* String input */){/* 
-        return "/* " + input + " */";
-     */
+         */
 }

@@ -6,12 +6,15 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class Main {
     public interface List<T> {
         List<T> add(T element);
 
         Iterator<T> iter();
+
+        boolean isEmpty();
     }
 
     private interface Head<T> {
@@ -268,24 +271,48 @@ public class Main {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
 
                 var paramStart = beforeContent.indexOf("(");
-                var withoutParams = paramStart >= 0
-                        ? beforeContent.substring(0, paramStart).strip()
-                        : beforeContent;
 
-                if (withoutParams.endsWith(">")) {
-                    return Optional.of("");
+                if (paramStart >= 0) {
+                    String withoutParams = beforeContent.substring(0, paramStart).strip();
+                    return getString(withoutParams, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
                 }
-
-                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
-                if (withEnd.endsWith("}")) {
-                    var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    var generated = generatePlaceholder(beforeClass) + "struct " + withoutParams + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
-                    structs.add(generated);
-                    return Optional.of("");
+                else {
+                    return getString(beforeContent, beforeClass, afterClass.substring(contentStart + "{".length()).strip());
                 }
             }
         }
         return Optional.empty();
+    }
+
+    private static Optional<String> getString(String beforeContent, String beforeClass, String withEnd) {
+        if (!withEnd.endsWith("}")) {
+            return Optional.empty();
+        }
+
+        var content = withEnd.substring(0, withEnd.length() - "}".length());
+
+        var strippedBeforeContent = beforeContent.strip();
+        if (strippedBeforeContent.endsWith(">")) {
+            var typeParamStart = strippedBeforeContent.indexOf("<");
+            if (typeParamStart >= 0) {
+                var name = strippedBeforeContent.substring(0, typeParamStart).strip();
+                var substring = strippedBeforeContent.substring(typeParamStart + "<".length());
+                var typeParameters = Lists.fromArray(substring.split(Pattern.quote(",")));
+                return assemble(typeParameters, name, beforeClass, content);
+            }
+        }
+
+        return assemble(Lists.empty(), strippedBeforeContent, beforeClass, content);
+    }
+
+    private static Optional<String> assemble(List<String> typeParams, String name, String beforeClass, String content) {
+        if (!typeParams.isEmpty()) {
+            return Optional.of("");
+        }
+
+        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+        structs.add(generated);
+        return Optional.of("");
     }
 
     private static String compileClassSegment(String input) {
@@ -372,12 +399,16 @@ public class Main {
             var index = withoutEnd.indexOf("<");
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
-                var arguments = compileAll(withoutEnd.substring(index + "<".length()), Main::foldValueChar, Main::compileType, Main::mergeValues);
+                var arguments = compileValues(withoutEnd.substring(index + "<".length()), Main::compileType);
                 return base + "<" + arguments + ">";
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileValues(String input, Function<String, String> compiler) {
+        return compileAll(input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static StringBuilder mergeValues(StringBuilder builder, String element) {
