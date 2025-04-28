@@ -886,12 +886,20 @@ public class Main {
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
-            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
-                var content = afterArrow.substring(1, afterArrow.length() - 1);
-                var name = generateName();
-                assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return new Symbol(name);
+            if (isSymbol(beforeArrow)) {
+                var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+                if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+                    var content = afterArrow.substring(1, afterArrow.length() - 1);
+                    var name = generateName();
+                    assembleMethod("auto " + name, "auto " + beforeArrow, content);
+                    return new Symbol(name);
+                } else {
+                    var newValue = compileValue(afterArrow);
+
+                    var name = generateName();
+                    assembleMethod("auto " + name, "auto " + beforeArrow, "\n\treturn " + newValue + ";");
+                    return new Symbol(name);
+                }
             }
         }
 

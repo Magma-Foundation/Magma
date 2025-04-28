@@ -111,20 +111,26 @@ struct private Joiner(struct Joiner this){
         public */ Option<char*> createInitial(struct Joiner this){
 	return None</*  */>();
 }
+auto fold_local0(auto inner){
+	return inner + this.delimiter + element;
+}
 /* @Override
         public */ Option<char*> fold(struct Joiner this, Option<char*> current, char* element){
-	auto fold_local1 = current.map(current, /* inner -> inner */ + this.delimiter + element);
-	return Some</*  */>(fold_local1.orElse(fold_local1, element));
+	auto fold_local2 = current.map(current, fold_local0);
+	return Some</*  */>(fold_local2.orElse(fold_local2, element));
 }
 struct public Definition(struct Definition this, char* type, char* name){
 	/* this(new None<>(), type, name); */
 }
+auto generate_local2(auto inner){
+	return inner + " ";
+}
 /* @Override
         public */ char* generate(struct Definition this){
 	auto generate_local1 = this.beforeType(this);
-	auto generate_local2 = generate_local1.map(generate_local1, /* Main::generatePlaceholder */);
-	auto generate_local3 = generate_local2.map(generate_local2, /* inner -> inner */ + " ");
-	struct var joined = generate_local3.orElse(generate_local3, "");
+	auto generate_local3 = generate_local1.map(generate_local1, /* Main::generatePlaceholder */);
+	auto generate_local4 = generate_local3.map(generate_local3, generate_local2);
+	struct var joined = generate_local4.orElse(generate_local4, "");
 	return joined + this.type() + " " + this.name(joined + this.type() + " " + this);
 }
 /* @Override
@@ -255,9 +261,12 @@ auto compileRoot_local1(auto tuple){
 	}
 	return Some</*  */>(current);
 }
+auto foldSingleQuotes_local2(auto maybeSlash){
+	return maybeSlash.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>;
+}
 /* private static */ Option<struct State> foldSingleQuotes(struct Main this, struct State state, struct char next){
 	auto foldSingleQuotes_local3 = appended.popAndAppendToTuple(appended);
-	auto foldSingleQuotes_local4 = foldSingleQuotes_local3.flatMap(foldSingleQuotes_local3, /* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right.popAndAppend() : new Some<>(/* maybeSlash -> maybeSlash */.left == '\\' ? maybeSlash.right, maybeSlash.right));
+	auto foldSingleQuotes_local4 = foldSingleQuotes_local3.flatMap(foldSingleQuotes_local3, foldSingleQuotes_local2(maybeSlash.right));
 	if (/* next != '\'' */){
 		return None</*  */>();
 	}
@@ -392,15 +401,18 @@ auto compileRoot_local1(auto tuple){
 	}
 	return None</*  */>();
 }
+auto compileMethod_local12(auto parameter){
+	return /* /* ! */ */;
+}
 /* private static */ Option<char*> compileMethod(struct Main this, char* stripped){
 	auto compileMethod_local3 = paramStart + "(";
 	auto compileMethod_local7 = paramEnd + ")";
 	auto compileMethod_local11 = parseValues(params, /* Main::parseParameter */);
-	auto compileMethod_local12 = compileMethod_local11.iter(compileMethod_local11);
-	auto compileMethod_local13 = compileMethod_local12.filter(compileMethod_local12, /* parameter -> ! */(/* parameter instanceof Whitespace */));
-	auto compileMethod_local15 = "struct " + structNames;
-	auto compileMethod_local16 = Lists.<Defined>listEmpty(Lists);
-	auto compileMethod_local17 = compileMethod_local16.addLast(compileMethod_local16, struct Definition(compileMethod_local15.last(compileMethod_local15), "this"));
+	auto compileMethod_local13 = compileMethod_local11.iter(compileMethod_local11);
+	auto compileMethod_local14 = compileMethod_local13.filter(compileMethod_local13, compileMethod_local12(/* parameter instanceof Whitespace */));
+	auto compileMethod_local16 = "struct " + structNames;
+	auto compileMethod_local17 = Lists.<Defined>listEmpty(Lists);
+	auto compileMethod_local18 = compileMethod_local17.addLast(compileMethod_local17, struct Definition(compileMethod_local16.last(compileMethod_local16), "this"));
 	struct var paramStart = stripped.indexOf(stripped, "(");
 	if (/* paramStart < 0 */){
 		return None</*  */>();
@@ -425,8 +437,8 @@ auto compileRoot_local1(auto tuple){
             return new Some<>(""); */
 	}
 	struct var content = withBraces.substring(withBraces, 1, withBraces.length() - 1);
-	struct var newParams = compileMethod_local13.collect(compileMethod_local13, ListCollector</*  */>());
-	struct var copy = compileMethod_local17.addAll(compileMethod_local17, newParams);
+	struct var newParams = compileMethod_local14.collect(compileMethod_local14, ListCollector</*  */>());
+	struct var copy = compileMethod_local18.addAll(compileMethod_local18, newParams);
 	struct var outputParams = generateValueList(copy);
 	return assembleMethod(outputDefinition, outputParams, content);
 }
@@ -436,8 +448,11 @@ auto compileRoot_local1(auto tuple){
 	auto generateValueList_local3 = generateValueList_local2.collect(generateValueList_local2, struct Joiner(", "));
 	return generateValueList_local3.orElse(generateValueList_local3, "");
 }
+auto assembleMethod_local0(auto input){
+	return compileFunctionSegment;
+}
 /* private static */ Option<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
-	struct var parsed = parseStatementsWithLocals(content, /* input -> compileFunctionSegment */(input, 1));
+	struct var parsed = parseStatementsWithLocals(content, assembleMethod_local0(input, 1));
 	struct var generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
 	/* methods.addLast(generated); */
 	return Some</*  */>("");
@@ -450,12 +465,18 @@ auto compileRoot_local1(auto tuple){
 	struct var elements = statements.removeAndGetLast(statements);
 	return parseStatementsWithLocals_local5.addAll(parseStatementsWithLocals_local5, /* parsed1 */);
 }
+auto parseParameter_local0(auto value){
+	return value;
+}
+auto parseParameter_local2(auto value){
+	return value;
+}
 /* private static */ struct Defined parseParameter(struct Main this, char* input){
-	auto parseParameter_local0 = parseWhitespace(input);
-	auto parseParameter_local1 = /* () -> parseDefinition */(input);
-	auto parseParameter_local2 = parseParameter_local0.<Defined>map(parseParameter_local0, /* value -> value */);
-	auto parseParameter_local3 = parseParameter_local2.or(parseParameter_local2, parseParameter_local1.map(parseParameter_local1, /* value -> value */));
-	return parseParameter_local3.orElseGet(parseParameter_local3, /* () -> new Content */(input));
+	auto parseParameter_local1 = parseWhitespace(input);
+	auto parseParameter_local3 = /* () -> parseDefinition */(input);
+	auto parseParameter_local4 = parseParameter_local1.<Defined>map(parseParameter_local1, parseParameter_local0);
+	auto parseParameter_local5 = parseParameter_local4.or(parseParameter_local4, parseParameter_local3.map(parseParameter_local3, parseParameter_local2));
+	return parseParameter_local5.orElseGet(parseParameter_local5, /* () -> new Content */(input));
 }
 /* private static */ Option<struct Whitespace> parseWhitespace(struct Main this, char* input){
 	if (input.isBlank(input)){
@@ -529,6 +550,9 @@ auto compileRoot_local1(auto tuple){
 	auto compileValue_local0 = parseValue(input);
 	return compileValue_local0.generate(compileValue_local0);
 }
+auto parseValue_local13(auto value){
+	return /* /* ! */ */;
+}
 /* private static */ struct Value parseValue(struct Main this, char* input){
 	struct var stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
@@ -540,10 +564,10 @@ auto compileRoot_local1(auto tuple){
 		struct var divisions = divideAll(withoutEnd, /* Main::foldInvokableStart */);
 		if (divisions.size() >= 2){
 	auto parseValue_local12 = parseValues(arguments, /* Main::parseValue */);
-	auto parseValue_local13 = parseValue_local12.iter(parseValue_local12);
-	auto parseValue_local14 = parseValue_local13.filter(parseValue_local13, /* value -> ! */(/* value instanceof Whitespace */));
-	auto parseValue_local16 = Lists.<Value>listEmpty(Lists);
-	auto parseValue_local17 = parseValue_local16.addLast(parseValue_local16, symbol);
+	auto parseValue_local14 = parseValue_local12.iter(parseValue_local12);
+	auto parseValue_local15 = parseValue_local14.filter(parseValue_local14, parseValue_local13(/* value instanceof Whitespace */));
+	auto parseValue_local17 = Lists.<Value>listEmpty(Lists);
+	auto parseValue_local18 = parseValue_local17.addLast(parseValue_local17, symbol);
 			struct var joined = join(divisions.subList(divisions, 0, divisions.size() - 1), "");
 			struct var caller = joined.substring(joined, 0, joined.length() - ")".length(joined.length() - ")"));
 			struct var arguments = divisions.last(divisions);
@@ -555,7 +579,7 @@ auto compileRoot_local1(auto tuple){
 			else {
 				/* parsedCaller  */ = parseValue(caller);
 			}
-			struct var parsedArgs = parseValue_local14.collect(parseValue_local14, ListCollector</*  */>());
+			struct var parsedArgs = parseValue_local15.collect(parseValue_local15, ListCollector</*  */>());
 			if (/* ! */(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
 				return struct Invocation(parsedCaller, parsedArgs);
 			}
@@ -569,7 +593,7 @@ auto compileRoot_local1(auto tuple){
 				/* statements.last().addLast(statement); */
 				/* symbol  */ = struct Symbol(name);
 			}
-			struct var newArgs = parseValue_local17.addAll(parseValue_local17, parsedArgs);
+			struct var newArgs = parseValue_local18.addAll(parseValue_local18, parsedArgs);
 			return struct Invocation(struct DataAccess(symbol, property), newArgs);
 		}
 	}
@@ -581,24 +605,32 @@ auto compileRoot_local1(auto tuple){
 	}
 	struct var arrowIndex = stripped.indexOf(stripped, "->");
 	if (/* arrowIndex >= 0 */){
-	auto parseValue_local21 = stripped.substring(stripped, 0, arrowIndex);
-	auto parseValue_local22 = arrowIndex + "->";
-	auto parseValue_local24 = stripped.substring(stripped, parseValue_local22.length(parseValue_local22));
-		struct var beforeArrow = parseValue_local21.strip(parseValue_local21);
-		struct var afterArrow = parseValue_local24.strip(parseValue_local24);
-		/* if (afterArrow.startsWith(" */{
-			/* ") && afterArrow.endsWith("}")) {
-                var */ content = afterArrow.substring(1, afterArrow.length() - 1);
-                var name = generateName();
-                assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return new Symbol(afterArrow.substring(1, afterArrow, name);
+	auto parseValue_local22 = stripped.substring(stripped, 0, arrowIndex);
+		struct var beforeArrow = parseValue_local22.strip(parseValue_local22);
+		if (isSymbol(beforeArrow)){
+	auto parseValue_local23 = arrowIndex + "->";
+	auto parseValue_local25 = stripped.substring(stripped, parseValue_local23.length(parseValue_local23));
+			struct var afterArrow = parseValue_local25.strip(parseValue_local25);
+			/* if (afterArrow.startsWith(" */{
+				/* ") && afterArrow.endsWith("}")) {
+                    var */ content = afterArrow.substring(1, afterArrow.length() - 1);
+                    var name = generateName();
+                    assembleMethod("auto " + name, "auto " + beforeArrow, content);
+                    return new Symbol(afterArrow.substring(1, afterArrow, name);
+			}
+			else {
+				struct var newValue = compileValue(afterArrow);
+				struct var name = generateName();
+				/* assembleMethod("auto " + name, "auto " + beforeArrow, "\n\treturn " + newValue + ";"); */
+				return struct Symbol(name);
+			}
 		}
 	}
 	struct var separator = stripped.lastIndexOf(stripped, /* " */.");
 	if (/* separator >= 0 */){
-	auto parseValue_local30 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
+	auto parseValue_local31 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
 		struct var value = stripped.substring(stripped, 0, separator);
-		struct var property = parseValue_local30.strip(parseValue_local30);
+		struct var property = parseValue_local31.strip(parseValue_local31);
 		return struct DataAccess(parseValue(value), property);
 	}
 	if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("\"") && stripped, "\"")){
@@ -647,10 +679,13 @@ auto compileRoot_local1(auto tuple){
 	auto compileDefinitionOrPlaceholder_local0 = parseDefinitionOrPlaceholder(input);
 	return compileDefinitionOrPlaceholder_local0.generate(compileDefinitionOrPlaceholder_local0);
 }
+auto parseDefinitionOrPlaceholder_local0(auto value){
+	return value;
+}
 /* private static */ struct Defined parseDefinitionOrPlaceholder(struct Main this, char* input){
-	auto parseDefinitionOrPlaceholder_local0 = parseDefinition(input);
-	auto parseDefinitionOrPlaceholder_local1 = parseDefinitionOrPlaceholder_local0.<Defined>map(parseDefinitionOrPlaceholder_local0, /* value -> value */);
-	return parseDefinitionOrPlaceholder_local1.orElseGet(parseDefinitionOrPlaceholder_local1, /* () -> new Content */(input));
+	auto parseDefinitionOrPlaceholder_local1 = parseDefinition(input);
+	auto parseDefinitionOrPlaceholder_local2 = parseDefinitionOrPlaceholder_local1.<Defined>map(parseDefinitionOrPlaceholder_local1, parseDefinitionOrPlaceholder_local0);
+	return parseDefinitionOrPlaceholder_local2.orElseGet(parseDefinitionOrPlaceholder_local2, /* () -> new Content */(input));
 }
 /* private static */ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	auto parseDefinition_local3 = nameSeparator + " ";
