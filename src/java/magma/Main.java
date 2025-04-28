@@ -550,7 +550,22 @@ public class Main {
             return stripped;
         }
 
+        if (isNumber(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(stripped);
+    }
+
+    private static boolean isNumber(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static String compileValues(String input) {

@@ -15,7 +15,7 @@
 /* public */struct List<char*> {
 };
 /* private static */ struct State fromInput(char* input){
-	return struct State(input, listEmpty(), "", /* 0 */, /* 0 */);
+	return struct State(input, listEmpty(), "", 0, 0);
 }
 /* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){
 	return /* this.pop */(/* ).map(tuple -> new Tuple<>(tuple.left */, /* tuple.right.append */(/* tuple.left) */));
@@ -320,7 +320,22 @@ struct private Joiner(/*  */){
 	/* if (isSymbol(stripped)) {
             return stripped;
         } */
+	/* if (isNumber(stripped)) {
+            return stripped;
+        } */
 	return generatePlaceholder(stripped);
+}
+/* private static */ struct boolean isNumber(char* input){
+	/* for (var i = 0; */
+	/* i < input.length(); */
+	/* i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        } */
+	return true;
 }
 /* private static */ char* compileValues(char* input){
 	return generateValues(/* parseValues(input */, /* Main::compileValue) */);
