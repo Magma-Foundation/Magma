@@ -911,6 +911,12 @@ public class Main {
                 var substring = withoutEnd.substring(index + "<".length());
                 var parsed = parseValues(substring, Main::compileType);
 
+                if (base.equals("Function")) {
+                    var arg0 = parsed.get(0);
+                    var returns = parsed.get(1);
+                    return returns + " (*)(" + arg0 + ")";
+                }
+
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }

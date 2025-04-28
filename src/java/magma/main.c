@@ -50,10 +50,8 @@
 };
 /* public sealed */struct Option<struct Definition> {
 };
-// Function<char*, char*>
 // BiFunction<struct State, char, struct State>
 // BiFunction<char*, char*, char*>
-// Function<char*, struct T>
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
@@ -170,16 +168,16 @@ struct public Definition(struct Definition this, char* type, char* name){
 /* private static */ char* join(struct Main this, List<char*> list, char* delimiter){
 	return list.iter(list).collect(list.iter(list), struct Joiner(delimiter)).orElse(list.iter(list).collect(list.iter(list), struct Joiner(delimiter)), "");
 }
-/* private static */ char* compileStatements(struct Main this, char* input, Function<char*, char*> compiler){
+/* private static */ char* compileStatements(struct Main this, char* input, char* (*)(char*) compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler, BiFunction<char*, char*, char*> merger){
+/* private static */ char* compileAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, char* (*)(char*) compiler, BiFunction<char*, char*, char*> merger){
 	return generateAll(merger, parseAll(input, folder, compiler));
 }
 /* private static */ char* generateAll(struct Main this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return parsed.iter(parsed).fold(parsed.iter(parsed), "", merger);
 }
-/* private static <T> */ List<struct T> parseAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
+/* private static <T> */ List<struct T> parseAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, struct T (*)(char*) compiler){
 	return divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler).collect(divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler), ListCollector</*  */>());
 }
 /* private static */ char* mergeStatements(struct Main this, char* buffer, char* element){
@@ -572,6 +570,12 @@ struct public Definition(struct Definition this, char* type, char* name){
                 var substring = withoutEnd.substring(index + "<".length());
                 var parsed = parseValues(substring, Main::compileType);
 
+                if (base.equals("Function")) {
+                    var arg0 = parsed.get(0);
+                    var returns = parsed.get(1);
+                    return returns + " (*)(" + arg0 + ")";
+                }
+
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }
@@ -587,7 +591,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 /* private static */ char* generateValues(struct Main this, List<char*> values){
 	return generateAll(/* Main::mergeValues */, values);
 }
-/* private static <T> */ List<struct T> parseValues(struct Main this, char* input, Function<char*, struct T> compiler){
+/* private static <T> */ List<struct T> parseValues(struct Main this, char* input, struct T (*)(char*) compiler){
 	return parseAll(input, /* Main::foldValueChar */, compiler);
 }
 /* private static */ char* mergeValues(struct Main this, char* builder, char* element){
@@ -627,7 +631,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return "/* " + input + " */";
 }
 /* @Override
-        public <R> */ Option<struct R> map(struct Some</*  */> this, Function</*  */, struct R> mapper){
+        public <R> */ Option<struct R> map(struct Some</*  */> this, struct R (*)(/*  */) mapper){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
@@ -647,7 +651,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return this.value;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(struct Some</*  */> this, Function</*  */, Option<struct R>> mapper){
+        public <R> */ Option<struct R> flatMap(struct Some</*  */> this, Option<struct R> (*)(/*  */) mapper){
 	return mapper.apply(mapper, this.value);
 }
 /* @Override
@@ -655,7 +659,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return this;
 }
 /* @Override
-        public <R> */ Option<struct R> map(struct None</*  */> this, Function</*  */, struct R> mapper){
+        public <R> */ Option<struct R> map(struct None</*  */> this, struct R (*)(/*  */) mapper){
 	return None</*  */>();
 }
 /* @Override
@@ -675,7 +679,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return supplier.get(supplier);
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(struct None</*  */> this, Function</*  */, Option<struct R>> mapper){
+        public <R> */ Option<struct R> flatMap(struct None</*  */> this, Option<struct R> (*)(/*  */) mapper){
 	return None</*  */>();
 }
 /* @Override
@@ -691,7 +695,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return current.addLast(current, element);
 }
 /* @Override
-        public <R> */ Option<struct R> map(struct Some<char*> this, Function<char*, struct R> mapper){
+        public <R> */ Option<struct R> map(struct Some<char*> this, struct R (*)(char*) mapper){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 /* @Override
@@ -711,7 +715,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	return this.value;
 }
 /* @Override
-        public <R> */ Option<struct R> flatMap(struct Some<char*> this, Function<char*, Option<struct R>> mapper){
+        public <R> */ Option<struct R> flatMap(struct Some<char*> this, Option<struct R> (*)(char*) mapper){
 	return mapper.apply(mapper, this.value);
 }
 /* @Override
