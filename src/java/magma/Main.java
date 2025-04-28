@@ -175,6 +175,7 @@ public class Main {
     }
 
     private static final List<String> methods = Lists.empty();
+    private static final List<String> structs = Lists.empty();
 
     public static void main() {
         try {
@@ -189,8 +190,11 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var joinedMethods = methods.iter().collect(new Joiner()).orElse("");
-        return compileStatements(input, Main::compileRootSegment) + joinedMethods;
+        return compileStatements(input, Main::compileRootSegment) + join(structs) + join(methods);
+    }
+
+    private static String join(List<String> list) {
+        return list.iter().collect(new Joiner()).orElse("");
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -289,7 +293,9 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n");
+                    var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compileStatements(content, Main::compileClassSegment) + "\n};\n";
+                    structs.add(generated);
+                    return Optional.of("");
                 }
             }
         }
