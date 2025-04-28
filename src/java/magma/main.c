@@ -1,5 +1,4 @@
-/* public class Main {
-    public static void main() {
+/* public  */struct Main { /* public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java"); *//* var target = source.resolveSibling("main.c"); *//* var input = Files.readString(source); *//* Files.writeString(target, compileRoot(input)); *//* } catch (IOException e) {
             e.printStackTrace(); *//* }
@@ -19,6 +18,10 @@
         var stripped = input.strip(); *//* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return ""; *//* }
 
+        var classIndex = stripped.indexOf("class "); *//* if (classIndex >= 0) {
+            var beforeClass = stripped.substring(0, classIndex); *//* var afterClass = stripped.substring(classIndex + "class ".length()); *//* var contentStart = afterClass.indexOf("{"); *//* if (contentStart >= 0) {
+                var name = afterClass.substring(0, contentStart).strip(); *//* var withEnd = afterClass.substring(contentStart + "{".length()).strip(); *//* return generatePlaceholder(beforeClass) + "struct " + name + " { " + generatePlaceholder(withEnd); *//* }
+        }
 
         return generatePlaceholder(stripped); *//* }
 

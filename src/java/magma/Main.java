@@ -46,6 +46,17 @@ public class Main {
             return "";
         }
 
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var beforeClass = stripped.substring(0, classIndex);
+            var afterClass = stripped.substring(classIndex + "class ".length());
+            var contentStart = afterClass.indexOf("{");
+            if (contentStart >= 0) {
+                var name = afterClass.substring(0, contentStart).strip();
+                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
+                return generatePlaceholder(beforeClass) + "struct " + name + " { " + generatePlaceholder(withEnd);
+            }
+        }
 
         return generatePlaceholder(stripped);
     }
