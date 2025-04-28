@@ -3,9 +3,9 @@
 /* private static */struct State {
 	/* private final */ char* input;
 	/* private final */ List<char*> segments;
-	/* private */ /* int */ index;
+	/* private */ int index;
 	/* private */ /* StringBuilder */ buffer;
-	/* private */ /* int */ depth;
+	/* private */ int depth;
 };
 
 	/* public static final List<String> methods = new ArrayList<>() */;
@@ -259,6 +259,10 @@
 }
 /* private static */ char* compileType(/* String input */){/* 
         var stripped = input.strip();
+        if (stripped.equals("int")) {
+            return "int";
+        }
+
         if (stripped.equals("void")) {
             return "void";
         }
