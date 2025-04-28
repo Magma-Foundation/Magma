@@ -137,8 +137,22 @@ public class Main {
             var beforeName = stripped.substring(0, nameSeparator);
             var name = stripped.substring(nameSeparator + " ".length());
             if (isSymbol(name)) {
-                return generatePlaceholder(beforeName) + " " + name;
+                var typeSeparator = beforeName.lastIndexOf(" ");
+                if (typeSeparator >= 0) {
+                    var beforeType = beforeName.substring(0, typeSeparator);
+                    var type = beforeName.substring(typeSeparator + " ".length());
+                    return generatePlaceholder(beforeType) + " " + compileType(type) + " " + name;
+                }
             }
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String compileType(String input) {
+        var stripped = input.strip();
+        if (stripped.equals("void")) {
+            return "void";
         }
 
         return generatePlaceholder(stripped);
