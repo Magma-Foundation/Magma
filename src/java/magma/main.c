@@ -15,7 +15,7 @@
 /* public */struct List<char*> {
 };
 /* private static */ struct State fromInput(char* input){
-	return struct State(input, listEmpty(), /* "" */, /* 0 */, /* 0 */);
+	return struct State(input, listEmpty(), "", /* 0 */, /* 0 */);
 }
 /* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){
 	return /* this.pop */(/* ).map(tuple -> new Tuple<>(tuple.left */, /* tuple.right.append */(/* tuple.left) */));
@@ -30,7 +30,7 @@
 	return struct State(/* this.input */, /* this.segments */, /* this.buffer */, /* this.depth - 1 */, /* this.index */);
 }
 /* private */ struct State advance(/*  */){
-	return struct State(/* this.input */, /* this.segments.add */(/* this.buffer */), /* "" */, /* this.depth */, /* this.index */);
+	return struct State(/* this.input */, /* this.segments.add */(/* this.buffer */), "", /* this.depth */, /* this.index */);
 }
 /* private */ struct boolean isShallow(/*  */){
 	return /* this.depth == 1 */;
@@ -89,7 +89,7 @@ struct private Joiner(/*  */){
 	return /* compiled + join */(/* structs) + joinedExpansions + join(methods */);
 }
 /* private static */ char* join(List<char*> list){
-	return join(list, /* "" */);
+	return join(list, "");
 }
 /* private static */ char* join(List<char*> list, char* delimiter){
 	return /* list.iter */(/* ).collect(new Joiner(delimiter)).orElse("" */);
@@ -169,7 +169,7 @@ struct private Joiner(/*  */){
 	return compileClass(/* stripped).orElseGet */(/* () -> generatePlaceholder(stripped */));
 }
 /* private static */ Option<char*> compileClass(char* stripped){
-	return compileStructure(stripped, /* "class " */);
+	return compileStructure(stripped, "class ");
 }
 /* private static */ Option<char*> compileStructure(char* input, char* infix){
 	/* var classIndex = input.indexOf(infix); */
@@ -232,7 +232,7 @@ struct private Joiner(/*  */){
 	/* ; */
 	/* \n"; */
 	/* structs.add(generated); */
-	return Some<struct >(/* "" */);
+	return Some<struct >("");
 }
 /* private static */ char* compileClassSegment(char* input){
 	/* var stripped = input.strip(); */
@@ -297,6 +297,9 @@ struct private Joiner(/*  */){
 }
 /* private static */ char* compileValue(char* input){
 	/* var stripped = input.strip(); */
+	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        } */
 	/* if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
             var argsStart = withoutEnd.indexOf("(");
@@ -413,7 +416,7 @@ struct private Joiner(/*  */){
 	return true;
 }
 /* private static */ char* generatePlaceholder(char* input){
-	return /* "/* " + input + " */" */;
+	return "/* " + input + " */";
 }
 /* @Override
         public <R> */ Option<struct R> map(/* Function<T */, /* R> */ mapper){

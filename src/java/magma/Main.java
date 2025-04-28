@@ -524,6 +524,10 @@ public class Main {
 
     private static String compileValue(String input) {
         var stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return stripped;
+        }
+
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
             var argsStart = withoutEnd.indexOf("(");
