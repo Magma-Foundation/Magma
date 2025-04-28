@@ -60,6 +60,10 @@ public class Main {
         C fold(C current, T element);
     }
 
+    private interface Defined {
+        String generate();
+    }
+
     public record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -261,12 +265,36 @@ public class Main {
         }
     }
 
+    private record Definition(Option<String> beforeType, String type, String name) implements Defined {
+        @Override
+        public String generate() {
+            var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
+            return joined + " " + this.type() + " " + this.name();
+        }
+    }
+
+    private record Content(String input) implements Defined {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
+        }
+    }
+
+    private class Whitespace implements Defined {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
+    private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<String>>> expansions = listEmpty();
     private static List<String> typeArguments = listEmpty();
+    private static int functionLocalCounter = 0;
 
     public static void main() {
         try {
@@ -492,28 +520,42 @@ public class Main {
 
     private static Option<String> compileMethod(String stripped) {
         var paramStart = stripped.indexOf("(");
-        if (paramStart >= 0) {
-            var definition = stripped.substring(0, paramStart);
-            var afterParams = stripped.substring(paramStart + "(".length());
-            var paramEnd = afterParams.indexOf(")");
-            if (paramEnd >= 0) {
-                var params = afterParams.substring(0, paramEnd);
-                var withoutParams = afterParams.substring(paramEnd + ")".length());
-                var withBraces = withoutParams.strip();
-
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1);
-                    var outputParams = generateValues(parseValues(params, Main::compileParameter));
-                    var generated = compileDefinitionOrPlaceholder(definition) + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
-                    methods.add(generated);
-                    return new Some<>("");
-                }
-                else {
-                    return new Some<>("");
-                }
-            }
+        if (paramStart < 0) {
+            return new None<>();
         }
-        return new None<>();
+
+        var inputDefinition = stripped.substring(0, paramStart);
+        var defined = parseDefinitionOrPlaceholder(inputDefinition);
+        if (defined instanceof Definition definition) {
+            functionName = definition.name;
+        }
+
+        var outputDefinition = defined.generate();
+
+        var afterParams = stripped.substring(paramStart + "(".length());
+        var paramEnd = afterParams.indexOf(")");
+        if (paramEnd < 0) {
+            return new None<>();
+        }
+
+        var params = afterParams.substring(0, paramEnd);
+        var withoutParams = afterParams.substring(paramEnd + ")".length());
+        var withBraces = withoutParams.strip();
+
+        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            return new Some<>("");
+        }
+
+        var content = withBraces.substring(1, withBraces.length() - 1);
+        var outputParams = generateValues(parseValues(params, Main::compileParameter));
+
+        return assembleMethod(outputDefinition, outputParams, content);
+    }
+
+    private static Some<String> assembleMethod(String definition, String outputParams, String content) {
+        var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n";
+        methods.add(generated);
+        return new Some<>("");
     }
 
     private static String compileParameter(String input) {
@@ -595,11 +637,12 @@ public class Main {
             var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
             if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
                 var content = afterArrow.substring(1, afterArrow.length() - 1);
-                var outputContent = compileStatements(content, Main::compileFunctionSegment);
 
-                return "(auto " +
-                        beforeArrow +
-                        ")" + " -> {" + outputContent + "}";
+                var name = functionName + "_local" + functionLocalCounter;
+                functionLocalCounter++;
+
+                assembleMethod("auto " + name, "auto " + beforeArrow, content);
+                return name;
             }
         }
 
@@ -629,10 +672,15 @@ public class Main {
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {
-        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
+        return parseDefinitionOrPlaceholder(input).generate();
     }
 
-    private static Option<String> compileDefinition(String input) {
+    private static Defined parseDefinitionOrPlaceholder(String input) {
+        return parseDefinition(input).<Defined>map(value -> value)
+                .orElseGet(() -> new Content(input));
+    }
+
+    private static Option<Definition> parseDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
@@ -647,14 +695,13 @@ public class Main {
 
         var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
         if (divisions.size() == 1) {
-            return new Some<>(compileType(beforeName) + " " + name);
+            return new Some<>(new Definition(new None<>(), compileType(beforeName), name));
         }
-        else {
-            var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
-            var type = divisions.last();
 
-            return new Some<>(generatePlaceholder(beforeType) + " " + compileType(type) + " " + name);
-        }
+        var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
+        var type = divisions.last();
+
+        return new Some<>(new Definition(new Some<>(beforeType), compileType(type), name));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
