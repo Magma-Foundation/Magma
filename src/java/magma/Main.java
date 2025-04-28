@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -140,7 +141,27 @@ public class Main {
         }
     }
 
+    private static class SingleHead<T> implements Head<T> {
+        private final T element;
+        private boolean retrieved = false;
+
+        public SingleHead(T element) {
+            this.element = element;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.element);
+        }
+    }
+
     public record Iterator<T>(Head<T> head) {
+
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -161,6 +182,18 @@ public class Main {
                     return current;
                 }
             }
+        }
+
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
+        }
+
+        private <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other.head::next));
         }
     }
 
@@ -268,6 +301,10 @@ public class Main {
     }
 
     private record Definition(Option<String> beforeType, String type, String name) implements Defined {
+        public Definition(String type, String name) {
+            this(new None<>(), type, name);
+        }
+
         @Override
         public String generate() {
             var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse("");
@@ -282,10 +319,17 @@ public class Main {
         }
     }
 
-    private class Whitespace implements Defined {
+    private static class Whitespace implements Defined {
         @Override
         public String generate() {
             return "";
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
         }
     }
 
@@ -357,7 +401,7 @@ public class Main {
                 .fold("", merger);
     }
 
-    private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
+    private static <T> List<T> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, T> compiler) {
         return divideAll(input, folder)
                 .iter()
                 .map(compiler)
@@ -555,15 +599,24 @@ public class Main {
         }
 
         var content = withBraces.substring(1, withBraces.length() - 1);
-        var newParams = parseValues(params, Main::compileParameter);
+        var newParams = parseValues(params, Main::parseParameter)
+                .iter()
+                .filter(parameter -> !(parameter instanceof Whitespace))
+                .collect(new ListCollector<>());
 
-        var copy = Lists.<String>listEmpty()
-                .add("struct " + structName + " this")
+        var copy = Lists.<Defined>listEmpty()
+                .add(new Definition("struct " + structName, "this"))
                 .addAll(newParams);
 
-        var outputParams = generateValues(copy);
-
+        var outputParams = generateValueList(copy);
         return assembleMethod(outputDefinition, outputParams, content);
+    }
+
+    private static String generateValueList(List<Defined> copy) {
+        return copy.iter()
+                .map(Defined::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
     }
 
     private static Some<String> assembleMethod(String definition, String outputParams, String content) {
@@ -572,11 +625,19 @@ public class Main {
         return new Some<>("");
     }
 
-    private static String compileParameter(String input) {
+    private static Defined parseParameter(String input) {
+        return parseWhitespace(input).<Defined>map(value -> value)
+                .or(() -> parseDefinition(input).map(value -> value))
+                .orElseGet(() -> new Content(input));
+    }
+
+    private static Option<Whitespace> parseWhitespace(String input) {
         if (input.isBlank()) {
-            return "";
+            return new Some<>(new Whitespace());
         }
-        return compileDefinitionOrPlaceholder(input);
+        else {
+            return new None<>();
+        }
     }
 
     private static String compileFunctionSegment(String input) {
@@ -783,7 +844,7 @@ public class Main {
         return generateAll(Main::mergeValues, values);
     }
 
-    private static List<String> parseValues(String input, Function<String, String> compiler) {
+    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
         return parseAll(input, Main::foldValueChar, compiler);
     }
 

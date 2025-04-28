@@ -95,7 +95,7 @@
     private static String generateValues(List<String> values) {
         return generateAll(Main::mergeValues, values); *//* }
 
-    private static List<String> parseValues(String input, Function<String, String> compiler) {
+    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
         return parseAll(input, Main::foldValueChar, compiler); *//* }
 
     private static String mergeValues(String builder, String element) {
@@ -135,7 +135,7 @@
 };
 /* private */struct Content {
 };
-/* private */struct Whitespace implements Defined {
+/* private static */struct Whitespace implements Defined {
 };
 /* private static Option<String> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
@@ -237,13 +237,18 @@
 };
 /* public */struct List<char*> {
 };
+/* public */struct List<struct T> {
+};
 /* private static */struct ListCollector</*  */> {
 };
 /* public */struct Some<char*> {
 };
+/* public */struct Option<struct Whitespace> {
+};
 // Function<char*, char*>
 // BiFunction<struct State, char, struct State>
 // BiFunction<char*, char*, char*>
+// Function<char*, struct T>
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
@@ -253,25 +258,25 @@ auto popAndAppendToTuple_local0(auto tuple){
 	/* var appended = poppedState.append(poppedChar); */
 	return Tuple</*  */>(poppedChar, appended);
 }
-/* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this, ){
+/* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
 	return this.pop().map(popAndAppendToTuple_local0);
 }
-/* private */ struct boolean isLevel(struct State this, ){
+/* private */ struct boolean isLevel(struct State this){
 	return this.depth == 0;
 }
-/* private */ struct State enter(struct State this, ){
+/* private */ struct State enter(struct State this){
 	return struct State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
 }
-/* private */ struct State exit(struct State this, ){
+/* private */ struct State exit(struct State this){
 	return struct State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
 }
-/* private */ struct State advance(struct State this, ){
+/* private */ struct State advance(struct State this){
 	return struct State(this.input, this.segments.add(this.buffer), "", this.depth, this.index);
 }
-/* private */ struct boolean isShallow(struct State this, ){
+/* private */ struct boolean isShallow(struct State this){
 	return this.depth == 1;
 }
-/* private */ Option<Tuple<char, struct State>> pop(struct State this, ){
+/* private */ Option<Tuple<char, struct State>> pop(struct State this){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
@@ -281,34 +286,37 @@ auto popAndAppendToTuple_local0(auto tuple){
 /* private */ struct State append(struct State this, struct char c){
 	return struct State(this.input, this.segments, this.buffer + c, this.depth, this.index);
 }
-/* public */ Option<struct State> popAndAppend(struct State this, ){
+/* public */ Option<struct State> popAndAppend(struct State this){
 	return this.popAndAppendToTuple().map(/* Tuple::right */);
 }
-struct private Joiner(struct Joiner this, ){
+struct private Joiner(struct Joiner this){
 	/* this(""); */
 }
 /* @Override
-        public */ Option<char*> createInitial(struct Joiner this, ){
+        public */ Option<char*> createInitial(struct Joiner this){
 	return None</*  */>();
 }
 /* @Override
         public */ Option<char*> fold(struct Joiner this, Option<char*> current, char* element){
 	return Some</*  */>(current.map(/* inner -> inner + this */.delimiter + element).orElse(element));
 }
+struct public Definition(struct Definition this, char* type, char* name){
+	/* this(new None<>(), type, name); */
+}
 /* @Override
-        public */ char* generate(struct Definition this, ){
+        public */ char* generate(struct Definition this){
 	/* var joined = this.beforeType().map(Main::generatePlaceholder).map(inner -> inner + " ").orElse(""); */
 	return /* joined + this */.type() + " " + this.name();
 }
 /* @Override
-        public */ char* generate(struct Content this, ){
+        public */ char* generate(struct Content this){
 	return generatePlaceholder(this.input);
 }
 /* @Override
-        public */ char* generate(struct Whitespace implements Defined this, ){
+        public */ char* generate(struct Whitespace implements Defined this){
 	return "";
 }
-/* public static */ void main(struct Whitespace implements Defined this, ){
+/* public static */ void main(struct Whitespace implements Defined this){
 	/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -351,7 +359,7 @@ struct private Joiner(struct Joiner this, ){
 /* private static */ char* generateAll(struct Whitespace implements Defined this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
 	return parsed.iter().fold("", merger);
 }
-/* private static */ List<char*> parseAll(struct Whitespace implements Defined this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, char*> compiler){
+/* private static <T> */ List<struct T> parseAll(struct Whitespace implements Defined this, char* input, BiFunction<struct State, char, struct State> folder, Function<char*, struct T> compiler){
 	return divideAll(input, folder).iter().map(compiler).collect(ListCollector</*  */>());
 }
 /* private static */ char* mergeStatements(struct Whitespace implements Defined this, char* buffer, char* element){
@@ -418,17 +426,17 @@ struct private Joiner(struct Joiner this, ){
 }
 /* }
 
-    private static */ char* compileParameter(struct ")
+    private static */ Option<struct Whitespace> parseWhitespace(struct ")
                 .or this, char* input){
 	/* if (input.isBlank()) {
-            return ""; */
+            return new Some<>(new Whitespace()); */
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some</*  */> this, Function</*  */, struct R> mapper){
 	return Some</*  */>(mapper.apply(this.value));
 }
 /* @Override
-        public */ struct boolean isPresent(struct Some</*  */> this, ){
+        public */ struct boolean isPresent(struct Some</*  */> this){
 	return true;
 }
 /* @Override
@@ -436,7 +444,7 @@ struct private Joiner(struct Joiner this, ){
 	return this.value;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct Some</*  */> this, ){
+        public */ struct boolean isEmpty(struct Some</*  */> this){
 	return false;
 }
 /* @Override
@@ -456,7 +464,7 @@ struct private Joiner(struct Joiner this, ){
 	return None</*  */>();
 }
 /* @Override
-        public */ struct boolean isPresent(struct None</*  */> this, ){
+        public */ struct boolean isPresent(struct None</*  */> this){
 	return false;
 }
 /* @Override
@@ -464,7 +472,7 @@ struct private Joiner(struct Joiner this, ){
 	return other;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct None</*  */> this, ){
+        public */ struct boolean isEmpty(struct None</*  */> this){
 	return true;
 }
 /* @Override
@@ -480,7 +488,7 @@ struct private Joiner(struct Joiner this, ){
 	return supplier.get();
 }
 /* @Override
-        public */ List<struct T> createInitial(struct ListCollector</*  */> this, ){
+        public */ List<struct T> createInitial(struct ListCollector</*  */> this){
 	return listEmpty();
 }
 /* @Override
@@ -492,7 +500,7 @@ struct private Joiner(struct Joiner this, ){
 	return Some</*  */>(mapper.apply(this.value));
 }
 /* @Override
-        public */ struct boolean isPresent(struct Some<char*> this, ){
+        public */ struct boolean isPresent(struct Some<char*> this){
 	return true;
 }
 /* @Override
@@ -500,7 +508,7 @@ struct private Joiner(struct Joiner this, ){
 	return this.value;
 }
 /* @Override
-        public */ struct boolean isEmpty(struct Some<char*> this, ){
+        public */ struct boolean isEmpty(struct Some<char*> this){
 	return false;
 }
 /* @Override
