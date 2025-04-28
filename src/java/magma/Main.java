@@ -3,13 +3,12 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private interface List<T> {
+    public interface List<T> {
         List<T> add(T element);
 
         Iterator<T> iter();
@@ -25,7 +24,7 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private record Iterator<T>(Head<T> head) {
+    public record Iterator<T>(Head<T> head) {
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new Iterator<>(() -> this.head.next().map(mapper));
         }
@@ -52,7 +51,7 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private static class RangeHead implements Head<Integer> {
+    public static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0;
 
@@ -69,23 +68,6 @@ public class Main {
             var value = this.counter;
             this.counter++;
             return Optional.of(value);
-        }
-    }
-
-    private record JavaList<T>(java.util.List<T> list) implements Main.List<T> {
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        @Override
-        public List<T> add(T element) {
-            this.list.add(element);
-            return this;
-        }
-
-        @Override
-        public Iterator<T> iter() {
-            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
         }
     }
 
@@ -165,12 +147,6 @@ public class Main {
         @Override
         public Optional<String> fold(Optional<String> current, String element) {
             return Optional.of(current.map(inner -> inner + element).orElse(element));
-        }
-    }
-
-    private static class Lists {
-        public static <T> List<T> empty() {
-            return new JavaList<>();
         }
     }
 

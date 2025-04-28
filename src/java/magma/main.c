@@ -1,4 +1,4 @@
-/* private */struct List<T> {
+/* public */struct List<T> {
 	/* List<T> add(T element) */;
 	/* Iterator<T> iter() */;
 };
@@ -9,15 +9,13 @@
 	/* C createInitial() */;
 	/* C fold(C current, T element) */;
 };
-/* private */struct Iterator<T>(Head<T> head) {
+/* public */struct Iterator<T>(Head<T> head) {
 };
 /* private */struct Tuple<A, B>(A left, B right) {
 };
-/* private static */struct RangeHead implements Head<Integer> {
+/* public static */struct RangeHead implements Head<Integer> {
 	/* private final */ int length;
 	/* private int counter = 0 */;
-};
-/* private */struct JavaList<T>(java.util.List<T> list) implements Main.List<T> {
 };
 /* private static */struct State {
 	/* private final */ char* input;
@@ -27,8 +25,6 @@
 	/* private */ int depth;
 };
 /* private */struct Joiner() implements Collector<String, Optional<String>> {
-};
-/* private static */struct Lists {
 };
 /* public */struct Main {
 	/* private static final List<String> methods = Lists.empty() */;
@@ -69,21 +65,6 @@
             var value = this.counter;
             this.counter++;
             return Optional.of(value);
-         */
-}
-/* public JavaList */(/*  */){/* 
-            this(new ArrayList<>());
-         */
-}
-/* @Override
-        public */ List</* T */> add(/* T element */){/* 
-            this.list.add(element);
-            return this;
-         */
-}
-/* @Override
-        public */ Iterator</* T */> iter(/*  */){/* 
-            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
          */
 }
 /* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
@@ -153,10 +134,6 @@
 /* @Override
         public */ Optional<char*> fold(/* Optional<String> current, String element */){/* 
             return Optional.of(current.map(inner -> inner + element).orElse(element));
-         */
-}
-/* public static <T> */ List</* T */> empty(/*  */){/* 
-            return new JavaList<>();
          */
 }
 /* public static */ void main(/*  */){/* 
