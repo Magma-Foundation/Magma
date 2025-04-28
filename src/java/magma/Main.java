@@ -542,6 +542,10 @@ public class Main {
             }
         }
 
+        if (isSymbol(stripped)) {
+            return stripped;
+        }
+
         return generatePlaceholder(stripped);
     }
 
