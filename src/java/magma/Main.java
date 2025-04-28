@@ -1204,7 +1204,7 @@ public class Main {
 
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)) || c == '_') {
                 continue;
             }
             return false;
