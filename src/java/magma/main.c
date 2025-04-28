@@ -15,7 +15,7 @@
 	/* private static List<Tuple<String, List<String>>> expansions = Lists.empty() */;
 	/* private static List<String> typeArguments = Lists.empty() */;
 };
-/* public */struct List {
+/* public */struct List<char*> {
 	/* List<T> add(T element) */;
 	/* Iterator<T> iter() */;
 	/* boolean isEmpty() */;
@@ -280,7 +280,9 @@
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
-                return generateStructure(name, beforeClass, content);
+
+                var newName = name + "<" + join(typeArgs, ", ") + ">";
+                return generateStructure(newName, beforeClass, content);
             });
 
             return Optional.of("");

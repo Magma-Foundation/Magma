@@ -366,7 +366,9 @@ public class Main {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
-                return generateStructure(name, beforeClass, content);
+
+                var newName = name + "<" + join(typeArgs, ", ") + ">";
+                return generateStructure(newName, beforeClass, content);
             });
 
             return Optional.of("");
