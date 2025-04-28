@@ -1,70 +1,70 @@
-/* private */struct Defined extends Assignable {
+struct Defined extends Assignable {
 };
-/* private */struct Value extends Assignable {
+struct Value extends Assignable {
 };
-/* private */struct Node {
+struct Node {
 };
-/* private */struct Assignable extends Node {
+struct Assignable extends Node {
 };
-/* private */struct State {
+struct State {
 };
-/* private */struct Joiner {
+struct Joiner {
 };
-/* private */struct Definition {
+struct Definition {
 };
-/* private */struct Content {
+struct Content {
 };
-/* private static */struct Whitespace implements Defined, Value {
+struct Whitespace implements Defined, Value {
 };
-/* private */struct StringValue {
+struct StringValue {
 };
-/* private */struct Symbol {
+struct Symbol {
 };
-/* private */struct Invocation {
+struct Invocation {
 };
-/* private */struct DataAccess {
+struct DataAccess {
 };
-/* private */struct Operation {
+struct Operation {
 };
-/* private static */struct Iterators {
+struct Iterators {
 };
-/* private */struct CharValue {
+struct CharValue {
 };
-/* private */struct Not {
+struct Not {
 };
-/* public */struct Main {
+struct Main {
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
 };
-/* private */struct Tuple<char, struct State> {
+struct Tuple<char, struct State> {
 };
-/* public sealed */struct Option<Tuple<char, struct State>> {
+struct Option<Tuple<char, struct State>> {
 };
-/* private */struct Tuple</*  */> {
+struct Tuple</*  */> {
 };
-/* public */struct None</*  */> {
+struct None</*  */> {
 };
-/* public */struct Some</*  */> {
+struct Some</*  */> {
 };
-/* public sealed */struct Option<struct State> {
+struct Option<struct State> {
 };
-/* public sealed */struct Option<char> {
+struct Option<char> {
 };
-/* public sealed */struct Option<char*> {
+struct Option<char*> {
 };
-/* public */struct Iterator<struct T> {
+struct Iterator<struct T> {
 };
-/* public */struct List<char*> {
+struct List<char*> {
 };
-/* public */struct List<struct T> {
+struct List<struct T> {
 };
-/* private static */struct ListCollector</*  */> {
+struct ListCollector</*  */> {
 };
-/* public sealed */struct Option<struct Whitespace> {
+struct Option<struct Whitespace> {
 };
-/* public sealed */struct Option<struct Invocation> {
+struct Option<struct Invocation> {
 };
-/* public sealed */struct Option<struct Definition> {
+struct Option<struct Definition> {
 };
 struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
@@ -342,16 +342,16 @@ Option<char*> compileStructure(struct Main this, char* input, char* infix){
 			if (paramStart >= 0){
 	auto compileStructure_local15 = withoutPermits.substring(withoutPermits, 0, paramStart);
 				char* withoutParams = compileStructure_local15.strip(compileStructure_local15);
-				return getString(withoutParams, beforeClass, withEnd);
+				return getString(withoutParams, withEnd);
 			}
 			else {
-				return getString(withoutPermits, beforeClass, withEnd);
+				return getString(withoutPermits, withEnd);
 			}
 		}
 	}
 	return None</*  */>();
 }
-Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass, char* withEnd){
+Option<char*> getString(struct Main this, char* beforeContent, char* withEnd){
 	auto getString_local0 = !withEnd;
 	if (getString_local0.endsWith(getString_local0, "}")){
 		return None</*  */>();
@@ -367,29 +367,29 @@ Option<char*> getString(struct Main this, char* beforeContent, char* beforeClass
 			auto name = getString_local8.strip(getString_local8);
 			auto substring = withoutEnd.substring(withoutEnd, getString_local9.length(getString_local9));
 			auto typeParameters = listFromArray(substring.split(substring, Pattern.quote(Pattern, ",")));
-			return assembleStructure(typeParameters, name, beforeClass, content);
+			return assembleStructure(typeParameters, name, content);
 		}
 	}
-	return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
+	return assembleStructure(listEmpty(), strippedBeforeContent, content);
 }
-Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* beforeClass, char* content){
+Option<char*> assembleStructure(struct Main this, List<char*> typeParams, char* name, char* content){
 	auto assembleStructure_local0 = !typeParams;
 	if (assembleStructure_local0.isEmpty(assembleStructure_local0)){
 		/* -> { */ typeParameters = /* typeParams;
                 typeArguments = typeArgs;
 
                 var newName = name */ + "<" + join(typeArgs, ", ") + /* " */ > /* ";
-                return generateStructure */(newName, beforeClass, /* content);
+                return generateStructure */(newName, /* content);
             } */);
 		return Some</*  */>("");
 	}
-	return generateStructure(name, beforeClass, content);
+	return generateStructure(name, content);
 }
-Option<char*> generateStructure(struct Main this, char* name, char* beforeClass, char* content){
+Option<char*> generateStructure(struct Main this, char* name, char* content){
 	structNames = structNames.addLast(structNames, name);
 	auto compiled = compileStatements(content, /* Main::compileClassSegment */);
 	structNames = structNames.removeLast(structNames);
-	auto generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n";
+	auto generated = "struct " + name + " {" + compiled + "\n};\n";
 	/* structs.addLast(generated); */
 	return Some</*  */>("");
 }

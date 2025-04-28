@@ -634,17 +634,17 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
                     String withoutParams = withoutPermits.substring(0, paramStart).strip();
-                    return getString(withoutParams, beforeClass, withEnd);
+                    return getString(withoutParams, withEnd);
                 }
                 else {
-                    return getString(withoutPermits, beforeClass, withEnd);
+                    return getString(withoutPermits, withEnd);
                 }
             }
         }
         return new None<>();
     }
 
-    private static Option<String> getString(String beforeContent, String beforeClass, String withEnd) {
+    private static Option<String> getString(String beforeContent, String withEnd) {
         if (!withEnd.endsWith("}")) {
             return new None<>();
         }
@@ -658,35 +658,35 @@ public class Main {
                 var name = withoutEnd.substring(0, typeParamStart).strip();
                 var substring = withoutEnd.substring(typeParamStart + "<".length());
                 var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
-                return assembleStructure(typeParameters, name, beforeClass, content);
+                return assembleStructure(typeParameters, name, content);
             }
         }
 
-        return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
+        return assembleStructure(listEmpty(), strippedBeforeContent, content);
     }
 
-    private static Option<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
+    private static Option<String> assembleStructure(List<String> typeParams, String name, String content) {
         if (!typeParams.isEmpty()) {
             expandables.put(name, typeArgs -> {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
                 var newName = name + "<" + join(typeArgs, ", ") + ">";
-                return generateStructure(newName, beforeClass, content);
+                return generateStructure(newName, content);
             });
 
             return new Some<>("");
         }
 
-        return generateStructure(name, beforeClass, content);
+        return generateStructure(name, content);
     }
 
-    private static Option<String> generateStructure(String name, String beforeClass, String content) {
+    private static Option<String> generateStructure(String name, String content) {
         structNames = structNames.addLast(name);
         var compiled = compileStatements(content, Main::compileClassSegment);
         structNames = structNames.removeLast();
 
-        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n";
+        var generated = "struct " + name + " {" + compiled + "\n};\n";
         structs.addLast(generated);
         return new Some<>("");
     }
