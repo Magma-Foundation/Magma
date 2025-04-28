@@ -86,10 +86,10 @@ public class Main {
         private final String input;
         private List<String> segments;
         private int index;
-        private StringBuilder buffer;
+        private String buffer;
         private int depth;
 
-        private State(String input, List<String> segments, StringBuilder buffer, int depth, int index) {
+        private State(String input, List<String> segments, String buffer, int depth, int index) {
             this.input = input;
             this.index = index;
             this.buffer = buffer;
@@ -98,7 +98,7 @@ public class Main {
         }
 
         public State(String input) {
-            this(input, Lists.empty(), new StringBuilder(), 0, 0);
+            this(input, Lists.empty(), "", 0, 0);
         }
 
         private Optional<Tuple<Character, State>> popAndAppendToTuple() {
@@ -120,8 +120,8 @@ public class Main {
         }
 
         private State advance() {
-            this.segments = this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments = this.segments.add(this.buffer);
+            this.buffer = "";
             return this;
         }
 
@@ -140,7 +140,7 @@ public class Main {
         }
 
         private State append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         }
 
@@ -230,15 +230,14 @@ public class Main {
             String input,
             BiFunction<State, Character, State> folder,
             Function<String, String> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
+            BiFunction<String, String, String> merger
     ) {
         return generateAll(merger, parseAll(input, folder, compiler));
     }
 
-    private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed) {
+    private static String generateAll(BiFunction<String, String, String> merger, List<String> parsed) {
         return parsed.iter()
-                .foldRight(new StringBuilder(), merger)
-                .toString();
+                .foldRight("", merger);
     }
 
     private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> compiler) {
@@ -248,8 +247,8 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private static StringBuilder mergeStatements(StringBuilder output, String compiled) {
-        return output.append(compiled);
+    private static String mergeStatements(String buffer, String element) {
+        return buffer + element;
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
@@ -497,11 +496,12 @@ public class Main {
         return parseAll(input, Main::foldValueChar, compiler);
     }
 
-    private static StringBuilder mergeValues(StringBuilder builder, String element) {
+    private static String mergeValues(String builder, String element) {
         if (builder.isEmpty()) {
-            return builder.append(element);
+            return builder + element;
         }
-        return builder.append(", ").append(element);
+
+        return builder + ", " + element;
     }
 
     private static State foldValueChar(State state, char c) {

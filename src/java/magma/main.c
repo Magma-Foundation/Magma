@@ -2,7 +2,7 @@
 	/* private final */ char* input;
 	/* private */ List<char*> segments;
 	/* private */ int index;
-	/* private */ /* StringBuilder */ buffer;
+	/* private */ char* buffer;
 	/* private */ int depth;
 };
 /* private */struct Joiner {
@@ -13,7 +13,7 @@
 };
 // Optional</* State */>
 // Optional<char*>
-/* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
+/* private State */(/* String input, List<String> segments, String buffer, int depth, int index */){/* 
             this.input = input;
             this.index = index;
             this.buffer = buffer;
@@ -22,7 +22,7 @@
          */
 }
 /* public State */(/* String input */){/* 
-            this(input, Lists.empty(), new StringBuilder(), 0, 0);
+            this(input, Lists.empty(), "", 0, 0);
          */
 }
 /* private Optional<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){/* 
@@ -44,8 +44,8 @@
          */
 }
 /* private */ /* State */ advance(/*  */){/* 
-            this.segments = this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments = this.segments.add(this.buffer);
+            this.buffer = "";
             return this;
          */
 }
@@ -64,7 +64,7 @@
          */
 }
 /* private */ /* State */ append(/* char c */){/* 
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
          */
 }
@@ -132,15 +132,14 @@
             String input,
             BiFunction<State, Character, State> folder,
             Function<String, String> compiler,
-            BiFunction<StringBuilder, String, StringBuilder> merger
+            BiFunction<String, String, String> merger
      */){/* 
         return generateAll(merger, parseAll(input, folder, compiler));
      */
 }
-/* private static */ char* generateAll(/* BiFunction<StringBuilder, String, StringBuilder> merger, List<String> parsed */){/* 
+/* private static */ char* generateAll(/* BiFunction<String, String, String> merger, List<String> parsed */){/* 
         return parsed.iter()
-                .foldRight(new StringBuilder(), merger)
-                .toString();
+                .foldRight("", merger);
      */
 }
 /* private static */ List<char*> parseAll(/* String input, BiFunction<State, Character, State> folder, Function<String, String> compiler */){/* 
@@ -150,8 +149,8 @@
                 .collect(new ListCollector<>());
      */
 }
-/* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder output, String compiled */){/* 
-        return output.append(compiled);
+/* private static */ char* mergeStatements(/* String buffer, String element */){/* 
+        return buffer + element;
      */
 }
 /* private static */ List<char*> divideAll(/* String input, BiFunction<State, Character, State> folder */){/* 
@@ -399,11 +398,12 @@
         return parseAll(input, Main::foldValueChar, compiler);
      */
 }
-/* private static */ /* StringBuilder */ mergeValues(/* StringBuilder builder, String element */){/* 
+/* private static */ char* mergeValues(/* String builder, String element */){/* 
         if (builder.isEmpty()) {
-            return builder.append(element);
+            return builder + element;
         }
-        return builder.append(", ").append(element);
+
+        return builder + ", " + element;
      */
 }
 /* private static */ /* State */ foldValueChar(/* State state, char c */){/* 
