@@ -30,10 +30,32 @@ public class Main {
         var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
-        for (var i = 0; i < input.length(); i++) {
+        var i = 0;
+        while (i < input.length()) {
             var c = input.charAt(i);
-            buffer.append(c);
 
+            if (c == '\'') {
+                buffer.append(c);
+                i++;
+
+                var maybeSlash = input.charAt(i);
+                buffer.append(maybeSlash);
+                i++;
+
+                if (maybeSlash == '\\') {
+                    var escaped = input.charAt(i);
+                    buffer.append(escaped);
+                    i++;
+                }
+
+                var slash = input.charAt(i);
+                buffer.append(slash);
+                i++;
+                continue;
+            }
+
+            buffer.append(c);
+            i++;
             if (c == ';' && depth == 0) {
                 segments.add(buffer.toString());
                 buffer = new StringBuilder();
@@ -64,6 +86,10 @@ public class Main {
 
     private static String compileRootSegment(String input) {
         var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return "";
+        }
+
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
@@ -96,7 +122,7 @@ public class Main {
         if (paramStart >= 0) {
             var beforeParams = stripped.substring(0, paramStart);
             var afterParams = stripped.substring(paramStart + "(".length());
-            var generated = generatePlaceholder(beforeParams) + "(" + generatePlaceholder(afterParams);
+            var generated = generatePlaceholder(beforeParams) + "(" + generatePlaceholder(afterParams) + "\n";
             methods.add(generated);
             return "";
         }
