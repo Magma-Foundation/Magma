@@ -729,6 +729,17 @@ public class Main {
             }
         }
 
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeBlock = withoutEnd.substring(0, contentStart);
+                var content = withoutEnd.substring(contentStart + "{".length());
+                var outputContent = compileStatements(content, Main::compileFunctionSegment);
+                return "\n\t" + generatePlaceholder(beforeBlock) + "{" + outputContent + "\n\t}";
+            }
+        }
+
         return "\n\t" + generatePlaceholder(stripped);
     }
 
