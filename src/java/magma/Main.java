@@ -419,6 +419,13 @@ public class Main {
         }
     }
 
+    private record CharValue(String slice) implements Value {
+        @Override
+        public String generate() {
+            return "'" + this.slice + "'";
+        }
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
@@ -952,6 +959,11 @@ public class Main {
         if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return new StringValue(stripped.substring(1, stripped.length() - 1));
         }
+
+        if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith("'")) {
+            return new CharValue(stripped.substring(1, stripped.length() - 1));
+        }
+
 
         for (var operator : Operator.values()) {
             var operatorIndex = stripped.indexOf(operator.representation);

@@ -28,6 +28,8 @@
 };
 /* private static */struct Iterators {
 };
+/* private */struct CharValue {
+};
 /* public */struct Main {
 	/* private static String functionName = "" */;
 	/* private static int functionLocalCounter = 0 */;
@@ -153,6 +155,9 @@ auto fromArray_local0(auto index){
 Iterator<struct T> fromArray(struct Iterators this, /* T[] */ array){
 	return /* Iterator<>(new RangeHead(array.length)).map */(fromArray_local0);
 }
+char* generate(struct CharValue this){
+	return "'" + this.slice + "'";
+}
 void main(struct Main this){
 	/* try */{
 		auto source = Paths.get(Paths, /* " */.", "src", "java", "magma", /* "Main */.java");
@@ -238,7 +243,7 @@ List<char*> divideAll(struct Main this, char* input, struct State (*)(struct Sta
 	return state.advance(state).segments;
 }
 Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext, struct char c){
-	if (c != /* '\"' */){
+	if (c != '\"'){
 		return None</*  */>();
 	}
 	auto current = withoutNext.append(withoutNext, c);
@@ -264,7 +269,7 @@ auto foldSingleQuotes_local3(auto maybeSlash){
 Option<struct State> foldSingleQuotes(struct Main this, struct State state, struct char next){
 	auto foldSingleQuotes_local5 = appended.popAndAppendToTuple(appended);
 	auto foldSingleQuotes_local6 = foldSingleQuotes_local5.flatMap(foldSingleQuotes_local5, foldSingleQuotes_local3);
-	if (next != /* '\'' */){
+	if (next != '\''){
 		return None</*  */>();
 	}
 	auto appended = state.append(state, next);
@@ -686,6 +691,9 @@ struct Value parseValue(struct Main this, char* input){
 	}
 	if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("\"") && stripped, "\"")){
 		return struct StringValue(stripped.substring(stripped, 1, stripped.length() - 1));
+	}
+	if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("'") && stripped, "'")){
+		return struct CharValue(stripped.substring(stripped, 1, stripped.length() - 1));
 	}
 	/* for (var operator : Operator.values()) */{
 		auto operatorIndex = stripped.indexOf(stripped, operator.representation);
