@@ -589,6 +589,13 @@ public class Main {
             return stripped;
         }
 
+        var arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+            return generatePlaceholder(beforeArrow) + " -> " + generatePlaceholder(afterArrow);
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var value = stripped.substring(0, separator);
