@@ -84,6 +84,7 @@ public class Main {
     private enum Operator {
         ADD("+"),
         AND("&&"),
+        OR("||"),
         EQUALS("=="),
         NOT_EQUALS("!="),
         LESS_THAN("<"),

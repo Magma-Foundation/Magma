@@ -673,7 +673,7 @@ struct Value parseValue(struct Main this, char* input){
 			}
 			auto name = generateName();
 			/* Value symbol; */
-			if (/* parent instanceof Symbol || parent instanceof DataAccess */){
+			if (/* parent instanceof Symbol */ || /* parent instanceof DataAccess */){
 				symbol = parent;
 			}
 			else {
