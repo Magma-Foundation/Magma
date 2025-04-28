@@ -42,6 +42,12 @@ public class Main {
         Option<Integer> indexOf(T element);
 
         T get(int index);
+
+        int size();
+
+        List<T> subList(int startInclusive, int endExclusive);
+
+        T last();
     }
 
     private interface Head<T> {
@@ -234,7 +240,7 @@ public class Main {
 
         @Override
         public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + element).orElse(element));
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -589,14 +595,31 @@ public class Main {
             return new None<>();
         }
 
-        var typeSeparator = beforeName.lastIndexOf(" ");
-        if (typeSeparator >= 0) {
-            var beforeType = beforeName.substring(0, typeSeparator).strip();
-            var type = beforeName.substring(typeSeparator + " ".length());
+        var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
+        if (divisions.size() == 1) {
+            return new Some<>(compileType(beforeName) + " " + name);
+        }
+        else {
+            var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
+            var type = divisions.last();
+
             return new Some<>(generatePlaceholder(beforeType) + " " + compileType(type) + " " + name);
         }
+    }
 
-        return new Some<>(compileType(beforeName) + " " + name);
+    private static State foldByTypeSeparator(State state, char c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String compileType(String input) {

@@ -40,6 +40,21 @@ class Lists {
         public T get(int index) {
             return this.elements.get(index);
         }
+
+        @Override
+        public int size() {
+            return this.elements.size();
+        }
+
+        @Override
+        public Main.List<T> subList(int startInclusive, int endExclusive) {
+            return new JavaList<>(this.elements.subList(startInclusive, endExclusive));
+        }
+
+        @Override
+        public T last() {
+            return this.elements.getLast();
+        }
     }
 
     public static <T> Main.List<T> listEmpty() {

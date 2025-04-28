@@ -4,6 +4,8 @@
 };
 /* public */struct Main {
 };
+/* public */struct Option</* Tuple<Character */, /* State> */> {
+};
 /* public */struct Some<struct > {
 };
 /* public */struct Option<struct State> {
@@ -17,7 +19,7 @@
 /* private static */ struct State fromInput(char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
-/* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){
+/* private */ Option</* Tuple<Character */, /* State> */> popAndAppendToTuple(/*  */){
 	return /* this.pop */(/* ).map(tuple -> new Tuple<>(tuple.left */, /* tuple.right.append */(/* tuple.left) */));
 }
 /* private */ struct boolean isLevel(/*  */){
@@ -35,7 +37,7 @@
 /* private */ struct boolean isShallow(/*  */){
 	return /* this.depth == 1 */;
 }
-/* private Option<Tuple<Character, */ /* State>> */ pop(/*  */){
+/* private */ Option</* Tuple<Character */, /* State> */> pop(/*  */){
 	/* if (this.index >= this.input.length()) {
                 return new None<>();
             } */
@@ -57,7 +59,7 @@ struct private Joiner(/*  */){
 }
 /* @Override
         public */ Option<char*> fold(Option<char*> current, char* element){
-	return Some<struct >(/* current.map */(/* inner -> inner + element).orElse(element */));
+	return Some<struct >(/* current.map */(/* inner -> inner + delimiter + element).orElse(element */));
 }
 /* public static */ void main(/*  */){
 	/* try {
@@ -354,13 +356,29 @@ struct private Joiner(/*  */){
 	/* if (!isSymbol(name)) {
             return new None<>();
         } */
-	/* var typeSeparator = beforeName.lastIndexOf(" "); */
-	/* if (typeSeparator >= 0) {
-            var beforeType = beforeName.substring(0, typeSeparator).strip();
-            var type = beforeName.substring(typeSeparator + " ".length());
+	/* var divisions = divideAll(beforeName, Main::foldByTypeSeparator); */
+	/* if(divisions.size() == 1) {
+            return new Some<>(compileType(beforeName) + " " + name);
+        } */
+	/* else {
+            var beforeType = join(divisions.subList(0, divisions.size() - 1), " ");
+            var type = divisions.last();
+
             return new Some<>(generatePlaceholder(beforeType) + " " + compileType(type) + " " + name);
         } */
-	return Some<struct >(/* compileType(beforeName) + " " + name */);
+}
+/* private static */ struct State foldByTypeSeparator(struct State state, struct char c){
+	/* if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        } */
+	/* var appended = state.append(c); */
+	/* if (c == '<') {
+            return appended.enter();
+        } */
+	/* if (c == '>') {
+            return appended.exit();
+        } */
+	return appended;
 }
 /* private static */ char* compileType(char* input){
 	/* var stripped = input.strip(); */
