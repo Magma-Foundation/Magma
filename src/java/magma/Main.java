@@ -176,7 +176,7 @@ public class Main {
     private static Optional<String> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            var beforeClass = input.substring(0, classIndex);
+            var beforeClass = input.substring(0, classIndex).strip();
             var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {

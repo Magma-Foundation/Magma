@@ -1,6 +1,6 @@
-/* public  */struct Main {/* private  */struct Tuple<A, B>(A left, B right) {
+/* public */struct Main {/* private */struct Tuple<A, B>(A left, B right) {
 };
-/* private static  */struct State {/* private final String input; *//* private final List<String> segments; *//* private int index; *//* private StringBuilder buffer; *//* private int depth; */
+/* private static */struct State {/* private final String input; *//* private final List<String> segments; *//* private int index; *//* private StringBuilder buffer; *//* private int depth; */
 };
 /* public static final List<String> methods = new ArrayList<>(); */
 };
@@ -158,7 +158,7 @@
 /* private static */ /* Optional<String> */ compileStructure(/* String input, String infix */){/* 
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            var beforeClass = input.substring(0, classIndex);
+            var beforeClass = input.substring(0, classIndex).strip();
             var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
