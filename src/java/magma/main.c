@@ -30,9 +30,13 @@
 };
 /* public sealed */struct Option<Tuple<char, struct State>> {
 };
+/* private */struct Tuple</*  */> {
+};
 /* public */struct Some</*  */> {
 };
 /* public sealed */struct Option<struct State> {
+};
+/* public sealed */struct Option<char> {
 };
 /* public sealed */struct Option<char*> {
 };
@@ -53,13 +57,14 @@
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
+auto popAndAppendToTuple_local0(auto tuple){
+	/* var poppedChar = tuple.left; */
+	/* var poppedState = tuple.right; */
+	/* var appended = poppedState.append(poppedChar); */
+	return Tuple</*  */>(poppedChar, appended);
+}
 /* private */ Option<Tuple<char, struct State>> popAndAppendToTuple(struct State this){
-	return this.pop(this).map(this.pop(this), /* tuple -> {
-                var poppedChar = tuple */.left;
-                var poppedState = tuple.right;
-                var appended = poppedState.append(poppedChar);
-                return new Tuple<>(poppedChar, /* appended);
-            } */);
+	return this.pop(this).map(this.pop(this), popAndAppendToTuple_local0);
 }
 /* private */ int isLevel(struct State this){
 	return this.depth == 0;
@@ -88,6 +93,14 @@
 }
 /* public */ Option<struct State> popAndAppend(struct State this){
 	return this.popAndAppendToTuple(this).map(this.popAndAppendToTuple(this), /* Tuple::right */);
+}
+/* public */ Option<char> peek(struct State this){
+	/* if (this.index < this.input.length()) {
+                return new Some<>(this.input.charAt(this.index));
+            } */
+	/* else {
+                return new None<>();
+            } */
 }
 struct private Joiner(struct Joiner this){
 	/* this(""); */
@@ -328,7 +341,7 @@ struct public Definition(struct Definition this, char* type, char* name){
 	/* if (stripped.isEmpty()) {
             return "";
         } */
-	return compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)).orElseGet(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)), /* () -> generatePlaceholder */(stripped));
+	return compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)).orElseGet(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure */(stripped, "interface ")), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)), /* () -> generatePlaceholder */(stripped));
 }
 /* private static */ Option<char*> compileDefinitionStatement(struct Main this, char* input){
 	/* var stripped = input.strip(); */
@@ -610,6 +623,13 @@ struct public Definition(struct Definition this, char* type, char* name){
             return state.advance();
         } */
 	/* var appended = state.append(c); */
+	/* if (c == '-') {
+            if (appended.peek() instanceof Some(var maybeArrow)) {
+                if (maybeArrow == '>') {
+                    return appended.popAndAppend().orElse(appended);
+                }
+            }
+        } */
 	/* if (c == '<' || c == '(') {
             return appended.enter();
         } */

@@ -279,6 +279,15 @@ public class Main {
         public Option<State> popAndAppend() {
             return this.popAndAppendToTuple().map(Tuple::right);
         }
+
+        public Option<Character> peek() {
+            if (this.index < this.input.length()) {
+                return new Some<>(this.input.charAt(this.index));
+            }
+            else {
+                return new None<>();
+            }
+        }
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
@@ -959,7 +968,16 @@ public class Main {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
+
         var appended = state.append(c);
+        if (c == '-') {
+            if (appended.peek() instanceof Some(var maybeArrow)) {
+                if (maybeArrow == '>') {
+                    return appended.popAndAppend().orElse(appended);
+                }
+            }
+        }
+
         if (c == '<' || c == '(') {
             return appended.enter();
         }
