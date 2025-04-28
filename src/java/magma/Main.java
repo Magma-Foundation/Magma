@@ -20,11 +20,7 @@ public class Main {
     public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
-        boolean isPresent();
-
         T orElse(T other);
-
-        boolean isEmpty();
 
         T orElseGet(Supplier<T> supplier);
 
@@ -46,7 +42,7 @@ public class Main {
 
         Option<Integer> indexOf(T element);
 
-        T get(int index);
+        Option<T> find(int index);
 
         int size();
 
@@ -61,6 +57,8 @@ public class Main {
         T removeAndGetLast();
 
         List<T> mapLast(Function<T, T> mapper);
+
+        Iterator<Tuple<Integer, T>> iterWithIndices();
     }
 
     private interface Head<T> {
@@ -162,18 +160,8 @@ public class Main {
         }
 
         @Override
-        public boolean isPresent() {
-            return true;
-        }
-
-        @Override
         public T orElse(T other) {
             return this.value;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
         }
 
         @Override
@@ -204,18 +192,8 @@ public class Main {
         }
 
         @Override
-        public boolean isPresent() {
-            return false;
-        }
-
-        @Override
         public T orElse(T other) {
             return other;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true;
         }
 
         @Override
@@ -272,11 +250,11 @@ public class Main {
             while (true) {
                 R finalCurrent = current;
                 var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (optional.isPresent()) {
-                    current = optional.orElse(null);
-                }
-                else {
-                    return current;
+                switch (optional) {
+                    case None<R> _ -> {
+                        return current;
+                    }
+                    case Some<R>(var nextState) -> current = nextState;
                 }
             }
         }
@@ -298,7 +276,7 @@ public class Main {
         }
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    public record Tuple<A, B>(A left, B right) {
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -559,7 +537,7 @@ public class Main {
         public Option<Type> find(String name) {
             return this.properties.iter()
                     .filter(definition -> definition.name.equals(name))
-                    .map(definition -> definition.findType())
+                    .map(Definition::findType)
                     .flatMap(Iterators::fromOption)
                     .next();
         }
@@ -623,6 +601,7 @@ public class Main {
     private static List<Tuple<String, List<Type>>> expansions = listEmpty();
     private static List<Type> typeArguments = listEmpty();
     private static int functionLocalCounter = 0;
+    private static List<Type> typeStack = Lists.listEmpty();
 
     private static Option<IOException> run() {
         return switch (readString(SOURCE)) {
@@ -723,17 +702,17 @@ public class Main {
         State state = State.fromInput(input);
         while (true) {
             var maybeNextTuple = state.pop();
-            if (maybeNextTuple.isEmpty()) {
+            if (maybeNextTuple instanceof None<Tuple<Character, State>>) {
                 break;
             }
+            if (maybeNextTuple instanceof Some<Tuple<Character, State>>(var nextTuple)) {
+                var next = nextTuple.left;
+                var withoutNext = nextTuple.right;
 
-            var nextTuple = maybeNextTuple.orElse(null);
-            var next = nextTuple.left;
-            var withoutNext = nextTuple.right;
-
-            state = foldSingleQuotes(withoutNext, next)
-                    .or(() -> foldDoubleQuotes(withoutNext, next))
-                    .orElseGet(() -> folder.apply(withoutNext, next));
+                state = foldSingleQuotes(withoutNext, next)
+                        .or(() -> foldDoubleQuotes(withoutNext, next))
+                        .orElseGet(() -> folder.apply(withoutNext, next));
+            }
         }
 
         return state.advance().segments;
@@ -1104,9 +1083,8 @@ public class Main {
         if (resolvedCaller instanceof Functional functional) {
             return functional.returns;
         }
-        else {
-            return new Content(invocation.generate());
-        }
+
+        return resolvedCaller;
     }
 
     private static Type resolveDataAccess(DataAccess dataAccess) {
@@ -1119,7 +1097,7 @@ public class Main {
             }
         }
 
-        return new Content(dataAccess.generate());
+        return resolved;
     }
 
     private static Assignable parseAssignable(String definition) {
@@ -1198,7 +1176,9 @@ public class Main {
         if (separator >= 0) {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
-            return new DataAccess(parseValue(value), property);
+            if (isSymbol(property)) {
+                return new DataAccess(parseValue(value), property);
+            }
         }
 
         if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
@@ -1241,21 +1221,46 @@ public class Main {
         var caller = joined.substring(0, joined.length() - ")".length());
         var arguments = divisions.last();
 
-        Value parsedCaller;
         if (caller.startsWith("new ")) {
-            parsedCaller = new Symbol(parseType(caller.substring("new ".length())).stringify());
-        }
-        else {
-            parsedCaller = parseValue(caller);
+            var type = parseType(caller.substring("new ".length()));
+            var parsedCaller = new Symbol("new_" + type.stringify());
+            return assembleInvokable(parsedCaller, arguments, Lists.listEmpty());
         }
 
-        var parsedArgs = parseValues(arguments, Main::parseValue)
+        Value parsedCaller = parseValue(caller);
+        if (resolve(parsedCaller) instanceof Functional functional) {
+            return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
+        }
+        else {
+            return assembleInvokable(parsedCaller, arguments, Lists.listEmpty());
+        }
+    }
+
+    private static Some<Invocation> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsType) {
+        var parsedArgs = divideAll(arguments, Main::foldValueChar)
+                .iterWithIndices()
+                .map((Tuple<Integer, String> input) -> {
+                    var maybeFound = expectedArgumentsType.find(input.left);
+
+                    Value parsed;
+                    if (maybeFound instanceof Some(var found)) {
+                        typeStack = typeStack.addLast(found);
+                        parsed = parseValue(input.right);
+                        typeStack = typeStack.removeLast();
+                    }
+                    else {
+                        parsed = parseValue(input.right);
+                    }
+
+                    return parsed;
+                })
+                .collect(new ListCollector<>())
                 .iter()
                 .filter(value -> !(value instanceof Whitespace))
                 .collect(new ListCollector<>());
 
-        if (!(parsedCaller instanceof DataAccess(var parent, var property))) {
-            return new Some<>(new Invocation(parsedCaller, parsedArgs));
+        if (!(caller instanceof DataAccess(var parent, var property))) {
+            return new Some<>(new Invocation(caller, parsedArgs));
         }
 
         var name = generateName();
@@ -1379,10 +1384,12 @@ public class Main {
 
     private static Type parseType(String input) {
         var stripped = input.strip();
-        var maybeTypeParamIndex = typeParameters.indexOf(stripped);
-        if (maybeTypeParamIndex.isPresent()) {
-            var typeParamIndex = maybeTypeParamIndex.orElse(null);
-            return typeArguments.get(typeParamIndex);
+        var maybeTypeArgument = typeParameters
+                .indexOf(stripped)
+                .flatMap(typeArguments::find);
+
+        if (maybeTypeArgument instanceof Some(var found)) {
+            return found;
         }
 
         switch (stripped) {
@@ -1413,15 +1420,15 @@ public class Main {
                 var parsed = parseValues(substring, Main::parseType);
 
                 if (base.equals("Function")) {
-                    var arg0 = parsed.get(0);
-                    var returns = parsed.get(1);
+                    var arg0 = parsed.find(0).orElse(null);
+                    var returns = parsed.find(1).orElse(null);
                     return new Functional(Lists.listFrom(arg0), returns);
                 }
 
                 if (base.equals("BiFunction")) {
-                    var arg0 = parsed.get(0);
-                    var arg1 = parsed.get(1);
-                    var returns = parsed.get(2);
+                    var arg0 = parsed.find(0).orElse(null);
+                    var arg1 = parsed.find(1).orElse(null);
+                    var returns = parsed.find(2).orElse(null);
                     return new Functional(Lists.listFrom(arg0, arg1), returns);
                 }
 

@@ -18,7 +18,7 @@ class Lists {
 
         @Override
         public Main.Iterator<T> iter() {
-            return new Main.Iterator<>(new Main.RangeHead(this.elements.size())).map(this.elements::get);
+            return this.iterWithIndices().map(Main.Tuple::right);
         }
 
         @Override
@@ -38,8 +38,13 @@ class Lists {
         }
 
         @Override
-        public T get(int index) {
-            return this.elements.get(index);
+        public Main.Option<T> find(int index) {
+            if (index < this.elements.size()) {
+                return new Main.Some<>(this.elements.get(index));
+            }
+            else {
+                return new Main.None<>();
+            }
         }
 
         @Override
@@ -76,6 +81,14 @@ class Lists {
         public Main.List<T> mapLast(Function<T, T> mapper) {
             this.elements.set(this.elements.size() - 1, mapper.apply(this.elements.getLast()));
             return this;
+        }
+
+        @Override
+        public Main.Iterator<Main.Tuple<Integer, T>> iterWithIndices() {
+            return new Main.Iterator<>(new Main.RangeHead(this.elements.size())).map(index -> {
+                var element = this.elements.get(index);
+                return new Main.Tuple<>(index, element);
+            });
         }
     }
 
