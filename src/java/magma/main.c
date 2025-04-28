@@ -1,138 +1,6 @@
-/* if (isSymbol(stripped)) {
-            return new Symbol(stripped);
-        } *//* if (isNumber(stripped)) {
-            return new Symbol(stripped);
-        } *//* var arrowIndex = stripped.indexOf("->"); *//* if (arrowIndex >= 0) {
-            var beforeArrow = stripped.substring(0, arrowIndex).strip();
-            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
-                var content = afterArrow.substring(1, afterArrow.length() - 1);
-
-                var name = functionName + "_local" + functionLocalCounter;
-                functionLocalCounter++;
-
-                assembleMethod("auto " + name, "auto " + beforeArrow, content);
-                return new Symbol(name);
-            }
-        } *//* var separator = stripped.lastIndexOf("."); *//* if (separator >= 0) {
-            var value = stripped.substring(0, separator);
-            var property = stripped.substring(separator + ".".length()).strip();
-            return new DataAccess(parseValue(value), property);
-        } *//* return new Content(stripped); *//* }
-
-    private static State foldInvokableStart(State state, Character c) {
-        var appended = state.append(c); *//* if (c == '(') {
-            var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
-            return maybeAdvanced.enter();
-        } *//* if (c == ')') {
-            return appended.exit();
-        } *//* return appended; *//* }
-
-    private static boolean isNumber(String input) {
-        if (input.isEmpty()) {
-            return false;
-        } *//* for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (Character.isDigit(c)) {
-                continue;
-            }
-            return false;
-        } *//* return true; *//* }
-
-    private static String compileDefinitionOrPlaceholder(String input) {
-        return parseDefinitionOrPlaceholder(input).generate(); *//* }
-
-    private static Defined parseDefinitionOrPlaceholder(String input) {
-        return parseDefinition(input).<Defined>map(value -> value)
-                .orElseGet(() -> new Content(input)); *//* }
-
-    private static Option<Definition> parseDefinition(String input) {
-        var stripped = input.strip(); *//* var nameSeparator = stripped.lastIndexOf(" "); *//* if (nameSeparator < 0) {
-            return new None<>();
-        } *//* var beforeName = stripped.substring(0, nameSeparator); *//* var name = stripped.substring(nameSeparator + " ".length()); *//* if (!isSymbol(name)) {
-            return new None<>();
-        } *//* var divisions = divideAll(beforeName, Main::foldByTypeSeparator); *//* if (divisions.size() == 1) {
-            return new Some<>(new Definition(new None<>(), compileType(beforeName), name));
-        } *//* var beforeType = join(divisions.subList(0, divisions.size() - 1), " "); *//* var type = divisions.last(); *//* return new Some<>(new Definition(new Some<>(beforeType), compileType(type), name)); *//* }
-
-    private static State foldByTypeSeparator(State state, char c) {
-        if (c == ' ' && state.isLevel()) {
-            return state.advance();
-        } *//* var appended = state.append(c); *//* if (c == '<') {
-            return appended.enter();
-        } *//* if (c == '>') {
-            return appended.exit();
-        } *//* return appended; *//* }
-
-    private static String compileType(String input) {
-        var stripped = input.strip(); *//* var maybeTypeParamIndex = typeParameters.indexOf(stripped); *//* if (maybeTypeParamIndex.isPresent()) {
-            var typeParamIndex = maybeTypeParamIndex.orElse(null);
-            return typeArguments.get(typeParamIndex);
-        } *//* switch (stripped) {
-            case "int", "boolean" -> {
-                return "int";
-            }
-            case "Character" -> {
-                return "char";
-            }
-            case "void" -> {
-                return "void";
-            }
-            case "String" -> {
-                return "char*";
-            }
-        } *//* if (stripped.endsWith(">")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-            var index = withoutEnd.indexOf("<");
-            if (index >= 0) {
-                var base = withoutEnd.substring(0, index).strip();
-                var substring = withoutEnd.substring(index + "<".length());
-                var parsed = parseValues(substring, Main::compileType);
-
-                if (!expansions.contains(new Tuple<>(base, parsed))) {
-                    expansions = expansions.add(new Tuple<>(base, parsed));
-                }
-
-                return base + "<" + generateValues(parsed) + ">";
-            }
-        } *//* if (isSymbol(stripped)) {
-            return "struct " + stripped;
-        } *//* return generatePlaceholder(stripped); *//* }
-
-    private static String generateValues(List<String> values) {
-        return generateAll(Main::mergeValues, values); *//* }
-
-    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
-        return parseAll(input, Main::foldValueChar, compiler); *//* }
-
-    private static String mergeValues(String builder, String element) {
-        if (builder.isEmpty()) {
-            return builder + element;
-        } *//* return builder + ", " + element; *//* }
-
-    private static State foldValueChar(State state, char c) {
-        if (c == ',' && state.isLevel()) {
-            return state.advance();
-        } *//* var appended = state.append(c); *//* if (c == '<' || c == '(') {
-            return appended.enter();
-        } *//* if (c == '>' || c == ')') {
-            return appended.exit();
-        } *//* return appended; *//* }
-
-    private static boolean isSymbol(String input) {
-        var stripped = input.strip(); *//* if (stripped.isEmpty()) {
-            return false;
-        } *//* for (var i = 0; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        } *//* return true; *//* }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */"; *//* }
-} *//* private */struct Defined extends Node {
+/* public sealed */struct Option<T> permits Some, None {
+};
+/* private */struct Defined extends Node {
 };
 /* private */struct Value extends Node {
 };
@@ -158,88 +26,6 @@
 };
 /* private */struct DataAccess {
 };
-/* private static Option<String> compileStructure(String input, String infix) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeClass = input.substring(0, classIndex).strip();
-            var afterClass = input.substring(classIndex + infix.length());
-            var contentStart = afterClass.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = afterClass.substring(0, contentStart).strip();
-
-                var paramStart = beforeContent.indexOf("(");
-                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
-                if (paramStart >= 0) {
-                    String withoutParams = beforeContent.substring(0, paramStart).strip();
-                    return getString(withoutParams, beforeClass, withEnd);
-                }
-                else {
-                    return getString(beforeContent, beforeClass, withEnd);
-                }
-            }
-        }
-        return new None<>();
-    }
-
-    private static Option<String> getString(String beforeContent, String beforeClass, String withEnd) {
-        if (!withEnd.endsWith("}")) {
-            return new None<>();
-        }
-        var content = withEnd.substring(0, withEnd.length() - "}".length());
-
-        var strippedBeforeContent = beforeContent.strip();
-        if (strippedBeforeContent.endsWith(">")) {
-            var withoutEnd = strippedBeforeContent.substring(0, strippedBeforeContent.length() - ">".length());
-            var typeParamStart = withoutEnd.indexOf("<");
-            if (typeParamStart >= 0) {
-                var name = withoutEnd.substring(0, typeParamStart).strip();
-                var substring = withoutEnd.substring(typeParamStart + "<".length());
-                var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
-                return assembleStructure(typeParameters, name, beforeClass, content);
-            }
-        }
-
-        return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
-    }
-
-    private static Option<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
-        if (!typeParams.isEmpty()) {
-            expandables.put(name, typeArgs -> {
-                typeParameters = typeParams;
-                typeArguments = typeArgs;
-
-                var newName = name + "<" + join(typeArgs, ", ") + ">";
-                return generateStructure(newName, beforeClass, content);
-            });
-
-            return new Some<>("");
-        }
-
-        return generateStructure(name, beforeClass, content);
-    }
-
-    private static Option<String> generateStructure(String name, String beforeClass, String content) {
-        structName = name;
-
-        var compiled = compileStatements(content, Main::compileClassSegment);
-        var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n";
-        structs.add(generated);
-        return new Some<>("");
-    }
-
-    private static String compileClassSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return "";
-        }
-
-        return compileStructure(stripped, " */struct ")
-                .or {
-	/* \n" */;
-	/* }
-                else {
-                    newArgs */ /* = */ parsedArgs;
-};
 /* public */struct Main {
 	/* private static String structName = "" */;
 	/* private static String functionName = "" */;
@@ -247,13 +33,7 @@
 };
 /* private */struct Tuple<char, struct State> {
 };
-/* public */struct Option<Tuple<char, struct State>> {
-};
 /* public */struct Some</*  */> {
-};
-/* public */struct Option<struct State> {
-};
-/* public */struct Option<char*> {
 };
 /* public */struct None</*  */> {
 };
@@ -265,12 +45,17 @@
 };
 /* public */struct Some<char*> {
 };
-/* public */struct Option<struct Whitespace> {
-};
+// Option<struct R>
+// Option<struct T>
+// Option<Tuple<char, struct State>>
+// Option<struct State>
+// Option<char*>
 // Function<char*, char*>
 // BiFunction<struct State, char, struct State>
 // BiFunction<char*, char*, char*>
 // Function<char*, struct T>
+// Option<struct Whitespace>
+// Option<struct Definition>
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
@@ -415,9 +200,31 @@ struct public Definition(struct Definition this, char* type, char* name){
             var withoutNext = nextTuple.right;
 
             state = foldSingleQuotes(withoutNext, next)
+                    .or(() -> foldDoubleQuotes(withoutNext, next))
                     .orElseGet(() -> folder.apply(withoutNext, next));
         } */
 	return state.advance(state).segments;
+}
+/* private static */ Option<struct State> foldDoubleQuotes(struct DataAccess this, struct State withoutNext, struct char c){
+	/* if (c != '\"') {
+            return new None<>();
+        } */
+	/* var current = withoutNext.append(c); */
+	/* while (true) {
+            var maybeNext = current.popAndAppendToTuple();
+            if (!(maybeNext instanceof Some(var next))) {
+                break;
+            }
+
+            current = next.right;
+            if (next.left == '"') {
+                break;
+            }
+            if (next.left == '\\') {
+                current = current.popAndAppend().orElse(current);
+            }
+        } */
+	return Some</*  */>(current);
 }
 /* private static */ Option<struct State> foldSingleQuotes(struct DataAccess this, struct State state, struct char next){
 	/* if (next != '\'') {
@@ -455,18 +262,365 @@ struct public Definition(struct Definition this, char* type, char* name){
 /* private static */ Option<char*> compileClass(struct DataAccess this, char* stripped){
 	return compileStructure(stripped, "class ");
 }
-/* }
+/* private static */ Option<char*> compileStructure(struct DataAccess this, char* input, char* infix){
+	/* var classIndex = input.indexOf(infix); */
+	/* if (classIndex >= 0) {
+            var beforeClass = input.substring(0, classIndex).strip();
+            var afterClass = input.substring(classIndex + infix.length());
+            var contentStart = afterClass.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeContent = afterClass.substring(0, contentStart).strip();
 
-    private static */ Some<char*> assembleMethod(struct ")
-                .or this, char* definition, char* outputParams, char* content){
-	/* var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n */
+                var paramStart = beforeContent.indexOf("(");
+                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
+                if (paramStart >= 0) {
+                    String withoutParams = beforeContent.substring(0, paramStart).strip();
+                    return getString(withoutParams, beforeClass, withEnd);
+                }
+                else {
+                    return getString(beforeContent, beforeClass, withEnd);
+                }
+            }
+        } */
+	return None</*  */>();
 }
-/* }
+/* private static */ Option<char*> getString(struct DataAccess this, char* beforeContent, char* beforeClass, char* withEnd){
+	/* if (!withEnd.endsWith("}")) {
+            return new None<>();
+        } */
+	/* var content = withEnd.substring(0, withEnd.length() - "}".length()); */
+	/* var strippedBeforeContent = beforeContent.strip(); */
+	/* if (strippedBeforeContent.endsWith(">")) {
+            var withoutEnd = strippedBeforeContent.substring(0, strippedBeforeContent.length() - ">".length());
+            var typeParamStart = withoutEnd.indexOf("<");
+            if (typeParamStart >= 0) {
+                var name = withoutEnd.substring(0, typeParamStart).strip();
+                var substring = withoutEnd.substring(typeParamStart + "<".length());
+                var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
+                return assembleStructure(typeParameters, name, beforeClass, content);
+            }
+        } */
+	return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
+}
+/* private static */ Option<char*> assembleStructure(struct DataAccess this, List<char*> typeParams, char* name, char* beforeClass, char* content){
+	/* if (!typeParams.isEmpty()) {
+            expandables.put(name, typeArgs -> {
+                typeParameters = typeParams;
+                typeArguments = typeArgs;
 
-    private static */ Option<struct Whitespace> parseWhitespace(struct ")
-                .or this, char* input){
+                var newName = name + "<" + join(typeArgs, ", ") + ">";
+                return generateStructure(newName, beforeClass, content);
+            });
+
+            return new Some<>("");
+        } */
+	return generateStructure(name, beforeClass, content);
+}
+/* private static */ Option<char*> generateStructure(struct DataAccess this, char* name, char* beforeClass, char* content){
+	/* structName = name; */
+	/* var compiled = compileStatements(content, Main::compileClassSegment); */
+	/* var generated = generatePlaceholder(beforeClass) + "struct " + name + " {" + compiled + "\n};\n"; */
+	/* structs.add(generated); */
+	return Some</*  */>("");
+}
+/* private static */ char* compileClassSegment(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* if (stripped.isEmpty()) {
+            return "";
+        } */
+	return compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)).orElseGet(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */).or(compileStructure(stripped, "record ").or(compileStructure(stripped, "record "), /* () -> compileStructure(stripped */, /* "interface ") */), /* () -> compileClass */(stripped)), /* () -> compileMethod */(stripped)), /* () -> compileDefinitionStatement */(stripped)), /* () -> generatePlaceholder */(stripped));
+}
+/* private static */ Option<char*> compileDefinitionStatement(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            return new Some<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
+        } */
+	return None</*  */>();
+}
+/* private static */ Option<char*> compileMethod(struct DataAccess this, char* stripped){
+	/* var paramStart = stripped.indexOf("("); */
+	/* if (paramStart < 0) {
+            return new None<>();
+        } */
+	/* var inputDefinition = stripped.substring(0, paramStart); */
+	/* var defined = parseDefinitionOrPlaceholder(inputDefinition); */
+	/* if (defined instanceof Definition definition) {
+            functionName = definition.name;
+        } */
+	/* var outputDefinition = defined.generate(); */
+	/* var afterParams = stripped.substring(paramStart + "(".length()); */
+	/* var paramEnd = afterParams.indexOf(")"); */
+	/* if (paramEnd < 0) {
+            return new None<>();
+        } */
+	/* var params = afterParams.substring(0, paramEnd); */
+	/* var withoutParams = afterParams.substring(paramEnd + ")".length()); */
+	/* var withBraces = withoutParams.strip(); */
+	/* if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            return new Some<>("");
+        } */
+	/* var content = withBraces.substring(1, withBraces.length() - 1); */
+	/* var newParams = parseValues(params, Main::parseParameter)
+                .iter()
+                .filter(parameter -> !(parameter instanceof Whitespace))
+                .collect(new ListCollector<>()); */
+	/* var copy = Lists.<Defined>listEmpty()
+                .add(new Definition("struct " + structName, "this"))
+                .addAll(newParams); */
+	/* var outputParams = generateValueList(copy); */
+	return assembleMethod(outputDefinition, outputParams, content);
+}
+/* private static <T extends Node> */ char* generateValueList(struct DataAccess this, List<struct T> copy){
+	return copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")).orElse(copy.iter(copy).map(copy.iter(copy), /* Node::generate */).collect(copy.iter(copy).map(copy.iter(copy), /* Node::generate */), struct Joiner(", ")), "");
+}
+/* private static */ Some<char*> assembleMethod(struct DataAccess this, char* definition, char* outputParams, char* content){
+	/* var generated = definition + "(" + outputParams + "){" + compileStatements(content, Main::compileFunctionSegment) + "\n}\n"; */
+	/* methods.add(generated); */
+	return Some</*  */>("");
+}
+/* private static */ struct Defined parseParameter(struct DataAccess this, char* input){
+	return parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */).or(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */), /* () -> parseDefinition */(input).map(/* () -> parseDefinition */(input), /* value -> value */)).orElseGet(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */).or(parseWhitespace(input).<Defined>map(parseWhitespace(input), /* value -> value */), /* () -> parseDefinition */(input).map(/* () -> parseDefinition */(input), /* value -> value */)), /* () -> new Content */(input));
+}
+/* private static */ Option<struct Whitespace> parseWhitespace(struct DataAccess this, char* input){
 	/* if (input.isBlank()) {
-            return new Some<>(new Whitespace()); */
+            return new Some<>(new Whitespace());
+        } */
+	/* else {
+            return new None<>();
+        } */
+}
+/* private static */ char* compileFunctionSegment(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* if (stripped.isEmpty()) {
+            return "";
+        } */
+	/* if (stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+            if (withoutEnd.startsWith("return ")) {
+                var value = withoutEnd.substring("return ".length());
+                return "\n\treturn " + compileValue(value) + ";";
+            }
+        } */
+	return /* "\n\t" + generatePlaceholder */(stripped);
+}
+/* private static */ char* compileValue(struct DataAccess this, char* input){
+	return parseValue(input).generate(parseValue(input));
+}
+/* private static */ struct Value parseValue(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* if (stripped.isEmpty()) {
+            return new Whitespace();
+        } */
+	/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new StringValue(stripped.substring(1, stripped.length() - 1));
+        } */
+	/* if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
+            var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
+            if (divisions.size() >= 2) {
+                var joined = join(divisions.subList(0, divisions.size() - 1), "");
+                var caller = joined.substring(0, joined.length() - ")".length());
+                var arguments = divisions.last();
+
+                Value parsedCaller;
+                if (caller.startsWith("new ")) {
+                    parsedCaller = new Symbol(compileType(caller.substring("new ".length())));
+                }
+                else {
+                    parsedCaller = parseValue(caller);
+                }
+
+                var parsedArgs = parseValues(arguments, Main::parseValue)
+                        .iter()
+                        .filter(value -> !(value instanceof Whitespace))
+                        .collect(new ListCollector<>());
+
+                List<Value> newArgs;
+                if (parsedCaller instanceof DataAccess(var parent, _)) {
+                    newArgs = Lists.<Value>listEmpty()
+                            .add(parent)
+                            .addAll(parsedArgs);
+                }
+                else {
+                    newArgs = parsedArgs;
+                }
+
+                return new Invocation(parsedCaller, newArgs);
+            }
+        } */
+	/* if (isSymbol(stripped)) {
+            return new Symbol(stripped);
+        } */
+	/* if (isNumber(stripped)) {
+            return new Symbol(stripped);
+        } */
+	/* var arrowIndex = stripped.indexOf("->"); */
+	/* if (arrowIndex >= 0) {
+            var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+            if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+                var content = afterArrow.substring(1, afterArrow.length() - 1);
+
+                var name = functionName + "_local" + functionLocalCounter;
+                functionLocalCounter++;
+
+                assembleMethod("auto " + name, "auto " + beforeArrow, content);
+                return new Symbol(name);
+            }
+        } */
+	/* var separator = stripped.lastIndexOf("."); */
+	/* if (separator >= 0) {
+            var value = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length()).strip();
+            return new DataAccess(parseValue(value), property);
+        } */
+	return struct Content(stripped);
+}
+/* private static */ struct State foldInvokableStart(struct DataAccess this, struct State state, char c){
+	/* var appended = state.append(c); */
+	/* if (c == '(') {
+            var maybeAdvanced = appended.isLevel() ? appended.advance() : appended;
+            return maybeAdvanced.enter();
+        } */
+	/* if (c == ')') {
+            return appended.exit();
+        } */
+	return appended;
+}
+/* private static */ int isNumber(struct DataAccess this, char* input){
+	/* if (input.isEmpty()) {
+            return false;
+        } */
+	/* for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        } */
+	return true;
+}
+/* private static */ char* compileDefinitionOrPlaceholder(struct DataAccess this, char* input){
+	return parseDefinitionOrPlaceholder(input).generate(parseDefinitionOrPlaceholder(input));
+}
+/* private static */ struct Defined parseDefinitionOrPlaceholder(struct DataAccess this, char* input){
+	return parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */).orElseGet(parseDefinition(input).<Defined>map(parseDefinition(input), /* value -> value */), /* () -> new Content */(input));
+}
+/* private static */ Option<struct Definition> parseDefinition(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* var nameSeparator = stripped.lastIndexOf(" "); */
+	/* if (nameSeparator < 0) {
+            return new None<>();
+        } */
+	/* var beforeName = stripped.substring(0, nameSeparator); */
+	/* var name = stripped.substring(nameSeparator + " ".length()); */
+	/* if (!isSymbol(name)) {
+            return new None<>();
+        } */
+	/* var divisions = divideAll(beforeName, Main::foldByTypeSeparator); */
+	/* if (divisions.size() == 1) {
+            return new Some<>(new Definition(new None<>(), compileType(beforeName), name));
+        } */
+	/* var beforeType = join(divisions.subList(0, divisions.size() - 1), " "); */
+	/* var type = divisions.last(); */
+	return Some</*  */>(struct Definition(Some</*  */>(beforeType), compileType(type), name));
+}
+/* private static */ struct State foldByTypeSeparator(struct DataAccess this, struct State state, struct char c){
+	/* if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        } */
+	/* var appended = state.append(c); */
+	/* if (c == '<') {
+            return appended.enter();
+        } */
+	/* if (c == '>') {
+            return appended.exit();
+        } */
+	return appended;
+}
+/* private static */ char* compileType(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* var maybeTypeParamIndex = typeParameters.indexOf(stripped); */
+	/* if (maybeTypeParamIndex.isPresent()) {
+            var typeParamIndex = maybeTypeParamIndex.orElse(null);
+            return typeArguments.get(typeParamIndex);
+        } */
+	/* switch (stripped) {
+            case "int", "boolean" -> {
+                return "int";
+            }
+            case "Character" -> {
+                return "char";
+            }
+            case "void" -> {
+                return "void";
+            }
+            case "String" -> {
+                return "char*";
+            }
+        } */
+	/* if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var index = withoutEnd.indexOf("<");
+            if (index >= 0) {
+                var base = withoutEnd.substring(0, index).strip();
+                var substring = withoutEnd.substring(index + "<".length());
+                var parsed = parseValues(substring, Main::compileType);
+
+                if (!expansions.contains(new Tuple<>(base, parsed))) {
+                    expansions = expansions.add(new Tuple<>(base, parsed));
+                }
+
+                return base + "<" + generateValues(parsed) + ">";
+            }
+        } */
+	/* if (isSymbol(stripped)) {
+            return "struct " + stripped;
+        } */
+	return generatePlaceholder(stripped);
+}
+/* private static */ char* generateValues(struct DataAccess this, List<char*> values){
+	return generateAll(/* Main::mergeValues */, values);
+}
+/* private static <T> */ List<struct T> parseValues(struct DataAccess this, char* input, Function<char*, struct T> compiler){
+	return parseAll(input, /* Main::foldValueChar */, compiler);
+}
+/* private static */ char* mergeValues(struct DataAccess this, char* builder, char* element){
+	/* if (builder.isEmpty()) {
+            return builder + element;
+        } */
+	return /* builder + ", " + element */;
+}
+/* private static */ struct State foldValueChar(struct DataAccess this, struct State state, struct char c){
+	/* if (c == ',' && state.isLevel()) {
+            return state.advance();
+        } */
+	/* var appended = state.append(c); */
+	/* if (c == '<' || c == '(') {
+            return appended.enter();
+        } */
+	/* if (c == '>' || c == ')') {
+            return appended.exit();
+        } */
+	return appended;
+}
+/* private static */ int isSymbol(struct DataAccess this, char* input){
+	/* var stripped = input.strip(); */
+	/* if (stripped.isEmpty()) {
+            return false;
+        } */
+	/* for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        } */
+	return true;
+}
+/* private static */ char* generatePlaceholder(struct DataAccess this, char* input){
+	return "/* " + input + " */";
 }
 /* @Override
         public <R> */ Option<struct R> map(struct Some</*  */> this, Function</*  */, struct R> mapper){

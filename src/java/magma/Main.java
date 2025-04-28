@@ -15,7 +15,7 @@ import static magma.Lists.listEmpty;
 import static magma.Lists.listFromArray;
 
 public class Main {
-    public interface Option<T> {
+    public sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
         boolean isPresent();
@@ -461,10 +461,35 @@ public class Main {
             var withoutNext = nextTuple.right;
 
             state = foldSingleQuotes(withoutNext, next)
+                    .or(() -> foldDoubleQuotes(withoutNext, next))
                     .orElseGet(() -> folder.apply(withoutNext, next));
         }
 
         return state.advance().segments;
+    }
+
+    private static Option<State> foldDoubleQuotes(State withoutNext, char c) {
+        if (c != '\"') {
+            return new None<>();
+        }
+
+        var current = withoutNext.append(c);
+        while (true) {
+            var maybeNext = current.popAndAppendToTuple();
+            if (!(maybeNext instanceof Some(var next))) {
+                break;
+            }
+
+            current = next.right;
+            if (next.left == '"') {
+                break;
+            }
+            if (next.left == '\\') {
+                current = current.popAndAppend().orElse(current);
+            }
+        }
+
+        return new Some<>(current);
     }
 
     private static Option<State> foldSingleQuotes(State state, char next) {
