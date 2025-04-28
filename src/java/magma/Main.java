@@ -770,6 +770,10 @@ public class Main {
             }
         }
 
+        if (stripped.equals("else")) {
+            return "else ";
+        }
+
         return generatePlaceholder(stripped);
     }
 

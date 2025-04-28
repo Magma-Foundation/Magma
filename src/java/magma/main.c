@@ -98,7 +98,7 @@ auto popAndAppendToTuple_local0(auto tuple){
 	if (this.index < this.input.length(this.index < this.input)){
 		return Some</*  */>(this.input.charAt(this.input, this.index));
 	}
-	/* else */{
+	else {
 		return None</*  */>();
 	}
 }
@@ -161,7 +161,7 @@ auto compileRoot_local1(auto tuple){
 		struct var expandable = expandables.get(expandables, tuple.left);
 		return expandable.apply(expandable, tuple.right).orElse(expandable.apply(expandable, tuple.right), "");
 	}
-	/* else */{
+	else {
 		return "// " + tuple.left + "<" + join(tuple.right, ", ") + ">\n";
 	}
 }
@@ -281,7 +281,7 @@ auto compileRoot_local1(auto tuple){
 				char* withoutParams = withoutPermits.substring(withoutPermits, 0, paramStart).strip(withoutPermits.substring(withoutPermits, 0, paramStart));
 				return getString(withoutParams, beforeClass, withEnd);
 			}
-			/* else */{
+			else {
 				return getString(withoutPermits, beforeClass, withEnd);
 			}
 		}
@@ -385,7 +385,7 @@ auto compileRoot_local1(auto tuple){
 	if (input.isBlank(input)){
 		return Some</*  */>(struct Whitespace());
 	}
-	/* else */{
+	else {
 		return None</*  */>();
 	}
 }
@@ -436,6 +436,9 @@ auto compileRoot_local1(auto tuple){
 			return "if (" + compileValue(condition) + ")";
 		}
 	}
+	if (stripped.equals(stripped, "else")){
+		return "else ";
+	}
 	return generatePlaceholder(stripped);
 }
 /* private static */ char* compileValue(struct Main this, char* input){
@@ -460,7 +463,7 @@ auto compileRoot_local1(auto tuple){
 			if (caller.startsWith(caller, "new ")){
 				/* parsedCaller  */ = struct Symbol(compileType(caller.substring(caller, "new ".length("new "))));
 			}
-			/* else */{
+			else {
 				/* parsedCaller  */ = parseValue(caller);
 			}
 			struct var parsedArgs = parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)).filter(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)), /* value -> ! */(/* value instanceof Whitespace */)).collect(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)).filter(parseValues(arguments, /* Main::parseValue */).iter(parseValues(arguments, /* Main::parseValue */)), /* value -> ! */(/* value instanceof Whitespace */)), ListCollector</*  */>());
@@ -468,7 +471,7 @@ auto compileRoot_local1(auto tuple){
 			if (/* parsedCaller instanceof DataAccess */(/* var parent */, /* _ */)){
 				/* newArgs  */ = Lists.<Value>listEmpty(Lists).addLast(Lists.<Value>listEmpty(Lists), parent).addAll(Lists.<Value>listEmpty(Lists).addLast(Lists.<Value>listEmpty(Lists), parent), parsedArgs);
 			}
-			/* else */{
+			else {
 				/* newArgs  */ = parsedArgs;
 			}
 			return struct Invocation(parsedCaller, newArgs);
