@@ -226,7 +226,7 @@ List<char*> divideAll(struct Main this, char* input, struct State (*)(struct Sta
 	auto divideAll_local9 = divideAll_local5.or(divideAll_local5, divideAll_local4);
 		auto maybeNextTuple = state.pop(state);
 		if (maybeNextTuple.isEmpty(maybeNextTuple)){
-			/* break; */
+			break;
 		}
 		auto nextTuple = maybeNextTuple.orElse(maybeNextTuple, null);
 		auto next = nextTuple.left;
@@ -243,11 +243,11 @@ Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext
 	/* while (true) */{
 		auto maybeNext = current.popAndAppendToTuple(current);
 		if (/* ! */(/* maybeNext instanceof Some */(/* var next */))){
-			/* break; */
+			break;
 		}
 		/* current  */ = next.right;
 		if (next.left == '"'){
-			/* break; */
+			break;
 		}
 		if (next.left == '\\'){
 	auto foldDoubleQuotes_local3 = current.popAndAppend(current);
@@ -535,18 +535,22 @@ char* compileFunctionSegment(struct Main this, char* input, int depth){
 	return indent + generatePlaceholder(stripped);
 }
 Option<char*> compileStatementValue(struct Main this, char* input){
-	if (input.startsWith(input, "return ")){
-	auto compileStatementValue_local0 = "return ";
-		auto value = input.substring(input, compileStatementValue_local0.length(compileStatementValue_local0));
+	auto stripped = input.strip(input);
+	if (stripped.equals(stripped, "break")){
+		return Some</*  */>("break");
+	}
+	if (stripped.startsWith(stripped, "return ")){
+	auto compileStatementValue_local2 = "return ";
+		auto value = stripped.substring(stripped, compileStatementValue_local2.length(compileStatementValue_local2));
 		return Some</*  */>("return " + compileValue(value));
 	}
-	auto valueSeparator = input.indexOf(input, "=");
+	auto valueSeparator = stripped.indexOf(stripped, "=");
 	if (/* valueSeparator >= 0 */){
-	auto compileStatementValue_local5 = valueSeparator + "=";
-	auto compileStatementValue_local7 = parseDefinitionOrPlaceholder(definition);
-		auto definition = input.substring(input, 0, valueSeparator);
-		auto value = input.substring(input, compileStatementValue_local5.length(compileStatementValue_local5));
-		return Some</*  */>(compileStatementValue_local7.generate() + " = " + compileValue(compileStatementValue_local7, value));
+	auto compileStatementValue_local7 = valueSeparator + "=";
+	auto compileStatementValue_local9 = parseDefinitionOrPlaceholder(definition);
+		auto definition = stripped.substring(stripped, 0, valueSeparator);
+		auto value = stripped.substring(stripped, compileStatementValue_local7.length(compileStatementValue_local7));
+		return Some</*  */>(compileStatementValue_local9.generate() + " = " + compileValue(compileStatementValue_local9, value));
 	}
 	return None</*  */>();
 }

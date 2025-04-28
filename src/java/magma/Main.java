@@ -789,15 +789,20 @@ public class Main {
     }
 
     private static Option<String> compileStatementValue(String input) {
-        if (input.startsWith("return ")) {
-            var value = input.substring("return ".length());
+        var stripped = input.strip();
+        if (stripped.equals("break")) {
+            return new Some<>("break");
+        }
+
+        if (stripped.startsWith("return ")) {
+            var value = stripped.substring("return ".length());
             return new Some<>("return " + compileValue(value));
         }
 
-        var valueSeparator = input.indexOf("=");
+        var valueSeparator = stripped.indexOf("=");
         if (valueSeparator >= 0) {
-            var definition = input.substring(0, valueSeparator);
-            var value = input.substring(valueSeparator + "=".length());
+            var definition = stripped.substring(0, valueSeparator);
+            var value = stripped.substring(valueSeparator + "=".length());
             return new Some<>(parseDefinitionOrPlaceholder(definition).generate() + " = " + compileValue(value));
         }
 
