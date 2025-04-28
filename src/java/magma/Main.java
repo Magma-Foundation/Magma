@@ -166,22 +166,29 @@ public class Main {
             return "";
         }
 
-        var classIndex = stripped.indexOf("class ");
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped) {
+        return compileStructure(stripped, "class ");
+    }
+
+    private static Optional<String> compileStructure(String input, String infix) {
+        var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            var beforeClass = stripped.substring(0, classIndex);
-            var afterClass = stripped.substring(classIndex + "class ".length());
+            var beforeClass = input.substring(0, classIndex);
+            var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterClass.substring(0, contentStart).strip();
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n";
+                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n");
                 }
             }
         }
-
-        return generatePlaceholder(stripped);
+        return Optional.empty();
     }
 
     private static String compileClassSegment(String input) {
@@ -190,6 +197,13 @@ public class Main {
             return "";
         }
 
+        return compileStructure(stripped, "record ")
+                .or(() -> compileClass(stripped))
+                .or(() -> compileMethod(stripped))
+                .orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileMethod(String stripped) {
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -204,12 +218,11 @@ public class Main {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
-                    return "";
+                    return Optional.of("");
                 }
             }
         }
-
-        return generatePlaceholder(stripped);
+        return Optional.empty();
     }
 
     private static String compileDefinition(String input) {

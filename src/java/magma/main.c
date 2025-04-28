@@ -1,56 +1,50 @@
-/* public  */struct Main {/* public static final List<String> methods = new ArrayList<>(); */
+/* public  */struct Main {/* private  */struct Tuple<A, B>(A left, B right) {
 };
-/* private record Tuple<A, B> */(/* A left, B right */){/* 
-     */
-}
-/* private static class State {
-        private final String input;
-        private final List<String> segments;
-        private int index;
-        private StringBuilder buffer;
-        private int depth;
-
-        */ /* private */ State(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
+/* private static  */struct State {/* private final String input; *//* private final List<String> segments; *//* private int index; *//* private StringBuilder buffer; *//* private int depth; */
+};
+/* public static final List<String> methods = new ArrayList<>(); */
+};
+/* private State */(/* String input, List<String> segments, StringBuilder buffer, int depth, int index */){/* 
             this.input = input;
             this.index = index;
             this.buffer = buffer;
             this.depth = depth;
             this.segments = segments;
-        }
-
-        public State(String input) {
+         */
+}
+/* public State */(/* String input */){/* 
             this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
-        }
-
-        private Optional<Tuple<Character, State>> popAndAppendToTuple() {
+         */
+}
+/* private Optional<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){/* 
             return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
-        }
-
-        private boolean isLevel() {
+         */
+}
+/* private */ /* boolean */ isLevel(/*  */){/* 
             return this.depth == 0;
-        }
-
-        private State enter() {
+         */
+}
+/* private */ /* State */ enter(/*  */){/* 
             this.depth = this.depth + 1;
             return this;
-        }
-
-        private State exit() {
+         */
+}
+/* private */ /* State */ exit(/*  */){/* 
             this.depth = this.depth - 1;
             return this;
-        }
-
-        private State advance() {
+         */
+}
+/* private */ /* State */ advance(/*  */){/* 
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        }
-
-        private boolean isShallow() {
+         */
+}
+/* private */ /* boolean */ isShallow(/*  */){/* 
             return this.depth == 1;
-        }
-
-        private Optional<Tuple<Character, State>> pop() {
+         */
+}
+/* private Optional<Tuple<Character, */ /* State>> */ pop(/*  */){/* 
             if (this.index >= this.input.length()) {
                 return Optional.empty();
             }
@@ -58,17 +52,16 @@
             var escaped = this.input.charAt(this.index);
             this.index = this.index + 1;
             return Optional.of(new Tuple<>(escaped, this));
-        }
-
-        private State append(char c) {
+         */
+}
+/* private */ /* State */ append(/* char c */){/* 
             this.buffer.append(c);
             return this;
-        }
-
-        public Optional<State> popAndAppend() {
+         */
+}
+/* public */ /* Optional<State> */ popAndAppend(/*  */){/* 
             return this.popAndAppendToTuple().map(Tuple::right);
-        }
-     */
+         */
 }
 /* public static */ void main(/*  */){/* 
         try {
@@ -155,22 +148,29 @@
             return "";
         }
 
-        var classIndex = stripped.indexOf("class ");
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+     */
+}
+/* private static */ /* Optional<String> */ compileClass(/* String stripped */){/* 
+        return compileStructure(stripped, "class ");
+     */
+}
+/* private static */ /* Optional<String> */ compileStructure(/* String input, String infix */){/* 
+        var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
-            var beforeClass = stripped.substring(0, classIndex);
-            var afterClass = stripped.substring(classIndex + "class ".length());
+            var beforeClass = input.substring(0, classIndex);
+            var afterClass = input.substring(classIndex + infix.length());
             var contentStart = afterClass.indexOf("{");
             if (contentStart >= 0) {
                 var name = afterClass.substring(0, contentStart).strip();
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (withEnd.endsWith("}")) {
                     var content = withEnd.substring(0, withEnd.length() - "}".length());
-                    return generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n";
+                    return Optional.of(generatePlaceholder(beforeClass) + "struct " + name + " {" + compileAll(content, Main::compileClassSegment) + "\n};\n");
                 }
             }
         }
-
-        return generatePlaceholder(stripped);
+        return Optional.empty();
      */
 }
 /* private static */ /* String */ compileClassSegment(/* String input */){/* 
@@ -179,6 +179,13 @@
             return "";
         }
 
+        return compileStructure(stripped, "record ")
+                .or(() -> compileClass(stripped))
+                .or(() -> compileMethod(stripped))
+                .orElseGet(() -> generatePlaceholder(stripped));
+     */
+}
+/* private static */ /* Optional<String> */ compileMethod(/* String stripped */){/* 
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var definition = stripped.substring(0, paramStart);
@@ -193,12 +200,11 @@
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
-                    return "";
+                    return Optional.of("");
                 }
             }
         }
-
-        return generatePlaceholder(stripped);
+        return Optional.empty();
      */
 }
 /* private static */ /* String */ compileDefinition(/* String input */){/* 
