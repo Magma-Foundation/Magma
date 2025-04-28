@@ -187,7 +187,12 @@ public class Main {
         }
 
         private Option<Tuple<Character, State>> popAndAppendToTuple() {
-            return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
+            return this.pop().map(tuple -> {
+                var poppedChar = tuple.left;
+                var poppedState = tuple.right;
+                var appended = poppedState.append(poppedChar);
+                return new Tuple<>(poppedChar, appended);
+            });
         }
 
         private boolean isLevel() {
@@ -369,10 +374,10 @@ public class Main {
         if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
         }
-        if (c == '{') {
+        if (c == '{' || c == '(') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '}' || c == ')') {
             return appended.exit();
         }
         return appended;
@@ -585,7 +590,7 @@ public class Main {
         }
 
         var separator = stripped.lastIndexOf(".");
-        if(separator >= 0) {
+        if (separator >= 0) {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
             return compileValue(value) + "." + property;
