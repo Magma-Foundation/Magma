@@ -856,10 +856,17 @@ public class Main {
                 }
 
                 var name = generateName();
-                var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
-                statements.last().addLast(statement);
 
-                var symbol = new Symbol(name);
+                Value symbol;
+                if (parent instanceof Symbol || parent instanceof DataAccess) {
+                    symbol = parent;
+                }
+                else {
+                    var statement = "\n\tauto " + name + " = " + parent.generate() + ";";
+                    statements.last().addLast(statement);
+                    symbol = new Symbol(name);
+                }
+
                 var newArgs = Lists.<Value>listEmpty()
                         .addLast(symbol)
                         .addAll(parsedArgs);
