@@ -221,7 +221,7 @@ auto divideAll_local7(){
 }
 List<char*> divideAll(struct Main this, char* input, struct State (*)(struct State, char) folder){
 	struct State state = State.fromInput(State, input);
-	while (true){
+	while (1){
 	auto divideAll_local5 = foldSingleQuotes(withoutNext, next);
 	auto divideAll_local9 = divideAll_local5.or(divideAll_local5, divideAll_local4);
 		auto maybeNextTuple = state.pop(state);
@@ -240,7 +240,7 @@ Option<struct State> foldDoubleQuotes(struct Main this, struct State withoutNext
 		return None</*  */>();
 	}
 	auto current = withoutNext.append(withoutNext, c);
-	while (true){
+	while (1){
 		auto maybeNext = current.popAndAppendToTuple(current);
 		if (/* ! */(/* maybeNext instanceof Some */(/* var next */))){
 			break;
@@ -584,11 +584,11 @@ char* compileValue(struct Main this, char* input){
 	auto compileValue_local0 = parseValue(input);
 	return compileValue_local0.generate(compileValue_local0);
 }
-auto parseValue_local15(auto value){
-	auto parseValue_local16 = /* parseValue_local14 */;
-	return parseValue_local16.isEmpty(parseValue_local16, /* parseValue_local14 */);
+auto parseValue_local17(auto value){
+	auto parseValue_local18 = /* parseValue_local16 */;
+	return parseValue_local18.isEmpty(parseValue_local18, /* parseValue_local16 */);
 }
-auto parseValue_local31(auto value){
+auto parseValue_local33(auto value){
 	return /* /* ! */ */(/* /* value instanceof Whitespace */ */);
 }
 struct Value parseValue(struct Main this, char* input){
@@ -596,48 +596,54 @@ struct Value parseValue(struct Main this, char* input){
 	if (stripped.isEmpty(stripped)){
 		return struct Whitespace();
 	}
+	if (stripped.equals(stripped, "false")){
+		return BooleanValue.False;
+	}
+	if (stripped.equals(stripped, "true")){
+		return BooleanValue.True;
+	}
 	auto arrowIndex = stripped.indexOf(stripped, "->");
 	if (/* arrowIndex >= 0 */){
-	auto parseValue_local4 = stripped.substring(stripped, 0, arrowIndex);
-	auto parseValue_local5 = arrowIndex + "->";
-	auto parseValue_local7 = stripped.substring(stripped, parseValue_local5.length(parseValue_local5));
-		auto beforeArrow = parseValue_local4.strip(parseValue_local4);
-		auto afterArrow = parseValue_local7.strip(parseValue_local7);
+	auto parseValue_local6 = stripped.substring(stripped, 0, arrowIndex);
+	auto parseValue_local7 = arrowIndex + "->";
+	auto parseValue_local9 = stripped.substring(stripped, parseValue_local7.length(parseValue_local7));
+		auto beforeArrow = parseValue_local6.strip(parseValue_local6);
+		auto afterArrow = parseValue_local9.strip(parseValue_local9);
 		if (isSymbol(beforeArrow)){
 			return assembleLambda(afterArrow, Lists.listFrom(Lists, beforeArrow));
 		}
 		if (beforeArrow.startsWith("(") && beforeArrow.endsWith(beforeArrow.startsWith("(") && beforeArrow, ")")){
-	auto parseValue_local11 = beforeArrow.substring(beforeArrow, 1, beforeArrow.length() - 1);
-	auto parseValue_local13 = Iterators.fromArray(Iterators, parseValue_local11.split(parseValue_local11, Pattern.quote(Pattern, ",")));
-	auto parseValue_local14 = /* !value */;
-	auto parseValue_local17 = parseValue_local13.map(parseValue_local13, /* String::strip */);
-	auto parseValue_local18 = parseValue_local17.filter(parseValue_local17, parseValue_local15);
-			auto args = parseValue_local18.collect(parseValue_local18, ListCollector</*  */>());
+	auto parseValue_local13 = beforeArrow.substring(beforeArrow, 1, beforeArrow.length() - 1);
+	auto parseValue_local15 = Iterators.fromArray(Iterators, parseValue_local13.split(parseValue_local13, Pattern.quote(Pattern, ",")));
+	auto parseValue_local16 = /* !value */;
+	auto parseValue_local19 = parseValue_local15.map(parseValue_local15, /* String::strip */);
+	auto parseValue_local20 = parseValue_local19.filter(parseValue_local19, parseValue_local17);
+			auto args = parseValue_local20.collect(parseValue_local20, ListCollector</*  */>());
 			return assembleLambda(afterArrow, args);
 		}
 	}
 	if (stripped.endsWith(stripped, ")")){
-	auto parseValue_local22 = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")"));
-		auto withoutEnd = parseValue_local22.strip(parseValue_local22);
+	auto parseValue_local24 = stripped.substring(stripped, 0, stripped.length() - ")".length(stripped.length() - ")"));
+		auto withoutEnd = parseValue_local24.strip(parseValue_local24);
 		auto divisions = divideAll(withoutEnd, /* Main::foldInvokableStart */);
 		if (divisions.size() >= 2){
-	auto parseValue_local30 = parseValues(arguments, /* Main::parseValue */);
-	auto parseValue_local32 = parseValue_local30.iter(parseValue_local30);
-	auto parseValue_local33 = parseValue_local32.filter(parseValue_local32, parseValue_local31);
-	auto parseValue_local35 = Lists.<Value>listEmpty(Lists);
-	auto parseValue_local36 = parseValue_local35.addLast(parseValue_local35, symbol);
+	auto parseValue_local32 = parseValues(arguments, /* Main::parseValue */);
+	auto parseValue_local34 = parseValue_local32.iter(parseValue_local32);
+	auto parseValue_local35 = parseValue_local34.filter(parseValue_local34, parseValue_local33);
+	auto parseValue_local37 = Lists.<Value>listEmpty(Lists);
+	auto parseValue_local38 = parseValue_local37.addLast(parseValue_local37, symbol);
 			auto joined = join(divisions.subList(divisions, 0, divisions.size() - 1), "");
 			auto caller = joined.substring(joined, 0, joined.length() - ")".length(joined.length() - ")"));
 			auto arguments = divisions.last(divisions);
 			/* Value parsedCaller; */
 			if (caller.startsWith(caller, "new ")){
-	auto parseValue_local27 = "new ";
-				/* parsedCaller  */ = struct Symbol(compileType(caller.substring(caller, parseValue_local27.length(parseValue_local27))));
+	auto parseValue_local29 = "new ";
+				/* parsedCaller  */ = struct Symbol(compileType(caller.substring(caller, parseValue_local29.length(parseValue_local29))));
 			}
 			else {
 				/* parsedCaller  */ = parseValue(caller);
 			}
-			auto parsedArgs = parseValue_local33.collect(parseValue_local33, ListCollector</*  */>());
+			auto parsedArgs = parseValue_local35.collect(parseValue_local35, ListCollector</*  */>());
 			if (/* ! */(/* parsedCaller instanceof DataAccess */(/* var parent */, /* var property */))){
 				return struct Invocation(parsedCaller, parsedArgs);
 			}
@@ -651,7 +657,7 @@ struct Value parseValue(struct Main this, char* input){
 				/* statements.last().addLast(statement); */
 				/* symbol  */ = struct Symbol(name);
 			}
-			auto newArgs = parseValue_local36.addAll(parseValue_local36, parsedArgs);
+			auto newArgs = parseValue_local38.addAll(parseValue_local38, parsedArgs);
 			return struct Invocation(struct DataAccess(symbol, property), newArgs);
 		}
 	}
@@ -663,9 +669,9 @@ struct Value parseValue(struct Main this, char* input){
 	}
 	auto separator = stripped.lastIndexOf(stripped, /* " */.");
 	if (/* separator >= 0 */){
-	auto parseValue_local42 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
+	auto parseValue_local44 = stripped.substring(stripped, separator + /* " */.".length(separator + /* " */."));
 		auto value = stripped.substring(stripped, 0, separator);
-		auto property = parseValue_local42.strip(parseValue_local42);
+		auto property = parseValue_local44.strip(parseValue_local44);
 		return struct DataAccess(parseValue(value), property);
 	}
 	if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith(stripped.length() >= 2 && stripped.startsWith("\"") && stripped, "\"")){
@@ -719,16 +725,16 @@ struct State foldInvokableStart(struct Main this, struct State state, char c){
 }
 int isNumber(struct Main this, char* input){
 	if (input.isEmpty(input)){
-		return false;
+		return 0;
 	}
 	/* for (var i = 0; i < input.length(); i++) */{
 		auto c = input.charAt(input, i);
 		if (Character.isDigit(Character, c)){
 			/* continue; */
 		}
-		return false;
+		return 0;
 	}
-	return true;
+	return 1;
 }
 char* compileDefinitionOrPlaceholder(struct Main this, char* input){
 	auto compileDefinitionOrPlaceholder_local0 = parseDefinitionOrPlaceholder(input);
@@ -872,16 +878,16 @@ struct State foldValueChar(struct Main this, struct State state, struct char c){
 int isSymbol(struct Main this, char* input){
 	auto stripped = input.strip(input);
 	if (stripped.isEmpty(stripped)){
-		return false;
+		return 0;
 	}
 	/* for (var i = 0; i < stripped.length(); i++) */{
 		auto c = stripped.charAt(stripped, i);
 		if (Character.isLetter(Character, c)){
 			/* continue; */
 		}
-		return false;
+		return 0;
 	}
-	return true;
+	return 1;
 }
 char* generatePlaceholder(struct Main this, char* input){
 	return "/* " + input + " */";
@@ -890,13 +896,13 @@ Option<struct R> map(struct None</*  */> this, struct R (*)(/*  */) mapper){
 	return None</*  */>();
 }
 int isPresent(struct None</*  */> this){
-	return false;
+	return 0;
 }
 /*  */ orElse(struct None</*  */> this, /*  */ other){
 	return other;
 }
 int isEmpty(struct None</*  */> this){
-	return true;
+	return 1;
 }
 /*  */ orElseGet(struct None</*  */> this, Supplier</*  */> supplier){
 	return supplier.get(supplier);
@@ -911,13 +917,13 @@ Option<struct R> map(struct Some</*  */> this, struct R (*)(/*  */) mapper){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
 int isPresent(struct Some</*  */> this){
-	return true;
+	return 1;
 }
 /*  */ orElse(struct Some</*  */> this, /*  */ other){
 	return this.value;
 }
 int isEmpty(struct Some</*  */> this){
-	return false;
+	return 0;
 }
 /*  */ orElseGet(struct Some</*  */> this, Supplier</*  */> supplier){
 	return this.value;
@@ -944,7 +950,7 @@ auto fold_local2(auto next){
 }
 struct R fold(struct Iterator<struct T> this, struct R initial, struct R (*)(struct R, struct T) folder){
 	auto current = initial;
-	while (true){
+	while (1){
 	auto fold_local4 = this.head.next(this.head);
 		struct R finalCurrent = current;
 		auto optional = fold_local4.map(fold_local4, fold_local2);

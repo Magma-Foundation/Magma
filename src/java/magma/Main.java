@@ -88,6 +88,22 @@ public class Main {
         }
     }
 
+    private enum BooleanValue implements Value {
+        False(0),
+        True(1);
+
+        private final int value;
+
+        BooleanValue(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return String.valueOf(this.value);
+        }
+    }
+
     public record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -398,13 +414,10 @@ public class Main {
             return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
         }
     }
-
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-
     public static List<List<String>> statements = Lists.listEmpty();
-
     private static List<String> structNames = Lists.listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
@@ -840,7 +853,12 @@ public class Main {
         if (stripped.isEmpty()) {
             return new Whitespace();
         }
-
+        if (stripped.equals("false")) {
+            return BooleanValue.False;
+        }
+        if (stripped.equals("true")) {
+            return BooleanValue.True;
+        }
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
