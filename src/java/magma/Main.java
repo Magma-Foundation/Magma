@@ -917,6 +917,13 @@ public class Main {
                     return returns + " (*)(" + arg0 + ")";
                 }
 
+                if (base.equals("BiFunction")) {
+                    var arg0 = parsed.get(0);
+                    var arg1 = parsed.get(1);
+                    var returns = parsed.get(2);
+                    return returns + " (*)(" + arg0 + ", " + arg1 + ")";
+                }
+
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
                     expansions = expansions.addLast(new Tuple<>(base, parsed));
                 }

@@ -50,8 +50,6 @@
 };
 /* public sealed */struct Option<struct Definition> {
 };
-// BiFunction<struct State, char, struct State>
-// BiFunction<char*, char*, char*>
 /* private static */ struct State fromInput(struct State this, char* input){
 	return struct State(input, listEmpty(), "", 0, 0);
 }
@@ -171,19 +169,19 @@ struct public Definition(struct Definition this, char* type, char* name){
 /* private static */ char* compileStatements(struct Main this, char* input, char* (*)(char*) compiler){
 	return compileAll(input, /* Main::foldStatementChar */, compiler, /* Main::mergeStatements */);
 }
-/* private static */ char* compileAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, char* (*)(char*) compiler, BiFunction<char*, char*, char*> merger){
+/* private static */ char* compileAll(struct Main this, char* input, struct State (*)(struct State, char) folder, char* (*)(char*) compiler, char* (*)(char*, char*) merger){
 	return generateAll(merger, parseAll(input, folder, compiler));
 }
-/* private static */ char* generateAll(struct Main this, BiFunction<char*, char*, char*> merger, List<char*> parsed){
+/* private static */ char* generateAll(struct Main this, char* (*)(char*, char*) merger, List<char*> parsed){
 	return parsed.iter(parsed).fold(parsed.iter(parsed), "", merger);
 }
-/* private static <T> */ List<struct T> parseAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder, struct T (*)(char*) compiler){
+/* private static <T> */ List<struct T> parseAll(struct Main this, char* input, struct State (*)(struct State, char) folder, struct T (*)(char*) compiler){
 	return divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler).collect(divideAll(input, folder).iter(divideAll(input, folder)).map(divideAll(input, folder).iter(divideAll(input, folder)), compiler), ListCollector</*  */>());
 }
 /* private static */ char* mergeStatements(struct Main this, char* buffer, char* element){
 	return /* buffer + element */;
 }
-/* private static */ List<char*> divideAll(struct Main this, char* input, BiFunction<struct State, char, struct State> folder){
+/* private static */ List<char*> divideAll(struct Main this, char* input, struct State (*)(struct State, char) folder){
 	/* State state = State.fromInput(input); */
 	/* while (true) {
             var maybeNextTuple = state.pop();
@@ -574,6 +572,13 @@ struct public Definition(struct Definition this, char* type, char* name){
                     var arg0 = parsed.get(0);
                     var returns = parsed.get(1);
                     return returns + " (*)(" + arg0 + ")";
+                }
+
+                if (base.equals("BiFunction")) {
+                    var arg0 = parsed.get(0);
+                    var arg1 = parsed.get(1);
+                    var returns = parsed.get(2);
+                    return returns + " (*)(" + arg0 + ", " + arg1 + ")";
                 }
 
                 if (!expansions.contains(new Tuple<>(base, parsed))) {
