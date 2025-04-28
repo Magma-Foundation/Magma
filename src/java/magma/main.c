@@ -54,6 +54,14 @@ struct Option<char*> {
 };
 struct Iterator<struct T> {
 };
+struct Option<struct IOException> {
+};
+struct Result<char*, struct IOException> {
+};
+struct Ok</*  */> {
+};
+struct Err</*  */> {
+};
 struct List<char*> {
 };
 struct List<struct T> {
@@ -166,14 +174,33 @@ char* generate(struct Not this){
 	return "!" + this.value.generate("!" + this.value);
 }
 void main(struct Main this){
+	/* run().ifPresent(Throwable::printStackTrace); */
+}
+Option<struct IOException> run(struct Main this){
+	/* return switch (readString(SOURCE)) */{
+		/* case Err<String, IOException>(var error) -> new Some<>(error); */
+		/* case Ok<String, IOException>(var input) -> */{
+			auto output = compileRoot(input);
+			/* yield writeTarget(TARGET, output); */
+		}
+	}
+	/* ; */
+}
+Option<struct IOException> writeTarget(struct Main this, struct Path target, char* csq){
 	/* try */{
-		auto source = Paths.get(Paths, /* " */.", "src", "java", "magma", /* "Main */.java");
-		auto target = source.resolveSibling(source, /* "main */.c");
-		auto input = Files.readString(Files, source);
-		/* Files.writeString(target, compileRoot(input)); */
+		/* Files.writeString(target, csq); */
+		return None</*  */>();
 	}
 	/* catch (IOException e) */{
-		/* e.printStackTrace(); */
+		return Some</*  */>(e);
+	}
+}
+Result<char*, struct IOException> readString(struct Main this, struct Path source){
+	/* try */{
+		return Ok</*  */>(Files.readString(Files, source));
+	}
+	/* catch (IOException e) */{
+		return Err</*  */>(e);
 	}
 }
 auto compileRoot_local1(auto tuple){
@@ -485,12 +512,12 @@ Option<char*> assembleMethod(struct Main this, char* definition, char* outputPar
 	return Some</*  */>("");
 }
 List<char*> parseStatementsWithLocals(struct Main this, char* content, char* (*)(char*) compiler){
-	auto parseStatementsWithLocals_local4 = Lists.<String>listEmpty(Lists);
-	auto parseStatementsWithLocals_local5 = parseStatementsWithLocals_local4.addAll(parseStatementsWithLocals_local4, elements);
-	statements = statements.addLast(statements, Lists.listEmpty(Lists));
+	auto parseStatementsWithLocals_local3 = Lists.<String>listEmpty(Lists);
+	auto parseStatementsWithLocals_local4 = parseStatementsWithLocals_local3.addAll(parseStatementsWithLocals_local3, elements);
+	statements = statements.addLast(statements, listEmpty());
 	auto parsed1 = parseStatements(content, compiler);
 	auto elements = statements.removeAndGetLast(statements);
-	return parseStatementsWithLocals_local5.addAll(parseStatementsWithLocals_local5, parsed1);
+	return parseStatementsWithLocals_local4.addAll(parseStatementsWithLocals_local4, parsed1);
 }
 auto parseParameter_local0(auto value){
 	return value;
@@ -953,6 +980,8 @@ Option<struct R> flatMap(struct None</*  */> this, Option<struct R> (*)(/*  */) 
 Option</*  */> or(struct None</*  */> this, Supplier<Option</*  */>> supplier){
 	return supplier.get(supplier);
 }
+void ifPresent(struct None</*  */> this, Consumer</*  */> consumer){
+}
 Option<struct R> map(struct Some</*  */> this, struct R (*)(/*  */) mapper){
 	return Some</*  */>(mapper.apply(mapper, this.value));
 }
@@ -973,6 +1002,9 @@ Option<struct R> flatMap(struct Some</*  */> this, Option<struct R> (*)(/*  */) 
 }
 Option</*  */> or(struct Some</*  */> this, Supplier<Option</*  */>> supplier){
 	return this;
+}
+void ifPresent(struct Some</*  */> this, Consumer</*  */> consumer){
+	/* consumer.accept(this.value); */
 }
 auto map_local2(){
 	return map_local1.map(map_local1, map_local1, mapper);

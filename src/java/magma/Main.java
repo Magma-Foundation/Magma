@@ -2,10 +2,12 @@ package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -29,6 +31,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         Option<T> or(Supplier<Option<T>> supplier);
+
+        void ifPresent(Consumer<T> consumer);
     }
 
     public interface List<T> {
@@ -79,6 +83,9 @@ public class Main {
     }
 
     private interface Assignable extends Node {
+    }
+
+    private sealed interface Result<T, X> permits Ok, Err {
     }
 
     private enum Operator {
@@ -150,6 +157,11 @@ public class Main {
         public Option<T> or(Supplier<Option<T>> supplier) {
             return this;
         }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
     }
 
     public record None<T>() implements Option<T> {
@@ -186,6 +198,10 @@ public class Main {
         @Override
         public Option<T> or(Supplier<Option<T>> supplier) {
             return supplier.get();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
         }
     }
 
@@ -440,11 +456,19 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+    }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    public static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
-    public static List<List<String>> statements = Lists.listEmpty();
-    private static List<String> structNames = Lists.listEmpty();
+    public static List<List<String>> statements = listEmpty();
+    private static List<String> structNames = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Tuple<String, List<String>>> expansions = listEmpty();
@@ -452,14 +476,33 @@ public class Main {
     private static int functionLocalCounter = 0;
 
     public static void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var target = source.resolveSibling("main.c");
+        run().ifPresent(Throwable::printStackTrace);
+    }
 
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
+    private static Option<IOException> run() {
+        return switch (readString(SOURCE)) {
+            case Err<String, IOException>(var error) -> new Some<>(error);
+            case Ok<String, IOException>(var input) -> {
+                var output = compileRoot(input);
+                yield writeTarget(TARGET, output);
+            }
+        };
+    }
+
+    private static Option<IOException> writeTarget(Path target, String csq) {
+        try {
+            Files.writeString(target, csq);
+            return new None<>();
         } catch (IOException e) {
-            e.printStackTrace();
+            return new Some<>(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
@@ -774,7 +817,7 @@ public class Main {
     }
 
     private static List<String> parseStatementsWithLocals(String content, Function<String, String> compiler) {
-        statements = statements.addLast(Lists.listEmpty());
+        statements = statements.addLast(listEmpty());
         var parsed1 = parseStatements(content, compiler);
 
         var elements = statements.removeAndGetLast();
@@ -910,7 +953,7 @@ public class Main {
             }
         }
 
-        if(compileInvokable(stripped) instanceof Some(var invokable)) {
+        if (compileInvokable(stripped) instanceof Some(var invokable)) {
             return invokable;
         }
 
