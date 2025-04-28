@@ -890,6 +890,10 @@ public class Main {
             return new Some<>(assignable.generate() + " = " + compileValue(value));
         }
 
+        if (compileInvokable(input) instanceof Some(var invokable)) {
+            return new Some<>(invokable.generate());
+        }
+
         return new None<>();
     }
 

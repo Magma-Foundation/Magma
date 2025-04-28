@@ -125,7 +125,7 @@ Option<char> peek(struct State this){
 	}
 }
 struct private Joiner(struct Joiner this){
-	/* this(""); */
+	this("");
 }
 Option<char*> createInitial(struct Joiner this){
 	return None</*  */>();
@@ -174,21 +174,25 @@ char* generate(struct Not this){
 	return "!" + this.value.generate("!" + this.value);
 }
 void main(struct Main this){
-	/* run().ifPresent(Throwable::printStackTrace); */
+	auto main_local0 = run();
+	main_local0.ifPresent(main_local0, /* Throwable::printStackTrace */);
+}
+auto run_local0(auto var error){
+	return /* /* new Some */ */;
 }
 Option<struct IOException> run(struct Main this){
 	/* return switch (readString(SOURCE)) */{
-		/* case Err<String, IOException>(var error) -> new Some<>(error); */
+		/* case Err */ < /* String, IOException */ > run_local0 <  > (error);
 		/* case Ok<String, IOException>(var input) -> */{
 			auto output = compileRoot(input);
-			/* yield writeTarget(TARGET, output); */
+			/* yield writeTarget */(TARGET, output);
 		}
 	}
 	/* ; */
 }
 Option<struct IOException> writeTarget(struct Main this, struct Path target, char* csq){
 	/* try */{
-		/* Files.writeString(target, csq); */
+		Files.writeString(Files, target, csq);
 		return None</*  */>();
 	}
 	/* catch (IOException e) */{
@@ -417,7 +421,7 @@ Option<char*> generateStructure(struct Main this, char* name, char* content){
 	auto compiled = compileStatements(content, /* Main::compileClassSegment */);
 	structNames = structNames.removeLast(structNames);
 	auto generated = "struct " + name + " {" + compiled + "\n};\n";
-	/* structs.addLast(generated); */
+	structs.addLast(structs, generated);
 	return Some</*  */>("");
 }
 auto compileClassSegment_local2(){
@@ -508,7 +512,7 @@ auto assembleMethod_local0(auto input){
 Option<char*> assembleMethod(struct Main this, char* definition, char* outputParams, char* content){
 	auto parsed = parseStatementsWithLocals(content, assembleMethod_local0);
 	auto generated = definition + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
-	/* methods.addLast(generated); */
+	methods.addLast(methods, generated);
 	return Some</*  */>("");
 }
 List<char*> parseStatementsWithLocals(struct Main this, char* content, char* (*)(char*) compiler){
@@ -594,6 +598,9 @@ Option<char*> compileStatementValue(struct Main this, char* input){
 		auto value = stripped.substring(stripped, compileStatementValue_local7.length(compileStatementValue_local7));
 		auto assignable = parseAssignable(definition);
 		return Some</*  */>(assignable.generate() + " = " + compileValue(assignable, value));
+	}
+	if (/* compileInvokable(input) instanceof Some */(/* var invokable */)){
+		return Some</*  */>(invokable.generate(invokable));
 	}
 	return None</*  */>();
 }
@@ -716,8 +723,8 @@ Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
 	auto compileInvokable_local11 = parseValues(arguments, /* Main::parseValue */);
 	auto compileInvokable_local13 = compileInvokable_local11.iter(compileInvokable_local11);
 	auto compileInvokable_local14 = compileInvokable_local13.filter(compileInvokable_local13, compileInvokable_local12);
-	auto compileInvokable_local16 = Lists.<Value>listEmpty(Lists);
-	auto compileInvokable_local17 = compileInvokable_local16.addLast(compileInvokable_local16, symbol);
+	auto compileInvokable_local18 = Lists.<Value>listEmpty(Lists);
+	auto compileInvokable_local19 = compileInvokable_local18.addLast(compileInvokable_local18, symbol);
 	if (compileInvokable_local0.endsWith(compileInvokable_local0, ")")){
 		return None</*  */>();
 	}
@@ -747,11 +754,12 @@ Option<struct Invocation> compileInvokable(struct Main this, char* stripped){
 		symbol = parent;
 	}
 	else {
+	auto compileInvokable_local16 = statements.last(statements);
 		auto statement = "\n\tauto " + name + " = " + parent.generate() + ";";
-		/* statements.last().addLast(statement); */
+		compileInvokable_local16.addLast(compileInvokable_local16, statement);
 		symbol = struct Symbol(name);
 	}
-	auto newArgs = compileInvokable_local17.addAll(compileInvokable_local17, parsedArgs);
+	auto newArgs = compileInvokable_local19.addAll(compileInvokable_local19, parsedArgs);
 	return Some</*  */>(struct Invocation(struct DataAccess(symbol, property), newArgs));
 }
 auto assembleLambda_local1(auto name){
@@ -771,7 +779,7 @@ struct Symbol assembleLambda(struct Main this, char* afterArrow, List<char*> nam
 	}
 	auto newValue = compileValue(afterArrow);
 	auto name = generateName();
-	/* assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";"); */
+	assembleMethod("auto " + name, params, "\n\treturn " + newValue + ";");
 	return struct Symbol(name);
 }
 char* generateName(struct Main this){
@@ -1004,7 +1012,7 @@ Option</*  */> or(struct Some</*  */> this, Supplier<Option</*  */>> supplier){
 	return this;
 }
 void ifPresent(struct Some</*  */> this, Consumer</*  */> consumer){
-	/* consumer.accept(this.value); */
+	consumer.accept(consumer, this.value);
 }
 auto map_local2(){
 	return map_local1.map(map_local1, map_local1, mapper);
