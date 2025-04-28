@@ -281,8 +281,8 @@ Option<struct State> foldSingleQuotes(struct Main this, struct State state, stru
 	return foldSingleQuotes_local6.flatMap(foldSingleQuotes_local6, /* State::popAndAppend */);
 }
 struct State foldStatementChar(struct Main this, struct State state, struct char c){
-	auto foldStatementChar_local2 = /* c == ';' && appended */;
-	auto foldStatementChar_local5 = /* c == '}' && appended */;
+	auto foldStatementChar_local2 = /* c == ';' */ && appended;
+	auto foldStatementChar_local5 = /* c == '}' */ && appended;
 	auto appended = state.append(state, c);
 	if (foldStatementChar_local2.isLevel(foldStatementChar_local2)){
 		return appended.advance(appended);
@@ -798,7 +798,7 @@ Option<struct Definition> parseDefinition(struct Main this, char* input){
 	return Some</*  */>(struct Definition(compileType(type), name));
 }
 struct State foldByTypeSeparator(struct Main this, struct State state, struct char c){
-	auto foldByTypeSeparator_local1 = /* c == ' ' && state */;
+	auto foldByTypeSeparator_local1 = /* c == ' ' */ && state;
 	if (foldByTypeSeparator_local1.isLevel(foldByTypeSeparator_local1)){
 		return state.advance(state);
 	}
@@ -880,7 +880,7 @@ char* mergeValues(struct Main this, char* builder, char* element){
 	return builder + ", " + element;
 }
 struct State foldValueChar(struct Main this, struct State state, struct char c){
-	auto foldValueChar_local1 = /* c == ',' && state */;
+	auto foldValueChar_local1 = /* c == ',' */ && state;
 	if (foldValueChar_local1.isLevel(foldValueChar_local1)){
 		return state.advance(state);
 	}
