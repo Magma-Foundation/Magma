@@ -67,15 +67,18 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private interface Defined extends Node {
+    private interface Defined extends Assignable {
         String generate();
     }
 
-    private interface Value extends Node {
+    private interface Value extends Assignable {
     }
 
     private interface Node {
         String generate();
+    }
+
+    private interface Assignable extends Node {
     }
 
     private enum Operator {
@@ -414,6 +417,7 @@ public class Main {
             return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
         }
     }
+
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
@@ -816,10 +820,18 @@ public class Main {
         if (valueSeparator >= 0) {
             var definition = stripped.substring(0, valueSeparator);
             var value = stripped.substring(valueSeparator + "=".length());
-            return new Some<>(parseDefinitionOrPlaceholder(definition).generate() + " = " + compileValue(value));
+
+            var assignable = parseAssignable(definition);
+            return new Some<>(assignable.generate() + " = " + compileValue(value));
         }
 
         return new None<>();
+    }
+
+    private static Assignable parseAssignable(String definition) {
+        return parseDefinition(definition)
+                .<Assignable>map(value1 -> value1)
+                .orElseGet(() -> parseValue(definition));
     }
 
     private static String compileBeforeBlock(String input) {
