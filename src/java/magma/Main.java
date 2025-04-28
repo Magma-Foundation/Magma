@@ -64,7 +64,7 @@ public class Main {
 
         @Override
         public T orElse(T other) {
-            return value;
+            return this.value;
         }
 
         @Override
@@ -573,6 +573,10 @@ public class Main {
 
                 return base + "<" + generateValues(parsed) + ">";
             }
+        }
+
+        if (isSymbol(stripped)) {
+            return "struct " + stripped;
         }
 
         return generatePlaceholder(stripped);

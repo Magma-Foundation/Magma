@@ -11,7 +11,7 @@
 };
 /* public */struct List<char*> {
 };
-/* public */struct Option</* State */> {
+/* public */struct Option<struct State> {
 };
 /* public */struct Option<char*> {
 };
@@ -31,27 +31,27 @@
             return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
          */
 }
-/* private */ /* boolean */ isLevel(/*  */){/* 
+/* private */ struct boolean isLevel(/*  */){/* 
             return this.depth == 0;
          */
 }
-/* private */ /* State */ enter(/*  */){/* 
+/* private */ struct State enter(/*  */){/* 
             this.depth = this.depth + 1;
             return this;
          */
 }
-/* private */ /* State */ exit(/*  */){/* 
+/* private */ struct State exit(/*  */){/* 
             this.depth = this.depth - 1;
             return this;
          */
 }
-/* private */ /* State */ advance(/*  */){/* 
+/* private */ struct State advance(/*  */){/* 
             this.segments = this.segments.add(this.buffer);
             this.buffer = "";
             return this;
          */
 }
-/* private */ /* boolean */ isShallow(/*  */){/* 
+/* private */ struct boolean isShallow(/*  */){/* 
             return this.depth == 1;
          */
 }
@@ -65,12 +65,12 @@
             return new Some<>(new Tuple<Character, State>(escaped, this));
          */
 }
-/* private */ /* State */ append(/* char c */){/* 
+/* private */ struct State append(/* char c */){/* 
             this.buffer = this.buffer + c;
             return this;
          */
 }
-/* public */ Option</* State */> popAndAppend(/*  */){/* 
+/* public */ Option<struct State> popAndAppend(/*  */){/* 
             return this.popAndAppendToTuple().map(Tuple::right);
          */
 }
@@ -174,7 +174,7 @@
         return state.advance().segments;
      */
 }
-/* private static */ Option</* State */> foldSingleQuotes(/* State state, char next */){/* 
+/* private static */ Option<struct State> foldSingleQuotes(/* State state, char next */){/* 
         if (next != '\'') {
             return new None<>();
         }
@@ -185,7 +185,7 @@
                 .flatMap(State::popAndAppend);
      */
 }
-/* private static */ /* State */ foldStatementChar(/* State state, char c */){/* 
+/* private static */ struct State foldStatementChar(/* State state, char c */){/* 
         var appended = state.append(c);
 
         if (c == ';' && appended.isLevel()) {
@@ -389,6 +389,10 @@
             }
         }
 
+        if (isSymbol(stripped)) {
+            return "struct " + stripped;
+        }
+
         return generatePlaceholder(stripped);
      */
 }
@@ -408,14 +412,14 @@
         return builder + ", " + element;
      */
 }
-/* private static */ /* State */ foldValueChar(/* State state, char c */){/* 
+/* private static */ struct State foldValueChar(/* State state, char c */){/* 
         if (c == ',') {
             return state.advance();
         }
         return state.append(c);
      */
 }
-/* private static */ /* boolean */ isSymbol(/* String input */){/* 
+/* private static */ struct boolean isSymbol(/* String input */){/* 
         var stripped = input.strip();
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
