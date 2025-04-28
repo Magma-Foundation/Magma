@@ -424,6 +424,9 @@ public class Main {
                     methods.add(generated);
                     return Optional.of("");
                 }
+                else {
+                    return Optional.of("");
+                }
             }
         }
         return Optional.empty();

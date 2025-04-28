@@ -8,20 +8,8 @@
 /* private */struct Joiner {
 };
 /* public */struct Main {
-	/* public static final Map<String, Function<List<String>, Optional<String>>> expandables = new HashMap<>() */;
-	/* private static final List<String> methods = Lists.empty() */;
-	/* private static final List<String> structs = Lists.empty() */;
-	/* private static List<String> typeParameters = Lists.empty() */;
-	/* private static List<Tuple<String, List<String>>> expansions = Lists.empty() */;
-	/* private static List<String> typeArguments = Lists.empty() */;
 };
 /* public */struct List<char*> {
-	/* List<T> add(T element) */;
-	/* Iterator<T> iter() */;
-	/* boolean isEmpty() */;
-	/* boolean contains(T element) */;
-	/* Optional<Integer> indexOf(T element) */;
-	/* T get(int index) */;
 };
 // Optional</* State */>
 // Optional<char*>
@@ -336,6 +324,9 @@
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "\n}\n";
                     methods.add(generated);
+                    return Optional.of("");
+                }
+                else {
                     return Optional.of("");
                 }
             }
