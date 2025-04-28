@@ -511,7 +511,19 @@ public class Main {
             return "";
         }
 
+        if(stripped.endsWith(";")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+            if(withoutEnd.startsWith("return ")) {
+                var value = withoutEnd.substring("return ".length());
+                return "\n\treturn " + compileValue(value) + ";";
+            }
+        }
+
         return "\n\t" + generatePlaceholder(stripped);
+    }
+
+    private static String compileValue(String value) {
+        return generatePlaceholder(value);
     }
 
     private static String compileDefinitionOrPlaceholder(String input) {
