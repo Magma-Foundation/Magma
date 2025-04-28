@@ -11,7 +11,7 @@
 /* public */struct List<char*> {
 };
 /* private static */ struct State fromInput(char* input){
-	/* return new State(input, Lists.empty(), "", 0, 0); */
+	/* return new State(input, listEmpty(), "", 0, 0); */
 }
 /* private Option<Tuple<Character, */ /* State>> */ popAndAppendToTuple(/*  */){
 	/* return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left))); */
@@ -203,11 +203,11 @@ struct private Joiner(/*  */){
             if (typeParamStart >= 0) {
                 var name = withoutEnd.substring(0, typeParamStart).strip();
                 var substring = withoutEnd.substring(typeParamStart + "<".length());
-                var typeParameters = Lists.fromArray(substring.split(Pattern.quote(",")));
+                var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
                 return assembleStructure(typeParameters, name, beforeClass, content);
             }
         } */
-	/* return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content); */
+	/* return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content); */
 }
 /* private static */ Option<char*> assembleStructure(List<char*> typeParams, char* name, char* beforeClass, char* content){
 	/* if (!typeParams.isEmpty()) {

@@ -42,11 +42,11 @@ class Lists {
         }
     }
 
-    public static <T> Main.List<T> empty() {
+    public static <T> Main.List<T> listEmpty() {
         return new JavaList<>();
     }
 
-    public static <T> Main.List<T> fromArray(T[] array) {
+    public static <T> Main.List<T> listFromArray(T[] array) {
         return new JavaList<>(Arrays.asList(array));
     }
 }

@@ -10,6 +10,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static magma.Lists.listEmpty;
+import static magma.Lists.listFromArray;
+
 public class Main {
     public interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
@@ -174,7 +177,7 @@ public class Main {
 
     private record State(String input, List<String> segments, String buffer, int depth, int index) {
         private static State fromInput(String input) {
-            return new State(input, Lists.empty(), "", 0, 0);
+            return new State(input, listEmpty(), "", 0, 0);
         }
 
         private Option<Tuple<Character, State>> popAndAppendToTuple() {
@@ -238,7 +241,7 @@ public class Main {
     private static class ListCollector<T> implements Collector<T, List<T>> {
         @Override
         public List<T> createInitial() {
-            return Lists.empty();
+            return listEmpty();
         }
 
         @Override
@@ -248,11 +251,11 @@ public class Main {
     }
 
     public static final Map<String, Function<List<String>, Option<String>>> expandables = new HashMap<>();
-    private static final List<String> methods = Lists.empty();
-    private static final List<String> structs = Lists.empty();
-    private static List<String> typeParameters = Lists.empty();
-    private static List<Tuple<String, List<String>>> expansions = Lists.empty();
-    private static List<String> typeArguments = Lists.empty();
+    private static final List<String> methods = listEmpty();
+    private static final List<String> structs = listEmpty();
+    private static List<String> typeParameters = listEmpty();
+    private static List<Tuple<String, List<String>>> expansions = listEmpty();
+    private static List<String> typeArguments = listEmpty();
 
     public static void main() {
         try {
@@ -422,12 +425,12 @@ public class Main {
             if (typeParamStart >= 0) {
                 var name = withoutEnd.substring(0, typeParamStart).strip();
                 var substring = withoutEnd.substring(typeParamStart + "<".length());
-                var typeParameters = Lists.fromArray(substring.split(Pattern.quote(",")));
+                var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
                 return assembleStructure(typeParameters, name, beforeClass, content);
             }
         }
 
-        return assembleStructure(Lists.empty(), strippedBeforeContent, beforeClass, content);
+        return assembleStructure(listEmpty(), strippedBeforeContent, beforeClass, content);
     }
 
     private static Option<String> assembleStructure(List<String> typeParams, String name, String beforeClass, String content) {
