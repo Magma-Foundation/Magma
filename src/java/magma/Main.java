@@ -169,65 +169,6 @@ public class Main {
         Iterator<K> keys();
     }
 
-    private enum Operator {
-        Add("+", new None<>()),
-        And("&&", new Some<>(Primitive.Bool)),
-        Or("||", new Some<>(Primitive.Bool)),
-        Equals("==", new Some<>(Primitive.Bool)),
-        EqualsNot("!=", new Some<>(Primitive.Bool)),
-        LessThanOrEquals("<=", new Some<>(Primitive.Bool)),
-        LessThan("<", new Some<>(Primitive.Bool)),
-        GreaterThanOrEquals(">=", new Some<>(Primitive.Bool)),
-        GreaterThan(">", new Some<>(Primitive.Bool));
-
-        private final String_ representation;
-        private final Option<Type> type;
-
-        Operator(String representation, Option<Type> type) {
-            this.representation = Strings.from(representation);
-            this.type = type;
-        }
-    }
-
-    private enum BooleanValue implements Value {
-        False("0"),
-        True("1");
-
-        private final String_ value;
-
-        BooleanValue(String value) {
-            this.value = Strings.from(value);
-        }
-
-        @Override
-        public String_ generate() {
-            return this.value;
-        }
-    }
-
-    private enum Primitive implements Type {
-        I32("int"),
-        I8("char"),
-        Void("void"),
-        Auto("auto"),
-        Bool("int");
-        private final String_ value;
-
-        Primitive(String value) {
-            this.value = Strings.from(value);
-        }
-
-        @Override
-        public String_ stringify() {
-            return Strings.from(this.name()).toLowerCase();
-        }
-
-        @Override
-        public String_ generate() {
-            return this.value;
-        }
-    }
-
     private static class Strings {
         @External
         private record JavaString(String value) implements String_ {
@@ -334,6 +275,65 @@ public class Main {
 
         public static String_ empty() {
             return from("");
+        }
+    }
+
+    private enum Operator {
+        Add("+", new None<>()),
+        And("&&", new Some<>(Primitive.Bool)),
+        Or("||", new Some<>(Primitive.Bool)),
+        Equals("==", new Some<>(Primitive.Bool)),
+        EqualsNot("!=", new Some<>(Primitive.Bool)),
+        LessThanOrEquals("<=", new Some<>(Primitive.Bool)),
+        LessThan("<", new Some<>(Primitive.Bool)),
+        GreaterThanOrEquals(">=", new Some<>(Primitive.Bool)),
+        GreaterThan(">", new Some<>(Primitive.Bool));
+
+        private final String_ representation;
+        private final Option<Type> type;
+
+        Operator(String representation, Option<Type> type) {
+            this.representation = Strings.from(representation);
+            this.type = type;
+        }
+    }
+
+    private enum BooleanValue implements Value {
+        False("0"),
+        True("1");
+
+        private final String_ value;
+
+        BooleanValue(String value) {
+            this.value = Strings.from(value);
+        }
+
+        @Override
+        public String_ generate() {
+            return this.value;
+        }
+    }
+
+    private enum Primitive implements Type {
+        I32("int"),
+        I8("char"),
+        Void("void"),
+        Auto("auto"),
+        Bool("int");
+        private final String_ value;
+
+        Primitive(String value) {
+            this.value = Strings.from(value);
+        }
+
+        @Override
+        public String_ stringify() {
+            return Strings.from(this.name()).toLowerCase();
+        }
+
+        @Override
+        public String_ generate() {
+            return this.value;
         }
     }
 
@@ -1298,9 +1298,10 @@ public class Main {
     private static Result<String_, CompileError> compileClassSegment(String_ input0) {
         return or(input0, Lists.listFrom(
                 whitespace(),
-                type("interface", stripped -> compileStructure("interface ", stripped, Strings.from("?"))),
-                type("enum", stripped -> compileStructure("enum ", stripped, Strings.from("enum"))),
                 type("class", Main::compileClass),
+                type("enum", stripped -> compileStructure("enum ", stripped, Strings.from("enum"))),
+                type("record", stripped -> compileStructure("record ", stripped, Strings.from("?"))),
+                type("interface", stripped -> compileStructure("interface ", stripped, Strings.from("?"))),
                 type("method", Main::compileMethod),
                 type("definition-statement", Main::compileDefinitionStatement)
         ));
