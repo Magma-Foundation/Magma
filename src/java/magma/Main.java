@@ -372,10 +372,6 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
-        }
-
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -609,9 +605,9 @@ public class Main {
         }
     }
 
-    public static final Map<String, Function<List<Type>, Option<String>>> expandables = new HashMap<>();
-    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
-    public static final Path TARGET = SOURCE.resolveSibling("main.c");
+    private static final Map<String, Function<List<Type>, Option<String>>> expanding = new HashMap<>();
+    private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
     public static List<List<String>> statements = listEmpty();
@@ -624,11 +620,11 @@ public class Main {
     private static List<Type> typeStack = listEmpty();
 
     private static Option<IOException> run() {
-        return switch (readString(SOURCE)) {
+        return switch (readString()) {
             case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
-                yield writeTarget(TARGET, output);
+                yield writeTarget(output);
             }
         };
     }
@@ -637,18 +633,18 @@ public class Main {
         run().ifPresent(Throwable::printStackTrace);
     }
 
-    private static Option<IOException> writeTarget(Path target, String csq) {
+    private static Option<IOException> writeTarget(String csq) {
         try {
-            Files.writeString(target, csq);
+            Files.writeString(Main.TARGET, csq);
             return new None<>();
         } catch (IOException e) {
             return new Some<>(e);
         }
     }
 
-    private static Result<String, IOException> readString(Path source) {
+    private static Result<String, IOException> readString() {
         try {
-            return new Ok<>(Files.readString(source));
+            return new Ok<>(Files.readString(Main.SOURCE));
         } catch (IOException e) {
             return new Err<>(e);
         }
@@ -660,11 +656,9 @@ public class Main {
     }
 
     private static String join(List<String> list) {
-        return join(list, "");
-    }
-
-    private static String join(List<String> list, String delimiter) {
-        return list.iter().collect(new Joiner(delimiter)).orElse("");
+        return list.iter()
+                .collect(new Joiner(""))
+                .orElse("");
     }
 
     private static String compileStatements(String input, Function<String, String> compiler) {
@@ -677,15 +671,6 @@ public class Main {
 
     private static List<String> parseStatements(String input, Function<String, String> compiler) {
         return parseAll(input, Main::foldStatementChar, compiler);
-    }
-
-    private static String compileAll(
-            String input,
-            BiFunction<State, Character, State> folder,
-            Function<String, String> compiler,
-            BiFunction<String, String, String> merger
-    ) {
-        return generateAll(merger, parseAll(input, folder, compiler));
     }
 
     private static String generateAll(BiFunction<String, String, String> merger, List<String> parsed) {
@@ -844,7 +829,7 @@ public class Main {
 
     private static Option<String> assembleStructure(List<String> typeParams, String name, String content) {
         if (!typeParams.isEmpty()) {
-            expandables.put(name, typeArgs -> {
+            expanding.put(name, typeArgs -> {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
@@ -1227,7 +1212,7 @@ public class Main {
             return new None<>();
         }
 
-        var joined = join(divisions.subList(0, divisions.size() - 1), "");
+        var joined = join(divisions.subList(0, divisions.size() - 1));
         var caller = joined.substring(0, joined.length() - ")".length());
         var arguments = divisions.findLast().orElse(null);
 
@@ -1449,9 +1434,9 @@ public class Main {
                 }
 
                 var generic = new Tuple<>(base, parsed);
-                if (!visitedExpansions.contains(generic) && expandables.containsKey(base)) {
+                if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
                     visitedExpansions = visitedExpansions.addLast(generic);
-                    expandables.get(base).apply(parsed);
+                    expanding.get(base).apply(parsed);
                 }
 
                 return new StructType(merge(base, parsed));

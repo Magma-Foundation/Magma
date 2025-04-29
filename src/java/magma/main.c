@@ -350,9 +350,6 @@ struct Option_char peek(struct State this){
 		return new_None_/*  */();
 	}
 }
-struct private Joiner(struct Joiner this){
-	this("");
-}
 struct Option_char* createInitial(struct Joiner this){
 	return new_None_/*  */();
 }
@@ -1017,11 +1014,11 @@ char* stringify(struct Functional this){
 	return /* /* new Some */ */;
 }
 struct Option_struct IOException run(struct Main this){
-	/* return switch (readString(SOURCE)) */{
+	/* return switch (readString()) */{
 		/* case Err */ < /* String, IOException */ > run_local0 <  > (error);
 		/* case Ok<String, IOException>(var input) -> */{
 			/* compileRoot(input) */ output = compileRoot(input);
-			/* yield writeTarget */(TARGET, output);
+			/* yield writeTarget */(output);
 		}
 	}
 	/* ; */
@@ -1030,18 +1027,18 @@ void main(struct Main this){
 	/* run() */ main_local0 = run();
 	main_local0.ifPresent(main_local0, /* Throwable::printStackTrace */);
 }
-struct Option_struct IOException writeTarget(struct Main this, struct Path target, char* csq){
+struct Option_struct IOException writeTarget(struct Main this, char* csq){
 	/* try */{
-		Files.writeString(Files, target, csq);
+		Files.writeString(Files, Main.TARGET, csq);
 		return new_None_/*  */();
 	}
 	/* catch (IOException e) */{
 		return new_Some_/*  */(e);
 	}
 }
-struct Result_char*_struct IOException readString(struct Main this, struct Path source){
+struct Result_char*_struct IOException readString(struct Main this){
 	/* try */{
-		return new_Ok_/*  */(Files.readString(Files, source));
+		return new_Ok_/*  */(Files.readString(Files, Main.SOURCE));
 	}
 	/* catch (IOException e) */{
 		return new_Err_/*  */(e);
@@ -1146,12 +1143,9 @@ struct Option_struct Tuple_int_char* next(struct Iterator_struct Tuple_int_char*
 	return this.head.next(this.head);
 }
 char* join(struct Main this, struct List_char* list){
-	return join(list, "");
-}
-char* join(struct Main this, struct List_char* list, char* delimiter){
-	/* list.iter(list) */ join_local1 = list.iter(list);
-	/* join_local1.collect(join_local1, new_Joiner(delimiter)) */ join_local2 = join_local1.collect(join_local1, new_Joiner(delimiter));
-	return join_local2.orElse(join_local2, "");
+	/* list.iter(list) */ iterWithIndices_local1 = list.iter(list);
+	/* iterWithIndices_local1.collect(iterWithIndices_local1, new_Joiner("")) */ iterWithIndices_local2 = iterWithIndices_local1.collect(iterWithIndices_local1, new_Joiner(""));
+	return iterWithIndices_local2.orElse(iterWithIndices_local2, "");
 }
 char* compileStatements(struct Main this, char* input, char* (*)(char*) compiler){
 	return generateStatements(parseStatements(input, compiler));
@@ -1161,9 +1155,6 @@ char* generateStatements(struct Main this, struct List_char* parsed){
 }
 struct List_char* parseStatements(struct Main this, char* input, char* (*)(char*) compiler){
 	return parseAll(input, /* Main::foldStatementChar */, compiler);
-}
-char* compileAll(struct Main this, char* input, struct State (*)(struct State, char) folder, char* (*)(char*) compiler, char* (*)(char*, char*) merger){
-	return generateAll(merger, parseAll(input, folder, compiler));
 }
 char* generateAll(struct Main this, char* (*)(char*, char*) merger, struct List_char* parsed){
 	/* parsed.iter(parsed) */ generateAll_local1 = parsed.iter(parsed);
@@ -2051,7 +2042,7 @@ struct Option_struct Invocation compileInvokable(struct Main this, char* strippe
 	if (divisions.size(divisions) < 2){
 		return new_None_/*  */();
 	}
-	/* join(divisions.subList(divisions, 0, /* divisions.size() - 1 */), "") */ joined = join(divisions.subList(divisions, 0, /* divisions.size() - 1 */), "");
+	/* join(divisions.subList(divisions, 0, /* divisions.size() - 1 */)) */ joined = join(divisions.subList(divisions, 0, /* divisions.size() - 1 */));
 	/* joined.substring(joined, 0, compileInvokable_local6.length(compileInvokable_local6)) */ caller = joined.substring(joined, 0, compileInvokable_local6.length(compileInvokable_local6));
 	/* compileInvokable_local9.orElse(compileInvokable_local9, null) */ arguments = compileInvokable_local9.orElse(compileInvokable_local9, null);
 	if (caller.startsWith(caller, "new ")){
@@ -2397,7 +2388,7 @@ struct Type parseType(struct Main this, char* input){
 		if (index >= 0){
 	/* withoutEnd.substring(withoutEnd, 0, index) */ parseType_local8 = withoutEnd.substring(withoutEnd, 0, index);
 	/* index */ parseType_local9 = index + "<";
-	int parseType_local29 = !visitedExpansions.contains(visitedExpansions, generic) && expandables;
+	int parseType_local29 = !visitedExpansions.contains(visitedExpansions, generic) && expanding;
 			/* parseType_local8.strip(parseType_local8) */ base = parseType_local8.strip(parseType_local8);
 			/* withoutEnd.substring(withoutEnd, parseType_local9.length(parseType_local9)) */ substring = withoutEnd.substring(withoutEnd, parseType_local9.length(parseType_local9));
 			/* parseValues(substring, /* Main::parseType */) */ parsed = parseValues(substring, /* Main::parseType */);
@@ -2419,7 +2410,7 @@ struct Type parseType(struct Main this, char* input){
 			}
 			/* new_Tuple_/*  */(base, parsed) */ generic = new_Tuple_/*  */(base, parsed);
 			if (parseType_local29.containsKey(parseType_local29, base)){
-	/* expandables.get(expandables, base) */ parseType_local27 = expandables.get(expandables, base);
+	/* expanding.get(expanding, base) */ parseType_local27 = expanding.get(expanding, base);
 				visitedExpansions = visitedExpansions.addLast(visitedExpansions, generic);
 				parseType_local27.apply(parseType_local27, parsed);
 			}
