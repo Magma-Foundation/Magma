@@ -39,7 +39,7 @@ public class Main {
     public interface List<T> {
         List<T> addLast(T element);
 
-        Iterator<T> iter();
+        Iterator<T> iterate();
 
         boolean isEmpty();
 
@@ -64,6 +64,8 @@ public class Main {
         Iterator<Tuple<Integer, T>> iterateWithIndices();
 
         List<T> sort(BiFunction<T, T, Integer> comparator);
+
+        Iterator<T> iterateReversed();
     }
 
     private interface Head<T> {
@@ -588,7 +590,7 @@ public class Main {
         }
 
         public Option<Type> findTypeAsOption(String name) {
-            return findSymbolInFrame(this.definitions, name);
+            return findSymbolInDefinitions(this.definitions, name);
         }
     }
 
@@ -658,7 +660,7 @@ public class Main {
         private String joinErrors(int depth) {
             return this.errors
                     .sort((error, error2) -> error.computeMaxDepth() - error2.computeMaxDepth())
-                    .iter()
+                    .iterate()
                     .map(error -> error.format(depth + 1))
                     .map(display -> "\n" + "\t".repeat(depth) + display)
                     .collect(new Joiner(""))
@@ -666,7 +668,7 @@ public class Main {
         }
 
         private int computeMaxDepth() {
-            return 1 + this.errors.iter()
+            return 1 + this.errors.iterate()
                     .map(CompileError::computeMaxDepth)
                     .collect(new Max())
                     .orElse(0);
@@ -736,15 +738,34 @@ public class Main {
         }
     }
 
+    private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
+        public Frame(StructRef ref) {
+            this(new Some<>(ref), listEmpty());
+        }
+
+        public Frame(List<Definition> definitions) {
+            this(new None<>(), definitions);
+        }
+
+        private Option<Type> findDefinitionInFrame(String value) {
+            return findSymbolInDefinitions(this.definitions, value);
+        }
+
+        public Option<StructType> toStructType() {
+            return this.maybeRef.map(ref -> {
+                return new StructType(ref.name, this.definitions);
+            });
+        }
+    }
+
     private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final Map<Tuple<String, List<Type>>, Tuple<StructType, String>> structRegistry = new HashMap<>();
     public static List<List<String>> statements = listEmpty();
-    private static List<List<Definition>> currentDefinitions = Lists.listEmpty();
     private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
-    private static List<StructRef> currentStructs = listEmpty();
+    private static List<Frame> frames = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Type> typeArguments = listEmpty();
@@ -800,7 +821,7 @@ public class Main {
     }
 
     private static String join(List<String> list) {
-        return list.iter()
+        return list.iterate()
                 .collect(new Joiner(""))
                 .orElse("");
     }
@@ -810,7 +831,7 @@ public class Main {
     }
 
     private static String generateAll(BiFunction<String, String, String> merger, List<String> parsed) {
-        return parsed.iter()
+        return parsed.iterate()
                 .fold("", merger);
     }
 
@@ -820,7 +841,7 @@ public class Main {
             Function<String, Result<T, CompileError>> compiler
     ) {
         return divideAll(input, folder)
-                .iter()
+                .iterate()
                 .map(compiler)
                 .collect(new Exceptional<>(new ListCollector<>()));
     }
@@ -978,7 +999,7 @@ public class Main {
 
     private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content) {
         if (typeParams.isEmpty()) {
-            return generateStructure(name, content, Lists.listEmpty());
+            return generateStructure(name, content, listEmpty());
         }
 
         if (!isSymbol(name)) {
@@ -996,11 +1017,11 @@ public class Main {
     }
 
     private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs) {
-        currentStructs = currentStructs.addLast(new StructRef(name));
+        frames = frames.addLast(new Frame(new StructRef(name)));
         var result = parseStatements(content, Main::compileClassSegment)
                 .flatMapValue(parsed -> getRecord(name, typeArgs, parsed));
 
-        currentStructs = currentStructs.removeLast().map(Tuple::right).orElse(currentStructs);
+        frames = frames.removeLast().map(Tuple::right).orElse(frames);
         return result;
     }
 
@@ -1010,7 +1031,7 @@ public class Main {
             List<String> definitions
     ) {
         var compiled = generateAll(Main::mergeStatements, definitions);
-        var maybeCurrentRef = currentStructs.findLast();
+        var maybeCurrentRef = frames.findLast();
         if (maybeCurrentRef instanceof Some(var currentRef)) {
             var alias = createAlias(name, typeArgs);
             var generated = "struct " + alias + " {" + compiled + "\n};\n";
@@ -1080,20 +1101,25 @@ public class Main {
             var content = withBraces.substring(1, withBraces.length() - 1);
             return parseValues(params, Main::parseParameter).flatMapValue(results -> {
                 var oldParams = results
-                        .iter()
+                        .iterate()
                         .map(Main::requireDefinition)
                         .flatMap(Iterators::fromOption)
                         .collect(new ListCollector<>());
 
-                currentDefinitions = currentDefinitions.addLast(oldParams);
+                frames = frames.addLast(new Frame(oldParams));
+
+                var thisType = frames.findLast()
+                        .flatMap(frame -> frame.maybeRef)
+                        .orElse(new StructRef("this"));
+
                 var newParams = Lists.<Definition>listEmpty()
-                        .addLast(new Definition(currentStructs.findLast().orElse(null), "this"))
+                        .addLast(new Definition(thisType, "this"))
                         .addAll(oldParams);
 
                 var outputParams = generateValueList(newParams);
                 var assembled = assembleMethod(defined, outputParams, content).mapValue(method -> {
-                    currentStructs = currentStructs.mapLast(last -> {
-                        var paramTypes = newParams.iter()
+                    frames = frames.mapLast(last -> {
+                        var paramTypes = newParams.iterate()
                                 .map(Defined::findType)
                                 .flatMap(Iterators::fromOption)
                                 .collect(new ListCollector<>());
@@ -1107,7 +1133,7 @@ public class Main {
                     return method;
                 });
 
-                currentDefinitions = currentDefinitions.removeLast().map(Tuple::right).orElse(currentDefinitions);
+                frames = frames.removeLast().map(Tuple::right).orElse(frames);
                 return assembled;
             });
         });
@@ -1141,7 +1167,7 @@ public class Main {
     }
 
     private static <T extends Node> String generateValueList(List<T> copy, Function<T, String> generate) {
-        return copy.iter()
+        return copy.iterate()
                 .map(generate)
                 .collect(new Joiner(", "))
                 .orElse("");
@@ -1183,7 +1209,7 @@ public class Main {
     }
 
     private static <T> Result<T, CompileError> or(String input, List<Function<String, Result<T, CompileError>>> lists) {
-        return lists.iter()
+        return lists.iterate()
                 .fold(new OrState<T>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper))
                 .toResult()
                 .mapErr(errs -> new CompileError("No valid combinations present", new StringContext(input), errs));
@@ -1353,7 +1379,11 @@ public class Main {
     private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
         var value = symbol.value;
         if (value.equals("this")) {
-            return new Ok<>(currentStructs.findLast().orElse(null));
+            return switch (findCurrentStructType()) {
+                case None<StructType> _ ->
+                        new Err<>(new CompileError("No current struct type present", new StringContext("")));
+                case Some<StructType>(var type) -> new Ok<>(type);
+            };
         }
 
         return findSymbolInFrames(value)
@@ -1361,9 +1391,17 @@ public class Main {
                 .orElseGet(() -> createUndefinedError(value));
     }
 
+    private static Option<StructType> findCurrentStructType() {
+        return frames.iterateReversed()
+                .map(Frame::toStructType)
+                .flatMap(Iterators::fromOption)
+                .next();
+    }
+
     private static Result<Type, CompileError> createUndefinedError(String value) {
-        var joinedNames = currentDefinitions.iter()
-                .flatMap(List::iter)
+        var joinedNames = frames.iterate()
+                .map(Frame::definitions)
+                .flatMap(List::iterate)
                 .map(Definition::name)
                 .collect(new Joiner(", "))
                 .orElse("");
@@ -1372,14 +1410,14 @@ public class Main {
     }
 
     private static Option<Type> findSymbolInFrames(String value) {
-        return currentDefinitions.iter()
-                .map(list -> findSymbolInFrame(list, value))
+        return frames.iterateReversed()
+                .map(list -> list.findDefinitionInFrame(value))
                 .flatMap(Iterators::fromOption)
                 .next();
     }
 
-    private static Option<Type> findSymbolInFrame(List<Definition> frame, String value) {
-        return frame.iter()
+    private static Option<Type> findSymbolInDefinitions(List<Definition> frame, String value) {
+        return frame.iterate()
                 .filter(definition -> definition.name.equals(value))
                 .map(definition -> definition.type)
                 .next();
@@ -1657,7 +1695,7 @@ public class Main {
 
     private static Result<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
         var parsedArgs = collect
-                .iter()
+                .iterate()
                 .filter(value -> !(value instanceof Whitespace))
                 .collect(new ListCollector<>());
 
@@ -1702,7 +1740,7 @@ public class Main {
     private static Result<Value, CompileError> assembleLambda(String afterArrow, List<String> names) {
         var maybeLast = typeStack.findLast();
 
-        var params = names.iter()
+        var params = names.iterate()
                 .map(name -> maybeLast.map(last -> last + " " + name).orElse("? " + name))
                 .collect(new Joiner(", "))
                 .orElse("");
@@ -1866,7 +1904,7 @@ public class Main {
     }
 
     private static String createAlias(String base, List<Type> parsed) {
-        return base + "_" + parsed.iter()
+        return base + "_" + parsed.iterate()
                 .map(Node::generate)
                 .collect(new Joiner("_"))
                 .orElse("");

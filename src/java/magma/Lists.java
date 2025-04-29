@@ -19,7 +19,7 @@ class Lists {
         }
 
         @Override
-        public Main.Iterator<T> iter() {
+        public Main.Iterator<T> iterate() {
             return this.iterateWithIndices().map(Main.Tuple::right);
         }
 
@@ -71,7 +71,7 @@ class Lists {
 
         @Override
         public Main.List<T> addAll(Main.List<T> elements) {
-            return elements.iter().<Main.List<T>>fold(this, Main.List::addLast);
+            return elements.iterate().<Main.List<T>>fold(this, Main.List::addLast);
         }
 
         @Override
@@ -105,6 +105,13 @@ class Lists {
             var copy = new ArrayList<>(this.elements);
             copy.sort(comparator::apply);
             return new JavaList<>(copy);
+        }
+
+        @Override
+        public Main.Iterator<T> iterateReversed() {
+            return new Main.Iterator<>(new Main.RangeHead(this.elements.size()))
+                    .map(index -> this.elements.size() - index - 1)
+                    .map(this.elements::get);
         }
     }
 
