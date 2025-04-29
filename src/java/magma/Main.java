@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -529,7 +530,15 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
     }
 
-    private record StructType(String name, List<Definition> properties) implements Type {
+    private static final class StructType implements Type {
+        private final String name;
+        private final List<Definition> properties;
+
+        private StructType(String name, List<Definition> properties) {
+            this.name = name;
+            this.properties = properties;
+        }
+
         public StructType(String name) {
             this(name, listEmpty());
         }
@@ -555,20 +564,23 @@ public class Main {
         public StructType define(Definition definition) {
             return new StructType(this.name, this.properties.addLast(definition));
         }
-    }
 
-    private record Generic(String base, List<Type> args) implements Type {
         @Override
-        public String generate() {
-            return this.base + "<" + generateValueList(this.args) + ">";
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj == null || obj.getClass() != this.getClass()) {
+                return false;
+            }
+            var that = (StructType) obj;
+            return Objects.equals(this.name, that.name) &&
+                    Objects.equals(this.properties, that.properties);
         }
 
         @Override
-        public String stringify() {
-            return this.base + "_" + this.args.iter()
-                    .map(Type::stringify)
-                    .collect(new Joiner("_"))
-                    .orElse("");
+        public int hashCode() {
+            return Objects.hash(this.name, this.properties);
         }
     }
 
@@ -603,7 +615,7 @@ public class Main {
     private static final List<String> methods = listEmpty();
     private static final List<String> structs = listEmpty();
     public static List<List<String>> statements = listEmpty();
-    private static List<Type> visitedExpansions = listEmpty();
+    private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
     private static List<StructType> structStack = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
@@ -836,7 +848,7 @@ public class Main {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
-                var newName = new Generic(name, typeArgs).stringify();
+                var newName = merge(name, typeArgs);
                 return generateStructure(newName, content);
             });
 
@@ -1284,10 +1296,10 @@ public class Main {
     }
 
     private static Symbol assembleLambda(String afterArrow, List<String> names) {
-        var last = typeStack.findLast().orElse(null);
+        var maybeLast = typeStack.findLast();
 
         var params = names.iter()
-                .map(name -> last.generate() + " " + name)
+                .map(name -> maybeLast.map(last -> last + " " + name).orElse("? " + name))
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -1436,13 +1448,13 @@ public class Main {
                     return new Functional(Lists.listFrom(arg0, arg1), returns);
                 }
 
-                var generic = new Generic(base, parsed);
+                var generic = new Tuple<>(base, parsed);
                 if (!visitedExpansions.contains(generic) && expandables.containsKey(base)) {
                     visitedExpansions = visitedExpansions.addLast(generic);
                     expandables.get(base).apply(parsed);
                 }
 
-                return generic;
+                return new StructType(merge(base, parsed));
             }
         }
 
@@ -1451,6 +1463,13 @@ public class Main {
         }
 
         return new Content(stripped);
+    }
+
+    private static String merge(String base, List<Type> parsed) {
+        return base + "_" + parsed.iter()
+                .map(Node::generate)
+                .collect(new Joiner("_"))
+                .orElse("");
     }
 
     private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
