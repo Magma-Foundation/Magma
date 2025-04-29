@@ -80,7 +80,7 @@ class Lists {
                 return new Main.None<>();
             }
 
-            var slice = this.elements.subList(0, this.elements.size() - 1);
+            var slice = new ArrayList<>(this.elements.subList(0, this.elements.size() - 1));
             var last = this.elements.removeLast();
             return new Main.Some<>(new Main.Tuple<>(last, new JavaList<>(slice)));
         }
