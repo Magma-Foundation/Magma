@@ -1328,7 +1328,8 @@ public class Main {
     private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
         return resolve(access.parent)
                 .flatMapValue(Main::resolveStructureType)
-                .flatMapValue(structType -> structType.findTypeAsResult(access.property));
+                .flatMapValue(structType -> structType.findTypeAsResult(access.property))
+                .mapErr(err -> new CompileError("Failed to resolve data access", new NodeContext(access.parent), Lists.listFrom(err)));
     }
 
     private static Result<StructType, CompileError> resolveStructureType(Type parentType) {
@@ -1494,18 +1495,22 @@ public class Main {
         }
     }
 
-    private static Result<Value, CompileError> parseDataAccess(String input) {
+    private static Result<DataAccess, CompileError> parseDataAccess(String input) {
         var stripped = input.strip();
         var separator = stripped.lastIndexOf(".");
         if (separator < 0) {
             return createInfixErr(stripped, ".");
         }
-        var value = stripped.substring(0, separator);
+
+        var parent = stripped.substring(0, separator);
         var property = stripped.substring(separator + ".".length()).strip();
-        if (isSymbol(property)) {
-            return parseValue(value).mapValue(parsed -> new DataAccess(parsed, property));
+        if (!isSymbol(property)) {
+            return createSymbolErr(property);
         }
-        return createSymbolErr(property);
+
+        return parseValue(parent)
+                .mapValue(parsed -> new DataAccess(parsed, property))
+                .mapErr(err -> new CompileError("Invalid parent", new StringContext(input), Lists.listFrom(err)));
     }
 
     private static <T> Result<T, CompileError> createSymbolErr(String property) {
@@ -1579,47 +1584,49 @@ public class Main {
         }
 
         var joined = join(divisions.subList(0, divisions.size() - 1));
-        var caller = joined.substring(0, joined.length() - ")".length());
+        var callerString = joined.substring(0, joined.length() - ")".length());
         var arguments = divisions.findLast().orElse(null);
 
-        if (caller.startsWith("new ")) {
-            String withoutPrefix = caller.substring("new ".length());
+        if (callerString.startsWith("new ")) {
+            String withoutPrefix = callerString.substring("new ".length());
             return parseType(withoutPrefix).flatMapValue(type -> {
                 var parsedCaller = new Symbol("new_" + type.stringify());
                 return assembleInvokable(parsedCaller, arguments, listEmpty());
             });
         }
 
-        return parseValue(caller).flatMapValue(parsedCaller -> {
-            return resolve(parsedCaller).flatMapValue(resolved -> {
-                if (resolved instanceof Functional functional) {
-                    return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
-                }
+        return parseValue(callerString)
+                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> getInvocationCompileErrorResult(caller, callerType, arguments)))
+                .mapErr(err -> new CompileError("Invalid caller", new StringContext(callerString), Lists.listFrom(err)));
+    }
 
-                if (!(resolved instanceof StructRef structRef)) {
-                    return new Err<>(new CompileError("Not an invokable type", new NodeContext(resolved)));
-                }
+    private static Result<Invocation, CompileError> getInvocationCompileErrorResult(Value caller, Type callerType, String argumentsString) {
+        if (callerType instanceof Functional functional) {
+            return assembleInvokable(caller, argumentsString, functional.paramTypes);
+        }
 
-                var baseName = structRef.name;
-                return findStructType(baseName).flatMapValue(maybeStructType -> {
-                    if (!(maybeStructType instanceof StructType structType)) {
-                        return new Err<>(new CompileError("The struct '" + baseName + "' seems to exist, but isn't actually a struct", new NodeContext(maybeStructType)));
-                    }
+        if (!(callerType instanceof StructRef structRef)) {
+            return new Err<>(new CompileError("Not an invokable type", new NodeContext(callerType)));
+        }
 
-                    var maybeConstructor = structType.findTypeAsOption("new");
-                    if (!(maybeConstructor instanceof Some(var constructor))) {
-                        return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
-                    }
+        var baseName = structRef.name;
+        return findStructType(baseName).flatMapValue(maybeStructType -> {
+            if (!(maybeStructType instanceof StructType structType)) {
+                return new Err<>(new CompileError("The struct '" + baseName + "' seems to exist, but isn't actually a struct", new NodeContext(maybeStructType)));
+            }
 
-                    if (constructor instanceof Functional functional) {
-                        return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
-                    }
-                    else {
-                        return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
-                    }
-                });
-            });
-        }).mapErr(err -> new CompileError("Invalid caller", new StringContext(caller), Lists.listFrom(err)));
+            var maybeConstructor = structType.findTypeAsOption("new");
+            if (!(maybeConstructor instanceof Some(var constructor))) {
+                return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
+            }
+
+            if (constructor instanceof Functional functional) {
+                return assembleInvokable(caller, argumentsString, functional.paramTypes);
+            }
+            else {
+                return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
+            }
+        });
     }
 
     private static Result<StructType, CompileError> findStructType(String baseName) {
