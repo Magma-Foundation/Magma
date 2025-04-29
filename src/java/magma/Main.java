@@ -248,7 +248,7 @@ public class Main {
 
             @Override
             public char charAt(int index) {
-                return 0;
+                return this.value.charAt(index);
             }
 
             @Override
@@ -303,12 +303,12 @@ public class Main {
 
             @Override
             public boolean endsWith(String slice) {
-                return this.value.equals(slice);
+                return this.value.endsWith(slice);
             }
 
             @Override
             public boolean equalsToSlice(String slice) {
-                return false;
+                return this.value.equals(slice);
             }
 
             @Override
@@ -1013,7 +1013,7 @@ public class Main {
     }
 
     public static void main() {
-        run().ifPresent(error -> System.err.println(error.display()));
+        run().ifPresent(error -> System.err.println(error.display().toSlice()));
     }
 
     private static Option<IOException> writeTarget(String_ csq) {
@@ -1204,12 +1204,13 @@ public class Main {
         return new Err<>(new CompileError("Not a struct", new StringContext(input)));
     }
 
-    private static Result<String_, CompileError> getString_(String_ beforeContent, String_ withEnd, String_ type) {
-        if (!withEnd.endsWith("}")) {
-            return createSuffixErr(withEnd, "}");
+    private static Result<String_, CompileError> getString_(String_ beforeContent, String_ input, String_ type) {
+        var stripped = input.strip();
+        if (!stripped.endsWith("}")) {
+            return createSuffixErr(stripped, "}");
         }
 
-        var content = withEnd.substring(0, withEnd.length() - "}".length());
+        var content = stripped.substring(0, stripped.length() - "}".length());
 
         var strippedBeforeContent = beforeContent.strip();
         if (strippedBeforeContent.endsWith(">")) {
