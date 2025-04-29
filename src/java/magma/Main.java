@@ -63,6 +63,8 @@ public class Main {
         List<T> mapLast(Function<T, T> mapper);
 
         Iterator<Tuple<Integer, T>> iterWithIndices();
+
+        List<T> sort(BiFunction<T, T, Integer> comparator);
     }
 
     private interface Head<T> {
@@ -624,6 +626,18 @@ public class Main {
         }
     }
 
+    private static class Max implements Collector<Integer, Option<Integer>> {
+        @Override
+        public Option<Integer> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Integer> fold(Option<Integer> current, Integer element) {
+            return new Some<>(current.map(inner -> inner > element ? inner : element).orElse(element));
+        }
+    }
+
     private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
         public CompileError(String message, Context context) {
             this(message, context, listEmpty());
@@ -639,11 +653,20 @@ public class Main {
         }
 
         private String joinErrors(int depth) {
-            return this.errors.iter()
+            return this.errors
+                    .sort((error, error2) -> error.computeMaxDepth() - error2.computeMaxDepth())
+                    .iter()
                     .map(error -> error.format(depth + 1))
                     .map(display -> "\n" + "\t".repeat(depth) + display)
                     .collect(new Joiner(""))
                     .orElse("");
+        }
+
+        private int computeMaxDepth() {
+            return 1 + this.errors.iter()
+                    .map(CompileError::computeMaxDepth)
+                    .collect(new Max())
+                    .orElse(0);
         }
     }
 
@@ -973,6 +996,7 @@ public class Main {
         return or(input0, Lists.listFrom(
                 wrap(value -> parseWhitespace(value).mapValue(Whitespace::generate)),
                 wrap(stripped -> compileStructure(stripped, "interface ")),
+                wrap(stripped -> compileStructure(stripped, "enum ")),
                 wrap(Main::compileClass),
                 wrap(Main::compileMethod),
                 wrap(Main::compileDefinitionStatement)

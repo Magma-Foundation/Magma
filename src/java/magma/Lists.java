@@ -2,6 +2,7 @@ package magma;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class Lists {
@@ -94,6 +95,12 @@ class Lists {
                 var element = this.elements.get(index);
                 return new Main.Tuple<>(index, element);
             });
+        }
+
+        @Override
+        public Main.List<T> sort(BiFunction<T, T, Integer> comparator) {
+            this.elements.sort((o1, o2) -> comparator.apply(o1, o2));
+            return this;
         }
     }
 
