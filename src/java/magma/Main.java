@@ -1431,10 +1431,10 @@ public class Main {
                     return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
                 }
                 else {
-                    return assembleInvokable(parsedCaller, arguments, listEmpty());
+                    return new Err<>(new CompileError("Not an invokable type", new NodeContext(resolved)));
                 }
             });
-        });
+        }).mapErr(err -> new CompileError("Invalid caller", new StringContext(caller), Lists.listFrom(err)));
     }
 
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsTypes) {
