@@ -137,18 +137,18 @@ public class Main {
     }
 
     private enum BooleanValue implements Value {
-        False(0),
-        True(1);
+        False("0"),
+        True("1");
 
-        private final int value;
+        private final String value;
 
-        BooleanValue(int value) {
+        BooleanValue(String value) {
             this.value = value;
         }
 
         @Override
         public String generate() {
-            return String.valueOf(this.value);
+            return this.value;
         }
     }
 
@@ -1316,9 +1316,10 @@ public class Main {
                 return new Err<>(new CompileError("Not a structure type", new NodeContext(resolved)));
             }
 
-            if(structType.find(access.property) instanceof Some(var found)) {
+            if (structType.find(access.property) instanceof Some(var found)) {
                 return new Ok<>(found);
-            } else {
+            }
+            else {
                 return new Err<>(new CompileError("Undefined field", new StringContext(access.property)));
             }
         });
