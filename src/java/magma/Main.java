@@ -117,15 +117,15 @@ public class Main {
     }
 
     private enum Operator {
-        ADD("+", new None<>()),
-        AND("&&", new Some<>(Primitive.Bool)),
-        OR("||", new Some<>(Primitive.Bool)),
-        EQUALS("==", new Some<>(Primitive.Bool)),
-        NOT_EQUALS("!=", new Some<>(Primitive.Bool)),
-        LESS_THAN_OR_EQUALS_TO("<=", new Some<>(Primitive.Bool)),
-        LESS_THAN("<", new Some<>(Primitive.Bool)),
-        GREATER_THAN_OR_EQUALS_TO(">=", new Some<>(Primitive.Bool)),
-        GREATER_THAN(">", new Some<>(Primitive.Bool));
+        Add("+", new None<>()),
+        And("&&", new Some<>(Primitive.Bool)),
+        Or("||", new Some<>(Primitive.Bool)),
+        Equals("==", new Some<>(Primitive.Bool)),
+        EqualsNot("!=", new Some<>(Primitive.Bool)),
+        LessThanOrEquals("<=", new Some<>(Primitive.Bool)),
+        LessThan("<", new Some<>(Primitive.Bool)),
+        GreaterThanOrEquals(">=", new Some<>(Primitive.Bool)),
+        GreaterThan(">", new Some<>(Primitive.Bool));
 
         private final String representation;
         private final Option<Type> type;
@@ -727,6 +727,7 @@ public class Main {
             return this.node.generate();
         }
     }
+
     private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
@@ -1240,7 +1241,7 @@ public class Main {
                 type("break", Main::compileBreak),
                 type("return ", Main::compileReturn),
                 type("assignment", Main::compileAssignment),
-                type("invokable", input0 -> compileInvokable(input0).mapValue(Invocation::generate))
+                type("invokable", input0 -> parseInvokable(input0).mapValue(Invocation::generate))
         ));
     }
 
@@ -1281,7 +1282,7 @@ public class Main {
         return createPrefixErr(stripped, "return ");
     }
 
-    private static Result<String, CompileError> createPrefixErr(String input, String prefix) {
+    private static <T> Result<T, CompileError> createPrefixErr(String input, String prefix) {
         return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(input)));
     }
 
@@ -1393,81 +1394,146 @@ public class Main {
     }
 
     private static Result<Value, CompileError> parseValue(String input) {
+        List<Function<String, Result<Value, CompileError>>> rules = Lists.listFrom(
+                type("whitespace", Main::parseWhitespace),
+                type("boolean", Main::parseBoolean),
+                type("lambda", Main::parseLambda),
+                type("invokable", Main::parseInvokable),
+                type("symbol", Main::parseSymbol),
+                type("number", Main::parseNumber),
+                type("data-access", Main::parseDataAccess),
+                type("string", Main::parseString),
+                type("char", Main::parseChar),
+                type("not", Main::parseNot)
+        );
+
+        var operatorRules = Iterators.fromArray(Operator.values())
+                .map(operator -> type(operator.name(), parseOperator(operator)))
+                .collect(new ListCollector<>());
+
+        return or(input, rules.addAll(operatorRules));
+    }
+
+    private static Function<String, Result<Value, CompileError>> parseOperator(Operator operator) {
+        return input -> {
+            var representation = operator.representation;
+            var stripped = input.strip();
+            var operatorIndex = stripped.indexOf(representation);
+            if (operatorIndex < 0) {
+                return createInfixErr(stripped, representation);
+            }
+
+            var leftString = stripped.substring(0, operatorIndex);
+            var rightString = stripped.substring(operatorIndex + representation.length());
+            return parseValue(leftString)
+                    .and(() -> parseValue(rightString))
+                    .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
+        };
+    }
+
+    private static Result<Value, CompileError> parseNot(String input) {
         var stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return new Ok<>(new Whitespace());
+        if (stripped.startsWith("!")) {
+            return parseValue(input.substring(1)).mapValue(Not::new);
         }
+        else {
+            return createPrefixErr(stripped, "!");
+        }
+    }
+
+    private static Result<Value, CompileError> parseChar(String input) {
+        var stripped = input.strip();
+        if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith("'")) {
+            return new Ok<>(new CharValue(stripped.substring(1, stripped.length() - 1)));
+        }
+        else {
+            return new Err<>(new CompileError("Not a char", new StringContext(stripped)));
+        }
+    }
+
+    private static Result<Value, CompileError> parseString(String input) {
+        var stripped = input.strip();
+        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Ok<>(new StringValue(stripped.substring(1, stripped.length() - 1)));
+        }
+        else {
+            return new Err<>(new CompileError("Not a string", new StringContext(input)));
+        }
+    }
+
+    private static Result<Value, CompileError> parseDataAccess(String input) {
+        var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator < 0) {
+            return createInfixErr(stripped, ".");
+        }
+        var value = stripped.substring(0, separator);
+        var property = stripped.substring(separator + ".".length()).strip();
+        if (isSymbol(property)) {
+            return parseValue(value).mapValue(parsed -> new DataAccess(parsed, property));
+        }
+        return createSymbolErr(property);
+    }
+
+    private static Err<Value, CompileError> createSymbolErr(String property) {
+        return new Err<>(new CompileError("Not a symbol", new StringContext(property)));
+    }
+
+    private static Result<Value, CompileError> parseNumber(String input) {
+        var stripped = input.strip();
+        if (isNumber(stripped)) {
+            return new Ok<>(new Symbol(stripped));
+        }
+        else {
+            return new Err<>(new CompileError("Not a number", new StringContext(stripped)));
+        }
+    }
+
+    private static Result<Value, CompileError> parseSymbol(String input) {
+        var stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return new Ok<>(new Symbol(stripped));
+        }
+        return createSymbolErr(stripped);
+    }
+
+    private static Result<Value, CompileError> parseLambda(String input) {
+        var stripped = input.strip();
+        var arrowIndex = stripped.indexOf("->");
+        if (arrowIndex < 0) {
+            return createInfixErr(stripped, "->");
+        }
+
+        var beforeArrow = stripped.substring(0, arrowIndex).strip();
+        var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+        if (isSymbol(beforeArrow)) {
+            return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
+        }
+
+        if (!beforeArrow.startsWith("(") || !beforeArrow.endsWith(")")) {
+            return new Err<>(new CompileError("No parentheses present", new StringContext(beforeArrow)));
+        }
+
+        var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
+
+        return assembleLambda(afterArrow, args);
+    }
+
+    private static Result<BooleanValue, CompileError> parseBoolean(String input) {
+        var stripped = input.strip();
         if (stripped.equals("false")) {
             return new Ok<>(BooleanValue.False);
         }
         if (stripped.equals("true")) {
             return new Ok<>(BooleanValue.True);
         }
-        var arrowIndex = stripped.indexOf("->");
-        if (arrowIndex >= 0) {
-            var beforeArrow = stripped.substring(0, arrowIndex).strip();
-            var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
-            if (isSymbol(beforeArrow)) {
-                return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
-            }
-            if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-                var args = Iterators.fromArray(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
-                        .map(String::strip)
-                        .filter(value -> !value.isEmpty())
-                        .collect(new ListCollector<>());
-
-                return assembleLambda(afterArrow, args);
-            }
-        }
-
-        if (compileInvokable(stripped) instanceof Ok(var invokable)) {
-            return new Ok<>(invokable);
-        }
-
-        if (isSymbol(stripped)) {
-            return new Ok<>(new Symbol(stripped));
-        }
-
-        if (isNumber(stripped)) {
-            return new Ok<>(new Symbol(stripped));
-        }
-
-        var separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            var value = stripped.substring(0, separator);
-            var property = stripped.substring(separator + ".".length()).strip();
-            if (isSymbol(property)) {
-                return parseValue(value).mapValue(parsed -> new DataAccess(parsed, property));
-            }
-        }
-
-        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Ok<>(new StringValue(stripped.substring(1, stripped.length() - 1)));
-        }
-
-        if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith("'")) {
-            return new Ok<>(new CharValue(stripped.substring(1, stripped.length() - 1)));
-        }
-
-        if (stripped.startsWith("!")) {
-            return parseValue(input.substring(1)).mapValue(Not::new);
-        }
-
-        for (var operator : Operator.values()) {
-            var operatorIndex = stripped.indexOf(operator.representation);
-            if (operatorIndex >= 0) {
-                var leftString = stripped.substring(0, operatorIndex);
-                var rightString = stripped.substring(operatorIndex + operator.representation.length());
-                return parseValue(leftString)
-                        .and(() -> parseValue(rightString))
-                        .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
-            }
-        }
-
-        return new Err<>(new CompileError("Not a input", new StringContext(input)));
+        return new Err<>(new CompileError("Not a boolean", new StringContext(input)));
     }
 
-    private static Result<Invocation, CompileError> compileInvokable(String input) {
+    private static Result<Invocation, CompileError> parseInvokable(String input) {
         var stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return createSuffixErr(stripped, ")");
