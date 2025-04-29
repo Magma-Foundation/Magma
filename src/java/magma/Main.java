@@ -1488,7 +1488,12 @@ public class Main {
                 var baseName = structRef.name;
                 var tuple = new Tuple<String, List<Type>>(baseName, listEmpty());
                 if (!structRegistry.containsKey(tuple)) {
-                    return new Err<>(new CompileError("No struct exists with base " + baseName, new StringContext(baseName)));
+                    var joinedKeys = structRegistry.keySet()
+                            .stream()
+                            .map(Tuple::left)
+                            .collect(Collectors.joining(", "));
+
+                    return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
                 }
 
                 var maybeStructType = structRegistry.get(tuple).left;
