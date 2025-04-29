@@ -1437,12 +1437,17 @@ public class Main {
         });
     }
 
-    private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsType) {
-        return divideAll(arguments, Main::foldValueChar)
-                .iterWithIndices()
-                .map((Tuple<Integer, String> input) -> getValueCompileErrorResult(expectedArgumentsType, input))
-                .collect(new Exceptional<>(new ListCollector<>()))
-                .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
+    private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsTypes) {
+        var divided = divideAll(arguments, Main::foldValueChar);
+        if (divided.size() == expectedArgumentsTypes.size()) {
+            return divided.iterWithIndices()
+                    .map((Tuple<Integer, String> input) -> getValueCompileErrorResult(expectedArgumentsTypes, input))
+                    .collect(new Exceptional<>(new ListCollector<>()))
+                    .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
+        }
+        else {
+            return new Err<>(new CompileError("Found '" + divided.size() + "' arguments, but '" + expectedArgumentsTypes.size() + "' were supplied", new NodeContext(caller)));
+        }
     }
 
     private static Result<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
