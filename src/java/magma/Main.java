@@ -569,6 +569,14 @@ public class Main {
     }
 
     private record StructType(String name, List<Definition> definitions) implements Type {
+        private Result<Type, CompileError> findTypeAsResult(String propertyKey) {
+            if (this.findTypeAsOption(propertyKey) instanceof Some(var propertyValue)) {
+                return new Ok<>(propertyValue);
+            }
+
+            return new Err<>(new CompileError("Undefined property", new StringContext(propertyKey)));
+        }
+
         @Override
         public String stringify() {
             return this.name;
@@ -579,7 +587,7 @@ public class Main {
             return "struct " + this.name;
         }
 
-        public Option<Type> find(String name) {
+        public Option<Type> findTypeAsOption(String name) {
             return findSymbolInFrame(this.definitions, name);
         }
     }
@@ -732,7 +740,7 @@ public class Main {
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
-    private static final Map<Tuple<String, List<Type>>, Tuple<Type, String>> structRegistry = new HashMap<>();
+    private static final Map<Tuple<String, List<Type>>, Tuple<StructType, String>> structRegistry = new HashMap<>();
     public static List<List<String>> statements = listEmpty();
     private static List<List<Definition>> currentDefinitions = Lists.listEmpty();
     private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
@@ -779,13 +787,16 @@ public class Main {
     private static Result<String, CompileError> compileRoot(String input) {
         return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
-            var joinedStructs = structRegistry.values()
-                    .stream()
-                    .map(Tuple::right)
-                    .collect(Collectors.joining());
-
+            var joinedStructs = joinStructures();
             return compiled + joinedStructs + join(methods);
         });
+    }
+
+    private static String joinStructures() {
+        return structRegistry.values()
+                .stream()
+                .map(Tuple::right)
+                .collect(Collectors.joining());
     }
 
     private static String join(List<String> list) {
@@ -1315,17 +1326,17 @@ public class Main {
     }
 
     private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
-        return resolve(access.parent).flatMapValue(resolved -> {
-            if (!(resolved instanceof StructType structType)) {
-                return new Err<>(new CompileError("Not a structure type '" + resolved.getClass() + "'", new NodeContext(resolved)));
+        return resolve(access.parent).flatMapValue(parentType -> {
+            if (parentType instanceof StructRef ref) {
+                return findStructType(ref.name)
+                        .flatMapValue(inner -> inner.findTypeAsResult(access.property));
             }
 
-            if (structType.find(access.property) instanceof Some(var found)) {
-                return new Ok<>(found);
+            if (parentType instanceof StructType structType) {
+                return structType.findTypeAsResult(access.property);
             }
-            else {
-                return new Err<>(new CompileError("Undefined field", new StringContext(access.property)));
-            }
+
+            return new Err<>(new CompileError("Not a structure type '" + parentType.getClass() + "'", new NodeContext(parentType)));
         });
     }
 
@@ -1587,34 +1598,38 @@ public class Main {
                 }
 
                 var baseName = structRef.name;
-                var tuple = new Tuple<String, List<Type>>(baseName, listEmpty());
-                if (!structRegistry.containsKey(tuple)) {
-                    var joinedKeys = structRegistry.keySet()
-                            .stream()
-                            .map(Tuple::left)
-                            .collect(Collectors.joining(", "));
+                return findStructType(baseName).flatMapValue(maybeStructType -> {
+                    if (!(maybeStructType instanceof StructType structType)) {
+                        return new Err<>(new CompileError("The struct '" + baseName + "' seems to exist, but isn't actually a struct", new NodeContext(maybeStructType)));
+                    }
 
-                    return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
-                }
+                    var maybeConstructor = structType.findTypeAsOption("new");
+                    if (!(maybeConstructor instanceof Some(var constructor))) {
+                        return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
+                    }
 
-                var maybeStructType = structRegistry.get(tuple).left;
-                if (!(maybeStructType instanceof StructType structType)) {
-                    return new Err<>(new CompileError("The struct '" + baseName + "' seems to exist, but isn't actually a struct", new NodeContext(maybeStructType)));
-                }
-
-                var maybeConstructor = structType.find("new");
-                if (!(maybeConstructor instanceof Some(var constructor))) {
-                    return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
-                }
-
-                if (constructor instanceof Functional functional) {
-                    return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
-                }
-                else {
-                    return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
-                }
+                    if (constructor instanceof Functional functional) {
+                        return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
+                    }
+                    else {
+                        return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
+                    }
+                });
             });
         }).mapErr(err -> new CompileError("Invalid caller", new StringContext(caller), Lists.listFrom(err)));
+    }
+
+    private static Result<StructType, CompileError> findStructType(String baseName) {
+        var tuple = new Tuple<String, List<Type>>(baseName, listEmpty());
+        if (structRegistry.containsKey(tuple)) {
+            return new Ok<>(structRegistry.get(tuple).left);
+        }
+
+        var joinedKeys = structRegistry.keySet()
+                .stream()
+                .map(Tuple::left)
+                .collect(Collectors.joining(", "));
+        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
     }
 
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsTypes) {
