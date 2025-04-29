@@ -1020,7 +1020,12 @@ public class Main {
         }
 
         var inputDefinition = input.substring(0, paramStart);
-        return parseDefinition(inputDefinition).flatMapValue(defined -> {
+        var or = or(inputDefinition, Lists.listFrom(
+                type("definition", Main::parseDefinition),
+                type("constructor", Main::parseConstructor)
+        ));
+
+        return or.flatMapValue(defined -> {
             if (defined instanceof Definition definition) {
                 functionName = definition.name;
                 functionLocalCounter = 0;
@@ -1069,6 +1074,16 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static Result<Definition, CompileError> parseConstructor(String constructor) {
+        var stripped = constructor.strip();
+        if (isSymbol(stripped)) {
+            return new Ok<>(new Definition(Primitive.Auto, stripped));
+        }
+        else {
+            return new Err<>(new CompileError("Not a constructor", new StringContext(stripped)));
+        }
     }
 
     private static <T> Result<T, CompileError> createInfixErr(String input, String infix) {
