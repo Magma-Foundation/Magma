@@ -994,12 +994,12 @@ public class Main {
 
     private static Result<String, CompileError> compileClassSegment(String input0) {
         return or(input0, Lists.listFrom(
-                type("?", value -> parseWhitespace(value).mapValue(Whitespace::generate)),
-                type("?", stripped -> compileStructure(stripped, "interface ")),
-                type("?", stripped -> compileStructure(stripped, "enum ")),
-                type("?", Main::compileClass),
+                whitespace(),
+                type("interface", stripped -> compileStructure(stripped, "interface ")),
+                type("enum", stripped -> compileStructure(stripped, "enum ")),
+                type("class", Main::compileClass),
                 type("method", Main::compileMethod),
-                type("?", Main::compileDefinitionStatement)
+                type("definition-statement", Main::compileDefinitionStatement)
         ));
     }
 
@@ -1158,20 +1158,33 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileFunctionSegment(String input, int depth) {
-        var stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return new Ok<>("");
-        }
+        return or(input, Lists.listFrom(
+                whitespace(),
+                type("statement", input0 -> compileStatement(input0, depth)),
+                type("block", input0 -> compileBlock(input0, depth))
+        ));
+    }
 
-        var indent = "\n" + "\t".repeat(depth);
+    private static Function<String, Result<String, CompileError>> whitespace() {
+        return type("whitespace", input0 -> parseWhitespace(input0).mapValue(Whitespace::generate));
+    }
+
+    private static Result<String, CompileError> compileStatement(String input, int depth) {
+        var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
             var maybeStatementValue = compileStatementValue(withoutEnd);
             if (maybeStatementValue instanceof Ok(var statementValue)) {
-                return new Ok<>(indent + statementValue + ";");
+                return new Ok<>("\n" + "\t".repeat(depth) + statementValue + ";");
             }
         }
 
+        return new Err<>(new CompileError("Not a statement", new StringContext(stripped)));
+    }
+
+    private static Result<String, CompileError> compileBlock(String input, int depth) {
+        String indent = "\n" + "\t".repeat(depth);
+        var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
             var contentStart = withoutEnd.indexOf("{");
@@ -1183,7 +1196,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError("Not a function segment", new StringContext(indent)));
+        return new Err<>(new CompileError("Not a block", new StringContext(indent)));
     }
 
     private static Result<String, CompileError> compileStatementValue(String input) {
