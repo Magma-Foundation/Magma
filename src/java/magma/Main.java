@@ -892,9 +892,9 @@ public class Main {
 
     private static Result<String, CompileError> compileRootSegment(String input) {
         return or(input, Lists.listFrom(
-                wrap(input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
-                wrap(Main::compileNamespaced),
-                wrap(Main::compileClass)
+                type("?", input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
+                type("?", Main::compileNamespaced),
+                type("?", Main::compileClass)
         ));
     }
 
@@ -994,12 +994,12 @@ public class Main {
 
     private static Result<String, CompileError> compileClassSegment(String input0) {
         return or(input0, Lists.listFrom(
-                wrap(value -> parseWhitespace(value).mapValue(Whitespace::generate)),
-                wrap(stripped -> compileStructure(stripped, "interface ")),
-                wrap(stripped -> compileStructure(stripped, "enum ")),
-                wrap(Main::compileClass),
-                wrap(Main::compileMethod),
-                wrap(Main::compileDefinitionStatement)
+                type("?", value -> parseWhitespace(value).mapValue(Whitespace::generate)),
+                type("?", stripped -> compileStructure(stripped, "interface ")),
+                type("?", stripped -> compileStructure(stripped, "enum ")),
+                type("?", Main::compileClass),
+                type("method", Main::compileMethod),
+                type("?", Main::compileDefinitionStatement)
         ));
     }
 
@@ -1106,8 +1106,8 @@ public class Main {
 
     private static Result<Defined, CompileError> parseParameter(String input) {
         var lists = Lists.<Function<String, Result<Defined, CompileError>>>listFrom(
-                wrap(Main::parseWhitespace),
-                wrap(Main::parseDefinition)
+                type("?", Main::parseWhitespace),
+                type("?", Main::parseDefinition)
         );
 
         return or(input, lists);
@@ -1127,8 +1127,10 @@ public class Main {
         return mapper.apply(input).match(tOrState::withValue, tOrState::withError);
     }
 
-    private static <B, T extends B> Function<String, Result<B, CompileError>> wrap(Function<String, Result<T, CompileError>> parser) {
-        return input0 -> parser.apply(input0).mapValue(value -> value);
+    private static <B, T extends B> Function<String, Result<B, CompileError>> type(String type, Function<String, Result<T, CompileError>> parser) {
+        return input0 -> parser.apply(input0)
+                .<B>mapValue(value -> value)
+                .mapErr(err -> new CompileError("Unknown type '" + type + "'", new StringContext(input0), Lists.listFrom(err)));
     }
 
     private static Result<Whitespace, CompileError> parseWhitespace(String input) {
@@ -1250,7 +1252,7 @@ public class Main {
     }
 
     private static Result<Assignable, CompileError> parseAssignable(String definition) {
-        return or(definition, Lists.listFrom(wrap(Main::parseDefinition), wrap(Main::parseValue)));
+        return or(definition, Lists.listFrom(type("?", Main::parseDefinition), type("?", Main::parseValue)));
     }
 
     private static String compileBeforeBlock(String input) {
