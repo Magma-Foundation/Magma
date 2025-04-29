@@ -576,7 +576,7 @@ public class Main {
                 return new Ok<>(propertyValue);
             }
 
-            return new Err<>(new CompileError("Undefined property", new StringContext(propertyKey)));
+            return new Err<>(new CompileError("Undefined property on struct type '" + this.generate() + "'", new StringContext(propertyKey)));
         }
 
         @Override
