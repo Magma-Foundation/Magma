@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static magma.Lists.listEmpty;
 import static magma.Lists.listFromArray;
@@ -56,13 +57,11 @@ public class Main {
 
         List<T> addAll(List<T> elements);
 
-        List<T> removeLast();
-
-        T removeAndGetLast();
+        Option<Tuple<T, List<T>>> removeLast();
 
         List<T> mapLast(Function<T, T> mapper);
 
-        Iterator<Tuple<Integer, T>> iterWithIndices();
+        Iterator<Tuple<Integer, T>> iterateWithIndices();
 
         List<T> sort(BiFunction<T, T, Integer> comparator);
     }
@@ -589,7 +588,26 @@ public class Main {
         }
     }
 
-    private record StructType(String name) implements Type {
+    private record StructType(String name, List<Definition> definitions) implements Type {
+        @Override
+        public String stringify() {
+            return this.name;
+        }
+
+        @Override
+        public String generate() {
+            return "struct " + this.name;
+        }
+
+        public Option<Type> find(String name) {
+            return this.definitions.iter()
+                    .filter(definition -> definition.name.equals(name))
+                    .map(definition -> definition.type)
+                    .next();
+        }
+    }
+
+    private record StructRef(String name) implements Type {
         @Override
         public String generate() {
             return "struct " + this.name;
@@ -737,10 +755,12 @@ public class Main {
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
-    private static final List<String> structs = listEmpty();
+
+    private static final Map<Tuple<String, List<Type>>, Tuple<Type, String>> structRegistry = new HashMap<>();
+
     public static List<List<String>> statements = listEmpty();
     private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
-    private static List<StructType> structStack = listEmpty();
+    private static List<StructRef> structStack = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Type> typeArguments = listEmpty();
@@ -783,7 +803,12 @@ public class Main {
     private static Result<String, CompileError> compileRoot(String input) {
         return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
-            return compiled + join(structs) + join(methods);
+            var joinedStructs = structRegistry.values()
+                    .stream()
+                    .map(Tuple::right)
+                    .collect(Collectors.joining());
+
+            return compiled + joinedStructs + join(methods);
         });
     }
 
@@ -970,26 +995,42 @@ public class Main {
                 typeParameters = typeParams;
                 typeArguments = typeArgs;
 
-                var newName = merge(name, typeArgs);
-                return generateStructure(newName, content);
+                return generateStructure(name, content, typeArgs);
             });
 
             return new Ok<>("");
         }
 
-        return generateStructure(name, content);
+        return generateStructure(name, content, Lists.listEmpty());
     }
 
-    private static Result<String, CompileError> generateStructure(String name, String content) {
-        structStack = structStack.addLast(new StructType(name));
-        return parseStatements(content, Main::compileClassSegment).mapValue(parsed -> {
-            var compiled = generateAll(Main::mergeStatements, parsed);
-            structStack = structStack.removeLast();
+    private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs) {
+        structStack = structStack.addLast(new StructRef(name));
+        var result = parseStatements(content, Main::compileClassSegment)
+                .flatMapValue(parsed -> getRecord(name, typeArgs, parsed));
 
-            var generated = "struct " + name + " {" + compiled + "\n};\n";
-            structs.addLast(generated);
-            return "";
-        });
+        structStack = structStack.removeLast().map(Tuple::right).orElse(structStack);
+        return result;
+    }
+
+    private static Result<String, CompileError> getRecord(
+            String name,
+            List<Type> typeArgs,
+            List<String> definitions
+    ) {
+        var compiled = generateAll(Main::mergeStatements, definitions);
+        var maybeCurrentRef = structStack.findLast();
+        if (maybeCurrentRef instanceof Some(var currentRef)) {
+            var alias = createAlias(name, typeArgs);
+            var generated = "struct " + alias + " {" + compiled + "\n};\n";
+
+            var structType = new StructType(compiled, listEmpty());
+            structRegistry.put(new Tuple<>(name, typeArgs), new Tuple<>(structType, generated));
+            return new Ok<>("");
+        }
+        else {
+            return new Err<>(new CompileError("No current ref present", new StringContext(name)));
+        }
     }
 
     private static Result<String, CompileError> compileClassSegment(String input0) {
@@ -1111,12 +1152,20 @@ public class Main {
 
     private static Result<List<String>, CompileError> parseStatementsWithLocals(String content, Function<String, Result<String, CompileError>> compiler) {
         statements = statements.addLast(listEmpty());
-        return parseStatements(content, compiler).mapValue(parsed1 -> {
-            var elements = statements.removeAndGetLast();
-            return Lists.<String>listEmpty()
-                    .addAll(elements)
-                    .addAll(parsed1);
+        var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
+            var maybeElements = statements.findLast();
+            if (maybeElements instanceof Some(var elements)) {
+                return new Ok<>(Lists.<String>listEmpty()
+                        .addAll(elements)
+                        .addAll(parsed1));
+            }
+            else {
+                return new Err<>(new CompileError("No statement frames found", new StringContext(content)));
+            }
         });
+
+        statements = statements.removeLast().map(Tuple::right).orElse(statements);
+        return result;
     }
 
     private static Result<Defined, CompileError> parseParameter(String input) {
@@ -1289,6 +1338,7 @@ public class Main {
         var caller = invocation.caller;
         return resolve(caller).flatMapValue(resolvedCaller -> {
             if (resolvedCaller instanceof Functional functional) {
+
                 return new Ok<>(functional.returns);
             }
 
@@ -1430,8 +1480,32 @@ public class Main {
                 if (resolved instanceof Functional functional) {
                     return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
                 }
-                else {
+
+                if (!(resolved instanceof StructRef structRef)) {
                     return new Err<>(new CompileError("Not an invokable type", new NodeContext(resolved)));
+                }
+
+                var baseName = structRef.name;
+                var tuple = new Tuple<String, List<Type>>(baseName, listEmpty());
+                if (!structRegistry.containsKey(tuple)) {
+                    return new Err<>(new CompileError("No struct exists with base " + baseName, new StringContext(baseName)));
+                }
+
+                var maybeStructType = structRegistry.get(tuple).left;
+                if (!(maybeStructType instanceof StructType structType)) {
+                    return new Err<>(new CompileError("The struct '" + baseName + "' seems to exist, but isn't actually a struct", new NodeContext(maybeStructType)));
+                }
+
+                var maybeConstructor = structType.find("new");
+                if (!(maybeConstructor instanceof Some(var constructor))) {
+                    return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
+                }
+
+                if (constructor instanceof Functional functional) {
+                    return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
+                }
+                else {
+                    return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
                 }
             });
         }).mapErr(err -> new CompileError("Invalid caller", new StringContext(caller), Lists.listFrom(err)));
@@ -1440,7 +1514,7 @@ public class Main {
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsTypes) {
         var divided = divideAll(arguments, Main::foldValueChar);
         if (divided.size() == expectedArgumentsTypes.size()) {
-            return divided.iterWithIndices()
+            return divided.iterateWithIndices()
                     .map((Tuple<Integer, String> input) -> getValueCompileErrorResult(expectedArgumentsTypes, input))
                     .collect(new Exceptional<>(new ListCollector<>()))
                     .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
@@ -1489,7 +1563,7 @@ public class Main {
         return expectedArgumentsType.find(index).map(found -> {
             typeStack = typeStack.addLast(found);
             Result<Value, CompileError> parsed = parseValue(input.right);
-            typeStack = typeStack.removeLast();
+            typeStack = typeStack.removeLast().map(Tuple::right).orElse(typeStack);
             return parsed;
         }).orElseGet(() -> new Err<>(new CompileError("Could not find expected argument", new StringContext(input.right))));
     }
@@ -1648,19 +1722,19 @@ public class Main {
                         // expanding.get(base).apply(parsed);
                     }
 
-                    return new Ok<>(new StructType(merge(base, parsed)));
+                    return new Ok<>(new StructRef(createAlias(base, parsed)));
                 });
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Ok<>(new StructType(stripped));
+            return new Ok<>(new StructRef(stripped));
         }
 
         return new Err<>(new CompileError("Not a valid type", new StringContext(input)));
     }
 
-    private static String merge(String base, List<Type> parsed) {
+    private static String createAlias(String base, List<Type> parsed) {
         return base + "_" + parsed.iter()
                 .map(Node::generate)
                 .collect(new Joiner("_"))

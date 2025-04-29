@@ -19,7 +19,7 @@ class Lists {
 
         @Override
         public Main.Iterator<T> iter() {
-            return this.iterWithIndices().map(Main.Tuple::right);
+            return this.iterateWithIndices().map(Main.Tuple::right);
         }
 
         @Override
@@ -74,13 +74,14 @@ class Lists {
         }
 
         @Override
-        public Main.List<T> removeLast() {
-            return new JavaList<>(this.elements.subList(0, this.elements.size() - 1));
-        }
+        public Main.Option<Main.Tuple<T, Main.List<T>>> removeLast() {
+            if (this.elements.isEmpty()) {
+                return new Main.None<>();
+            }
 
-        @Override
-        public T removeAndGetLast() {
-            return this.elements.removeLast();
+            var slice = this.elements.subList(0, this.elements.size() - 1);
+            var last = this.elements.removeLast();
+            return new Main.Some<>(new Main.Tuple<>(last, new JavaList<>(slice)));
         }
 
         @Override
@@ -90,7 +91,7 @@ class Lists {
         }
 
         @Override
-        public Main.Iterator<Main.Tuple<Integer, T>> iterWithIndices() {
+        public Main.Iterator<Main.Tuple<Integer, T>> iterateWithIndices() {
             return new Main.Iterator<>(new Main.RangeHead(this.elements.size())).map(index -> {
                 var element = this.elements.get(index);
                 return new Main.Tuple<>(index, element);
