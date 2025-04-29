@@ -1171,15 +1171,13 @@ public class Main {
 
     private static Result<String, CompileError> compileStatement(String input, int depth) {
         var stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
-            var maybeStatementValue = compileStatementValue(withoutEnd);
-            if (maybeStatementValue instanceof Ok(var statementValue)) {
-                return new Ok<>("\n" + "\t".repeat(depth) + statementValue + ";");
-            }
+        if (!stripped.endsWith(";")) {
+            return createSuffixErr(stripped, ";");
         }
 
-        return new Err<>(new CompileError("Not a statement", new StringContext(stripped)));
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
+        return compileStatementValue(withoutEnd)
+                .mapValue(statementValue -> "\n" + "\t".repeat(depth) + statementValue + ";");
     }
 
     private static Result<String, CompileError> compileBlock(String input, int depth) {
@@ -1200,44 +1198,63 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileStatementValue(String input) {
+        return or(input, Lists.listFrom(
+                type("break", Main::compileBreak),
+                type("return ", Main::compileReturn),
+                type("assignment", Main::compileAssignment),
+                type("invokable", input0 -> compileInvokable(input0).mapValue(Invocation::generate))
+        ));
+    }
+
+    private static Result<String, CompileError> compileAssignment(String input) {
         var stripped = input.strip();
+        var valueSeparator = stripped.indexOf("=");
+        if (valueSeparator < 0) {
+            return createInfixErr(stripped, "=");
+        }
+        var assignableString = stripped.substring(0, valueSeparator);
+        var valueString = stripped.substring(valueSeparator + "=".length());
+
+        return parseAssignable(assignableString).and(() -> parseValue(valueString)).flatMapValue(tuple -> {
+            var assignable = tuple.left;
+            var value = tuple.right;
+
+            return resolve(value).flatMapValue(type -> {
+                Assignable newAssignable;
+                if (assignable instanceof Definition definition) {
+                    newAssignable = new Definition(type, definition.name);
+                }
+                else {
+                    newAssignable = assignable;
+                }
+
+                return new Ok<>(newAssignable.generate() + " = " + value.generate());
+            });
+        });
+    }
+
+    private static Result<String, CompileError> compileReturn(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            var slice = stripped.substring("return ".length());
+            return compileValue(slice).mapValue(value -> "return " + value);
+        }
+
+        return createPrefixErr(stripped, "return ");
+    }
+
+    private static Result<String, CompileError> createPrefixErr(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", new StringContext(input)));
+    }
+
+    private static Result<String, CompileError> compileBreak(String s) {
+        var stripped = s.strip();
         if (stripped.equals("break")) {
             return new Ok<>("break");
         }
-
-        if (stripped.startsWith("return ")) {
-            var value = stripped.substring("return ".length());
-            return new Ok<>("return " + compileValue(value));
+        else {
+            return new Err<>(new CompileError("Not break", new StringContext(stripped)));
         }
-
-        var valueSeparator = stripped.indexOf("=");
-        if (valueSeparator >= 0) {
-            var assignableString = stripped.substring(0, valueSeparator);
-            var valueString = stripped.substring(valueSeparator + "=".length());
-
-            return parseAssignable(assignableString).and(() -> parseValue(valueString)).flatMapValue(tuple -> {
-                var assignable = tuple.left;
-                var value = tuple.right;
-
-                return resolve(value).flatMapValue(type -> {
-                    Assignable newAssignable;
-                    if (assignable instanceof Definition definition) {
-                        newAssignable = new Definition(type, definition.name);
-                    }
-                    else {
-                        newAssignable = assignable;
-                    }
-
-                    return new Ok<>(newAssignable.generate() + " = " + value.generate());
-                });
-            });
-        }
-
-        if (compileInvokable(input) instanceof Ok(var invokable)) {
-            return new Ok<>(invokable.generate());
-        }
-
-        return new Err<>(new CompileError("Not a statement input", new StringContext(input)));
     }
 
     private static Result<Type, CompileError> resolve(Value value) {
