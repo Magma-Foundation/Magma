@@ -1310,7 +1310,17 @@ public class Main {
 
         return findSymbolInFrames(value)
                 .<Result<Type, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Symbol not defined", new StringContext(value))));
+                .orElseGet(() -> createUndefinedError(value));
+    }
+
+    private static Result<Type, CompileError> createUndefinedError(String value) {
+        var joinedNames = currentDefinitions.iter()
+                .flatMap(List::iter)
+                .map(Definition::name)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return new Err<>(new CompileError("Symbol not defined [" + joinedNames + "]", new StringContext(value)));
     }
 
     private static Option<Type> findSymbolInFrames(String value) {
