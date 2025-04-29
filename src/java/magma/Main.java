@@ -95,8 +95,6 @@ public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
-        Option<T> findValue();
-
         <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
 
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
@@ -523,11 +521,6 @@ public class Main {
         }
 
         @Override
-        public Option<T> findValue() {
-            return new Some<>(this.value);
-        }
-
-        @Override
         public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
             return mapper.apply(this.value);
         }
@@ -552,11 +545,6 @@ public class Main {
         @Override
         public <R> Result<R, X> mapValue(Function<T, R> mapper) {
             return new Err<>(this.error);
-        }
-
-        @Override
-        public Option<T> findValue() {
-            return new None<>();
         }
 
         @Override
@@ -592,10 +580,7 @@ public class Main {
         }
 
         public Option<Type> find(String name) {
-            return this.definitions.iter()
-                    .filter(definition -> definition.name.equals(name))
-                    .map(definition -> definition.type)
-                    .next();
+            return findSymbolInFrame(this.definitions, name);
         }
     }
 
@@ -743,16 +728,15 @@ public class Main {
         }
     }
 
+    private static final List<List<Definition>> currentDefinitions = Lists.listEmpty();
     private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
-
     private static final Map<Tuple<String, List<Type>>, Tuple<Type, String>> structRegistry = new HashMap<>();
-
     public static List<List<String>> statements = listEmpty();
     private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
-    private static List<StructRef> structStack = listEmpty();
+    private static List<StructRef> currentStructs = listEmpty();
     private static String functionName = "";
     private static List<String> typeParameters = listEmpty();
     private static List<Type> typeArguments = listEmpty();
@@ -997,11 +981,11 @@ public class Main {
     }
 
     private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs) {
-        structStack = structStack.addLast(new StructRef(name));
+        currentStructs = currentStructs.addLast(new StructRef(name));
         var result = parseStatements(content, Main::compileClassSegment)
                 .flatMapValue(parsed -> getRecord(name, typeArgs, parsed));
 
-        structStack = structStack.removeLast().map(Tuple::right).orElse(structStack);
+        currentStructs = currentStructs.removeLast().map(Tuple::right).orElse(currentStructs);
         return result;
     }
 
@@ -1011,7 +995,7 @@ public class Main {
             List<String> definitions
     ) {
         var compiled = generateAll(Main::mergeStatements, definitions);
-        var maybeCurrentRef = structStack.findLast();
+        var maybeCurrentRef = currentStructs.findLast();
         if (maybeCurrentRef instanceof Some(var currentRef)) {
             var alias = createAlias(name, typeArgs);
             var generated = "struct " + alias + " {" + compiled + "\n};\n";
@@ -1086,12 +1070,12 @@ public class Main {
                         .collect(new ListCollector<>());
 
                 var newParams = Lists.<Defined>listEmpty()
-                        .addLast(new Definition(structStack.findLast().orElse(null), "this"))
+                        .addLast(new Definition(currentStructs.findLast().orElse(null), "this"))
                         .addAll(oldParams);
 
                 var outputParams = generateValueList(newParams);
                 return assembleMethod(defined, outputParams, content).mapValue(method -> {
-                    structStack = structStack.mapLast(last -> {
+                    currentStructs = currentStructs.mapLast(last -> {
                         var paramTypes = newParams.iter()
                                 .map(Defined::findType)
                                 .flatMap(Iterators::fromOption)
@@ -1319,11 +1303,28 @@ public class Main {
     }
 
     private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
-        if (symbol.value.equals("this")) {
-            return new Ok<>(structStack.findLast().orElse(null));
+        var value = symbol.value;
+        if (value.equals("this")) {
+            return new Ok<>(currentStructs.findLast().orElse(null));
         }
 
-        return new Err<>(new CompileError("Not a symbol", new StringContext(symbol.value)));
+        return findSymbolInFrames(value)
+                .<Result<Type, CompileError>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileError("Symbol not defined", new StringContext(value))));
+    }
+
+    private static Option<Type> findSymbolInFrames(String value) {
+        return currentDefinitions.iter()
+                .map(list -> findSymbolInFrame(list, value))
+                .flatMap(Iterators::fromOption)
+                .next();
+    }
+
+    private static Option<Type> findSymbolInFrame(List<Definition> frame, String value) {
+        return frame.iter()
+                .filter(definition -> definition.name.equals(value))
+                .map(definition -> definition.type)
+                .next();
     }
 
     private static Result<Type, CompileError> resolveInvocation(Invocation invocation) {
