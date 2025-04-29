@@ -119,30 +119,22 @@ public class Main {
     }
 
     private enum Operator {
-        ADD("+"),
-        AND("&&", Primitive.Bool),
-        OR("||", Primitive.Bool),
-        EQUALS("==", Primitive.Bool),
-        NOT_EQUALS("!=", Primitive.Bool),
-        LESS_THAN_OR_EQUALS_TO("<=", Primitive.Bool),
-        LESS_THAN("<", Primitive.Bool),
-        GREATER_THAN_OR_EQUALS_TO(">=", Primitive.Bool),
-        GREATER_THAN(">", Primitive.Bool);
+        ADD("+", new None<>()),
+        AND("&&", new Some<>(Primitive.Bool)),
+        OR("||", new Some<>(Primitive.Bool)),
+        EQUALS("==", new Some<>(Primitive.Bool)),
+        NOT_EQUALS("!=", new Some<>(Primitive.Bool)),
+        LESS_THAN_OR_EQUALS_TO("<=", new Some<>(Primitive.Bool)),
+        LESS_THAN("<", new Some<>(Primitive.Bool)),
+        GREATER_THAN_OR_EQUALS_TO(">=", new Some<>(Primitive.Bool)),
+        GREATER_THAN(">", new Some<>(Primitive.Bool));
 
         private final String representation;
         private final Option<Type> type;
 
-        Operator(String value) {
-            this(value, new None<>());
-        }
-
         Operator(String value, Option<Type> type) {
             this.representation = value;
             this.type = type;
-        }
-
-        Operator(String value, Type type) {
-            this(value, new Some<>(type));
         }
     }
 
