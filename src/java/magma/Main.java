@@ -91,6 +91,7 @@ public class Main {
     }
 
     private sealed interface Result<T, X> permits Ok, Err {
+        Option<T> findValue();
     }
 
     private interface Type extends Node {
@@ -521,9 +522,17 @@ public class Main {
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public Option<T> findValue() {
+            return new Some<>(this.value);
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public Option<T> findValue() {
+            return new None<>();
+        }
     }
 
     private static final class StructType implements Type {
@@ -602,6 +611,12 @@ public class Main {
         @Override
         public String stringify() {
             return "_Func_" + generateValueList(this.paramTypes) + "_" + this.returns.stringify() + "_";
+        }
+    }
+
+    private record CompileError(String message, String context, List<CompileError> errors) {
+        public CompileError(String message, String context) {
+            this(message, context, listEmpty());
         }
     }
 
@@ -963,17 +978,17 @@ public class Main {
     }
 
     private static Defined parseParameter(String input) {
-        return parseWhitespace(input).<Defined>map(value -> value)
+        return parseWhitespace(input).findValue().<Defined>map(value -> value)
                 .or(() -> parseDefinition(input).map(value -> value))
                 .orElseGet(() -> new Content(input));
     }
 
-    private static Option<Whitespace> parseWhitespace(String input) {
+    private static Result<Whitespace, CompileError> parseWhitespace(String input) {
         if (input.isBlank()) {
-            return new Some<>(new Whitespace());
+            return new Ok<>(new Whitespace());
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not blank", input));
         }
     }
 

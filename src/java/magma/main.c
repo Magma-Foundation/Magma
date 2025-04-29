@@ -142,6 +142,8 @@ struct Ref {
 };
 struct Functional {
 };
+struct CompileError {
+};
 struct Option_struct IOException {
 };
 struct Result_char*_struct IOException {
@@ -227,6 +229,8 @@ struct Iterator_struct Tuple_int_struct Tuple_int_struct Tuple_int_struct Tuple_
 struct List_struct Tuple_int_struct Tuple_int_struct Tuple_int_struct Tuple_int_struct T {
 };
 struct Option_struct Whitespace {
+};
+struct Result_struct Whitespace_struct CompileError {
 };
 struct Option_struct Invocation {
 };
@@ -1010,6 +1014,9 @@ char* generate(struct Functional this){
 char* stringify(struct Functional this){
 	return "_Func_" + generateValueList(this.paramTypes) + "_" + this.returns.stringify() + "_";
 }
+struct public CompileError(struct CompileError this, char* message, char* context){
+	this(message, context, listEmpty());
+}
 /* new Some */ run_local0(? var error){
 	return /* /* new Some */ */;
 }
@@ -1035,6 +1042,12 @@ struct Option_struct IOException writeTarget(struct Main this, char* csq){
 	/* catch (IOException e) */{
 		return new_Some_/*  */(e);
 	}
+}
+struct Option_/*  */ findValue(struct Ok_/*  */ this){
+	return new_Some_/*  */(this.value);
+}
+struct Option_/*  */ findValue(struct Err_/*  */ this){
+	return new_None_/*  */();
 }
 struct Result_char*_struct IOException readString(struct Main this){
 	/* try */{
@@ -1785,16 +1798,16 @@ struct List_char* parseStatementsWithLocals(struct Main this, char* content, cha
 }
 struct Defined parseParameter(struct Main this, char* input){
 	/* parseDefinition(input) */ parseParameter_local2 = parseDefinition(input);
-	/* /* parseWhitespace(input). */ < Defined > map(parseParameter_local0) */ parseParameter_local5 = /* parseWhitespace(input). */ < Defined > map(parseParameter_local0);
+	/* /* parseWhitespace(input).findValue(). */ < Defined > map(parseParameter_local0) */ parseParameter_local5 = /* parseWhitespace(input).findValue(). */ < Defined > map(parseParameter_local0);
 	/* parseParameter_local5.or(parseParameter_local5, parseParameter_local3) */ parseParameter_local7 = parseParameter_local5.or(parseParameter_local5, parseParameter_local3);
 	return parseParameter_local7.orElseGet(parseParameter_local7, parseParameter_local6);
 }
-struct Option_struct Whitespace parseWhitespace(struct Main this, char* input){
+struct Result_struct Whitespace_struct CompileError parseWhitespace(struct Main this, char* input){
 	if (input.isBlank(input)){
-		return new_Some_/*  */(new_Whitespace());
+		return new_Ok_/*  */(new_Whitespace());
 	}
 	else {
-		return new_None_/*  */();
+		return new_Err_/*  */(new_CompileError("Not blank", input));
 	}
 }
 /* compileFunctionSegment(input1, depth + 1) */ compileFunctionSegment_local13(Content[input= input1 -> compileFunctionSegment(input1, depth + 1)] input1){
