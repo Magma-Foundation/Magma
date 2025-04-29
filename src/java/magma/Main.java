@@ -1326,18 +1326,21 @@ public class Main {
     }
 
     private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
-        return resolve(access.parent).flatMapValue(parentType -> {
-            if (parentType instanceof StructRef ref) {
-                return findStructType(ref.name)
-                        .flatMapValue(inner -> inner.findTypeAsResult(access.property));
-            }
+        return resolve(access.parent)
+                .flatMapValue(Main::resolveStructureType)
+                .flatMapValue(structType -> structType.findTypeAsResult(access.property));
+    }
 
-            if (parentType instanceof StructType structType) {
-                return structType.findTypeAsResult(access.property);
-            }
+    private static Result<StructType, CompileError> resolveStructureType(Type parentType) {
+        if (parentType instanceof StructRef ref) {
+            return findStructType(ref.name);
+        }
 
-            return new Err<>(new CompileError("Not a structure type '" + parentType.getClass() + "'", new NodeContext(parentType)));
-        });
+        if (parentType instanceof StructType structType) {
+            return new Ok<>(structType);
+        }
+
+        return new Err<>(new CompileError("Not a structure type '" + parentType.getClass() + "'", new NodeContext(parentType)));
     }
 
     private static Result<Type, CompileError> resolveOperation(Operation operation) {
