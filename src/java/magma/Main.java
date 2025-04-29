@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +32,8 @@ public class Main {
         Option<T> or(Supplier<Option<T>> supplier);
 
         void ifPresent(Consumer<T> consumer);
+
+        boolean isPresent();
     }
 
     public interface List<T> {
@@ -76,8 +80,6 @@ public class Main {
         String generate();
 
         Option<Type> findType();
-
-        Option<String> findName();
     }
 
     private sealed interface Value extends Assignable {
@@ -91,11 +93,25 @@ public class Main {
     }
 
     private sealed interface Result<T, X> permits Ok, Err {
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
         Option<T> findValue();
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
     private interface Type extends Node {
         String stringify();
+    }
+
+    private interface Error {
+        String display();
     }
 
     private enum Operator {
@@ -195,6 +211,11 @@ public class Main {
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
         }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
     }
 
     public record None<T>() implements Option<T> {
@@ -225,6 +246,11 @@ public class Main {
 
         @Override
         public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
         }
     }
 
@@ -407,8 +433,7 @@ public class Main {
             return new Some<>(this.type);
         }
 
-        @Override
-        public Option<String> findName() {
+        private Option<String> findName() {
             return new Some<>(this.name);
         }
     }
@@ -421,11 +446,6 @@ public class Main {
 
         @Override
         public Option<Type> findType() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<String> findName() {
             return new None<>();
         }
 
@@ -446,10 +466,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<String> findName() {
-            return new None<>();
-        }
     }
 
     private static class EmptyHead<T> implements Head<T> {
@@ -523,15 +539,65 @@ public class Main {
 
     private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
         public Option<T> findValue() {
             return new Some<>(this.value);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return supplier.get().mapValue(otherValue -> new Tuple<>(this.value, otherValue));
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
         }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
         public Option<T> findValue() {
             return new None<>();
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
         }
     }
 
@@ -614,13 +680,70 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, String context, List<CompileError> errors) {
+    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
         public CompileError(String message, String context) {
             this(message, context, listEmpty());
         }
+
+        @Override
+        public String display() {
+            return this.message + ": " + this.context + this.errors.iter()
+                    .map(CompileError::display)
+                    .collect(new Joiner(""))
+                    .orElse("");
+        }
     }
 
-    private static final Map<String, Function<List<Type>, Option<String>>> expanding = new HashMap<>();
+    private record Exceptional<T, C, X>(Collector<T, C> collector) implements Collector<Result<T, X>, Result<C, X>> {
+        @Override
+        public Result<C, X> createInitial() {
+            return new Ok<>(this.collector.createInitial());
+        }
+
+        @Override
+        public Result<C, X> fold(Result<C, X> current, Result<T, X> element) {
+            return current.flatMapValue(currentValue -> element.mapValue(elementValue -> this.collector.fold(currentValue, elementValue)));
+        }
+    }
+
+    private record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
+        public OrState() {
+            this(new None<>(), listEmpty());
+        }
+
+        public OrState<T> withValue(T value) {
+            return new OrState<>(new Some<>(value), this.errors);
+        }
+
+        public OrState<T> withError(CompileError error) {
+            return new OrState<>(this.maybeValue, this.errors.addLast(error));
+        }
+
+        public Result<T, List<CompileError>> toResult() {
+            return switch (this.maybeValue) {
+                case None<T> _ -> new Err<>(this.errors);
+                case Some<T>(var value) -> new Ok<>(value);
+            };
+        }
+    }
+
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String display() {
+            return this.error.display();
+        }
+    }
+
+    private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
@@ -634,18 +757,20 @@ public class Main {
     private static int functionLocalCounter = 0;
     private static List<Type> typeStack = listEmpty();
 
-    private static Option<IOException> run() {
+    private static Option<ApplicationError> run() {
         return switch (readString()) {
-            case Err<String, IOException>(var error) -> new Some<>(error);
-            case Ok<String, IOException>(var input) -> {
-                var output = compileRoot(input);
-                yield writeTarget(output);
-            }
+            case Err<String, IOException>(var error) -> new Some<>(new ApplicationError(new ThrowableError(error)));
+            case Ok<String, IOException>(var input) -> switch (compileRoot(input)) {
+                case Err<String, CompileError>(var result) -> new Some<>(new ApplicationError(result));
+                case Ok<String, CompileError>(var output) -> writeTarget(output)
+                        .map(ThrowableError::new)
+                        .map(ApplicationError::new);
+            };
         };
     }
 
     public static void main() {
-        run().ifPresent(Throwable::printStackTrace);
+        run().ifPresent(error -> System.err.println(error.display()));
     }
 
     private static Option<IOException> writeTarget(String csq) {
@@ -665,9 +790,11 @@ public class Main {
         }
     }
 
-    private static String compileRoot(String input) {
-        var compiled = compileStatements(input, Main::compileRootSegment);
-        return compiled + join(structs) + join(methods);
+    private static Result<String, CompileError> compileRoot(String input) {
+        return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
+            var compiled = generateAll(Main::mergeStatements, parsed);
+            return compiled + join(structs) + join(methods);
+        });
     }
 
     private static String join(List<String> list) {
@@ -676,15 +803,7 @@ public class Main {
                 .orElse("");
     }
 
-    private static String compileStatements(String input, Function<String, String> compiler) {
-        return generateStatements(parseStatements(input, compiler));
-    }
-
-    private static String generateStatements(List<String> parsed) {
-        return generateAll(Main::mergeStatements, parsed);
-    }
-
-    private static List<String> parseStatements(String input, Function<String, String> compiler) {
+    private static <T> Result<List<T>, CompileError> parseStatements(String input, Function<String, Result<T, CompileError>> compiler) {
         return parseAll(input, Main::foldStatementChar, compiler);
     }
 
@@ -693,11 +812,15 @@ public class Main {
                 .fold("", merger);
     }
 
-    private static <T> List<T> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, T> compiler) {
+    private static <T> Result<List<T>, CompileError> parseAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, Result<T, CompileError>> compiler
+    ) {
         return divideAll(input, folder)
                 .iter()
                 .map(compiler)
-                .collect(new ListCollector<>());
+                .collect(new Exceptional<>(new ListCollector<>()));
     }
 
     private static String mergeStatements(String buffer, String element) {
@@ -777,24 +900,28 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.isEmpty()) {
-            return "";
-        }
-
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
-        }
-
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    private static Result<String, CompileError> compileRootSegment(String input) {
+        return or(input, Lists.listFrom(
+                wrap(input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
+                wrap(Main::compileNamespaced),
+                wrap(Main::compileClass)
+        ));
     }
 
-    private static Option<String> compileClass(String stripped) {
+    private static Result<String, CompileError> compileNamespaced(String input) {
+        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+            return new Ok<>("");
+        }
+        else {
+            return new Err<>(new CompileError("Not namespaced", input.strip()));
+        }
+    }
+
+    private static Result<String, CompileError> compileClass(String stripped) {
         return compileStructure(stripped, "class ");
     }
 
-    private static Option<String> compileStructure(String input, String infix) {
+    private static Result<String, CompileError> compileStructure(String input, String infix) {
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var afterClass = input.substring(classIndex + infix.length());
@@ -818,12 +945,13 @@ public class Main {
                 }
             }
         }
-        return new None<>();
+
+        return new Err<>(new CompileError("Not a struct", input));
     }
 
-    private static Option<String> getString(String beforeContent, String withEnd) {
+    private static Result<String, CompileError> getString(String beforeContent, String withEnd) {
         if (!withEnd.endsWith("}")) {
-            return new None<>();
+            return createSuffixErr(withEnd, "}");
         }
         var content = withEnd.substring(0, withEnd.length() - "}".length());
 
@@ -842,7 +970,11 @@ public class Main {
         return assembleStructure(listEmpty(), strippedBeforeContent, content);
     }
 
-    private static Option<String> assembleStructure(List<String> typeParams, String name, String content) {
+    private static <T> Result<T, CompileError> createSuffixErr(String input, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
+    }
+
+    private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content) {
         if (!typeParams.isEmpty()) {
             expanding.put(name, typeArgs -> {
                 typeParameters = typeParams;
@@ -852,100 +984,103 @@ public class Main {
                 return generateStructure(newName, content);
             });
 
-            return new Some<>("");
+            return new Ok<>("");
         }
 
         return generateStructure(name, content);
     }
 
-    private static Option<String> generateStructure(String name, String content) {
+    private static Result<String, CompileError> generateStructure(String name, String content) {
         structStack = structStack.addLast(new StructType(name));
-        var compiled = compileStatements(content, Main::compileClassSegment);
+        return parseStatements(content, Main::compileClassSegment).mapValue(parsed -> {
+            var compiled = generateAll(Main::mergeStatements, parsed);
+            structStack = structStack.removeLast();
 
-
-        structStack = structStack.removeLast();
-
-        var generated = "struct " + name + " {" + compiled + "\n};\n";
-        structs.addLast(generated);
-        return new Some<>("");
-    }
-
-    private static String compileClassSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.isEmpty()) {
+            var generated = "struct " + name + " {" + compiled + "\n};\n";
+            structs.addLast(generated);
             return "";
-        }
-
-        return compileStructure(stripped, "record ")
-                .or(() -> compileStructure(stripped, "interface "))
-                .or(() -> compileClass(stripped))
-                .or(() -> compileMethod(stripped))
-                .or(() -> compileDefinitionStatement(stripped))
-                .orElseGet(() -> generatePlaceholder(stripped));
+        });
     }
 
-    private static Option<String> compileDefinitionStatement(String input) {
+    private static Result<String, CompileError> compileClassSegment(String input0) {
+        return or(input0, Lists.listFrom(
+                wrap(value -> parseWhitespace(value).mapValue(Whitespace::generate)),
+                wrap(stripped -> compileStructure(stripped, "interface ")),
+                wrap(Main::compileClass),
+                wrap(Main::compileMethod),
+                wrap(Main::compileDefinitionStatement)
+        ));
+    }
+
+    private static Result<String, CompileError> compileDefinitionStatement(String input) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            return new Some<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
+            return new Ok<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a definition statement", input));
     }
 
-    private static Option<String> compileMethod(String stripped) {
-        var paramStart = stripped.indexOf("(");
+    private static Result<String, CompileError> compileMethod(String input) {
+        var paramStart = input.indexOf("(");
         if (paramStart < 0) {
-            return new None<>();
+            return createInfixErr(input, "(");
         }
 
-        var inputDefinition = stripped.substring(0, paramStart);
-        var defined = parseDefinitionOrPlaceholder(inputDefinition);
-        if (defined instanceof Definition definition) {
-            functionName = definition.name;
-            functionLocalCounter = 0;
-        }
+        var inputDefinition = input.substring(0, paramStart);
+        return parseDefinition(inputDefinition).flatMapValue(defined -> {
+            if (defined instanceof Definition definition) {
+                functionName = definition.name;
+                functionLocalCounter = 0;
+            }
 
-        var afterParams = stripped.substring(paramStart + "(".length());
-        var paramEnd = afterParams.indexOf(")");
-        if (paramEnd < 0) {
-            return new None<>();
-        }
+            var afterParams = input.substring(paramStart + "(".length());
+            var paramEnd = afterParams.indexOf(")");
+            if (paramEnd < 0) {
+                return createInfixErr(afterParams, ")");
+            }
 
-        var params = afterParams.substring(0, paramEnd);
-        var withoutParams = afterParams.substring(paramEnd + ")".length());
-        var withBraces = withoutParams.strip();
+            var params = afterParams.substring(0, paramEnd);
+            var withoutParams = afterParams.substring(paramEnd + ")".length());
+            var withBraces = withoutParams.strip();
 
-        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-            return new Some<>("");
-        }
+            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                return new Err<>(new CompileError("No braces present", withBraces));
+            }
 
-        var content = withBraces.substring(1, withBraces.length() - 1);
-        var oldParams = parseValues(params, Main::parseParameter)
-                .iter()
-                .filter(parameter -> !(parameter instanceof Whitespace))
-                .collect(new ListCollector<>());
-
-        var newParams = Lists.<Defined>listEmpty()
-                .addLast(new Definition(structStack.findLast().orElse(null), "this"))
-                .addAll(oldParams);
-
-        var outputParams = generateValueList(newParams);
-        return assembleMethod(defined, outputParams, content).map(method -> {
-            structStack = structStack.mapLast(last -> {
-                var paramTypes = newParams.iter()
-                        .map(Defined::findType)
-                        .flatMap(Iterators::fromOption)
+            var content = withBraces.substring(1, withBraces.length() - 1);
+            return parseValues(params, Main::parseParameter).flatMapValue(results -> {
+                var oldParams = results
+                        .iter()
+                        .filter(parameter -> !(parameter instanceof Whitespace))
                         .collect(new ListCollector<>());
 
-                var name = defined.findName().orElse("?");
-                var type = defined.findType().orElse(Primitive.Auto);
+                var newParams = Lists.<Defined>listEmpty()
+                        .addLast(new Definition(structStack.findLast().orElse(null), "this"))
+                        .addAll(oldParams);
 
-                return last.define(new Definition(new Functional(paramTypes, type), name));
+                var outputParams = generateValueList(newParams);
+                return assembleMethod(defined, outputParams, content).mapValue(method -> {
+                    structStack = structStack.mapLast(last -> {
+                        var paramTypes = newParams.iter()
+                                .map(Defined::findType)
+                                .flatMap(Iterators::fromOption)
+                                .collect(new ListCollector<>());
+
+                        var name = defined.findName().orElse("?");
+                        var type = defined.findType().orElse(Primitive.Auto);
+
+                        return last.define(new Definition(new Functional(paramTypes, type), name));
+                    });
+                    return method;
+                });
             });
-            return method;
         });
+    }
+
+    private static <T> Result<T, CompileError> createInfixErr(String input, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
     }
 
     private static <T extends Node> String generateValueList(List<T> copy) {
@@ -959,28 +1094,46 @@ public class Main {
                 .orElse("");
     }
 
-    private static Option<String> assembleMethod(Defined definition, String outputParams, String content) {
-        var parsed = parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1));
-
-        var generated = definition.generate() + "(" + outputParams + "){" + generateStatements(parsed) + "\n}\n";
-        methods.addLast(generated);
-        return new Some<>("");
+    private static Result<String, CompileError> assembleMethod(Defined definition, String outputParams, String content) {
+        return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
+            var generated = definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n";
+            methods.addLast(generated);
+            return "";
+        });
     }
 
-    private static List<String> parseStatementsWithLocals(String content, Function<String, String> compiler) {
+    private static Result<List<String>, CompileError> parseStatementsWithLocals(String content, Function<String, Result<String, CompileError>> compiler) {
         statements = statements.addLast(listEmpty());
-        var parsed1 = parseStatements(content, compiler);
-
-        var elements = statements.removeAndGetLast();
-        return Lists.<String>listEmpty()
-                .addAll(elements)
-                .addAll(parsed1);
+        return parseStatements(content, compiler).mapValue(parsed1 -> {
+            var elements = statements.removeAndGetLast();
+            return Lists.<String>listEmpty()
+                    .addAll(elements)
+                    .addAll(parsed1);
+        });
     }
 
-    private static Defined parseParameter(String input) {
-        return parseWhitespace(input).findValue().<Defined>map(value -> value)
-                .or(() -> parseDefinition(input).map(value -> value))
-                .orElseGet(() -> new Content(input));
+    private static Result<Defined, CompileError> parseParameter(String input) {
+        var lists = Lists.<Function<String, Result<Defined, CompileError>>>listFrom(
+                wrap(Main::parseWhitespace),
+                wrap(Main::parseDefinition)
+        );
+
+        return or(input, lists);
+    }
+
+    private static <T> Result<T, CompileError> or(String input, List<Function<String, Result<T, CompileError>>> lists) {
+        return lists.iter().fold(new OrState<T>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper)).toResult().mapErr(errs -> new CompileError("No valid combinations present", input, errs));
+    }
+
+    private static <T> OrState<T> foldOr(String input, OrState<T> tOrState, Function<String, Result<T, CompileError>> mapper) {
+        if (tOrState.maybeValue.isPresent()) {
+            return tOrState;
+        }
+        return mapper.apply(input).match(tOrState::withValue, tOrState::withError);
+    }
+
+    private static <B, T extends B> Function<String, Result<B, CompileError>> wrap(Function<String, Result<T, CompileError>> parser) {
+        return input0 -> parser.apply(input0).mapValue(value -> value);
     }
 
     private static Result<Whitespace, CompileError> parseWhitespace(String input) {
@@ -992,18 +1145,18 @@ public class Main {
         }
     }
 
-    private static String compileFunctionSegment(String input, int depth) {
+    private static Result<String, CompileError> compileFunctionSegment(String input, int depth) {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
-            return "";
+            return new Ok<>("");
         }
 
         var indent = "\n" + "\t".repeat(depth);
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length()).strip();
             var maybeStatementValue = compileStatementValue(withoutEnd);
-            if (maybeStatementValue instanceof Some(var statementValue)) {
-                return indent + statementValue + ";";
+            if (maybeStatementValue instanceof Ok(var statementValue)) {
+                return new Ok<>(indent + statementValue + ";");
             }
         }
 
@@ -1013,23 +1166,23 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var outputContent = parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1));
-                return indent + compileBeforeBlock(beforeBlock) + "{" + join(outputContent) + indent + "}";
+                return parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
+                        .mapValue(outputContent -> indent + compileBeforeBlock(beforeBlock) + "{" + join(outputContent) + indent + "}");
             }
         }
 
-        return indent + generatePlaceholder(stripped);
+        return new Err<>(new CompileError("Not a function segment", indent));
     }
 
-    private static Option<String> compileStatementValue(String input) {
+    private static Result<String, CompileError> compileStatementValue(String input) {
         var stripped = input.strip();
         if (stripped.equals("break")) {
-            return new Some<>("break");
+            return new Ok<>("break");
         }
 
         if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
-            return new Some<>("return " + compileValue(value));
+            return new Ok<>("return " + compileValue(value));
         }
 
         var valueSeparator = stripped.indexOf("=");
@@ -1037,27 +1190,28 @@ public class Main {
             var assignableString = stripped.substring(0, valueSeparator);
             var valueString = stripped.substring(valueSeparator + "=".length());
 
-            var assignable = parseAssignable(assignableString);
-            var value = parseValue(valueString);
+            return parseAssignable(assignableString).and(() -> parseValue(valueString)).flatMapValue(tuple -> {
+                var assignable = tuple.left;
+                var value = tuple.right;
 
-            var type = resolve(value);
+                var type = resolve(value);
+                Assignable newAssignable;
+                if (assignable instanceof Definition definition) {
+                    newAssignable = new Definition(type, definition.name);
+                }
+                else {
+                    newAssignable = assignable;
+                }
 
-            Assignable newAssignable;
-            if (assignable instanceof Definition definition) {
-                newAssignable = new Definition(type, definition.name);
-            }
-            else {
-                newAssignable = assignable;
-            }
-
-            return new Some<>(newAssignable.generate() + " = " + value.generate());
+                return new Ok<>(newAssignable.generate() + " = " + value.generate());
+            });
         }
 
-        if (compileInvokable(input) instanceof Some(var invokable)) {
-            return new Some<>(invokable.generate());
+        if (compileInvokable(input) instanceof Ok(var invokable)) {
+            return new Ok<>(invokable.generate());
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a statement value", input));
     }
 
     private static Type resolve(Value value) {
@@ -1110,10 +1264,8 @@ public class Main {
         return new Content(dataAccess.generate());
     }
 
-    private static Assignable parseAssignable(String definition) {
-        return parseDefinition(definition)
-                .<Assignable>map(value1 -> value1)
-                .orElseGet(() -> parseValue(definition));
+    private static Result<Assignable, CompileError> parseAssignable(String definition) {
+        return or(definition, Lists.listFrom(wrap(Main::parseDefinition), wrap(Main::parseValue)));
     }
 
     private static String compileBeforeBlock(String input) {
@@ -1138,20 +1290,20 @@ public class Main {
         return new None<>();
     }
 
-    private static String compileValue(String input) {
-        return parseValue(input).generate();
+    private static Result<String, CompileError> compileValue(String input) {
+        return parseValue(input).mapValue(Node::generate);
     }
 
-    private static Value parseValue(String input) {
+    private static Result<Value, CompileError> parseValue(String input) {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
-            return new Whitespace();
+            return new Ok<>(new Whitespace());
         }
         if (stripped.equals("false")) {
-            return BooleanValue.False;
+            return new Ok<>(BooleanValue.False);
         }
         if (stripped.equals("true")) {
-            return BooleanValue.True;
+            return new Ok<>(BooleanValue.True);
         }
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
@@ -1170,16 +1322,16 @@ public class Main {
             }
         }
 
-        if (compileInvokable(stripped) instanceof Some(var invokable)) {
-            return invokable;
+        if (compileInvokable(stripped) instanceof Ok(var invokable)) {
+            return new Ok<>(invokable);
         }
 
         if (isSymbol(stripped)) {
-            return new Symbol(stripped);
+            return new Ok<>(new Symbol(stripped));
         }
 
         if (isNumber(stripped)) {
-            return new Symbol(stripped);
+            return new Ok<>(new Symbol(stripped));
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -1187,44 +1339,46 @@ public class Main {
             var value = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length()).strip();
             if (isSymbol(property)) {
-                return new DataAccess(parseValue(value), property);
+                return parseValue(value).mapValue(parsed -> new DataAccess(parsed, property));
             }
         }
 
         if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new StringValue(stripped.substring(1, stripped.length() - 1));
+            return new Ok<>(new StringValue(stripped.substring(1, stripped.length() - 1)));
         }
 
         if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith("'")) {
-            return new CharValue(stripped.substring(1, stripped.length() - 1));
+            return new Ok<>(new CharValue(stripped.substring(1, stripped.length() - 1)));
         }
 
         if (stripped.startsWith("!")) {
-            return new Not(parseValue(input.substring(1)));
+            return parseValue(input.substring(1)).mapValue(Not::new);
         }
 
         for (var operator : Operator.values()) {
             var operatorIndex = stripped.indexOf(operator.representation);
             if (operatorIndex >= 0) {
-                var left = stripped.substring(0, operatorIndex);
-                var right = stripped.substring(operatorIndex + operator.representation.length());
-                return new Operation(parseValue(left), operator, parseValue(right));
+                var leftString = stripped.substring(0, operatorIndex);
+                var rightString = stripped.substring(operatorIndex + operator.representation.length());
+                return parseValue(leftString)
+                        .and(() -> parseValue(rightString))
+                        .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
             }
         }
 
-
-        return new Content(stripped);
+        return new Err<>(new CompileError("Not a value", input));
     }
 
-    private static Option<Invocation> compileInvokable(String stripped) {
+    private static Result<Invocation, CompileError> compileInvokable(String input) {
+        var stripped = input.strip();
         if (!stripped.endsWith(")")) {
-            return new None<>();
+            return createSuffixErr(stripped, ")");
         }
 
         var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
         var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
         if (divisions.size() < 2) {
-            return new None<>();
+            return new Err<>(new CompileError("Insufficient divisions", withoutEnd));
         }
 
         var joined = join(divisions.subList(0, divisions.size() - 1));
@@ -1232,47 +1386,38 @@ public class Main {
         var arguments = divisions.findLast().orElse(null);
 
         if (caller.startsWith("new ")) {
-            var type = parseType(caller.substring("new ".length()));
+            String withoutPrefix = caller.substring("new ".length());
+            var type = parseType(withoutPrefix).findValue().orElseGet(() -> new Content(withoutPrefix));
             var parsedCaller = new Symbol("new_" + type.stringify());
             return assembleInvokable(parsedCaller, arguments, listEmpty());
         }
 
-        Value parsedCaller = parseValue(caller);
-        if (resolve(parsedCaller) instanceof Functional functional) {
-            return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
-        }
-        else {
-            return assembleInvokable(parsedCaller, arguments, listEmpty());
-        }
+        return parseValue(caller).flatMapValue(parsedCaller -> {
+            if (resolve(parsedCaller) instanceof Functional functional) {
+                return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
+            }
+            else {
+                return assembleInvokable(parsedCaller, arguments, listEmpty());
+            }
+        });
     }
 
-    private static Some<Invocation> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsType) {
-        var parsedArgs = divideAll(arguments, Main::foldValueChar)
+    private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsType) {
+        return divideAll(arguments, Main::foldValueChar)
                 .iterWithIndices()
-                .map((Tuple<Integer, String> input) -> {
-                    var index = input.left;
-                    var maybeFound = expectedArgumentsType.find(index);
+                .map((Tuple<Integer, String> input) -> getValueCompileErrorResult(expectedArgumentsType, input))
+                .collect(new Exceptional<>(new ListCollector<>()))
+                .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
+    }
 
-                    Type expectedType;
-                    if (maybeFound instanceof Some(var found)) {
-                        expectedType = found;
-                    }
-                    else {
-                        expectedType = new Content(input.right);
-                    }
-
-                    typeStack = typeStack.addLast(expectedType);
-                    Value parsed = parseValue(input.right);
-                    typeStack = typeStack.removeLast();
-                    return parsed;
-                })
-                .collect(new ListCollector<>())
+    private static Ok<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
+        var parsedArgs = collect
                 .iter()
                 .filter(value -> !(value instanceof Whitespace))
                 .collect(new ListCollector<>());
 
         if (!(caller instanceof DataAccess(var parent, var property))) {
-            return new Some<>(new Invocation(caller, parsedArgs));
+            return new Ok<>(new Invocation(caller, parsedArgs));
         }
 
         var name = generateName();
@@ -1292,10 +1437,28 @@ public class Main {
                 .addLast(symbol)
                 .addAll(parsedArgs);
 
-        return new Some<>(new Invocation(new DataAccess(symbol, property), newArgs));
+        return new Ok<>(new Invocation(new DataAccess(symbol, property), newArgs));
     }
 
-    private static Symbol assembleLambda(String afterArrow, List<String> names) {
+    private static Result<Value, CompileError> getValueCompileErrorResult(List<Type> expectedArgumentsType, Tuple<Integer, String> input) {
+        var index = input.left;
+        var maybeFound = expectedArgumentsType.find(index);
+
+        Type expectedType;
+        if (maybeFound instanceof Some(var found)) {
+            expectedType = found;
+        }
+        else {
+            expectedType = new Content(input.right);
+        }
+
+        typeStack = typeStack.addLast(expectedType);
+        Result<Value, CompileError> parsed = parseValue(input.right);
+        typeStack = typeStack.removeLast();
+        return parsed;
+    }
+
+    private static Result<Value, CompileError> assembleLambda(String afterArrow, List<String> names) {
         var maybeLast = typeStack.findLast();
 
         var params = names.iter()
@@ -1307,16 +1470,17 @@ public class Main {
             var content = afterArrow.substring(1, afterArrow.length() - 1);
             var name = generateName();
             assembleMethod(new Definition(Primitive.Auto, name), params, content);
-            return new Symbol(name);
+            return new Ok<>(new Symbol(name));
         }
 
-        var value = parseValue(afterArrow);
-        var newValue = value.generate();
-        var resolved = resolve(value);
+        return parseValue(afterArrow).mapValue(value -> {
+            var newValue = value.generate();
+            var resolved = resolve(value);
 
-        var name = generateName();
-        assembleMethod(new Definition(resolved, name), params, "\n\treturn " + newValue + ";");
-        return new Symbol(name);
+            var name = generateName();
+            assembleMethod(new Definition(resolved, name), params, "\n\treturn " + newValue + ";");
+            return new Symbol(name);
+        });
     }
 
     private static String generateName() {
@@ -1352,35 +1516,30 @@ public class Main {
         return true;
     }
 
-    private static String compileDefinitionOrPlaceholder(String input) {
-        return parseDefinitionOrPlaceholder(input).generate();
+    private static Result<String, CompileError> compileDefinitionOrPlaceholder(String input) {
+        return parseDefinition(input).mapValue(Definition::generate);
     }
 
-    private static Defined parseDefinitionOrPlaceholder(String input) {
-        return parseDefinition(input).<Defined>map(value -> value)
-                .orElseGet(() -> new Content(input));
-    }
-
-    private static Option<Definition> parseDefinition(String input) {
+    private static Result<Definition, CompileError> parseDefinition(String input) {
         var stripped = input.strip();
         var nameSeparator = stripped.lastIndexOf(" ");
         if (nameSeparator < 0) {
-            return new None<>();
+            return createInfixErr(stripped, " ");
         }
 
         var beforeName = stripped.substring(0, nameSeparator);
         var name = stripped.substring(nameSeparator + " ".length());
         if (!isSymbol(name)) {
-            return new None<>();
+            return new Err<>(new CompileError("Not a symbol", name));
         }
 
         var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
         if (divisions.size() == 1) {
-            return new Some<>(new Definition(parseType(beforeName), name));
+            return new Ok<>(new Definition(parseType(beforeName).findValue().orElseGet(() -> new Content(beforeName)), name));
         }
 
         var type = divisions.findLast().orElse(null);
-        return new Some<>(new Definition(parseType(type), name));
+        return new Ok<>(new Definition(parseType(type).findValue().orElseGet(() -> new Content(type)), name));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
@@ -1398,33 +1557,33 @@ public class Main {
         return appended;
     }
 
-    private static Type parseType(String input) {
+    private static Result<Type, CompileError> parseType(String input) {
         var stripped = input.strip();
         var maybeTypeArgument = typeParameters
                 .indexOf(stripped)
                 .flatMap(typeArguments::find);
 
         if (maybeTypeArgument instanceof Some(var found)) {
-            return found;
+            return new Ok<>(found);
         }
 
         switch (stripped) {
             case "int", "Integer", "boolean", "Boolean" -> {
-                return Primitive.I32;
+                return new Ok<>(Primitive.I32);
             }
             case "char", "Character" -> {
-                return Primitive.I8;
+                return new Ok<>(Primitive.I8);
             }
             case "void" -> {
-                return Primitive.Void;
+                return new Ok<>(Primitive.Void);
             }
             case "var" -> {
-                return Primitive.Auto;
+                return new Ok<>(Primitive.Auto);
             }
         }
 
         if (stripped.equals("String")) {
-            return new Ref(Primitive.I8);
+            return new Ok<>(new Ref(Primitive.I8));
         }
 
         if (stripped.endsWith(">")) {
@@ -1433,36 +1592,36 @@ public class Main {
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
                 var substring = withoutEnd.substring(index + "<".length());
-                var parsed = parseValues(substring, Main::parseType);
+                return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
+                    if (base.equals("Function")) {
+                        var arg0 = parsed.find(0).orElse(null);
+                        var returns = parsed.find(1).orElse(null);
+                        return new Ok<>(new Functional(Lists.listFrom(arg0), returns));
+                    }
 
-                if (base.equals("Function")) {
-                    var arg0 = parsed.find(0).orElse(null);
-                    var returns = parsed.find(1).orElse(null);
-                    return new Functional(Lists.listFrom(arg0), returns);
-                }
+                    if (base.equals("BiFunction")) {
+                        var arg0 = parsed.find(0).orElse(null);
+                        var arg1 = parsed.find(1).orElse(null);
+                        var returns = parsed.find(2).orElse(null);
+                        return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
+                    }
 
-                if (base.equals("BiFunction")) {
-                    var arg0 = parsed.find(0).orElse(null);
-                    var arg1 = parsed.find(1).orElse(null);
-                    var returns = parsed.find(2).orElse(null);
-                    return new Functional(Lists.listFrom(arg0, arg1), returns);
-                }
+                    var generic = new Tuple<>(base, parsed);
+                    if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
+                        visitedExpansions = visitedExpansions.addLast(generic);
+                        expanding.get(base).apply(parsed);
+                    }
 
-                var generic = new Tuple<>(base, parsed);
-                if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
-                    visitedExpansions = visitedExpansions.addLast(generic);
-                    expanding.get(base).apply(parsed);
-                }
-
-                return new StructType(merge(base, parsed));
+                    return new Ok<>(new StructType(merge(base, parsed)));
+                });
             }
         }
 
         if (isSymbol(stripped)) {
-            return new StructType(stripped);
+            return new Ok<>(new StructType(stripped));
         }
 
-        return new Content(stripped);
+        return new Err<>(new CompileError("Not a valid type", input));
     }
 
     private static String merge(String base, List<Type> parsed) {
@@ -1472,7 +1631,7 @@ public class Main {
                 .orElse("");
     }
 
-    private static <T> List<T> parseValues(String input, Function<String, T> compiler) {
+    private static <T> Result<List<T>, CompileError> parseValues(String input, Function<String, Result<T, CompileError>> compiler) {
         return parseAll(input, Main::foldValueChar, compiler);
     }
 

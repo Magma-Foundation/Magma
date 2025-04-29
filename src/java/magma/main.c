@@ -250,15 +250,7 @@ struct Iterator_struct Tuple_int_struct Type {
 };
 struct List_struct Type {
 };
-struct Tuple_int_struct Tuple_int_struct Type {
-};
-struct Collector_struct Tuple_int_struct Tuple_int_struct Type_struct C {
-};
-struct Option_struct Tuple_int_struct Tuple_int_struct Type {
-};
-struct Iterator_struct Tuple_int_struct Tuple_int_struct Type {
-};
-struct List_struct Tuple_int_struct Type {
+struct Result_struct Type_struct CompileError {
 };
 struct Main {
 	/* private static String functionName = "" */;
@@ -2370,70 +2362,78 @@ struct State foldByTypeSeparator(struct Main this, struct State state, char c){
 	}
 	return appended;
 }
+/* new_Content(input) */ parseType_local1(){
+	return new_Content(input);
+}
 struct Type parseType(struct Main this, char* input){
-	/* typeParameters.indexOf(typeParameters, stripped) */ parseType_local2 = typeParameters.indexOf(typeParameters, stripped);
+	/* getType(input) */ parseType_local0 = getType(input);
+	/* parseType_local0.findValue(parseType_local0) */ parseType_local2 = parseType_local0.findValue(parseType_local0);
+	return parseType_local2.orElseGet(parseType_local2, parseType_local1);
+}
+struct Result_struct Type_struct CompileError getType(struct Main this, char* input){
+	/* typeParameters.indexOf(typeParameters, stripped) */ getType_local2 = typeParameters.indexOf(typeParameters, stripped);
 	/* input.strip(input) */ stripped = input.strip(input);
-	/* parseType_local2.flatMap(parseType_local2, /* typeArguments::find */) */ maybeTypeArgument = parseType_local2.flatMap(parseType_local2, /* typeArguments::find */);
+	/* getType_local2.flatMap(getType_local2, /* typeArguments::find */) */ maybeTypeArgument = getType_local2.flatMap(getType_local2, /* typeArguments::find */);
 	if (/* maybeTypeArgument instanceof Some */(/* var found */)){
-		return found;
+		return new_Ok_/*  */(found);
 	}
 	/* switch (stripped) */{
 		/* case "int", "Integer", "boolean", "Boolean" -> */{
-			return Primitive.I32;
+			return new_Ok_/*  */(Primitive.I32);
 		}
 		/* case "char", "Character" -> */{
-			return Primitive.I8;
+			return new_Ok_/*  */(Primitive.I8);
 		}
 		/* case "void" -> */{
-			return Primitive.Void;
+			return new_Ok_/*  */(Primitive.Void);
 		}
 		/* case "var" -> */{
-			return Primitive.Auto;
+			return new_Ok_/*  */(Primitive.Auto);
 		}
 	}
 	if (stripped.equals(stripped, "String")){
-		return new_Ref(Primitive.I8);
+		return new_Ok_/*  */(new_Ref(Primitive.I8));
 	}
 	if (stripped.endsWith(stripped, ">")){
-	int parseType_local4 = /* stripped.length() - " */ > /* " */;
-		/* stripped.substring(stripped, 0, parseType_local4.length(parseType_local4)) */ withoutEnd = stripped.substring(stripped, 0, parseType_local4.length(parseType_local4));
+	int getType_local4 = /* stripped.length() - " */ > /* " */;
+		/* stripped.substring(stripped, 0, getType_local4.length(getType_local4)) */ withoutEnd = stripped.substring(stripped, 0, getType_local4.length(getType_local4));
 		/* withoutEnd.indexOf(withoutEnd, "<") */ index = withoutEnd.indexOf(withoutEnd, "<");
 		if (index >= 0){
-	/* withoutEnd.substring(withoutEnd, 0, index) */ parseType_local8 = withoutEnd.substring(withoutEnd, 0, index);
-	/* index */ parseType_local9 = index + "<";
-	int parseType_local29 = !visitedExpansions.contains(visitedExpansions, generic) && expanding;
-			/* parseType_local8.strip(parseType_local8) */ base = parseType_local8.strip(parseType_local8);
-			/* withoutEnd.substring(withoutEnd, parseType_local9.length(parseType_local9)) */ substring = withoutEnd.substring(withoutEnd, parseType_local9.length(parseType_local9));
+	/* withoutEnd.substring(withoutEnd, 0, index) */ getType_local8 = withoutEnd.substring(withoutEnd, 0, index);
+	/* index */ getType_local9 = index + "<";
+	int getType_local29 = !visitedExpansions.contains(visitedExpansions, generic) && expanding;
+			/* getType_local8.strip(getType_local8) */ base = getType_local8.strip(getType_local8);
+			/* withoutEnd.substring(withoutEnd, getType_local9.length(getType_local9)) */ substring = withoutEnd.substring(withoutEnd, getType_local9.length(getType_local9));
 			/* parseValues(substring, /* Main::parseType */) */ parsed = parseValues(substring, /* Main::parseType */);
 			if (base.equals(base, "Function")){
-	/* parsed.find(parsed, 0) */ parseType_local12 = parsed.find(parsed, 0);
-	/* parsed.find(parsed, 1) */ parseType_local14 = parsed.find(parsed, 1);
-				/* parseType_local12.orElse(parseType_local12, null) */ arg0 = parseType_local12.orElse(parseType_local12, null);
-				/* parseType_local14.orElse(parseType_local14, null) */ returns = parseType_local14.orElse(parseType_local14, null);
-				return new_Functional(Lists.listFrom(Lists, arg0), returns);
+	/* parsed.find(parsed, 0) */ getType_local12 = parsed.find(parsed, 0);
+	/* parsed.find(parsed, 1) */ getType_local14 = parsed.find(parsed, 1);
+				/* getType_local12.orElse(getType_local12, null) */ arg0 = getType_local12.orElse(getType_local12, null);
+				/* getType_local14.orElse(getType_local14, null) */ returns = getType_local14.orElse(getType_local14, null);
+				return new_Ok_/*  */(new_Functional(Lists.listFrom(Lists, arg0), returns));
 			}
 			if (base.equals(base, "BiFunction")){
-	/* parsed.find(parsed, 0) */ parseType_local18 = parsed.find(parsed, 0);
-	/* parsed.find(parsed, 1) */ parseType_local20 = parsed.find(parsed, 1);
-	/* parsed.find(parsed, 2) */ parseType_local22 = parsed.find(parsed, 2);
-				/* parseType_local18.orElse(parseType_local18, null) */ arg0 = parseType_local18.orElse(parseType_local18, null);
-				/* parseType_local20.orElse(parseType_local20, null) */ arg1 = parseType_local20.orElse(parseType_local20, null);
-				/* parseType_local22.orElse(parseType_local22, null) */ returns = parseType_local22.orElse(parseType_local22, null);
-				return new_Functional(Lists.listFrom(Lists, arg0, arg1), returns);
+	/* parsed.find(parsed, 0) */ getType_local18 = parsed.find(parsed, 0);
+	/* parsed.find(parsed, 1) */ getType_local20 = parsed.find(parsed, 1);
+	/* parsed.find(parsed, 2) */ getType_local22 = parsed.find(parsed, 2);
+				/* getType_local18.orElse(getType_local18, null) */ arg0 = getType_local18.orElse(getType_local18, null);
+				/* getType_local20.orElse(getType_local20, null) */ arg1 = getType_local20.orElse(getType_local20, null);
+				/* getType_local22.orElse(getType_local22, null) */ returns = getType_local22.orElse(getType_local22, null);
+				return new_Ok_/*  */(new_Functional(Lists.listFrom(Lists, arg0, arg1), returns));
 			}
 			/* new_Tuple_/*  */(base, parsed) */ generic = new_Tuple_/*  */(base, parsed);
-			if (parseType_local29.containsKey(parseType_local29, base)){
-	/* expanding.get(expanding, base) */ parseType_local27 = expanding.get(expanding, base);
+			if (getType_local29.containsKey(getType_local29, base)){
+	/* expanding.get(expanding, base) */ getType_local27 = expanding.get(expanding, base);
 				visitedExpansions = visitedExpansions.addLast(visitedExpansions, generic);
-				parseType_local27.apply(parseType_local27, parsed);
+				getType_local27.apply(getType_local27, parsed);
 			}
-			return new_StructType(merge(base, parsed));
+			return new_Ok_/*  */(new_StructType(merge(base, parsed)));
 		}
 	}
 	if (isSymbol(stripped)){
-		return new_StructType(stripped);
+		return new_Ok_/*  */(new_StructType(stripped));
 	}
-	return new_Content(stripped);
+	return new_Err_/*  */(new_CompileError("Not a valid type", input));
 }
 char* merge(struct Main this, char* base, struct List_struct Type parsed){
 	/* base */ merge_local0 = base + "_" + parsed;
@@ -2442,54 +2442,7 @@ char* merge(struct Main this, char* base, struct List_struct Type parsed){
 	/* merge_local2.collect(merge_local2, new_Joiner("_")) */ merge_local3 = merge_local2.collect(merge_local2, new_Joiner("_"));
 	return merge_local3.orElse(merge_local3, "");
 }
-/* map_local1.map(map_local1, mapper) */ map_local2(){
-	return map_local1.map(map_local1, map_local1, mapper);
-}
-struct Iterator_struct R map(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct R (*)(struct Tuple_int_struct Tuple_int_struct Type) mapper){
-	/* this.head.next(this.head) */ map_local1 = this.head.next(this.head);
-	return new_Iterator_/*  */(map_local2);
-}
-struct C collect(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct Collector_struct Tuple_int_struct Tuple_int_struct Type_struct C collector){
-	return this.fold(this, collector.createInitial(collector), /* collector::fold */);
-}
-/* folder.apply(folder, finalCurrent, next) */ fold_local2(Content[input=next -> folder.apply(finalCurrent, next)] next){
-	return folder.apply(folder, folder, finalCurrent, next);
-}
-struct R fold(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct R initial, struct R (*)(struct R, struct Tuple_int_struct Tuple_int_struct Type) folder){
-	/* initial */ current = initial;
-	while (1){
-	/* this.head.next(this.head) */ fold_local4 = this.head.next(this.head);
-		/* current */ finalCurrent = current;
-		/* fold_local4.map(fold_local4, fold_local2) */ optional = fold_local4.map(fold_local4, fold_local2);
-		/* switch (optional) */{
-			/* case None<R> _ -> */{
-				return current;
-			}
-			/* nextState */ current = nextState;
-		}
-	}
-}
-/* new_Iterator_/*  */(/* predicate.test(element) ? new SingleHead */ <  > /* (element) : new EmptyHead */ <  > ()) */ filter_local0(Content[input=element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>())] element){
-	return /* new_Iterator_/*  */ */(/* /* predicate.test(element) ? new SingleHead */ */ <  > /* /* (element) : new EmptyHead */ */ <  > ());
-}
-struct Iterator_struct Tuple_int_struct Tuple_int_struct Type filter(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct Predicate_struct Tuple_int_struct Tuple_int_struct Type predicate){
-	return this.flatMap(this, filter_local0);
-}
-struct Iterator_struct R flatMap(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct Iterator_struct R (*)(struct Tuple_int_struct Tuple_int_struct Type) mapper){
-	struct Iterator_struct R flatMap_local1 = this.map(this, mapper);
-	return flatMap_local1.fold(flatMap_local1, new_Iterator_/*  */(new_EmptyHead_/*  */()), /* Iterator::concat */);
-}
-/* concat_local1.or(concat_local1, /* other::next */) */ concat_local2(){
-	return concat_local1.or(concat_local1, concat_local1, /* /* other::next */ */);
-}
-struct Iterator_struct Tuple_int_struct Tuple_int_struct Type concat(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this, struct Iterator_struct Tuple_int_struct Tuple_int_struct Type other){
-	/* this.head.next(this.head) */ concat_local1 = this.head.next(this.head);
-	return new_Iterator_/*  */(concat_local2);
-}
-struct Option_struct Tuple_int_struct Tuple_int_struct Type next(struct Iterator_struct Tuple_int_struct Tuple_int_struct Type this){
-	return this.head.next(this.head);
-}
-struct List_struct Tuple_int_struct Type parseValues(struct Main this, char* input, struct Tuple_int_struct Tuple_int_struct Type (*)(char*) compiler){
+struct List_struct Type parseValues(struct Main this, char* input, struct Type (*)(char*) compiler){
 	return parseAll(input, /* Main::foldValueChar */, compiler);
 }
 struct State foldValueChar(struct Main this, struct State state, char c){
