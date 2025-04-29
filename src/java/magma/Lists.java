@@ -13,8 +13,9 @@ class Lists {
 
         @Override
         public Main.List<T> addLast(T element) {
-            this.elements.addLast(element);
-            return this;
+            var copy = new ArrayList<>(this.elements);
+            copy.addLast(element);
+            return new JavaList<>(copy);
         }
 
         @Override
@@ -86,8 +87,9 @@ class Lists {
 
         @Override
         public Main.List<T> mapLast(Function<T, T> mapper) {
-            this.elements.set(this.elements.size() - 1, mapper.apply(this.elements.getLast()));
-            return this;
+            var copy = new ArrayList<>(this.elements);
+            copy.set(copy.size() - 1, mapper.apply(copy.getLast()));
+            return new JavaList<>(copy);
         }
 
         @Override
@@ -100,8 +102,9 @@ class Lists {
 
         @Override
         public Main.List<T> sort(BiFunction<T, T, Integer> comparator) {
-            this.elements.sort((o1, o2) -> comparator.apply(o1, o2));
-            return this;
+            var copy = new ArrayList<>(this.elements);
+            copy.sort(comparator::apply);
+            return new JavaList<>(copy);
         }
     }
 
