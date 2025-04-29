@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -111,6 +110,10 @@ public class Main {
     }
 
     private interface Error {
+        String display();
+    }
+
+    private interface Context {
         String display();
     }
 
@@ -438,23 +441,6 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Defined, Value, Type {
-        @Override
-        public String generate() {
-            return generatePlaceholder(this.input);
-        }
-
-        @Override
-        public Option<Type> findType() {
-            return new None<>();
-        }
-
-        @Override
-        public String stringify() {
-            return generatePlaceholder(this.input);
-        }
-    }
-
     private static final class Whitespace implements Defined, Value {
         @Override
         public String generate() {
@@ -601,19 +587,7 @@ public class Main {
         }
     }
 
-    private static final class StructType implements Type {
-        private final String name;
-        private final List<Definition> properties;
-
-        private StructType(String name, List<Definition> properties) {
-            this.name = name;
-            this.properties = properties;
-        }
-
-        public StructType(String name) {
-            this(name, listEmpty());
-        }
-
+    private record StructType(String name) implements Type {
         @Override
         public String generate() {
             return "struct " + this.name;
@@ -622,36 +596,6 @@ public class Main {
         @Override
         public String stringify() {
             return this.name;
-        }
-
-        public Option<Type> find(String name) {
-            return this.properties.iter()
-                    .filter(definition -> definition.name.equals(name))
-                    .map(Definition::findType)
-                    .flatMap(Iterators::fromOption)
-                    .next();
-        }
-
-        public StructType define(Definition definition) {
-            return new StructType(this.name, this.properties.addLast(definition));
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (StructType) obj;
-            return Objects.equals(this.name, that.name) &&
-                    Objects.equals(this.properties, that.properties);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.name, this.properties);
         }
     }
 
@@ -680,14 +624,14 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
-        public CompileError(String message, String context) {
+    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
+        public CompileError(String message, Context context) {
             this(message, context, listEmpty());
         }
 
         @Override
         public String display() {
-            return this.message + ": " + this.context + this.errors.iter()
+            return this.message + ": " + this.context.display() + this.errors.iter()
                     .map(CompileError::display)
                     .collect(new Joiner(""))
                     .orElse("");
@@ -740,6 +684,20 @@ public class Main {
         @Override
         public String display() {
             return this.error.display();
+        }
+    }
+
+    private record StringContext(String input) implements Context {
+        @Override
+        public String display() {
+            return this.input;
+        }
+    }
+
+    private record NodeContext(Node node) implements Context {
+        @Override
+        public String display() {
+            return this.node.generate();
         }
     }
 
@@ -913,7 +871,7 @@ public class Main {
             return new Ok<>("");
         }
         else {
-            return new Err<>(new CompileError("Not namespaced", input.strip()));
+            return new Err<>(new CompileError("Not namespaced", new StringContext(input.strip())));
         }
     }
 
@@ -946,7 +904,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError("Not a struct", input));
+        return new Err<>(new CompileError("Not a struct", new StringContext(input)));
     }
 
     private static Result<String, CompileError> getString(String beforeContent, String withEnd) {
@@ -971,7 +929,7 @@ public class Main {
     }
 
     private static <T> Result<T, CompileError> createSuffixErr(String input, String suffix) {
-        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", input));
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
     }
 
     private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content) {
@@ -1019,7 +977,7 @@ public class Main {
             return new Ok<>("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";");
         }
 
-        return new Err<>(new CompileError("Not a definition statement", input));
+        return new Err<>(new CompileError("Not a definition statement", new StringContext(input)));
     }
 
     private static Result<String, CompileError> compileMethod(String input) {
@@ -1046,7 +1004,7 @@ public class Main {
             var withBraces = withoutParams.strip();
 
             if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                return new Err<>(new CompileError("No braces present", withBraces));
+                return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
             }
 
             var content = withBraces.substring(1, withBraces.length() - 1);
@@ -1071,7 +1029,8 @@ public class Main {
                         var name = defined.findName().orElse("?");
                         var type = defined.findType().orElse(Primitive.Auto);
 
-                        return last.define(new Definition(new Functional(paramTypes, type), name));
+                        return last;
+                        // return last.define(new Definition(new Functional(paramTypes, type), name));
                     });
                     return method;
                 });
@@ -1080,7 +1039,7 @@ public class Main {
     }
 
     private static <T> Result<T, CompileError> createInfixErr(String input, String infix) {
-        return new Err<>(new CompileError("Infix '" + infix + "' not present", input));
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", new StringContext(input)));
     }
 
     private static <T extends Node> String generateValueList(List<T> copy) {
@@ -1122,7 +1081,10 @@ public class Main {
     }
 
     private static <T> Result<T, CompileError> or(String input, List<Function<String, Result<T, CompileError>>> lists) {
-        return lists.iter().fold(new OrState<T>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper)).toResult().mapErr(errs -> new CompileError("No valid combinations present", input, errs));
+        return lists.iter()
+                .fold(new OrState<T>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper))
+                .toResult()
+                .mapErr(errs -> new CompileError("No valid combinations present", new StringContext(input), errs));
     }
 
     private static <T> OrState<T> foldOr(String input, OrState<T> tOrState, Function<String, Result<T, CompileError>> mapper) {
@@ -1141,7 +1103,7 @@ public class Main {
             return new Ok<>(new Whitespace());
         }
         else {
-            return new Err<>(new CompileError("Not blank", input));
+            return new Err<>(new CompileError("Not blank", new StringContext(input)));
         }
     }
 
@@ -1171,7 +1133,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError("Not a function segment", indent));
+        return new Err<>(new CompileError("Not a function segment", new StringContext(indent)));
     }
 
     private static Result<String, CompileError> compileStatementValue(String input) {
@@ -1194,16 +1156,17 @@ public class Main {
                 var assignable = tuple.left;
                 var value = tuple.right;
 
-                var type = resolve(value);
-                Assignable newAssignable;
-                if (assignable instanceof Definition definition) {
-                    newAssignable = new Definition(type, definition.name);
-                }
-                else {
-                    newAssignable = assignable;
-                }
+                return resolve(value).flatMapValue(type -> {
+                    Assignable newAssignable;
+                    if (assignable instanceof Definition definition) {
+                        newAssignable = new Definition(type, definition.name);
+                    }
+                    else {
+                        newAssignable = assignable;
+                    }
 
-                return new Ok<>(newAssignable.generate() + " = " + value.generate());
+                    return new Ok<>(newAssignable.generate() + " = " + value.generate());
+                });
             });
         }
 
@@ -1211,57 +1174,46 @@ public class Main {
             return new Ok<>(invokable.generate());
         }
 
-        return new Err<>(new CompileError("Not a statement value", input));
+        return new Err<>(new CompileError("Not a statement input", new StringContext(input)));
     }
 
-    private static Type resolve(Value value) {
+    private static Result<Type, CompileError> resolve(Value value) {
         return switch (value) {
-            case BooleanValue _ -> Primitive.Bool;
-            case CharValue _ -> Primitive.I8;
-            case Content content -> content;
-            case DataAccess dataAccess -> resolveDataAccess(dataAccess);
+            case BooleanValue _ -> new Ok<>(Primitive.Bool);
+            case CharValue _ -> new Ok<>(Primitive.I8);
             case Invocation invocation -> resolveInvocation(invocation);
-            case Not _ -> Primitive.Bool;
+            case Not _ -> new Ok<>(Primitive.Bool);
             case Operation operation -> resolveOperation(operation);
-            case StringValue _ -> new Ref(Primitive.I8);
+            case StringValue _ -> new Ok<>(new Ref(Primitive.I8));
             case Symbol symbol -> resolveSymbol(symbol);
-            case Whitespace _ -> Primitive.Void;
+            case Whitespace _ -> new Ok<>(Primitive.Void);
+            case DataAccess _ -> new Err<>(new CompileError("This is a stub!", new NodeContext(value)));
         };
     }
 
-    private static Type resolveOperation(Operation operation) {
-        return operation.operator.type.orElseGet(() -> resolve(operation.left));
+    private static Result<Type, CompileError> resolveOperation(Operation operation) {
+        return operation.operator.type
+                .<Result<Type, CompileError>>map(Ok::new)
+                .orElseGet(() -> resolve(operation.left));
     }
 
-    private static Type resolveSymbol(Symbol symbol) {
+    private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
         if (symbol.value.equals("this")) {
-            return structStack.findLast().orElse(null);
+            return new Ok<>(structStack.findLast().orElse(null));
         }
 
-        return new Content(symbol.value);
+        return new Err<>(new CompileError("Not a symbol", new StringContext(symbol.value)));
     }
 
-    private static Type resolveInvocation(Invocation invocation) {
+    private static Result<Type, CompileError> resolveInvocation(Invocation invocation) {
         var caller = invocation.caller;
-        var resolvedCaller = resolve(caller);
-        if (resolvedCaller instanceof Functional functional) {
-            return functional.returns;
-        }
-
-        return new Content(invocation.generate());
-    }
-
-    private static Type resolveDataAccess(DataAccess dataAccess) {
-        var parent = dataAccess.parent;
-        var resolved = resolve(parent);
-        if (resolved instanceof StructType structType) {
-            Option<Type> typeOption = structType.find(dataAccess.property);
-            if (typeOption instanceof Some<Type>(var propertyType)) {
-                return propertyType;
+        return resolve(caller).flatMapValue(resolvedCaller -> {
+            if (resolvedCaller instanceof Functional functional) {
+                return new Ok<>(functional.returns);
             }
-        }
 
-        return new Content(dataAccess.generate());
+            return new Err<>(new CompileError("Not a functional type", new NodeContext(resolvedCaller)));
+        });
     }
 
     private static Result<Assignable, CompileError> parseAssignable(String definition) {
@@ -1366,7 +1318,7 @@ public class Main {
             }
         }
 
-        return new Err<>(new CompileError("Not a value", input));
+        return new Err<>(new CompileError("Not a input", new StringContext(input)));
     }
 
     private static Result<Invocation, CompileError> compileInvokable(String input) {
@@ -1378,7 +1330,7 @@ public class Main {
         var withoutEnd = stripped.substring(0, stripped.length() - ")".length()).strip();
         var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
         if (divisions.size() < 2) {
-            return new Err<>(new CompileError("Insufficient divisions", withoutEnd));
+            return new Err<>(new CompileError("Insufficient divisions", new StringContext(withoutEnd)));
         }
 
         var joined = join(divisions.subList(0, divisions.size() - 1));
@@ -1387,18 +1339,21 @@ public class Main {
 
         if (caller.startsWith("new ")) {
             String withoutPrefix = caller.substring("new ".length());
-            var type = parseType(withoutPrefix).findValue().orElseGet(() -> new Content(withoutPrefix));
-            var parsedCaller = new Symbol("new_" + type.stringify());
-            return assembleInvokable(parsedCaller, arguments, listEmpty());
+            return parseType(withoutPrefix).flatMapValue(type -> {
+                var parsedCaller = new Symbol("new_" + type.stringify());
+                return assembleInvokable(parsedCaller, arguments, listEmpty());
+            });
         }
 
         return parseValue(caller).flatMapValue(parsedCaller -> {
-            if (resolve(parsedCaller) instanceof Functional functional) {
-                return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
-            }
-            else {
-                return assembleInvokable(parsedCaller, arguments, listEmpty());
-            }
+            return resolve(parsedCaller).flatMapValue(resolved -> {
+                if (resolved instanceof Functional functional) {
+                    return assembleInvokable(parsedCaller, arguments, functional.paramTypes);
+                }
+                else {
+                    return assembleInvokable(parsedCaller, arguments, listEmpty());
+                }
+            });
         });
     }
 
@@ -1410,7 +1365,7 @@ public class Main {
                 .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
     }
 
-    private static Ok<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
+    private static Result<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
         var parsedArgs = collect
                 .iter()
                 .filter(value -> !(value instanceof Whitespace))
@@ -1422,17 +1377,20 @@ public class Main {
 
         var name = generateName();
 
-        Value symbol;
         if (parent instanceof Symbol || parent instanceof DataAccess) {
-            symbol = parent;
-        }
-        else {
-            var type = resolve(parent);
-            var statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
-            statements.findLast().orElse(null).addLast(statement);
-            symbol = new Symbol(name);
+            return assembleInvocation(property, parent, parsedArgs);
         }
 
+        return resolve(parent).flatMapValue(type -> {
+            var statement = "\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";";
+            statements.findLast().orElse(null).addLast(statement);
+
+            Value symbol = new Symbol(name);
+            return assembleInvocation(property, symbol, parsedArgs);
+        });
+    }
+
+    private static Result<Invocation, CompileError> assembleInvocation(String property, Value symbol, List<Value> parsedArgs) {
         var newArgs = Lists.<Value>listEmpty()
                 .addLast(symbol)
                 .addAll(parsedArgs);
@@ -1442,20 +1400,13 @@ public class Main {
 
     private static Result<Value, CompileError> getValueCompileErrorResult(List<Type> expectedArgumentsType, Tuple<Integer, String> input) {
         var index = input.left;
-        var maybeFound = expectedArgumentsType.find(index);
 
-        Type expectedType;
-        if (maybeFound instanceof Some(var found)) {
-            expectedType = found;
-        }
-        else {
-            expectedType = new Content(input.right);
-        }
-
-        typeStack = typeStack.addLast(expectedType);
-        Result<Value, CompileError> parsed = parseValue(input.right);
-        typeStack = typeStack.removeLast();
-        return parsed;
+        return expectedArgumentsType.find(index).map(found -> {
+            typeStack = typeStack.addLast(found);
+            Result<Value, CompileError> parsed = parseValue(input.right);
+            typeStack = typeStack.removeLast();
+            return parsed;
+        }).orElseGet(() -> new Err<>(new CompileError("Could not find expected argument", new StringContext(input.right))));
     }
 
     private static Result<Value, CompileError> assembleLambda(String afterArrow, List<String> names) {
@@ -1473,13 +1424,13 @@ public class Main {
             return new Ok<>(new Symbol(name));
         }
 
-        return parseValue(afterArrow).mapValue(value -> {
+        return parseValue(afterArrow).flatMapValue(value -> {
             var newValue = value.generate();
-            var resolved = resolve(value);
-
-            var name = generateName();
-            assembleMethod(new Definition(resolved, name), params, "\n\treturn " + newValue + ";");
-            return new Symbol(name);
+            return resolve(value).mapValue(resolved -> {
+                var name = generateName();
+                assembleMethod(new Definition(resolved, name), params, "\n\treturn " + newValue + ";");
+                return new Symbol(name);
+            });
         });
     }
 
@@ -1530,16 +1481,16 @@ public class Main {
         var beforeName = stripped.substring(0, nameSeparator);
         var name = stripped.substring(nameSeparator + " ".length());
         if (!isSymbol(name)) {
-            return new Err<>(new CompileError("Not a symbol", name));
+            return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
         }
 
         var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
         if (divisions.size() == 1) {
-            return new Ok<>(new Definition(parseType(beforeName).findValue().orElseGet(() -> new Content(beforeName)), name));
+            return parseType(beforeName).mapValue(type -> new Definition(type, name));
         }
 
         var type = divisions.findLast().orElse(null);
-        return new Ok<>(new Definition(parseType(type).findValue().orElseGet(() -> new Content(type)), name));
+        return parseType(type).mapValue(type1 -> new Definition(type1, name));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
@@ -1609,7 +1560,7 @@ public class Main {
                     var generic = new Tuple<>(base, parsed);
                     if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
                         visitedExpansions = visitedExpansions.addLast(generic);
-                        expanding.get(base).apply(parsed);
+                        // expanding.get(base).apply(parsed);
                     }
 
                     return new Ok<>(new StructType(merge(base, parsed)));
@@ -1621,7 +1572,7 @@ public class Main {
             return new Ok<>(new StructType(stripped));
         }
 
-        return new Err<>(new CompileError("Not a valid type", input));
+        return new Err<>(new CompileError("Not a valid type", new StringContext(input)));
     }
 
     private static String merge(String base, List<Type> parsed) {
