@@ -966,18 +966,22 @@ public class Main {
     }
 
     private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content) {
-        if (!typeParams.isEmpty()) {
-            expanding.put(name, typeArgs -> {
-                typeParameters = typeParams;
-                typeArguments = typeArgs;
-
-                return generateStructure(name, content, typeArgs);
-            });
-
-            return new Ok<>("");
+        if (typeParams.isEmpty()) {
+            return generateStructure(name, content, Lists.listEmpty());
         }
 
-        return generateStructure(name, content, Lists.listEmpty());
+        if (!isSymbol(name)) {
+            return createSymbolErr(name);
+        }
+
+        expanding.put(name, typeArgs -> {
+            typeParameters = typeParams;
+            typeArguments = typeArgs;
+
+            return generateStructure(name, content, typeArgs);
+        });
+
+        return new Ok<>("");
     }
 
     private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs) {
@@ -1313,7 +1317,7 @@ public class Main {
     private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
         return resolve(access.parent).flatMapValue(resolved -> {
             if (!(resolved instanceof StructType structType)) {
-                return new Err<>(new CompileError("Not a structure type", new NodeContext(resolved)));
+                return new Err<>(new CompileError("Not a structure type '" + resolved.getClass() + "'", new NodeContext(resolved)));
             }
 
             if (structType.find(access.property) instanceof Some(var found)) {
@@ -1490,7 +1494,7 @@ public class Main {
         return createSymbolErr(property);
     }
 
-    private static Err<Value, CompileError> createSymbolErr(String property) {
+    private static <T> Result<T, CompileError> createSymbolErr(String property) {
         return new Err<>(new CompileError("Not a symbol", new StringContext(property)));
     }
 
