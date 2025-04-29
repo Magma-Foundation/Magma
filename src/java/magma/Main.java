@@ -586,7 +586,12 @@ public class Main {
 
         @Override
         public String generate() {
-            return "struct " + this.name;
+            var joinedDefinitions = this.definitions.iterate()
+                    .map(Definition::generate)
+                    .collect(new Joiner(""))
+                    .orElse("");
+
+            return "struct " + this.name + " {" + joinedDefinitions + "}";
         }
 
         public Option<Type> findTypeAsOption(String name) {
@@ -952,19 +957,24 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
 
-                var permitsIndex = beforeContent.indexOf(" permits");
+                var permitsIndex = beforeContent.indexOf(" permits ");
                 var withoutPermits = permitsIndex >= 0
                         ? beforeContent.substring(0, permitsIndex).strip()
                         : beforeContent;
 
-                var paramStart = withoutPermits.indexOf("(");
+                var implementsIndex = withoutPermits.indexOf(" implements ");
+                var withoutImplements = implementsIndex >= 0
+                        ? withoutPermits.substring(0, implementsIndex)
+                        : withoutPermits;
+
+                var paramStart = withoutImplements.indexOf("(");
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
-                    String withoutParams = withoutPermits.substring(0, paramStart).strip();
+                    String withoutParams = withoutImplements.substring(0, paramStart).strip();
                     return getString(withoutParams, withEnd);
                 }
                 else {
-                    return getString(withoutPermits, withEnd);
+                    return getString(withoutImplements, withEnd);
                 }
             }
         }
