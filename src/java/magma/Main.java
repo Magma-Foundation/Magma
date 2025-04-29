@@ -761,6 +761,10 @@ public class Main {
                 return new StructType(ref.name, this.definitions);
             });
         }
+
+        public Frame define(Definition definition) {
+            return new Frame(this.maybeRef, this.definitions.addLast(definition));
+        }
     }
 
     private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
@@ -946,10 +950,10 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileClass(String stripped) {
-        return compileStructure(stripped, "class ");
+        return compileStructure("?", "class ", stripped);
     }
 
-    private static Result<String, CompileError> compileStructure(String input, String infix) {
+    private static Result<String, CompileError> compileStructure(String type, String infix, String input) {
         var classIndex = input.indexOf(infix);
         if (classIndex >= 0) {
             var afterClass = input.substring(classIndex + infix.length());
@@ -971,10 +975,10 @@ public class Main {
                 var withEnd = afterClass.substring(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
                     String withoutParams = withoutImplements.substring(0, paramStart).strip();
-                    return getString(withoutParams, withEnd);
+                    return getString(withoutParams, withEnd, type);
                 }
                 else {
-                    return getString(withoutImplements, withEnd);
+                    return getString(withoutImplements, withEnd, type);
                 }
             }
         }
@@ -982,7 +986,7 @@ public class Main {
         return new Err<>(new CompileError("Not a struct", new StringContext(input)));
     }
 
-    private static Result<String, CompileError> getString(String beforeContent, String withEnd) {
+    private static Result<String, CompileError> getString(String beforeContent, String withEnd, String type) {
         if (!withEnd.endsWith("}")) {
             return createSuffixErr(withEnd, "}");
         }
@@ -996,20 +1000,20 @@ public class Main {
                 var name = withoutEnd.substring(0, typeParamStart).strip();
                 var substring = withoutEnd.substring(typeParamStart + "<".length());
                 var typeParameters = listFromArray(substring.split(Pattern.quote(",")));
-                return assembleStructure(typeParameters, name, content);
+                return assembleStructure(typeParameters, name, content, type);
             }
         }
 
-        return assembleStructure(listEmpty(), strippedBeforeContent, content);
+        return assembleStructure(listEmpty(), strippedBeforeContent, content, type);
     }
 
     private static <T> Result<T, CompileError> createSuffixErr(String input, String suffix) {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
     }
 
-    private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content) {
+    private static Result<String, CompileError> assembleStructure(List<String> typeParams, String name, String content, String type) {
         if (typeParams.isEmpty()) {
-            return generateStructure(name, content, listEmpty());
+            return generateStructure(name, content, listEmpty(), type);
         }
 
         if (!isSymbol(name)) {
@@ -1020,19 +1024,27 @@ public class Main {
             typeParameters = typeParams;
             typeArguments = typeArgs;
 
-            return generateStructure(name, content, typeArgs);
+            return generateStructure(name, content, typeArgs, type);
         });
 
         return new Ok<>("");
     }
 
-    private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs) {
+    private static Result<String, CompileError> generateStructure(String name, String content, List<Type> typeArgs, String type) {
         frames = frames.addLast(new Frame(new StructRef(name)));
+        if (type.equals("enum")) {
+            frames = define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name"));
+        }
+
         var result = parseStatements(content, Main::compileClassSegment)
                 .flatMapValue(parsed -> getRecord(name, typeArgs, parsed));
 
         frames = frames.removeLast().map(Tuple::right).orElse(frames);
         return result;
+    }
+
+    private static List<Frame> define(Definition definition) {
+        return frames.mapLast(last -> last.define(definition));
     }
 
     private static Result<String, CompileError> getRecord(
@@ -1058,8 +1070,8 @@ public class Main {
     private static Result<String, CompileError> compileClassSegment(String input0) {
         return or(input0, Lists.listFrom(
                 whitespace(),
-                type("interface", stripped -> compileStructure(stripped, "interface ")),
-                type("enum", stripped -> compileStructure(stripped, "enum ")),
+                type("interface", stripped -> compileStructure("?", "interface ", stripped)),
+                type("enum", stripped -> compileStructure("enum", "enum ", stripped)),
                 type("class", Main::compileClass),
                 type("method", Main::compileMethod),
                 type("definition-statement", Main::compileDefinitionStatement)
@@ -1691,7 +1703,12 @@ public class Main {
     }
 
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String arguments, List<Type> expectedArgumentsTypes) {
-        var divided = divideAll(arguments, Main::foldValueChar);
+        var divided = divideAll(arguments, Main::foldValueChar)
+                .iterate()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
+
         if (divided.size() == expectedArgumentsTypes.size()) {
             return divided.iterateWithIndices()
                     .map((Tuple<Integer, String> input) -> getValueCompileErrorResult(expectedArgumentsTypes, input))
