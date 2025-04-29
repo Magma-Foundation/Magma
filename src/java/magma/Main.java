@@ -1306,8 +1306,22 @@ public class Main {
             case StringValue _ -> new Ok<>(new Ref(Primitive.I8));
             case Symbol symbol -> resolveSymbol(symbol);
             case Whitespace _ -> new Ok<>(Primitive.Void);
-            case DataAccess _ -> new Err<>(new CompileError("This is a stub!", new NodeContext(value)));
+            case DataAccess dataAccess -> resolveDataAccess(dataAccess);
         };
+    }
+
+    private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
+        return resolve(access.parent).flatMapValue(resolved -> {
+            if (!(resolved instanceof StructType structType)) {
+                return new Err<>(new CompileError("Not a structure type", new NodeContext(resolved)));
+            }
+
+            if(structType.find(access.property) instanceof Some(var found)) {
+                return new Ok<>(found);
+            } else {
+                return new Err<>(new CompileError("Undefined field", new StringContext(access.property)));
+            }
+        });
     }
 
     private static Result<Type, CompileError> resolveOperation(Operation operation) {
