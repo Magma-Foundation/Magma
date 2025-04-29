@@ -727,14 +727,13 @@ public class Main {
             return this.node.generate();
         }
     }
-
-    private static final List<List<Definition>> currentDefinitions = Lists.listEmpty();
     private static final Map<String, Function<List<Type>, Result<String, CompileError>>> expanding = new HashMap<>();
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static final List<String> methods = listEmpty();
     private static final Map<Tuple<String, List<Type>>, Tuple<Type, String>> structRegistry = new HashMap<>();
     public static List<List<String>> statements = listEmpty();
+    private static List<List<Definition>> currentDefinitions = Lists.listEmpty();
     private static List<Tuple<String, List<Type>>> visitedExpansions = listEmpty();
     private static List<StructRef> currentStructs = listEmpty();
     private static String functionName = "";
@@ -1066,15 +1065,17 @@ public class Main {
             return parseValues(params, Main::parseParameter).flatMapValue(results -> {
                 var oldParams = results
                         .iter()
-                        .filter(parameter -> !(parameter instanceof Whitespace))
+                        .map(Main::requireDefinition)
+                        .flatMap(Iterators::fromOption)
                         .collect(new ListCollector<>());
 
-                var newParams = Lists.<Defined>listEmpty()
+                currentDefinitions = currentDefinitions.addLast(oldParams);
+                var newParams = Lists.<Definition>listEmpty()
                         .addLast(new Definition(currentStructs.findLast().orElse(null), "this"))
                         .addAll(oldParams);
 
                 var outputParams = generateValueList(newParams);
-                return assembleMethod(defined, outputParams, content).mapValue(method -> {
+                var assembled = assembleMethod(defined, outputParams, content).mapValue(method -> {
                     currentStructs = currentStructs.mapLast(last -> {
                         var paramTypes = newParams.iter()
                                 .map(Defined::findType)
@@ -1089,8 +1090,20 @@ public class Main {
                     });
                     return method;
                 });
+
+                currentDefinitions = currentDefinitions.removeLast().map(Tuple::right).orElse(currentDefinitions);
+                return assembled;
             });
         });
+    }
+
+    private static Option<Definition> requireDefinition(Defined parameter) {
+        if (parameter instanceof Definition definition) {
+            return new Some<>(definition);
+        }
+        else {
+            return new None<Definition>();
+        }
     }
 
     private static Result<Definition, CompileError> parseConstructor(String constructor) {
