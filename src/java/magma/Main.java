@@ -1581,24 +1581,22 @@ public class Main {
 
             return parseStatements(content, Main::compileClassSegment)
                     .mapValue(Main::retainDefinitions)
-                    .flatMapValue(definitions -> generateStructure(name, typeArgs, params.addAll(definitions)));
+                    .flatMapValue(definitions -> registerStruct(new StructNode(name, typeArgs, params.addAll(definitions))));
         });
     }
 
-    private static Result<Whitespace, CompileError> generateStructure(
-            String_ name,
-            List<Type> typeArgs,
-            List<Definition> definitions
-    ) {
-        var generated = new StructNode(name, typeArgs, definitions).generate();
-
+    private static Result<Whitespace, CompileError> registerStruct(StructNode structNode) {
         if (frames.findCurrentStructType() instanceof Some(var currentStructType)) {
-            structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
+            structRegistry = registerStruct(structNode.name, structNode.typeParams, currentStructType, structNode.generate());
             return new Ok<>(new Whitespace());
         }
         else {
-            return new Err<>(new CompileError("We aren't in a struct?", new StringContext(name)));
+            return new Err<>(new CompileError("We aren't in a struct?", new StringContext(structNode.name)));
         }
+    }
+
+    private static Map_<Generic, Tuple<StructType, String_>> registerStruct(String_ name, List<Type> typeArgs, StructType currentStructType, String_ generated) {
+        return structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
     }
 
     private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
