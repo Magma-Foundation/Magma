@@ -1597,21 +1597,24 @@ public class Main {
 
     private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
         return orString(input0, Lists.listFrom(
-                type("whitespace", input1 -> parseWhitespace(input1)),
+                type("whitespace", Main::parseWhitespace),
                 type("class", Main::compileClass),
                 type("enum", stripped -> parseStructure("enum ", stripped, Strings.from("enum"))),
                 type("record", stripped -> parseStructure("record ", stripped, Strings.from("?"))),
                 type("interface", stripped -> parseStructure("interface ", stripped, Strings.from("?"))),
                 type("method", Main::compileMethod),
-                type("definition-statement", Main::compileDefinitionStatement)
+                type("definition-statement", Main::parseDefinitionStatement)
         ));
     }
 
-    private static Result<Definition, CompileError> compileDefinitionStatement(String_ input) {
+    private static Result<Definition, CompileError> parseDefinitionStatement(String_ input) {
         var stripped = input.strip();
         if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
-            return parseDefinition(withoutEnd);
+            return parseDefinition(withoutEnd).mapValue(parsed -> {
+                frames = frames.define(parsed);
+                return parsed;
+            });
         }
 
         return new Err<>(new CompileError("Not a definition statement", new StringContext(input)));
