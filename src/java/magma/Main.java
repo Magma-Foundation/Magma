@@ -1114,7 +1114,7 @@ public class Main {
         var beforeArrow = stripped.sliceTo(arrowIndex).strip();
         var afterArrow = stripped.sliceFrom(arrowIndex + "->".length()).strip();
         if (isSymbol(beforeArrow)) {
-            return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
+            return assembleLambda(Lists.listFrom(beforeArrow), afterArrow);
         }
 
         if (!beforeArrow.startsWithSlice("(") || !beforeArrow.endsWithSlice(")")) {
@@ -1129,7 +1129,7 @@ public class Main {
                 .filter(value -> !value.isEmpty())
                 .collect(new ListCollector<>());
 
-        return assembleLambda(afterArrow, args);
+        return assembleLambda(args, afterArrow);
     }
 
     private static Result<BooleanValue, CompileError> parseBoolean(String_ input) {
@@ -1168,13 +1168,13 @@ public class Main {
         }
 
         return parseValue(callerString_)
-                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> getInvocationCompileErrorResult(caller, callerType, arguments)))
+                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> parseInvokableWithCallerType(caller, callerType, arguments)))
                 .mapErr(err -> new CompileError("Invalid caller", new StringContext(callerString_), Lists.listFrom(err)));
     }
 
-    private static Result<Invocation, CompileError> getInvocationCompileErrorResult(Value caller, Type callerType, String_ argumentsString_) {
+    private static Result<Invocation, CompileError> parseInvokableWithCallerType(Value caller, Type callerType, String_ argumentsString) {
         if (callerType instanceof Functional functional) {
-            return assembleInvokable(caller, argumentsString_, functional.paramTypes);
+            return assembleInvokable(caller, argumentsString, functional.paramTypes);
         }
 
         if (!(callerType instanceof StructRef structRef)) {
@@ -1189,7 +1189,7 @@ public class Main {
             }
 
             if (constructor instanceof Functional functional) {
-                return assembleInvokable(caller, argumentsString_, functional.paramTypes);
+                return assembleInvokable(caller, argumentsString, functional.paramTypes);
             }
             else {
                 return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
@@ -1238,18 +1238,17 @@ public class Main {
 
         if (divided.size() == expectedArgumentsTypes.size()) {
             return divided.iterateWithIndices()
-                    .map((Tuple<Integer, String_> input) -> getValueCompileErrorResult(expectedArgumentsTypes, input))
+                    .map((Tuple<Integer, String_> input) -> assembleInvocationArgument(expectedArgumentsTypes, input))
                     .collect(new Exceptional<>(new ListCollector<>()))
-                    .flatMapValue(collect -> getInvocationCompileErrorOk(caller, collect));
+                    .flatMapValue(collect -> assumeInvocation(caller, collect));
         }
         else {
             return new Err<>(new CompileError("Found '" + divided.size() + "' arguments, but '" + expectedArgumentsTypes.size() + "' were supplied", new NodeContext(caller)));
         }
     }
 
-    private static Result<Invocation, CompileError> getInvocationCompileErrorOk(Value caller, List<Value> collect) {
-        var parsedArgs = collect
-                .iterate()
+    private static Result<Invocation, CompileError> assumeInvocation(Value caller, List<Value> rawArguments) {
+        var parsedArgs = rawArguments.iterate()
                 .filter(value -> !(value instanceof Whitespace))
                 .collect(new ListCollector<>());
 
@@ -1280,40 +1279,53 @@ public class Main {
         return new Ok<>(new Invocation(new DataAccess(symbol, property), newArgs));
     }
 
-    private static Result<Value, CompileError> getValueCompileErrorResult(List<Type> expectedArgumentsType, Tuple<Integer, String_> input) {
+    private static Result<Value, CompileError> assembleInvocationArgument(List<Type> expectedArgumentsType, Tuple<Integer, String_> input) {
         var index = input.left;
 
-        return expectedArgumentsType.get(index).map(found -> {
-            typeStack = typeStack.addLast(found);
-            Result<Value, CompileError> parsed = parseValue(input.right);
-            typeStack = typeStack.removeLast().map(Tuple::right).orElse(typeStack);
-            return parsed;
-        }).orElseGet(() -> new Err<>(new CompileError("Could not find expected argument", new StringContext(input.right))));
+        var argumentValue = input.right;
+        return expectedArgumentsType.get(index)
+                .map(argumentType -> usingTypeStack(argumentType, () -> parseValue(argumentValue)))
+                .orElseGet(() -> new Err<>(new CompileError("Could not find expected argument", new StringContext(argumentValue))));
     }
 
-    private static Result<Value, CompileError> assembleLambda(String_ afterArrow, List<String_> names) {
-        var maybeLast = typeStack.findLast();
+    private static Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier) {
+        typeStack = typeStack.addLast(found);
+        Result<Value, CompileError> parsed = supplier.get();
+        typeStack = typeStack.removeLast().map(Tuple::right).orElse(typeStack);
+        return parsed;
+    }
 
-        var params = names.iterate()
-                .map(name -> Strings.from(maybeLast.map(last -> last + " " + name).orElse("? " + name)))
-                .collect(new Joiner(Strings.from(", ")))
-                .orElse(Strings.empty());
+    private static Result<Value, CompileError> assembleLambda(List<String_> paramNames, String_ afterArrow) {
+        return typeStack.findLast().<Result<Value, CompileError>>map(maybeExpectedType -> {
+            if (!(maybeExpectedType instanceof Functional expectedType)) {
+                return new Err<>(new CompileError("A lambda has to be a functional type", new NodeContext(maybeExpectedType)));
+            }
 
-        if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
-            var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
-            var name = generateName();
-            assembleMethod(new Definition(Primitive.Auto, name), params, content);
-            return new Ok<>(new Symbol(name));
-        }
+            if (expectedType.paramTypes.size() != paramNames.size()) {
+                return new Err<>(new CompileError("Insufficient parameters", new StringContext(afterArrow)));
+            }
 
-        return parseValue(afterArrow).flatMapValue(value -> {
-            var newValue = value.generate();
-            return resolve(value).mapValue(resolved -> {
+            var params = expectedType.paramTypes.iterate()
+                    .zip(paramNames.iterate())
+                    .map(tuple -> new Definition(tuple.left, tuple.right))
+                    .collect(new ListCollector<>());
+
+            if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
+                var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
                 var name = generateName();
-                assembleMethod(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
-                return new Symbol(name);
+                assembleMethod0(new Definition(expectedType.returns, name), params, content);
+                return new Ok<>(new Symbol(name));
+            }
+
+            return parseValue(afterArrow).flatMapValue(value -> {
+                var newValue = value.generate();
+                return resolve(value).mapValue(resolved -> {
+                    var name = generateName();
+                    assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
+                    return new Symbol(name);
+                });
             });
-        });
+        }).orElseGet(() -> new Err<>(new CompileError("No expected type was present for lambda", new StringContext(afterArrow))));
     }
 
     private static String_ generateName() {
@@ -1953,6 +1965,10 @@ public class Main {
 
         public Option<T> next() {
             return this.head.next();
+        }
+
+        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> iterator) {
+            return this.map(value -> iterator.next().map(otherValue -> new Tuple<>(value, otherValue))).flatMap(Iterators::fromOption);
         }
     }
 
