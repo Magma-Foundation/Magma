@@ -1377,7 +1377,7 @@ public class Main {
 
     private static String_ createAlias(String_ base, List<Type> parsed) {
         var other = parsed.iterate()
-                .map(Node::generate)
+                .map(Type::stringify)
                 .collect(new Joiner(Strings.from("_")))
                 .orElse(Strings.empty());
 
