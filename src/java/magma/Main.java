@@ -556,15 +556,16 @@ public class Main {
                         .addAll(oldParams);
 
                 var outputParams = generateValueList(newParams);
-                var assembled = assembleMethod(defined, outputParams, content).mapValue(method -> {
-                    frames = frames.mapLast(last -> {
-                        return last;
-                        // return last.define(new Definition(new Functional(paramTypes, type), name));
-                    });
-                    return method;
-                });
-
+                var assembled = assembleMethod(defined, outputParams, content);
                 frames = frames.removeLast().map(Tuple::right).orElse(frames);
+
+                var paramTypes = oldParams.iterate()
+                        .map(Definition::type)
+                        .collect(new ListCollector<>());
+
+                var type = defined.type;
+                var name = defined.name;
+                frames = define(new Definition(new Functional(paramTypes, type), name));
                 return assembled;
             });
         });
@@ -851,7 +852,7 @@ public class Main {
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
-        return new Err<>(new CompileError("Symbol not defined [" + joinedNames + "]", new StringContext(value)));
+        return new Err<>(new CompileError("Symbol not defined [" + joinedNames.toSlice() + "]", new StringContext(value)));
     }
 
     private static Option<Type> findSymbolInFrames(String name) {
