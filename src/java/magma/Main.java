@@ -1871,9 +1871,21 @@ public class Main {
                 whitespace(),
                 type("break", Main::compileBreak),
                 type("return ", Main::compileReturn),
+                type("postfix", Main::compilePostfix),
                 type("assignment", Main::compileAssignment),
                 type("invokable", input0 -> parseInvokable(input0).mapValue(Invocation::generate))
         ));
+    }
+
+    private static Result<String_, CompileError> compilePostfix(String_ input) {
+        var stripped = input.strip();
+        if (stripped.endsWithSlice("++")) {
+            var value = stripped.sliceTo(stripped.length() - "++".length());
+            return compileValue(value).mapValue(result -> result.appendSlice("++"));
+        }
+        else {
+            return createSuffixErr(stripped, "++");
+        }
     }
 
     private static Result<String_, CompileError> compileAssignment(String_ input) {
