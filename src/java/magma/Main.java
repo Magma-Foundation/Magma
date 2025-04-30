@@ -207,6 +207,14 @@ public class Main {
     }
 
     private interface CompileState {
+        Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier);
+
+        Result<List<String_>, CompileError> withinStatements(Supplier<Result<List<String_>, CompileError>> action);
+
+        <T> T withinTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier);
+
+        <T> Result<T, CompileError> withinFrame(Supplier<Result<T, CompileError>> supplier);
+
         Option<Tuple<String_, Option<Type>>> lookupTypeParam(String_ typeParamValue);
 
         Option<Type> findTypeByName(String name);
@@ -223,19 +231,7 @@ public class Main {
 
         CompileState define(Definition name1);
 
-        CompileState enterFrames();
-
-        CompileState exitFrames();
-
         String_ createName(String type);
-
-        CompileState exitTypeStack();
-
-        CompileState enterTypeStack(Type found);
-
-        CompileState enterTypeParams(List<String_> typeParams, List<Type> typeArgs);
-
-        CompileState exitTypeParams();
 
         CompileState withFunctionPrototype(Definition definition);
 
@@ -252,10 +248,6 @@ public class Main {
         CompileState addFunction(String_ function);
 
         CompileState addStatement(String_ statement);
-
-        CompileState exitStatements();
-
-        CompileState enterStatements();
 
         Option<List<String_>> findLastStatements();
 
@@ -1276,7 +1268,6 @@ public class Main {
     }
 
     private static class MutableCompileState implements CompileState {
-        public static final CompileState INSTANCE = new MutableCompileState();
         private List<Generic> visitedExpansions = listEmpty();
         private List<List<String_>> generatedStatements = listEmpty();
         private List<String_> generatedFunctions = listEmpty();
@@ -1287,6 +1278,38 @@ public class Main {
         private List<Tuple<List<String_>, List<Type>>> typeParamStack = listEmpty();
         private int functionLocalCounter = 0;
         private List<Type> typeStack = listEmpty();
+
+        @Override
+        public Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier) {
+            this.enterTypeStack(found);
+            Result<Value, CompileError> parsed = supplier.get();
+            this.exitTypeStack();
+            return parsed;
+        }
+
+        @Override
+        public Result<List<String_>, CompileError> withinStatements(Supplier<Result<List<String_>, CompileError>> action) {
+            this.generatedStatements = this.generatedStatements.addLast(listEmpty());
+            var result = action.get();
+            this.generatedStatements = this.generatedStatements.removeLast().map(Tuple::right).orElse(this.generatedStatements);
+            return result;
+        }
+
+        @Override
+        public <T> T withinTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
+            this.typeParamStack = this.typeParamStack.addLast(new Tuple<>(typeParams, typeArgs));
+            var generated = supplier.get();
+            this.typeParamStack = this.typeParamStack.removeLast().map(Tuple::right).orElse(this.typeParamStack);
+            return generated;
+        }
+
+        @Override
+        public <T> Result<T, CompileError> withinFrame(Supplier<Result<T, CompileError>> supplier) {
+            this.frames = this.frames.enter();
+            var assembled = supplier.get();
+            this.frames = this.frames.exit();
+            return assembled;
+        }
 
         @Override
         public Option<Tuple<String_, Option<Type>>> lookupTypeParam(String_ typeParamValue) {
@@ -1348,46 +1371,10 @@ public class Main {
         }
 
         @Override
-        public CompileState enterFrames() {
-            this.frames = this.frames.enter();
-            return this;
-        }
-
-        @Override
-        public CompileState exitFrames() {
-            this.frames = this.frames.exit();
-            return this;
-        }
-
-        @Override
         public String_ createName(String type) {
             var name = this.functionName.appendSlice("_" + type).appendSlice(String.valueOf(this.functionLocalCounter));
             this.functionLocalCounter = this.functionLocalCounter + 1;
             return name;
-        }
-
-        @Override
-        public CompileState exitTypeStack() {
-            this.typeStack = this.typeStack.removeLast().map(Tuple::right).orElse(this.typeStack);
-            return this;
-        }
-
-        @Override
-        public CompileState enterTypeStack(Type found) {
-            this.typeStack = this.typeStack.addLast(found);
-            return this;
-        }
-
-        @Override
-        public CompileState enterTypeParams(List<String_> typeParams, List<Type> typeArgs) {
-            this.typeParamStack = this.typeParamStack.addLast(new Tuple<>(typeParams, typeArgs));
-            return this;
-        }
-
-        @Override
-        public CompileState exitTypeParams() {
-            this.typeParamStack = this.typeParamStack.removeLast().map(Tuple::right).orElse(this.typeParamStack);
-            return this;
         }
 
         @Override
@@ -1450,18 +1437,6 @@ public class Main {
         }
 
         @Override
-        public CompileState exitStatements() {
-            this.generatedStatements = this.generatedStatements.removeLast().map(Tuple::right).orElse(this.generatedStatements);
-            return this;
-        }
-
-        @Override
-        public CompileState enterStatements() {
-            this.generatedStatements = this.generatedStatements.addLast(listEmpty());
-            return this;
-        }
-
-        @Override
         public Option<List<String_>> findLastStatements() {
             return this.generatedStatements.findLast();
         }
@@ -1494,6 +1469,16 @@ public class Main {
         @Override
         public Option<Type> findLastType() {
             return this.typeStack.findLast();
+        }
+
+        private CompileState exitTypeStack() {
+            this.typeStack = this.typeStack.removeLast().map(Tuple::right).orElse(this.typeStack);
+            return this;
+        }
+
+        private CompileState enterTypeStack(Type found) {
+            this.typeStack = this.typeStack.addLast(found);
+            return this;
         }
     }
 
@@ -1608,10 +1593,11 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileRoot(String_ input) {
-        return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
+        var state = new MutableCompileState();
+        return parseStatements(input, input1 -> compileRootSegment(input1, state)).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
-            var joinedStructs = MutableCompileState.INSTANCE.joinStructures();
-            return compiled.appendOwned(joinedStructs).appendOwned(MutableCompileState.INSTANCE.joinFunctions());
+            var joinedStructs = state.joinStructures();
+            return compiled.appendOwned(joinedStructs).appendOwned(state.joinFunctions());
         });
     }
 
@@ -1717,11 +1703,11 @@ public class Main {
         return appended;
     }
 
-    private static Result<String_, CompileError> compileRootSegment(String_ input) {
+    private static Result<String_, CompileError> compileRootSegment(String_ input, CompileState instance) {
         return orString(input, Lists.listFrom(
                 type("?", input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
                 type("?", Main::compileNamespaced),
-                type("?", stripped -> compileClass(stripped).mapValue(Whitespace::generate))
+                type("?", stripped -> compileClass(stripped, instance).mapValue(Whitespace::generate))
         ));
     }
 
@@ -1734,11 +1720,11 @@ public class Main {
         }
     }
 
-    private static Result<Whitespace, CompileError> compileClass(String_ stripped) {
-        return parseStructure("class ", stripped, Strings.from("?"));
+    private static Result<Whitespace, CompileError> compileClass(String_ stripped, CompileState instance) {
+        return parseStructure("class ", stripped, Strings.from("?"), instance);
     }
 
-    private static Result<Whitespace, CompileError> parseStructure(String infix, String_ input, String_ type) {
+    private static Result<Whitespace, CompileError> parseStructure(String infix, String_ input, String_ type, CompileState instance) {
         var classIndex = input.indexOfSlice(infix);
         if (classIndex < 0) {
             return createInfixErr(input, infix);
@@ -1770,7 +1756,7 @@ public class Main {
 
         var paramStart = withoutImplements.indexOfSlice("(");
         if (paramStart < 0) {
-            return parseStructureWithBeforeContent(withContentEnd, type, withoutImplements, listEmpty())
+            return parseStructureWithBeforeContent(withContentEnd, type, withoutImplements, listEmpty(), instance)
                     .mapErr(err -> new CompileError("Failed to parse structure without params", new StringContext(input), Lists.listFrom(err)));
         }
 
@@ -1780,12 +1766,12 @@ public class Main {
             return createSuffixErr(paramString, ")");
         }
 
-        return parseParameters(paramString.sliceTo(paramString.length() - 1))
-                .flatMapValue(params -> parseStructureWithBeforeContent(withContentEnd, type, withoutParams, params))
+        return parseParameters(paramString.sliceTo(paramString.length() - 1), instance)
+                .flatMapValue(params -> parseStructureWithBeforeContent(withContentEnd, type, withoutParams, params, instance))
                 .mapErr(err -> new CompileError("Failed to parse structure with params", new StringContext(input), Lists.listFrom(err)));
     }
 
-    private static Result<Whitespace, CompileError> parseStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent, List<Definition> params) {
+    private static Result<Whitespace, CompileError> parseStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent, List<Definition> params, CompileState instance) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice("}")) {
             return createSuffixErr(stripped, "}");
@@ -1802,11 +1788,11 @@ public class Main {
                 var substring = withoutEnd.sliceFrom(typeParamStart + "<".length());
 
                 var typeParameters = divideAll(substring, (state, c) -> foldDelimiter(state, c, ','));
-                return assembleStructure(typeParameters, name, content, type, params);
+                return assembleStructure(typeParameters, name, content, type, params, instance, instance, instance, instance);
             }
         }
 
-        return assembleStructure(listEmpty(), strippedBeforeContent, content, type, params);
+        return assembleStructure(listEmpty(), strippedBeforeContent, content, type, params, instance, instance, instance, instance);
     }
 
     private static State foldDelimiter(State state, char c, char delimiter) {
@@ -1820,45 +1806,47 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
     }
 
-    private static Result<Whitespace, CompileError> assembleStructure(List<String_> typeParams, String_ name, String_ content, String_ type, List<Definition> params) {
+    private static Result<Whitespace, CompileError> assembleStructure(
+            List<String_> typeParams,
+            String_ name,
+            String_ content,
+            String_ type,
+            List<Definition> params,
+            CompileState instance,
+            CompileState instance1,
+            CompileState instance2,
+            CompileState instance3) {
         if (typeParams.isEmpty()) {
-            return generateStructureWithTypeParams(name, content, listEmpty(), type, params);
+            return generateStructureWithTypeParams(name, content, listEmpty(), type, params, instance2, instance3, instance2);
         }
 
         if (!isSymbol(name)) {
             return createSymbolErr(name);
         }
 
-        MutableCompileState.INSTANCE.addExpanding(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params)));
+        instance.addExpanding(name, typeArgs -> instance1.withinTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params, instance2, instance3, instance3)));
         return new Ok<>(new Whitespace());
     }
 
-    private static <T> T usingTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
-        MutableCompileState.INSTANCE.enterTypeParams(typeParams, typeArgs);
-        var generated = supplier.get();
-        MutableCompileState.INSTANCE.exitTypeParams();
-        return generated;
-    }
-
-    private static Result<Whitespace, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type, List<Definition> params) {
-        return usingFrames(() -> {
-            MutableCompileState.INSTANCE.withRef(new StructPrototype(name));
-            MutableCompileState.INSTANCE.defineAll(params);
+    private static Result<Whitespace, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type, List<Definition> params, CompileState instance, CompileState instance1, CompileState compileState) {
+        return instance.withinFrame(() -> {
+            instance.withRef(new StructPrototype(name));
+            instance.defineAll(params);
 
             if (type.equalsToSlice("enum")) {
                 var name1 = new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name");
-                MutableCompileState.INSTANCE.define(name1);
+                instance.define(name1);
             }
 
-            return parseStatements(content, Main::compileClassSegment)
+            return parseStatements(content, input0 -> compileClassSegment(input0, instance1, compileState, compileState))
                     .mapValue(Main::retainDefinitions)
-                    .flatMapValue(definitions -> registerStruct(new StructNode(name, typeArgs, params.addAll(definitions))));
+                    .flatMapValue(definitions -> registerStruct(new StructNode(name, typeArgs, params.addAll(definitions)), instance1));
         });
     }
 
-    private static Result<Whitespace, CompileError> registerStruct(StructNode structNode) {
-        if (MutableCompileState.INSTANCE.getCurrentStructType() instanceof Some(var currentStructType)) {
-            MutableCompileState.INSTANCE.registerStruct(currentStructType, structNode);
+    private static Result<Whitespace, CompileError> registerStruct(StructNode structNode, CompileState instance) {
+        if (instance.getCurrentStructType() instanceof Some(var currentStructType)) {
+            instance.registerStruct(currentStructType, structNode);
             return new Ok<>(new Whitespace());
         }
         else {
@@ -1866,24 +1854,24 @@ public class Main {
         }
     }
 
-    private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
+    private static Result<Parameter, CompileError> compileClassSegment(String_ input0, CompileState instance, CompileState instance1, CompileState instance2) {
         return orString(input0, Lists.listFrom(
                 type("whitespace", Main::parseWhitespace),
-                type("class", Main::compileClass),
-                type("enum", stripped -> parseStructure("enum ", stripped, Strings.from("enum"))),
-                type("record", stripped -> parseStructure("record ", stripped, Strings.from("?"))),
-                type("interface", stripped -> parseStructure("interface ", stripped, Strings.from("?"))),
-                type("method", Main::compileMethod),
-                type("definition-statement", Main::parseDefinitionStatement)
+                type("class", stripped1 -> compileClass(stripped1, instance1)),
+                type("enum", stripped -> parseStructure("enum ", stripped, Strings.from("enum"), instance1)),
+                type("record", stripped -> parseStructure("record ", stripped, Strings.from("?"), instance1)),
+                type("interface", stripped -> parseStructure("interface ", stripped, Strings.from("?"), instance1)),
+                type("method", input -> compileMethod(input, instance, instance2)),
+                type("definition-statement", input1 -> parseDefinitionStatement(input1, instance1))
         ));
     }
 
-    private static Result<Definition, CompileError> parseDefinitionStatement(String_ input) {
+    private static Result<Definition, CompileError> parseDefinitionStatement(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
-            return parseDefinition(withoutEnd).mapValue(parsed -> {
-                MutableCompileState.INSTANCE.define(parsed);
+            return parseDefinition(withoutEnd, instance).mapValue(parsed -> {
+                instance.define(parsed);
                 return parsed;
             });
         }
@@ -1891,7 +1879,7 @@ public class Main {
         return new Err<>(new CompileError("Not a definition statement", new StringContext(input)));
     }
 
-    private static Result<Whitespace, CompileError> compileMethod(String_ input) {
+    private static Result<Whitespace, CompileError> compileMethod(String_ input, CompileState state, CompileState instance) {
         var paramStart = input.indexOfSlice("(");
         if (paramStart < 0) {
             return createInfixErr(input, "(");
@@ -1899,15 +1887,15 @@ public class Main {
 
         var inputDefinition = input.sliceTo(paramStart);
         var withParams = input.sliceFrom(paramStart + "(".length());
-        return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, withParams));
+        return parseMethodHeader(inputDefinition, instance).flatMapValue(defined -> compileMethodWithDefinition(state, instance, defined, withParams));
     }
 
-    private static Result<Whitespace, CompileError> compileMethodWithDefinition(Definition definition, String_ withParams) {
-        if (!definition.typeParams.isEmpty()) {
+    private static Result<Whitespace, CompileError> compileMethodWithDefinition(CompileState state, CompileState instance, Definition defined, String_ withParams) {
+        if (!defined.typeParams.isEmpty()) {
             return new Ok<>(new Whitespace());
         }
 
-        MutableCompileState.INSTANCE.withFunctionPrototype(definition);
+        state.withFunctionPrototype(defined);
 
         var paramEnd = withParams.indexOfSlice(")");
         if (paramEnd < 0) {
@@ -1917,20 +1905,20 @@ public class Main {
         var params = withParams.sliceTo(paramEnd);
         var withoutParams = withParams.sliceFrom(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
-        return parseParameters(params).flatMapValue(oldParameters -> {
-            if (!definition.annotations.contains("External", String::equals) && (withBraces.startsWithSlice("{") && withBraces.endsWithSlice("}"))) {
+        return parseParameters(params, instance).flatMapValue(oldParameters -> {
+            if (!defined.annotations.contains("External", String::equals) && (withBraces.startsWithSlice("{") && withBraces.endsWithSlice("}"))) {
                 var content = withBraces.sliceBetween(1, withBraces.length() - 1);
-                return compileMethodWithParameters(definition, content, oldParameters);
+                return compileMethodWithParameters(defined, content, oldParameters, instance, instance, instance, instance);
             }
             else {
-                MutableCompileState.INSTANCE.defineFunction(definition, oldParameters);
+                state.defineFunction(defined, oldParameters);
                 return new Ok<>(new Whitespace());
             }
         });
     }
 
-    private static Result<List<Definition>, CompileError> parseParameters(String_ parameters) {
-        return parseValues(parameters, Main::parseParameter).mapValue(Main::retainDefinitions);
+    private static Result<List<Definition>, CompileError> parseParameters(String_ parameters, CompileState instance) {
+        return parseValues(parameters, input -> parseParameter(input, instance)).mapValue(Main::retainDefinitions);
     }
 
     private static List<Definition> retainDefinitions(List<Parameter> parameters) {
@@ -1940,36 +1928,29 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private static Result<Whitespace, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
-        var thisType = MutableCompileState.INSTANCE.getCurrentRef().orElse(new StructPrototype("this"));
+    private static Result<Whitespace, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters, CompileState instance, CompileState instance1, CompileState state, CompileState instance2) {
+        var thisType = instance.getCurrentRef().orElse(new StructPrototype("this"));
 
         var newParams = Lists.<Definition>listEmpty()
                 .addLast(new Definition(thisType, "this"))
                 .addAll(oldParameters);
 
-        return usingFrames(() -> {
-            MutableCompileState.INSTANCE.defineAll(oldParameters);
-            return assembleMethod0(definition, newParams, content);
+        return instance1.withinFrame(() -> {
+            instance.defineAll(oldParameters);
+            return assembleMethod0(definition, newParams, content, state, instance2);
         }).mapValue(output -> {
-            MutableCompileState.INSTANCE.defineFunction(definition, oldParameters);
+            instance.defineFunction(definition, oldParameters);
             return output;
         });
     }
 
-    private static <T> Result<T, CompileError> usingFrames(Supplier<Result<T, CompileError>> supplier) {
-        MutableCompileState.INSTANCE.enterFrames();
-        var assembled = supplier.get();
-        MutableCompileState.INSTANCE.exitFrames();
-        return assembled;
+    private static Result<Whitespace, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content, CompileState instance, CompileState instance1) {
+        return assembleMethod(definition, generateValueList(params), content, instance, instance1);
     }
 
-    private static Result<Whitespace, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
-        return assembleMethod(definition, generateValueList(params), content);
-    }
-
-    private static Result<Definition, CompileError> parseMethodHeader(String_ inputDefinition) {
+    private static Result<Definition, CompileError> parseMethodHeader(String_ inputDefinition, CompileState instance) {
         return orString(inputDefinition, Lists.listFrom(
-                type("definition", Main::parseDefinition),
+                type("definition", input -> parseDefinition(input, instance)),
                 type("constructor", Main::parseConstructor)
         ));
     }
@@ -2008,18 +1989,9 @@ public class Main {
                 .orElse(Strings.empty());
     }
 
-    private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
-        return usingStatements(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
-            var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
-            MutableCompileState.INSTANCE.addFunction(generated);
-            return new Whitespace();
-        });
-    }
-
-    private static Result<List<String_>, CompileError> usingStatements(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        MutableCompileState.INSTANCE.enterStatements();
-        var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
-            var maybeElements = MutableCompileState.INSTANCE.findLastStatements();
+    private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content, CompileState instance, CompileState instance1) {
+        return instance1.withinStatements(() -> parseStatements(content, input -> compileFunctionSegment(input, 1, instance)).flatMapValue(parsed1 -> {
+            var maybeElements = instance1.findLastStatements();
             if (maybeElements instanceof Some(var elements)) {
                 return new Ok<>(Lists.<String_>listEmpty()
                         .addAll(elements)
@@ -2028,16 +2000,17 @@ public class Main {
             else {
                 return new Err<>(new CompileError("No statement frames found", new StringContext(content)));
             }
+        })).mapValue(parsed -> {
+            var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
+            instance.addFunction(generated);
+            return new Whitespace();
         });
-
-        MutableCompileState.INSTANCE.exitStatements();
-        return result;
     }
 
-    private static Result<Parameter, CompileError> parseParameter(String_ input) {
+    private static Result<Parameter, CompileError> parseParameter(String_ input, CompileState instance) {
         var lists = Lists.<Transformer<String_, Parameter>>listFrom(
                 type("?", Main::parseWhitespace),
-                type("?", Main::parseDefinition)
+                type("?", input1 -> parseDefinition(input1, instance))
         );
 
         return orString(input, lists);
@@ -2083,12 +2056,12 @@ public class Main {
         }
     }
 
-    private static Result<String_, CompileError> compileFunctionSegment(String_ input, int depth) {
+    private static Result<String_, CompileError> compileFunctionSegment(String_ input, int depth, CompileState instance) {
         return orString(input, Lists.listFrom(
                 whitespace(),
-                type("block", input0 -> compileBlock(input0, depth)),
-                type("statement", input0 -> compileStatement(input0, depth)),
-                type("return ", Main::compileReturn)
+                type("block", input0 -> compileBlock(input0, depth, instance, instance)),
+                type("statement", input0 -> compileStatement(input0, depth, instance)),
+                type("return ", input1 -> compileReturn(input1, instance))
         ));
     }
 
@@ -2096,17 +2069,17 @@ public class Main {
         return type("whitespace", input0 -> parseWhitespace(input0).mapValue(Whitespace::generate));
     }
 
-    private static Result<String_, CompileError> compileStatement(String_ input, int depth) {
+    private static Result<String_, CompileError> compileStatement(String_ input, int depth, CompileState instance) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice(";")) {
             return createSuffixErr(stripped, ";");
         }
 
         var withoutEnd = stripped.sliceTo(stripped.length() - ";".length()).strip();
-        return compileStatementValue(withoutEnd).mapValue(statementValue -> Strings.from("\n" + "\t".repeat(depth) + statementValue + ";"));
+        return compileStatementValue(withoutEnd, instance).mapValue(statementValue -> Strings.from("\n" + "\t".repeat(depth) + statementValue + ";"));
     }
 
-    private static Result<String_, CompileError> compileBlock(String_ input, int depth) {
+    private static Result<String_, CompileError> compileBlock(String_ input, int depth, CompileState instance, CompileState compileState) {
         String_ indent = Strings.from("\n").appendOwned(Strings.from("\t").repeat(depth));
         var stripped = input.strip();
         if (stripped.endsWithSlice("}")) {
@@ -2115,7 +2088,17 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.sliceTo(contentStart);
                 var content = withoutEnd.sliceFrom(contentStart + "{".length());
-                return compileBeforeBlock(beforeBlock).flatMapValue(result -> usingStatements(content, input1 -> compileFunctionSegment(input1, depth + 1))
+                return compileBeforeBlock(beforeBlock, instance).flatMapValue(result -> instance.withinStatements(() -> parseStatements(content, input1 -> compileFunctionSegment(input1, depth + 1, compileState)).flatMapValue(parsed1 -> {
+                            var maybeElements = instance.findLastStatements();
+                            if (maybeElements instanceof Some(var elements)) {
+                                return new Ok<>(Lists.<String_>listEmpty()
+                                        .addAll(elements)
+                                        .addAll(parsed1));
+                            }
+                            else {
+                                return new Err<>(new CompileError("No statement frames found", new StringContext(content)));
+                            }
+                        }))
                         .mapValue(outputContent -> indent.appendOwned(result)
                                 .appendSlice("{")
                                 .appendOwned(join(outputContent))
@@ -2127,29 +2110,29 @@ public class Main {
         return new Err<>(new CompileError("Not a block", new StringContext(indent)));
     }
 
-    private static Result<String_, CompileError> compileStatementValue(String_ input) {
+    private static Result<String_, CompileError> compileStatementValue(String_ input, CompileState instance) {
         return orString(input, Lists.listFrom(
                 whitespace(),
                 type("break", Main::compileBreak),
-                type("return ", Main::compileReturn),
-                type("postfix", Main::compilePostfix),
-                type("assignment", Main::compileAssignment),
-                type("invokable", input0 -> parseInvokable(input0).mapValue(Invocation::generate))
+                type("return ", input3 -> compileReturn(input3, instance)),
+                type("postfix", input2 -> compilePostfix(input2, instance)),
+                type("assignment", input1 -> compileAssignment(input1, instance)),
+                type("invokable", input0 -> parseInvokable(input0, instance).mapValue(Invocation::generate))
         ));
     }
 
-    private static Result<String_, CompileError> compilePostfix(String_ input) {
+    private static Result<String_, CompileError> compilePostfix(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (stripped.endsWithSlice("++")) {
             var value = stripped.sliceTo(stripped.length() - "++".length());
-            return compileValue(value).mapValue(result -> result.appendSlice("++"));
+            return compileValue(value, instance).mapValue(result -> result.appendSlice("++"));
         }
         else {
             return createSuffixErr(stripped, "++");
         }
     }
 
-    private static Result<String_, CompileError> compileAssignment(String_ input) {
+    private static Result<String_, CompileError> compileAssignment(String_ input, CompileState instance) {
         var stripped = input.strip();
         var valueSeparator = stripped.indexOfSlice("=");
         if (valueSeparator < 0) {
@@ -2158,11 +2141,11 @@ public class Main {
         var assignableString_ = stripped.sliceTo(valueSeparator);
         var valueString_ = stripped.sliceFrom(valueSeparator + "=".length());
 
-        return parseAssignable(assignableString_).and(() -> parseValue(valueString_)).flatMapValue(tuple -> {
+        return parseAssignable(assignableString_, instance).and(() -> parseValue(valueString_, instance, instance)).flatMapValue(tuple -> {
             var assignable = tuple.left;
             var value = tuple.right;
 
-            return resolve(value).flatMapValue(type -> {
+            return resolve(value, instance).flatMapValue(type -> {
                 Assignable newAssignable;
                 if (assignable instanceof Definition definition) {
                     newAssignable = new Definition(type, definition.name);
@@ -2178,11 +2161,11 @@ public class Main {
         });
     }
 
-    private static Result<String_, CompileError> compileReturn(String_ input) {
+    private static Result<String_, CompileError> compileReturn(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("return ")) {
             var slice = stripped.sliceFrom("return ".length());
-            return compileValue(slice).mapValue(value -> Strings.from("return ").appendOwned(value));
+            return compileValue(slice, instance).mapValue(value -> Strings.from("return ").appendOwned(value));
         }
 
         return createPrefixErr(stripped, "return ");
@@ -2202,32 +2185,32 @@ public class Main {
         }
     }
 
-    private static Result<Type, CompileError> resolve(Value value) {
+    private static Result<Type, CompileError> resolve(Value value, CompileState instance) {
         return switch (value) {
             case BooleanValue _ -> new Ok<>(Primitive.Bool);
             case CharValue _ -> new Ok<>(Primitive.I8);
-            case Invocation invocation -> resolveInvocation(invocation);
+            case Invocation invocation -> resolveInvocation(invocation, instance);
             case Not _ -> new Ok<>(Primitive.Bool);
-            case Operation operation -> resolveOperation(operation);
+            case Operation operation -> resolveOperation(operation, instance);
             case String_Value _ -> new Ok<>(new Ref(Primitive.I8));
-            case Symbol symbol -> resolveSymbol(symbol);
+            case Symbol symbol -> resolveSymbol(symbol, instance, instance);
             case Whitespace _ -> new Ok<>(Primitive.Void);
-            case DataAccess dataAccess -> resolveDataAccess(dataAccess);
+            case DataAccess dataAccess -> resolveDataAccess(dataAccess, instance);
             case NumberValue _ -> new Ok<>(Primitive.I32);
         };
     }
 
-    private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
-        return resolve(access.parent)
-                .flatMapValue(Main::resolveStructuredType)
+    private static Result<Type, CompileError> resolveDataAccess(DataAccess access, CompileState instance) {
+        return resolve(access.parent, instance)
+                .flatMapValue(type -> resolveStructuredType(type, instance))
                 .flatMapValue(structType -> structType.findTypeAsResult(access.property.toSlice()))
                 .mapErr(err -> new CompileError("Failed to resolve data access", new NodeContext(access.parent), Lists.listFrom(err)));
     }
 
-    private static Result<StructType, CompileError> resolveStructuredType(Type type) {
+    private static Result<StructType, CompileError> resolveStructuredType(Type type, CompileState instance) {
         return Main.or(type, new NodeContext(type), Lists.listFrom(
-                Main::resolveGenericType,
-                Main::resolveStructRef,
+                type2 -> resolveGenericType(type2, instance),
+                type1 -> resolveStructRef(type1, instance),
                 Main::resolveStructureType
         ));
     }
@@ -2239,47 +2222,47 @@ public class Main {
         return new Err<>(new CompileError("Not a structure", new NodeContext(type)));
     }
 
-    private static Result<StructType, CompileError> resolveStructRef(Type type1) {
+    private static Result<StructType, CompileError> resolveStructRef(Type type1, CompileState instance) {
         if (type1 instanceof StructPrototype ref) {
-            return resolveStructByName(ref.name, listEmpty());
+            return resolveStructByName(ref.name, listEmpty(), instance);
         }
         else {
             return new Err<>(new CompileError("Not a struct ref", new NodeContext(type1)));
         }
     }
 
-    private static Result<StructType, CompileError> resolveGenericType(Type type) {
+    private static Result<StructType, CompileError> resolveGenericType(Type type, CompileState instance) {
         if (type instanceof Generic generic) {
-            return resolveStructByName(generic.base, generic.args);
+            return resolveStructByName(generic.base, generic.args, instance);
         }
         else {
             return new Err<>(new CompileError("Not a generic type", new NodeContext(type)));
         }
     }
 
-    private static Result<Type, CompileError> resolveOperation(Operation operation) {
+    private static Result<Type, CompileError> resolveOperation(Operation operation, CompileState compileState) {
         return operation.operator.type
                 .<Result<Type, CompileError>>map(Ok::new)
-                .orElseGet(() -> resolve(operation.left));
+                .orElseGet(() -> resolve(operation.left, compileState));
     }
 
-    private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
+    private static Result<Type, CompileError> resolveSymbol(Symbol symbol, CompileState instance, CompileState compileState) {
         var value = symbol.value;
         if (value.equalsToSlice("this")) {
-            return switch (MutableCompileState.INSTANCE.findCurrentStructType()) {
+            return switch (instance.findCurrentStructType()) {
                 case None<StructType> _ ->
                         new Err<>(new CompileError("No current struct type present", new StringContext(Strings.empty())));
                 case Some<StructType>(var type) -> new Ok<>(type);
             };
         }
 
-        return MutableCompileState.INSTANCE.findTypeByName(value.toSlice())
+        return instance.findTypeByName(value.toSlice())
                 .<Result<Type, CompileError>>map(Ok::new)
-                .orElseGet(() -> createUndefinedError(value));
+                .orElseGet(() -> createUndefinedError(value, compileState));
     }
 
-    private static Result<Type, CompileError> createUndefinedError(String_ value) {
-        var joinedNames = MutableCompileState.INSTANCE.iterDefinitions()
+    private static Result<Type, CompileError> createUndefinedError(String_ value, CompileState compileState) {
+        var joinedNames = compileState.iterDefinitions()
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
@@ -2294,9 +2277,9 @@ public class Main {
                 .next();
     }
 
-    private static Result<Type, CompileError> resolveInvocation(Invocation invocation) {
+    private static Result<Type, CompileError> resolveInvocation(Invocation invocation, CompileState compileState) {
         var caller = invocation.caller;
-        return resolve(caller).flatMapValue(resolvedCaller -> {
+        return resolve(caller, compileState).flatMapValue(resolvedCaller -> {
             if (resolvedCaller instanceof Functional functional) {
 
                 return new Ok<>(functional.returns);
@@ -2306,15 +2289,15 @@ public class Main {
         });
     }
 
-    private static Result<Assignable, CompileError> parseAssignable(String_ definition) {
-        return orString(definition, Lists.listFrom(type("?", Main::parseDefinition), type("?", Main::parseValue)));
+    private static Result<Assignable, CompileError> parseAssignable(String_ definition, CompileState instance) {
+        return orString(definition, Lists.listFrom(type("?", input1 -> parseDefinition(input1, instance)), type("?", input -> parseValue(input, instance, instance))));
     }
 
-    private static Result<String_, CompileError> compileBeforeBlock(String_ input) {
+    private static Result<String_, CompileError> compileBeforeBlock(String_ input, CompileState instance) {
         return orString(input, Lists.listFrom(
                 type("else", string -> parseElse(input, string)),
-                type("if", string -> parseConditional(string, "if")),
-                type("if", string -> parseConditional(string, "while"))
+                type("if", string -> parseConditional(string, "if", instance)),
+                type("if", string -> parseConditional(string, "while", instance))
         ));
     }
 
@@ -2327,12 +2310,12 @@ public class Main {
         }
     }
 
-    private static Result<String_, CompileError> parseConditional(String_ stripped, String prefix) {
+    private static Result<String_, CompileError> parseConditional(String_ stripped, String prefix, CompileState instance) {
         if (stripped.startsWithSlice(prefix)) {
             var withoutPrefix = stripped.sliceFrom(prefix.length()).strip();
             if (withoutPrefix.startsWithSlice("(") && withoutPrefix.endsWithSlice(")")) {
                 var condition = withoutPrefix.sliceBetween(1, withoutPrefix.length() - 1);
-                return compileValue(condition)
+                return compileValue(condition, instance)
                         .mapValue(result -> Strings.from(prefix)
                                 .appendSlice(" (")
                                 .appendOwned(result)
@@ -2342,43 +2325,43 @@ public class Main {
         return new Err<>(new CompileError("Not a conditional", new StringContext(stripped)));
     }
 
-    private static Result<String_, CompileError> compileValue(String_ input) {
-        return parseValue(input).mapValue(Node::generate);
+    private static Result<String_, CompileError> compileValue(String_ input, CompileState instance) {
+        return parseValue(input, instance, instance).mapValue(Node::generate);
     }
 
-    private static Result<Value, CompileError> parseValue(String_ input) {
+    private static Result<Value, CompileError> parseValue(String_ input, CompileState compileState, CompileState instance) {
         List<Transformer<String_, Value>> rules = Lists.listFrom(
                 type("whitespace", Main::parseWhitespace),
                 type("boolean", Main::parseBoolean),
-                type("switch", Main::parseSwitch),
-                type("lambda", Main::parseLambda),
-                type("invokable", Main::parseInvokable),
+                type("switch", input1 -> parseSwitch(input1, compileState)),
+                type("lambda", input2 -> parseLambda(input2, instance)),
+                type("invokable", input5 -> parseInvokable(input5, instance)),
                 type("symbol", Main::parseSymbol),
                 type("number", Main::parseNumber),
-                type("data-access", Main::parseDataAccess),
+                type("data-access", input4 -> parseDataAccess(input4, instance)),
                 type("string", Main::parseString_),
                 type("char", Main::parseChar),
-                type("not", Main::parseNot)
+                type("not", input3 -> parseNot(input3, instance))
         );
 
         var operatorRules = Iterators.fromArray(Operator.values())
-                .map(operator -> type(operator.name(), parseOperator(operator)))
+                .map(operator -> type(operator.name(), parseOperator(operator, instance)))
                 .collect(new ListCollector<>());
 
         return orString(input, rules.addAll(operatorRules));
     }
 
-    private static Result<Value, CompileError> parseSwitch(String_ input) {
+    private static Result<Value, CompileError> parseSwitch(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("switch")) {
-            var name = MutableCompileState.INSTANCE.createName("local");
+            var name = instance.createName("local");
             return new Ok<>(new Symbol(name));
         }
 
         return createPrefixErr(stripped, "switch");
     }
 
-    private static Transformer<String_, Value> parseOperator(Operator operator) {
+    private static Transformer<String_, Value> parseOperator(Operator operator, CompileState instance) {
         return input -> {
             var representation = operator.representation;
             var stripped = input.strip();
@@ -2389,16 +2372,16 @@ public class Main {
 
             var leftString_ = stripped.sliceTo(operatorIndex);
             var rightString_ = stripped.sliceFrom(operatorIndex + representation.length());
-            return parseValue(leftString_)
-                    .and(() -> parseValue(rightString_))
+            return parseValue(leftString_, instance, instance)
+                    .and(() -> parseValue(rightString_, instance, instance))
                     .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
         };
     }
 
-    private static Result<Value, CompileError> parseNot(String_ input) {
+    private static Result<Value, CompileError> parseNot(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("!")) {
-            return parseValue(input.sliceFrom(1)).mapValue(Not::new);
+            return parseValue(input.sliceFrom(1), instance, instance).mapValue(Not::new);
         }
         else {
             return createPrefixErr(stripped, "!");
@@ -2425,7 +2408,7 @@ public class Main {
         }
     }
 
-    private static Result<DataAccess, CompileError> parseDataAccess(String_ input) {
+    private static Result<DataAccess, CompileError> parseDataAccess(String_ input, CompileState instance) {
         var stripped = input.strip();
         var separator = (int) stripped.lastIndexOfSlice(".").orElse(-1);
         if (separator < 0) {
@@ -2438,7 +2421,7 @@ public class Main {
             return createSymbolErr(property);
         }
 
-        return parseValue(parent)
+        return parseValue(parent, instance, instance)
                 .mapValue(parsed -> new DataAccess(parsed, property))
                 .mapErr(err -> new CompileError("Invalid parent", new StringContext(input), Lists.listFrom(err)));
     }
@@ -2465,7 +2448,7 @@ public class Main {
         return createSymbolErr(stripped);
     }
 
-    private static Result<Value, CompileError> parseLambda(String_ input) {
+    private static Result<Value, CompileError> parseLambda(String_ input, CompileState instance) {
         var stripped = input.strip();
         var arrowIndex = stripped.indexOfSlice("->");
         if (arrowIndex < 0) {
@@ -2475,7 +2458,7 @@ public class Main {
         var beforeArrow = stripped.sliceTo(arrowIndex).strip();
         var afterArrow = stripped.sliceFrom(arrowIndex + "->".length()).strip();
         if (isSymbol(beforeArrow)) {
-            return assembleLambda(Lists.listFrom(beforeArrow), afterArrow);
+            return assembleLambda(Lists.listFrom(beforeArrow), afterArrow, instance);
         }
 
         if (!beforeArrow.startsWithSlice("(") || !beforeArrow.endsWithSlice(")")) {
@@ -2490,7 +2473,7 @@ public class Main {
                 .filter(value -> !value.isEmpty())
                 .collect(new ListCollector<>());
 
-        return assembleLambda(args, afterArrow);
+        return assembleLambda(args, afterArrow, instance);
     }
 
     private static Result<BooleanValue, CompileError> parseBoolean(String_ input) {
@@ -2504,7 +2487,7 @@ public class Main {
         return new Err<>(new CompileError("Not a boolean", new StringContext(input)));
     }
 
-    private static Result<Invocation, CompileError> parseInvokable(String_ input) {
+    private static Result<Invocation, CompileError> parseInvokable(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice(")")) {
             return createSuffixErr(stripped, ")");
@@ -2521,32 +2504,32 @@ public class Main {
         var arguments = divisions.findLast().orElse(null);
 
         return orString(callerString_, Lists.listFrom(
-                type("construction", beforeArgs -> parseConstruction(beforeArgs, arguments)),
-                type("invocation", beforeArgs -> parseInvocation(beforeArgs, arguments))
+                type("construction", beforeArgs -> parseConstruction(beforeArgs, arguments, instance)),
+                type("invocation", beforeArgs -> parseInvocation(beforeArgs, arguments, instance))
         ));
     }
 
-    private static Result<Invocation, CompileError> parseInvocation(String_ callerString_, String_ arguments) {
-        return parseValue(callerString_)
-                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> parseInvokableWithCallerType(caller, callerType, arguments)))
+    private static Result<Invocation, CompileError> parseInvocation(String_ callerString_, String_ arguments, CompileState instance) {
+        return parseValue(callerString_, instance, instance)
+                .flatMapValue(caller -> resolve(caller, instance).flatMapValue(callerType -> parseInvokableWithCallerType(caller, callerType, arguments, instance)))
                 .mapErr(err -> new CompileError("Not an invocation", new StringContext(callerString_), Lists.listFrom(err)));
     }
 
-    private static Result<Invocation, CompileError> parseConstruction(String_ callerString_, String_ arguments) {
+    private static Result<Invocation, CompileError> parseConstruction(String_ callerString_, String_ arguments, CompileState instance) {
         if (callerString_.startsWithSlice("new ")) {
             String_ withoutPrefix = callerString_.sliceFrom("new ".length());
-            return parseType(withoutPrefix).flatMapValue(type -> {
+            return parseType(withoutPrefix, instance, instance).flatMapValue(type -> {
                 var parsedCaller = new Symbol(Strings.from("new_").appendOwned(type.stringify()));
-                return assembleInvokable(parsedCaller, arguments, listEmpty());
+                return assembleInvokable(parsedCaller, arguments, listEmpty(), instance);
             });
         }
 
         return createPrefixErr(callerString_, "new ");
     }
 
-    private static Result<Invocation, CompileError> parseInvokableWithCallerType(Value caller, Type callerType, String_ argumentsString) {
+    private static Result<Invocation, CompileError> parseInvokableWithCallerType(Value caller, Type callerType, String_ argumentsString, CompileState instance) {
         if (callerType instanceof Functional functional) {
-            return assembleInvokable(caller, argumentsString, functional.paramTypes);
+            return assembleInvokable(caller, argumentsString, functional.paramTypes, instance);
         }
 
         if (!(callerType instanceof StructPrototype structPrototype)) {
@@ -2554,14 +2537,14 @@ public class Main {
         }
 
         var baseName = structPrototype.name;
-        return resolveStructByName(baseName, listEmpty()).flatMapValue(structType -> {
+        return resolveStructByName(baseName, listEmpty(), instance).flatMapValue(structType -> {
             var maybeConstructor = structType.findTypeAsOption("new");
             if (!(maybeConstructor instanceof Some(var constructor))) {
                 return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
             }
 
             if (constructor instanceof Functional functional) {
-                return assembleInvokable(caller, argumentsString, functional.paramTypes);
+                return assembleInvokable(caller, argumentsString, functional.paramTypes, instance);
             }
             else {
                 return new Err<>(new CompileError("Constructor does not appear to a functional type", new NodeContext(constructor)));
@@ -2569,18 +2552,18 @@ public class Main {
         });
     }
 
-    private static Result<StructType, CompileError> resolveStructByName(String_ baseName, List<Type> args) {
+    private static Result<StructType, CompileError> resolveStructByName(String_ baseName, List<Type> args, CompileState compileState) {
         return orString(baseName, Lists.listFrom(
-                Main::resolveCurrentStruct,
-                baseName1 -> resolveDefinedStruct(new Generic(baseName1, args))
+                baseName2 -> resolveCurrentStruct(baseName2, compileState),
+                baseName1 -> resolveDefinedStruct(new Generic(baseName1, args), compileState)
         ));
     }
 
-    private static Result<StructType, CompileError> resolveDefinedStruct(Generic generic) {
-        return MutableCompileState.INSTANCE.findStructType(generic)
+    private static Result<StructType, CompileError> resolveDefinedStruct(Generic generic, CompileState instance) {
+        return instance.findStructType(generic)
                 .<Result<StructType, CompileError>>map(Ok::new)
                 .orElseGet(() -> {
-                    var joinedKeys = MutableCompileState.INSTANCE.stream()
+                    var joinedKeys = instance.stream()
                             .map(Generic::generate)
                             .collect(new Joiner(Strings.from(", ")))
                             .orElse(Strings.empty());
@@ -2589,8 +2572,8 @@ public class Main {
                 });
     }
 
-    private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
-        if (!(MutableCompileState.INSTANCE.findCurrentStructType() instanceof Some(var currentStructType))) {
+    private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName, CompileState state) {
+        if (!(state.findCurrentStructType() instanceof Some(var currentStructType))) {
             return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
 
@@ -2601,7 +2584,12 @@ public class Main {
         return new Err<>(new CompileError("Current struct did not match '" + currentStructType.generate() + "'", new StringContext(baseName)));
     }
 
-    private static Result<Invocation, CompileError> assembleInvokable(Value caller, String_ arguments, List<Type> expectedArgumentsTypes) {
+    private static Result<Invocation, CompileError> assembleInvokable(
+            Value caller,
+            String_ arguments,
+            List<Type> expectedArgumentsTypes,
+            CompileState state
+    ) {
         var divided = divideAll(arguments, Main::foldValueChar)
                 .iterate()
                 .map(String_::strip)
@@ -2610,16 +2598,16 @@ public class Main {
 
         if (divided.size() == expectedArgumentsTypes.size()) {
             return divided.iterateWithIndices()
-                    .map((Tuple<Integer, String_> input) -> assembleInvocationArgument(expectedArgumentsTypes, input))
+                    .map((Tuple<Integer, String_> input) -> assembleInvocationArgument(expectedArgumentsTypes, input, state))
                     .collect(new Exceptional<>(new ListCollector<>()))
-                    .flatMapValue(collect -> assumeInvocation(caller, collect));
+                    .flatMapValue(collect -> assumeInvocation(caller, collect, state, state));
         }
         else {
             return new Err<>(new CompileError("Found '" + divided.size() + "' arguments, but '" + expectedArgumentsTypes.size() + "' were supplied", new NodeContext(caller)));
         }
     }
 
-    private static Result<Invocation, CompileError> assumeInvocation(Value caller, List<Value> rawArguments) {
+    private static Result<Invocation, CompileError> assumeInvocation(Value caller, List<Value> rawArguments, CompileState instance, CompileState compileState) {
         var parsedArgs = rawArguments.iterate()
                 .filter(value -> !(value instanceof Whitespace))
                 .collect(new ListCollector<>());
@@ -2628,15 +2616,15 @@ public class Main {
             return new Ok<>(new Invocation(caller, parsedArgs));
         }
 
-        var name = MutableCompileState.INSTANCE.createName("local");
+        var name = instance.createName("local");
 
         if (parent instanceof Symbol || parent instanceof DataAccess) {
             return assembleInvocation(property, parent, parsedArgs);
         }
 
-        return resolve(parent).flatMapValue(type -> {
+        return resolve(parent, compileState).flatMapValue(type -> {
             var statement = Strings.from("\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";");
-            MutableCompileState.INSTANCE.addStatement(statement);
+            instance.addStatement(statement);
 
             Value symbol = new Symbol(name);
             return assembleInvocation(property, symbol, parsedArgs);
@@ -2651,24 +2639,17 @@ public class Main {
         return new Ok<>(new Invocation(new DataAccess(symbol, property), newArgs));
     }
 
-    private static Result<Value, CompileError> assembleInvocationArgument(List<Type> expectedArgumentsType, Tuple<Integer, String_> input) {
+    private static Result<Value, CompileError> assembleInvocationArgument(List<Type> expectedArgumentsType, Tuple<Integer, String_> input, CompileState compileState) {
         var index = input.left;
 
         var argumentValue = input.right;
         return expectedArgumentsType.get(index)
-                .map(argumentType -> usingTypeStack(argumentType, () -> parseValue(argumentValue)))
+                .map(argumentType -> compileState.usingTypeStack(argumentType, () -> parseValue(argumentValue, compileState, compileState)))
                 .orElseGet(() -> new Err<>(new CompileError("Could not find expected argument", new StringContext(argumentValue))));
     }
 
-    private static Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier) {
-        MutableCompileState.INSTANCE.enterTypeStack(found);
-        Result<Value, CompileError> parsed = supplier.get();
-        MutableCompileState.INSTANCE.exitTypeStack();
-        return parsed;
-    }
-
-    private static Result<Value, CompileError> assembleLambda(List<String_> paramNames, String_ afterArrow) {
-        return MutableCompileState.INSTANCE.findLastType().<Result<Value, CompileError>>map(maybeExpectedType -> {
+    private static Result<Value, CompileError> assembleLambda(List<String_> paramNames, String_ afterArrow, CompileState compileState) {
+        return compileState.findLastType().<Result<Value, CompileError>>map(maybeExpectedType -> {
             if (!(maybeExpectedType instanceof Functional expectedType)) {
                 return new Err<>(new CompileError("A lambda has to be a functional type", new NodeContext(maybeExpectedType)));
             }
@@ -2682,21 +2663,21 @@ public class Main {
                     .map(tuple -> new Definition(tuple.left, tuple.right))
                     .collect(new ListCollector<>());
 
-            return usingFrames(() -> {
-                MutableCompileState.INSTANCE.defineAll(params);
+            return compileState.withinFrame(() -> {
+                compileState.defineAll(params);
 
                 if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
                     var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
-                    var name = MutableCompileState.INSTANCE.createName("local");
-                    assembleMethod0(new Definition(expectedType.returns, name), params, content);
+                    var name = compileState.createName("local");
+                    assembleMethod0(new Definition(expectedType.returns, name), params, content, compileState, compileState);
                     return new Ok<>(new Symbol(name));
                 }
 
-                return parseValue(afterArrow).flatMapValue(value -> {
+                return parseValue(afterArrow, compileState, compileState).flatMapValue(value -> {
                     var newValue = value.generate();
-                    return resolve(value).mapValue(resolved -> {
-                        var name = MutableCompileState.INSTANCE.createName("local");
-                        assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
+                    return resolve(value, compileState).mapValue(resolved -> {
+                        var name = compileState.createName("local");
+                        assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"), compileState, compileState);
                         return new Symbol(name);
                     });
                 });
@@ -2731,7 +2712,7 @@ public class Main {
         return true;
     }
 
-    private static Result<Definition, CompileError> parseDefinition(String_ input) {
+    private static Result<Definition, CompileError> parseDefinition(String_ input, CompileState instance) {
         var stripped = input.strip();
         return stripped.lastIndexOfSlice(" ").<Result<Definition, CompileError>>map(nameSeparator -> {
             var beforeName = stripped.sliceTo(nameSeparator);
@@ -2742,7 +2723,7 @@ public class Main {
 
             var divisions = divideAll(beforeName, Main::foldByTypeSeparator);
             if (divisions.size() == 1) {
-                return parseType(beforeName).mapValue(type -> new Definition(type, name));
+                return parseType(beforeName, instance, instance).mapValue(type -> new Definition(type, name));
             }
 
             return divisions.popLast().map(tuple -> {
@@ -2751,28 +2732,28 @@ public class Main {
                         .orElse(Strings.empty())
                         .strip();
 
-                return parseDefinitionWithType(joined, tuple.right, name);
+                return parseDefinitionWithType(joined, tuple.right, name, instance);
             }).orElseGet(() -> new Err<>(new CompileError("Insufficient divisions", new StringContext(beforeName))));
         }).orElseGet(() -> createInfixErr(stripped, " "));
     }
 
-    private static Result<Definition, CompileError> parseDefinitionWithType(String_ beforeType, String_ type, String_ name) {
+    private static Result<Definition, CompileError> parseDefinitionWithType(String_ beforeType, String_ type, String_ name, CompileState instance) {
         if (beforeType.endsWithSlice(">")) {
             var withoutEnd = beforeType.sliceTo(beforeType.length() - ">".length());
             if (withoutEnd.lastIndexOfSlice("<") instanceof Some(var typeParamStart)) {
                 var beforeTypeParams = withoutEnd.sliceTo(typeParamStart);
                 var typeParamsString = withoutEnd.sliceFrom(typeParamStart + 1);
                 var typeParams = divideAll(typeParamsString, Main::foldValueChar);
-                return parseDefinitionWithTypeParams(beforeTypeParams, typeParams, type, name);
+                return parseDefinitionWithTypeParams(beforeTypeParams, typeParams, type, name, instance, instance);
             }
         }
 
-        return parseDefinitionWithTypeParams(beforeType, listEmpty(), type, name);
+        return parseDefinitionWithTypeParams(beforeType, listEmpty(), type, name, instance, instance);
     }
 
-    private static Result<Definition, CompileError> parseDefinitionWithTypeParams(String_ withoutTypeParams, List<String_> typeParams, String_ type, String_ name) {
-        return usingTypeParams(typeParams, listEmpty(), () -> {
-            return parseType(type).mapValue(type1 -> {
+    private static Result<Definition, CompileError> parseDefinitionWithTypeParams(String_ withoutTypeParams, List<String_> typeParams, String_ type, String_ name, CompileState state1, CompileState instance) {
+        return state1.withinTypeParams(typeParams, listEmpty(), () -> {
+            return parseType(type, instance, instance).mapValue(type1 -> {
                 return withoutTypeParams.lastIndexOfSlice("\n").map(annotationsSeparator -> {
                     var string = withoutTypeParams.sliceTo(annotationsSeparator);
                     var annotations = divideAll(string, (state, c) -> foldDelimiter(state, c, '\n'))
@@ -2805,12 +2786,12 @@ public class Main {
         return appended;
     }
 
-    private static Result<Type, CompileError> parseType(String_ input) {
+    private static Result<Type, CompileError> parseType(String_ input, CompileState compileState, CompileState instance) {
         return Main.orString(input, Lists.listFrom(
-                type("type-param", Main::parseTypeParam),
+                type("type-param", input2 -> parseTypeParam(input2, instance)),
                 type("primitive", Main::parsePrimitive),
                 type("string", Main::parseStringType),
-                type("generic", Main::parseGeneric),
+                type("generic", input1 -> parseGeneric(input1, compileState)),
                 type("symbol-type", Main::parseSymbolType)
         ));
     }
@@ -2825,7 +2806,7 @@ public class Main {
         }
     }
 
-    private static Result<Type, CompileError> parseGeneric(String_ input) {
+    private static Result<Type, CompileError> parseGeneric(String_ input, CompileState instance) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice(">")) {
             return createSuffixErr(stripped, ">");
@@ -2839,7 +2820,7 @@ public class Main {
 
         var base = withoutEnd.sliceTo(index).strip();
         var argsString = withoutEnd.sliceFrom(index + "<".length());
-        return parseValues(argsString, Main::parseGenericArgument).flatMapValue(rawArguments -> {
+        return parseValues(argsString, argString -> parseGenericArgument(argString, instance)).flatMapValue(rawArguments -> {
             var arguments = rawArguments.iterate()
                     .map(Main::retainTypes)
                     .flatMap(Iterators::fromOption)
@@ -2865,7 +2846,7 @@ public class Main {
 
             var generic = new Generic(base, arguments);
             if (!generic.hasTypeParams()) {
-                MutableCompileState.INSTANCE.expandGeneric(generic);
+                instance.expandGeneric(generic);
             }
 
             return new Ok<>(generic);
@@ -2876,10 +2857,10 @@ public class Main {
         return argument instanceof Type type ? new Some<>(type) : new None<Type>();
     }
 
-    private static Result<Argument, CompileError> parseGenericArgument(String_ argString) {
+    private static Result<Argument, CompileError> parseGenericArgument(String_ argString, CompileState instance) {
         return orString(argString, Lists.listFrom(
                 type("whitespace", Main::parseWhitespace),
-                type("type", Main::parseType)
+                type("type", input -> parseType(input, instance, instance))
         ));
     }
 
@@ -2912,9 +2893,9 @@ public class Main {
         return new Err<>(new CompileError("Not a primitive", new StringContext(input)));
     }
 
-    private static Result<Type, CompileError> parseTypeParam(String_ input) {
+    private static Result<Type, CompileError> parseTypeParam(String_ input, CompileState compileState) {
         var stripped = input.strip();
-        if (MutableCompileState.INSTANCE.lookupTypeParam(stripped) instanceof Some(var typeParamEntry)) {
+        if (compileState.lookupTypeParam(stripped) instanceof Some(var typeParamEntry)) {
             var typeParam = typeParamEntry.left;
             var maybeTypeArgument = typeParamEntry.right;
             if (maybeTypeArgument instanceof Some(var found)) {
