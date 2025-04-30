@@ -1224,8 +1224,16 @@ public class Main {
         private int functionLocalCounter = 0;
         private List<Type> typeStack = listEmpty();
 
-        public void setGeneratedStatements(List<List<String_>> generatedStatements) {
-            this.generatedStatements = generatedStatements;
+        private void addStatement(String_ statement) {
+            this.generatedStatements = this.generatedStatements.mapLast(last -> last.addLast(statement));
+        }
+
+        private void exit() {
+            this.generatedStatements = this.generatedStatements.removeLast().map(Tuple::right).orElse(this.generatedStatements);
+        }
+
+        private void enter() {
+            this.generatedStatements = this.generatedStatements.addLast(listEmpty());
         }
 
         public void setGeneratedMethods(List<String_> generatedMethods) {
@@ -1804,7 +1812,7 @@ public class Main {
     }
 
     private static Result<List<String_>, CompileError> parseStatementsWithLocals(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.generatedStatements.addLast(listEmpty()));
+        CompileState.INSTANCE.enter();
         var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
             var maybeElements = CompileState.INSTANCE.generatedStatements.findLast();
             if (maybeElements instanceof Some(var elements)) {
@@ -1817,7 +1825,7 @@ public class Main {
             }
         });
 
-        CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.generatedStatements.removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.generatedStatements));
+        CompileState.INSTANCE.exit();
         return result;
     }
 
@@ -2423,7 +2431,7 @@ public class Main {
 
         return resolve(parent).flatMapValue(type -> {
             var statement = Strings.from("\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";");
-            CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.generatedStatements.mapLast(last -> last.addLast(statement)));
+            CompileState.INSTANCE.addStatement(statement);
 
             Value symbol = new Symbol(name);
             return assembleInvocation(property, symbol, parsedArgs);
