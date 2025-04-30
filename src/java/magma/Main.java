@@ -1224,84 +1224,84 @@ public class Main {
         private int functionLocalCounter = 0;
         private List<Type> typeStack = listEmpty();
 
-        public static List<Generic> getVisitedExpansions() {
-            return INSTANCE.visitedExpansions;
+        public List<List<String_>> getGeneratedStatements() {
+            return this.generatedStatements;
         }
 
-        public static void setVisitedExpansions(List<Generic> visitedExpansions) {
-            CompileState.INSTANCE.visitedExpansions = visitedExpansions;
+        public void setGeneratedStatements(List<List<String_>> generatedStatements) {
+            this.generatedStatements = generatedStatements;
         }
 
-        public static List<List<String_>> getGeneratedStatements() {
-            return INSTANCE.generatedStatements;
+        public List<String_> getGeneratedMethods() {
+            return this.generatedMethods;
         }
 
-        public static void setGeneratedStatements(List<List<String_>> generatedStatements) {
-            CompileState.INSTANCE.generatedStatements = generatedStatements;
+        public void setGeneratedMethods(List<String_> generatedMethods) {
+            this.generatedMethods = generatedMethods;
         }
 
-        public static List<String_> getGeneratedMethods() {
-            return INSTANCE.generatedMethods;
+        public Map_<Generic, Tuple<StructType, String_>> getStructRegistry() {
+            return this.structRegistry;
         }
 
-        public static void setGeneratedMethods(List<String_> generatedMethods) {
-            CompileState.INSTANCE.generatedMethods = generatedMethods;
+        public void setStructRegistry(Map_<Generic, Tuple<StructType, String_>> structRegistry) {
+            this.structRegistry = structRegistry;
         }
 
-        public static Map_<Generic, Tuple<StructType, String_>> getStructRegistry() {
-            return INSTANCE.structRegistry;
+        public Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> getExpanding() {
+            return this.expanding;
         }
 
-        public static void setStructRegistry(Map_<Generic, Tuple<StructType, String_>> structRegistry) {
-            CompileState.INSTANCE.structRegistry = structRegistry;
+        public void setExpanding(Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> expanding) {
+            this.expanding = expanding;
         }
 
-        public static Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> getExpanding() {
-            return INSTANCE.expanding;
+        public Frames getFrames() {
+            return this.frames;
         }
 
-        public static void setExpanding(Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> expanding) {
-            CompileState.INSTANCE.expanding = expanding;
+        public void setFrames(Frames frames) {
+            this.frames = frames;
         }
 
-        public static Frames getFrames() {
-            return INSTANCE.frames;
+        public String_ getFunctionName() {
+            return this.functionName;
         }
 
-        public static void setFrames(Frames frames) {
-            CompileState.INSTANCE.frames = frames;
+        public void setFunctionName(String_ functionName) {
+            this.functionName = functionName;
         }
 
-        public static String_ getFunctionName() {
-            return INSTANCE.functionName;
+        public List<Tuple<List<String_>, List<Type>>> getTypeParamStack() {
+            return this.typeParamStack;
         }
 
-        public static void setFunctionName(String_ functionName) {
-            CompileState.INSTANCE.functionName = functionName;
+        public void setTypeParamStack(List<Tuple<List<String_>, List<Type>>> typeParamStack) {
+            this.typeParamStack = typeParamStack;
         }
 
-        public static List<Tuple<List<String_>, List<Type>>> getTypeParamStack() {
-            return INSTANCE.typeParamStack;
+        public int getFunctionLocalCounter() {
+            return this.functionLocalCounter;
         }
 
-        public static void setTypeParamStack(List<Tuple<List<String_>, List<Type>>> typeParamStack) {
-            CompileState.INSTANCE.typeParamStack = typeParamStack;
+        public void setFunctionLocalCounter(int functionLocalCounter) {
+            this.functionLocalCounter = functionLocalCounter;
         }
 
-        public static int getFunctionLocalCounter() {
-            return INSTANCE.functionLocalCounter;
+        public List<Type> getTypeStack() {
+            return this.typeStack;
         }
 
-        public static void setFunctionLocalCounter(int functionLocalCounter) {
-            CompileState.INSTANCE.functionLocalCounter = functionLocalCounter;
+        public void setTypeStack(List<Type> typeStack) {
+            this.typeStack = typeStack;
         }
 
-        public static List<Type> getTypeStack() {
-            return INSTANCE.typeStack;
+        public List<Generic> getVisitedExpansions() {
+            return this.visitedExpansions;
         }
 
-        public static void setTypeStack(List<Type> typeStack) {
-            CompileState.INSTANCE.typeStack = typeStack;
+        public void setVisitedExpansions(List<Generic> visitedExpansions) {
+            this.visitedExpansions = visitedExpansions;
         }
     }
 
@@ -1419,12 +1419,12 @@ public class Main {
         return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
             var joinedStructs = joinStructures();
-            return compiled.appendOwned(joinedStructs).appendOwned(join(CompileState.getGeneratedMethods()));
+            return compiled.appendOwned(joinedStructs).appendOwned(join(CompileState.INSTANCE.getGeneratedMethods()));
         });
     }
 
     private static String_ joinStructures() {
-        return CompileState.getStructRegistry().values()
+        return CompileState.INSTANCE.getStructRegistry().values()
                 .map(Tuple::right)
                 .collect(new Joiner())
                 .orElse(Strings.empty());
@@ -1644,23 +1644,23 @@ public class Main {
             return createSymbolErr(name);
         }
 
-        CompileState.setExpanding(CompileState.getExpanding().put(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params))));
+        CompileState.INSTANCE.setExpanding(CompileState.INSTANCE.getExpanding().put(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params))));
         return new Ok<>(new Whitespace());
     }
 
     private static <T> T usingTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
-        CompileState.setTypeParamStack(CompileState.getTypeParamStack().addLast(new Tuple<>(typeParams, typeArgs)));
+        CompileState.INSTANCE.setTypeParamStack(CompileState.INSTANCE.getTypeParamStack().addLast(new Tuple<>(typeParams, typeArgs)));
         var generated = supplier.get();
-        CompileState.setTypeParamStack(CompileState.getTypeParamStack().removeLast().map(Tuple::right).orElse(CompileState.getTypeParamStack()));
+        CompileState.INSTANCE.setTypeParamStack(CompileState.INSTANCE.getTypeParamStack().removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.getTypeParamStack()));
         return generated;
     }
 
     private static Result<Whitespace, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type, List<Definition> params) {
         return usingFrames(() -> {
-            CompileState.setFrames(CompileState.getFrames().withRef(new StructRef(name)).defineAll(params));
+            CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().withRef(new StructRef(name)).defineAll(params));
 
             if (type.equalsToSlice("enum")) {
-                CompileState.setFrames(CompileState.getFrames().define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name")));
+                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name")));
             }
 
             return parseStatements(content, Main::compileClassSegment)
@@ -1670,8 +1670,8 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> registerStruct(StructNode structNode) {
-        if (CompileState.getFrames().findCurrentStructType() instanceof Some(var currentStructType)) {
-            CompileState.setStructRegistry(registerStruct(structNode.name, structNode.typeParams, currentStructType, structNode.generate()));
+        if (CompileState.INSTANCE.getFrames().findCurrentStructType() instanceof Some(var currentStructType)) {
+            CompileState.INSTANCE.setStructRegistry(registerStruct(structNode.name, structNode.typeParams, currentStructType, structNode.generate()));
             return new Ok<>(new Whitespace());
         }
         else {
@@ -1680,7 +1680,7 @@ public class Main {
     }
 
     private static Map_<Generic, Tuple<StructType, String_>> registerStruct(String_ name, List<Type> typeArgs, StructType currentStructType, String_ generated) {
-        return CompileState.getStructRegistry().put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
+        return CompileState.INSTANCE.getStructRegistry().put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
     }
 
     private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
@@ -1700,7 +1700,7 @@ public class Main {
         if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
             return parseDefinition(withoutEnd).mapValue(parsed -> {
-                CompileState.setFrames(CompileState.getFrames().define(parsed));
+                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().define(parsed));
                 return parsed;
             });
         }
@@ -1724,8 +1724,8 @@ public class Main {
             return new Ok<>(new Whitespace());
         }
 
-        CompileState.setFunctionName(definition.name);
-        CompileState.setFunctionLocalCounter(0);
+        CompileState.INSTANCE.setFunctionName(definition.name);
+        CompileState.INSTANCE.setFunctionLocalCounter(0);
 
         var paramEnd = withParams.indexOfSlice(")");
         if (paramEnd < 0) {
@@ -1741,7 +1741,7 @@ public class Main {
                 return compileMethodWithParameters(definition, content, oldParameters);
             }
             else {
-                CompileState.setFrames(defineMethod(definition, oldParameters));
+                CompileState.INSTANCE.setFrames(defineMethod(definition, oldParameters));
                 return new Ok<>(new Whitespace());
             }
         });
@@ -1759,25 +1759,25 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
-        var thisType = CompileState.getFrames().findCurrentRef().orElse(new StructRef("this"));
+        var thisType = CompileState.INSTANCE.getFrames().findCurrentRef().orElse(new StructRef("this"));
 
         var newParams = Lists.<Definition>listEmpty()
                 .addLast(new Definition(thisType, "this"))
                 .addAll(oldParameters);
 
         return usingFrames(() -> {
-            CompileState.setFrames(CompileState.getFrames().defineAll(oldParameters));
+            CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().defineAll(oldParameters));
             return assembleMethod0(definition, newParams, content);
         }).mapValue(output -> {
-            CompileState.setFrames(defineMethod(definition, oldParameters));
+            CompileState.INSTANCE.setFrames(defineMethod(definition, oldParameters));
             return output;
         });
     }
 
     private static <T> Result<T, CompileError> usingFrames(Supplier<Result<T, CompileError>> supplier) {
-        CompileState.setFrames(CompileState.getFrames().enter());
+        CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().enter());
         var assembled = supplier.get();
-        CompileState.setFrames(CompileState.getFrames().exit());
+        CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().exit());
         return assembled;
     }
 
@@ -1787,7 +1787,7 @@ public class Main {
                 .collect(new ListCollector<>());
         var type = definition.type;
         var name = definition.name;
-        return CompileState.getFrames().define(new Definition(new Functional(paramTypes, type), name));
+        return CompileState.INSTANCE.getFrames().define(new Definition(new Functional(paramTypes, type), name));
     }
 
     private static Result<Whitespace, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
@@ -1838,15 +1838,15 @@ public class Main {
     private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
         return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
             var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
-            CompileState.setGeneratedMethods(CompileState.getGeneratedMethods().addLast(generated));
+            CompileState.INSTANCE.setGeneratedMethods(CompileState.INSTANCE.getGeneratedMethods().addLast(generated));
             return new Whitespace();
         });
     }
 
     private static Result<List<String_>, CompileError> parseStatementsWithLocals(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        CompileState.setGeneratedStatements(CompileState.getGeneratedStatements().addLast(listEmpty()));
+        CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.getGeneratedStatements().addLast(listEmpty()));
         var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
-            var maybeElements = CompileState.getGeneratedStatements().findLast();
+            var maybeElements = CompileState.INSTANCE.getGeneratedStatements().findLast();
             if (maybeElements instanceof Some(var elements)) {
                 return new Ok<>(Lists.<String_>listEmpty()
                         .addAll(elements)
@@ -1857,7 +1857,7 @@ public class Main {
             }
         });
 
-        CompileState.setGeneratedStatements(CompileState.getGeneratedStatements().removeLast().map(Tuple::right).orElse(CompileState.getGeneratedStatements()));
+        CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.getGeneratedStatements().removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.getGeneratedStatements()));
         return result;
     }
 
@@ -2093,20 +2093,20 @@ public class Main {
     private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
         var value = symbol.value;
         if (value.equalsToSlice("this")) {
-            return switch (CompileState.getFrames().findCurrentStructType()) {
+            return switch (CompileState.INSTANCE.getFrames().findCurrentStructType()) {
                 case None<StructType> _ ->
                         new Err<>(new CompileError("No current struct type present", new StringContext(Strings.empty())));
                 case Some<StructType>(var type) -> new Ok<>(type);
             };
         }
 
-        return CompileState.getFrames().findTypeByName(value.toSlice())
+        return CompileState.INSTANCE.getFrames().findTypeByName(value.toSlice())
                 .<Result<Type, CompileError>>map(Ok::new)
                 .orElseGet(() -> createUndefinedError(value));
     }
 
     private static Result<Type, CompileError> createUndefinedError(String_ value) {
-        var joinedNames = CompileState.getFrames().streamDefined()
+        var joinedNames = CompileState.INSTANCE.getFrames().streamDefined()
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
@@ -2404,11 +2404,11 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveDefinedStruct(Generic generic) {
-        if (CompileState.getStructRegistry().containsKey(generic)) {
-            return new Ok<>(CompileState.getStructRegistry().get(generic).left);
+        if (CompileState.INSTANCE.getStructRegistry().containsKey(generic)) {
+            return new Ok<>(CompileState.INSTANCE.getStructRegistry().get(generic).left);
         }
 
-        var joinedKeys = CompileState.getStructRegistry().keys()
+        var joinedKeys = CompileState.INSTANCE.getStructRegistry().keys()
                 .map(Generic::generate)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
@@ -2417,7 +2417,7 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
-        if (!(CompileState.getFrames().findCurrentStructType() instanceof Some(var currentStructType))) {
+        if (!(CompileState.INSTANCE.getFrames().findCurrentStructType() instanceof Some(var currentStructType))) {
             return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
 
@@ -2463,7 +2463,7 @@ public class Main {
 
         return resolve(parent).flatMapValue(type -> {
             var statement = Strings.from("\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";");
-            CompileState.setGeneratedStatements(CompileState.getGeneratedStatements().mapLast(last -> last.addLast(statement)));
+            CompileState.INSTANCE.setGeneratedStatements(CompileState.INSTANCE.getGeneratedStatements().mapLast(last -> last.addLast(statement)));
 
             Value symbol = new Symbol(name);
             return assembleInvocation(property, symbol, parsedArgs);
@@ -2488,14 +2488,14 @@ public class Main {
     }
 
     private static Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier) {
-        CompileState.setTypeStack(CompileState.getTypeStack().addLast(found));
+        CompileState.INSTANCE.setTypeStack(CompileState.INSTANCE.getTypeStack().addLast(found));
         Result<Value, CompileError> parsed = supplier.get();
-        CompileState.setTypeStack(CompileState.getTypeStack().removeLast().map(Tuple::right).orElse(CompileState.getTypeStack()));
+        CompileState.INSTANCE.setTypeStack(CompileState.INSTANCE.getTypeStack().removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.getTypeStack()));
         return parsed;
     }
 
     private static Result<Value, CompileError> assembleLambda(List<String_> paramNames, String_ afterArrow) {
-        return CompileState.getTypeStack().findLast().<Result<Value, CompileError>>map(maybeExpectedType -> {
+        return CompileState.INSTANCE.getTypeStack().findLast().<Result<Value, CompileError>>map(maybeExpectedType -> {
             if (!(maybeExpectedType instanceof Functional expectedType)) {
                 return new Err<>(new CompileError("A lambda has to be a functional type", new NodeContext(maybeExpectedType)));
             }
@@ -2510,7 +2510,7 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return usingFrames(() -> {
-                CompileState.setFrames(CompileState.getFrames().defineAll(params));
+                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.getFrames().defineAll(params));
 
                 if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
                     var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
@@ -2532,8 +2532,8 @@ public class Main {
     }
 
     private static String_ generateName() {
-        var name = CompileState.getFunctionName().appendSlice("_local").appendSlice(String.valueOf(CompileState.getFunctionLocalCounter()));
-        CompileState.setFunctionLocalCounter(CompileState.getFunctionLocalCounter() + 1);
+        var name = CompileState.INSTANCE.getFunctionName().appendSlice("_local").appendSlice(String.valueOf(CompileState.INSTANCE.getFunctionLocalCounter()));
+        CompileState.INSTANCE.setFunctionLocalCounter(CompileState.INSTANCE.getFunctionLocalCounter() + 1);
         return name;
     }
 
@@ -2702,14 +2702,18 @@ public class Main {
 
             var generic = new Generic(base, arguments);
             if (!generic.hasTypeParams()) {
-                if (!CompileState.getVisitedExpansions().contains(generic, Generic::equalsTo) && CompileState.getExpanding().containsKey(base)) {
-                    CompileState.setVisitedExpansions(CompileState.getVisitedExpansions().addLast(generic));
-                    CompileState.getExpanding().get(base).apply(arguments);
+                if (!hasVisited(generic) && CompileState.INSTANCE.getExpanding().containsKey(base)) {
+                    CompileState.INSTANCE.setVisitedExpansions(CompileState.INSTANCE.getVisitedExpansions().addLast(generic));
+                    CompileState.INSTANCE.getExpanding().get(base).apply(arguments);
                 }
             }
 
             return new Ok<>(generic);
         });
+    }
+
+    private static boolean hasVisited(Generic generic) {
+        return CompileState.INSTANCE.getVisitedExpansions().contains(generic, Generic::equalsTo);
     }
 
     private static Option<Type> retainTypes(Argument argument) {
@@ -2767,7 +2771,7 @@ public class Main {
     }
 
     private static Option<Tuple<String_, Option<Type>>> findTypeParamEntryInStack(String_ typeParamValue) {
-        return CompileState.getTypeParamStack().iterateReversed()
+        return CompileState.INSTANCE.getTypeParamStack().iterateReversed()
                 .flatMap(element -> findTypeParamEntry(typeParamValue, element))
                 .next();
     }
