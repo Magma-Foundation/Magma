@@ -78,7 +78,7 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private interface String_ {
+    public interface String_ {
         String_ sliceTo(int index);
 
         String_ appendSlice(String slice);
@@ -127,7 +127,7 @@ public class Main {
         String_ generate();
     }
 
-    private sealed interface Value extends Assignable {
+    sealed public interface Value extends Assignable {
     }
 
     private interface Node {
@@ -137,7 +137,7 @@ public class Main {
     private interface Assignable extends Node {
     }
 
-    private sealed interface Result<T, X> permits Ok, Err {
+    sealed public interface Result<T, X> permits Ok, Err {
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
         <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
@@ -149,7 +149,7 @@ public class Main {
         <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
-    private interface Type extends Node, Argument {
+    public interface Type extends Node, Argument {
         boolean hasTypeParams();
 
         String_ stringify();
@@ -204,62 +204,6 @@ public class Main {
     }
 
     private interface Argument extends Node {
-    }
-
-    private interface CompileState {
-        Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier);
-
-        Result<List<String_>, CompileError> withinStatements(Supplier<Result<List<String_>, CompileError>> action);
-
-        <T> T withinTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier);
-
-        <T> Result<T, CompileError> withinFrame(Supplier<Result<T, CompileError>> supplier);
-
-        Option<Tuple<String_, Option<Type>>> lookupTypeParam(String_ typeParamValue);
-
-        Option<Type> findTypeByName(String name);
-
-        Option<StructPrototype> getCurrentRef();
-
-        Option<StructType> getCurrentStructType();
-
-        String_ joinFunctions();
-
-        String_ joinStructures();
-
-        CompileState defineFunction(Definition definition, List<Definition> oldParameters);
-
-        CompileState define(Definition name1);
-
-        String_ createName(String type);
-
-        CompileState withFunctionPrototype(Definition definition);
-
-        CompileState defineAll(List<Definition> params);
-
-        CompileState withRef(StructPrototype prototype);
-
-        CompileState expandGeneric(Generic generic);
-
-        CompileState addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction);
-
-        CompileState registerStruct(StructType type, StructNode node);
-
-        CompileState addFunction(String_ function);
-
-        CompileState addStatement(String_ statement);
-
-        Option<List<String_>> findLastStatements();
-
-        Option<StructType> findCurrentStructType();
-
-        Iterator<Definition> iterDefinitions();
-
-        Option<StructType> findStructType(Generic generic);
-
-        Iterator<Generic> stream();
-
-        Option<Type> findLastType();
     }
 
     private record ApplicationError(Error error) implements Error {
@@ -716,7 +660,7 @@ public class Main {
         }
     }
 
-    private record Definition(
+    public record Definition(
             List<String> annotations,
             List<String_> typeParams,
             Type type,
@@ -740,7 +684,7 @@ public class Main {
         }
     }
 
-    private static final class Whitespace implements Parameter, Value, Argument {
+    public static final class Whitespace implements Parameter, Value, Argument {
         @Override
         public String_ generate() {
             return Strings.empty();
@@ -884,7 +828,7 @@ public class Main {
         }
     }
 
-    private record StructType(String_ name, List<Definition> definitions) implements Type {
+    public record StructType(String_ name, List<Definition> definitions) implements Type {
         private Result<Type, CompileError> findTypeAsResult(String propertyKey) {
             if (this.findTypeAsOption(propertyKey) instanceof Some(var propertyValue)) {
                 return new Ok<>(propertyValue);
@@ -936,7 +880,7 @@ public class Main {
         }
     }
 
-    private record StructPrototype(String_ name) implements Type {
+    public record StructPrototype(String_ name) implements Type {
         public StructPrototype(String name) {
             this(Strings.from(name));
         }
@@ -1025,7 +969,7 @@ public class Main {
         }
     }
 
-    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
+    public record CompileError(String message, Context context, List<CompileError> errors) implements Error {
         public CompileError(String message, Context context) {
             this(message, context, listEmpty());
         }
@@ -1215,7 +1159,7 @@ public class Main {
         }
     }
 
-    private record Generic(String_ base, List<Type> args) implements Type {
+    public record Generic(String_ base, List<Type> args) implements Type {
         @Override
         public String_ generate() {
             var string = this.args
@@ -1255,7 +1199,7 @@ public class Main {
         }
     }
 
-    private record StructNode(String_ name, List<Type> typeParams, List<Definition> definitions) {
+    public record StructNode(String_ name, List<Type> typeParams, List<Definition> definitions) {
         private String_ generate() {
             var alias = createAlias(this.name(), this.typeParams());
             var joinedDefinitions = this.definitions().iterate()
@@ -1353,7 +1297,7 @@ public class Main {
         }
 
         @Override
-        public CompileState defineFunction(Definition definition, List<Definition> oldParameters) {
+        public void defineFunction(Definition definition, List<Definition> oldParameters) {
             var type = definition.type;
             var name = definition.name;
 
@@ -1361,13 +1305,11 @@ public class Main {
                     .map(Definition::type)
                     .collect(new ListCollector<>());
             this.frames = this.frames.define(new Definition(new Functional(paramTypes, type), name));
-            return this;
         }
 
         @Override
-        public CompileState define(Definition name1) {
+        public void define(Definition name1) {
             this.frames = this.frames.define(name1);
-            return this;
         }
 
         @Override
@@ -1378,31 +1320,27 @@ public class Main {
         }
 
         @Override
-        public CompileState withFunctionPrototype(Definition definition) {
+        public void withFunctionPrototype(Definition definition) {
             this.functionName = definition.name;
             this.functionLocalCounter = 0;
-            return this;
         }
 
         @Override
-        public CompileState defineAll(List<Definition> params) {
+        public void defineAll(List<Definition> params) {
             this.frames = this.frames.defineAll(params);
-            return this;
         }
 
         @Override
-        public CompileState withRef(StructPrototype prototype) {
+        public void withRef(StructPrototype prototype) {
             this.frames = this.frames.withRef(prototype);
-            return this;
         }
 
         @Override
-        public CompileState expandGeneric(Generic generic) {
+        public void expandGeneric(Generic generic) {
             if (!this.hasVisited(generic) && this.expanding.containsKey(generic.base)) {
                 this.visitedExpansions = this.visitedExpansions.addLast(generic);
                 this.expanding.get(generic.base).apply(generic.args);
             }
-            return this;
         }
 
         private boolean hasVisited(Generic generic) {
@@ -1410,30 +1348,26 @@ public class Main {
         }
 
         @Override
-        public CompileState addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction) {
+        public void addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction) {
             this.expanding = this.expanding.put(name, listResultFunction);
-            return this;
         }
 
         @Override
-        public CompileState registerStruct(StructType type, StructNode node) {
+        public void registerStruct(StructType type, StructNode node) {
             var generated = node.generate();
             var key = new Generic(node.name, node.typeParams);
             var value = new Tuple<StructType, String_>(type, generated);
             this.structRegistry = this.structRegistry.put(key, value);
-            return this;
         }
 
         @Override
-        public CompileState addFunction(String_ function) {
+        public void addFunction(String_ function) {
             this.generatedFunctions = this.generatedFunctions.addLast(function);
-            return this;
         }
 
         @Override
-        public CompileState addStatement(String_ statement) {
+        public void addStatement(String_ statement) {
             this.generatedStatements = this.generatedStatements.mapLast(last -> last.addLast(statement));
-            return this;
         }
 
         @Override
@@ -1447,7 +1381,7 @@ public class Main {
         }
 
         @Override
-        public Iterator<Definition> iterDefinitions() {
+        public Iterator<Definition> iterateDefinitions() {
             return this.frames.iterDefinitions();
         }
 
@@ -2262,7 +2196,7 @@ public class Main {
     }
 
     private static Result<Type, CompileError> createUndefinedError(String_ value, CompileState compileState) {
-        var joinedNames = compileState.iterDefinitions()
+        var joinedNames = compileState.iterateDefinitions()
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
