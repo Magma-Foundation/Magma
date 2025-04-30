@@ -1446,49 +1446,57 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> compileClass(String_ stripped) {
-        return compileStructure("class ", stripped, Strings.from("?"));
+        return parseStructure("class ", stripped, Strings.from("?"));
     }
 
-    private static Result<Whitespace, CompileError> compileStructure(String infix, String_ input, String_ type) {
+    private static Result<Whitespace, CompileError> parseStructure(String infix, String_ input, String_ type) {
         var classIndex = input.indexOfSlice(infix);
-        if (classIndex >= 0) {
-            var beforeInfix = input.sliceTo(classIndex).strip();
-            if (beforeInfix.startsWithSlice("@External")) {
-                return new Ok<>(new Whitespace());
-            }
-
-            var afterClass = input.sliceFrom(classIndex + infix.length());
-            var contentStart = afterClass.indexOfSlice("{");
-            if (contentStart >= 0) {
-                var beforeContent = afterClass.sliceTo(contentStart).strip();
-
-                var permitsIndex = beforeContent.indexOfSlice(" permits ");
-                var withoutPermits = permitsIndex >= 0
-                        ? beforeContent.sliceTo(permitsIndex).strip()
-                        : beforeContent;
-
-                var implementsIndex = withoutPermits.indexOfSlice(" implements ");
-                var withoutImplements = implementsIndex >= 0
-                        ? withoutPermits.sliceTo(implementsIndex)
-                        : withoutPermits;
-
-                var paramStart = withoutImplements.indexOfSlice("(");
-                var withEnd = afterClass.sliceFrom(contentStart + "{".length()).strip();
-                if (paramStart >= 0) {
-                    var withoutParams = withoutImplements.sliceTo(paramStart).strip();
-                    var paramString = withoutImplements.sliceFrom(paramStart + 1);
-                    return parseParameters(paramString).flatMapValue(params -> compileStructureWithBeforeContent(withEnd, type, withoutParams, params));
-                }
-                else {
-                    return compileStructureWithBeforeContent(withEnd, type, withoutImplements, Lists.listEmpty());
-                }
-            }
+        if (classIndex < 0) {
+            return createInfixErr(input, infix);
         }
 
-        return new Err<>(new CompileError("Not a struct", new StringContext(input)));
+        var beforeInfix = input.sliceTo(classIndex).strip();
+        if (beforeInfix.startsWithSlice("@External")) {
+            return new Ok<>(new Whitespace());
+        }
+
+        var afterClass = input.sliceFrom(classIndex + infix.length());
+        var contentStart = afterClass.indexOfSlice("{");
+        if (contentStart < 0) {
+            return createInfixErr(afterClass, "{");
+        }
+
+        var beforeContent = afterClass.sliceTo(contentStart).strip();
+        var withContentEnd = afterClass.sliceFrom(contentStart + "{".length()).strip();
+
+        var permitsIndex = beforeContent.indexOfSlice(" permits ");
+        var withoutPermits = permitsIndex >= 0
+                ? beforeContent.sliceTo(permitsIndex).strip()
+                : beforeContent;
+
+        var implementsIndex = withoutPermits.indexOfSlice(" implements ");
+        var withoutImplements = implementsIndex >= 0
+                ? withoutPermits.sliceTo(implementsIndex)
+                : withoutPermits;
+
+        var paramStart = withoutImplements.indexOfSlice("(");
+        if (paramStart < 0) {
+            return parseStructureWithBeforeContent(withContentEnd, type, withoutImplements, Lists.listEmpty())
+                    .mapErr(err -> new CompileError("Failed to parse structure without params", new StringContext(input), Lists.listFrom(err)));
+        }
+
+        var withoutParams = withoutImplements.sliceTo(paramStart).strip();
+        var paramString = withoutImplements.sliceFrom(paramStart + 1);
+        if (!paramString.endsWithSlice(")")) {
+            return createSuffixErr(paramString, ")");
+        }
+
+        return parseParameters(paramString.sliceTo(paramString.length() - 1))
+                .flatMapValue(params -> parseStructureWithBeforeContent(withContentEnd, type, withoutParams, params))
+                .mapErr(err -> new CompileError("Failed to parse structure with params", new StringContext(input), Lists.listFrom(err)));
     }
 
-    private static Result<Whitespace, CompileError> compileStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent, List<Definition> params) {
+    private static Result<Whitespace, CompileError> parseStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent, List<Definition> params) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice("}")) {
             return createSuffixErr(stripped, "}");
@@ -1583,9 +1591,9 @@ public class Main {
         return orString(input0, Lists.listFrom(
                 type("whitespace", input1 -> parseWhitespace(input1)),
                 type("class", Main::compileClass),
-                type("enum", stripped -> compileStructure("enum ", stripped, Strings.from("enum"))),
-                type("record", stripped -> compileStructure("record ", stripped, Strings.from("?"))),
-                type("interface", stripped -> compileStructure("interface ", stripped, Strings.from("?"))),
+                type("enum", stripped -> parseStructure("enum ", stripped, Strings.from("enum"))),
+                type("record", stripped -> parseStructure("record ", stripped, Strings.from("?"))),
+                type("interface", stripped -> parseStructure("interface ", stripped, Strings.from("?"))),
                 type("method", Main::compileMethod),
                 type("definition-statement", Main::compileDefinitionStatement)
         ));
@@ -1785,7 +1793,7 @@ public class Main {
         return input0 -> parser.apply(input0)
                 .<B>mapValue(value -> value)
                 .mapErr(err -> {
-                    var message = Strings.from("Unknown type '")
+                    var message = Strings.from("Invalid type '")
                             .appendSlice(type)
                             .appendSlice("'");
 
