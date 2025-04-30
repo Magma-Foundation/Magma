@@ -1224,6 +1224,10 @@ public class Main {
         private int functionLocalCounter = 0;
         private List<Type> typeStack = listEmpty();
 
+        private void addMethod(String_ generated) {
+            this.generatedMethods = this.generatedMethods.addLast(generated);
+        }
+
         private void addStatement(String_ statement) {
             this.generatedStatements = this.generatedStatements.mapLast(last -> last.addLast(statement));
         }
@@ -1234,10 +1238,6 @@ public class Main {
 
         private void enter() {
             this.generatedStatements = this.generatedStatements.addLast(listEmpty());
-        }
-
-        public void setGeneratedMethods(List<String_> generatedMethods) {
-            this.generatedMethods = generatedMethods;
         }
 
         public void setStructRegistry(Map_<Generic, Tuple<StructType, String_>> structRegistry) {
@@ -1806,7 +1806,7 @@ public class Main {
     private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
         return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
             var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
-            CompileState.INSTANCE.setGeneratedMethods(CompileState.INSTANCE.generatedMethods.addLast(generated));
+            CompileState.INSTANCE.addMethod(generated);
             return new Whitespace();
         });
     }
