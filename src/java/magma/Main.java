@@ -168,6 +168,7 @@ public class Main {
 
         Iterator<K> keys();
     }
+
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static List<List<String_>> statements = listEmpty();
@@ -705,8 +706,8 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                return parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
-                        .flatMapValue(outputContent -> compileBeforeBlock(beforeBlock).mapValue(result -> indent.appendOwned(result)
+                return compileBeforeBlock(beforeBlock).flatMapValue(result -> parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
+                        .mapValue(outputContent -> indent.appendOwned(result)
                                 .appendSlice("{")
                                 .appendOwned(join(outputContent))
                                 .appendOwned(indent)
