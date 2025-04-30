@@ -678,8 +678,9 @@ public class Main {
     private static Result<String_, CompileError> compileFunctionSegment(String_ input, int depth) {
         return or(input, Lists.listFrom(
                 whitespace(),
+                type("block", input0 -> compileBlock(input0, depth)),
                 type("statement", input0 -> compileStatement(input0, depth)),
-                type("block", input0 -> compileBlock(input0, depth))
+                type("return ", Main::compileReturn)
         ));
     }
 
