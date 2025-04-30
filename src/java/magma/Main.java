@@ -1137,8 +1137,8 @@ public class Main {
 
     private static Result<StructType, CompileError> resolveStructByName(String_ baseName) {
         return or(baseName, Lists.listFrom(
-                string -> Main.resolveCurrentStruct(string, baseName),
-                string -> Main.resolveDefinedStruct(baseName)
+                Main::resolveCurrentStruct,
+                Main::resolveDefinedStruct
         ));
     }
 
@@ -1156,15 +1156,15 @@ public class Main {
         return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
     }
 
-    private static Result<StructType, CompileError> resolveCurrentStruct(String_ string, String_ baseName) {
+    private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
         if (!(findCurrentStructType() instanceof Some(var currentStructType))) {
-            return new Err<>(new CompileError("Not in a structure", new StringContext(string)));
+            return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
         if (baseName.equalsTo(currentStructType.name)) {
             return new Ok<>(currentStructType);
         }
 
-        return new Err<>(new CompileError("Current struct did not match '" + currentStructType.generate() + "'", new StringContext(string)));
+        return new Err<>(new CompileError("Current struct did not match '" + currentStructType.generate() + "'", new StringContext(baseName)));
     }
 
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String_ arguments, List<Type> expectedArgumentsTypes) {
@@ -1380,7 +1380,7 @@ public class Main {
                     var generic = new Tuple<>(base, parsed);
                     if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
                         visitedExpansions = visitedExpansions.addLast(generic);
-                        // expanding.get(base).apply(parsed);
+                        expanding.get(base).apply(parsed);
                     }
 
                     return new Ok<>(new StructRef(createAlias(base, parsed)));
