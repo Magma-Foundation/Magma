@@ -81,6 +81,8 @@ public class Main {
     }
 
     private interface String_ {
+        String_ sliceTo(int index);
+
         String_ appendSlice(String slice);
 
         String_ toLowerCase();
@@ -105,7 +107,7 @@ public class Main {
 
         int indexOfSlice(String slice);
 
-        String_ sliceFromStart(int startInclusive);
+        String_ sliceFrom(int startInclusive);
 
         String_ sliceBetween(int startInclusive, int endExclusive);
 
@@ -224,8 +226,13 @@ public class Main {
         };
     }
 
+    @External
+    private static void printError(String slice) {
+        System.err.println(slice);
+    }
+
     public static void main() {
-        run().ifPresent(error -> System.err.println(error.display().toSlice()));
+        run().ifPresent(error -> printError(error.display().toSlice()));
     }
 
     private static Option<IOException> writeTarget(String_ csq) {
@@ -386,30 +393,30 @@ public class Main {
     private static Result<String_, CompileError> compileStructure(String infix, String_ input, String_ type) {
         var classIndex = input.indexOfSlice(infix);
         if (classIndex >= 0) {
-            var beforeInfix = input.sliceBetween(0, classIndex).strip();
+            var beforeInfix = input.sliceTo(classIndex).strip();
             if (beforeInfix.startsWithSlice("@External")) {
                 return new Ok<>(Strings.empty());
             }
 
-            var afterClass = input.sliceFromStart(classIndex + infix.length());
+            var afterClass = input.sliceFrom(classIndex + infix.length());
             var contentStart = afterClass.indexOfSlice("{");
             if (contentStart >= 0) {
-                var beforeContent = afterClass.sliceBetween(0, contentStart).strip();
+                var beforeContent = afterClass.sliceTo(contentStart).strip();
 
                 var permitsIndex = beforeContent.indexOfSlice(" permits ");
                 var withoutPermits = permitsIndex >= 0
-                        ? beforeContent.sliceBetween(0, permitsIndex).strip()
+                        ? beforeContent.sliceTo(permitsIndex).strip()
                         : beforeContent;
 
                 var implementsIndex = withoutPermits.indexOfSlice(" implements ");
                 var withoutImplements = implementsIndex >= 0
-                        ? withoutPermits.sliceBetween(0, implementsIndex)
+                        ? withoutPermits.sliceTo(implementsIndex)
                         : withoutPermits;
 
                 var paramStart = withoutImplements.indexOfSlice("(");
-                var withEnd = afterClass.sliceFromStart(contentStart + "{".length()).strip();
+                var withEnd = afterClass.sliceFrom(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
-                    String_ withoutParams = withoutImplements.sliceBetween(0, paramStart).strip();
+                    String_ withoutParams = withoutImplements.sliceTo(paramStart).strip();
                     return compileStructureWithBeforeContent(withEnd, type, withoutParams);
                 }
                 else {
@@ -427,17 +434,17 @@ public class Main {
             return createSuffixErr(stripped, "}");
         }
 
-        var content = stripped.sliceBetween(0, stripped.length() - "}".length());
+        var content = stripped.sliceTo(stripped.length() - "}".length());
 
         var strippedBeforeContent = beforeContent.strip();
         if (strippedBeforeContent.endsWithSlice(">")) {
-            var withoutEnd = strippedBeforeContent.sliceBetween(0, strippedBeforeContent.length() - ">".length());
+            var withoutEnd = strippedBeforeContent.sliceTo(strippedBeforeContent.length() - ">".length());
             var typeParamStart = withoutEnd.indexOfSlice("<");
             if (typeParamStart >= 0) {
-                var name = withoutEnd.sliceBetween(0, typeParamStart).strip();
-                var substring = withoutEnd.sliceFromStart(typeParamStart + "<".length());
+                var name = withoutEnd.sliceTo(typeParamStart).strip();
+                var substring = withoutEnd.sliceFrom(typeParamStart + "<".length());
 
-                var typeParameters = divideAll(substring, Main::foldDelimiter);
+                var typeParameters = divideAll(substring, (state, c) -> foldDelimiter(state, c, ','));
                 return assembleStructure(typeParameters, name, content, type);
             }
         }
@@ -445,8 +452,8 @@ public class Main {
         return assembleStructure(listEmpty(), strippedBeforeContent, content, type);
     }
 
-    private static State foldDelimiter(State state, char c) {
-        if (c == ',') {
+    private static State foldDelimiter(State state, char c, char delimiter) {
+        if (c == delimiter) {
             return state.advance();
         }
         return state.append(c);
@@ -524,7 +531,7 @@ public class Main {
     private static Result<String_, CompileError> compileDefinitionStatement(String_ input) {
         var stripped = input.strip();
         if (stripped.endsWithSlice(";")) {
-            var withoutEnd = stripped.sliceBetween(0, stripped.length() - ";".length());
+            var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
             return new Ok<>(Strings.from("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";"));
         }
 
@@ -537,8 +544,8 @@ public class Main {
             return createInfixErr(input, "(");
         }
 
-        var inputDefinition = input.sliceBetween(0, paramStart);
-        var withParams = input.sliceFromStart(paramStart + "(".length());
+        var inputDefinition = input.sliceTo(paramStart);
+        var withParams = input.sliceFrom(paramStart + "(".length());
         return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, withParams));
     }
 
@@ -555,8 +562,8 @@ public class Main {
             return createInfixErr(withParams, ")");
         }
 
-        var params = withParams.sliceBetween(0, paramEnd);
-        var withoutParams = withParams.sliceFromStart(paramEnd + ")".length());
+        var params = withParams.sliceTo(paramEnd);
+        var withoutParams = withParams.sliceFrom(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
 
         return parseValues(params, Main::parseParameter).flatMapValue(rawParameters -> {
@@ -565,13 +572,14 @@ public class Main {
                     .flatMap(Iterators::fromOption)
                     .collect(new ListCollector<>());
 
-            if (!withBraces.startsWithSlice("{") || !withBraces.endsWithSlice("}")) {
+            if (!definition.annotations.contains("External", String::equals) && (withBraces.startsWithSlice("{") && withBraces.endsWithSlice("}"))) {
+                var content = withBraces.sliceBetween(1, withBraces.length() - 1);
+                return compileMethodWithParameters(definition, content, oldParameters);
+            }
+            else {
                 frames = defineMethod(definition, oldParameters);
                 return new Ok<>(Strings.empty());
             }
-
-            var content = withBraces.sliceBetween(1, withBraces.length() - 1);
-            return compileMethodWithParameters(definition, content, oldParameters);
         });
     }
 
@@ -746,7 +754,7 @@ public class Main {
             return createSuffixErr(stripped, ";");
         }
 
-        var withoutEnd = stripped.sliceBetween(0, stripped.length() - ";".length()).strip();
+        var withoutEnd = stripped.sliceTo(stripped.length() - ";".length()).strip();
         return compileStatementValue(withoutEnd).mapValue(statementValue -> Strings.from("\n" + "\t".repeat(depth) + statementValue + ";"));
     }
 
@@ -754,11 +762,11 @@ public class Main {
         String_ indent = Strings.from("\n").appendOwned(Strings.from("\t").repeat(depth));
         var stripped = input.strip();
         if (stripped.endsWithSlice("}")) {
-            var withoutEnd = stripped.sliceBetween(0, stripped.length() - "}".length());
+            var withoutEnd = stripped.sliceTo(stripped.length() - "}".length());
             var contentStart = withoutEnd.indexOfSlice("{");
             if (contentStart >= 0) {
-                var beforeBlock = withoutEnd.sliceBetween(0, contentStart);
-                var content = withoutEnd.sliceFromStart(contentStart + "{".length());
+                var beforeBlock = withoutEnd.sliceTo(contentStart);
+                var content = withoutEnd.sliceFrom(contentStart + "{".length());
                 return compileBeforeBlock(beforeBlock).flatMapValue(result -> parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
                         .mapValue(outputContent -> indent.appendOwned(result)
                                 .appendSlice("{")
@@ -787,8 +795,8 @@ public class Main {
         if (valueSeparator < 0) {
             return createInfixErr(stripped, "=");
         }
-        var assignableString_ = stripped.sliceBetween(0, valueSeparator);
-        var valueString_ = stripped.sliceFromStart(valueSeparator + "=".length());
+        var assignableString_ = stripped.sliceTo(valueSeparator);
+        var valueString_ = stripped.sliceFrom(valueSeparator + "=".length());
 
         return parseAssignable(assignableString_).and(() -> parseValue(valueString_)).flatMapValue(tuple -> {
             var assignable = tuple.left;
@@ -813,7 +821,7 @@ public class Main {
     private static Result<String_, CompileError> compileReturn(String_ input) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("return ")) {
-            var slice = stripped.sliceFromStart("return ".length());
+            var slice = stripped.sliceFrom("return ".length());
             return compileValue(slice).mapValue(value -> Strings.from("return ").appendOwned(value));
         }
 
@@ -960,7 +968,7 @@ public class Main {
 
     private static Result<String_, CompileError> parseConditional(String_ stripped, String prefix) {
         if (stripped.startsWithSlice(prefix)) {
-            var withoutPrefix = stripped.sliceFromStart(prefix.length()).strip();
+            var withoutPrefix = stripped.sliceFrom(prefix.length()).strip();
             if (withoutPrefix.startsWithSlice("(") && withoutPrefix.endsWithSlice(")")) {
                 var condition = withoutPrefix.sliceBetween(1, withoutPrefix.length() - 1);
                 return compileValue(condition)
@@ -1018,8 +1026,8 @@ public class Main {
                 return createInfixErr(stripped, representation.toSlice());
             }
 
-            var leftString_ = stripped.sliceBetween(0, operatorIndex);
-            var rightString_ = stripped.sliceFromStart(operatorIndex + representation.length());
+            var leftString_ = stripped.sliceTo(operatorIndex);
+            var rightString_ = stripped.sliceFrom(operatorIndex + representation.length());
             return parseValue(leftString_)
                     .and(() -> parseValue(rightString_))
                     .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
@@ -1029,7 +1037,7 @@ public class Main {
     private static Result<Value, CompileError> parseNot(String_ input) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("!")) {
-            return parseValue(input.sliceFromStart(1)).mapValue(Not::new);
+            return parseValue(input.sliceFrom(1)).mapValue(Not::new);
         }
         else {
             return createPrefixErr(stripped, "!");
@@ -1063,8 +1071,8 @@ public class Main {
             return createInfixErr(stripped, ".");
         }
 
-        var parent = stripped.sliceBetween(0, separator);
-        var property = stripped.sliceFromStart(separator + ".".length()).strip();
+        var parent = stripped.sliceTo(separator);
+        var property = stripped.sliceFrom(separator + ".".length()).strip();
         if (!isSymbol(property)) {
             return createSymbolErr(property);
         }
@@ -1103,8 +1111,8 @@ public class Main {
             return createInfixErr(stripped, "->");
         }
 
-        var beforeArrow = stripped.sliceBetween(0, arrowIndex).strip();
-        var afterArrow = stripped.sliceFromStart(arrowIndex + "->".length()).strip();
+        var beforeArrow = stripped.sliceTo(arrowIndex).strip();
+        var afterArrow = stripped.sliceFrom(arrowIndex + "->".length()).strip();
         if (isSymbol(beforeArrow)) {
             return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
         }
@@ -1114,7 +1122,7 @@ public class Main {
         }
 
         var substring = beforeArrow.sliceBetween(1, beforeArrow.length() - 1);
-        var stringList = divideAll(substring, Main::foldDelimiter);
+        var stringList = divideAll(substring, (state, c) -> foldDelimiter(state, c, ','));
 
         var args = stringList.iterate()
                 .map(String_::strip)
@@ -1141,18 +1149,18 @@ public class Main {
             return createSuffixErr(stripped, ")");
         }
 
-        var withoutEnd = stripped.sliceBetween(0, stripped.length() - ")".length()).strip();
+        var withoutEnd = stripped.sliceTo(stripped.length() - ")".length()).strip();
         var divisions = divideAll(withoutEnd, Main::foldInvokableStart);
         if (divisions.size() < 2) {
             return new Err<>(new CompileError("Insufficient divisions", new StringContext(withoutEnd)));
         }
 
         var joined = join(divisions.subList(0, divisions.size() - 1));
-        var callerString_ = joined.sliceBetween(0, joined.length() - ")".length());
+        var callerString_ = joined.sliceTo(joined.length() - ")".length());
         var arguments = divisions.findLast().orElse(null);
 
         if (callerString_.startsWithSlice("new ")) {
-            String_ withoutPrefix = callerString_.sliceFromStart("new ".length());
+            String_ withoutPrefix = callerString_.sliceFrom("new ".length());
             return parseType(withoutPrefix).flatMapValue(type -> {
                 var parsedCaller = new Symbol(Strings.from("new_").appendOwned(type.stringify()));
                 return assembleInvokable(parsedCaller, arguments, listEmpty());
@@ -1348,8 +1356,8 @@ public class Main {
     private static Result<Definition, CompileError> parseDefinition(String_ input) {
         var stripped = input.strip();
         return stripped.lastIndexOfSlice(" ").<Result<Definition, CompileError>>map(nameSeparator -> {
-            var beforeName = stripped.sliceBetween(0, nameSeparator);
-            var name = stripped.sliceFromStart(nameSeparator + " ".length());
+            var beforeName = stripped.sliceTo(nameSeparator);
+            var name = stripped.sliceFrom(nameSeparator + " ".length());
             if (!isSymbol(name)) {
                 return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
             }
@@ -1365,26 +1373,43 @@ public class Main {
                         .orElse(Strings.empty())
                         .strip();
 
-                var typeParams = findTypeParams(joined).orElseGet(Lists::listEmpty);
-                return usingTypeParams(typeParams, listEmpty(), () -> {
-                    var type = tuple.right;
-                    return parseType(type).mapValue(type1 -> new Definition(typeParams, type1, name));
-                });
+                return parseDefinitionWithType(joined, tuple.right, name);
             }).orElseGet(() -> new Err<>(new CompileError("Insufficient divisions", new StringContext(beforeName))));
         }).orElseGet(() -> createInfixErr(stripped, " "));
     }
 
-    private static Option<List<String_>> findTypeParams(String_ joined) {
-        if (!joined.endsWithSlice(">")) {
-            return new None<>();
+    private static Result<Definition, CompileError> parseDefinitionWithType(String_ beforeType, String_ type, String_ name) {
+        if (beforeType.endsWithSlice(">")) {
+            var withoutEnd = beforeType.sliceTo(beforeType.length() - ">".length());
+            if (withoutEnd.lastIndexOfSlice("<") instanceof Some(var typeParamStart)) {
+                var beforeTypeParams = withoutEnd.sliceTo(typeParamStart);
+                var typeParamsString = withoutEnd.sliceFrom(typeParamStart + 1);
+                var typeParams = divideAll(typeParamsString, Main::foldValueChar);
+                return parseDefinitionWithTypeParams(beforeTypeParams, typeParams, type, name);
+            }
         }
 
-        var withoutEnd = joined.sliceBetween(0, joined.length() - ">".length());
-        if (!(withoutEnd.lastIndexOfSlice("<") instanceof Some(var typeParamStart))) {
-            return new None<>();
-        }
+        return parseDefinitionWithTypeParams(beforeType, listEmpty(), type, name);
+    }
 
-        return new Some<>(divideAll(withoutEnd.sliceFromStart(typeParamStart + 1), Main::foldValueChar));
+    private static Result<Definition, CompileError> parseDefinitionWithTypeParams(String_ withoutTypeParams, List<String_> typeParams, String_ type, String_ name) {
+        return usingTypeParams(typeParams, listEmpty(), () -> {
+            return parseType(type).mapValue(type1 -> {
+                return withoutTypeParams.lastIndexOfSlice("\n").map(annotationsSeparator -> {
+                    var string = withoutTypeParams.sliceTo(annotationsSeparator);
+                    var annotations = divideAll(string, (state, c) -> foldDelimiter(state, c, '\n'))
+                            .iterate()
+                            .map(slice -> slice.sliceFrom(1))
+                            .map(String_::strip)
+                            .map(String_::toSlice)
+                            .collect(new ListCollector<>());
+
+                    return new Definition(annotations, typeParams, type1, name);
+                }).orElseGet(() -> {
+                    return new Definition(listEmpty(), typeParams, type1, name);
+                });
+            });
+        });
     }
 
     private static State foldByTypeSeparator(State state, char c) {
@@ -1433,11 +1458,11 @@ public class Main {
         }
 
         if (stripped.endsWithSlice(">")) {
-            var withoutEnd = stripped.sliceBetween(0, stripped.length() - ">".length());
+            var withoutEnd = stripped.sliceTo(stripped.length() - ">".length());
             var index = withoutEnd.indexOfSlice("<");
             if (index >= 0) {
-                var base = withoutEnd.sliceBetween(0, index).strip();
-                var substring = withoutEnd.sliceFromStart(index + "<".length());
+                var base = withoutEnd.sliceTo(index).strip();
+                var substring = withoutEnd.sliceFrom(index + "<".length());
                 return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
                     if (base.equalsToSlice("Function")) {
                         var arg0 = parsed.get(0).orElse(null);
@@ -1455,7 +1480,6 @@ public class Main {
                     var generic = new Generic(base, parsed);
                     if (!generic.hasTypeParams()) {
                         if (!visitedExpansions.contains(generic, Generic::equalsTo) && expanding.containsKey(base)) {
-                            System.out.println(generic.generate());
                             visitedExpansions = visitedExpansions.addLast(generic);
                             expanding.get(base).apply(parsed);
                         }
@@ -1681,7 +1705,7 @@ public class Main {
             }
 
             @Override
-            public String_ sliceFromStart(int startInclusive) {
+            public String_ sliceFrom(int startInclusive) {
                 return new JavaString(this.value.substring(startInclusive));
             }
 
@@ -1721,6 +1745,11 @@ public class Main {
                 return index == -1
                         ? new None<>()
                         : new Some<>(index);
+            }
+
+            @Override
+            public String_ sliceTo(int index) {
+                return this.sliceBetween(0, index);
             }
         }
     }
@@ -2043,13 +2072,18 @@ public class Main {
         }
     }
 
-    private record Definition(List<String_> typeParams, Type type, String_ name) implements Parameter {
+    private record Definition(
+            List<String> annotations,
+            List<String_> typeParams,
+            Type type,
+            String_ name
+    ) implements Parameter {
         public Definition(Type type, String name) {
-            this(Lists.listEmpty(), type, Strings.from(name));
+            this(Lists.listEmpty(), Lists.listEmpty(), type, Strings.from(name));
         }
 
         public Definition(Type type, String_ name) {
-            this(Lists.listEmpty(), type, name);
+            this(Lists.listEmpty(), Lists.listEmpty(), type, name);
         }
 
         @Override
