@@ -124,6 +124,7 @@ public class Main {
         boolean equalsTo(String_ other);
     }
 
+
     private interface Parameter extends Assignable {
         String_ generate();
     }
@@ -201,6 +202,1057 @@ public class Main {
         Frames withRef(StructRef ref);
     }
 
+    private record ApplicationError(Error error) implements Error {
+        @Override
+        public String_ display() {
+            return this.error.display();
+        }
+    }
+
+    private record ImmutableFrames(List<Frame> frames) implements Frames {
+        public ImmutableFrames() {
+            this(Lists.listEmpty());
+        }
+
+        @Override
+        public Option<Type> findTypeByName(String name) {
+            return this.streamReversedFrames()
+                    .map(list -> list.findDefinitionInFrame(name))
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        @Override
+        public Option<StructType> findCurrentStructType() {
+            return this.streamReversedFrames()
+                    .map(Frame::toStructType)
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        @Override
+        public Iterator<Definition> streamDefined() {
+            return this.frames.iterate()
+                    .map(Frame::definitions)
+                    .flatMap(List::iterate);
+        }
+
+        @Override
+        public Option<StructRef> findCurrentRef() {
+            return this.streamReversedFrames()
+                    .map(frame -> frame.maybeRef)
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        @Override
+        public Frames defineAll(List<Definition> definitions) {
+            return definitions.iterate().fold(this, Frames::define);
+        }
+
+        @Override
+        public Frames define(Definition definition) {
+            return new ImmutableFrames(this.frames.mapLast(last -> last.define(definition)));
+        }
+
+        @Override
+        public Frames exit() {
+            return new ImmutableFrames(this.frames.removeLast().map(Tuple::right).orElse(this.frames));
+        }
+
+        @Override
+        public Frames enter() {
+            return new ImmutableFrames(this.frames.addLast(new Frame()));
+        }
+
+        @Override
+        public Frames withRef(StructRef ref) {
+            return new ImmutableFrames(this.frames.mapLast(last -> last.withRef(ref)));
+        }
+
+        private Iterator<Frame> streamReversedFrames() {
+            return this.frames.iterateReversed();
+        }
+    }
+
+    private static class Strings {
+        @External
+        private record JavaString(String value) implements String_ {
+            @Override
+            public String toString() {
+                return this.value;
+            }
+
+            @Override
+            public String_ sliceTo(int index) {
+                return this.sliceBetween(0, index);
+            }
+
+            @Override
+            public String_ appendSlice(String slice) {
+                return new JavaString(this.value + slice);
+            }
+
+            @Override
+            public String_ toLowerCase() {
+                return new JavaString(this.value.strip());
+            }
+
+            @Override
+            public int length() {
+                return this.value.length();
+            }
+
+            @Override
+            public char charAt(int index) {
+                return this.value.charAt(index);
+            }
+
+            @Override
+            public String_ appendChar(char c) {
+                return new JavaString(this.value + c);
+            }
+
+            @Override
+            public String_ appendOwned(String_ other) {
+                return new JavaString(this.value + other.toSlice());
+            }
+
+            @Override
+            public String toSlice() {
+                return this.value;
+            }
+
+            @Override
+            public String_ strip() {
+                return new JavaString(this.value.strip());
+            }
+
+            @Override
+            public String_ repeat(int depth) {
+                return new JavaString(this.value.repeat(depth));
+            }
+
+            @Override
+            public boolean isBlank() {
+                return this.value.isBlank();
+            }
+
+            @Override
+            public boolean startsWithSlice(String slice) {
+                return this.value.startsWith(slice);
+            }
+
+            @Override
+            public int indexOfSlice(String slice) {
+                return this.value.indexOf(slice);
+            }
+
+            @Override
+            public String_ sliceFrom(int startInclusive) {
+                return new JavaString(this.value.substring(startInclusive));
+            }
+
+            @Override
+            public String_ sliceBetween(int startInclusive, int endExclusive) {
+                return new JavaString(this.value.substring(startInclusive, endExclusive));
+            }
+
+            @Override
+            public boolean endsWithSlice(String slice) {
+                return this.value.endsWith(slice);
+            }
+
+            @Override
+            public boolean equalsToSlice(String slice) {
+                return this.value.equals(slice);
+            }
+
+            @Override
+            public int indexOfOwned(String_ other) {
+                return this.value.indexOf(other.toSlice());
+            }
+
+            @Override
+            public Option<Integer> lastIndexOfSlice(String slice) {
+                var index = this.value.lastIndexOf(slice);
+                return index == -1
+                        ? new None<>()
+                        : new Some<>(index);
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return this.value.isEmpty();
+            }
+
+            @Override
+            public boolean equalsTo(String_ other) {
+                return other.equalsToSlice(this.value);
+            }
+        }
+
+        public static String_ empty() {
+            return from("");
+        }
+
+        @External
+        public static String_ from(String value) {
+            return new JavaString(value);
+        }
+    }
+
+    public record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
+        }
+
+        @Override
+        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> supplier) {
+            return this;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+    }
+
+    public record None<T>() implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> supplier) {
+            return supplier.get();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T element;
+        private boolean retrieved = false;
+
+        public SingleHead(T element) {
+            this.element = element;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.element);
+        }
+    }
+
+    public record Iterator<T>(Head<T> head) {
+
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                R finalCurrent = current;
+                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                switch (optional) {
+                    case None<R> _ -> {
+                        return current;
+                    }
+                    case Some<R>(var nextState) -> current = nextState;
+                }
+            }
+        }
+
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
+        }
+
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other::next));
+        }
+
+        public Option<T> next() {
+            return this.head.next();
+        }
+
+        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> iterator) {
+            return this.map(value -> iterator.next().map(otherValue -> new Tuple<>(value, otherValue))).flatMap(Iterators::fromOption);
+        }
+    }
+
+    public record Tuple<A, B>(A left, B right) {
+    }
+
+    public static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter >= this.length) {
+                return new None<>();
+            }
+
+            var value = this.counter;
+            this.counter++;
+            return new Some<>(value);
+        }
+    }
+
+    private record State(String_ input, List<String_> segments, String_ buffer, int depth, int index) {
+        private static State fromInput(String_ input) {
+            return new State(input, listEmpty(), Strings.empty(), 0, 0);
+        }
+
+        private boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        private State enter() {
+            return new State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
+        }
+
+        private State exit() {
+            return new State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
+        }
+
+        private State advance() {
+            return new State(this.input, this.segments.addLast(this.buffer), Strings.empty(), this.depth, this.index);
+        }
+
+        private boolean isShallow() {
+            return this.depth == 1;
+        }
+
+        public Option<State> popAndAppend() {
+            return this.popAndAppendToTuple().map(Tuple::right);
+        }
+
+        private Option<Tuple<Character, State>> popAndAppendToTuple() {
+            return this.pop().map(tuple -> {
+                var poppedChar = tuple.left;
+                var poppedState = tuple.right;
+                var appended = poppedState.append(poppedChar);
+                return new Tuple<>(poppedChar, appended);
+            });
+        }
+
+        private Option<Tuple<Character, State>> pop() {
+            if (this.index >= this.input.length()) {
+                return new None<>();
+            }
+
+            var escaped = this.input.charAt(this.index);
+            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
+        }
+
+        private State append(char c) {
+            return new State(this.input, this.segments, this.buffer.appendChar(c), this.depth, this.index);
+        }
+
+        public Option<Character> peek() {
+            if (this.index < this.input.length()) {
+                return new Some<>(this.input.charAt(this.index));
+            }
+            else {
+                return new None<>();
+            }
+        }
+    }
+
+    private record Joiner(String_ delimiter) implements Collector<String_, Option<String_>> {
+        public Joiner() {
+            this(Strings.empty());
+        }
+
+        public Joiner(String delimiter) {
+            this(Strings.from(delimiter));
+        }
+
+        @Override
+        public Option<String_> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String_> fold(Option<String_> current, String_ element) {
+            return new Some<>(current.map(inner -> inner.appendOwned(this.delimiter).appendOwned(element)).orElse(element));
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return listEmpty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.addLast(element);
+        }
+    }
+
+    private record Definition(
+            List<String> annotations,
+            List<String_> typeParams,
+            Type type,
+            String_ name
+    ) implements Parameter {
+        public Definition(Type type, String name) {
+            this(Lists.listEmpty(), Lists.listEmpty(), type, Strings.from(name));
+        }
+
+        public Definition(Type type, String_ name) {
+            this(Lists.listEmpty(), Lists.listEmpty(), type, name);
+        }
+
+        @Override
+        public String_ generate() {
+            return this.type.generate().appendSlice(" ").appendOwned(this.name);
+        }
+
+        public boolean equalsTo(Definition other) {
+            return this.type.equalsTo(other.type) && this.name.equalsTo(other.name);
+        }
+    }
+
+    private static final class Whitespace implements Parameter, Value {
+        @Override
+        public String_ generate() {
+            return Strings.empty();
+        }
+
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
+    private record String_Value(String_ value) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from("\"")
+                    .appendOwned(this.value)
+                    .appendSlice("\"");
+        }
+    }
+
+    private record Symbol(String_ value) implements Value {
+        @Override
+        public String_ generate() {
+            return this.value;
+        }
+    }
+
+    private record Invocation(Value caller, List<Value> args) implements Value {
+        @Override
+        public String_ generate() {
+            return this.caller.generate()
+                    .appendSlice("(")
+                    .appendOwned(generateValueList(this.args))
+                    .appendSlice(")");
+        }
+    }
+
+    private record DataAccess(Value parent, String_ property) implements Value {
+        @Override
+        public String_ generate() {
+            return this.parent.generate()
+                    .appendSlice(".")
+                    .appendOwned(this.property);
+        }
+    }
+
+    private record Operation(Value left, Operator operator, Value right) implements Value {
+        @Override
+        public String_ generate() {
+            return this.left.generate()
+                    .appendSlice(" ")
+                    .appendOwned(this.operator.representation)
+                    .appendSlice(" ")
+                    .appendOwned(this.right.generate());
+        }
+    }
+
+    public static class Iterators {
+        public static <T> Iterator<T> fromArray(T[] array) {
+            return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
+        }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new Iterator<>(switch (option) {
+                case None<T> _ -> new EmptyHead<T>();
+                case Some<T>(var value) -> new SingleHead<>(value);
+            });
+        }
+    }
+
+    private record CharValue(String_ slice) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from("'")
+                    .appendOwned(this.slice)
+                    .appendSlice("'");
+        }
+    }
+
+    private record Not(Value value) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from("!").appendOwned(this.value.generate());
+        }
+    }
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return supplier.get().mapValue(otherValue -> new Tuple<>(this.value, otherValue));
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+
+        @Override
+        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
+    }
+
+    private record StructType(String_ name, List<Definition> definitions) implements Type {
+        private Result<Type, CompileError> findTypeAsResult(String propertyKey) {
+            if (this.findTypeAsOption(propertyKey) instanceof Some(var propertyValue)) {
+                return new Ok<>(propertyValue);
+            }
+
+            return new Err<>(new CompileError("Undefined property on struct type '" + this.generate() + "'", new StringContext(Strings.from(propertyKey))));
+        }
+
+        @Override
+        public String_ generate() {
+            var joinedDefinitions = this.definitions.iterate()
+                    .map(Definition::generate)
+                    .map(value -> Strings.from("\n\t").appendOwned(value).appendSlice(";"))
+                    .collect(new Joiner())
+                    .orElse(Strings.empty());
+
+            return Strings.from("struct ")
+                    .appendOwned(this.name)
+                    .appendSlice(" {")
+                    .appendOwned(joinedDefinitions)
+                    .appendSlice("\n}");
+        }
+
+        public Option<Type> findTypeAsOption(String name) {
+            return findSymbolInDefinitions(this.definitions, name);
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.definitions.iterate()
+                    .map(definition -> definition.type)
+                    .filter(type -> type instanceof TypeParam)
+                    .next()
+                    .isPresent();
+        }
+
+        @Override
+        public String_ stringify() {
+            return this.name;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            if (other instanceof StructType structType) {
+                return this.name.equalsTo(structType.name) && this.definitions.equalsTo(structType.definitions, Definition::equalsTo);
+            }
+
+            return false;
+        }
+    }
+
+    private record StructRef(String_ name) implements Type {
+        public StructRef(String name) {
+            this(Strings.from(name));
+        }
+
+        @Override
+        public String_ generate() {
+            return Strings.from("struct ").appendOwned(this.name);
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return false;
+        }
+
+        @Override
+        public String_ stringify() {
+            return this.name;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof StructRef ref && this.name.equalsTo(ref.name);
+        }
+    }
+
+    private record Ref(Type type) implements Type {
+        @Override
+        public String_ generate() {
+            return this.type.generate().appendSlice("*");
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.type.hasTypeParams();
+        }
+
+        @Override
+        public String_ stringify() {
+            return this.type.stringify().appendSlice("_star");
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Ref ref && this.type.equalsTo(ref.type);
+        }
+    }
+
+    private record Functional(List<Type> paramTypes, Type returns) implements Type {
+        @Override
+        public String_ generate() {
+            var generated = generateValueList(this.paramTypes());
+            return this.returns.generate().appendSlice(" (*)(").appendOwned(generated).appendSlice(")");
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.returns.hasTypeParams() || this.paramTypes.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
+        }
+
+        @Override
+        public String_ stringify() {
+            return Strings.from("_Func_")
+                    .appendOwned(generateValueList(this.paramTypes))
+                    .appendSlice("_")
+                    .appendOwned(this.returns.stringify())
+                    .appendSlice("_");
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Functional functional
+                    && this.returns.equalsTo(functional.returns)
+                    && this.paramTypes.equalsTo(functional.paramTypes, Type::equalsTo);
+        }
+    }
+
+    private static class Max implements Collector<Integer, Option<Integer>> {
+        @Override
+        public Option<Integer> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Integer> fold(Option<Integer> current, Integer element) {
+            return new Some<>(current.map(inner -> inner > element ? inner : element).orElse(element));
+        }
+    }
+
+    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
+        public CompileError(String message, Context context) {
+            this(message, context, listEmpty());
+        }
+
+        @Override
+        public String_ display() {
+            return this.format(0);
+        }
+
+        private String_ format(int depth) {
+            return Strings.from(this.message)
+                    .appendSlice(": ")
+                    .appendOwned(this.context.display())
+                    .appendOwned(this.joinErrors(depth));
+        }
+
+        private String_ joinErrors(int depth) {
+            return this.errors
+                    .sort((error, error2) -> error.computeMaxDepth() - error2.computeMaxDepth())
+                    .iterate()
+                    .map(error -> error.format(depth + 1))
+                    .map(display -> Strings.from("\n").appendOwned(Strings.from("\t").repeat(depth)).appendOwned(display))
+                    .collect(new Joiner())
+                    .orElse(Strings.empty());
+        }
+
+        private int computeMaxDepth() {
+            return 1 + this.errors.iterate()
+                    .map(CompileError::computeMaxDepth)
+                    .collect(new Max())
+                    .orElse(0);
+        }
+    }
+
+    private record Exceptional<T, C, X>(Collector<T, C> collector) implements Collector<Result<T, X>, Result<C, X>> {
+        @Override
+        public Result<C, X> createInitial() {
+            return new Ok<>(this.collector.createInitial());
+        }
+
+        @Override
+        public Result<C, X> fold(Result<C, X> current, Result<T, X> element) {
+            return current.flatMapValue(currentValue -> element.mapValue(elementValue -> this.collector.fold(currentValue, elementValue)));
+        }
+    }
+
+    private record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
+        public OrState() {
+            this(new None<>(), listEmpty());
+        }
+
+        public OrState<T> withValue(T value) {
+            return new OrState<>(new Some<>(value), this.errors);
+        }
+
+        public OrState<T> withError(CompileError error) {
+            return new OrState<>(this.maybeValue, this.errors.addLast(error));
+        }
+
+        public Result<T, List<CompileError>> toResult() {
+            return switch (this.maybeValue) {
+                case None<T> _ -> new Err<>(this.errors);
+                case Some<T>(var value) -> new Ok<>(value);
+            };
+        }
+    }
+
+    private record ThrowableError(Throwable throwable) implements Error {
+        @Override
+        public String_ display() {
+            var writer = new StringWriter();
+            this.throwable.printStackTrace(new PrintWriter(writer));
+            return Strings.from(writer.toString());
+        }
+    }
+
+    private record StringContext(String_ input) implements Context {
+        @Override
+        public String_ display() {
+            return this.input;
+        }
+    }
+
+    private record NodeContext(Node node) implements Context {
+        @Override
+        public String_ display() {
+            return this.node.generate();
+        }
+    }
+
+    private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
+        public Frame() {
+            this(Lists.listEmpty());
+        }
+
+        public Frame(List<Definition> definitions) {
+            this(new None<>(), definitions);
+        }
+
+        private Option<Type> findDefinitionInFrame(String name) {
+            return findSymbolInDefinitions(this.definitions, name);
+        }
+
+        public Option<StructType> toStructType() {
+            return this.maybeRef.map(ref -> new StructType(ref.name, this.definitions));
+        }
+
+        public Frame define(Definition definition) {
+            return new Frame(this.maybeRef, this.definitions.addLast(definition));
+        }
+
+        public Frame withRef(StructRef ref) {
+            return new Frame(new Some<>(ref), this.definitions);
+        }
+    }
+
+    private static class Maps {
+        @External
+        private record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
+            public JavaMap() {
+                this(new HashMap<>());
+            }
+
+            @Override
+            public Iterator<V> values() {
+                return new Lists.JavaList<>(new ArrayList<>(this.map.values())).iterate();
+            }
+
+            @Override
+            public Map_<K, V> put(K key, V value) {
+                this.map.put(key, value);
+                return this;
+            }
+
+            @Override
+            public boolean containsKey(K key) {
+                return this.map.containsKey(key);
+            }
+
+            @Override
+            public V get(K key) {
+                return this.map.get(key);
+            }
+
+            @Override
+            public Iterator<K> keys() {
+                return new Lists.JavaList<>(new ArrayList<>(this.map.keySet())).iterate();
+            }
+        }
+
+        public static <K, V> Map_<K, V> empty() {
+            return new JavaMap<>();
+        }
+    }
+
+    private record AnyMatch<T>(Predicate<T> predicate) implements Collector<T, Boolean> {
+        @Override
+        public Boolean createInitial() {
+            return false;
+        }
+
+        @Override
+        public Boolean fold(Boolean current, T element) {
+            return current || this.predicate.test(element);
+        }
+    }
+
+    private record TypeParam(String_ value) implements Type {
+        @Override
+        public String_ generate() {
+            return Strings.from("typeparam ").appendOwned(this.value);
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return true;
+        }
+
+        @Override
+        public String_ stringify() {
+            return this.value;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof TypeParam param && this.value.equalsTo(param.value);
+        }
+    }
+
+    private record Generic(String_ base, List<Type> args) implements Type {
+        @Override
+        public String_ generate() {
+            var string = this.args
+                    .iterate()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse(Strings.empty());
+
+            return this.base.appendSlice("<").appendOwned(string).appendSlice(">");
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.args.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
+        }
+
+        @Override
+        public String_ stringify() {
+            return this.base.appendSlice("_").appendOwned(this.args.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .orElse(Strings.empty()));
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Generic generic
+                    && this.base.equalsTo(generic.base)
+                    && this.args.equalsTo(generic.args, Type::equalsTo);
+        }
+    }
+
+    private enum Operator {
+        Add("+", new None<>()),
+        And("&&", new Some<>(Primitive.Bool)),
+        Or("||", new Some<>(Primitive.Bool)),
+        Equals("==", new Some<>(Primitive.Bool)),
+        EqualsNot("!=", new Some<>(Primitive.Bool)),
+        LessThanOrEquals("<=", new Some<>(Primitive.Bool)),
+        LessThan("<", new Some<>(Primitive.Bool)),
+        GreaterThanOrEquals(">=", new Some<>(Primitive.Bool)),
+        GreaterThan(">", new Some<>(Primitive.Bool));
+
+        private final String_ representation;
+        private final Option<Type> type;
+
+        Operator(String representation, Option<Type> type) {
+            this.representation = Strings.from(representation);
+            this.type = type;
+        }
+    }
+    private enum BooleanValue implements Value {
+        False("0"),
+        True("1");
+
+        private final String_ value;
+
+        BooleanValue(String value) {
+            this.value = Strings.from(value);
+        }
+
+        @Override
+        public String_ generate() {
+            return this.value;
+        }
+    }
+    private enum Primitive implements Type {
+        I32("int"),
+        I8("char"),
+        Void("void"),
+        Auto("auto"),
+        Bool("int");
+        private final String_ value;
+
+        Primitive(String value) {
+            this.value = Strings.from(value);
+        }
+
+        @Override
+        public String_ generate() {
+            return this.value;
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return false;
+        }
+
+        @Override
+        public String_ stringify() {
+            return Strings.from(this.name()).toLowerCase();
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Primitive primitive && this == primitive;
+        }
+    }
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static List<List<String_>> generatedStatements = listEmpty();
@@ -1580,1058 +2632,5 @@ public class Main {
             return false;
         }
         return true;
-    }
-
-    private record ImmutableFrames(List<Frame> frames) implements Frames {
-        public ImmutableFrames() {
-            this(Lists.listEmpty());
-        }
-
-        @Override
-        public Option<Type> findTypeByName(String name) {
-            return this.streamReversedFrames()
-                    .map(list -> list.findDefinitionInFrame(name))
-                    .flatMap(Iterators::fromOption)
-                    .next();
-        }
-
-        @Override
-        public Option<StructType> findCurrentStructType() {
-            return this.streamReversedFrames()
-                    .map(Frame::toStructType)
-                    .flatMap(Iterators::fromOption)
-                    .next();
-        }
-
-        private Iterator<Frame> streamReversedFrames() {
-            return this.frames.iterateReversed();
-        }
-
-        @Override
-        public Iterator<Definition> streamDefined() {
-            return this.frames.iterate()
-                    .map(Frame::definitions)
-                    .flatMap(List::iterate);
-        }
-
-        @Override
-        public Option<StructRef> findCurrentRef() {
-            return this.streamReversedFrames()
-                    .map(frame -> frame.maybeRef)
-                    .flatMap(Iterators::fromOption)
-                    .next();
-        }
-
-        @Override
-        public Frames defineAll(List<Definition> definitions) {
-            return definitions.iterate().fold(this, Frames::define);
-        }
-
-        @Override
-        public Frames define(Definition definition) {
-            return new ImmutableFrames(this.frames.mapLast(last -> last.define(definition)));
-        }
-
-        @Override
-        public Frames exit() {
-            return new ImmutableFrames(this.frames.removeLast().map(Tuple::right).orElse(this.frames));
-        }
-
-        @Override
-        public Frames enter() {
-            return new ImmutableFrames(this.frames.addLast(new Frame()));
-        }
-
-        @Override
-        public Frames withRef(StructRef ref) {
-            return new ImmutableFrames(this.frames.mapLast(last -> last.withRef(ref)));
-        }
-    }
-
-    private static class Strings {
-        @External
-        public static String_ from(String value) {
-            return new JavaString(value);
-        }
-
-        public static String_ empty() {
-            return from("");
-        }
-
-        @External
-        private record JavaString(String value) implements String_ {
-            @Override
-            public String toString() {
-                return this.value;
-            }
-
-            @Override
-            public String_ appendSlice(String slice) {
-                return new JavaString(this.value + slice);
-            }
-
-            @Override
-            public String_ toLowerCase() {
-                return new JavaString(this.value.strip());
-            }
-
-            @Override
-            public int length() {
-                return this.value.length();
-            }
-
-            @Override
-            public char charAt(int index) {
-                return this.value.charAt(index);
-            }
-
-            @Override
-            public String_ appendChar(char c) {
-                return new JavaString(this.value + c);
-            }
-
-            @Override
-            public String_ appendOwned(String_ other) {
-                return new JavaString(this.value + other.toSlice());
-            }
-
-            @Override
-            public String toSlice() {
-                return this.value;
-            }
-
-            @Override
-            public String_ strip() {
-                return new JavaString(this.value.strip());
-            }
-
-            @Override
-            public String_ repeat(int depth) {
-                return new JavaString(this.value.repeat(depth));
-            }
-
-            @Override
-            public boolean isBlank() {
-                return this.value.isBlank();
-            }
-
-            @Override
-            public boolean startsWithSlice(String slice) {
-                return this.value.startsWith(slice);
-            }
-
-            @Override
-            public int indexOfSlice(String slice) {
-                return this.value.indexOf(slice);
-            }
-
-            @Override
-            public String_ sliceFrom(int startInclusive) {
-                return new JavaString(this.value.substring(startInclusive));
-            }
-
-            @Override
-            public String_ sliceBetween(int startInclusive, int endExclusive) {
-                return new JavaString(this.value.substring(startInclusive, endExclusive));
-            }
-
-            @Override
-            public boolean endsWithSlice(String slice) {
-                return this.value.endsWith(slice);
-            }
-
-            @Override
-            public boolean equalsToSlice(String slice) {
-                return this.value.equals(slice);
-            }
-
-            @Override
-            public int indexOfOwned(String_ other) {
-                return this.value.indexOf(other.toSlice());
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return this.value.isEmpty();
-            }
-
-            @Override
-            public boolean equalsTo(String_ other) {
-                return other.equalsToSlice(this.value);
-            }
-
-            @Override
-            public Option<Integer> lastIndexOfSlice(String slice) {
-                var index = this.value.lastIndexOf(slice);
-                return index == -1
-                        ? new None<>()
-                        : new Some<>(index);
-            }
-
-            @Override
-            public String_ sliceTo(int index) {
-                return this.sliceBetween(0, index);
-            }
-        }
-    }
-
-    private enum Operator {
-        Add("+", new None<>()),
-        And("&&", new Some<>(Primitive.Bool)),
-        Or("||", new Some<>(Primitive.Bool)),
-        Equals("==", new Some<>(Primitive.Bool)),
-        EqualsNot("!=", new Some<>(Primitive.Bool)),
-        LessThanOrEquals("<=", new Some<>(Primitive.Bool)),
-        LessThan("<", new Some<>(Primitive.Bool)),
-        GreaterThanOrEquals(">=", new Some<>(Primitive.Bool)),
-        GreaterThan(">", new Some<>(Primitive.Bool));
-
-        private final String_ representation;
-        private final Option<Type> type;
-
-        Operator(String representation, Option<Type> type) {
-            this.representation = Strings.from(representation);
-            this.type = type;
-        }
-    }
-
-    private enum BooleanValue implements Value {
-        False("0"),
-        True("1");
-
-        private final String_ value;
-
-        BooleanValue(String value) {
-            this.value = Strings.from(value);
-        }
-
-        @Override
-        public String_ generate() {
-            return this.value;
-        }
-    }
-
-    private enum Primitive implements Type {
-        I32("int"),
-        I8("char"),
-        Void("void"),
-        Auto("auto"),
-        Bool("int");
-        private final String_ value;
-
-        Primitive(String value) {
-            this.value = Strings.from(value);
-        }
-
-        @Override
-        public String_ stringify() {
-            return Strings.from(this.name()).toLowerCase();
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof Primitive primitive && this == primitive;
-        }
-
-        @Override
-        public String_ generate() {
-            return this.value;
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return false;
-        }
-    }
-
-    public record Some<T>(T value) implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public T orElse(T other) {
-            return this.value;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> supplier) {
-            return this.value;
-        }
-
-        @Override
-        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> supplier) {
-            return this;
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-            consumer.accept(this.value);
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-    }
-
-    public record None<T>() implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public T orElse(T other) {
-            return other;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> supplier) {
-            return supplier.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap_(Function<T, Option<R>> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> supplier) {
-            return supplier.get();
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
-    }
-
-    private static class SingleHead<T> implements Head<T> {
-        private final T element;
-        private boolean retrieved = false;
-
-        public SingleHead(T element) {
-            this.element = element;
-        }
-
-        @Override
-        public Option<T> next() {
-            if (this.retrieved) {
-                return new None<>();
-            }
-
-            this.retrieved = true;
-            return new Some<>(this.element);
-        }
-    }
-
-    public record Iterator<T>(Head<T> head) {
-
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new Iterator<>(() -> this.head.next().map(mapper));
-        }
-
-        public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
-        }
-
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-            var current = initial;
-            while (true) {
-                R finalCurrent = current;
-                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                switch (optional) {
-                    case None<R> _ -> {
-                        return current;
-                    }
-                    case Some<R>(var nextState) -> current = nextState;
-                }
-            }
-        }
-
-        public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap(element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
-        }
-
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
-        }
-
-        private Iterator<T> concat(Iterator<T> other) {
-            return new Iterator<>(() -> this.head.next().or(other::next));
-        }
-
-        public Option<T> next() {
-            return this.head.next();
-        }
-
-        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> iterator) {
-            return this.map(value -> iterator.next().map(otherValue -> new Tuple<>(value, otherValue))).flatMap(Iterators::fromOption);
-        }
-    }
-
-    public record Tuple<A, B>(A left, B right) {
-    }
-
-    public static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter = 0;
-
-        public RangeHead(int length) {
-            this.length = length;
-        }
-
-        @Override
-        public Option<Integer> next() {
-            if (this.counter >= this.length) {
-                return new None<>();
-            }
-
-            var value = this.counter;
-            this.counter++;
-            return new Some<>(value);
-        }
-    }
-
-    private record State(String_ input, List<String_> segments, String_ buffer, int depth, int index) {
-        private static State fromInput(String_ input) {
-            return new State(input, listEmpty(), Strings.empty(), 0, 0);
-        }
-
-        private Option<Tuple<Character, State>> pop() {
-            if (this.index >= this.input.length()) {
-                return new None<>();
-            }
-
-            var escaped = this.input.charAt(this.index);
-            return new Some<>(new Tuple<Character, State>(escaped, new State(this.input, this.segments, this.buffer, this.depth, this.index + 1)));
-        }
-
-        private State append(char c) {
-            return new State(this.input, this.segments, this.buffer.appendChar(c), this.depth, this.index);
-        }
-
-        private Option<Tuple<Character, State>> popAndAppendToTuple() {
-            return this.pop().map(tuple -> {
-                var poppedChar = tuple.left;
-                var poppedState = tuple.right;
-                var appended = poppedState.append(poppedChar);
-                return new Tuple<>(poppedChar, appended);
-            });
-        }
-
-        private boolean isLevel() {
-            return this.depth == 0;
-        }
-
-        private State enter() {
-            return new State(this.input, this.segments, this.buffer, this.depth + 1, this.index);
-        }
-
-        private State exit() {
-            return new State(this.input, this.segments, this.buffer, this.depth - 1, this.index);
-        }
-
-        private State advance() {
-            return new State(this.input, this.segments.addLast(this.buffer), Strings.empty(), this.depth, this.index);
-        }
-
-        private boolean isShallow() {
-            return this.depth == 1;
-        }
-
-        public Option<State> popAndAppend() {
-            return this.popAndAppendToTuple().map(Tuple::right);
-        }
-
-        public Option<Character> peek() {
-            if (this.index < this.input.length()) {
-                return new Some<>(this.input.charAt(this.index));
-            }
-            else {
-                return new None<>();
-            }
-        }
-    }
-
-    private record Joiner(String_ delimiter) implements Collector<String_, Option<String_>> {
-        public Joiner() {
-            this(Strings.empty());
-        }
-
-        public Joiner(String delimiter) {
-            this(Strings.from(delimiter));
-        }
-
-        @Override
-        public Option<String_> createInitial() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<String_> fold(Option<String_> current, String_ element) {
-            return new Some<>(current.map(inner -> inner.appendOwned(this.delimiter).appendOwned(element)).orElse(element));
-        }
-    }
-
-    private static class ListCollector<T> implements Collector<T, List<T>> {
-        @Override
-        public List<T> createInitial() {
-            return listEmpty();
-        }
-
-        @Override
-        public List<T> fold(List<T> current, T element) {
-            return current.addLast(element);
-        }
-    }
-
-    private record Definition(
-            List<String> annotations,
-            List<String_> typeParams,
-            Type type,
-            String_ name
-    ) implements Parameter {
-        public Definition(Type type, String name) {
-            this(Lists.listEmpty(), Lists.listEmpty(), type, Strings.from(name));
-        }
-
-        public Definition(Type type, String_ name) {
-            this(Lists.listEmpty(), Lists.listEmpty(), type, name);
-        }
-
-        @Override
-        public String_ generate() {
-            return this.type.generate().appendSlice(" ").appendOwned(this.name);
-        }
-
-        public boolean equalsTo(Definition other) {
-            return this.type.equalsTo(other.type) && this.name.equalsTo(other.name);
-        }
-    }
-
-    private static final class Whitespace implements Parameter, Value {
-        @Override
-        public String_ generate() {
-            return Strings.empty();
-        }
-
-    }
-
-    private static class EmptyHead<T> implements Head<T> {
-        @Override
-        public Option<T> next() {
-            return new None<>();
-        }
-    }
-
-    private record String_Value(String_ value) implements Value {
-        @Override
-        public String_ generate() {
-            return Strings.from("\"")
-                    .appendOwned(this.value)
-                    .appendSlice("\"");
-        }
-    }
-
-    private record Symbol(String_ value) implements Value {
-        @Override
-        public String_ generate() {
-            return this.value;
-        }
-    }
-
-    private record Invocation(Value caller, List<Value> args) implements Value {
-        @Override
-        public String_ generate() {
-            return this.caller.generate()
-                    .appendSlice("(")
-                    .appendOwned(generateValueList(this.args))
-                    .appendSlice(")");
-        }
-    }
-
-    private record DataAccess(Value parent, String_ property) implements Value {
-        @Override
-        public String_ generate() {
-            return this.parent.generate()
-                    .appendSlice(".")
-                    .appendOwned(this.property);
-        }
-    }
-
-    private record Operation(Value left, Operator operator, Value right) implements Value {
-        @Override
-        public String_ generate() {
-            return this.left.generate()
-                    .appendSlice(" ")
-                    .appendOwned(this.operator.representation)
-                    .appendSlice(" ")
-                    .appendOwned(this.right.generate());
-        }
-    }
-
-    public static class Iterators {
-        public static <T> Iterator<T> fromArray(T[] array) {
-            return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
-        }
-
-        public static <T> Iterator<T> fromOption(Option<T> option) {
-            return new Iterator<>(switch (option) {
-                case None<T> _ -> new EmptyHead<T>();
-                case Some<T>(var value) -> new SingleHead<>(value);
-            });
-        }
-    }
-
-    private record CharValue(String_ slice) implements Value {
-        @Override
-        public String_ generate() {
-            return Strings.from("'")
-                    .appendOwned(this.slice)
-                    .appendSlice("'");
-        }
-    }
-
-    private record Not(Value value) implements Value {
-        @Override
-        public String_ generate() {
-            return Strings.from("!").appendOwned(this.value.generate());
-        }
-    }
-
-    private record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Ok<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        }
-
-        @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
-            return supplier.get().mapValue(otherValue -> new Tuple<>(this.value, otherValue));
-        }
-
-        @Override
-        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
-            return new Ok<>(this.value);
-        }
-    }
-
-    private record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-            return new Err<>(this.error);
-        }
-
-        @Override
-        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-            return new Err<>(this.error);
-        }
-
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(this.error);
-        }
-
-        @Override
-        public <R> Result<Tuple<T, R>, X> and(Supplier<Result<R, X>> supplier) {
-            return new Err<>(this.error);
-        }
-
-        @Override
-        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
-            return new Err<>(mapper.apply(this.error));
-        }
-    }
-
-    private record StructType(String_ name, List<Definition> definitions) implements Type {
-        private Result<Type, CompileError> findTypeAsResult(String propertyKey) {
-            if (this.findTypeAsOption(propertyKey) instanceof Some(var propertyValue)) {
-                return new Ok<>(propertyValue);
-            }
-
-            return new Err<>(new CompileError("Undefined property on struct type '" + this.generate() + "'", new StringContext(Strings.from(propertyKey))));
-        }
-
-        @Override
-        public String_ stringify() {
-            return this.name;
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            if (other instanceof StructType structType) {
-                return this.name.equalsTo(structType.name) && this.definitions.equalsTo(structType.definitions, Definition::equalsTo);
-            }
-
-            return false;
-        }
-
-        @Override
-        public String_ generate() {
-            var joinedDefinitions = this.definitions.iterate()
-                    .map(Definition::generate)
-                    .collect(new Joiner())
-                    .orElse(Strings.empty());
-
-            return Strings.from("struct ")
-                    .appendOwned(this.name)
-                    .appendSlice(" {")
-                    .appendOwned(joinedDefinitions)
-                    .appendSlice("}");
-        }
-
-        public Option<Type> findTypeAsOption(String name) {
-            return findSymbolInDefinitions(this.definitions, name);
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return this.definitions.iterate()
-                    .map(definition -> definition.type)
-                    .filter(type -> type instanceof TypeParam)
-                    .next()
-                    .isPresent();
-        }
-    }
-
-    private record StructRef(String_ name) implements Type {
-        public StructRef(String name) {
-            this(Strings.from(name));
-        }
-
-        @Override
-        public String_ generate() {
-            return Strings.from("struct ").appendOwned(this.name);
-        }
-
-        @Override
-        public String_ stringify() {
-            return this.name;
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof StructRef ref && this.name.equalsTo(ref.name);
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return false;
-        }
-    }
-
-    private record Ref(Type type) implements Type {
-        @Override
-        public String_ stringify() {
-            return this.type.stringify().appendSlice("_star");
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof Ref ref && this.type.equalsTo(ref.type);
-        }
-
-        @Override
-        public String_ generate() {
-            return this.type.generate().appendSlice("*");
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return this.type.hasTypeParams();
-        }
-    }
-
-    private record Functional(List<Type> paramTypes, Type returns) implements Type {
-        @Override
-        public String_ generate() {
-            var generated = generateValueList(this.paramTypes());
-            return this.returns.generate().appendSlice(" (*)(").appendOwned(generated).appendSlice(")");
-        }
-
-        @Override
-        public String_ stringify() {
-            return Strings.from("_Func_")
-                    .appendOwned(generateValueList(this.paramTypes))
-                    .appendSlice("_")
-                    .appendOwned(this.returns.stringify())
-                    .appendSlice("_");
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof Functional functional
-                    && this.returns.equalsTo(functional.returns)
-                    && this.paramTypes.equalsTo(functional.paramTypes, Type::equalsTo);
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return this.returns.hasTypeParams() || this.paramTypes.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
-        }
-    }
-
-    private static class Max implements Collector<Integer, Option<Integer>> {
-        @Override
-        public Option<Integer> createInitial() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<Integer> fold(Option<Integer> current, Integer element) {
-            return new Some<>(current.map(inner -> inner > element ? inner : element).orElse(element));
-        }
-    }
-
-    private record CompileError(String message, Context context, List<CompileError> errors) implements Error {
-        public CompileError(String message, Context context) {
-            this(message, context, listEmpty());
-        }
-
-        @Override
-        public String_ display() {
-            return this.format(0);
-        }
-
-        private String_ format(int depth) {
-            return Strings.from(this.message)
-                    .appendSlice(": ")
-                    .appendOwned(this.context.display())
-                    .appendOwned(this.joinErrors(depth));
-        }
-
-        private String_ joinErrors(int depth) {
-            return this.errors
-                    .sort((error, error2) -> error.computeMaxDepth() - error2.computeMaxDepth())
-                    .iterate()
-                    .map(error -> error.format(depth + 1))
-                    .map(display -> Strings.from("\n").appendOwned(Strings.from("\t").repeat(depth)).appendOwned(display))
-                    .collect(new Joiner())
-                    .orElse(Strings.empty());
-        }
-
-        private int computeMaxDepth() {
-            return 1 + this.errors.iterate()
-                    .map(CompileError::computeMaxDepth)
-                    .collect(new Max())
-                    .orElse(0);
-        }
-    }
-
-    private record Exceptional<T, C, X>(Collector<T, C> collector) implements Collector<Result<T, X>, Result<C, X>> {
-        @Override
-        public Result<C, X> createInitial() {
-            return new Ok<>(this.collector.createInitial());
-        }
-
-        @Override
-        public Result<C, X> fold(Result<C, X> current, Result<T, X> element) {
-            return current.flatMapValue(currentValue -> element.mapValue(elementValue -> this.collector.fold(currentValue, elementValue)));
-        }
-    }
-
-    private record OrState<T>(Option<T> maybeValue, List<CompileError> errors) {
-        public OrState() {
-            this(new None<>(), listEmpty());
-        }
-
-        public OrState<T> withValue(T value) {
-            return new OrState<>(new Some<>(value), this.errors);
-        }
-
-        public OrState<T> withError(CompileError error) {
-            return new OrState<>(this.maybeValue, this.errors.addLast(error));
-        }
-
-        public Result<T, List<CompileError>> toResult() {
-            return switch (this.maybeValue) {
-                case None<T> _ -> new Err<>(this.errors);
-                case Some<T>(var value) -> new Ok<>(value);
-            };
-        }
-    }
-
-    private record ThrowableError(Throwable throwable) implements Error {
-        @Override
-        public String_ display() {
-            var writer = new StringWriter();
-            this.throwable.printStackTrace(new PrintWriter(writer));
-            return Strings.from(writer.toString());
-        }
-    }
-
-    private record ApplicationError(Error error) implements Error {
-        @Override
-        public String_ display() {
-            return this.error.display();
-        }
-    }
-
-    private record StringContext(String_ input) implements Context {
-        @Override
-        public String_ display() {
-            return this.input;
-        }
-    }
-
-    private record NodeContext(Node node) implements Context {
-        @Override
-        public String_ display() {
-            return this.node.generate();
-        }
-    }
-
-    private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
-        public Frame(List<Definition> definitions) {
-            this(new None<>(), definitions);
-        }
-
-        public Frame() {
-            this(Lists.listEmpty());
-        }
-
-        private Option<Type> findDefinitionInFrame(String name) {
-            return findSymbolInDefinitions(this.definitions, name);
-        }
-
-        public Option<StructType> toStructType() {
-            return this.maybeRef.map(ref -> new StructType(ref.name, this.definitions));
-        }
-
-        public Frame define(Definition definition) {
-            return new Frame(this.maybeRef, this.definitions.addLast(definition));
-        }
-
-        public Frame withRef(StructRef ref) {
-            return new Frame(new Some<>(ref), this.definitions);
-        }
-    }
-
-    private static class Maps {
-        public static <K, V> Map_<K, V> empty() {
-            return new JavaMap<>();
-        }
-
-        @External
-        private record JavaMap<K, V>(Map<K, V> map) implements Map_<K, V> {
-            public JavaMap() {
-                this(new HashMap<>());
-            }
-
-            @Override
-            public Iterator<V> values() {
-                return new Lists.JavaList<>(new ArrayList<>(this.map.values())).iterate();
-            }
-
-            @Override
-            public Map_<K, V> put(K key, V value) {
-                this.map.put(key, value);
-                return this;
-            }
-
-            @Override
-            public boolean containsKey(K key) {
-                return this.map.containsKey(key);
-            }
-
-            @Override
-            public V get(K key) {
-                return this.map.get(key);
-            }
-
-            @Override
-            public Iterator<K> keys() {
-                return new Lists.JavaList<>(new ArrayList<>(this.map.keySet())).iterate();
-            }
-        }
-    }
-
-    private record AnyMatch<T>(Predicate<T> predicate) implements Collector<T, Boolean> {
-        @Override
-        public Boolean createInitial() {
-            return false;
-        }
-
-        @Override
-        public Boolean fold(Boolean current, T element) {
-            return current || this.predicate.test(element);
-        }
-    }
-
-    private record TypeParam(String_ value) implements Type {
-        @Override
-        public String_ stringify() {
-            return this.value;
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof TypeParam param && this.value.equalsTo(param.value);
-        }
-
-        @Override
-        public String_ generate() {
-            return Strings.from("typeparam ").appendOwned(this.value);
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return true;
-        }
-    }
-
-    private record Generic(String_ base, List<Type> args) implements Type {
-        @Override
-        public String_ stringify() {
-            return this.base.appendSlice("_").appendOwned(this.args.iterate()
-                    .map(Type::stringify)
-                    .collect(new Joiner("_"))
-                    .orElse(Strings.empty()));
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof Generic generic
-                    && this.base.equalsTo(generic.base)
-                    && this.args.equalsTo(generic.args, Type::equalsTo);
-        }
-
-        @Override
-        public String_ generate() {
-            var string = this.args
-                    .iterate()
-                    .map(Node::generate)
-                    .collect(new Joiner(", "))
-                    .orElse(Strings.empty());
-
-            return this.base.appendSlice("<").appendOwned(string).appendSlice(">");
-        }
-
-        @Override
-        public boolean hasTypeParams() {
-            return this.args.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
-        }
     }
 }
