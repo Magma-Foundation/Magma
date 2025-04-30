@@ -219,45 +219,43 @@ public class Main {
 
         String_ joinStructures();
 
-        void defineFunction(Definition definition, List<Definition> oldParameters);
+        CompileState defineFunction(Definition definition, List<Definition> oldParameters);
 
-        void define(Definition name1);
+        CompileState define(Definition name1);
 
-        void enterFrames();
+        CompileState enterFrames();
 
-        void exitFrames();
+        CompileState exitFrames();
 
         String_ createName(String type);
 
-        void exitTypeStack();
+        CompileState exitTypeStack();
 
-        void enterTypeStack(Type found);
+        CompileState enterTypeStack(Type found);
 
-        void enterTypeParams(List<String_> typeParams, List<Type> typeArgs);
+        CompileState enterTypeParams(List<String_> typeParams, List<Type> typeArgs);
 
-        void exitTypeParams();
+        CompileState exitTypeParams();
 
-        void withFunctionPrototype(Definition definition);
+        CompileState withFunctionPrototype(Definition definition);
 
-        void defineAll(List<Definition> params);
+        CompileState defineAll(List<Definition> params);
 
-        void withRef(StructPrototype prototype);
+        CompileState withRef(StructPrototype prototype);
 
-        void expandGeneric(Generic generic);
+        CompileState expandGeneric(Generic generic);
 
-        boolean hasVisited(Generic generic);
+        CompileState addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction);
 
-        void addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction);
+        CompileState registerStruct(StructType type, StructNode node);
 
-        void registerStruct(StructType type, StructNode node);
+        CompileState addFunction(String_ function);
 
-        void addFunction(String_ function);
+        CompileState addStatement(String_ statement);
 
-        void addStatement(String_ statement);
+        CompileState exitStatements();
 
-        void exitStatements();
-
-        void enter();
+        CompileState enterStatements();
 
         Option<List<String_>> findLastStatements();
 
@@ -1332,30 +1330,33 @@ public class Main {
         }
 
         @Override
-        public void defineFunction(Definition definition, List<Definition> oldParameters) {
+        public CompileState defineFunction(Definition definition, List<Definition> oldParameters) {
             var type = definition.type;
             var name = definition.name;
 
             var paramTypes = oldParameters.iterate()
                     .map(Definition::type)
                     .collect(new ListCollector<>());
-
             this.frames = this.frames.define(new Definition(new Functional(paramTypes, type), name));
+            return this;
         }
 
         @Override
-        public void define(Definition name1) {
+        public CompileState define(Definition name1) {
             this.frames = this.frames.define(name1);
+            return this;
         }
 
         @Override
-        public void enterFrames() {
+        public CompileState enterFrames() {
             this.frames = this.frames.enter();
+            return this;
         }
 
         @Override
-        public void exitFrames() {
+        public CompileState exitFrames() {
             this.frames = this.frames.exit();
+            return this;
         }
 
         @Override
@@ -1366,85 +1367,98 @@ public class Main {
         }
 
         @Override
-        public void exitTypeStack() {
+        public CompileState exitTypeStack() {
             this.typeStack = this.typeStack.removeLast().map(Tuple::right).orElse(this.typeStack);
+            return this;
         }
 
         @Override
-        public void enterTypeStack(Type found) {
+        public CompileState enterTypeStack(Type found) {
             this.typeStack = this.typeStack.addLast(found);
+            return this;
         }
 
         @Override
-        public void enterTypeParams(List<String_> typeParams, List<Type> typeArgs) {
+        public CompileState enterTypeParams(List<String_> typeParams, List<Type> typeArgs) {
             this.typeParamStack = this.typeParamStack.addLast(new Tuple<>(typeParams, typeArgs));
+            return this;
         }
 
         @Override
-        public void exitTypeParams() {
+        public CompileState exitTypeParams() {
             this.typeParamStack = this.typeParamStack.removeLast().map(Tuple::right).orElse(this.typeParamStack);
+            return this;
         }
 
         @Override
-        public void withFunctionPrototype(Definition definition) {
+        public CompileState withFunctionPrototype(Definition definition) {
             this.functionName = definition.name;
             this.functionLocalCounter = 0;
+            return this;
         }
 
         @Override
-        public void defineAll(List<Definition> params) {
+        public CompileState defineAll(List<Definition> params) {
             this.frames = this.frames.defineAll(params);
+            return this;
         }
 
         @Override
-        public void withRef(StructPrototype prototype) {
+        public CompileState withRef(StructPrototype prototype) {
             this.frames = this.frames.withRef(prototype);
+            return this;
         }
 
         @Override
-        public void expandGeneric(Generic generic) {
+        public CompileState expandGeneric(Generic generic) {
             if (!this.hasVisited(generic) && this.expanding.containsKey(generic.base)) {
                 this.visitedExpansions = this.visitedExpansions.addLast(generic);
                 this.expanding.get(generic.base).apply(generic.args);
             }
+            return this;
         }
 
-        @Override
-        public boolean hasVisited(Generic generic) {
+        private boolean hasVisited(Generic generic) {
             return this.visitedExpansions.contains(generic, Generic::equalsTo);
         }
 
         @Override
-        public void addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction) {
+        public CompileState addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction) {
             this.expanding = this.expanding.put(name, listResultFunction);
+            return this;
         }
 
         @Override
-        public void registerStruct(StructType type, StructNode node) {
+        public CompileState registerStruct(StructType type, StructNode node) {
             var generated = node.generate();
             var key = new Generic(node.name, node.typeParams);
             var value = new Tuple<StructType, String_>(type, generated);
             this.structRegistry = this.structRegistry.put(key, value);
+            return this;
         }
 
         @Override
-        public void addFunction(String_ function) {
+        public CompileState addFunction(String_ function) {
             this.generatedFunctions = this.generatedFunctions.addLast(function);
+            return this;
         }
 
         @Override
-        public void addStatement(String_ statement) {
+        public CompileState addStatement(String_ statement) {
             this.generatedStatements = this.generatedStatements.mapLast(last -> last.addLast(statement));
+            return this;
         }
 
         @Override
-        public void exitStatements() {
+        public CompileState exitStatements() {
             this.generatedStatements = this.generatedStatements.removeLast().map(Tuple::right).orElse(this.generatedStatements);
+            return this;
         }
 
         @Override
-        public void enter() {
+        public CompileState enterStatements() {
             this.generatedStatements = this.generatedStatements.addLast(listEmpty());
+            return this;
         }
 
         @Override
@@ -2003,7 +2017,7 @@ public class Main {
     }
 
     private static Result<List<String_>, CompileError> usingStatements(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        MutableCompileState.INSTANCE.enter();
+        MutableCompileState.INSTANCE.enterStatements();
         var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
             var maybeElements = MutableCompileState.INSTANCE.findLastStatements();
             if (maybeElements instanceof Some(var elements)) {
