@@ -1199,6 +1199,18 @@ public class Main {
         }
     }
 
+    private record StructNode(String_ name, List<Type> typeParams, List<Definition> definitions) {
+        private String_ generate() {
+            var alias = createAlias(this.name(), this.typeParams());
+            var joinedDefinitions = this.definitions().iterate()
+                    .map(Definition::generate)
+                    .collect(new Joiner())
+                    .orElse(Strings.empty());
+
+            return Strings.from("struct " + alias + " {" + joinedDefinitions + "\n};\n");
+        }
+    }
+
     private enum Operator {
         Add("+", new None<>()),
         And("&&", new Some<>(Primitive.Bool)),
@@ -1578,13 +1590,7 @@ public class Main {
             List<Type> typeArgs,
             List<Definition> definitions
     ) {
-        var joinedDefinitions = definitions.iterate()
-                .map(Definition::generate)
-                .collect(new Joiner())
-                .orElse(Strings.empty());
-
-        var alias = createAlias(name, typeArgs);
-        var generated = Strings.from("struct " + alias + " {" + joinedDefinitions + "\n};\n");
+        var generated = new StructNode(name, typeArgs, definitions).generate();
 
         if (frames.findCurrentStructType() instanceof Some(var currentStructType)) {
             structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
