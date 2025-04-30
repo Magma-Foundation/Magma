@@ -343,7 +343,7 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileRootSegment(String_ input) {
-        return or(input, Lists.listFrom(
+        return orString(input, Lists.listFrom(
                 type("?", input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
                 type("?", Main::compileNamespaced),
                 type("?", Main::compileClass)
@@ -497,7 +497,7 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileClassSegment(String_ input0) {
-        return or(input0, Lists.listFrom(
+        return orString(input0, Lists.listFrom(
                 whitespace(),
                 type("class", Main::compileClass),
                 type("enum", stripped -> compileStructure("enum ", stripped, Strings.from("enum"))),
@@ -583,7 +583,7 @@ public class Main {
     }
 
     private static Result<Definition, CompileError> parseMethodHeader(String_ inputDefinition) {
-        return or(inputDefinition, Lists.listFrom(
+        return orString(inputDefinition, Lists.listFrom(
                 type("definition", Main::parseDefinition),
                 type("constructor", Main::parseConstructor)
         ));
@@ -655,21 +655,25 @@ public class Main {
                 type("?", Main::parseDefinition)
         );
 
-        return or(input, lists);
+        return orString(input, lists);
     }
 
-    private static <T> Result<T, CompileError> or(String_ input, List<Function<String_, Result<T, CompileError>>> lists) {
+    private static <R> Result<R, CompileError> orString(String_ input, List<Function<String_, Result<R, CompileError>>> lists) {
+        return or(input, new StringContext(input), lists);
+    }
+
+    private static <T, R> Result<R, CompileError> or(T input, Context context, List<Function<T, Result<R, CompileError>>> lists) {
         return lists.iterate()
-                .fold(new OrState<T>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper))
+                .fold(new OrState<R>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper))
                 .toResult()
-                .mapErr(errs -> new CompileError("No valid combinations present", new StringContext(input), errs));
+                .mapErr(errs -> new CompileError("No valid combinations present", context, errs));
     }
 
-    private static <T> OrState<T> foldOr(String_ input, OrState<T> tOrState, Function<String_, Result<T, CompileError>> mapper) {
-        if (tOrState.maybeValue.isPresent()) {
-            return tOrState;
+    private static <T, R> OrState<R> foldOr(T input, OrState<R> state, Function<T, Result<R, CompileError>> mapper) {
+        if (state.maybeValue.isPresent()) {
+            return state;
         }
-        return mapper.apply(input).match(tOrState::withValue, tOrState::withError);
+        return mapper.apply(input).match(state::withValue, state::withError);
     }
 
     private static <B, T extends B> Function<String_, Result<B, CompileError>> type(String type, Function<String_, Result<T, CompileError>> parser) {
@@ -695,7 +699,7 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileFunctionSegment(String_ input, int depth) {
-        return or(input, Lists.listFrom(
+        return orString(input, Lists.listFrom(
                 whitespace(),
                 type("block", input0 -> compileBlock(input0, depth)),
                 type("statement", input0 -> compileStatement(input0, depth)),
@@ -739,7 +743,7 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileStatementValue(String_ input) {
-        return or(input, Lists.listFrom(
+        return orString(input, Lists.listFrom(
                 whitespace(),
                 type("break", Main::compileBreak),
                 type("return ", Main::compileReturn),
@@ -817,21 +821,42 @@ public class Main {
 
     private static Result<Type, CompileError> resolveDataAccess(DataAccess access) {
         return resolve(access.parent)
-                .flatMapValue(Main::resolveStructureType)
+                .flatMapValue(Main::resolveStructuredType)
                 .flatMapValue(structType -> structType.findTypeAsResult(access.property.toSlice()))
                 .mapErr(err -> new CompileError("Failed to resolve data access", new NodeContext(access.parent), Lists.listFrom(err)));
     }
 
-    private static Result<StructType, CompileError> resolveStructureType(Type parentType) {
-        if (parentType instanceof StructRef ref) {
-            return resolveStructByName(ref.name);
-        }
+    private static Result<StructType, CompileError> resolveStructuredType(Type type) {
+        return Main.or(type, new NodeContext(type), Lists.listFrom(
+                Main::resolveGenericType,
+                Main::resolveStructRef,
+                Main::resolveStructureType
+        ));
+    }
 
-        if (parentType instanceof StructType structType) {
+    private static Result<StructType, CompileError> resolveStructureType(Type type) {
+        if (type instanceof StructType structType) {
             return new Ok<>(structType);
         }
+        return new Err<>(new CompileError("Not a structure", new NodeContext(type)));
+    }
 
-        return new Err<>(new CompileError("Not a structure type '" + parentType.getClass() + "'", new NodeContext(parentType)));
+    private static Result<StructType, CompileError> resolveStructRef(Type type1) {
+        if (type1 instanceof StructRef ref) {
+            return resolveStructByName(ref.name);
+        }
+        else {
+            return new Err<>(new CompileError("Not a struct ref", new NodeContext(type1)));
+        }
+    }
+
+    private static Result<StructType, CompileError> resolveGenericType(Type type) {
+        if (type instanceof Generic generic) {
+            return resolveStructByName(generic.base);
+        }
+        else {
+            return new Err<>(new CompileError("Not a generic type", new NodeContext(type)));
+        }
     }
 
     private static Result<Type, CompileError> resolveOperation(Operation operation) {
@@ -900,11 +925,11 @@ public class Main {
     }
 
     private static Result<Assignable, CompileError> parseAssignable(String_ definition) {
-        return or(definition, Lists.listFrom(type("?", Main::parseDefinition), type("?", Main::parseValue)));
+        return orString(definition, Lists.listFrom(type("?", Main::parseDefinition), type("?", Main::parseValue)));
     }
 
     private static Result<String_, CompileError> compileBeforeBlock(String_ input) {
-        return or(input, Lists.listFrom(
+        return orString(input, Lists.listFrom(
                 type("else", string -> parseElse(input, string)),
                 type("if", string -> parseConditional(string, "if")),
                 type("if", string -> parseConditional(string, "while"))
@@ -958,7 +983,7 @@ public class Main {
                 .map(operator -> type(operator.name(), parseOperator(operator)))
                 .collect(new ListCollector<>());
 
-        return or(input, rules.addAll(operatorRules));
+        return orString(input, rules.addAll(operatorRules));
     }
 
     private static Result<Value, CompileError> parseSwitch(String_ input) {
@@ -1152,7 +1177,7 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveStructByName(String_ baseName) {
-        return or(baseName, Lists.listFrom(
+        return orString(baseName, Lists.listFrom(
                 Main::resolveCurrentStruct,
                 Main::resolveDefinedStruct
         ));
