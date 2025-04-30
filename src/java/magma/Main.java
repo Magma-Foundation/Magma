@@ -179,6 +179,26 @@ public class Main {
         Iterator<K> keys();
     }
 
+    private interface Frames {
+        Option<Type> findTypeByName(String name);
+
+        Option<StructType> findCurrentStructType();
+
+        Iterator<Definition> streamDefined();
+
+        Option<StructRef> findCurrentRef();
+
+        Frames defineAll(List<Definition> definitions);
+
+        Frames define(Definition definition);
+
+        Frames exit();
+
+        Frames enter();
+
+        Frames withRef(StructRef ref);
+    }
+
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static List<List<String_>> generatedStatements = listEmpty();
@@ -186,7 +206,7 @@ public class Main {
     private static Map_<Generic, Tuple<StructType, String_>> structRegistry = Maps.empty();
     private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
     private static List<Generic> visitedExpansions = listEmpty();
-    private static List<Frame> frames = listEmpty();
+    private static Frames frames = new ImmutableFrames();
     private static String_ functionName = Strings.empty();
     private static List<Tuple<List<String_>, List<Type>>> typeParamStack = listEmpty();
     private static int functionLocalCounter = 0;
@@ -460,20 +480,15 @@ public class Main {
     }
 
     private static Result<String_, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type) {
-        frames = frames.addLast(new Frame(new StructRef(name)));
-        if (type.equalsToSlice("enum")) {
-            frames = define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name"));
-        }
+        return usingFrames(() -> {
+            frames = frames.withRef(new StructRef(name));
+            if (type.equalsToSlice("enum")) {
+                frames = frames.define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name"));
+            }
 
-        var result = parseStatements(content, Main::compileClassSegment)
-                .flatMapValue(parsed -> generateStructure(name, typeArgs, parsed));
-
-        frames = frames.removeLast().map(Tuple::right).orElse(frames);
-        return result;
-    }
-
-    private static List<Frame> define(Definition definition) {
-        return frames.mapLast(last -> last.define(definition));
+            return parseStatements(content, Main::compileClassSegment)
+                    .flatMapValue(parsed -> generateStructure(name, typeArgs, parsed));
+        });
     }
 
     private static Result<String_, CompileError> generateStructure(
@@ -482,11 +497,6 @@ public class Main {
             List<String_> definitions
     ) {
         var compiled = generateAll(Main::mergeStatements, definitions);
-        var maybeCurrentRef = frames.findLast();
-        if (!(maybeCurrentRef instanceof Some(var _))) {
-            return new Err<>(new CompileError("No current ref present", new StringContext(name)));
-        }
-
         var alias = createAlias(name, typeArgs);
         var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
 
@@ -524,10 +534,11 @@ public class Main {
         }
 
         var inputDefinition = input.sliceBetween(0, paramStart);
-        return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, input.sliceFromStart(paramStart + "(".length())));
+        var withParams = input.sliceFromStart(paramStart + "(".length());
+        return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, withParams));
     }
 
-    private static Result<String_, CompileError> compileMethodWithDefinition(Definition definition, String_ afterParams) {
+    private static Result<String_, CompileError> compileMethodWithDefinition(Definition definition, String_ withParams) {
         if (!definition.typeParams.isEmpty()) {
             return new Ok<>(Strings.empty());
         }
@@ -535,21 +546,23 @@ public class Main {
         functionName = definition.name;
         functionLocalCounter = 0;
 
-        var paramEnd = afterParams.indexOfSlice(")");
+        var paramEnd = withParams.indexOfSlice(")");
         if (paramEnd < 0) {
-            return createInfixErr(afterParams, ")");
+            return createInfixErr(withParams, ")");
         }
 
-        var params = afterParams.sliceBetween(0, paramEnd);
-        var withoutParams = afterParams.sliceFromStart(paramEnd + ")".length());
+        var params = withParams.sliceBetween(0, paramEnd);
+        var withoutParams = withParams.sliceFromStart(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
 
-        if (!withBraces.startsWithSlice("{") || !withBraces.endsWithSlice("}")) {
-            return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
-        }
+        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> {
+            if (!withBraces.startsWithSlice("{") || !withBraces.endsWithSlice("}")) {
+                return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
+            }
 
-        var content = withBraces.sliceBetween(1, withBraces.length() - 1);
-        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> compileMethodWithParameters(definition, parsedParameters, content));
+            var content = withBraces.sliceBetween(1, withBraces.length() - 1);
+            return compileMethodWithParameters(definition, parsedParameters, content);
+        });
     }
 
     private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, List<Parameter> rawParameters, String_ content) {
@@ -558,27 +571,39 @@ public class Main {
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
 
-        frames = frames.addLast(new Frame(oldParameters));
-        var thisType = frames.findLast()
-                .flatMap_(frame -> frame.maybeRef)
-                .orElse(new StructRef("this"));
+        var thisType = frames.findCurrentRef().orElse(new StructRef("this"));
 
         var newParams = Lists.<Definition>listEmpty()
                 .addLast(new Definition(thisType, "this"))
                 .addAll(oldParameters);
 
-        var outputParams = generateValueList(newParams);
-        var assembled = assembleMethod(definition, outputParams, content);
-        frames = frames.removeLast().map(Tuple::right).orElse(frames);
+        return usingFrames(() -> {
+            frames = frames.defineAll(oldParameters);
+            return assembleMethod0(definition, newParams, content);
+        }).mapValue(output -> {
+            frames = defineMethod(definition, oldParameters);
+            return output;
+        });
+    }
 
+    private static Result<String_, CompileError> usingFrames(Supplier<Result<String_, CompileError>> supplier) {
+        frames = frames.enter();
+        var assembled = supplier.get();
+        frames = frames.exit();
+        return assembled;
+    }
+
+    private static Frames defineMethod(Definition definition, List<Definition> oldParameters) {
         var paramTypes = oldParameters.iterate()
                 .map(Definition::type)
                 .collect(new ListCollector<>());
-
         var type = definition.type;
         var name = definition.name;
-        frames = define(new Definition(new Functional(paramTypes, type), name));
-        return assembled;
+        return frames.define(new Definition(new Functional(paramTypes, type), name));
+    }
+
+    private static Result<String_, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
+        return assembleMethod(definition, generateValueList(params), content);
     }
 
     private static Result<Definition, CompileError> parseMethodHeader(String_ inputDefinition) {
@@ -867,41 +892,25 @@ public class Main {
     private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
         var value = symbol.value;
         if (value.equalsToSlice("this")) {
-            return switch (findCurrentStructType()) {
+            return switch (frames.findCurrentStructType()) {
                 case None<StructType> _ ->
                         new Err<>(new CompileError("No current struct type present", new StringContext(Strings.empty())));
                 case Some<StructType>(var type) -> new Ok<>(type);
             };
         }
 
-        return findSymbolInFrames(value.toSlice())
+        return frames.findTypeByName(value.toSlice())
                 .<Result<Type, CompileError>>map(Ok::new)
                 .orElseGet(() -> createUndefinedError(value));
     }
 
-    private static Option<StructType> findCurrentStructType() {
-        return frames.iterateReversed()
-                .map(Frame::toStructType)
-                .flatMap(Iterators::fromOption)
-                .next();
-    }
-
     private static Result<Type, CompileError> createUndefinedError(String_ value) {
-        var joinedNames = frames.iterate()
-                .map(Frame::definitions)
-                .flatMap(List::iterate)
+        var joinedNames = frames.streamDefined()
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
         return new Err<>(new CompileError("Symbol not defined [" + joinedNames.toSlice() + "]", new StringContext(value)));
-    }
-
-    private static Option<Type> findSymbolInFrames(String name) {
-        return frames.iterateReversed()
-                .map(list -> list.findDefinitionInFrame(name))
-                .flatMap(Iterators::fromOption)
-                .next();
     }
 
     private static Option<Type> findSymbolInDefinitions(List<Definition> frame, String value) {
@@ -1196,7 +1205,7 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
-        if (!(findCurrentStructType() instanceof Some(var currentStructType))) {
+        if (!(frames.findCurrentStructType() instanceof Some(var currentStructType))) {
             return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
         if (baseName.equalsTo(currentStructType.name)) {
@@ -1520,6 +1529,72 @@ public class Main {
             return false;
         }
         return true;
+    }
+
+    private record ImmutableFrames(List<Frame> frames) implements Frames {
+        public ImmutableFrames() {
+            this(Lists.listEmpty());
+        }
+
+        @Override
+        public Option<Type> findTypeByName(String name) {
+            return this.streamReversedFrames()
+                    .map(list -> list.findDefinitionInFrame(name))
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        @Override
+        public Option<StructType> findCurrentStructType() {
+            return this.streamReversedFrames()
+                    .map(Frame::toStructType)
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        private Iterator<Frame> streamReversedFrames() {
+            return this.frames.iterateReversed();
+        }
+
+        @Override
+        public Iterator<Definition> streamDefined() {
+            return this.frames.iterate()
+                    .map(Frame::definitions)
+                    .flatMap(List::iterate);
+        }
+
+        @Override
+        public Option<StructRef> findCurrentRef() {
+            return this.streamReversedFrames()
+                    .map(frame -> frame.maybeRef)
+                    .flatMap(Iterators::fromOption)
+                    .next();
+        }
+
+        @Override
+        public Frames defineAll(List<Definition> definitions) {
+            return definitions.iterate().fold(this, Frames::define);
+        }
+
+        @Override
+        public Frames define(Definition definition) {
+            return new ImmutableFrames(this.frames.mapLast(last -> last.define(definition)));
+        }
+
+        @Override
+        public Frames exit() {
+            return new ImmutableFrames(this.frames.removeLast().map(Tuple::right).orElse(this.frames));
+        }
+
+        @Override
+        public Frames enter() {
+            return new ImmutableFrames(this.frames.addLast(new Frame()));
+        }
+
+        @Override
+        public Frames withRef(StructRef ref) {
+            return new ImmutableFrames(this.frames.mapLast(last -> last.withRef(ref)));
+        }
     }
 
     private static class Strings {
@@ -2364,12 +2439,12 @@ public class Main {
     }
 
     private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
-        public Frame(StructRef ref) {
-            this(new Some<>(ref), listEmpty());
-        }
-
         public Frame(List<Definition> definitions) {
             this(new None<>(), definitions);
+        }
+
+        public Frame() {
+            this(Lists.listEmpty());
         }
 
         private Option<Type> findDefinitionInFrame(String name) {
@@ -2382,6 +2457,10 @@ public class Main {
 
         public Frame define(Definition definition) {
             return new Frame(this.maybeRef, this.definitions.addLast(definition));
+        }
+
+        public Frame withRef(StructRef ref) {
+            return new Frame(new Some<>(ref), this.definitions);
         }
     }
 
