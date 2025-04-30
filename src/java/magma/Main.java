@@ -151,7 +151,7 @@ public class Main {
         <R> Result<T, R> mapErr(Function<X, R> mapper);
     }
 
-    private interface Type extends Node {
+    private interface Type extends Node, Argument {
         boolean hasTypeParams();
 
         String_ stringify();
@@ -203,6 +203,9 @@ public class Main {
     }
 
     private interface Transformer<T, R> extends Function<T, Result<R, CompileError>> {
+    }
+
+    private interface Argument extends Node {
     }
 
     private record ApplicationError(Error error) implements Error {
@@ -682,7 +685,7 @@ public class Main {
         }
     }
 
-    private static final class Whitespace implements Parameter, Value {
+    private static final class Whitespace implements Parameter, Value, Argument {
         @Override
         public String_ generate() {
             return Strings.empty();
@@ -2545,36 +2548,57 @@ public class Main {
         }
 
         var base = withoutEnd.sliceTo(index).strip();
-        var substring = withoutEnd.sliceFrom(index + "<".length());
-        return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
+        var argsString = withoutEnd.sliceFrom(index + "<".length());
+        return parseValues(argsString, Main::getOr).flatMapValue(rawArguments -> {
+            var arguments = rawArguments.iterate()
+                    .map(Main::retainTypes)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
+
             if (base.equalsToSlice("Consumer")) {
-                var arg0 = parsed.get(0).orElse(null);
+                var arg0 = arguments.get(0).orElse(null);
                 return new Ok<>(new Functional(Lists.listFrom(arg0), Primitive.Void));
             }
 
             if (base.equalsToSlice("Function")) {
-                var arg0 = parsed.get(0).orElse(null);
-                var returns = parsed.get(1).orElse(null);
+                var arg0 = arguments.get(0).orElse(null);
+                var returns = arguments.get(1).orElse(null);
                 return new Ok<>(new Functional(Lists.listFrom(arg0), returns));
             }
 
             if (base.equalsToSlice("BiFunction")) {
-                var arg0 = parsed.get(0).orElse(null);
-                var arg1 = parsed.get(1).orElse(null);
-                var returns = parsed.get(2).orElse(null);
+                var arg0 = arguments.get(0).orElse(null);
+                var arg1 = arguments.get(1).orElse(null);
+                var returns = arguments.get(2).orElse(null);
                 return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
             }
 
-            var generic = new Generic(base, parsed);
+            var generic = new Generic(base, arguments);
             if (!generic.hasTypeParams()) {
                 if (!visitedExpansions.contains(generic, Generic::equalsTo) && expanding.containsKey(base)) {
                     visitedExpansions = visitedExpansions.addLast(generic);
-                    expanding.get(base).apply(parsed);
+                    expanding.get(base).apply(arguments);
                 }
             }
 
             return new Ok<>(generic);
         });
+    }
+
+    private static Option<Type> retainTypes(Argument argument) {
+        return argument instanceof Type type ? new Some<>(type) : new None<Type>();
+    }
+
+    private static Result<Argument, CompileError> getOr(String_ argString) {
+        return orString(argString, Lists.listFrom(
+                type("whitespace", input0 -> parseWhitespace(input0)),
+                type("type", new Transformer<String_, Type>() {
+                    @Override
+                    public Result<Type, CompileError> apply(String_ string) {
+                        return parseType(string);
+                    }
+                })
+        ));
     }
 
     private static Result<Type, CompileError> parseStringType(String_ input) {
