@@ -500,9 +500,13 @@ public class Main {
         var alias = createAlias(name, typeArgs);
         var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
 
-        var structType = new StructType(alias, listEmpty());
-        structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(structType, generated));
-        return new Ok<>(Strings.empty());
+        if (frames.findCurrentStructType() instanceof Some(var currentStructType)) {
+            structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
+            return new Ok<>(Strings.empty());
+        }
+        else {
+            return new Err<>(new CompileError("We aren't in a struct?", new StringContext(name)));
+        }
     }
 
     private static Result<String_, CompileError> compileClassSegment(String_ input0) {
@@ -555,22 +559,23 @@ public class Main {
         var withoutParams = withParams.sliceFromStart(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
 
-        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> {
+        return parseValues(params, Main::parseParameter).flatMapValue(rawParameters -> {
+            var oldParameters = rawParameters.iterate()
+                    .map(Main::requireDefinition)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
+
             if (!withBraces.startsWithSlice("{") || !withBraces.endsWithSlice("}")) {
-                return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
+                frames = defineMethod(definition, oldParameters);
+                return new Ok<>(Strings.empty());
             }
 
             var content = withBraces.sliceBetween(1, withBraces.length() - 1);
-            return compileMethodWithParameters(definition, parsedParameters, content);
+            return compileMethodWithParameters(definition, content, oldParameters);
         });
     }
 
-    private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, List<Parameter> rawParameters, String_ content) {
-        var oldParameters = rawParameters.iterate()
-                .map(Main::requireDefinition)
-                .flatMap(Iterators::fromOption)
-                .collect(new ListCollector<>());
-
+    private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
         var thisType = frames.findCurrentRef().orElse(new StructRef("this"));
 
         var newParams = Lists.<Definition>listEmpty()
@@ -1208,6 +1213,7 @@ public class Main {
         if (!(frames.findCurrentStructType() instanceof Some(var currentStructType))) {
             return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
+
         if (baseName.equalsTo(currentStructType.name)) {
             return new Ok<>(currentStructType);
         }
