@@ -599,7 +599,7 @@ public class Main {
         });
     }
 
-    private static Result<String_, CompileError> usingFrames(Supplier<Result<String_, CompileError>> supplier) {
+    private static <T> Result<T, CompileError> usingFrames(Supplier<Result<T, CompileError>> supplier) {
         frames = frames.enter();
         var assembled = supplier.get();
         frames = frames.exit();
@@ -1310,19 +1310,23 @@ public class Main {
                     .map(tuple -> new Definition(tuple.left, tuple.right))
                     .collect(new ListCollector<>());
 
-            if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
-                var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
-                var name = generateName();
-                assembleMethod0(new Definition(expectedType.returns, name), params, content);
-                return new Ok<>(new Symbol(name));
-            }
+            return usingFrames(() -> {
+                frames = frames.defineAll(params);
 
-            return parseValue(afterArrow).flatMapValue(value -> {
-                var newValue = value.generate();
-                return resolve(value).mapValue(resolved -> {
+                if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
+                    var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
                     var name = generateName();
-                    assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
-                    return new Symbol(name);
+                    assembleMethod0(new Definition(expectedType.returns, name), params, content);
+                    return new Ok<>(new Symbol(name));
+                }
+
+                return parseValue(afterArrow).flatMapValue(value -> {
+                    var newValue = value.generate();
+                    return resolve(value).mapValue(resolved -> {
+                        var name = generateName();
+                        assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
+                        return new Symbol(name);
+                    });
                 });
             });
         }).orElseGet(() -> new Err<>(new CompileError("No expected type was present for lambda", new StringContext(afterArrow))));
