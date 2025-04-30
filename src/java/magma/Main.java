@@ -183,7 +183,7 @@ public class Main {
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static List<List<String_>> generatedStatements = listEmpty();
     private static List<String_> generatedMethods = listEmpty();
-    private static Map_<Tuple<String_, List<Type>>, Tuple<StructType, String_>> structRegistry = Maps.empty();
+    private static Map_<Generic, Tuple<StructType, String_>> structRegistry = Maps.empty();
     private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
     private static List<Generic> visitedExpansions = listEmpty();
     private static List<Frame> frames = listEmpty();
@@ -488,7 +488,7 @@ public class Main {
             var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
 
             var structType = new StructType(compiled, listEmpty());
-            structRegistry = structRegistry.put(new Tuple<>(name, typeArgs), new Tuple<>(structType, generated));
+            structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(structType, generated));
             return new Ok<>(Strings.empty());
         }
         else {
@@ -1184,17 +1184,17 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveDefinedStruct(String_ baseName) {
-        var tuple = new Tuple<String_, List<Type>>(baseName, listEmpty());
+        var tuple = new Generic(baseName, listEmpty());
         if (structRegistry.containsKey(tuple)) {
             return new Ok<>(structRegistry.get(tuple).left);
         }
 
         var joinedKeys = structRegistry.keys()
-                .map(Tuple::left)
+                .map(Generic::generate)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
-        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
+        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new NodeContext(tuple)));
     }
 
     private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
