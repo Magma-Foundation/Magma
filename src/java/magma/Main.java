@@ -390,10 +390,10 @@ public class Main {
                 var withEnd = afterClass.sliceFromStart(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
                     String_ withoutParams = withoutImplements.sliceBetween(0, paramStart).strip();
-                    return getString_(withoutParams, withEnd, type);
+                    return compileStructureWithBeforeContent(withEnd, type, withoutParams);
                 }
                 else {
-                    return getString_(withoutImplements, withEnd, type);
+                    return compileStructureWithBeforeContent(withEnd, type, withoutImplements);
                 }
             }
         }
@@ -401,7 +401,7 @@ public class Main {
         return new Err<>(new CompileError("Not a struct", new StringContext(input)));
     }
 
-    private static Result<String_, CompileError> getString_(String_ beforeContent, String_ input, String_ type) {
+    private static Result<String_, CompileError> compileStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice("}")) {
             return createSuffixErr(stripped, "}");
@@ -438,7 +438,7 @@ public class Main {
 
     private static Result<String_, CompileError> assembleStructure(List<String_> typeParams, String_ name, String_ content, String_ type) {
         if (typeParams.isEmpty()) {
-            return generateStructure(name, content, listEmpty(), type);
+            return generateStructureWithTypeParams(name, content, listEmpty(), type);
         }
 
         if (!isSymbol(name)) {
@@ -446,7 +446,7 @@ public class Main {
         }
 
         expanding = expanding.put(name, typeArgs -> {
-            return usingTypeParams(typeParams, typeArgs, () -> generateStructure(name, content, typeArgs, type));
+            return usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type));
         });
 
         return new Ok<>(Strings.empty());
@@ -459,14 +459,14 @@ public class Main {
         return generated;
     }
 
-    private static Result<String_, CompileError> generateStructure(String_ name, String_ content, List<Type> typeArgs, String_ type) {
+    private static Result<String_, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type) {
         frames = frames.addLast(new Frame(new StructRef(name)));
         if (type.equalsToSlice("enum")) {
             frames = define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name"));
         }
 
         var result = parseStatements(content, Main::compileClassSegment)
-                .flatMapValue(parsed -> getRecord(name, typeArgs, parsed));
+                .flatMapValue(parsed -> generateStructure(name, typeArgs, parsed));
 
         frames = frames.removeLast().map(Tuple::right).orElse(frames);
         return result;
@@ -476,24 +476,23 @@ public class Main {
         return frames.mapLast(last -> last.define(definition));
     }
 
-    private static Result<String_, CompileError> getRecord(
+    private static Result<String_, CompileError> generateStructure(
             String_ name,
             List<Type> typeArgs,
             List<String_> definitions
     ) {
         var compiled = generateAll(Main::mergeStatements, definitions);
         var maybeCurrentRef = frames.findLast();
-        if (maybeCurrentRef instanceof Some(var _)) {
-            var alias = createAlias(name, typeArgs);
-            var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
-
-            var structType = new StructType(alias, listEmpty());
-            structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(structType, generated));
-            return new Ok<>(Strings.empty());
-        }
-        else {
+        if (!(maybeCurrentRef instanceof Some(var _))) {
             return new Err<>(new CompileError("No current ref present", new StringContext(name)));
         }
+
+        var alias = createAlias(name, typeArgs);
+        var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
+
+        var structType = new StructType(alias, listEmpty());
+        structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(structType, generated));
+        return new Ok<>(Strings.empty());
     }
 
     private static Result<String_, CompileError> compileClassSegment(String_ input0) {
