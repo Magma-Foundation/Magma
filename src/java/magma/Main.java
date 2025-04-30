@@ -487,7 +487,7 @@ public class Main {
             var alias = createAlias(name, typeArgs);
             var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
 
-            var structType = new StructType(compiled, listEmpty());
+            var structType = new StructType(alias, listEmpty());
             structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(structType, generated));
             return new Ok<>(Strings.empty());
         }
