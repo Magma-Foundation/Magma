@@ -6,6 +6,18 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class Lists {
+    public static <T> Main.List<T> listEmpty() {
+        return new JavaList<>();
+    }
+
+    public static <T> Main.List<T> listFromArray(T[] array) {
+        return new JavaList<>(Arrays.asList(array));
+    }
+
+    public static <T> Main.List<T> listFrom(T... elements) {
+        return new JavaList<>(Arrays.asList(elements));
+    }
+
     public record JavaList<T>(java.util.List<T> elements) implements Main.List<T> {
         public JavaList() {
             this(new ArrayList<>());
@@ -29,8 +41,14 @@ class Lists {
         }
 
         @Override
-        public boolean contains(T element) {
-            return this.elements.contains(element);
+        public boolean contains(T element, BiFunction<T, T, Boolean> equator) {
+            for (var maybeElement : this.elements) {
+                if (equator.apply(element, maybeElement)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         @Override
@@ -113,17 +131,24 @@ class Lists {
                     .map(index -> this.elements.size() - index - 1)
                     .map(this.elements::get);
         }
-    }
 
-    public static <T> Main.List<T> listEmpty() {
-        return new JavaList<>();
-    }
+        @Override
+        public boolean equalsTo(Main.List<T> other, BiFunction<T, T, Boolean> equator) {
+            if (this.elements.size() != other.size()) {
+                return false;
+            }
 
-    public static <T> Main.List<T> listFromArray(T[] array) {
-        return new JavaList<>(Arrays.asList(array));
-    }
+            return this.iterateWithIndices().map(tuple -> this.createElementPair(tuple, other))
+                    .flatMap(Main.Iterators::fromOption)
+                    .map(tuple -> equator.apply(tuple.left(), tuple.right()))
+                    .fold(true, (aBoolean, aBoolean2) -> aBoolean && aBoolean2);
+        }
 
-    public static <T> Main.List<T> listFrom(T... elements) {
-        return new JavaList<>(Arrays.asList(elements));
+        private Main.Option<Main.Tuple<T, T>> createElementPair(Main.Tuple<Integer, T> tuple, Main.List<T> other) {
+            var index = tuple.left();
+            var thisElement = tuple.right();
+
+            return other.find(index).map(otherElement -> new Main.Tuple<>(thisElement, otherElement));
+        }
     }
 }

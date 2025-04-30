@@ -41,7 +41,7 @@ public class Main {
 
         boolean isEmpty();
 
-        boolean contains(T element);
+        boolean contains(T element, BiFunction<T, T, Boolean> equator);
 
         Option<Integer> indexOf(T element);
 
@@ -64,6 +64,8 @@ public class Main {
         List<T> sort(BiFunction<T, T, Integer> comparator);
 
         Iterator<T> iterateReversed();
+
+        boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator);
     }
 
     private interface Head<T> {
@@ -118,7 +120,7 @@ public class Main {
         boolean equalsTo(String_ other);
     }
 
-    private interface Defined extends Assignable {
+    private interface Parameter extends Assignable {
         String_ generate();
     }
 
@@ -146,6 +148,8 @@ public class Main {
 
     private interface Type extends Node {
         String_ stringify();
+
+        boolean equalsTo(Type other);
     }
 
     private interface Error {
@@ -173,11 +177,14 @@ public class Main {
 
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
-    private static List<List<String_>> statements = listEmpty();
-    private static List<String_> methods = listEmpty();
+
+    private static List<List<String_>> generatedStatements = listEmpty();
+    private static List<String_> generatedMethods = listEmpty();
     private static Map_<Tuple<String_, List<Type>>, Tuple<StructType, String_>> structRegistry = Maps.empty();
+
     private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
     private static List<Tuple<String_, List<Type>>> visitedExpansions = listEmpty();
+
     private static List<Frame> frames = listEmpty();
     private static String_ functionName = Strings.empty();
     private static List<String_> typeParameters = listEmpty();
@@ -222,7 +229,7 @@ public class Main {
         return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
             var joinedStructs = joinStructures();
-            return compiled.appendOwned(joinedStructs).appendOwned(join(methods));
+            return compiled.appendOwned(joinedStructs).appendOwned(join(generatedMethods));
         });
     }
 
@@ -514,66 +521,73 @@ public class Main {
         }
 
         var inputDefinition = input.substring(0, paramStart);
-        var or = or(inputDefinition, Lists.listFrom(
-                type("definition", Main::parseDefinition),
-                type("constructor", Main::parseConstructor)
-        ));
+        return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, input.sliceFromStart(paramStart + "(".length())));
+    }
 
-        return or.flatMapValue(defined -> {
-            if (defined instanceof Definition definition) {
-                functionName = definition.name;
-                functionLocalCounter = 0;
-            }
+    private static Result<String_, CompileError> compileMethodWithDefinition(Definition definition, String_ afterParams) {
+        if (!definition.typeParams.isEmpty()) {
+            return new Ok<>(Strings.empty());
+        }
 
-            var afterParams = input.sliceFromStart(paramStart + "(".length());
-            var paramEnd = afterParams.indexOfSlice(")");
-            if (paramEnd < 0) {
-                return createInfixErr(afterParams, ")");
-            }
+        functionName = definition.name;
+        functionLocalCounter = 0;
 
-            var params = afterParams.substring(0, paramEnd);
-            var withoutParams = afterParams.sliceFromStart(paramEnd + ")".length());
-            var withBraces = withoutParams.strip();
+        var paramEnd = afterParams.indexOfSlice(")");
+        if (paramEnd < 0) {
+            return createInfixErr(afterParams, ")");
+        }
 
-            if (!withBraces.startsWithSlice("{") || !withBraces.endsWith("}")) {
-                return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
-            }
+        var params = afterParams.substring(0, paramEnd);
+        var withoutParams = afterParams.sliceFromStart(paramEnd + ")".length());
+        var withBraces = withoutParams.strip();
 
-            var content = withBraces.substring(1, withBraces.length() - 1);
-            return parseValues(params, Main::parseParameter).flatMapValue(results -> {
-                var oldParams = results
-                        .iterate()
-                        .map(Main::requireDefinition)
-                        .flatMap_(Iterators::fromOption)
-                        .collect(new ListCollector<>());
+        if (!withBraces.startsWithSlice("{") || !withBraces.endsWith("}")) {
+            return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
+        }
 
-                frames = frames.addLast(new Frame(oldParams));
-
-                var thisType = frames.findLast()
-                        .flatMap_(frame -> frame.maybeRef)
-                        .orElse(new StructRef("this"));
-
-                var newParams = Lists.<Definition>listEmpty()
-                        .addLast(new Definition(thisType, "this"))
-                        .addAll(oldParams);
-
-                var outputParams = generateValueList(newParams);
-                var assembled = assembleMethod(defined, outputParams, content);
-                frames = frames.removeLast().map(Tuple::right).orElse(frames);
-
-                var paramTypes = oldParams.iterate()
-                        .map(Definition::type)
-                        .collect(new ListCollector<>());
-
-                var type = defined.type;
-                var name = defined.name;
-                frames = define(new Definition(new Functional(paramTypes, type), name));
-                return assembled;
-            });
+        var content = withBraces.substring(1, withBraces.length() - 1);
+        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> {
+            return compileMethodWithParameters(definition, parsedParameters, content);
         });
     }
 
-    private static Option<Definition> requireDefinition(Defined parameter) {
+    private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, List<Parameter> rawParameters, String_ content) {
+        var oldParameters = rawParameters.iterate()
+                .map(Main::requireDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+
+        frames = frames.addLast(new Frame(oldParameters));
+        var thisType = frames.findLast()
+                .flatMap_(frame -> frame.maybeRef)
+                .orElse(new StructRef("this"));
+
+        var newParams = Lists.<Definition>listEmpty()
+                .addLast(new Definition(thisType, "this"))
+                .addAll(oldParameters);
+
+        var outputParams = generateValueList(newParams);
+        var assembled = assembleMethod(definition, outputParams, content);
+        frames = frames.removeLast().map(Tuple::right).orElse(frames);
+
+        var paramTypes = oldParameters.iterate()
+                .map(Definition::type)
+                .collect(new ListCollector<>());
+
+        var type = definition.type;
+        var name = definition.name;
+        frames = define(new Definition(new Functional(paramTypes, type), name));
+        return assembled;
+    }
+
+    private static Result<Definition, CompileError> parseMethodHeader(String_ inputDefinition) {
+        return or(inputDefinition, Lists.listFrom(
+                type("definition", Main::parseDefinition),
+                type("constructor", Main::parseConstructor)
+        ));
+    }
+
+    private static Option<Definition> requireDefinition(Parameter parameter) {
         if (parameter instanceof Definition definition) {
             return new Some<>(definition);
         }
@@ -607,18 +621,18 @@ public class Main {
                 .orElse(Strings.empty());
     }
 
-    private static Result<String_, CompileError> assembleMethod(Defined definition, String_ outputParams, String_ content) {
+    private static Result<String_, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
         return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
             var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
-            methods = methods.addLast(generated);
+            generatedMethods = generatedMethods.addLast(generated);
             return Strings.empty();
         });
     }
 
     private static Result<List<String_>, CompileError> parseStatementsWithLocals(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        statements = statements.addLast(listEmpty());
+        generatedStatements = generatedStatements.addLast(listEmpty());
         var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
-            var maybeElements = statements.findLast();
+            var maybeElements = generatedStatements.findLast();
             if (maybeElements instanceof Some(var elements)) {
                 return new Ok<>(Lists.<String_>listEmpty()
                         .addAll(elements)
@@ -629,12 +643,12 @@ public class Main {
             }
         });
 
-        statements = statements.removeLast().map(Tuple::right).orElse(statements);
+        generatedStatements = generatedStatements.removeLast().map(Tuple::right).orElse(generatedStatements);
         return result;
     }
 
-    private static Result<Defined, CompileError> parseParameter(String_ input) {
-        var lists = Lists.<Function<String_, Result<Defined, CompileError>>>listFrom(
+    private static Result<Parameter, CompileError> parseParameter(String_ input) {
+        var lists = Lists.<Function<String_, Result<Parameter, CompileError>>>listFrom(
                 type("?", Main::parseWhitespace),
                 type("?", Main::parseDefinition)
         );
@@ -842,14 +856,14 @@ public class Main {
     private static Option<StructType> findCurrentStructType() {
         return frames.iterateReversed()
                 .map(Frame::toStructType)
-                .flatMap_(Iterators::fromOption)
+                .flatMap(Iterators::fromOption)
                 .next();
     }
 
     private static Result<Type, CompileError> createUndefinedError(String_ value) {
         var joinedNames = frames.iterate()
                 .map(Frame::definitions)
-                .flatMap_(List::iterate)
+                .flatMap(List::iterate)
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
@@ -860,7 +874,7 @@ public class Main {
     private static Option<Type> findSymbolInFrames(String name) {
         return frames.iterateReversed()
                 .map(list -> list.findDefinitionInFrame(name))
-                .flatMap_(Iterators::fromOption)
+                .flatMap(Iterators::fromOption)
                 .next();
     }
 
@@ -1203,7 +1217,7 @@ public class Main {
 
         return resolve(parent).flatMapValue(type -> {
             var statement = Strings.from("\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";");
-            statements = statements.mapLast(last -> last.addLast(statement));
+            generatedStatements = generatedStatements.mapLast(last -> last.addLast(statement));
 
             Value symbol = new Symbol(name);
             return assembleInvocation(property, symbol, parsedArgs);
@@ -1378,7 +1392,8 @@ public class Main {
                     }
 
                     var generic = new Tuple<>(base, parsed);
-                    if (!visitedExpansions.contains(generic) && expanding.containsKey(base)) {
+                    if (!hasGenericBeenVisited(generic) && expanding.containsKey(base)) {
+                        System.out.println(generic);
                         visitedExpansions = visitedExpansions.addLast(generic);
                         expanding.get(base).apply(parsed);
                     }
@@ -1393,6 +1408,12 @@ public class Main {
         }
 
         return new Err<>(new CompileError("Not a valid type", new StringContext(input)));
+    }
+
+    private static boolean hasGenericBeenVisited(Tuple<String_, List<Type>> generic) {
+        return visitedExpansions.contains(generic,
+                (tuple, other) -> Tuple.equalsTo(tuple, other, String_::equalsTo,
+                        (typeList, typeList2) -> typeList.equalsTo(typeList2, Type::equalsTo)));
     }
 
     private static String_ createAlias(String_ base, List<Type> parsed) {
@@ -1615,6 +1636,11 @@ public class Main {
         }
 
         @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Primitive primitive && this == primitive;
+        }
+
+        @Override
         public String_ generate() {
             return this.value;
         }
@@ -1737,10 +1763,10 @@ public class Main {
         }
 
         public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap_(element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
+            return this.flatMap(element -> new Iterator<>(predicate.test(element) ? new SingleHead<>(element) : new EmptyHead<>()));
         }
 
-        private <R> Iterator<R> flatMap_(Function<T, Iterator<R>> mapper) {
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
             return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
         }
 
@@ -1754,6 +1780,14 @@ public class Main {
     }
 
     public record Tuple<A, B>(A left, B right) {
+        private static <A, B> boolean equalsTo(
+                Tuple<A, B> first,
+                Tuple<A, B> second,
+                BiFunction<A, A, Boolean> leftEquator,
+                BiFunction<B, B, Boolean> rightEquator
+        ) {
+            return leftEquator.apply(first.left, second.left) && rightEquator.apply(first.right, second.right);
+        }
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -1865,18 +1899,26 @@ public class Main {
         }
     }
 
-    private record Definition(Type type, String_ name) implements Defined {
+    private record Definition(List<String_> typeParams, Type type, String_ name) implements Parameter {
         public Definition(Type type, String name) {
-            this(type, Strings.from(name));
+            this(Lists.listEmpty(), type, Strings.from(name));
+        }
+
+        public Definition(Type type, String_ name) {
+            this(Lists.listEmpty(), type, name);
         }
 
         @Override
         public String_ generate() {
             return this.type.generate().appendSlice(" ").appendOwned(this.name);
         }
+
+        public boolean equalsTo(Definition other) {
+            return this.type.equalsTo(other.type) && this.name.equalsTo(other.name);
+        }
     }
 
-    private static final class Whitespace implements Defined, Value {
+    private static final class Whitespace implements Parameter, Value {
         @Override
         public String_ generate() {
             return Strings.empty();
@@ -1937,7 +1979,7 @@ public class Main {
         }
     }
 
-    private static class Iterators {
+    public static class Iterators {
         public static <T> Iterator<T> fromArray(T[] array) {
             return new Iterator<>(new RangeHead(array.length)).map(index -> array[index]);
         }
@@ -2035,6 +2077,15 @@ public class Main {
         }
 
         @Override
+        public boolean equalsTo(Type other) {
+            if (other instanceof StructType structType) {
+                return this.name.equalsTo(structType.name) && this.definitions.equalsTo(structType.definitions, Definition::equalsTo);
+            }
+
+            return false;
+        }
+
+        @Override
         public String_ generate() {
             var joinedDefinitions = this.definitions.iterate()
                     .map(Definition::generate)
@@ -2067,12 +2118,22 @@ public class Main {
         public String_ stringify() {
             return this.name;
         }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof StructRef ref && this.name.equalsTo(ref.name);
+        }
     }
 
     private record Ref(Type type) implements Type {
         @Override
         public String_ stringify() {
             return this.type.stringify().appendSlice("_star");
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Ref ref && this.type.equalsTo(ref.type);
         }
 
         @Override
@@ -2095,6 +2156,13 @@ public class Main {
                     .appendSlice("_")
                     .appendOwned(this.returns.stringify())
                     .appendSlice("_");
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Functional functional
+                    && this.returns.equalsTo(functional.returns)
+                    && this.paramTypes.equalsTo(functional.paramTypes, Type::equalsTo);
         }
     }
 
