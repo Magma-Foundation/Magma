@@ -1206,6 +1206,7 @@ public class Main {
             this.type = type;
         }
     }
+
     private enum BooleanValue implements Value {
         False("0"),
         True("1");
@@ -1221,6 +1222,7 @@ public class Main {
             return this.value;
         }
     }
+
     private enum Primitive implements Type {
         I32("int"),
         I8("char"),
@@ -1253,6 +1255,7 @@ public class Main {
             return other instanceof Primitive primitive && this == primitive;
         }
     }
+
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
     private static List<List<String_>> generatedStatements = listEmpty();
@@ -2211,6 +2214,19 @@ public class Main {
         var callerString_ = joined.sliceTo(joined.length() - ")".length());
         var arguments = divisions.findLast().orElse(null);
 
+        return orString(callerString_, Lists.listFrom(
+                type("construction", beforeArgs -> parseConstruction(beforeArgs, arguments)),
+                type("invocation", beforeArgs -> parseInvocation(beforeArgs, arguments))
+        ));
+    }
+
+    private static Result<Invocation, CompileError> parseInvocation(String_ callerString_, String_ arguments) {
+        return parseValue(callerString_)
+                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> parseInvokableWithCallerType(caller, callerType, arguments)))
+                .mapErr(err -> new CompileError("Not an invocation", new StringContext(callerString_), Lists.listFrom(err)));
+    }
+
+    private static Result<Invocation, CompileError> parseConstruction(String_ callerString_, String_ arguments) {
         if (callerString_.startsWithSlice("new ")) {
             String_ withoutPrefix = callerString_.sliceFrom("new ".length());
             return parseType(withoutPrefix).flatMapValue(type -> {
@@ -2218,10 +2234,7 @@ public class Main {
                 return assembleInvokable(parsedCaller, arguments, listEmpty());
             });
         }
-
-        return parseValue(callerString_)
-                .flatMapValue(caller -> resolve(caller).flatMapValue(callerType -> parseInvokableWithCallerType(caller, callerType, arguments)))
-                .mapErr(err -> new CompileError("Invalid caller", new StringContext(callerString_), Lists.listFrom(err)));
+        return createPrefixErr(callerString_, "new ");
     }
 
     private static Result<Invocation, CompileError> parseInvokableWithCallerType(Value caller, Type callerType, String_ argumentsString) {
