@@ -114,6 +114,8 @@ public class Main {
         int lastIndexOf(String slice);
 
         boolean isEmpty();
+
+        boolean equalsTo(String_ other);
     }
 
     private interface Defined extends Assignable {
@@ -806,7 +808,7 @@ public class Main {
 
     private static Result<StructType, CompileError> resolveStructureType(Type parentType) {
         if (parentType instanceof StructRef ref) {
-            return findStructType(ref.name);
+            return resolveStructByName(ref.name);
         }
 
         if (parentType instanceof StructType structType) {
@@ -1118,7 +1120,7 @@ public class Main {
         }
 
         var baseName = structRef.name;
-        return findStructType(baseName).flatMapValue(structType -> {
+        return resolveStructByName(baseName).flatMapValue(structType -> {
             var maybeConstructor = structType.findTypeAsOption("new");
             if (!(maybeConstructor instanceof Some(var constructor))) {
                 return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
@@ -1133,7 +1135,14 @@ public class Main {
         });
     }
 
-    private static Result<StructType, CompileError> findStructType(String_ baseName) {
+    private static Result<StructType, CompileError> resolveStructByName(String_ baseName) {
+        return or(baseName, Lists.listFrom(
+                string -> Main.resolveCurrentStruct(string, baseName),
+                string -> Main.resolveDefinedStruct(baseName)
+        ));
+    }
+
+    private static Result<StructType, CompileError> resolveDefinedStruct(String_ baseName) {
         var tuple = new Tuple<String_, List<Type>>(baseName, listEmpty());
         if (structRegistry.containsKey(tuple)) {
             return new Ok<>(structRegistry.get(tuple).left);
@@ -1145,6 +1154,17 @@ public class Main {
                 .orElse(Strings.empty());
 
         return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new StringContext(baseName)));
+    }
+
+    private static Result<StructType, CompileError> resolveCurrentStruct(String_ string, String_ baseName) {
+        if (!(findCurrentStructType() instanceof Some(var currentStructType))) {
+            return new Err<>(new CompileError("Not in a structure", new StringContext(string)));
+        }
+        if (baseName.equalsTo(currentStructType.name)) {
+            return new Ok<>(currentStructType);
+        }
+
+        return new Err<>(new CompileError("Current struct did not match '" + currentStructType.generate() + "'", new StringContext(string)));
     }
 
     private static Result<Invocation, CompileError> assembleInvokable(Value caller, String_ arguments, List<Type> expectedArgumentsTypes) {
@@ -1532,6 +1552,11 @@ public class Main {
             @Override
             public boolean isEmpty() {
                 return this.value.isEmpty();
+            }
+
+            @Override
+            public boolean equalsTo(String_ other) {
+                return other.equalsToSlice(this.value);
             }
         }
     }
