@@ -1476,6 +1476,11 @@ public class Main {
                 var base = withoutEnd.sliceTo(index).strip();
                 var substring = withoutEnd.sliceFrom(index + "<".length());
                 return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
+                    if (base.equalsToSlice("Consumer")) {
+                        var arg0 = parsed.get(0).orElse(null);
+                        return new Ok<>(new Functional(Lists.listFrom(arg0), Primitive.Void));
+                    }
+
                     if (base.equalsToSlice("Function")) {
                         var arg0 = parsed.get(0).orElse(null);
                         var returns = parsed.get(1).orElse(null);
