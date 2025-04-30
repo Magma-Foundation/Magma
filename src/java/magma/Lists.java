@@ -48,12 +48,6 @@ class Lists {
         }
 
         @Override
-        public Main.Option<Integer> indexOf(T element) {
-            var index = this.elements.indexOf(element);
-            return index == -1 ? new Main.None<>() : new Main.Some<>(index);
-        }
-
-        @Override
         public Main.Option<T> get(int index) {
             if (index < this.elements.size()) {
                 return new Main.Some<>(this.elements.get(index));

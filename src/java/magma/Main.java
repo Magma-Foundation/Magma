@@ -43,8 +43,6 @@ public class Main {
 
         boolean contains(T element, BiFunction<T, T, Boolean> equator);
 
-        Option<Integer> indexOf(T element);
-
         Option<T> get(int index);
 
         int size();
@@ -1268,7 +1266,7 @@ public class Main {
     private static List<List<String_>> generatedStatements = listEmpty();
     private static List<String_> generatedMethods = listEmpty();
     private static Map_<Generic, Tuple<StructType, String_>> structRegistry = Maps.empty();
-    private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
+    private static Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> expanding = Maps.empty();
     private static Frames frames = new ImmutableFrames();
     private static String_ functionName = Strings.empty();
     private static List<Tuple<List<String_>, List<Type>>> typeParamStack = listEmpty();
@@ -1434,7 +1432,7 @@ public class Main {
         return orString(input, Lists.listFrom(
                 type("?", input1 -> parseWhitespace(input1).mapValue(Whitespace::generate)),
                 type("?", Main::compileNamespaced),
-                type("?", Main::compileClass)
+                type("?", stripped -> compileClass(stripped).mapValue(Whitespace::generate))
         ));
     }
 
@@ -1447,16 +1445,16 @@ public class Main {
         }
     }
 
-    private static Result<String_, CompileError> compileClass(String_ stripped) {
+    private static Result<Whitespace, CompileError> compileClass(String_ stripped) {
         return compileStructure("class ", stripped, Strings.from("?"));
     }
 
-    private static Result<String_, CompileError> compileStructure(String infix, String_ input, String_ type) {
+    private static Result<Whitespace, CompileError> compileStructure(String infix, String_ input, String_ type) {
         var classIndex = input.indexOfSlice(infix);
         if (classIndex >= 0) {
             var beforeInfix = input.sliceTo(classIndex).strip();
             if (beforeInfix.startsWithSlice("@External")) {
-                return new Ok<>(Strings.empty());
+                return new Ok<>(new Whitespace());
             }
 
             var afterClass = input.sliceFrom(classIndex + infix.length());
@@ -1477,11 +1475,12 @@ public class Main {
                 var paramStart = withoutImplements.indexOfSlice("(");
                 var withEnd = afterClass.sliceFrom(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
-                    String_ withoutParams = withoutImplements.sliceTo(paramStart).strip();
-                    return compileStructureWithBeforeContent(withEnd, type, withoutParams);
+                    var withoutParams = withoutImplements.sliceTo(paramStart).strip();
+                    var paramString = withoutImplements.sliceFrom(paramStart + 1);
+                    return parseParameters(paramString).flatMapValue(params -> compileStructureWithBeforeContent(withEnd, type, withoutParams, params));
                 }
                 else {
-                    return compileStructureWithBeforeContent(withEnd, type, withoutImplements);
+                    return compileStructureWithBeforeContent(withEnd, type, withoutImplements, Lists.listEmpty());
                 }
             }
         }
@@ -1489,7 +1488,7 @@ public class Main {
         return new Err<>(new CompileError("Not a struct", new StringContext(input)));
     }
 
-    private static Result<String_, CompileError> compileStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent) {
+    private static Result<Whitespace, CompileError> compileStructureWithBeforeContent(String_ input, String_ type, String_ beforeContent, List<Definition> params) {
         var stripped = input.strip();
         if (!stripped.endsWithSlice("}")) {
             return createSuffixErr(stripped, "}");
@@ -1506,11 +1505,11 @@ public class Main {
                 var substring = withoutEnd.sliceFrom(typeParamStart + "<".length());
 
                 var typeParameters = divideAll(substring, (state, c) -> foldDelimiter(state, c, ','));
-                return assembleStructure(typeParameters, name, content, type);
+                return assembleStructure(typeParameters, name, content, type, params);
             }
         }
 
-        return assembleStructure(listEmpty(), strippedBeforeContent, content, type);
+        return assembleStructure(listEmpty(), strippedBeforeContent, content, type, params);
     }
 
     private static State foldDelimiter(State state, char c, char delimiter) {
@@ -1524,20 +1523,17 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", new StringContext(input)));
     }
 
-    private static Result<String_, CompileError> assembleStructure(List<String_> typeParams, String_ name, String_ content, String_ type) {
+    private static Result<Whitespace, CompileError> assembleStructure(List<String_> typeParams, String_ name, String_ content, String_ type, List<Definition> params) {
         if (typeParams.isEmpty()) {
-            return generateStructureWithTypeParams(name, content, listEmpty(), type);
+            return generateStructureWithTypeParams(name, content, listEmpty(), type, params);
         }
 
         if (!isSymbol(name)) {
             return createSymbolErr(name);
         }
 
-        expanding = expanding.put(name, typeArgs -> {
-            return usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type));
-        });
-
-        return new Ok<>(Strings.empty());
+        expanding = expanding.put(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params)));
+        return new Ok<>(new Whitespace());
     }
 
     private static <T> T usingTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
@@ -1547,39 +1543,45 @@ public class Main {
         return generated;
     }
 
-    private static Result<String_, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type) {
+    private static Result<Whitespace, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type, List<Definition> params) {
         return usingFrames(() -> {
-            frames = frames.withRef(new StructRef(name));
+            frames = frames.withRef(new StructRef(name)).defineAll(params);
+
             if (type.equalsToSlice("enum")) {
                 frames = frames.define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name"));
             }
 
             return parseStatements(content, Main::compileClassSegment)
-                    .flatMapValue(parsed -> generateStructure(name, typeArgs, parsed));
+                    .mapValue(Main::retainDefinitions)
+                    .flatMapValue(definitions -> generateStructure(name, typeArgs, params.addAll(definitions)));
         });
     }
 
-    private static Result<String_, CompileError> generateStructure(
+    private static Result<Whitespace, CompileError> generateStructure(
             String_ name,
             List<Type> typeArgs,
-            List<String_> definitions
+            List<Definition> definitions
     ) {
-        var compiled = generateAll(Main::mergeStatements, definitions);
+        var joinedDefinitions = definitions.iterate()
+                .map(Definition::generate)
+                .collect(new Joiner())
+                .orElse(Strings.empty());
+
         var alias = createAlias(name, typeArgs);
-        var generated = Strings.from("struct " + alias + " {" + compiled + "\n};\n");
+        var generated = Strings.from("struct " + alias + " {" + joinedDefinitions + "\n};\n");
 
         if (frames.findCurrentStructType() instanceof Some(var currentStructType)) {
             structRegistry = structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
-            return new Ok<>(Strings.empty());
+            return new Ok<>(new Whitespace());
         }
         else {
             return new Err<>(new CompileError("We aren't in a struct?", new StringContext(name)));
         }
     }
 
-    private static Result<String_, CompileError> compileClassSegment(String_ input0) {
+    private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
         return orString(input0, Lists.listFrom(
-                whitespace(),
+                type("whitespace", input1 -> parseWhitespace(input1)),
                 type("class", Main::compileClass),
                 type("enum", stripped -> compileStructure("enum ", stripped, Strings.from("enum"))),
                 type("record", stripped -> compileStructure("record ", stripped, Strings.from("?"))),
@@ -1589,17 +1591,17 @@ public class Main {
         ));
     }
 
-    private static Result<String_, CompileError> compileDefinitionStatement(String_ input) {
+    private static Result<Definition, CompileError> compileDefinitionStatement(String_ input) {
         var stripped = input.strip();
         if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
-            return new Ok<>(Strings.from("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";"));
+            return parseDefinition(withoutEnd);
         }
 
         return new Err<>(new CompileError("Not a definition statement", new StringContext(input)));
     }
 
-    private static Result<String_, CompileError> compileMethod(String_ input) {
+    private static Result<Whitespace, CompileError> compileMethod(String_ input) {
         var paramStart = input.indexOfSlice("(");
         if (paramStart < 0) {
             return createInfixErr(input, "(");
@@ -1610,9 +1612,9 @@ public class Main {
         return parseMethodHeader(inputDefinition).flatMapValue(defined -> compileMethodWithDefinition(defined, withParams));
     }
 
-    private static Result<String_, CompileError> compileMethodWithDefinition(Definition definition, String_ withParams) {
+    private static Result<Whitespace, CompileError> compileMethodWithDefinition(Definition definition, String_ withParams) {
         if (!definition.typeParams.isEmpty()) {
-            return new Ok<>(Strings.empty());
+            return new Ok<>(new Whitespace());
         }
 
         functionName = definition.name;
@@ -1626,25 +1628,30 @@ public class Main {
         var params = withParams.sliceTo(paramEnd);
         var withoutParams = withParams.sliceFrom(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
-
-        return parseValues(params, Main::parseParameter).flatMapValue(rawParameters -> {
-            var oldParameters = rawParameters.iterate()
-                    .map(Main::requireDefinition)
-                    .flatMap(Iterators::fromOption)
-                    .collect(new ListCollector<>());
-
+        return parseParameters(params).flatMapValue(oldParameters -> {
             if (!definition.annotations.contains("External", String::equals) && (withBraces.startsWithSlice("{") && withBraces.endsWithSlice("}"))) {
                 var content = withBraces.sliceBetween(1, withBraces.length() - 1);
                 return compileMethodWithParameters(definition, content, oldParameters);
             }
             else {
                 frames = defineMethod(definition, oldParameters);
-                return new Ok<>(Strings.empty());
+                return new Ok<>(new Whitespace());
             }
         });
     }
 
-    private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
+    private static Result<List<Definition>, CompileError> parseParameters(String_ parameters) {
+        return parseValues(parameters, Main::parseParameter).mapValue(Main::retainDefinitions);
+    }
+
+    private static List<Definition> retainDefinitions(List<Parameter> parameters) {
+        return parameters.iterate()
+                .map(Main::requireDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    }
+
+    private static Result<Whitespace, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
         var thisType = frames.findCurrentRef().orElse(new StructRef("this"));
 
         var newParams = Lists.<Definition>listEmpty()
@@ -1676,7 +1683,7 @@ public class Main {
         return frames.define(new Definition(new Functional(paramTypes, type), name));
     }
 
-    private static Result<String_, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
+    private static Result<Whitespace, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
         return assembleMethod(definition, generateValueList(params), content);
     }
 
@@ -1721,11 +1728,11 @@ public class Main {
                 .orElse(Strings.empty());
     }
 
-    private static Result<String_, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
+    private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
         return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
             var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
             generatedMethods = generatedMethods.addLast(generated);
-            return Strings.empty();
+            return new Whitespace();
         });
     }
 
@@ -2549,7 +2556,7 @@ public class Main {
 
         var base = withoutEnd.sliceTo(index).strip();
         var argsString = withoutEnd.sliceFrom(index + "<".length());
-        return parseValues(argsString, Main::getOr).flatMapValue(rawArguments -> {
+        return parseValues(argsString, Main::parseGenericArgument).flatMapValue(rawArguments -> {
             var arguments = rawArguments.iterate()
                     .map(Main::retainTypes)
                     .flatMap(Iterators::fromOption)
@@ -2589,15 +2596,10 @@ public class Main {
         return argument instanceof Type type ? new Some<>(type) : new None<Type>();
     }
 
-    private static Result<Argument, CompileError> getOr(String_ argString) {
+    private static Result<Argument, CompileError> parseGenericArgument(String_ argString) {
         return orString(argString, Lists.listFrom(
-                type("whitespace", input0 -> parseWhitespace(input0)),
-                type("type", new Transformer<String_, Type>() {
-                    @Override
-                    public Result<Type, CompileError> apply(String_ string) {
-                        return parseType(string);
-                    }
-                })
+                type("whitespace", Main::parseWhitespace),
+                type("type", Main::parseType)
         ));
     }
 
