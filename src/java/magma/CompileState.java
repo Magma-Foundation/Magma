@@ -24,26 +24,36 @@ interface CompileState {
 
     Main.String_ joinStructures();
 
+    @Deprecated
     void defineFunction(Main.Definition definition, Main.List<Main.Definition> oldParameters);
 
+    @Deprecated
     void define(Main.Definition name1);
 
     Main.String_ createName(String type);
 
+    @Deprecated
     void withFunctionPrototype(Main.Definition definition);
 
+    @Deprecated
     void defineAll(Main.List<Main.Definition> params);
 
+    @Deprecated
     void withRef(Main.StructPrototype prototype);
 
+    @Deprecated
     void expandGeneric(Main.Generic generic);
 
+    @Deprecated
     void addExpanding(Main.String_ name, Function<Main.List<Main.Type>, Main.Result<Main.Whitespace, Main.CompileError>> listResultFunction);
 
+    @Deprecated
     void registerStruct(Main.StructType type, Main.StructNode node);
 
+    @Deprecated
     void addFunction(Main.String_ function);
 
+    @Deprecated
     void addStatement(Main.String_ statement);
 
     Main.Option<Main.List<Main.String_>> findLastStatements();
