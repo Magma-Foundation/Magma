@@ -10,10 +10,6 @@ class Lists {
         return new JavaList<>();
     }
 
-    public static <T> Main.List<T> listFromArray(T[] array) {
-        return new JavaList<>(Arrays.asList(array));
-    }
-
     public static <T> Main.List<T> listFrom(T... elements) {
         return new JavaList<>(Arrays.asList(elements));
     }
@@ -58,7 +54,7 @@ class Lists {
         }
 
         @Override
-        public Main.Option<T> find(int index) {
+        public Main.Option<T> get(int index) {
             if (index < this.elements.size()) {
                 return new Main.Some<>(this.elements.get(index));
             }
@@ -144,11 +140,23 @@ class Lists {
                     .fold(true, (aBoolean, aBoolean2) -> aBoolean && aBoolean2);
         }
 
+        @Override
+        public Main.Option<Main.Tuple<Main.List<T>, T>> popLast() {
+            if (this.elements.isEmpty()) {
+                return new Main.None<>();
+            }
+
+            var slice = this.elements.subList(0, this.elements.size() - 1);
+            var last = this.elements.getLast();
+
+            return new Main.Some<>(new Main.Tuple<>(new JavaList<>(new ArrayList<>(slice)), last));
+        }
+
         private Main.Option<Main.Tuple<T, T>> createElementPair(Main.Tuple<Integer, T> tuple, Main.List<T> other) {
             var index = tuple.left();
             var thisElement = tuple.right();
 
-            return other.find(index).map(otherElement -> new Main.Tuple<>(thisElement, otherElement));
+            return other.get(index).map(otherElement -> new Main.Tuple<>(thisElement, otherElement));
         }
     }
 }

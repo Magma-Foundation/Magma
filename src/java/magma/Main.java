@@ -45,7 +45,7 @@ public class Main {
 
         Option<Integer> indexOf(T element);
 
-        Option<T> find(int index);
+        Option<T> get(int index);
 
         int size();
 
@@ -66,6 +66,8 @@ public class Main {
         Iterator<T> iterateReversed();
 
         boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator);
+
+        Option<Tuple<List<T>, T>> popLast();
     }
 
     private interface Head<T> {
@@ -107,13 +109,13 @@ public class Main {
 
         String_ sliceBetween(int startInclusive, int endExclusive);
 
-        boolean endsWith(String slice);
+        boolean endsWithSlice(String slice);
 
         boolean equalsToSlice(String slice);
 
         int indexOfOwned(String_ other);
 
-        Option<Integer> lastIndexOf(String slice);
+        Option<Integer> lastIndexOfSlice(String slice);
 
         boolean isEmpty();
 
@@ -403,14 +405,14 @@ public class Main {
 
     private static Result<String_, CompileError> getString_(String_ beforeContent, String_ input, String_ type) {
         var stripped = input.strip();
-        if (!stripped.endsWith("}")) {
+        if (!stripped.endsWithSlice("}")) {
             return createSuffixErr(stripped, "}");
         }
 
         var content = stripped.sliceBetween(0, stripped.length() - "}".length());
 
         var strippedBeforeContent = beforeContent.strip();
-        if (strippedBeforeContent.endsWith(">")) {
+        if (strippedBeforeContent.endsWithSlice(">")) {
             var withoutEnd = strippedBeforeContent.sliceBetween(0, strippedBeforeContent.length() - ">".length());
             var typeParamStart = withoutEnd.indexOfSlice("<");
             if (typeParamStart >= 0) {
@@ -506,7 +508,7 @@ public class Main {
 
     private static Result<String_, CompileError> compileDefinitionStatement(String_ input) {
         var stripped = input.strip();
-        if (stripped.endsWith(";")) {
+        if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceBetween(0, stripped.length() - ";".length());
             return new Ok<>(Strings.from("\n\t" + compileDefinitionOrPlaceholder(withoutEnd) + ";"));
         }
@@ -541,7 +543,7 @@ public class Main {
         var withoutParams = afterParams.sliceFromStart(paramEnd + ")".length());
         var withBraces = withoutParams.strip();
 
-        if (!withBraces.startsWithSlice("{") || !withBraces.endsWith("}")) {
+        if (!withBraces.startsWithSlice("{") || !withBraces.endsWithSlice("}")) {
             return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
         }
 
@@ -707,7 +709,7 @@ public class Main {
 
     private static Result<String_, CompileError> compileStatement(String_ input, int depth) {
         var stripped = input.strip();
-        if (!stripped.endsWith(";")) {
+        if (!stripped.endsWithSlice(";")) {
             return createSuffixErr(stripped, ";");
         }
 
@@ -718,7 +720,7 @@ public class Main {
     private static Result<String_, CompileError> compileBlock(String_ input, int depth) {
         String_ indent = Strings.from("\n").appendOwned(Strings.from("\t").repeat(depth));
         var stripped = input.strip();
-        if (stripped.endsWith("}")) {
+        if (stripped.endsWithSlice("}")) {
             var withoutEnd = stripped.sliceBetween(0, stripped.length() - "}".length());
             var contentStart = withoutEnd.indexOfSlice("{");
             if (contentStart >= 0) {
@@ -921,7 +923,7 @@ public class Main {
     private static Result<String_, CompileError> parseConditional(String_ stripped, String prefix) {
         if (stripped.startsWithSlice(prefix)) {
             var withoutPrefix = stripped.sliceFromStart(prefix.length()).strip();
-            if (withoutPrefix.startsWithSlice("(") && withoutPrefix.endsWith(")")) {
+            if (withoutPrefix.startsWithSlice("(") && withoutPrefix.endsWithSlice(")")) {
                 var condition = withoutPrefix.sliceBetween(1, withoutPrefix.length() - 1);
                 return compileValue(condition)
                         .mapValue(result -> Strings.from(prefix)
@@ -998,7 +1000,7 @@ public class Main {
 
     private static Result<Value, CompileError> parseChar(String_ input) {
         var stripped = input.strip();
-        if (stripped.length() >= 2 && stripped.startsWithSlice("'") && stripped.endsWith("'")) {
+        if (stripped.length() >= 2 && stripped.startsWithSlice("'") && stripped.endsWithSlice("'")) {
             return new Ok<>(new CharValue(stripped.sliceBetween(1, stripped.length() - 1)));
         }
         else {
@@ -1008,7 +1010,7 @@ public class Main {
 
     private static Result<Value, CompileError> parseString_(String_ input) {
         var stripped = input.strip();
-        if (stripped.length() >= 2 && stripped.startsWithSlice("\"") && stripped.endsWith("\"")) {
+        if (stripped.length() >= 2 && stripped.startsWithSlice("\"") && stripped.endsWithSlice("\"")) {
             return new Ok<>(new String_Value(stripped.sliceBetween(1, stripped.length() - 1)));
         }
         else {
@@ -1018,7 +1020,7 @@ public class Main {
 
     private static Result<DataAccess, CompileError> parseDataAccess(String_ input) {
         var stripped = input.strip();
-        var separator = (int) stripped.lastIndexOf(".").orElse(-1);
+        var separator = (int) stripped.lastIndexOfSlice(".").orElse(-1);
         if (separator < 0) {
             return createInfixErr(stripped, ".");
         }
@@ -1069,7 +1071,7 @@ public class Main {
             return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
         }
 
-        if (!beforeArrow.startsWithSlice("(") || !beforeArrow.endsWith(")")) {
+        if (!beforeArrow.startsWithSlice("(") || !beforeArrow.endsWithSlice(")")) {
             return new Err<>(new CompileError("No parentheses present", new StringContext(beforeArrow)));
         }
 
@@ -1097,7 +1099,7 @@ public class Main {
 
     private static Result<Invocation, CompileError> parseInvokable(String_ input) {
         var stripped = input.strip();
-        if (!stripped.endsWith(")")) {
+        if (!stripped.endsWithSlice(")")) {
             return createSuffixErr(stripped, ")");
         }
 
@@ -1235,7 +1237,7 @@ public class Main {
     private static Result<Value, CompileError> getValueCompileErrorResult(List<Type> expectedArgumentsType, Tuple<Integer, String_> input) {
         var index = input.left;
 
-        return expectedArgumentsType.find(index).map(found -> {
+        return expectedArgumentsType.get(index).map(found -> {
             typeStack = typeStack.addLast(found);
             Result<Value, CompileError> parsed = parseValue(input.right);
             typeStack = typeStack.removeLast().map(Tuple::right).orElse(typeStack);
@@ -1251,7 +1253,7 @@ public class Main {
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
-        if (afterArrow.startsWithSlice("{") && afterArrow.endsWith("}")) {
+        if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
             var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
             var name = generateName();
             assembleMethod(new Definition(Primitive.Auto, name), params, content);
@@ -1307,7 +1309,7 @@ public class Main {
 
     private static Result<Definition, CompileError> parseDefinition(String_ input) {
         var stripped = input.strip();
-        return stripped.lastIndexOf(" ").<Result<Definition, CompileError>>map(nameSeparator -> {
+        return stripped.lastIndexOfSlice(" ").<Result<Definition, CompileError>>map(nameSeparator -> {
             var beforeName = stripped.sliceBetween(0, nameSeparator);
             var name = stripped.sliceFromStart(nameSeparator + " ".length());
             if (!isSymbol(name)) {
@@ -1319,9 +1321,32 @@ public class Main {
                 return parseType(beforeName).mapValue(type -> new Definition(type, name));
             }
 
-            var type = divisions.findLast().orElse(null);
-            return parseType(type).mapValue(type1 -> new Definition(type1, name));
+            return divisions.popLast().map(tuple -> {
+                var joined = tuple.left.iterate()
+                        .collect(new Joiner(" "))
+                        .orElse(Strings.empty())
+                        .strip();
+
+                var typeParams = findTypeParams(joined).orElseGet(Lists::listEmpty);
+                typeParameters = typeParams;
+
+                var type = tuple.right;
+                return parseType(type).mapValue(type1 -> new Definition(typeParams, type1, name));
+            }).orElseGet(() -> new Err<>(new CompileError("Insufficient divisions", new StringContext(beforeName))));
         }).orElseGet(() -> createInfixErr(stripped, " "));
+    }
+
+    private static Option<List<String_>> findTypeParams(String_ joined) {
+        if (!joined.endsWithSlice(">")) {
+            return new None<>();
+        }
+
+        var withoutEnd = joined.sliceBetween(0, joined.length() - ">".length());
+        if (!(withoutEnd.lastIndexOfSlice("<") instanceof Some(var typeParamStart))) {
+            return new None<>();
+        }
+
+        return new Some<>(divideAll(withoutEnd.sliceFromStart(typeParamStart + 1), Main::foldValueChar));
     }
 
     private static State foldByTypeSeparator(State state, char c) {
@@ -1341,12 +1366,15 @@ public class Main {
 
     private static Result<Type, CompileError> parseType(String_ input) {
         var stripped = input.strip();
-        var maybeTypeArgument = typeParameters
-                .indexOf(stripped)
-                .flatMap_(typeArguments::find);
-
-        if (maybeTypeArgument instanceof Some(var found)) {
-            return new Ok<>(found);
+        var maybeTypeParam = typeParameters.indexOf(stripped);
+        if (maybeTypeParam instanceof Some(var typeParam)) {
+            var maybeTypeArgument = typeArguments.get(typeParam);
+            if (maybeTypeArgument instanceof Some(var found)) {
+                return new Ok<>(found);
+            }
+            else {
+                return new Ok<>(new TypeParam(typeParameters.get(typeParam).orElse(Strings.empty())));
+            }
         }
 
         switch (stripped.toSlice()) {
@@ -1368,7 +1396,7 @@ public class Main {
             return new Ok<>(new Ref(Primitive.I8));
         }
 
-        if (stripped.endsWith(">")) {
+        if (stripped.endsWithSlice(">")) {
             var withoutEnd = stripped.sliceBetween(0, stripped.length() - ">".length());
             var index = withoutEnd.indexOfSlice("<");
             if (index >= 0) {
@@ -1376,23 +1404,25 @@ public class Main {
                 var substring = withoutEnd.sliceFromStart(index + "<".length());
                 return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
                     if (base.equalsToSlice("Function")) {
-                        var arg0 = parsed.find(0).orElse(null);
-                        var returns = parsed.find(1).orElse(null);
+                        var arg0 = parsed.get(0).orElse(null);
+                        var returns = parsed.get(1).orElse(null);
                         return new Ok<>(new Functional(Lists.listFrom(arg0), returns));
                     }
 
                     if (base.equalsToSlice("BiFunction")) {
-                        var arg0 = parsed.find(0).orElse(null);
-                        var arg1 = parsed.find(1).orElse(null);
-                        var returns = parsed.find(2).orElse(null);
+                        var arg0 = parsed.get(0).orElse(null);
+                        var arg1 = parsed.get(1).orElse(null);
+                        var returns = parsed.get(2).orElse(null);
                         return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
                     }
 
-                    var generic = new Tuple<>(base, parsed);
-                    if (!hasGenericBeenVisited(generic) && expanding.containsKey(base)) {
-                        System.out.println(generic);
-                        visitedExpansions = visitedExpansions.addLast(generic);
-                        expanding.get(base).apply(parsed);
+                    if (parsed.iterate().collect(new AnyMatch<>(type -> type instanceof TypeParam))) {
+                        var generic = new Tuple<>(base, parsed);
+                        if (!hasGenericBeenVisited(generic) && expanding.containsKey(base)) {
+                            System.out.println(generic);
+                            visitedExpansions = visitedExpansions.addLast(generic);
+                            expanding.get(base).apply(parsed);
+                        }
                     }
 
                     return new Ok<>(new StructRef(createAlias(base, parsed)));
@@ -1478,6 +1508,11 @@ public class Main {
         @External
         private record JavaString(String value) implements String_ {
             @Override
+            public String toString() {
+                return this.value;
+            }
+
+            @Override
             public String_ appendSlice(String slice) {
                 return new JavaString(this.value + slice);
             }
@@ -1548,7 +1583,7 @@ public class Main {
             }
 
             @Override
-            public boolean endsWith(String slice) {
+            public boolean endsWithSlice(String slice) {
                 return this.value.endsWith(slice);
             }
 
@@ -1573,7 +1608,7 @@ public class Main {
             }
 
             @Override
-            public Option<Integer> lastIndexOf(String slice) {
+            public Option<Integer> lastIndexOfSlice(String slice) {
                 var index = this.value.lastIndexOf(slice);
                 return index == -1
                         ? new None<>()
@@ -1874,6 +1909,10 @@ public class Main {
     private record Joiner(String_ delimiter) implements Collector<String_, Option<String_>> {
         public Joiner() {
             this(Strings.empty());
+        }
+
+        public Joiner(String delimiter) {
+            this(Strings.from(delimiter));
         }
 
         @Override
@@ -2334,6 +2373,35 @@ public class Main {
             public Iterator<K> keys() {
                 return new Lists.JavaList<>(new ArrayList<>(this.map.keySet())).iterate();
             }
+        }
+    }
+
+    private record AnyMatch<T>(Predicate<T> predicate) implements Collector<T, Boolean> {
+        @Override
+        public Boolean createInitial() {
+            return false;
+        }
+
+        @Override
+        public Boolean fold(Boolean current, T element) {
+            return current || this.predicate.test(element);
+        }
+    }
+
+    private record TypeParam(String_ value) implements Type {
+        @Override
+        public String_ stringify() {
+            return this.value;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof TypeParam param && this.value.equalsTo(param.value);
+        }
+
+        @Override
+        public String_ generate() {
+            return this.value;
         }
     }
 }
