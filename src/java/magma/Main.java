@@ -215,7 +215,7 @@ public class Main {
 
     private record ImmutableFrames(List<Frame> frames) implements Frames {
         public ImmutableFrames() {
-            this(Lists.listEmpty());
+            this(listEmpty());
         }
 
         @Override
@@ -667,11 +667,11 @@ public class Main {
             String_ name
     ) implements Parameter {
         public Definition(Type type, String name) {
-            this(Lists.listEmpty(), Lists.listEmpty(), type, Strings.from(name));
+            this(listEmpty(), listEmpty(), type, Strings.from(name));
         }
 
         public Definition(Type type, String_ name) {
-            this(Lists.listEmpty(), Lists.listEmpty(), type, name);
+            this(listEmpty(), listEmpty(), type, name);
         }
 
         @Override
@@ -1062,7 +1062,7 @@ public class Main {
 
     private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
         public Frame() {
-            this(Lists.listEmpty());
+            this(listEmpty());
         }
 
         public Frame(List<Definition> definitions) {
@@ -1189,6 +1189,13 @@ public class Main {
             return other instanceof Generic generic
                     && this.base.equalsTo(generic.base)
                     && this.args.equalsTo(generic.args, Type::equalsTo);
+        }
+    }
+
+    private record NumberValue(String_ value) implements Value {
+        @Override
+        public String_ generate() {
+            return this.value;
         }
     }
 
@@ -1482,7 +1489,7 @@ public class Main {
 
         var paramStart = withoutImplements.indexOfSlice("(");
         if (paramStart < 0) {
-            return parseStructureWithBeforeContent(withContentEnd, type, withoutImplements, Lists.listEmpty())
+            return parseStructureWithBeforeContent(withContentEnd, type, withoutImplements, listEmpty())
                     .mapErr(err -> new CompileError("Failed to parse structure without params", new StringContext(input), Lists.listFrom(err)));
         }
 
@@ -1930,6 +1937,7 @@ public class Main {
             case Symbol symbol -> resolveSymbol(symbol);
             case Whitespace _ -> new Ok<>(Primitive.Void);
             case DataAccess dataAccess -> resolveDataAccess(dataAccess);
+            case NumberValue _ -> new Ok<>(Primitive.I32);
         };
     }
 
@@ -2166,7 +2174,7 @@ public class Main {
     private static Result<Value, CompileError> parseNumber(String_ input) {
         var stripped = input.strip();
         if (isNumber(stripped)) {
-            return new Ok<>(new Symbol(stripped));
+            return new Ok<>(new NumberValue(stripped));
         }
         else {
             return new Err<>(new CompileError("Not a number", new StringContext(stripped)));
