@@ -202,6 +202,9 @@ public class Main {
         Frames withRef(StructRef ref);
     }
 
+    private interface Transformer<T, R> extends Function<T, Result<R, CompileError>> {
+    }
+
     private record ApplicationError(Error error) implements Error {
         @Override
         public String_ display() {
@@ -1258,11 +1261,11 @@ public class Main {
 
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
+    private static List<Generic> visitedExpansions = listEmpty();
     private static List<List<String_>> generatedStatements = listEmpty();
     private static List<String_> generatedMethods = listEmpty();
     private static Map_<Generic, Tuple<StructType, String_>> structRegistry = Maps.empty();
     private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
-    private static List<Generic> visitedExpansions = listEmpty();
     private static Frames frames = new ImmutableFrames();
     private static String_ functionName = Strings.empty();
     private static List<Tuple<List<String_>, List<Type>>> typeParamStack = listEmpty();
@@ -1742,7 +1745,7 @@ public class Main {
     }
 
     private static Result<Parameter, CompileError> parseParameter(String_ input) {
-        var lists = Lists.<Function<String_, Result<Parameter, CompileError>>>listFrom(
+        var lists = Lists.<Transformer<String_, Parameter>>listFrom(
                 type("?", Main::parseWhitespace),
                 type("?", Main::parseDefinition)
         );
@@ -1750,25 +1753,25 @@ public class Main {
         return orString(input, lists);
     }
 
-    private static <R> Result<R, CompileError> orString(String_ input, List<Function<String_, Result<R, CompileError>>> lists) {
+    private static <R> Result<R, CompileError> orString(String_ input, List<Transformer<String_, R>> lists) {
         return or(input, new StringContext(input), lists);
     }
 
-    private static <T, R> Result<R, CompileError> or(T input, Context context, List<Function<T, Result<R, CompileError>>> lists) {
+    private static <T, R> Result<R, CompileError> or(T input, Context context, List<Transformer<T, R>> lists) {
         return lists.iterate()
                 .fold(new OrState<R>(), (tOrState, mapper) -> foldOr(input, tOrState, mapper))
                 .toResult()
                 .mapErr(errs -> new CompileError("No valid combinations present", context, errs));
     }
 
-    private static <T, R> OrState<R> foldOr(T input, OrState<R> state, Function<T, Result<R, CompileError>> mapper) {
+    private static <T, R> OrState<R> foldOr(T input, OrState<R> state, Transformer<T, R> mapper) {
         if (state.maybeValue.isPresent()) {
             return state;
         }
         return mapper.apply(input).match(state::withValue, state::withError);
     }
 
-    private static <B, T extends B> Function<String_, Result<B, CompileError>> type(String type, Function<String_, Result<T, CompileError>> parser) {
+    private static <B, T extends B> Transformer<String_, B> type(String type, Transformer<String_, T> parser) {
         return input0 -> parser.apply(input0)
                 .<B>mapValue(value -> value)
                 .mapErr(err -> {
@@ -1799,7 +1802,7 @@ public class Main {
         ));
     }
 
-    private static Function<String_, Result<String_, CompileError>> whitespace() {
+    private static Transformer<String_, String_> whitespace() {
         return type("whitespace", input0 -> parseWhitespace(input0).mapValue(Whitespace::generate));
     }
 
@@ -2041,7 +2044,7 @@ public class Main {
     }
 
     private static Result<Value, CompileError> parseValue(String_ input) {
-        List<Function<String_, Result<Value, CompileError>>> rules = Lists.listFrom(
+        List<Transformer<String_, Value>> rules = Lists.listFrom(
                 type("whitespace", Main::parseWhitespace),
                 type("boolean", Main::parseBoolean),
                 type("switch", Main::parseSwitch),
@@ -2072,7 +2075,7 @@ public class Main {
         return createPrefixErr(stripped, "switch");
     }
 
-    private static Function<String_, Result<Value, CompileError>> parseOperator(Operator operator) {
+    private static Transformer<String_, Value> parseOperator(Operator operator) {
         return input -> {
             var representation = operator.representation;
             var stripped = input.strip();
@@ -2234,6 +2237,7 @@ public class Main {
                 return assembleInvokable(parsedCaller, arguments, listEmpty());
             });
         }
+
         return createPrefixErr(callerString_, "new ");
     }
 
@@ -2509,17 +2513,82 @@ public class Main {
     }
 
     private static Result<Type, CompileError> parseType(String_ input) {
+        return Main.orString(input, Lists.listFrom(
+                type("type-param", Main::parseTypeParam),
+                type("primitive", Main::parsePrimitive),
+                type("string", Main::parseStringType),
+                type("generic", Main::parseGeneric),
+                type("symbol-type", Main::parseSymbolType)
+        ));
+    }
+
+    private static Result<Type, CompileError> parseSymbolType(String_ input) {
         var stripped = input.strip();
-        if (findTypeParamEntryInStack(stripped) instanceof Some(var typeParamEntry)) {
-            var typeParam = typeParamEntry.left;
-            var maybeTypeArgument = typeParamEntry.right;
-            if (maybeTypeArgument instanceof Some(var found)) {
-                return new Ok<>(found);
-            }
-            return new Ok<>(new TypeParam(typeParam));
+        if (isSymbol(stripped)) {
+            return new Ok<>(new StructRef(stripped));
+        }
+        else {
+            return new Err<>(new CompileError("Not a symbol", new StringContext(stripped)));
+        }
+    }
+
+    private static Result<Type, CompileError> parseGeneric(String_ input) {
+        var stripped = input.strip();
+        if (!stripped.endsWithSlice(">")) {
+            return createSuffixErr(stripped, ">");
         }
 
-        switch (stripped.toSlice()) {
+        var withoutEnd = stripped.sliceTo(stripped.length() - ">".length());
+        var index = withoutEnd.indexOfSlice("<");
+        if (index < 0) {
+            return createInfixErr(withoutEnd, "<");
+        }
+
+        var base = withoutEnd.sliceTo(index).strip();
+        var substring = withoutEnd.sliceFrom(index + "<".length());
+        return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
+            if (base.equalsToSlice("Consumer")) {
+                var arg0 = parsed.get(0).orElse(null);
+                return new Ok<>(new Functional(Lists.listFrom(arg0), Primitive.Void));
+            }
+
+            if (base.equalsToSlice("Function")) {
+                var arg0 = parsed.get(0).orElse(null);
+                var returns = parsed.get(1).orElse(null);
+                return new Ok<>(new Functional(Lists.listFrom(arg0), returns));
+            }
+
+            if (base.equalsToSlice("BiFunction")) {
+                var arg0 = parsed.get(0).orElse(null);
+                var arg1 = parsed.get(1).orElse(null);
+                var returns = parsed.get(2).orElse(null);
+                return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
+            }
+
+            var generic = new Generic(base, parsed);
+            if (!generic.hasTypeParams()) {
+                if (!visitedExpansions.contains(generic, Generic::equalsTo) && expanding.containsKey(base)) {
+                    visitedExpansions = visitedExpansions.addLast(generic);
+                    expanding.get(base).apply(parsed);
+                }
+            }
+
+            return new Ok<>(generic);
+        });
+    }
+
+    private static Result<Type, CompileError> parseStringType(String_ input) {
+        if (input.strip().equalsToSlice("String_")) {
+            return new Ok<>(new Ref(Primitive.I8));
+        }
+        else {
+            return new Err<>(new CompileError("Not a string", new StringContext(input)));
+        }
+    }
+
+    private static Result<Primitive, CompileError> parsePrimitive(String_ input) {
+        var string_ = input.strip();
+        switch (string_.toSlice()) {
             case "int", "Integer", "boolean", "Boolean" -> {
                 return new Ok<>(Primitive.I32);
             }
@@ -2534,53 +2603,21 @@ public class Main {
             }
         }
 
-        if (stripped.equalsToSlice("String_")) {
-            return new Ok<>(new Ref(Primitive.I8));
-        }
+        return new Err<>(new CompileError("Not a primitive", new StringContext(input)));
+    }
 
-        if (stripped.endsWithSlice(">")) {
-            var withoutEnd = stripped.sliceTo(stripped.length() - ">".length());
-            var index = withoutEnd.indexOfSlice("<");
-            if (index >= 0) {
-                var base = withoutEnd.sliceTo(index).strip();
-                var substring = withoutEnd.sliceFrom(index + "<".length());
-                return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
-                    if (base.equalsToSlice("Consumer")) {
-                        var arg0 = parsed.get(0).orElse(null);
-                        return new Ok<>(new Functional(Lists.listFrom(arg0), Primitive.Void));
-                    }
-
-                    if (base.equalsToSlice("Function")) {
-                        var arg0 = parsed.get(0).orElse(null);
-                        var returns = parsed.get(1).orElse(null);
-                        return new Ok<>(new Functional(Lists.listFrom(arg0), returns));
-                    }
-
-                    if (base.equalsToSlice("BiFunction")) {
-                        var arg0 = parsed.get(0).orElse(null);
-                        var arg1 = parsed.get(1).orElse(null);
-                        var returns = parsed.get(2).orElse(null);
-                        return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
-                    }
-
-                    var generic = new Generic(base, parsed);
-                    if (!generic.hasTypeParams()) {
-                        if (!visitedExpansions.contains(generic, Generic::equalsTo) && expanding.containsKey(base)) {
-                            visitedExpansions = visitedExpansions.addLast(generic);
-                            expanding.get(base).apply(parsed);
-                        }
-                    }
-
-                    return new Ok<>(generic);
-                });
+    private static Result<Type, CompileError> parseTypeParam(String_ input) {
+        var stripped = input.strip();
+        if (findTypeParamEntryInStack(stripped) instanceof Some(var typeParamEntry)) {
+            var typeParam = typeParamEntry.left;
+            var maybeTypeArgument = typeParamEntry.right;
+            if (maybeTypeArgument instanceof Some(var found)) {
+                return new Ok<>(found);
             }
+            return new Ok<>(new TypeParam(typeParam));
         }
 
-        if (isSymbol(stripped)) {
-            return new Ok<>(new StructRef(stripped));
-        }
-
-        return new Err<>(new CompileError("Not a valid type", new StringContext(input)));
+        return new Err<>(new CompileError("Not a type param", new StringContext(stripped)));
     }
 
     private static Option<Tuple<String_, Option<Type>>> findTypeParamEntryInStack(String_ typeParamValue) {
