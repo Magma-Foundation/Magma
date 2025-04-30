@@ -97,11 +97,11 @@ public class Main {
 
         boolean isBlank();
 
-        boolean startsWith(String slice);
+        boolean startsWithSlice(String slice);
 
         int indexOfSlice(String slice);
 
-        String_ substring(int startInclusive);
+        String_ sliceFromStart(int startInclusive);
 
         String_ substring(int startInclusive, int endExclusive);
 
@@ -342,7 +342,7 @@ public class Main {
     }
 
     private static Result<String_, CompileError> compileNamespaced(String_ input) {
-        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+        if (input.strip().startsWithSlice("package ") || input.strip().startsWithSlice("import ")) {
             return new Ok<>(Strings.empty());
         }
         else {
@@ -358,11 +358,11 @@ public class Main {
         var classIndex = input.indexOfSlice(infix);
         if (classIndex >= 0) {
             var beforeInfix = input.substring(0, classIndex).strip();
-            if (beforeInfix.startsWith("@External")) {
+            if (beforeInfix.startsWithSlice("@External")) {
                 return new Ok<>(Strings.empty());
             }
 
-            var afterClass = input.substring(classIndex + infix.length());
+            var afterClass = input.sliceFromStart(classIndex + infix.length());
             var contentStart = afterClass.indexOfSlice("{");
             if (contentStart >= 0) {
                 var beforeContent = afterClass.substring(0, contentStart).strip();
@@ -378,7 +378,7 @@ public class Main {
                         : withoutPermits;
 
                 var paramStart = withoutImplements.indexOfSlice("(");
-                var withEnd = afterClass.substring(contentStart + "{".length()).strip();
+                var withEnd = afterClass.sliceFromStart(contentStart + "{".length()).strip();
                 if (paramStart >= 0) {
                     String_ withoutParams = withoutImplements.substring(0, paramStart).strip();
                     return getString_(withoutParams, withEnd, type);
@@ -406,7 +406,7 @@ public class Main {
             var typeParamStart = withoutEnd.indexOfSlice("<");
             if (typeParamStart >= 0) {
                 var name = withoutEnd.substring(0, typeParamStart).strip();
-                var substring = withoutEnd.substring(typeParamStart + "<".length());
+                var substring = withoutEnd.sliceFromStart(typeParamStart + "<".length());
 
                 var typeParameters = divideAll(substring, Main::foldDelimiter);
                 return assembleStructure(typeParameters, name, content, type);
@@ -523,17 +523,17 @@ public class Main {
                 functionLocalCounter = 0;
             }
 
-            var afterParams = input.substring(paramStart + "(".length());
+            var afterParams = input.sliceFromStart(paramStart + "(".length());
             var paramEnd = afterParams.indexOfSlice(")");
             if (paramEnd < 0) {
                 return createInfixErr(afterParams, ")");
             }
 
             var params = afterParams.substring(0, paramEnd);
-            var withoutParams = afterParams.substring(paramEnd + ")".length());
+            var withoutParams = afterParams.sliceFromStart(paramEnd + ")".length());
             var withBraces = withoutParams.strip();
 
-            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            if (!withBraces.startsWithSlice("{") || !withBraces.endsWith("}")) {
                 return new Err<>(new CompileError("No braces present", new StringContext(withBraces)));
             }
 
@@ -706,7 +706,7 @@ public class Main {
             var contentStart = withoutEnd.indexOfSlice("{");
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.substring(0, contentStart);
-                var content = withoutEnd.substring(contentStart + "{".length());
+                var content = withoutEnd.sliceFromStart(contentStart + "{".length());
                 return compileBeforeBlock(beforeBlock).flatMapValue(result -> parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
                         .mapValue(outputContent -> indent.appendOwned(result)
                                 .appendSlice("{")
@@ -721,6 +721,7 @@ public class Main {
 
     private static Result<String_, CompileError> compileStatementValue(String_ input) {
         return or(input, Lists.listFrom(
+                whitespace(),
                 type("break", Main::compileBreak),
                 type("return ", Main::compileReturn),
                 type("assignment", Main::compileAssignment),
@@ -735,7 +736,7 @@ public class Main {
             return createInfixErr(stripped, "=");
         }
         var assignableString_ = stripped.substring(0, valueSeparator);
-        var valueString_ = stripped.substring(valueSeparator + "=".length());
+        var valueString_ = stripped.sliceFromStart(valueSeparator + "=".length());
 
         return parseAssignable(assignableString_).and(() -> parseValue(valueString_)).flatMapValue(tuple -> {
             var assignable = tuple.left;
@@ -759,8 +760,8 @@ public class Main {
 
     private static Result<String_, CompileError> compileReturn(String_ input) {
         var stripped = input.strip();
-        if (stripped.startsWith("return ")) {
-            var slice = stripped.substring("return ".length());
+        if (stripped.startsWithSlice("return ")) {
+            var slice = stripped.sliceFromStart("return ".length());
             return compileValue(slice).mapValue(value -> Strings.from("return ").appendOwned(value));
         }
 
@@ -901,9 +902,9 @@ public class Main {
     }
 
     private static Result<String_, CompileError> parseConditional(String_ stripped, String prefix) {
-        if (stripped.startsWith(prefix)) {
-            var withoutPrefix = stripped.substring(prefix.length()).strip();
-            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+        if (stripped.startsWithSlice(prefix)) {
+            var withoutPrefix = stripped.sliceFromStart(prefix.length()).strip();
+            if (withoutPrefix.startsWithSlice("(") && withoutPrefix.endsWith(")")) {
                 var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
                 return compileValue(condition)
                         .mapValue(result -> Strings.from(prefix)
@@ -923,6 +924,7 @@ public class Main {
         List<Function<String_, Result<Value, CompileError>>> rules = Lists.listFrom(
                 type("whitespace", Main::parseWhitespace),
                 type("boolean", Main::parseBoolean),
+                type("switch", Main::parseSwitch),
                 type("lambda", Main::parseLambda),
                 type("invokable", Main::parseInvokable),
                 type("symbol", Main::parseSymbol),
@@ -940,6 +942,16 @@ public class Main {
         return or(input, rules.addAll(operatorRules));
     }
 
+    private static Result<Value, CompileError> parseSwitch(String_ input) {
+        var stripped = input.strip();
+        if (stripped.startsWithSlice("switch")) {
+            var name = generateName();
+            return new Ok<>(new Symbol(name));
+        }
+
+        return createPrefixErr(stripped, "switch");
+    }
+
     private static Function<String_, Result<Value, CompileError>> parseOperator(Operator operator) {
         return input -> {
             var representation = operator.representation;
@@ -950,7 +962,7 @@ public class Main {
             }
 
             var leftString_ = stripped.substring(0, operatorIndex);
-            var rightString_ = stripped.substring(operatorIndex + representation.length());
+            var rightString_ = stripped.sliceFromStart(operatorIndex + representation.length());
             return parseValue(leftString_)
                     .and(() -> parseValue(rightString_))
                     .mapValue(tuple -> new Operation(tuple.left, operator, tuple.right));
@@ -959,8 +971,8 @@ public class Main {
 
     private static Result<Value, CompileError> parseNot(String_ input) {
         var stripped = input.strip();
-        if (stripped.startsWith("!")) {
-            return parseValue(input.substring(1)).mapValue(Not::new);
+        if (stripped.startsWithSlice("!")) {
+            return parseValue(input.sliceFromStart(1)).mapValue(Not::new);
         }
         else {
             return createPrefixErr(stripped, "!");
@@ -969,7 +981,7 @@ public class Main {
 
     private static Result<Value, CompileError> parseChar(String_ input) {
         var stripped = input.strip();
-        if (stripped.length() >= 2 && stripped.startsWith("'") && stripped.endsWith("'")) {
+        if (stripped.length() >= 2 && stripped.startsWithSlice("'") && stripped.endsWith("'")) {
             return new Ok<>(new CharValue(stripped.substring(1, stripped.length() - 1)));
         }
         else {
@@ -979,7 +991,7 @@ public class Main {
 
     private static Result<Value, CompileError> parseString_(String_ input) {
         var stripped = input.strip();
-        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+        if (stripped.length() >= 2 && stripped.startsWithSlice("\"") && stripped.endsWith("\"")) {
             return new Ok<>(new String_Value(stripped.substring(1, stripped.length() - 1)));
         }
         else {
@@ -995,7 +1007,7 @@ public class Main {
         }
 
         var parent = stripped.substring(0, separator);
-        var property = stripped.substring(separator + ".".length()).strip();
+        var property = stripped.sliceFromStart(separator + ".".length()).strip();
         if (!isSymbol(property)) {
             return createSymbolErr(property);
         }
@@ -1035,12 +1047,12 @@ public class Main {
         }
 
         var beforeArrow = stripped.substring(0, arrowIndex).strip();
-        var afterArrow = stripped.substring(arrowIndex + "->".length()).strip();
+        var afterArrow = stripped.sliceFromStart(arrowIndex + "->".length()).strip();
         if (isSymbol(beforeArrow)) {
             return assembleLambda(afterArrow, Lists.listFrom(beforeArrow));
         }
 
-        if (!beforeArrow.startsWith("(") || !beforeArrow.endsWith(")")) {
+        if (!beforeArrow.startsWithSlice("(") || !beforeArrow.endsWith(")")) {
             return new Err<>(new CompileError("No parentheses present", new StringContext(beforeArrow)));
         }
 
@@ -1082,8 +1094,8 @@ public class Main {
         var callerString_ = joined.substring(0, joined.length() - ")".length());
         var arguments = divisions.findLast().orElse(null);
 
-        if (callerString_.startsWith("new ")) {
-            String_ withoutPrefix = callerString_.substring("new ".length());
+        if (callerString_.startsWithSlice("new ")) {
+            String_ withoutPrefix = callerString_.sliceFromStart("new ".length());
             return parseType(withoutPrefix).flatMapValue(type -> {
                 var parsedCaller = new Symbol(Strings.from("new_").appendOwned(type.stringify()));
                 return assembleInvokable(parsedCaller, arguments, listEmpty());
@@ -1204,7 +1216,7 @@ public class Main {
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
-        if (afterArrow.startsWith("{") && afterArrow.endsWith("}")) {
+        if (afterArrow.startsWithSlice("{") && afterArrow.endsWith("}")) {
             var content = afterArrow.substring(1, afterArrow.length() - 1);
             var name = generateName();
             assembleMethod(new Definition(Primitive.Auto, name), params, content);
@@ -1266,7 +1278,7 @@ public class Main {
         }
 
         var beforeName = stripped.substring(0, nameSeparator);
-        var name = stripped.substring(nameSeparator + " ".length());
+        var name = stripped.sliceFromStart(nameSeparator + " ".length());
         if (!isSymbol(name)) {
             return new Err<>(new CompileError("Not a symbol", new StringContext(name)));
         }
@@ -1329,7 +1341,7 @@ public class Main {
             var index = withoutEnd.indexOfSlice("<");
             if (index >= 0) {
                 var base = withoutEnd.substring(0, index).strip();
-                var substring = withoutEnd.substring(index + "<".length());
+                var substring = withoutEnd.sliceFromStart(index + "<".length());
                 return parseValues(substring, Main::parseType).flatMapValue(parsed -> {
                     if (base.equalsToSlice("Function")) {
                         var arg0 = parsed.find(0).orElse(null);
@@ -1477,7 +1489,7 @@ public class Main {
             }
 
             @Override
-            public boolean startsWith(String slice) {
+            public boolean startsWithSlice(String slice) {
                 return this.value.startsWith(slice);
             }
 
@@ -1487,7 +1499,7 @@ public class Main {
             }
 
             @Override
-            public String_ substring(int startInclusive) {
+            public String_ sliceFromStart(int startInclusive) {
                 return new JavaString(this.value.substring(startInclusive));
             }
 
