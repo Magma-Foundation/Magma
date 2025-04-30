@@ -185,9 +185,9 @@ public class Main {
 
         Option<StructType> findCurrentStructType();
 
-        Iterator<Definition> streamDefined();
+        Iterator<Definition> iterDefinitions();
 
-        Option<StructRef> findCurrentRef();
+        Option<StructPrototype> findCurrentRef();
 
         Frames defineAll(List<Definition> definitions);
 
@@ -197,13 +197,79 @@ public class Main {
 
         Frames enter();
 
-        Frames withRef(StructRef ref);
+        Frames withRef(StructPrototype ref);
     }
 
     private interface Transformer<T, R> extends Function<T, Result<R, CompileError>> {
     }
 
     private interface Argument extends Node {
+    }
+
+    private interface CompileState {
+        Option<Tuple<String_, Option<Type>>> lookupTypeParam(String_ typeParamValue);
+
+        Option<Type> findTypeByName(String name);
+
+        Option<StructPrototype> getCurrentRef();
+
+        Option<StructType> getCurrentStructType();
+
+        String_ joinFunctions();
+
+        String_ joinStructures();
+
+        void defineFunction(Definition definition, List<Definition> oldParameters);
+
+        void define(Definition name1);
+
+        void enterFrames();
+
+        void exitFrames();
+
+        String_ createName(String type);
+
+        void exitTypeStack();
+
+        void enterTypeStack(Type found);
+
+        void enterTypeParams(List<String_> typeParams, List<Type> typeArgs);
+
+        void exitTypeParams();
+
+        void withFunctionPrototype(Definition definition);
+
+        void defineAll(List<Definition> params);
+
+        void withRef(StructPrototype prototype);
+
+        void expandGeneric(Generic generic);
+
+        boolean hasVisited(Generic generic);
+
+        void addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction);
+
+        void registerStruct(StructType type, StructNode node);
+
+        void addFunction(String_ function);
+
+        void addStatement(String_ statement);
+
+        void exitStatements();
+
+        void enter();
+
+        Option<List<String_>> findLastStatements();
+
+        Option<StructType> findCurrentStructType();
+
+        Iterator<Definition> iterDefinitions();
+
+        Option<StructType> findStructType(Generic generic);
+
+        Iterator<Generic> stream();
+
+        Option<Type> findLastType();
     }
 
     private record ApplicationError(Error error) implements Error {
@@ -235,14 +301,14 @@ public class Main {
         }
 
         @Override
-        public Iterator<Definition> streamDefined() {
+        public Iterator<Definition> iterDefinitions() {
             return this.frames.iterate()
                     .map(Frame::definitions)
                     .flatMap(List::iterate);
         }
 
         @Override
-        public Option<StructRef> findCurrentRef() {
+        public Option<StructPrototype> findCurrentRef() {
             return this.streamReversedFrames()
                     .map(frame -> frame.maybeRef)
                     .flatMap(Iterators::fromOption)
@@ -270,7 +336,7 @@ public class Main {
         }
 
         @Override
-        public Frames withRef(StructRef ref) {
+        public Frames withRef(StructPrototype ref) {
             return new ImmutableFrames(this.frames.mapLast(last -> last.withRef(ref)));
         }
 
@@ -880,8 +946,8 @@ public class Main {
         }
     }
 
-    private record StructRef(String_ name) implements Type {
-        public StructRef(String name) {
+    private record StructPrototype(String_ name) implements Type {
+        public StructPrototype(String name) {
             this(Strings.from(name));
         }
 
@@ -902,7 +968,7 @@ public class Main {
 
         @Override
         public boolean equalsTo(Type other) {
-            return other instanceof StructRef ref && this.name.equalsTo(ref.name);
+            return other instanceof StructPrototype ref && this.name.equalsTo(ref.name);
         }
     }
 
@@ -1060,7 +1126,7 @@ public class Main {
         }
     }
 
-    private record Frame(Option<StructRef> maybeRef, List<Definition> definitions) {
+    private record Frame(Option<StructPrototype> maybeRef, List<Definition> definitions) {
         public Frame() {
             this(listEmpty());
         }
@@ -1081,7 +1147,7 @@ public class Main {
             return new Frame(this.maybeRef, this.definitions.addLast(definition));
         }
 
-        public Frame withRef(StructRef ref) {
+        public Frame withRef(StructPrototype ref) {
             return new Frame(new Some<>(ref), this.definitions);
         }
     }
@@ -1211,11 +1277,11 @@ public class Main {
         }
     }
 
-    private static class CompileState {
-        public static final CompileState INSTANCE = new CompileState();
+    private static class MutableCompileState implements CompileState {
+        public static final CompileState INSTANCE = new MutableCompileState();
         private List<Generic> visitedExpansions = listEmpty();
         private List<List<String_>> generatedStatements = listEmpty();
-        private List<String_> generatedMethods = listEmpty();
+        private List<String_> generatedFunctions = listEmpty();
         private Map_<Generic, Tuple<StructType, String_>> structRegistry = Maps.empty();
         private Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> expanding = Maps.empty();
         private Frames frames = new ImmutableFrames();
@@ -1224,52 +1290,196 @@ public class Main {
         private int functionLocalCounter = 0;
         private List<Type> typeStack = listEmpty();
 
-        private void addMethod(String_ generated) {
-            this.generatedMethods = this.generatedMethods.addLast(generated);
+        @Override
+        public Option<Tuple<String_, Option<Type>>> lookupTypeParam(String_ typeParamValue) {
+            return this.typeParamStack.iterateReversed()
+                    .flatMap(element -> this.lookupTypeParam0(typeParamValue, element))
+                    .next();
         }
 
-        private void addStatement(String_ statement) {
+        private Iterator<Tuple<String_, Option<Type>>> lookupTypeParam0(String_ typeParamValue, Tuple<List<String_>, List<Type>> element) {
+            return element.left.iterateWithIndices()
+                    .filter(entry -> entry.right.equalsTo(typeParamValue))
+                    .map(entry -> new Tuple<>(entry.right, element.right.get(entry.left)));
+        }
+
+        @Override
+        public Option<Type> findTypeByName(String name) {
+            return this.frames.findTypeByName(name);
+        }
+
+        @Override
+        public Option<StructPrototype> getCurrentRef() {
+            return this.frames.findCurrentRef();
+        }
+
+        @Override
+        public Option<StructType> getCurrentStructType() {
+            return this.frames.findCurrentStructType();
+        }
+
+        @Override
+        public String_ joinFunctions() {
+            return join(this.generatedFunctions);
+        }
+
+        @Override
+        public String_ joinStructures() {
+            return this.structRegistry.values()
+                    .map(Tuple::right)
+                    .collect(new Joiner())
+                    .orElse(Strings.empty());
+        }
+
+        @Override
+        public void defineFunction(Definition definition, List<Definition> oldParameters) {
+            var type = definition.type;
+            var name = definition.name;
+
+            var paramTypes = oldParameters.iterate()
+                    .map(Definition::type)
+                    .collect(new ListCollector<>());
+
+            this.frames = this.frames.define(new Definition(new Functional(paramTypes, type), name));
+        }
+
+        @Override
+        public void define(Definition name1) {
+            this.frames = this.frames.define(name1);
+        }
+
+        @Override
+        public void enterFrames() {
+            this.frames = this.frames.enter();
+        }
+
+        @Override
+        public void exitFrames() {
+            this.frames = this.frames.exit();
+        }
+
+        @Override
+        public String_ createName(String type) {
+            var name = this.functionName.appendSlice("_" + type).appendSlice(String.valueOf(this.functionLocalCounter));
+            this.functionLocalCounter = this.functionLocalCounter + 1;
+            return name;
+        }
+
+        @Override
+        public void exitTypeStack() {
+            this.typeStack = this.typeStack.removeLast().map(Tuple::right).orElse(this.typeStack);
+        }
+
+        @Override
+        public void enterTypeStack(Type found) {
+            this.typeStack = this.typeStack.addLast(found);
+        }
+
+        @Override
+        public void enterTypeParams(List<String_> typeParams, List<Type> typeArgs) {
+            this.typeParamStack = this.typeParamStack.addLast(new Tuple<>(typeParams, typeArgs));
+        }
+
+        @Override
+        public void exitTypeParams() {
+            this.typeParamStack = this.typeParamStack.removeLast().map(Tuple::right).orElse(this.typeParamStack);
+        }
+
+        @Override
+        public void withFunctionPrototype(Definition definition) {
+            this.functionName = definition.name;
+            this.functionLocalCounter = 0;
+        }
+
+        @Override
+        public void defineAll(List<Definition> params) {
+            this.frames = this.frames.defineAll(params);
+        }
+
+        @Override
+        public void withRef(StructPrototype prototype) {
+            this.frames = this.frames.withRef(prototype);
+        }
+
+        @Override
+        public void expandGeneric(Generic generic) {
+            if (!this.hasVisited(generic) && this.expanding.containsKey(generic.base)) {
+                this.visitedExpansions = this.visitedExpansions.addLast(generic);
+                this.expanding.get(generic.base).apply(generic.args);
+            }
+        }
+
+        @Override
+        public boolean hasVisited(Generic generic) {
+            return this.visitedExpansions.contains(generic, Generic::equalsTo);
+        }
+
+        @Override
+        public void addExpanding(String_ name, Function<List<Type>, Result<Whitespace, CompileError>> listResultFunction) {
+            this.expanding = this.expanding.put(name, listResultFunction);
+        }
+
+        @Override
+        public void registerStruct(StructType type, StructNode node) {
+            var generated = node.generate();
+            var key = new Generic(node.name, node.typeParams);
+            var value = new Tuple<StructType, String_>(type, generated);
+            this.structRegistry = this.structRegistry.put(key, value);
+        }
+
+        @Override
+        public void addFunction(String_ function) {
+            this.generatedFunctions = this.generatedFunctions.addLast(function);
+        }
+
+        @Override
+        public void addStatement(String_ statement) {
             this.generatedStatements = this.generatedStatements.mapLast(last -> last.addLast(statement));
         }
 
-        private void exit() {
+        @Override
+        public void exitStatements() {
             this.generatedStatements = this.generatedStatements.removeLast().map(Tuple::right).orElse(this.generatedStatements);
         }
 
-        private void enter() {
+        @Override
+        public void enter() {
             this.generatedStatements = this.generatedStatements.addLast(listEmpty());
         }
 
-        public void setStructRegistry(Map_<Generic, Tuple<StructType, String_>> structRegistry) {
-            this.structRegistry = structRegistry;
+        @Override
+        public Option<List<String_>> findLastStatements() {
+            return this.generatedStatements.findLast();
         }
 
-        public void setExpanding(Map_<String_, Function<List<Type>, Result<Whitespace, CompileError>>> expanding) {
-            this.expanding = expanding;
+        @Override
+        public Option<StructType> findCurrentStructType() {
+            return this.frames.findCurrentStructType();
         }
 
-        public void setFrames(Frames frames) {
-            this.frames = frames;
+        @Override
+        public Iterator<Definition> iterDefinitions() {
+            return this.frames.iterDefinitions();
         }
 
-        public void setFunctionName(String_ functionName) {
-            this.functionName = functionName;
+        @Override
+        public Option<StructType> findStructType(Generic generic) {
+            if (this.structRegistry.containsKey(generic)) {
+                return new Some<>(this.structRegistry.get(generic).left);
+            }
+            else {
+                return new None<>();
+            }
         }
 
-        public void setTypeParamStack(List<Tuple<List<String_>, List<Type>>> typeParamStack) {
-            this.typeParamStack = typeParamStack;
+        @Override
+        public Iterator<Generic> stream() {
+            return this.structRegistry.keys();
         }
 
-        public void setFunctionLocalCounter(int functionLocalCounter) {
-            this.functionLocalCounter = functionLocalCounter;
-        }
-
-        public void setTypeStack(List<Type> typeStack) {
-            this.typeStack = typeStack;
-        }
-
-        public void setVisitedExpansions(List<Generic> visitedExpansions) {
-            this.visitedExpansions = visitedExpansions;
+        @Override
+        public Option<Type> findLastType() {
+            return this.typeStack.findLast();
         }
     }
 
@@ -1386,16 +1596,9 @@ public class Main {
     private static Result<String_, CompileError> compileRoot(String_ input) {
         return parseStatements(input, Main::compileRootSegment).mapValue(parsed -> {
             var compiled = generateAll(Main::mergeStatements, parsed);
-            var joinedStructs = joinStructures();
-            return compiled.appendOwned(joinedStructs).appendOwned(join(CompileState.INSTANCE.generatedMethods));
+            var joinedStructs = MutableCompileState.INSTANCE.joinStructures();
+            return compiled.appendOwned(joinedStructs).appendOwned(MutableCompileState.INSTANCE.joinFunctions());
         });
-    }
-
-    private static String_ joinStructures() {
-        return CompileState.INSTANCE.structRegistry.values()
-                .map(Tuple::right)
-                .collect(new Joiner())
-                .orElse(Strings.empty());
     }
 
     private static String_ join(List<String_> list) {
@@ -1612,23 +1815,25 @@ public class Main {
             return createSymbolErr(name);
         }
 
-        CompileState.INSTANCE.setExpanding(CompileState.INSTANCE.expanding.put(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params))));
+        MutableCompileState.INSTANCE.addExpanding(name, typeArgs -> usingTypeParams(typeParams, typeArgs, () -> generateStructureWithTypeParams(name, content, typeArgs, type, params)));
         return new Ok<>(new Whitespace());
     }
 
     private static <T> T usingTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
-        CompileState.INSTANCE.setTypeParamStack(CompileState.INSTANCE.typeParamStack.addLast(new Tuple<>(typeParams, typeArgs)));
+        MutableCompileState.INSTANCE.enterTypeParams(typeParams, typeArgs);
         var generated = supplier.get();
-        CompileState.INSTANCE.setTypeParamStack(CompileState.INSTANCE.typeParamStack.removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.typeParamStack));
+        MutableCompileState.INSTANCE.exitTypeParams();
         return generated;
     }
 
     private static Result<Whitespace, CompileError> generateStructureWithTypeParams(String_ name, String_ content, List<Type> typeArgs, String_ type, List<Definition> params) {
         return usingFrames(() -> {
-            CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.withRef(new StructRef(name)).defineAll(params));
+            MutableCompileState.INSTANCE.withRef(new StructPrototype(name));
+            MutableCompileState.INSTANCE.defineAll(params);
 
             if (type.equalsToSlice("enum")) {
-                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.define(new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name")));
+                var name1 = new Definition(new Functional(listEmpty(), new Ref(Primitive.I8)), "name");
+                MutableCompileState.INSTANCE.define(name1);
             }
 
             return parseStatements(content, Main::compileClassSegment)
@@ -1638,17 +1843,13 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> registerStruct(StructNode structNode) {
-        if (CompileState.INSTANCE.frames.findCurrentStructType() instanceof Some(var currentStructType)) {
-            CompileState.INSTANCE.setStructRegistry(registerStruct(structNode.name, structNode.typeParams, currentStructType, structNode.generate()));
+        if (MutableCompileState.INSTANCE.getCurrentStructType() instanceof Some(var currentStructType)) {
+            MutableCompileState.INSTANCE.registerStruct(currentStructType, structNode);
             return new Ok<>(new Whitespace());
         }
         else {
             return new Err<>(new CompileError("We aren't in a struct?", new StringContext(structNode.name)));
         }
-    }
-
-    private static Map_<Generic, Tuple<StructType, String_>> registerStruct(String_ name, List<Type> typeArgs, StructType currentStructType, String_ generated) {
-        return CompileState.INSTANCE.structRegistry.put(new Generic(name, typeArgs), new Tuple<>(currentStructType, generated));
     }
 
     private static Result<Parameter, CompileError> compileClassSegment(String_ input0) {
@@ -1668,7 +1869,7 @@ public class Main {
         if (stripped.endsWithSlice(";")) {
             var withoutEnd = stripped.sliceTo(stripped.length() - ";".length());
             return parseDefinition(withoutEnd).mapValue(parsed -> {
-                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.define(parsed));
+                MutableCompileState.INSTANCE.define(parsed);
                 return parsed;
             });
         }
@@ -1692,8 +1893,7 @@ public class Main {
             return new Ok<>(new Whitespace());
         }
 
-        CompileState.INSTANCE.setFunctionName(definition.name);
-        CompileState.INSTANCE.setFunctionLocalCounter(0);
+        MutableCompileState.INSTANCE.withFunctionPrototype(definition);
 
         var paramEnd = withParams.indexOfSlice(")");
         if (paramEnd < 0) {
@@ -1709,7 +1909,7 @@ public class Main {
                 return compileMethodWithParameters(definition, content, oldParameters);
             }
             else {
-                CompileState.INSTANCE.setFrames(defineMethod(definition, oldParameters));
+                MutableCompileState.INSTANCE.defineFunction(definition, oldParameters);
                 return new Ok<>(new Whitespace());
             }
         });
@@ -1727,35 +1927,26 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> compileMethodWithParameters(Definition definition, String_ content, List<Definition> oldParameters) {
-        var thisType = CompileState.INSTANCE.frames.findCurrentRef().orElse(new StructRef("this"));
+        var thisType = MutableCompileState.INSTANCE.getCurrentRef().orElse(new StructPrototype("this"));
 
         var newParams = Lists.<Definition>listEmpty()
                 .addLast(new Definition(thisType, "this"))
                 .addAll(oldParameters);
 
         return usingFrames(() -> {
-            CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.defineAll(oldParameters));
+            MutableCompileState.INSTANCE.defineAll(oldParameters);
             return assembleMethod0(definition, newParams, content);
         }).mapValue(output -> {
-            CompileState.INSTANCE.setFrames(defineMethod(definition, oldParameters));
+            MutableCompileState.INSTANCE.defineFunction(definition, oldParameters);
             return output;
         });
     }
 
     private static <T> Result<T, CompileError> usingFrames(Supplier<Result<T, CompileError>> supplier) {
-        CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.enter());
+        MutableCompileState.INSTANCE.enterFrames();
         var assembled = supplier.get();
-        CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.exit());
+        MutableCompileState.INSTANCE.exitFrames();
         return assembled;
-    }
-
-    private static Frames defineMethod(Definition definition, List<Definition> oldParameters) {
-        var paramTypes = oldParameters.iterate()
-                .map(Definition::type)
-                .collect(new ListCollector<>());
-        var type = definition.type;
-        var name = definition.name;
-        return CompileState.INSTANCE.frames.define(new Definition(new Functional(paramTypes, type), name));
     }
 
     private static Result<Whitespace, CompileError> assembleMethod0(Definition definition, List<Definition> params, String_ content) {
@@ -1804,17 +1995,17 @@ public class Main {
     }
 
     private static Result<Whitespace, CompileError> assembleMethod(Parameter definition, String_ outputParams, String_ content) {
-        return parseStatementsWithLocals(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
+        return usingStatements(content, input -> compileFunctionSegment(input, 1)).mapValue(parsed -> {
             var generated = Strings.from(definition.generate() + "(" + outputParams + "){" + generateAll(Main::mergeStatements, parsed) + "\n}\n");
-            CompileState.INSTANCE.addMethod(generated);
+            MutableCompileState.INSTANCE.addFunction(generated);
             return new Whitespace();
         });
     }
 
-    private static Result<List<String_>, CompileError> parseStatementsWithLocals(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
-        CompileState.INSTANCE.enter();
+    private static Result<List<String_>, CompileError> usingStatements(String_ content, Function<String_, Result<String_, CompileError>> compiler) {
+        MutableCompileState.INSTANCE.enter();
         var result = parseStatements(content, compiler).flatMapValue(parsed1 -> {
-            var maybeElements = CompileState.INSTANCE.generatedStatements.findLast();
+            var maybeElements = MutableCompileState.INSTANCE.findLastStatements();
             if (maybeElements instanceof Some(var elements)) {
                 return new Ok<>(Lists.<String_>listEmpty()
                         .addAll(elements)
@@ -1825,7 +2016,7 @@ public class Main {
             }
         });
 
-        CompileState.INSTANCE.exit();
+        MutableCompileState.INSTANCE.exitStatements();
         return result;
     }
 
@@ -1910,7 +2101,7 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeBlock = withoutEnd.sliceTo(contentStart);
                 var content = withoutEnd.sliceFrom(contentStart + "{".length());
-                return compileBeforeBlock(beforeBlock).flatMapValue(result -> parseStatementsWithLocals(content, input1 -> compileFunctionSegment(input1, depth + 1))
+                return compileBeforeBlock(beforeBlock).flatMapValue(result -> usingStatements(content, input1 -> compileFunctionSegment(input1, depth + 1))
                         .mapValue(outputContent -> indent.appendOwned(result)
                                 .appendSlice("{")
                                 .appendOwned(join(outputContent))
@@ -2035,7 +2226,7 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveStructRef(Type type1) {
-        if (type1 instanceof StructRef ref) {
+        if (type1 instanceof StructPrototype ref) {
             return resolveStructByName(ref.name, listEmpty());
         }
         else {
@@ -2061,20 +2252,20 @@ public class Main {
     private static Result<Type, CompileError> resolveSymbol(Symbol symbol) {
         var value = symbol.value;
         if (value.equalsToSlice("this")) {
-            return switch (CompileState.INSTANCE.frames.findCurrentStructType()) {
+            return switch (MutableCompileState.INSTANCE.findCurrentStructType()) {
                 case None<StructType> _ ->
                         new Err<>(new CompileError("No current struct type present", new StringContext(Strings.empty())));
                 case Some<StructType>(var type) -> new Ok<>(type);
             };
         }
 
-        return CompileState.INSTANCE.frames.findTypeByName(value.toSlice())
+        return MutableCompileState.INSTANCE.findTypeByName(value.toSlice())
                 .<Result<Type, CompileError>>map(Ok::new)
                 .orElseGet(() -> createUndefinedError(value));
     }
 
     private static Result<Type, CompileError> createUndefinedError(String_ value) {
-        var joinedNames = CompileState.INSTANCE.frames.streamDefined()
+        var joinedNames = MutableCompileState.INSTANCE.iterDefinitions()
                 .map(Definition::name)
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
@@ -2166,7 +2357,7 @@ public class Main {
     private static Result<Value, CompileError> parseSwitch(String_ input) {
         var stripped = input.strip();
         if (stripped.startsWithSlice("switch")) {
-            var name = generateName();
+            var name = MutableCompileState.INSTANCE.createName("local");
             return new Ok<>(new Symbol(name));
         }
 
@@ -2344,11 +2535,11 @@ public class Main {
             return assembleInvokable(caller, argumentsString, functional.paramTypes);
         }
 
-        if (!(callerType instanceof StructRef structRef)) {
+        if (!(callerType instanceof StructPrototype structPrototype)) {
             return new Err<>(new CompileError("Not an invokable type", new NodeContext(callerType)));
         }
 
-        var baseName = structRef.name;
+        var baseName = structPrototype.name;
         return resolveStructByName(baseName, listEmpty()).flatMapValue(structType -> {
             var maybeConstructor = structType.findTypeAsOption("new");
             if (!(maybeConstructor instanceof Some(var constructor))) {
@@ -2372,20 +2563,20 @@ public class Main {
     }
 
     private static Result<StructType, CompileError> resolveDefinedStruct(Generic generic) {
-        if (CompileState.INSTANCE.structRegistry.containsKey(generic)) {
-            return new Ok<>(CompileState.INSTANCE.structRegistry.get(generic).left);
-        }
+        return MutableCompileState.INSTANCE.findStructType(generic)
+                .<Result<StructType, CompileError>>map(Ok::new)
+                .orElseGet(() -> {
+                    var joinedKeys = MutableCompileState.INSTANCE.stream()
+                            .map(Generic::generate)
+                            .collect(new Joiner(Strings.from(", ")))
+                            .orElse(Strings.empty());
 
-        var joinedKeys = CompileState.INSTANCE.structRegistry.keys()
-                .map(Generic::generate)
-                .collect(new Joiner(Strings.from(", ")))
-                .orElse(Strings.empty());
-
-        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new NodeContext(generic)));
+                    return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new NodeContext(generic)));
+                });
     }
 
     private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
-        if (!(CompileState.INSTANCE.frames.findCurrentStructType() instanceof Some(var currentStructType))) {
+        if (!(MutableCompileState.INSTANCE.findCurrentStructType() instanceof Some(var currentStructType))) {
             return new Err<>(new CompileError("Not in a structure", new StringContext(baseName)));
         }
 
@@ -2423,7 +2614,7 @@ public class Main {
             return new Ok<>(new Invocation(caller, parsedArgs));
         }
 
-        var name = generateName();
+        var name = MutableCompileState.INSTANCE.createName("local");
 
         if (parent instanceof Symbol || parent instanceof DataAccess) {
             return assembleInvocation(property, parent, parsedArgs);
@@ -2431,7 +2622,7 @@ public class Main {
 
         return resolve(parent).flatMapValue(type -> {
             var statement = Strings.from("\n\t" + type.generate() + " " + name + " = " + parent.generate() + ";");
-            CompileState.INSTANCE.addStatement(statement);
+            MutableCompileState.INSTANCE.addStatement(statement);
 
             Value symbol = new Symbol(name);
             return assembleInvocation(property, symbol, parsedArgs);
@@ -2456,14 +2647,14 @@ public class Main {
     }
 
     private static Result<Value, CompileError> usingTypeStack(Type found, Supplier<Result<Value, CompileError>> supplier) {
-        CompileState.INSTANCE.setTypeStack(CompileState.INSTANCE.typeStack.addLast(found));
+        MutableCompileState.INSTANCE.enterTypeStack(found);
         Result<Value, CompileError> parsed = supplier.get();
-        CompileState.INSTANCE.setTypeStack(CompileState.INSTANCE.typeStack.removeLast().map(Tuple::right).orElse(CompileState.INSTANCE.typeStack));
+        MutableCompileState.INSTANCE.exitTypeStack();
         return parsed;
     }
 
     private static Result<Value, CompileError> assembleLambda(List<String_> paramNames, String_ afterArrow) {
-        return CompileState.INSTANCE.typeStack.findLast().<Result<Value, CompileError>>map(maybeExpectedType -> {
+        return MutableCompileState.INSTANCE.findLastType().<Result<Value, CompileError>>map(maybeExpectedType -> {
             if (!(maybeExpectedType instanceof Functional expectedType)) {
                 return new Err<>(new CompileError("A lambda has to be a functional type", new NodeContext(maybeExpectedType)));
             }
@@ -2478,11 +2669,11 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return usingFrames(() -> {
-                CompileState.INSTANCE.setFrames(CompileState.INSTANCE.frames.defineAll(params));
+                MutableCompileState.INSTANCE.defineAll(params);
 
                 if (afterArrow.startsWithSlice("{") && afterArrow.endsWithSlice("}")) {
                     var content = afterArrow.sliceBetween(1, afterArrow.length() - 1);
-                    var name = generateName();
+                    var name = MutableCompileState.INSTANCE.createName("local");
                     assembleMethod0(new Definition(expectedType.returns, name), params, content);
                     return new Ok<>(new Symbol(name));
                 }
@@ -2490,19 +2681,13 @@ public class Main {
                 return parseValue(afterArrow).flatMapValue(value -> {
                     var newValue = value.generate();
                     return resolve(value).mapValue(resolved -> {
-                        var name = generateName();
+                        var name = MutableCompileState.INSTANCE.createName("local");
                         assembleMethod0(new Definition(resolved, name), params, Strings.from("\n\treturn " + newValue + ";"));
                         return new Symbol(name);
                     });
                 });
             });
         }).orElseGet(() -> new Err<>(new CompileError("No expected type was present for lambda", new StringContext(afterArrow))));
-    }
-
-    private static String_ generateName() {
-        var name = CompileState.INSTANCE.functionName.appendSlice("_local").appendSlice(String.valueOf(CompileState.INSTANCE.functionLocalCounter));
-        CompileState.INSTANCE.setFunctionLocalCounter(CompileState.INSTANCE.functionLocalCounter + 1);
-        return name;
     }
 
     private static State foldInvokableStart(State state, Character c) {
@@ -2530,10 +2715,6 @@ public class Main {
             return false;
         }
         return true;
-    }
-
-    private static Result<String_, CompileError> compileDefinitionOrPlaceholder(String_ input) {
-        return parseDefinition(input).mapValue(Definition::generate);
     }
 
     private static Result<Definition, CompileError> parseDefinition(String_ input) {
@@ -2623,7 +2804,7 @@ public class Main {
     private static Result<Type, CompileError> parseSymbolType(String_ input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return new Ok<>(new StructRef(stripped));
+            return new Ok<>(new StructPrototype(stripped));
         }
         else {
             return new Err<>(new CompileError("Not a symbol", new StringContext(stripped)));
@@ -2670,18 +2851,11 @@ public class Main {
 
             var generic = new Generic(base, arguments);
             if (!generic.hasTypeParams()) {
-                if (!hasVisited(generic) && CompileState.INSTANCE.expanding.containsKey(base)) {
-                    CompileState.INSTANCE.setVisitedExpansions(CompileState.INSTANCE.visitedExpansions.addLast(generic));
-                    CompileState.INSTANCE.expanding.get(base).apply(arguments);
-                }
+                MutableCompileState.INSTANCE.expandGeneric(generic);
             }
 
             return new Ok<>(generic);
         });
-    }
-
-    private static boolean hasVisited(Generic generic) {
-        return CompileState.INSTANCE.visitedExpansions.contains(generic, Generic::equalsTo);
     }
 
     private static Option<Type> retainTypes(Argument argument) {
@@ -2726,7 +2900,7 @@ public class Main {
 
     private static Result<Type, CompileError> parseTypeParam(String_ input) {
         var stripped = input.strip();
-        if (findTypeParamEntryInStack(stripped) instanceof Some(var typeParamEntry)) {
+        if (MutableCompileState.INSTANCE.lookupTypeParam(stripped) instanceof Some(var typeParamEntry)) {
             var typeParam = typeParamEntry.left;
             var maybeTypeArgument = typeParamEntry.right;
             if (maybeTypeArgument instanceof Some(var found)) {
@@ -2736,18 +2910,6 @@ public class Main {
         }
 
         return new Err<>(new CompileError("Not a type param", new StringContext(stripped)));
-    }
-
-    private static Option<Tuple<String_, Option<Type>>> findTypeParamEntryInStack(String_ typeParamValue) {
-        return CompileState.INSTANCE.typeParamStack.iterateReversed()
-                .flatMap(element -> findTypeParamEntry(typeParamValue, element))
-                .next();
-    }
-
-    private static Iterator<Tuple<String_, Option<Type>>> findTypeParamEntry(String_ typeParamValue, Tuple<List<String_>, List<Type>> element) {
-        return element.left.iterateWithIndices()
-                .filter(entry -> entry.right.equalsTo(typeParamValue))
-                .map(entry -> new Tuple<>(entry.right, element.right.get(entry.left)));
     }
 
     private static String_ createAlias(String_ base, List<Type> parsed) {
