@@ -843,7 +843,7 @@ public class Main {
 
     private static Result<StructType, CompileError> resolveStructRef(Type type1) {
         if (type1 instanceof StructRef ref) {
-            return resolveStructByName(ref.name);
+            return resolveStructByName(ref.name, listEmpty());
         }
         else {
             return new Err<>(new CompileError("Not a struct ref", new NodeContext(type1)));
@@ -852,7 +852,7 @@ public class Main {
 
     private static Result<StructType, CompileError> resolveGenericType(Type type) {
         if (type instanceof Generic generic) {
-            return resolveStructByName(generic.base);
+            return resolveStructByName(generic.base, generic.args);
         }
         else {
             return new Err<>(new CompileError("Not a generic type", new NodeContext(type)));
@@ -1161,7 +1161,7 @@ public class Main {
         }
 
         var baseName = structRef.name;
-        return resolveStructByName(baseName).flatMapValue(structType -> {
+        return resolveStructByName(baseName, listEmpty()).flatMapValue(structType -> {
             var maybeConstructor = structType.findTypeAsOption("new");
             if (!(maybeConstructor instanceof Some(var constructor))) {
                 return new Err<>(new CompileError("No constructor was found for type", new NodeContext(structType)));
@@ -1176,17 +1176,16 @@ public class Main {
         });
     }
 
-    private static Result<StructType, CompileError> resolveStructByName(String_ baseName) {
+    private static Result<StructType, CompileError> resolveStructByName(String_ baseName, List<Type> args) {
         return orString(baseName, Lists.listFrom(
                 Main::resolveCurrentStruct,
-                Main::resolveDefinedStruct
+                baseName1 -> resolveDefinedStruct(new Generic(baseName1, args))
         ));
     }
 
-    private static Result<StructType, CompileError> resolveDefinedStruct(String_ baseName) {
-        var tuple = new Generic(baseName, listEmpty());
-        if (structRegistry.containsKey(tuple)) {
-            return new Ok<>(structRegistry.get(tuple).left);
+    private static Result<StructType, CompileError> resolveDefinedStruct(Generic generic) {
+        if (structRegistry.containsKey(generic)) {
+            return new Ok<>(structRegistry.get(generic).left);
         }
 
         var joinedKeys = structRegistry.keys()
@@ -1194,7 +1193,7 @@ public class Main {
                 .collect(new Joiner(Strings.from(", ")))
                 .orElse(Strings.empty());
 
-        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new NodeContext(tuple)));
+        return new Err<>(new CompileError("No struct exists within [" + joinedKeys + "]", new NodeContext(generic)));
     }
 
     private static Result<StructType, CompileError> resolveCurrentStruct(String_ baseName) {
