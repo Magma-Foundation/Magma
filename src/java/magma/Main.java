@@ -149,6 +149,8 @@ public class Main {
     }
 
     private interface Type extends Node {
+        boolean hasTypeParams();
+
         String_ stringify();
 
         boolean equalsTo(Type other);
@@ -179,18 +181,14 @@ public class Main {
 
     private static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     private static final Path TARGET = SOURCE.resolveSibling("main.c");
-
     private static List<List<String_>> generatedStatements = listEmpty();
     private static List<String_> generatedMethods = listEmpty();
     private static Map_<Tuple<String_, List<Type>>, Tuple<StructType, String_>> structRegistry = Maps.empty();
-
     private static Map_<String_, Function<List<Type>, Result<String_, CompileError>>> expanding = Maps.empty();
-    private static List<Tuple<String_, List<Type>>> visitedExpansions = listEmpty();
-
+    private static List<Generic> visitedExpansions = listEmpty();
     private static List<Frame> frames = listEmpty();
     private static String_ functionName = Strings.empty();
-    private static List<String_> typeParameters = listEmpty();
-    private static List<Type> typeArguments = listEmpty();
+    private static List<Tuple<List<String_>, List<Type>>> typeParamStack = listEmpty();
     private static int functionLocalCounter = 0;
     private static List<Type> typeStack = listEmpty();
 
@@ -448,13 +446,17 @@ public class Main {
         }
 
         expanding = expanding.put(name, typeArgs -> {
-            typeParameters = typeParams;
-            typeArguments = typeArgs;
-
-            return generateStructure(name, content, typeArgs, type);
+            return usingTypeParams(typeParams, typeArgs, () -> generateStructure(name, content, typeArgs, type));
         });
 
         return new Ok<>(Strings.empty());
+    }
+
+    private static <T> T usingTypeParams(List<String_> typeParams, List<Type> typeArgs, Supplier<T> supplier) {
+        typeParamStack = typeParamStack.addLast(new Tuple<>(typeParams, typeArgs));
+        var generated = supplier.get();
+        typeParamStack = typeParamStack.removeLast().map(Tuple::right).orElse(typeParamStack);
+        return generated;
     }
 
     private static Result<String_, CompileError> generateStructure(String_ name, String_ content, List<Type> typeArgs, String_ type) {
@@ -548,9 +550,7 @@ public class Main {
         }
 
         var content = withBraces.sliceBetween(1, withBraces.length() - 1);
-        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> {
-            return compileMethodWithParameters(definition, parsedParameters, content);
-        });
+        return parseValues(params, Main::parseParameter).flatMapValue(parsedParameters -> compileMethodWithParameters(definition, parsedParameters, content));
     }
 
     private static Result<String_, CompileError> compileMethodWithParameters(Definition definition, List<Parameter> rawParameters, String_ content) {
@@ -1328,10 +1328,10 @@ public class Main {
                         .strip();
 
                 var typeParams = findTypeParams(joined).orElseGet(Lists::listEmpty);
-                typeParameters = typeParams;
-
-                var type = tuple.right;
-                return parseType(type).mapValue(type1 -> new Definition(typeParams, type1, name));
+                return usingTypeParams(typeParams, listEmpty(), () -> {
+                    var type = tuple.right;
+                    return parseType(type).mapValue(type1 -> new Definition(typeParams, type1, name));
+                });
             }).orElseGet(() -> new Err<>(new CompileError("Insufficient divisions", new StringContext(beforeName))));
         }).orElseGet(() -> createInfixErr(stripped, " "));
     }
@@ -1366,15 +1366,13 @@ public class Main {
 
     private static Result<Type, CompileError> parseType(String_ input) {
         var stripped = input.strip();
-        var maybeTypeParam = typeParameters.indexOf(stripped);
-        if (maybeTypeParam instanceof Some(var typeParam)) {
-            var maybeTypeArgument = typeArguments.get(typeParam);
+        if (findTypeParamEntryInStack(stripped) instanceof Some(var typeParamEntry)) {
+            var typeParam = typeParamEntry.left;
+            var maybeTypeArgument = typeParamEntry.right;
             if (maybeTypeArgument instanceof Some(var found)) {
                 return new Ok<>(found);
             }
-            else {
-                return new Ok<>(new TypeParam(typeParameters.get(typeParam).orElse(Strings.empty())));
-            }
+            return new Ok<>(new TypeParam(typeParam));
         }
 
         switch (stripped.toSlice()) {
@@ -1416,16 +1414,16 @@ public class Main {
                         return new Ok<>(new Functional(Lists.listFrom(arg0, arg1), returns));
                     }
 
-                    if (parsed.iterate().collect(new AnyMatch<>(type -> type instanceof TypeParam))) {
-                        var generic = new Tuple<>(base, parsed);
-                        if (!hasGenericBeenVisited(generic) && expanding.containsKey(base)) {
-                            System.out.println(generic);
+                    var generic = new Generic(base, parsed);
+                    if (!generic.hasTypeParams()) {
+                        if (!visitedExpansions.contains(generic, Generic::equalsTo) && expanding.containsKey(base)) {
+                            System.out.println(generic.generate());
                             visitedExpansions = visitedExpansions.addLast(generic);
                             expanding.get(base).apply(parsed);
                         }
                     }
 
-                    return new Ok<>(new StructRef(createAlias(base, parsed)));
+                    return new Ok<>(generic);
                 });
             }
         }
@@ -1437,10 +1435,16 @@ public class Main {
         return new Err<>(new CompileError("Not a valid type", new StringContext(input)));
     }
 
-    private static boolean hasGenericBeenVisited(Tuple<String_, List<Type>> generic) {
-        return visitedExpansions.contains(generic,
-                (tuple, other) -> Tuple.equalsTo(tuple, other, String_::equalsTo,
-                        (typeList, typeList2) -> typeList.equalsTo(typeList2, Type::equalsTo)));
+    private static Option<Tuple<String_, Option<Type>>> findTypeParamEntryInStack(String_ typeParamValue) {
+        return typeParamStack.iterateReversed()
+                .flatMap(element -> findTypeParamEntry(typeParamValue, element))
+                .next();
+    }
+
+    private static Iterator<Tuple<String_, Option<Type>>> findTypeParamEntry(String_ typeParamValue, Tuple<List<String_>, List<Type>> element) {
+        return element.left.iterateWithIndices()
+                .filter(entry -> entry.right.equalsTo(typeParamValue))
+                .map(entry -> new Tuple<>(entry.right, element.right.get(entry.left)));
     }
 
     private static String_ createAlias(String_ base, List<Type> parsed) {
@@ -1679,6 +1683,11 @@ public class Main {
         public String_ generate() {
             return this.value;
         }
+
+        @Override
+        public boolean hasTypeParams() {
+            return false;
+        }
     }
 
     public record Some<T>(T value) implements Option<T> {
@@ -1815,14 +1824,6 @@ public class Main {
     }
 
     public record Tuple<A, B>(A left, B right) {
-        private static <A, B> boolean equalsTo(
-                Tuple<A, B> first,
-                Tuple<A, B> second,
-                BiFunction<A, A, Boolean> leftEquator,
-                BiFunction<B, B, Boolean> rightEquator
-        ) {
-            return leftEquator.apply(first.left, second.left) && rightEquator.apply(first.right, second.right);
-        }
     }
 
     public static class RangeHead implements Head<Integer> {
@@ -2141,6 +2142,15 @@ public class Main {
         public Option<Type> findTypeAsOption(String name) {
             return findSymbolInDefinitions(this.definitions, name);
         }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.definitions.iterate()
+                    .map(definition -> definition.type)
+                    .filter(type -> type instanceof TypeParam)
+                    .next()
+                    .isPresent();
+        }
     }
 
     private record StructRef(String_ name) implements Type {
@@ -2162,6 +2172,11 @@ public class Main {
         public boolean equalsTo(Type other) {
             return other instanceof StructRef ref && this.name.equalsTo(ref.name);
         }
+
+        @Override
+        public boolean hasTypeParams() {
+            return false;
+        }
     }
 
     private record Ref(Type type) implements Type {
@@ -2178,6 +2193,11 @@ public class Main {
         @Override
         public String_ generate() {
             return this.type.generate().appendSlice("*");
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.type.hasTypeParams();
         }
     }
 
@@ -2202,6 +2222,11 @@ public class Main {
             return other instanceof Functional functional
                     && this.returns.equalsTo(functional.returns)
                     && this.paramTypes.equalsTo(functional.paramTypes, Type::equalsTo);
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.returns.hasTypeParams() || this.paramTypes.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
         }
     }
 
@@ -2401,7 +2426,45 @@ public class Main {
 
         @Override
         public String_ generate() {
-            return this.value;
+            return Strings.from("typeparam ").appendOwned(this.value);
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return true;
+        }
+    }
+
+    private record Generic(String_ base, List<Type> args) implements Type {
+        @Override
+        public String_ stringify() {
+            return this.base.appendSlice("_").appendOwned(this.args.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .orElse(Strings.empty()));
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Generic generic
+                    && this.base.equalsTo(generic.base)
+                    && this.args.equalsTo(generic.args, Type::equalsTo);
+        }
+
+        @Override
+        public String_ generate() {
+            var string = this.args
+                    .iterate()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse(Strings.empty());
+
+            return this.base.appendSlice("<").appendOwned(string).appendSlice(">");
+        }
+
+        @Override
+        public boolean hasTypeParams() {
+            return this.args.iterate().collect(new AnyMatch<>(Type::hasTypeParams));
         }
     }
 }
