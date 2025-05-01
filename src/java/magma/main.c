@@ -18,7 +18,7 @@ union OptionValue<T> {
 	S _super;
 	template List<T> (*addLast)(S, T);
 	template Iterator<T> (*iterate)(S);
-	template Option<template Tuple<template List<T>, /*  T */>> (*removeLast)(S);
+	template Option<template Tuple<template List<T>, T>> (*removeLast)(S);
 	int (*isEmpty)(S);
 	T (*get)(S, /* int */);
 	template List<T> (*addFirst)(S, T);
@@ -201,7 +201,7 @@ default /* String */ generateWithName(/* String */ name){/* return this.generate
 }
 public <C> /* C */ collect(template Collector<T, /*  C */> collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
 }
-private <C> /* C */ fold(/* C */ initial, template BiFunction</* C */, /*  T */, /*  C */> folder){/* var current = initial; *//* while (true) {
+private <C> /* C */ fold(/* C */ initial, template BiFunction</* C */, T, /*  C */> folder){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -293,7 +293,7 @@ public /* DivideState */ enter(){/* return new DivideState(this.input, this.segm
 }
 public int isShallow(){/* return this.depth == 1; *//*  */
 }
-public static <A, B, C> template Tuple<A, /*  C */> (*mapRight)(template Tuple<A, /*  B */>)(/*  C */ (*mapper)(B)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
+public static <A, B, C> template Tuple<A, /*  C */> (*mapRight)(template Tuple<A, B>)(/*  C */ (*mapper)(B)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
 }
 private static class Iterators {
  public static <T> template Iterator</* T */> fromOptions(template Option</* T */> option){/* return new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)); *//* } */
@@ -718,8 +718,9 @@ private static template Option<template Tuple</* CompileState */, /*  Type */>> 
         )); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  Type */>> typeParam(/* CompileState */ state, /* String */ input){/* if (state.maybeStructureType instanceof Some(var structureType)) {
-            if (structureType.typeParams.contains(input)) {
-                return new Some<>(new Tuple<>(state, new TypeParameter(input)));
+            var stripped = input.strip();
+            if (structureType.typeParams.contains(stripped)) {
+                return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
             }
         } *//* return new None<>(); *//*  */
 }

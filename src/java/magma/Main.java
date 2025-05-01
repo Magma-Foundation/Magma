@@ -1102,8 +1102,9 @@ public class Main {
 
     private static Option<Tuple<CompileState, Type>> typeParam(CompileState state, String input) {
         if (state.maybeStructureType instanceof Some(var structureType)) {
-            if (structureType.typeParams.contains(input)) {
-                return new Some<>(new Tuple<>(state, new TypeParameter(input)));
+            var stripped = input.strip();
+            if (structureType.typeParams.contains(stripped)) {
+                return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
             }
         }
         return new None<>();
