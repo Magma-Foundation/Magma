@@ -15,12 +15,26 @@ public class Main {
             this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         }
 
-        private State advance() {
-            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
+        private Optional<State> popAndAppend() {
+            return this.pop().map(tuple -> tuple.right.append(tuple.left));
         }
 
         private State append(char c) {
             return new State(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
+        }
+
+        public Optional<Tuple<Character, State>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+
+        private State advance() {
+            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
         }
 
         public State exit() {
@@ -37,16 +51,6 @@ public class Main {
 
         public boolean isShallow() {
             return this.depth == 1;
-        }
-
-        public Optional<Tuple<Character, State>> pop() {
-            if (this.index < this.input.length()) {
-                var c = this.input.charAt(this.index);
-                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
-            }
-            else {
-                return Optional.empty();
-            }
         }
     }
 
@@ -112,9 +116,27 @@ public class Main {
             var popped = maybePopped.get();
             var c = popped.left;
             var state = popped.right;
-            current = foldStatementChar(state, c);
+            current = foldSingleQuotes(state, c)
+                    .orElseGet(() -> foldStatementChar(state, c));
         }
         return current.advance().segments;
+    }
+
+    private static Optional<State> foldSingleQuotes(State state, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        return state.append(c).pop().map(maybeNextTuple -> {
+            var nextChar = maybeNextTuple.left;
+            var nextState = maybeNextTuple.right.append(nextChar);
+
+            var withEscaped = nextChar == '\\'
+                    ? nextState.popAndAppend().orElse(nextState)
+                    : nextState;
+
+            return withEscaped.popAndAppend().orElse(withEscaped);
+        });
     }
 
     private static State foldStatementChar(State state, char c) {

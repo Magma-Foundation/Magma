@@ -1,42 +1,27 @@
-/* private static Optional<Tuple<JavaList<String>, String>> compileStructure(JavaList<String> state, String input, String infix) {
-        return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", content -> {
-                    var tuple = compileAll(state, content, Main::compileStructSegment);
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + tuple.right + "}";
-                    return Optional.of(new Tuple<>(tuple.left.addLast(generated), ""));
-                });
-            });
-        });
-    } *//* private static Tuple<JavaList<String>, String> compileStructSegment(JavaList<String> state, String input) {
-        return compileStructure(state, input, "record ")
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
-    } *//* private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        var content = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(content);
-    } *//* private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    } *//* private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeKeyword = input.substring(0, classIndex);
-            var afterKeyword = input.substring(classIndex + infix.length());
-            return mapper.apply(beforeKeyword, afterKeyword);
-        }
-        return Optional.empty();
-    } *//* } *//* private  */struct State(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* public State(String input) {
+/*  *//* private  */struct State(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* public State(String input) {
             this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         } *//* 
 
-        private State advance() {
-            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
+        private Optional<State> popAndAppend() {
+            return this.pop().map(tuple -> tuple.right.append(tuple.left));
         } *//* 
 
         private State append(char c) {
             return new State(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
+        } *//* 
+
+        public Optional<Tuple<Character, State>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+            }
+            else {
+                return Optional.empty();
+            }
+        } *//* 
+
+        private State advance() {
+            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
         } *//* 
 
         public State exit() {
@@ -53,16 +38,6 @@
 
         public boolean isShallow() {
             return this.depth == 1;
-        } *//* 
-
-        public Optional<Tuple<Character, State>> pop() {
-            if (this.index < this.input.length()) {
-                var c = this.input.charAt(this.index);
-                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
-            }
-            else {
-                return Optional.empty();
-            }
         } *//* 
      */}/* 
 
@@ -126,9 +101,27 @@
             var popped = maybePopped.get();
             var c = popped.left;
             var state = popped.right;
-            current = foldStatementChar(state, c);
+            current = foldSingleQuotes(state, c)
+                    .orElseGet(() -> foldStatementChar(state, c));
         }
         return current.advance().segments;
+    } *//* 
+
+    private static Optional<State> foldSingleQuotes(State state, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        return state.append(c).pop().map(maybeNextTuple -> {
+            var nextChar = maybeNextTuple.left;
+            var nextState = maybeNextTuple.right.append(nextChar);
+
+            var withEscaped = nextChar == '\\'
+                    ? nextState.popAndAppend().orElse(nextState)
+                    : nextState;
+
+            return withEscaped.popAndAppend().orElse(withEscaped);
+        });
     } *//* 
 
     private static State foldStatementChar(State state, char c) {
@@ -136,22 +129,65 @@
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} *//* ' && appended.isShallow()) {
+        if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
-        } *//* 
+        }
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '} *//* ') {
+        if (c == '}') {
             return appended.exit();
-        } *//* 
-        return appended; *//* 
-     */}/* private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> state, String input) {
+        }
+        return appended;
+    } *//* 
+
+    private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Tuple<>(state, "");
         }
 
-        return compileStructure(state, stripped, " */struct ").orElseGet(() -> {/* return new Tuple<>(state, generatePlaceholder(stripped)); *//* 
+        return compileStructure(state, stripped, "class ").orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(stripped));
         });
-     */}
+    } *//* 
+
+    private static Optional<Tuple<JavaList<String>, String>> compileStructure(JavaList<String> state, String input, String infix) {
+        return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content -> {
+                    var tuple = compileAll(state, content, Main::compileStructSegment);
+                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + tuple.right + "}";
+                    return Optional.of(new Tuple<>(tuple.left.addLast(generated), ""));
+                });
+            });
+        });
+    } *//* 
+
+    private static Tuple<JavaList<String>, String> compileStructSegment(JavaList<String> state, String input) {
+        return compileStructure(state, input, "record ")
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    } *//* 
+
+    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        var content = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(content);
+    } *//* 
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
+    } *//* 
+
+    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex);
+            var afterKeyword = input.substring(classIndex + infix.length());
+            return mapper.apply(beforeKeyword, afterKeyword);
+        }
+        return Optional.empty();
+    } *//* 
+ */}
