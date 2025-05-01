@@ -29,9 +29,6 @@ union OptionValue<T> {
 	C (*createInitial)(S);
 	C (*fold)(S, C, T);
 };
-/* private @ */struct External<S> {
-	S _super;
-};
 /* private */struct Splitter<S> {
 	S _super;
 	template Option<template Tuple</* String */, /*  String */>> (*split)(S, /* String */);
@@ -517,6 +514,7 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> structSegment(/* CompileState */ state, /* String */ input){/* return or(state, input, Lists.of(
                 Main::whitespace,
+                Main::annotation,
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,

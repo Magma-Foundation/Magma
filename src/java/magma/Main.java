@@ -809,12 +809,17 @@ public class Main {
     private static Option<Tuple<CompileState, String>> structSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
                 Main::whitespace,
+                Main::annotation,
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,
                 Main::definitionStatement,
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> annotation(CompileState state, String input) {
+        return first(input, "@interface", (_, _) -> new Some<>(new Tuple<>(state, "")));
     }
 
     private static Option<Tuple<CompileState, String>> definitionStatement(CompileState state, String input) {
