@@ -420,10 +420,10 @@ public class Main {
             String input,
             BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper
     ) {
-        return compileAll(initial, input, Main::foldStatementChar, mapper, Main::mergeStatements);
+        return all(initial, input, Main::foldStatementChar, mapper, Main::mergeStatements);
     }
 
-    private static Option<Tuple<CompileState, String>> compileAll(
+    private static Option<Tuple<CompileState, String>> all(
             CompileState initial,
             String input,
             BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper,
@@ -565,14 +565,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
         return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return params(instance, paramString, Main::mergeStatements).flatMap(params -> {
+            return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
                 return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
             });
         }));
-    }
-
-    private static Option<Tuple<CompileState, String>> params(CompileState state, String input, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return compileAll(state, input, Main::foldValueChar, Main::compileParameter, merger);
     }
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {
@@ -663,7 +659,7 @@ public class Main {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (params, withBraces) -> {
                 return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                    return params(outputDefinition.left, params, Main::mergeValues).flatMap(outputParams -> {
+                    return values(outputDefinition.left, params, Main::compileParameter).flatMap(outputParams -> {
                         return or(outputParams.left, withBraces, Lists.of(
                                 (state0, element) -> methodWithoutContent(state0, outputDefinition.right, outputParams.right, element),
                                 (state0, element) -> methodWithContent(state0, outputDefinition.right, outputParams.right, element)));
@@ -671,6 +667,10 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static Option<Tuple<CompileState, String>> values(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
+        return all(state, input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
@@ -732,7 +732,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
-        return compileType(state, type).flatMap(typeTuple -> {
+        return type(state, type).flatMap(typeTuple -> {
             var generated = typeTuple.right + " " + name.strip();
             return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
         });
@@ -740,14 +740,14 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            return compileType(state, typeString).flatMap(typeTuple -> {
+            return type(state, typeString).flatMap(typeTuple -> {
                 var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + name.strip();
                 return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> type(CompileState state, String input) {
         return or(state, input, Lists.of(
                 Main::template,
                 Main::content
@@ -757,7 +757,9 @@ public class Main {
     private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
         return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {
-                return new Some<>(new Tuple<>(state, "template " + base + "<" + generatePlaceholder(argumentsString) + ">"));
+                return values(state, argumentsString, Main::type).flatMap(arguments -> {
+                    return new Some<>(new Tuple<>(arguments.left, "template " + base + "<" + arguments.right + ">"));
+                });
             });
         });
     }
