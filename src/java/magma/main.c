@@ -480,12 +480,21 @@
             return false;
         } *//* return true; *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ definitionWithoutTypeSeparator(/* CompileState */ instance, /* String */ type, /* String */ name){/* var generated = generatePlaceholder(type) + " " + name.strip(); *//* return new Some<>(new Tuple<CompileState, String>(instance, generated)); *//*  */
-}
-/* private static */ /* Option<Tuple<CompileState, String>> */ definitionWithTypeSeparator(/* CompileState */ instance, /* String */ beforeName, /* String */ name){/* return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
-            return new Some<>(new Tuple<CompileState, String>(instance, generated));
+/* private static */ /* Option<Tuple<CompileState, String>> */ definitionWithoutTypeSeparator(/* CompileState */ state, /* String */ type, /* String */ name){/* return compileType(type, state).flatMap(typeTuple -> {
+            var generated = typeTuple.right + " " + name.strip();
+            return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
         } *//* ); *//*  */
+}
+/* private static */ /* Option<Tuple<CompileState, String>> */ definitionWithTypeSeparator(/* CompileState */ state, /* String */ beforeName, /* String */ name){/* return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
+            return compileType(typeString, state).flatMap(typeTuple -> {
+                var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + name.strip();
+                return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
+            });
+        } *//* ); *//*  */
+}
+/* private static */ /* Option<Tuple<CompileState, String>> */ compileType(/* String */ input, /* CompileState */ state){/* return or(state, input, Lists.of(
+                Main::content
+        )); *//*  */
 }
 /* private static */ /* Option<Integer> */ lastIndexOfSlice(/* String */ input, /* String */ infix){/* var index = input.lastIndexOf(infix); *//* return index == -1 ? new None<Integer>() : new Some<>(index); *//*  */
 }
