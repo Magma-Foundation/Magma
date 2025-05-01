@@ -42,6 +42,18 @@ union OptionValue<T> {
 	char* (*toSlice)(S);
 	struct String_ (*appendSlice)(S, char*);
 };
+enum ResultVariant {
+	Ok,
+	Err
+};
+union ResultValue<T, X> {
+	Ok<T, X> ok;
+	Err<T, X> err;
+};
+/* private sealed */struct Result<T, X> {
+	ResultVariant _variant;
+	ResultValue<T, X> _value;
+};
 /* private static */struct Strings {
 };
 /* private */struct Some<T>(T value) implements Option<T> {
@@ -69,6 +81,10 @@ union OptionValue<T> {
 	/* private boolean retrieved */ /* = */ false;
 };
 /* private static */struct ListCollector<T> implements Collector<T, List<T>> {
+};
+/* private */struct Ok<T, X>(T value) implements Result<T, X> {
+};
+/* private */struct Err<T, X>(X error) implements Result<T, X> {
 };
 /* public */struct Main {/* 
 
@@ -246,7 +262,10 @@ union OptionValue<T> {
         private String generate0() {
             return this.value;
         }
-    } */
+    } *//* 
+
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
+    public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 };
 /* private interface Type extends Node {
  default */ struct String_ generateWithName(char* name){
@@ -289,6 +308,9 @@ union OptionValue<T> {
 	return /* true */;
 }
 /* @Override
+ public */ void Some::ifPresent(struct Some<T>(T value) implements Option<T> this, template Consumer<struct T> consumer){/* consumer.accept(this.value); */
+}
+/* @Override
  public <R> */ template Option<struct R> None::map(struct None<T>() implements Option<T> this, /*  R */ (*mapper)(struct T)){
 	return /* new None<>() */;
 }
@@ -319,6 +341,9 @@ union OptionValue<T> {
 /* @Override
  public */ int None::isPresent(struct None<T>() implements Option<T> this){
 	return /* false */;
+}
+/* @Override
+ public */ void None::ifPresent(struct None<T>() implements Option<T> this, template Consumer<struct T> consumer){
 }
 /* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, /*  C */> collector){
 	return /* this.fold(collector.createInitial(), collector::fold) */;
@@ -470,14 +495,29 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
  public */ template List<struct T> ListCollector::fold(struct ListCollector<T> implements Collector<T, List<T>> this, template List<struct T> current, struct T element){
 	return /* current.addLast(element) */;
 }
-/* public static */ void main(){/* try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var target = source.resolveSibling("main.c");
-
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
+/* public static */ void main(){/* run().ifPresent(Throwable::printStackTrace); */
+}
+/* private static */ template Option<struct IOException> run(){/* switch (readString()) {
+            case Err<String, IOException>(var error) -> {
+                return new Some<>(error);
+            }
+            case Ok<String, IOException>(var input) -> {
+                var output = compileRoot(input);
+                return writeString(output);
+            }
+        } */
+}
+/* private static */ template Option<struct IOException> writeString(char* output){/* try {
+            Files.writeString(TARGET, output);
+            return new None<>();
         } *//* catch (IOException e) {
-            e.printStackTrace();
+            return new Some<>(e);
+        } */
+}
+/* private static */ template Result<char*, /*  IOException */> readString(){/* try {
+            return new Ok<>(Files.readString(SOURCE));
+        } *//* catch (IOException e) {
+            return new Err<>(e);
         } */
 }
 /* private static */ char* compileRoot(char* input){/* var state = new CompileState(); *//* var tuple = compileAll(state, input, Main::compileRootSegment)

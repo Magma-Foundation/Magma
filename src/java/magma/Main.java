@@ -2,10 +2,12 @@ package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -27,6 +29,8 @@ public class Main {
         Option<T> filter(Predicate<T> predicate);
 
         boolean isPresent();
+
+        void ifPresent(Consumer<T> consumer);
     }
 
     private interface Head<T> {
@@ -79,6 +83,9 @@ public class Main {
         String toSlice();
 
         String_ appendSlice(String slice);
+    }
+
+    private sealed interface Result<T, X> permits Ok, Err {
     }
 
     private static class Strings {
@@ -141,6 +148,11 @@ public class Main {
         public boolean isPresent() {
             return true;
         }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
     }
 
     private record None<T>() implements Option<T> {
@@ -182,6 +194,10 @@ public class Main {
         @Override
         public boolean isPresent() {
             return false;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
         }
     }
 
@@ -628,6 +644,12 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+    }
+
     private enum Primitive implements Type {
         Auto("auto"),
         Void("void"),
@@ -649,15 +671,39 @@ public class Main {
         }
     }
 
-    public static void main() {
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var target = source.resolveSibling("main.c");
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
+    public static void main() {
+        run().ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Option<IOException> run() {
+        switch (readString()) {
+            case Err<String, IOException>(var error) -> {
+                return new Some<>(error);
+            }
+            case Ok<String, IOException>(var input) -> {
+                var output = compileRoot(input);
+                return writeString(output);
+            }
+        }
+    }
+
+    private static Option<IOException> writeString(String output) {
+        try {
+            Files.writeString(TARGET, output);
+            return new None<>();
         } catch (IOException e) {
-            e.printStackTrace();
+            return new Some<>(e);
+        }
+    }
+
+    private static Result<String, IOException> readString() {
+        try {
+            return new Ok<>(Files.readString(SOURCE));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 
