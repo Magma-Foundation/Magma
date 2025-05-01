@@ -103,6 +103,12 @@ public class Main {
         CompileState withoutStructType();
 
         Option<StructurePrototype> findStructureType();
+
+        Tuple<String, CompileState> createLocalName();
+
+        CompileState addStatement(String statement);
+
+        Tuple<List<String>, CompileState> removeStatements();
     }
 
     private static class Strings {
@@ -369,10 +375,12 @@ public class Main {
     private record ImmutableCompileState(
             List<String> structs,
             List<String> functions,
-            Option<StructurePrototype> maybeStructureType
+            List<String> statements,
+            Option<StructurePrototype> maybeStructureType,
+            int counter
     ) implements CompileState {
         public ImmutableCompileState() {
-            this(Lists.empty(), Lists.empty(), new None<>());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), 0);
         }
 
         @Override
@@ -386,27 +394,43 @@ public class Main {
 
         @Override
         public CompileState addStruct(String struct) {
-            return new ImmutableCompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType);
+            return new ImmutableCompileState(this.structs.addLast(struct), this.functions, this.statements, this.maybeStructureType, this.counter);
         }
 
         @Override
         public CompileState addFunction(String function) {
-            return new ImmutableCompileState(this.structs, this.functions.addLast(function), this.maybeStructureType);
+            return new ImmutableCompileState(this.structs, this.functions.addLast(function), this.statements, this.maybeStructureType, this.counter);
         }
 
         @Override
         public CompileState withStructType(StructurePrototype type) {
-            return new ImmutableCompileState(this.structs, this.functions, new Some<>(type));
+            return new ImmutableCompileState(this.structs, this.functions, this.statements, new Some<>(type), this.counter);
         }
 
         @Override
         public CompileState withoutStructType() {
-            return new ImmutableCompileState(this.structs, this.functions, new None<>());
+            return new ImmutableCompileState(this.structs, this.functions, this.statements, new None<>(), this.counter);
         }
 
         @Override
         public Option<StructurePrototype> findStructureType() {
             return this.maybeStructureType;
+        }
+
+        @Override
+        public Tuple<String, CompileState> createLocalName() {
+            var name = "local" + this.counter;
+            return new Tuple<>(name, new ImmutableCompileState(this.structs, this.functions, this.statements, this.maybeStructureType, this.counter + 1));
+        }
+
+        @Override
+        public CompileState addStatement(String statement) {
+            return new ImmutableCompileState(this.structs, this.functions, this.statements.addLast(statement), this.maybeStructureType, this.counter);
+        }
+
+        @Override
+        public Tuple<List<String>, CompileState> removeStatements() {
+            return new Tuple<>(this.statements, new ImmutableCompileState(this.structs, this.functions, Lists.empty(), this.maybeStructureType, this.counter));
         }
     }
 
@@ -1301,14 +1325,20 @@ public class Main {
         return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
-                    var newParameters = state.findStructureType()
+                    var newParameters = tuple.left.findStructureType()
                             .map(structType -> params.addFirst(new Definition(new StructRef(structType.name, structType.typeParams), "this")))
                             .orElse(params);
+
                     var paramStrings = generateNodesAsValues(newParameters);
 
+                    var removed = tuple.left.removeStatements();
+                    var joined = removed.left.iterate().collect(new Joiner()).orElse("");
+
                     var generated = definition
-                            .mapName(name -> state.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
-                    return new Some<>(new Tuple<>(state.addFunction(generated), ""));
+                            .mapName(name -> removed.right.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name))
+                            .generate().toSlice() + "(" + paramStrings + "){" + joined + tuple.right + "\n}\n";
+
+                    return new Some<>(new Tuple<>(removed.right.addFunction(generated), ""));
                 });
             });
         });
@@ -1377,17 +1407,21 @@ public class Main {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
                         var caller = callerTuple.right;
 
-                        var left = argumentsTuple.left;
+                        CompileState oldState;
                         var oldArguments = argumentsTuple.right;
                         List<Value> newArguments;
                         if (caller instanceof DataAccess access) {
+                            var localName = argumentsTuple.left.createLocalName();
+                            var name = localName.left;
+                            oldState = localName.right.addStatement("\n\tauto " + name + " = " + access.parent.generate().toSlice() + ";");
                             newArguments = oldArguments.addFirst(access.parent);
                         }
                         else {
+                            oldState = argumentsTuple.left;
                             newArguments = oldArguments;
                         }
 
-                        return new Tuple<>(left, new Invocation(caller, newArguments));
+                        return new Tuple<>(oldState, new Invocation(caller, newArguments));
                     });
                 }));
             });
@@ -1464,11 +1498,11 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
         return type(state, type).flatMap(typeTuple -> {
-            return assemble(typeTuple.left, new None<String>(), typeTuple.right, name);
+            return assembleDefinition(typeTuple.left, new None<String>(), typeTuple.right, name);
         });
     }
 
-    private static Option<Tuple<CompileState, Definition>> assemble(CompileState state, Option<String> maybeBeforeType, Type type, String name) {
+    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, Type type, String name) {
         var definition = new Definition(maybeBeforeType, type, name.strip());
         return new Some<>(new Tuple<>(state, definition));
     }
@@ -1476,7 +1510,7 @@ public class Main {
     private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
-                return assemble(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
+                return assembleDefinition(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
             });
         });
     }
