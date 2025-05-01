@@ -679,15 +679,13 @@ public class Main {
     }
 
     private static Option<IOException> run() {
-        switch (readString()) {
-            case Err<String, IOException>(var error) -> {
-                return new Some<>(error);
-            }
+        return switch (readString()) {
+            case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
-                return writeString(output);
+                yield writeString(output);
             }
-        }
+        };
     }
 
     private static Option<IOException> writeString(String output) {

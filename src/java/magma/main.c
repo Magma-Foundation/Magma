@@ -497,15 +497,13 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 }
 /* public static */ void main(){/* run().ifPresent(Throwable::printStackTrace); */
 }
-/* private static */ template Option<struct IOException> run(){/* switch (readString()) {
-            case Err<String, IOException>(var error) -> {
-                return new Some<>(error);
-            }
+/* private static */ template Option<struct IOException> run(){/* return switch (readString()) {
+            case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
-                return writeString(output);
+                yield writeString(output);
             }
-        } */
+        } *//* ; */
 }
 /* private static */ template Option<struct IOException> writeString(char* output){/* try {
             Files.writeString(TARGET, output);
