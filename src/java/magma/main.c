@@ -2,8 +2,13 @@ enum OptionVariant {
 	Some,
 	None
 };
+union OptionValue<T> {
+	Some,
+	None
+};
 /* private sealed */struct Option<T> {
 	OptionVariant _variant;
+	OptionValue<T> _value;
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
 	int isEmpty();
 	/* T */ orElse(/* T */ other);
@@ -436,18 +441,18 @@ enum OptionVariant {
             });
         } *//* ); *//*  */
 }
-/* private static */ template Tuple</* CompileState */, /*  String */> assembleStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, template List</* String */> variants, /* String */ content){/* if (variants.isEmpty()) {
-            return generateStruct(state, beforeKeyword, name, typeParams, params, content);
+/* private static */ template Tuple</* CompileState */, /*  String */> assembleStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, template List</* String */> variants, /* String */ oldContent){/* if (variants.isEmpty()) {
+            return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
         } *//* var enumName = name + "Variant"; *//* var variantsString = variants.iterate()
                 .map(variant -> "\n\t" + variant)
                 .collect(new Joiner(","))
-                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum); *//* return generateStruct(compileState, beforeKeyword, name, typeParams, params, "\n\t" + enumName + " _variant;" + content); *//*  */
+                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var typeParamString = generateTypeParams(typeParams); *//* var unionName = name + "Value" + typeParamString; *//* var generateUnion = "union " + unionName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum).addStruct(generateUnion); *//* var newContent = "\n\t" + enumName + " _variant;"
+                + "\n\t" + unionName + " _value;"
+                + oldContent; *//* return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent); *//*  */
 }
-/* private static */ template Tuple</* CompileState */, /*  String */> generateStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, /* String */ content){/* String typeParamString; *//* if (typeParams.isEmpty()) {
-            typeParamString = "";
-        } *//* else {
-            typeParamString = "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">";
-        } *//* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n"; *//* return new Tuple<CompileState, String>(state.addStruct(generatedStruct), ""); *//*  */
+/* private static */ template Tuple</* CompileState */, /*  String */> generateStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ typeParamString, /* String */ params, /* String */ content){/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n"; *//* return new Tuple<CompileState, String>(state.addStruct(generatedStruct), ""); *//*  */
+}
+/* private static */ /* String */ generateTypeParams(template List</* String */> typeParams){/* return typeParams.isEmpty() ? "" : "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">"; *//*  */
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> or(/* CompileState */ state, /* String */ input, template List<template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  String */>>>> actions){/* return actions.iterate()
                 .map(action -> action.apply(state, input))

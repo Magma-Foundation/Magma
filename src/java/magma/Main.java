@@ -679,10 +679,10 @@ public class Main {
             List<String> typeParams,
             String params,
             List<String> variants,
-            String content
+            String oldContent
     ) {
         if (variants.isEmpty()) {
-            return generateStruct(state, beforeKeyword, name, typeParams, params, content);
+            return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
         }
 
         var enumName = name + "Variant";
@@ -692,27 +692,34 @@ public class Main {
                 .orElse("");
 
         var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n";
-        var compileState = state.addStruct(generatedEnum);
-        return generateStruct(compileState, beforeKeyword, name, typeParams, params, "\n\t" + enumName + " _variant;" + content);
+
+
+        var typeParamString = generateTypeParams(typeParams);
+        var unionName = name + "Value" + typeParamString;
+        var generateUnion = "union " + unionName + " {" + variantsString + "\n};\n";
+
+        var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
+        var newContent = "\n\t" + enumName + " _variant;"
+                + "\n\t" + unionName + " _value;"
+                + oldContent;
+
+        return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
     }
 
     private static Tuple<CompileState, String> generateStruct(
             CompileState state,
             String beforeKeyword,
             String name,
-            List<String> typeParams,
+            String typeParamString,
             String params,
             String content
     ) {
-        String typeParamString;
-        if (typeParams.isEmpty()) {
-            typeParamString = "";
-        }
-        else {
-            typeParamString = "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">";
-        }
         var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n";
         return new Tuple<CompileState, String>(state.addStruct(generatedStruct), "");
+    }
+
+    private static String generateTypeParams(List<String> typeParams) {
+        return typeParams.isEmpty() ? "" : "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">";
     }
 
     private static Option<Tuple<CompileState, String>> or(
