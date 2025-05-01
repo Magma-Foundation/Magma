@@ -459,10 +459,11 @@ public class Main {
 
     private static class SingleHead<T> implements Head<T> {
         private final T value;
-        private boolean retrieved = false;
+        private boolean retrieved;
 
         public SingleHead(T value) {
             this.value = value;
+            this.retrieved = false;
         }
 
         @Override

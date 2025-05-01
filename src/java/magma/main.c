@@ -107,7 +107,7 @@ union ResultValue<T, X> {
 };
 /* private static */struct SingleHead<T> {
 	/* private final */ T value;
-	/* private boolean retrieved */ /* = */ false;
+	/* private */ int retrieved;
 };
 /* private */struct InfixSplitter {
 	char* infix;
@@ -374,7 +374,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 /* public static <T> */ template Iterator<struct T> Iterators::fromOptions(struct Iterators this, template Option<struct T> option){
 	return /* new Iterator<> */(option.<Head<T>>map(/* SingleHead::new */).orElseGet(/* EmptyHead::new */));
 }
-struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; */
+struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; *//* this.retrieved = false; */
 }
 /* @Override
  public */ template Option<T> SingleHead::next(struct SingleHead<T> this){/* if (this.retrieved) {
