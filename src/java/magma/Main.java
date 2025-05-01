@@ -543,9 +543,17 @@ public class Main {
         }
     }
 
+    private record Ref(Type type) implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "*";
+        }
+    }
+
     private enum Primitive implements Type {
-        I32("int"),
-        Auto("auto");
+        Auto("auto"),
+        I8("char"),
+        I32("int");
         private final String value;
 
         Primitive(String value) {
@@ -1101,8 +1109,18 @@ public class Main {
                 Main::primitive,
                 Main::template,
                 Main::typeParam,
+                Main::string,
                 wrap(Main::content)
         ));
+    }
+
+    private static Option<Tuple<CompileState, Type>> string(CompileState state, String input) {
+        if (input.strip().equals("String")) {
+            return new Some<>(new Tuple<>(state, new Ref(Primitive.I8)));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Option<Tuple<CompileState, Type>> typeParam(CompileState state, String input) {
