@@ -268,18 +268,29 @@ public class Main {
         return Optional.empty();
     }
 
-
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileInfix(input, "(", (definition, withParams) -> {
             return compileInfix(withParams, ")", (params, withBraces) -> {
                 return compilePrefix(withBraces.strip(), withoutStart1 -> {
                     return compileSuffix(withoutStart1, "}", content -> {
-                        var generated = generatePlaceholder(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                        var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
                         return Optional.of(new Tuple<>(state.addFunction(generated), ""));
                     });
                 });
             });
         });
+    }
+
+    private static String compileDefinition(String input) {
+        var stripped = input.strip();
+        var nameSeparator = stripped.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var beforeName = stripped.substring(0, nameSeparator);
+            var name = stripped.substring(nameSeparator + " ".length());
+            return generatePlaceholder(beforeName) + " " + name;
+        }
+
+        return generatePlaceholder(input);
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
