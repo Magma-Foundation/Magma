@@ -101,18 +101,23 @@ public class Main {
             return "";
         }
 
-        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+        return compileStructure(stripped, "class ").orElseGet(() -> generatePlaceholder(stripped));
+
+    }
+
+    private static Optional<String> compileStructure(String stripped, String infix) {
+        return compileInfix(stripped, infix, (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + compileAll(content, Main::compileStructSegment) + "}");
                 });
             });
-        }).orElseGet(() -> generatePlaceholder(stripped));
-
+        });
     }
 
     private static String compileStructSegment(String input) {
-        return generatePlaceholder(input);
+        return compileStructure(input, "record ")
+                .orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {

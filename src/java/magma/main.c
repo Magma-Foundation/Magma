@@ -1,34 +1,33 @@
-/* public  */struct Main {/* private record State(List<String> segments, StringBuilder buffer, int depth) {
-        public State() {
+/* public  */struct Main {/* private  */struct State(List<String> segments, StringBuilder buffer, int depth) {/* public State() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        }
+        } *//* 
 
         private State advance() {
             var copy = new ArrayList<String>(this.segments);
             copy.add(this.buffer.toString());
             return new State(copy, new StringBuilder(), this.depth);
-        }
+        } *//* 
 
         private State append(char c) {
             return new State(this.segments, this.buffer.append(c), this.depth);
-        }
+        } *//* 
 
         public State exit() {
             return new State(this.segments, this.buffer, this.depth - 1);
-        }
+        } *//* 
 
         public boolean isLevel() {
             return this.depth == 0;
-        }
+        } *//* 
 
         public State enter() {
             return new State(this.segments, this.buffer, this.depth + 1);
-        }
+        } *//* 
 
         public boolean isShallow() {
             return this.depth == 1;
-        }
-    } *//* 
+        } *//* 
+     */}/* 
 
     public static void main() {
         try {
@@ -87,15 +86,19 @@
             return "";
         }
 
-        return compileInfix(stripped, " */struct ", (beforeKeyword, afterKeyword) -> {/* return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+        return compileStructure(stripped, "class ").orElseGet(() -> generatePlaceholder(stripped));
+
+    } *//* private static Optional<String> compileStructure(String stripped, String infix) {
+        return compileInfix(stripped, infix, (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + compileAll(content, Main::compileStructSegment) + "}");
                 });
-            } *//* ); *//* 
-        }).orElseGet(() -> generatePlaceholder(stripped));
-
-     */}/* private static String compileStructSegment(String input) {
-        return generatePlaceholder(input);
+            });
+        });
+    } *//* private static String compileStructSegment(String input) {
+        return compileStructure(input, "record ")
+                .orElseGet(() -> generatePlaceholder(input));
     } *//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
