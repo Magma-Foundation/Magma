@@ -43,7 +43,7 @@ union OptionValue<T> {
 	S _super;
 	/* String_ */ (*generate)(S);
 };
-/* private */struct String_ {char* slice
+/* private */struct String_ {char* value
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -68,7 +68,7 @@ union OptionValue<T> {
 
         private String generate0() {
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name);
+            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
         } */
 };
 /* private */struct Content(String input) implements Type, Parameter {/* 
@@ -77,11 +77,7 @@ union OptionValue<T> {
             return generatePlaceholder(this.input);
         } */
 };
-/* private */struct Functional(List<Type> arguments, Type returns) implements Type {/* 
-
-        private String generate0() {
-            return this.generateWithName("");
-        } */
+/* private */struct Functional(List<Type> arguments, Type returns) implements Type {
 };
 /* private */struct Template(String base, List<Type> arguments) implements Type {/* 
 
@@ -190,9 +186,11 @@ union OptionValue<T> {
         }
     } */
 };
-/* default */ char* generateWithName_Type extends Node(char* name){/* return this.generate().toSlice() + " " + name; *//*  */
+/* default */ /* String_ */ generateWithName_Type extends Node(char* name){/* return this.generate().appendSlice(" ").appendSlice(name); *//*  */
 }
-/* public */ char* toSlice_String_(){/* return this.slice; *//*  */
+/* public */ char* toSlice_String_(){/* return this.value; *//*  */
+}
+/* public */ /* String_ */ appendSlice_String_(char* slice){/* return new String_(this.value + slice); *//*  */
 }
 /* @Override
  public <R> */ template Option</* R */> map_Some(/*  R */ (*mapper)(/* T */)){/* return new Some<>(mapper.apply(this.value)); *//*  */
@@ -400,13 +398,18 @@ union OptionValue<T> {
  public */ /* String_ */ generate_Content(String input) implements Type, Parameter(){/* return new String_(this.generate0()); *//*  */
 }
 /* @Override
- public */ /* String_ */ generate_Functional(List<Type> arguments, Type returns) implements Type(){/* return new String_(this.generate0()); *//*  */
+ public */ /* String_ */ generate_Functional(List<Type> arguments, Type returns) implements Type(){/* return this.generateWithName(""); *//*  */
 }
 /* @Override
- public */ char* generateWithName_Functional(List<Type> arguments, Type returns) implements Type(char* name){/* var joinedArguments = this.arguments().iterate()
+ public */ /* String_ */ generateWithName_Functional(List<Type> arguments, Type returns) implements Type(char* name){/* var joinedArguments = this.arguments().iterate()
                     .map(type -> type.generate().toSlice())
                     .collect(new Joiner(", "))
-                    .orElse(""); *//* return this.returns().generate().toSlice() + " (*" + name + ")(" + joinedArguments + ")"; *//*  */
+                    .orElse(""); *//* return this.returns.generate()
+                    .appendSlice(" (*")
+                    .appendSlice(name)
+                    .appendSlice(")(")
+                    .appendSlice(joinedArguments)
+                    .appendSlice(")"); *//*  */
 }
 /* @Override
  public */ /* String_ */ generate_Template(String base, List<Type> arguments) implements Type(){/* return new String_(this.generate0()); *//*  */

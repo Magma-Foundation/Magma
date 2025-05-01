@@ -63,8 +63,8 @@ public class Main {
     }
 
     private interface Type extends Node {
-        default String generateWithName(String name) {
-            return this.generate().toSlice() + " " + name;
+        default String_ generateWithName(String name) {
+            return this.generate().appendSlice(" ").appendSlice(name);
         }
     }
 
@@ -75,9 +75,13 @@ public class Main {
         String_ generate();
     }
 
-    private record String_(String slice) {
+    private record String_(String value) {
         public String toSlice() {
-            return this.slice;
+            return this.value;
+        }
+
+        public String_ appendSlice(String slice) {
+            return new String_(this.value + slice);
         }
     }
 
@@ -496,7 +500,7 @@ public class Main {
 
         private String generate0() {
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name);
+            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
         }
     }
 
@@ -514,21 +518,22 @@ public class Main {
     private record Functional(List<Type> arguments, Type returns) implements Type {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
-        }
-
-        private String generate0() {
             return this.generateWithName("");
         }
 
         @Override
-        public String generateWithName(String name) {
+        public String_ generateWithName(String name) {
             var joinedArguments = this.arguments().iterate()
                     .map(type -> type.generate().toSlice())
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.returns().generate().toSlice() + " (*" + name + ")(" + joinedArguments + ")";
+            return this.returns.generate()
+                    .appendSlice(" (*")
+                    .appendSlice(name)
+                    .appendSlice(")(")
+                    .appendSlice(joinedArguments)
+                    .appendSlice(")");
         }
     }
 
