@@ -1091,7 +1091,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> methodWithContent(CompileState state, Definition definition, List<Definition> params, String withBraces) {
         return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
-                return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
+                return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
                     var paramStrings = generateNodesAsValues(params);
 
                     var generated = definition
@@ -1119,8 +1119,24 @@ public class Main {
         }));
     }
 
-    private static Option<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> functionSegment(CompileState state, String input) {
         return or(state, input.strip(), Lists.of(
+                Main::whitespace,
+                (state0, input1) -> suffix(input1.strip(), ";", slice -> statementValue(state0, slice).map(Tuple.mapRight(slice0 -> "\n\t" + slice0 + ";"))),
+                (state0a, input1) -> content(state0a, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
+        ));
+    }
+
+    private static Option<Tuple<CompileState, String>> statementValue(CompileState state, String input) {
+        return or(state, input, Lists.of(Main::returns));
+    }
+
+    private static Option<Tuple<CompileState, String>> returns(CompileState state, String input) {
+        return prefix(input.strip(), "return ", slice -> compileValue(state, slice).map(Tuple.mapRight(result -> "return " + result)));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
+        return or(state, input, Lists.of(
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
