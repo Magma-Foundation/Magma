@@ -33,12 +33,6 @@ union OptionValue<T> {
 	S _super;
 	template Option<(char*, char*)> (*split)(S, char*);
 };
-/* private */struct Type extends Node<S> {
-	S _super;
-};
-/* private */struct Parameter extends Node<S> {
-	S _super;
-};
 /* private */struct Node<S> {
 	S _super;
 	struct String_ (*generate)(S);
@@ -56,15 +50,9 @@ union OptionValue<T> {
 };
 /* private */struct Iterator<T> {template Head<struct T> head
 };
-/* private static final */struct RangeHead implements Head<Integer> {
-	/* private final */ int length;/* 
-        private int counter = 0; */
-};
 /* private static */struct Lists {
 };
 /* private static */struct EmptyHead<T> implements Head<T> {
-};
-/* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
 /* private */struct StructurePrototype {char* type, char* name, template List<char*> typeParams, template List<char*> variants
 };
@@ -80,85 +68,188 @@ union OptionValue<T> {
 	/* private final */ struct T value;
 	/* private boolean retrieved */ /* = */ false;
 };
-/* private */struct InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter {
-};
-/* private static */struct TypeSeparatorSplitter implements Splitter {
-};
-/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
-};
-/* private */struct Content(String input) implements Type, Parameter {
-};
-/* private */struct Functional(List<Type> arguments, Type returns) implements Type {
-};
-/* private */struct Template(String base, List<Type> arguments) implements Type {
-};
 /* private static */struct ListCollector<T> implements Collector<T, List<T>> {
 };
-/* private */struct TypeParameter(String value) implements Type {
-};
-/* private */struct Ref(Type type) implements Type {
-};
-/* private */struct TupleType(List<Type> arguments) implements Type {
-};
-/* private */struct StructRef(String input, List<String> typeParams) implements Type {
-};
-/* private */struct Primitive implements Type {/* Auto("auto"),
+/* public */struct Main {/* 
+
+    private interface Parameter extends Node {
+    } *//* 
+
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        public Joiner() {
+            this("");
+        }
+
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
+        }
+    } *//* 
+
+    private record InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter {
+        @Override
+        public Option<Tuple<String, String>> split(String input) {
+            return this.apply(input).map(classIndex -> {
+                var beforeKeyword = input.substring(0, classIndex);
+                var afterKeyword = input.substring(classIndex + this.length());
+                return new Tuple<>(beforeKeyword, afterKeyword);
+            });
+        }
+
+        private int length() {
+            return this.infix.length();
+        }
+
+        private Option<Integer> apply(String input) {
+            return this.locator().apply(input, this.infix);
+        }
+    } *//* 
+
+    private record Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
+        public Definition(Type type, String name) {
+            this(new None<>(), type, name);
+        }
+
+        public Definition mapName(Function<String, String> mapper) {
+            return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name));
+        }
+
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
+            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
+        }
+    } *//* 
+
+    private record Content(String input) implements Type, Parameter {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            return generatePlaceholder(this.input);
+        }
+    } *//* 
+
+    private record Functional(List<Type> arguments, Type returns) implements Type {
+        @Override
+        public String_ generate() {
+            return this.generateWithName("");
+        }
+
+        @Override
+        public String_ generateWithName(String name) {
+            var joinedArguments = this.arguments().iterate()
+                    .map(type -> type.generate().toSlice())
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returns.generate()
+                    .appendSlice(" (*")
+                    .appendSlice(name)
+                    .appendSlice(")(")
+                    .appendSlice(joinedArguments)
+                    .appendSlice(")");
+        }
+    } *//* 
+
+    private record Template(String base, List<Type> arguments) implements Type {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            var generatedTuple = this.arguments().iterate()
+                    .map(type -> type.generate().toSlice())
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "template " + this.base() + "<" + generatedTuple + ">";
+        }
+    } *//* 
+
+    private record TypeParameter(String value) implements Type {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            return this.value;
+        }
+    } *//* 
+
+    private record Ref(Type type) implements Type {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            return this.type.generate().toSlice() + "*";
+        }
+    } *//* 
+
+    private record TupleType(List<Type> arguments) implements Type {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
+        }
+
+        private String generate0() {
+            return "(" + generateNodesAsValues(this.arguments) + ")";
+        }
+    } *//* 
+
+    private record StructRef(String input, List<String> typeParams) implements Type {
+        @Override
+        public String_ generate() {
+            var typeParamString = this.typeParams.iterate()
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+
+            return Strings.from("struct ")
+                    .appendSlice(this.input)
+                    .appendSlice(typeParamString);
+        }
+    } *//* 
+
+    private enum Primitive implements Type {
+        Auto("auto"),
         I8("char"),
-        I32("int"); */
-	/* private final */ char* value;/* 
+        I32("int");
+        private final String value;
 
         Primitive(String value) {
             this.value = value;
-        } */
-};
-/* private static Tuple<CompileState, String> assembleStruct(
-            String type,
-            CompileState state,
-            String beforeKeyword,
-            String name,
-            List<String> typeParams,
-            List<Parameter> params,
-            List<String> variants,
-            String oldContent
-    ) {
-        if (!variants.isEmpty()) {
-            var enumName = name + "Variant";
-            var enumFields = variants.iterate()
-                    .map(variant -> "\n\t" + variant)
-                    .collect(new Joiner(","))
-                    .orElse("");
-            var generatedEnum = " */struct " + enumName + " {/* " + enumFields + "\n};\n";
-
-            var typeParamString = generateTypeParams(typeParams);
-            var unionName = name + "Value" + typeParamString;
-            var unionFields = variants.iterate()
-                    .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
-                    .collect(new Joiner(""))
-                    .orElse("");
-            var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
-
-            var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
-            var newContent = "\n\t" + enumName + " _variant;"
-                    + "\n\t" + unionName + " _value;"
-                    + oldContent;
-
-            return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
         }
 
-        if (type.equals("interface")) {
-            var typeParamString = generateTypeParams(typeParams.addFirst("S"));
-            var newContent = "\n\tS _super;" + oldContent;
-            return generateStruct(state, beforeKeyword, name, typeParamString, params, newContent);
+        @Override
+        public String_ generate() {
+            return Strings.from(this.generate0());
         }
 
-        return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
-     */
+        private String generate0() {
+            return this.value;
+        }
+    } */
 };
-/* public */struct Main {
-};
-/* default */ struct String_ Type extends Node::generateWithName(struct Type extends Node this, char* name){
-	return /* this.generate().appendSlice(" ").appendSlice(name) */;
+/* private interface Type extends Node {
+ default */ struct String_ generateWithName(char* name){
+	return /* this.generate().appendSlice(" ").appendSlice(name) */;/* } */
 }
 /* @External
  private static */ struct String_ Strings::from(struct Strings this, char* value){
@@ -254,13 +345,18 @@ union OptionValue<T> {
 /* public */ template Option<T> Iterator::next(struct Iterator<T> this){
 	return /* this.head.next() */;
 }
-struct private RangeHead implements Head::RangeHead(struct RangeHead implements Head<Integer> this, int length){/* this.length = length; */
-}
-/* @Override
- public */ template Option<Integer> RangeHead implements Head::next(struct RangeHead implements Head<Integer> this){/* if (this.counter >= this.length) {
+/* private static final class RangeHead implements Head<Integer> {
+ private final int length;
+ private int counter = 0;
+
+ */ struct private RangeHead(int length){/* this.length = length; *//* }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter >= this.length) {
                 return new None<>();
             } *//* var value = this.counter; *//* this.counter++; */
-	return /* new Some<>(value) */;
+	return /* new Some<>(value) */;/* } */
 }
 /* public static <T> */ template List<struct T> Lists::of(struct Lists this, /* T... */ elements){
 	return /* new JavaList<>(Arrays.asList(elements)) */;
@@ -271,16 +367,6 @@ struct private RangeHead implements Head::RangeHead(struct RangeHead implements 
 /* @Override
  public */ template Option<struct T> EmptyHead::next(struct EmptyHead<T> implements Head<T> this){
 	return /* new None<>() */;
-}
-struct public Joiner(String delimiter) implements Collector::Joiner(struct Joiner(String delimiter) implements Collector<String, Option<String>> this){/* this(""); */
-}
-/* @Override
- public */ template Option<String> Joiner(String delimiter) implements Collector::createInitial(struct Joiner(String delimiter) implements Collector<String, Option<String>> this){
-	return /* new None<>() */;
-}
-/* @Override
- public */ template Option<String> Joiner(String delimiter) implements Collector::fold(struct Joiner(String delimiter) implements Collector<String, Option<String>> this, template Option<String> current, String element){
-	return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */;
 }
 struct public CompileState::CompileState(struct CompileState this){/* this(Lists.empty(), Lists.empty(), new None<>()); */
 }
@@ -352,27 +438,9 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             } *//* this.retrieved = true; */
 	return /* new Some<>(this.value) */;
 }
-/* @Override
- public */ template Option<(char*, char*)> InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter::split(struct InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter this, char* input){/* return this.apply(input).map(classIndex -> {
-                var beforeKeyword = input.substring(0, classIndex);
-                var afterKeyword = input.substring(classIndex + this.length());
-                return new Tuple<>(beforeKeyword, afterKeyword);
-            } *//* ); */
-}
-/* private */ int InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter::length(struct InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter this){
-	return /* this.infix.length() */;
-}
-/* private */ template Option<struct Integer> InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter::apply(struct InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter this, char* input){
-	return /* this.locator().apply(input, this.infix) */;
-}
-/* @Override
- public */ template Option<(char*, char*)> TypeSeparatorSplitter implements Splitter::split(struct TypeSeparatorSplitter implements Splitter this, char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
+/* private static class TypeSeparatorSplitter implements Splitter {
+ @Override
+ public */ template Option<(char*, char*)> split(char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
                 var left = segments.left;
                 if (left.isEmpty()) {
                     return new None<>();
@@ -381,61 +449,17 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
                 var beforeType = left.iterate().collect(new Joiner(" ")).orElse("");
                 var type = segments.right;
                 return new Some<>(new Tuple<>(beforeType, type));
-            } *//* ); */
-}
-/* private static */ struct DivideState TypeSeparatorSplitter implements Splitter::fold(struct TypeSeparatorSplitter implements Splitter this, struct DivideState state, struct char c){/* if (c == ' ' && state.isLevel()) {
+            } *//* ); *//* }
+
+        private static DivideState fold(DivideState state, char c) {
+            if (c == ' ' && state.isLevel()) {
                 return state.advance();
             } *//* var appended = state.append(c); *//* if (c == '<') {
                 return appended.enter();
             } *//* if (c == '>') {
                 return appended.exit();
             } */
-	return /* appended */;
-}
-struct public Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter::Definition(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this, struct Type type, char* name){/* this(new None<>(), type, name); */
-}
-/* public */ struct Definition Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter::mapName(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this, char* (*mapper)(char*)){
-	return /* new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name)) */;
-}
-/* @Override
- public */ struct String_ Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter::generate(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter::generate0(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse(""); */
-	return /* beforeTypeString + this.type.generateWithName(this.name).toSlice() */;
-}
-/* @Override
- public */ struct String_ Content(String input) implements Type, Parameter::generate(struct Content(String input) implements Type, Parameter this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* Content(String input) implements Type, Parameter::generate0(struct Content(String input) implements Type, Parameter this){
-	return /* generatePlaceholder(this.input) */;
-}
-/* @Override
- public */ struct String_ Functional(List<Type> arguments, Type returns) implements Type::generate(struct Functional(List<Type> arguments, Type returns) implements Type this){
-	return /* this.generateWithName("") */;
-}
-/* @Override
- public */ struct String_ Functional(List<Type> arguments, Type returns) implements Type::generateWithName(struct Functional(List<Type> arguments, Type returns) implements Type this, char* name){/* var joinedArguments = this.arguments().iterate()
-                    .map(type -> type.generate().toSlice())
-                    .collect(new Joiner(", "))
-                    .orElse(""); */
-	return /* this.returns.generate()
-                    .appendSlice(" (*")
-                    .appendSlice(name)
-                    .appendSlice(")(")
-                    .appendSlice(joinedArguments)
-                    .appendSlice(")") */;
-}
-/* @Override
- public */ struct String_ Template(String base, List<Type> arguments) implements Type::generate(struct Template(String base, List<Type> arguments) implements Type this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* Template(String base, List<Type> arguments) implements Type::generate0(struct Template(String base, List<Type> arguments) implements Type this){/* var generatedTuple = this.arguments().iterate()
-                    .map(type -> type.generate().toSlice())
-                    .collect(new Joiner(", "))
-                    .orElse(""); */
-	return /* "template " + this.base() + "<" + generatedTuple + ">" */;
+	return /* appended */;/* } */
 }
 /* @Override
  public */ template List<struct T> ListCollector::createInitial(struct ListCollector<T> implements Collector<T, List<T>> this){
@@ -444,43 +468,6 @@ struct public Definition(Option<String> maybeBeforeType, Type type, String name)
 /* @Override
  public */ template List<struct T> ListCollector::fold(struct ListCollector<T> implements Collector<T, List<T>> this, template List<struct T> current, struct T element){
 	return /* current.addLast(element) */;
-}
-/* @Override
- public */ struct String_ TypeParameter(String value) implements Type::generate(struct TypeParameter(String value) implements Type this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* TypeParameter(String value) implements Type::generate0(struct TypeParameter(String value) implements Type this){
-	return /* this.value */;
-}
-/* @Override
- public */ struct String_ Ref(Type type) implements Type::generate(struct Ref(Type type) implements Type this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* Ref(Type type) implements Type::generate0(struct Ref(Type type) implements Type this){
-	return /* this.type.generate().toSlice() + "*" */;
-}
-/* @Override
- public */ struct String_ TupleType(List<Type> arguments) implements Type::generate(struct TupleType(List<Type> arguments) implements Type this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* TupleType(List<Type> arguments) implements Type::generate0(struct TupleType(List<Type> arguments) implements Type this){
-	return /* "(" + generateNodesAsValues(this.arguments) + ")" */;
-}
-/* @Override
- public */ struct String_ StructRef(String input, List<String> typeParams) implements Type::generate(struct StructRef(String input, List<String> typeParams) implements Type this){/* var typeParamString = this.typeParams.iterate()
-                    .collect(new Joiner(", "))
-                    .map(inner -> "<" + inner + ">")
-                    .orElse(""); */
-	return /* Strings.from("struct ")
-                    .appendSlice(this.input)
-                    .appendSlice(typeParamString) */;
-}
-/* @Override
- public */ struct String_ Primitive implements Type::generate(struct Primitive implements Type this){
-	return /* Strings.from(this.generate0()) */;
-}
-/* private */ char* Primitive implements Type::generate0(struct Primitive implements Type this){
-	return /* this.value */;
 }
 /* public static */ struct void main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -589,9 +576,41 @@ struct public Definition(Option<String> maybeBeforeType, Type type, String name)
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){/* return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state.withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
+                if (!isSymbol(name)) {
+                    return new None<>();
+                }
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         } *//* ); */
+}
+/* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
+            var enumName = name + "Variant";
+            var enumFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant)
+                    .collect(new Joiner(","))
+                    .orElse("");
+            var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n";
+
+            var typeParamString = generateTypeParams(typeParams);
+            var unionName = name + "Value" + typeParamString;
+            var unionFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
+                    .collect(new Joiner(""))
+                    .orElse("");
+            var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
+
+            var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
+            var newContent = "\n\t" + enumName + " _variant;"
+                    + "\n\t" + unionName + " _value;"
+                    + oldContent;
+
+            return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
+        } *//* if (type.equals("interface")) {
+            var typeParamString = generateTypeParams(typeParams.addFirst("S"));
+            var newContent = "\n\tS _super;" + oldContent;
+            return generateStruct(state, beforeKeyword, name, typeParamString, params, newContent);
+        } */
+	return /* generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent) */;
 }
 /* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){/* var paramsString = generateNodesAsValues(params); *//* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
 	return /* new Tuple<CompileState, String>(state.addStruct(generatedStruct), "") */;
