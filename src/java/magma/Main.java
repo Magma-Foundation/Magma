@@ -571,11 +571,30 @@ public class Main {
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, Lists.of(
-                        (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
-                        (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
+                        (state3, beforeContent0) -> structureWithVariants(beforeKeyword, withEnd, state3, beforeContent0),
+                        (state1, s) -> structureWithoutVariants(state1, beforeKeyword, s, Lists.empty(), withEnd)
                 ));
             });
         });
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithVariants(String beforeKeyword, String withEnd, CompileState state3, String beforeContent0) {
+        return first(beforeContent0, " permits ", (beforePermits, variantsString) -> {
+            return parseValues(state3, variantsString, Main::structureVariant).flatMap(params -> {
+                return structureWithoutVariants(params.left, beforeKeyword, beforePermits, params.right, withEnd);
+            });
+        });
+    }
+
+    private static Some<Tuple<CompileState, String>> structureVariant(CompileState state, String value) {
+        return new Some<>(new Tuple<>(state, value.strip()));
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithoutVariants(CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
+        return or(state, beforeContent, Lists.of(
+                (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
+                (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
+        ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
