@@ -359,10 +359,22 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
-            return infix(beforeName.strip(), " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
-                var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
-                return Optional.of(new Tuple<>(state, generated));
-            });
+            return or(state, beforeName.strip(), List.of(
+                    (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
+                    (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
+            ));
+        });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileDefinitionWithoutTypeSeparator(CompileState instance, String type, String name) {
+        var generated = generatePlaceholder(type) + " " + name.strip();
+        return Optional.of(new Tuple<>(instance, generated));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileDefinitionWithTypeSeparator(CompileState instance, String beforeName, String name) {
+        return infix(beforeName, " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
+            var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
+            return Optional.of(new Tuple<>(instance, generated));
         });
     }
 

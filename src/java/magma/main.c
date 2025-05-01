@@ -1,14 +1,14 @@
-/* private */struct CompileState {/* JavaList<String> structs */, /*  JavaList<String> functions */
+/* private */struct CompileState {/* JavaList<String> */ structs, /* JavaList<String> */ functions
 };
-/* private */struct DivideState {/* String input */, /*  JavaList<String> segments */, /*  StringBuilder buffer */, /*  int index */, /*  int depth */
+/* private */struct DivideState {/* String */ input, /* JavaList<String> */ segments, /* StringBuilder */ buffer, /* int */ index, /* int */ depth
 };
-/* private */struct Tuple<A, B> {/* A left */, /*  B right */
+/* private */struct Tuple<A, B> {/* A */ left, /* B */ right
 };
-/* private */struct JavaList<T> {/* List<T> list */
+/* private */struct JavaList<T> {/* List<T> */ list
 };
 /* public */struct Main {
 };
-/* public CompileState */(/*  */){/* this(new JavaList<>(), new JavaList<>()); *//*  */
+/* public */ CompileState(/*  */){/* this(new JavaList<>(), new JavaList<>()); *//*  */
 }
 /* private */ /* String */ generate(/*  */){/* return String.join("", this.structs.list)
                     + String.join("", this.functions.list); *//*  */
@@ -17,7 +17,7 @@
 }
 /* public */ /* CompileState */ addFunction(/* String function */){/* return new CompileState(this.structs, this.functions.addLast(function)); *//*  */
 }
-/* public DivideState */(/* String input */){/* this(input, new JavaList<>(), new StringBuilder(), 0, 0); *//*  */
+/* public */ DivideState(/* String input */){/* this(input, new JavaList<>(), new StringBuilder(), 0, 0); *//*  */
 }
 /* private */ /* Optional<DivideState> */ popAndAppend(/*  */){/* return this.popAndAppendToTuple().map(Tuple::right); *//*  */
 }
@@ -46,7 +46,7 @@
 }
 /* public */ /* boolean */ isShallow(/*  */){/* return this.depth == 1; *//*  */
 }
-/* public JavaList */(/*  */){/* this(new ArrayList<>()); *//*  */
+/* public */ JavaList(/*  */){/* this(new ArrayList<>()); *//*  */
 }
 /* public */ /* JavaList<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
 }
@@ -236,10 +236,17 @@
         )); *//*  */
 }
 /* private static Optional<Tuple<CompileState, */ /* String>> */ compileDefinition(/* CompileState state, String input */){/* return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
-            return infix(beforeName.strip(), " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
-                var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
-                return Optional.of(new Tuple<>(state, generated));
-            });
+            return or(state, beforeName.strip(), List.of(
+                    (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
+                    (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
+            ));
+        } *//* ); *//*  */
+}
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileDefinitionWithoutTypeSeparator(/* CompileState instance, String type, String name */){/* var generated = generatePlaceholder(type) + " " + name.strip(); *//* return Optional.of(new Tuple<>(instance, generated)); *//*  */
+}
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileDefinitionWithTypeSeparator(/* CompileState instance, String beforeName, String name */){/* return infix(beforeName, " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
+            var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
+            return Optional.of(new Tuple<>(instance, generated));
         } *//* ); *//*  */
 }
 /* private static */ /* Optional<Integer> */ lastIndexOfSlice(/* String input, String infix */){/* var index = input.lastIndexOf(infix); *//* return index == -1 ? Optional.empty() : Optional.of(index); *//*  */
