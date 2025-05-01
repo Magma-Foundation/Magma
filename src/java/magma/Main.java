@@ -274,7 +274,7 @@ public class Main {
                 return compilePrefix(withBraces.strip(), withoutStart1 -> {
                     return compileSuffix(withoutStart1, "}", content -> {
                         var tuple = compileAll(state, content, Main::compileFunctionSegment);
-                        var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + tuple.right + "}";
+                        var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
                         return Optional.of(new Tuple<>(tuple.left.addFunction(generated), ""));
                     });
                 });
@@ -283,7 +283,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOr(state, input.strip(), List.of(
 
         ));
     }
