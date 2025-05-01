@@ -1,4 +1,4 @@
-/* public class Main {
+/* public  */struct /* Main {
     private record State(List<String> segments, StringBuilder buffer) {
         public State() {
             this(new ArrayList<>(), new StringBuilder()); *//* }
@@ -25,6 +25,9 @@
     private static String compileRootSegment(String input) {
         var stripped = input.strip(); *//* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return ""; *//* }
+
+        var classIndex = stripped.indexOf(" */struct /* "); *//* if (classIndex >= 0) {
+            var beforeKeyword = stripped.substring(0, classIndex); *//* var afterKeyword = stripped.substring(classIndex + " */struct /* ".length()); *//* return generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword); *//* }
 
         return generatePlaceholder(stripped); *//* }
 

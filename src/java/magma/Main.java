@@ -52,6 +52,13 @@ public class Main {
             return "";
         }
 
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex >= 0) {
+            var beforeKeyword = stripped.substring(0, classIndex);
+            var afterKeyword = stripped.substring(classIndex + "class ".length());
+            return generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword);
+        }
+
         return generatePlaceholder(stripped);
     }
 
