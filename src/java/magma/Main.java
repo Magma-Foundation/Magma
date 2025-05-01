@@ -661,7 +661,7 @@ public class Main {
 
         var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n";
         var compileState = state.addStruct(generatedEnum);
-        return generateStruct(compileState, beforeKeyword, name, params, content);
+        return generateStruct(compileState, beforeKeyword, name, params, "\n\t" + enumName + " _variant;" + content);
     }
 
     private static Tuple<CompileState, String> generateStruct(

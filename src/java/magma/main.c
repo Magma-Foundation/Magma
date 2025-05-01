@@ -3,6 +3,7 @@ enum Option<T>Variant {
 	None
 };
 /* private sealed */struct Option<T> {
+	Option<T>Variant _variant;
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
 	int isEmpty();
 	/* T */ orElse(/* T */ other);
@@ -426,7 +427,7 @@ enum Option<T>Variant {
         } *//* var enumName = name + "Variant"; *//* var variantsString = variants.iterate()
                 .map(variant -> "\n\t" + variant)
                 .collect(new Joiner(","))
-                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum); *//* return generateStruct(compileState, beforeKeyword, name, params, content); *//*  */
+                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum); *//* return generateStruct(compileState, beforeKeyword, name, params, "\n\t" + enumName + " _variant;" + content); *//*  */
 }
 /* private static */ template Tuple</* CompileState */, /*  String */> generateStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ params, /* String */ content){/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + content + "\n};\n"; *//* return new Tuple<CompileState, String>(state.addStruct(generatedStruct), ""); *//*  */
 }
