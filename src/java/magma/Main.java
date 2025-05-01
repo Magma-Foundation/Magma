@@ -294,7 +294,12 @@ public class Main {
         if (nameSeparator >= 0) {
             var beforeName = stripped.substring(0, nameSeparator);
             var name = stripped.substring(nameSeparator + " ".length());
-            return generatePlaceholder(beforeName) + " " + name;
+            var typeSeparator = beforeName.indexOf(" ".toString());
+            if (typeSeparator >= 0) {
+                var beforeType = beforeName.substring(0, typeSeparator);
+                var type = beforeName.substring(typeSeparator + " ".length());
+                return generatePlaceholder(beforeName) + " " + generatePlaceholder(type) + " " + name;
+            }
         }
 
         return generatePlaceholder(input);
