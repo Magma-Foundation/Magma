@@ -664,7 +664,12 @@ public class Main {
         @Override
         public Option<Tuple<String, String>> split(String input) {
             return divide(input, this.folder).removeLast().map(divisions -> {
-                var left = divisions.left.iterate().collect(new Joiner()).orElse("");
+                var left1 = divisions.left;
+                if (left1.isEmpty()) {
+                    return new Tuple<>(divisions.right, "");
+                }
+
+                var left = left1.iterate().collect(new Joiner()).orElse("");
                 var right = divisions.right;
                 return new Tuple<>(left, right);
             });
@@ -1279,15 +1284,18 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> value(CompileState state, String input) {
         return or(state, input, Lists.of(
+                Main::invocation,
                 Main::dataAccess,
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
 
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
-        return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> value(state, parent).map(tuple -> {
-            return new Tuple<>(tuple.left, tuple.right + "." + property);
-        }));
+        return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> {
+            return value(state, parent).map(tuple -> {
+                return new Tuple<>(tuple.left, tuple.right + "." + property);
+            });
+        });
     }
 
     private static Option<Tuple<CompileState, Definition>> definition(CompileState state, String input) {
