@@ -1227,7 +1227,26 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> statementValue(CompileState state, String input) {
-        return or(state, input, Lists.of(Main::returns));
+        return Main.or(state, input, Lists.of(
+                Main::returns,
+                Main::invocation
+        ));
+    }
+
+    private static Option<Tuple<CompileState, String>> invocation(CompileState state0, String input) {
+        return suffix(input.strip(), ")", withoutEnd -> {
+            return first(withoutEnd, "(", (callerString, argumentsString) -> {
+                return compileValue(state0, callerString).flatMap(callerTuple -> {
+                    return Main.parseValues(callerTuple.left, argumentsString, Main::compileValue).map(argumentsTuple -> {
+                        var joined = argumentsTuple.right.iterate()
+                                .collect(new Joiner(", "))
+                                .orElse("");
+
+                        return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
+                    });
+                });
+            });
+        });
     }
 
     private static Option<Tuple<CompileState, String>> returns(CompileState state, String input) {
