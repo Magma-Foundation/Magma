@@ -659,6 +659,18 @@ public class Main {
     private record Err<T, X>(X error) implements Result<T, X> {
     }
 
+    private record DividingSplitter(
+            BiFunction<DivideState, Character, DivideState> folder) implements Splitter {
+        @Override
+        public Option<Tuple<String, String>> split(String input) {
+            return divide(input, this.folder).removeLast().map(divisions -> {
+                var left = divisions.left.iterate().collect(new Joiner()).orElse("");
+                var right = divisions.right;
+                return new Tuple<>(left, right);
+            });
+        }
+    }
+
     private enum Primitive implements Type {
         Auto("auto"),
         Void("void"),
@@ -1235,8 +1247,8 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> invocation(CompileState state0, String input) {
         return suffix(input.strip(), ")", withoutEnd -> {
-            return first(withoutEnd, "(", (callerString, argumentsString) -> {
-                return compileValue(state0, callerString).flatMap(callerTuple -> {
+            return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
+                return suffix(withEnd.strip(), "(", callerString -> compileValue(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::compileValue).map(argumentsTuple -> {
                         var joined = argumentsTuple.right.iterate()
                                 .collect(new Joiner(", "))
@@ -1244,9 +1256,21 @@ public class Main {
 
                         return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
                     });
-                });
+                }));
             });
         });
+    }
+
+    private static DivideState foldInvocationStart(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var enter = appended.enter();
+            return appended.isLevel() ? enter.advance() : enter;
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Option<Tuple<CompileState, String>> returns(CompileState state, String input) {

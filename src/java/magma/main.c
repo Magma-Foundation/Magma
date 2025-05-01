@@ -259,6 +259,18 @@ union ResultValue<T, X> {
         }
     } *//* 
 
+    private record DividingSplitter(
+            BiFunction<DivideState, Character, DivideState> folder) implements Splitter {
+        @Override
+        public Option<Tuple<String, String>> split(String input) {
+            return divide(input, this.folder).removeLast().map(divisions -> {
+                var left = divisions.left.iterate().collect(new Joiner()).orElse("");
+                var right = divisions.right;
+                return new Tuple<>(left, right);
+            });
+        }
+    } *//* 
+
     private enum Primitive implements Type {
         Auto("auto"),
         Void("void"),
@@ -418,8 +430,7 @@ struct public JavaList::JavaList(struct JavaList<T>(java.util.List<T> elements) 
  public */ template Option<(template List<struct T>, /*  T */)> JavaList::removeLast(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){/* if (this.elements.isEmpty()) {
                 return new None<>();
             } */
-	/* var slice = this.elements.subList */(/* 0 */, /*  this.elements.size() - 1 */);
-	/* var last = this.elements.getLast */();
+	/* var slice = this.elements.subList */(/* 0 */, /*  this.elements.size() - 1 */);/* var last = this.elements.getLast(); */
 	return /* new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last)) */;
 }
 /* @Override
@@ -431,8 +442,7 @@ struct public JavaList::JavaList(struct JavaList<T>(java.util.List<T> elements) 
 	return /* this.elements.get(index) */;
 }
 /* @Override
- public */ template List<struct T> JavaList::addFirst(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, struct T element){
-	/* var copy = this.copy */();
+ public */ template List<struct T> JavaList::addFirst(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, struct T element){/* var copy = this.copy(); */
 	/* copy.addFirst */(/* element */);
 	return /* new JavaList<>(copy) */;
 }
@@ -497,7 +507,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
             } */
 }
 /* private */ struct DivideState DivideState::advance(struct DivideState this){
-	/* var withBuffer = this.buffer.isEmpty */(/* ) ? this.segments : this.segments.addLast(this.buffer.toString() */);
+	/* var withBuffer = this.buffer.isEmpty() ? this.segments : this.segments.addLast */(/* this.buffer.toString() */);
 	return /* new DivideState(this.input, withBuffer, new StringBuilder(), this.index, this.depth) */;
 }
 /* public */ struct DivideState DivideState::exit(struct DivideState this){
@@ -565,7 +575,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 	return /* current.addLast(element) */;
 }
 /* public static */ void main(){
-	/* run */(/* ).ifPresent(Throwable::printStackTrace */);
+	/* run().ifPresent */(/* Throwable::printStackTrace */);
 }
 /* private static */ template Option<struct IOException> run(){
 	return /* switch (readInput()) {
@@ -591,10 +601,9 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             return new Err<>(e);
         } */
 }
-/* private static */ char* compileRoot(char* input){
-	/* var state = new CompileState */();
-	/* var tuple = compileAll */(/* state */, /*  input */, /*  Main::compileRootSegment)
-                .orElse(new Tuple<>(state */, /*  "") */);
+/* private static */ char* compileRoot(char* input){/* var state = new CompileState(); */
+	/* var tuple = compileAll(state, input, Main::compileRootSegment)
+                .orElse */(/* new Tuple<>(state */, /*  "") */);
 	return /* tuple.right + tuple.left.generate() */;
 }
 /* private static */ template Option<(struct CompileState, char*)> compileAll(struct CompileState initial, char* input, template BiFunction<struct CompileState, char*, template Option<(struct CompileState, char*)>> mapper){
@@ -948,8 +957,8 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
         )) */;
 }
 /* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){/* return suffix(input.strip(), ")", withoutEnd -> {
-            return first(withoutEnd, "(", (callerString, argumentsString) -> {
-                return compileValue(state0, callerString).flatMap(callerTuple -> {
+            return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
+                return suffix(withEnd.strip(), "(", callerString -> compileValue(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::compileValue).map(argumentsTuple -> {
                         var joined = argumentsTuple.right.iterate()
                                 .collect(new Joiner(", "))
@@ -957,9 +966,18 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 
                         return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
                     });
-                });
+                }));
             });
         } *//* ); */
+}
+/* private static */ struct DivideState foldInvocationStart(struct DivideState state, struct char c){
+	/* var appended = state.append */(/* c */);/* if (c == '(') {
+            var enter = appended.enter();
+            return appended.isLevel() ? enter.advance() : enter;
+        } *//* if (c == ')') {
+            return appended.exit();
+        } */
+	return /* appended */;
 }
 /* private static */ template Option<(struct CompileState, char*)> returns(struct CompileState state, char* input){
 	return /* prefix(input.strip(), "return ", slice -> compileValue(state, slice).map(Tuple.mapRight(result -> "return " + result))) */;
@@ -980,8 +998,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             ));
         } *//* ); */
 }
-/* private static */ int isSymbol(char* value){/* for (var i = 0; */
-	/* i < value.length */();/* i++) {
+/* private static */ int isSymbol(char* value){/* for (var i = 0; *//* i < value.length(); *//* i++) {
             var c = value.charAt(i);
             if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
                 continue;
@@ -1037,8 +1054,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 /* private static <S, T extends S> */ template BiFunction<struct CompileState, char*, template Option<(struct CompileState, /*  S */)>> wrap(template BiFunction<struct CompileState, char*, template Option<(struct CompileState, /*  T */)>> content){
 	return /* (state, input) -> content.apply(state, input).map(Tuple.mapRight(value -> value)) */;
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> primitive(struct CompileState state, char* input){
-	/* var stripped = input.strip */();/* if (stripped.equals("boolean") || stripped.equals("int")) {
+/* private static */ template Option<(struct CompileState, /*  Type */)> primitive(struct CompileState state, char* input){/* var stripped = input.strip(); *//* if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Some<>(new Tuple<>(state, Primitive.I32));
         } *//* if (stripped.equals("void")) {
             return new Some<>(new Tuple<>(state, Primitive.Void));
