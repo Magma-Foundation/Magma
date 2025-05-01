@@ -827,7 +827,12 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> symbol(CompileState state, String value) {
-        return new Some<>(new Tuple<>(state, value.strip()));
+        var stripped = value.strip();
+        if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } else {
+            return new None<>();
+        }
     }
 
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
@@ -1297,6 +1302,7 @@ public class Main {
         return or(state, input, Lists.of(
                 Main::invocation,
                 Main::dataAccess,
+                Main::symbol,
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
