@@ -742,14 +742,14 @@ public class Main {
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
                 (instance, before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithMaybeTypeParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
         ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String type, CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
-                return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
+                return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         }));
     }
@@ -761,7 +761,7 @@ public class Main {
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithMaybeTypeParams(
+    private static Option<Tuple<CompileState, String>> structureWithoutParams(
             String type,
             CompileState state,
             String beforeKeyword,
@@ -1175,7 +1175,7 @@ public class Main {
     private static boolean isSymbol(String value) {
         for (var i = 0; i < value.length(); i++) {
             var c = value.charAt(i);
-            if (Character.isLetter(c) || c == '_') {
+            if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;

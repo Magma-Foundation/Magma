@@ -67,49 +67,19 @@ union OptionValue<T> {
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
 };
-/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {/* 
-
-        private String generate0() {
-            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
-        } */
+/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
 };
-/* private */struct Content(String input) implements Type, Parameter {/* 
-
-        private String generate0() {
-            return generatePlaceholder(this.input);
-        } */
+/* private */struct Content(String input) implements Type, Parameter {
 };
 /* private */struct Functional(List<Type> arguments, Type returns) implements Type {
 };
-/* private */struct Template(String base, List<Type> arguments) implements Type {/* 
-
-        private String generate0() {
-            var generatedTuple = this.arguments().iterate()
-                    .map(type -> type.generate().toSlice())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return "template " + this.base() + "<" + generatedTuple + ">";
-        } */
+/* private */struct Template(String base, List<Type> arguments) implements Type {
 };
-/* private */struct TypeParameter(String value) implements Type {/* 
-
-        private String generate0() {
-            return this.value;
-        } */
+/* private */struct TypeParameter(String value) implements Type {
 };
-/* private */struct Ref(Type type) implements Type {/* 
-
-        private String generate0() {
-            return this.type.generate().toSlice() + "*";
-        } */
+/* private */struct Ref(Type type) implements Type {
 };
-/* private */struct TupleType(List<Type> arguments) implements Type {/* 
-
-        private String generate0() {
-            return "(" + generateNodesAsValues(this.arguments) + ")";
-        } */
+/* private */struct TupleType(List<Type> arguments) implements Type {
 };
 /* private */struct StructRef(String input) implements Type {
 };
@@ -463,9 +433,15 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
  public */ struct String_ generate_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this){
 	return /* Strings.from(this.generate0()) */;
 }
+/* private */ char* generate0_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse(""); */
+	return /* beforeTypeString + this.type.generateWithName(this.name).toSlice() */;
+}
 /* @Override
  public */ struct String_ generate_Content(String input) implements Type, Parameter(struct Content(String input) implements Type, Parameter this){
 	return /* Strings.from(this.generate0()) */;
+}
+/* private */ char* generate0_Content(String input) implements Type, Parameter(struct Content(String input) implements Type, Parameter this){
+	return /* generatePlaceholder(this.input) */;
 }
 /* @Override
  public */ struct String_ generate_Functional(List<Type> arguments, Type returns) implements Type(struct Functional(List<Type> arguments, Type returns) implements Type this){
@@ -487,6 +463,12 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
  public */ struct String_ generate_Template(String base, List<Type> arguments) implements Type(struct Template(String base, List<Type> arguments) implements Type this){
 	return /* Strings.from(this.generate0()) */;
 }
+/* private */ char* generate0_Template(String base, List<Type> arguments) implements Type(struct Template(String base, List<Type> arguments) implements Type this){/* var generatedTuple = this.arguments().iterate()
+                    .map(type -> type.generate().toSlice())
+                    .collect(new Joiner(", "))
+                    .orElse(""); */
+	return /* "template " + this.base() + "<" + generatedTuple + ">" */;
+}
 /* private static class ListCollector<T> implements Collector<T, List<T>> {
  @Override
  public */ template List<struct T> createInitial(){
@@ -500,13 +482,22 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
  public */ struct String_ generate_TypeParameter(String value) implements Type(struct TypeParameter(String value) implements Type this){
 	return /* Strings.from(this.generate0()) */;
 }
+/* private */ char* generate0_TypeParameter(String value) implements Type(struct TypeParameter(String value) implements Type this){
+	return /* this.value */;
+}
 /* @Override
  public */ struct String_ generate_Ref(Type type) implements Type(struct Ref(Type type) implements Type this){
 	return /* Strings.from(this.generate0()) */;
 }
+/* private */ char* generate0_Ref(Type type) implements Type(struct Ref(Type type) implements Type this){
+	return /* this.type.generate().toSlice() + "*" */;
+}
 /* @Override
  public */ struct String_ generate_TupleType(List<Type> arguments) implements Type(struct TupleType(List<Type> arguments) implements Type this){
 	return /* Strings.from(this.generate0()) */;
+}
+/* private */ char* generate0_TupleType(List<Type> arguments) implements Type(struct TupleType(List<Type> arguments) implements Type this){
+	return /* "(" + generateNodesAsValues(this.arguments) + ")" */;
 }
 /* @Override
  public */ struct String_ generate_StructRef(String input) implements Type(struct StructRef(String input) implements Type this){
@@ -584,12 +575,12 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return /* or(state, beforeContent, Lists.of(
                 (instance, before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithMaybeTypeParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
         )) */;
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithParams(char* type, struct CompileState instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
-                return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
+                return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         } *//* )); */
 }
@@ -599,13 +590,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
                 wrap(Main::content)
         )) */;
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithMaybeTypeParams(char* type, struct CompileState state, char* beforeKeyword, char* beforeParams, char* params, template List<char*> variants, char* withEnd){
+/* private static */ template Option<(struct CompileState, char*)> structureWithoutParams(char* type, struct CompileState state, char* beforeKeyword, char* beforeParams, char* params, template List<char*> variants, char* withEnd){
 	return /* or(state, beforeParams, Lists.of(
                 (state0, beforeParams0) -> structureWithTypeParams(type, state0, beforeParams0, beforeKeyword, params, variants, withEnd),
                 (state0, name) -> structureWithName(type, state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
         )) */;
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeKeyword, char* params, template List<char*> variants, char* withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, char* params, template List<char*> variants, char* withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (name, typeParamString) -> {
                 return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
@@ -874,7 +865,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 }
 /* private static */ int isSymbol(char* value){/* for (var i = 0; *//* i < value.length(); *//* i++) {
             var c = value.charAt(i);
-            if (Character.isLetter(c) || c == '_') {
+            if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;
