@@ -24,7 +24,11 @@
         public State enter() {
             return new State(this.segments, this.buffer, this.depth + 1);
         }
-    }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    } *//* 
 
     public static void main() {
         try {
@@ -36,58 +40,22 @@
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    } *//* 
 
     private static String compileRoot(String input) {
+        return compileAll(input, Main::compileRootSegment);
+    } *//* 
+
+    private static String compileAll(String input, Function<String, String> mapper) {
         var segments = divide(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
         return output.toString();
-    }
-
-    private static String compileRootSegment(String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
-        }
-
-        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", content -> getString(beforeKeyword, name, content));
-            });
-        }).orElseGet(() -> generatePlaceholder(stripped));
-
-    }
-
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        var content = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(content);
-    }
-
-    private static Optional<String> getString(String beforeKeyword, String name, String content) {
-        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(content) + "}");
-    }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    }
-
-    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeKeyword = input.substring(0, classIndex);
-            var afterKeyword = input.substring(classIndex + infix.length());
-            return mapper.apply(beforeKeyword, afterKeyword);
-        }
-        return Optional.empty();
-    }
+    } *//* 
 
     private static List<String> divide(String input) {
         State current = new State();
@@ -96,19 +64,52 @@
             current = foldStatementChar(current, c);
         }
         return current.advance().segments;
-    }
+    } *//* 
 
     private static State foldStatementChar(State state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '} *//* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* 
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '} *//* ') {
             return appended.exit();
+        } *//* 
+        return appended; *//* 
+     */}/* private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return "";
         }
-        return appended;
-    }
- */}
+
+        return compileInfix(stripped, " */struct ", (beforeKeyword, afterKeyword) -> {/* return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content -> {
+                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + compileAll(content, Main::compileStructSegment) + "}");
+                });
+            } *//* ); *//* 
+        }).orElseGet(() -> generatePlaceholder(stripped));
+
+     */}/* private static String compileStructSegment(String input) {
+        return generatePlaceholder(input);
+    } *//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        var content = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(content);
+    } *//* private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
+    } *//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex);
+            var afterKeyword = input.substring(classIndex + infix.length());
+            return mapper.apply(beforeKeyword, afterKeyword);
+        }
+        return Optional.empty();
+    } *//* } */
