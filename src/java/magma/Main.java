@@ -35,7 +35,15 @@ public class Main {
         }
 
         private Optional<DivideState> popAndAppend() {
-            return this.pop().map(tuple -> tuple.right.append(tuple.left));
+            return this.popAndAppendToTuple().map(Tuple::right);
+        }
+
+        private Optional<Tuple<Character, DivideState>> popAndAppendToTuple() {
+            return this.pop().map(tuple -> {
+                var c = tuple.left;
+                var state = tuple.right;
+                return new Tuple<>(c, state.append(c));
+            });
         }
 
         private DivideState append(char c) {
@@ -136,9 +144,37 @@ public class Main {
             var c = popped.left;
             var state = popped.right;
             current = foldSingleQuotes(state, c)
+                    .or(() -> foldDoubleQuotes(state, c))
                     .orElseGet(() -> foldStatementChar(state, c));
         }
         return current.advance().segments;
+    }
+
+    private static Optional<DivideState> foldDoubleQuotes(DivideState state, char c) {
+        if (c != '\"') {
+            return Optional.empty();
+        }
+
+        var appended = state.append(c);
+        while (true) {
+            var maybeTuple = appended.popAndAppendToTuple();
+            if (maybeTuple.isEmpty()) {
+                break;
+            }
+
+            var nextTuple = maybeTuple.get();
+            var next = nextTuple.left;
+            appended = nextTuple.right;
+
+            if (next == '\\') {
+                appended = appended.popAndAppend().orElse(appended);
+            }
+            if (next == '\"') {
+                break;
+            }
+        }
+        return Optional.of(appended);
+
     }
 
     private static Optional<DivideState> foldSingleQuotes(DivideState state, char c) {

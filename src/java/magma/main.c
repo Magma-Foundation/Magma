@@ -1,36 +1,4 @@
-/* 
-
-    private static Optional<Tuple<CompileState, String>> compilePrefix(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
-        if (!input.startsWith("{")) {
-            return Optional.empty();
-        }
-        var slice = input.substring("{".length());
-        return mapper.apply(slice);
-    }
-
-    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        var content = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(content);
-    }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    }
-
-    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeKeyword = input.substring(0, classIndex);
-            var afterKeyword = input.substring(classIndex + infix.length());
-            return mapper.apply(beforeKeyword, afterKeyword);
-        }
-        return Optional.empty();
-    }
-}
- *//* private */struct CompileState(JavaList<String> structs, JavaList<String> functions) {
+/* private */struct CompileState(JavaList<String> structs, JavaList<String> functions) {
 };
 /* private */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {
 };
@@ -38,7 +6,7 @@
 };
 /* private */struct JavaList<T>(List<T> list) {
 };
-/* public */struct Main {/* ); */
+/* public */struct Main {
 };
 /* public CompileState */(/*  */){/* 
             this(new JavaList<>(), new JavaList<>());
@@ -60,7 +28,15 @@
          */}/* 
 
         private Optional<DivideState> popAndAppend */(/*  */){/* 
-            return this.pop().map(tuple -> tuple.right.append(tuple.left));
+            return this.popAndAppendToTuple().map(Tuple::right);
+         */}/* 
+
+        private Optional<Tuple<Character, DivideState>> popAndAppendToTuple */(/*  */){/* 
+            return this.pop().map(tuple -> {
+                var c = tuple.left;
+                var state = tuple.right;
+                return new Tuple<>(c, state.append(c));
+            });
          */}/* 
 
         private DivideState append */(/* char c */){/* 
@@ -153,9 +129,37 @@
             var c = popped.left;
             var state = popped.right;
             current = foldSingleQuotes(state, c)
+                    .or(() -> foldDoubleQuotes(state, c))
                     .orElseGet(() -> foldStatementChar(state, c));
         }
         return current.advance().segments;
+     */}/* 
+
+    private static Optional<DivideState> foldDoubleQuotes */(/* DivideState state, char c */){/* 
+        if (c != '\"') {
+            return Optional.empty();
+        }
+        
+        var appended = state.append(c);
+        while (true) {
+            var maybeTuple = appended.popAndAppendToTuple();
+            if (maybeTuple.isEmpty()) {
+                break;
+            }
+
+            var nextTuple = maybeTuple.get();
+            var next = nextTuple.left;
+            appended = nextTuple.right;
+
+            if (next == '\\') {
+                appended = appended.popAndAppend().orElse(appended);
+            }
+            if (next == '\"') {
+                break;
+            }
+        }
+        return Optional.of(appended);
+
      */}/* 
 
     private static Optional<DivideState> foldSingleQuotes */(/* DivideState state, char c */){/* 
@@ -260,4 +264,35 @@
                     });
                 });
             });
-         */}
+        });
+     */}/* 
+
+    private static Optional<Tuple<CompileState, String>> compilePrefix */(/* String input, Function<String, Optional<Tuple<CompileState, String>>> mapper */){/* 
+        if (!input.startsWith("{")) {
+            return Optional.empty();
+        }
+        var slice = input.substring("{".length());
+        return mapper.apply(slice);
+     */}/* 
+
+    private static <T> Optional<T> compileSuffix */(/* String input, String suffix, Function<String, Optional<T>> mapper */){/* 
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        var content = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(content);
+     */}/* 
+
+    private static String generatePlaceholder */(/* String input */){/* 
+        return "/* " + input + " */";
+     */}/* 
+
+    private static <T> Optional<T> compileInfix */(/* String input, String infix, BiFunction<String, String, Optional<T>> mapper */){/* 
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex);
+            var afterKeyword = input.substring(classIndex + infix.length());
+            return mapper.apply(beforeKeyword, afterKeyword);
+        }
+        return Optional.empty();
+     */}
