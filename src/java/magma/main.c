@@ -1,14 +1,10 @@
-/*  *//* private  */struct CompileState(JavaList<String> structs, JavaList<String> functions) {/* 
-     */}/* 
+/*  *//* private  */struct CompileState(JavaList<String> structs, JavaList<String> functions) {}/* 
 
-    private  */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* 
-     */}/* 
+    private  */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {}/* 
 
-    private  */struct Tuple<A, B>(A left, B right) {/*  */}/* 
+    private  */struct Tuple<A, B>(A left, B right) {}/* 
 
-    private  */struct JavaList<T>(List<T> list) {/* 
-     */}/* public  */struct Main {/* 
- */}/* public CompileState */(/* ) {
+    private  */struct JavaList<T>(List<T> list) {}/* public  */struct Main {}/* public CompileState */(/* ) {
             this(new JavaList<>(), new JavaList<>());
         } *//* 
 
@@ -184,9 +180,17 @@
     } *//* 
 
     private static Tuple<CompileState, String> compileStructSegment */(/* CompileState state, String input) {
-        return compileStructure(state, input, "record ")
+        return compileWhitespace(state, input)
+                .or(() -> compileStructure(state, input, "record "))
                 .or(() -> compileMethod(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileWhitespace */(/* CompileState state, String input) {
+        if (input.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     } *//* 
 
 

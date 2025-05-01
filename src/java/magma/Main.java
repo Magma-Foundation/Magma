@@ -199,9 +199,17 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
-        return compileStructure(state, input, "record ")
+        return compileWhitespace(state, input)
+                .or(() -> compileStructure(state, input, "record "))
                 .or(() -> compileMethod(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     }
 
 
