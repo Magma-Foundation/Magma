@@ -805,7 +805,7 @@ public class Main {
                     .filter(value -> !value.isEmpty())
                     .toList();
 
-            if (slices.contains("@External")) {
+            if (slices.contains("@Actual")) {
                 return new Some<>(new Tuple<>(state, ""));
             }
 
