@@ -1353,15 +1353,18 @@ public class Main {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
                         var caller = callerTuple.right;
 
+                        var left = argumentsTuple.left;
+
+                        var oldArguments = argumentsTuple.right;
                         List<Value> newArguments;
                         if (caller instanceof DataAccess access) {
-                            newArguments = argumentsTuple.right.addFirst(access.parent);
+                            newArguments = oldArguments.addFirst(access.parent);
                         }
                         else {
-                            newArguments = argumentsTuple.right;
+                            newArguments = oldArguments;
                         }
 
-                        return new Tuple<>(argumentsTuple.left, new Invocation(caller, newArguments));
+                        return new Tuple<>(left, new Invocation(caller, newArguments));
                     });
                 }));
             });
