@@ -1,4 +1,4 @@
-/* private */struct Option<T> {
+/* private sealed */struct Option<T> permits Some, None {
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
 	int isEmpty();
 	/* T */ orElse(/* T */ other);

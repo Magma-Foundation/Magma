@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Main {
-    private interface Option<T> {
+    private sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
         boolean isEmpty();
