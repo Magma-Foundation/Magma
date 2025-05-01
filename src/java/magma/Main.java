@@ -491,10 +491,14 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
         return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return compileAll(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
+            return params(instance, paramString, Main::mergeStatements).flatMap(params -> {
                 return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
             });
         }));
+    }
+
+    private static Option<Tuple<CompileState, String>> params(CompileState state, String input, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return compileAll(state, input, Main::foldValueChar, Main::compileParameter, merger);
     }
 
     private static StringBuilder mergeValues(StringBuilder buffer, String element) {
@@ -578,9 +582,11 @@ public class Main {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (params, withBraces) -> {
                 return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                    return or(outputDefinition.left, withBraces, Lists.of(
-                            (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
-                            (state0, element) -> methodWithContent(state0, outputDefinition.right, params, element)));
+                    return params(outputDefinition.left, params, Main::mergeValues).flatMap(outputParams -> {
+                        return or(outputParams.left, withBraces, Lists.of(
+                                (state0, element) -> methodWithoutContent(state0, outputDefinition.right, outputParams.right, element),
+                                (state0, element) -> methodWithContent(state0, outputDefinition.right, outputParams.right, element)));
+                    });
                 });
             });
         });
@@ -600,7 +606,7 @@ public class Main {
         return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
-                    var generated = outputDefinition + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
+                    var generated = outputDefinition + "(" + params + "){" + tuple.right + "\n}\n";
                     return Option.of(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
