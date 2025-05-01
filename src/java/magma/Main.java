@@ -1092,7 +1092,10 @@ public class Main {
         return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
-                    var paramStrings = generateNodesAsValues(params);
+                    var newParameters = state.maybeStructureType
+                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name), "this")))
+                            .orElse(params);
+                    var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
                             .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
