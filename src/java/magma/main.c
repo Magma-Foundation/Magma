@@ -85,75 +85,6 @@ union OptionValue<T> {
 };
 /* public */struct Main {/* 
 
-    @External
-    private record JavaString(String value) implements String_ {
-        @Override
-        public String toSlice() {
-            return this.value;
-        }
-
-        @Override
-        public String_ appendSlice(String slice) {
-            return Strings.from(this.value + slice);
-        }
-    } *//* 
-
-    @External
-    private record JavaList<T>(java.util.List<T> elements) implements List<T> {
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        @Override
-        public List<T> addLast(T element) {
-            var copy = new ArrayList<>(this.elements);
-            copy.add(element);
-            return new JavaList<>(copy);
-        }
-
-        @Override
-        public Iterator<T> iterate() {
-            return new Iterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
-        }
-
-        @Override
-        public Option<Tuple<List<T>, T>> removeLast() {
-            if (this.elements.isEmpty()) {
-                return new None<>();
-            }
-
-            var slice = this.elements.subList(0, this.elements.size() - 1);
-            var last = this.elements.getLast();
-            return new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last));
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return this.elements.isEmpty();
-        }
-
-        @Override
-        public T get(int index) {
-            return this.elements.get(index);
-        }
-
-        @Override
-        public List<T> addFirst(T element) {
-            var copy = this.copy();
-            copy.addFirst(element);
-            return new JavaList<>(copy);
-        }
-
-        @Override
-        public boolean contains(T element) {
-            return this.elements.contains(element);
-        }
-
-        private java.util.List<T> copy() {
-            return new ArrayList<T>(this.elements);
-        }
-    } *//* 
-
     private enum Primitive implements Type {
         Auto("auto"),
         I8("char"),
@@ -552,7 +483,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
                     .toList();
 
             if (slices.contains("@External")) {
-                return new None<>();
+                return new Some<>(new Tuple<>(state, ""));
             }
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {

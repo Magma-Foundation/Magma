@@ -715,7 +715,7 @@ public class Main {
                     .toList();
 
             if (slices.contains("@External")) {
-                return new None<>();
+                return new Some<>(new Tuple<>(state, ""));
             }
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
