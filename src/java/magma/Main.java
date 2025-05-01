@@ -481,7 +481,7 @@ public class Main {
 
         @Override
         public String generate() {
-            var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
+            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
             return beforeTypeString + this.type.generateWithName(this.name);
         }
     }
