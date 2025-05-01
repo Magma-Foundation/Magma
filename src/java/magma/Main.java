@@ -1266,15 +1266,19 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
         return type(state, type).flatMap(typeTuple -> {
-            var definition = new Definition(new None<>(), typeTuple.right, name.strip());
-            return new Some<>(new Tuple<>(typeTuple.left, definition));
+            return assemble(typeTuple.left, new None<String>(), typeTuple.right, name);
         });
+    }
+
+    private static Option<Tuple<CompileState, Definition>> assemble(CompileState state, Option<String> maybeBeforeType, Type type, String name) {
+        var definition = new Definition(maybeBeforeType, type, name.strip());
+        return new Some<>(new Tuple<>(state, definition));
     }
 
     private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
-                return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
+                return assemble(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
             });
         });
     }

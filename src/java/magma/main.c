@@ -555,16 +555,16 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 /* public static */ void main(){/* run().ifPresent(Throwable::printStackTrace); */
 }
 /* private static */ template Option<struct IOException> run(){
-	return /* switch (readString()) {
+	return /* switch (readInput()) {
             case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
-                yield writeString(output);
+                yield writeOutput(output);
             }
         } */;
 }
 /* @Actual
- private static */ template Option<struct IOException> writeString(char* output){/* try {
+ private static */ template Option<struct IOException> writeOutput(char* output){/* try {
             Files.writeString(TARGET, output);
             return new None<>();
         } *//* catch (IOException e) {
@@ -572,7 +572,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
         } */
 }
 /* @Actual
- private static */ template Result<char*, /*  IOException */> readString(){/* try {
+ private static */ template Result<char*, /*  IOException */> readInput(){/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
             return new Err<>(e);
@@ -953,13 +953,15 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 	return /* true */;
 }
 /* private static */ template Option<(struct CompileState, /*  Definition */)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){/* return type(state, type).flatMap(typeTuple -> {
-            var definition = new Definition(new None<>(), typeTuple.right, name.strip());
-            return new Some<>(new Tuple<>(typeTuple.left, definition));
+            return assemble(typeTuple.left, new None<String>(), typeTuple.right, name);
         } *//* ); */
+}
+/* private static */ template Option<(struct CompileState, /*  Definition */)> assemble(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){/* var definition = new Definition(maybeBeforeType, type, name.strip()); */
+	return /* new Some<>(new Tuple<>(state, definition)) */;
 }
 /* private static */ template Option<(struct CompileState, /*  Definition */)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
-                return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
+                return assemble(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
             });
         } *//* ); */
 }
