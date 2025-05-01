@@ -1186,10 +1186,14 @@ public class Main {
             return state.advance();
         }
         var appended = state.append(c);
-        if (c == '<') {
+        if (c == '-' && appended.peek().filter(value -> value == '>').isPresent()) {
+            return appended.popAndAppend().orElse(appended);
+        }
+
+        if (c == '<' || c == '(' || c == '{') {
             return appended.enter();
         }
-        if (c == '>') {
+        if (c == '>' || c == ')' || c == '}') {
             return appended.exit();
         }
         return appended;
@@ -1261,6 +1265,21 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> constructor(CompileState state, String input) {
+        return or(state, input, Lists.of(
+                Main::constructorWithType,
+                Main::constructorWithoutType
+        ));
+    }
+
+    private static Option<Tuple<CompileState, Definition>> constructorWithoutType(CompileState state, String s) {
+        var stripped = s.strip();
+        if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, new Definition(Primitive.Auto, stripped)));
+        }
+        return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, Definition>> constructorWithType(CompileState state, String input) {
         return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
             if (!structureType.name.equals(name)) {
                 return new None<>();
