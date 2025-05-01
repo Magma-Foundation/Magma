@@ -60,6 +60,9 @@ union ResultValue<T, X> {
 	ResultVariant _variant;
 	ResultValue<T, X> _value;
 };
+/* private */struct Value<S> {
+	S _super;
+};
 /* private static */struct Strings {
 };
 /* private */struct Some<T> {
@@ -154,6 +157,20 @@ union ResultValue<T, X> {
 };
 /* private */struct DividingSplitter {
 	struct DivideState (*folder)(struct DivideState, char);
+};
+/* private */struct Symbol {
+	char* value;
+};
+/* private */struct StringNode {
+	char* value;
+};
+/* private */struct Invocation {
+	struct Value caller;
+	template List<struct Value> arguments;
+};
+/* public */struct DataAccess {
+	char* property;
+	struct Value parent;
 };
 /* private */struct Primitive {/* Auto("auto"),
         Void("void"),
@@ -434,10 +451,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* @Override
  public */ struct String_ Content::generate(struct Content this){
-	return Strings.from(this.generate0());
-}
-/* private */ char* Content::generate0(struct Content this){
-	return generatePlaceholder(this.input);
+	return Strings.from(generatePlaceholder(this.input));
 }
 /* @Override
  public */ struct String_ Functional::generate(struct Functional this){
@@ -502,6 +516,23 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 var right = divisions.right;
                 return new Tuple<>(left, right);
             });
+}
+/* @Override
+ public */ struct String_ Symbol::generate(struct Symbol this){
+	return Strings.from(this.value);
+}
+/* @Override
+ public */ struct String_ StringNode::generate(struct StringNode this){
+	return Strings.from("\"").appendSlice(this.value).appendSlice("\"");
+}
+/* @Override
+ public */ struct String_ Invocation::generate(struct Invocation this){
+	auto joined = this.arguments(/* ) */.iterate().map(/* Node::generate */).map(/* String_::toSlice */).collect(/* new Joiner */(", ")).orElse("");
+	return Strings.from(this.caller(/* ) */.generate().toSlice() + "(" + joined + ")");
+}
+/* @Override
+ public */ struct String_ DataAccess::generate(struct DataAccess this){
+	return Strings.from(this.parent(/* ) */.generate().toSlice(/* ) + " */." + this.property());
 }
 auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = value; */
 }
@@ -597,14 +628,14 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){
 	return first(beforeContent, " permits ", /* (beforePermits, variantsString) -> {
-            return parseValues */(state, variantsString, /*  Main::symbol */).flatMap(params -> {
+            return parseValues */(state, variantsString, /* (state1, value) -> symbol */(state1, value).map(Tuple.mapRight(/* (Value node) -> node */.generate(/* ) */.toSlice()))).flatMap(params -> {
                 return structureWithoutVariants(type, params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
         });
 }
-/* private static */ template Option<(struct CompileState, char*)> symbol(struct CompileState state, char* value){
+/* private static */ template Option<(struct CompileState, struct Value)> symbol(struct CompileState state, char* value){
 	auto stripped = value.strip();/* if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new Symbol(stripped)));
         } *//* else {
             return new None<>();
         } */
@@ -639,8 +670,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
 	return suffix(beforeParams0.strip(), ">", /* withoutEnd -> {
-            return first */(withoutEnd, "<", /*  (name, typeParamString) -> {
-                return parseValues(state, typeParamString, Main::symbol */).flatMap(values -> {
+            return first */(withoutEnd, "<", /* (name, typeParamString) -> {
+                return parseValues */(state, typeParamString, /* (state1, value) -> symbol */(state1, value).map(Tuple.mapRight((/* Value node) -> node */.generate().toSlice()))).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
                 });
             });
@@ -898,25 +929,21 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 /* private static */ template Option<(struct CompileState, char*)> statementValue(struct CompileState state, char* input){
 	return Main.or(state, input, Lists.of(/* 
                 Main::returns */, /* 
-                Main::initialization */, /* 
-                Main::invocation
-         */));
+                Main::initialization */, /* (state1, s) -> invocation */(state1, s).map(Tuple.mapRight(/* right -> right */.generate(/* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){
 	return first(s, "=", /* (s1, s2) -> definition */(state, s1).flatMap(/* result0 -> {
-            return value */(result0.left, s2).map(result1 -> {
+            return value */(result0.left, s2).map(Tuple.mapRight(/* result -> result */.generate(/* ) */.toSlice())).map(result1 -> {
                 return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
             });
         }));
 }
-/* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){
+/* private static */ template Option<(struct CompileState, struct Value)> invocation(struct CompileState state0, char* input){
 	return suffix(input.strip(), ")", /* withoutEnd -> {
             return split */(withoutEnd, /* new DividingSplitter */(/* Main::foldInvocationStart */), /* (withEnd, argumentsString) -> {
-                return suffix */(withEnd.strip(), "(", /* callerString -> value */(state0, callerString).flatMap(/* callerTuple -> {
-                    return Main */.parseValues(callerTuple.left, argumentsString, /*  Main::value */).map(argumentsTuple -> {
-                        var joined = argumentsTuple.right.iterate().collect(new Joiner(", ")).orElse("");
-
-                        return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
+                return suffix */(withEnd.strip(), "(", /*  callerString -> value(state0, callerString */).flatMap(callerTuple -> {
+                    return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
+                        return new Tuple<>(argumentsTuple.left, new Invocation(callerTuple.right, argumentsTuple.right));
                     });
                 }));
             });
@@ -932,26 +959,26 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return appended;
 }
 /* private static */ template Option<(struct CompileState, char*)> returns(struct CompileState state, char* input){
-	return prefix(input.strip(), "return ", /* slice -> value */(state, slice).map(Tuple.mapRight(/* result -> "return " + result */)));
+	return prefix(input.strip(), "return ", /* slice -> value */(state, slice).map(Tuple.mapRight(/* result1 -> result1 */.generate(/* ) */.toSlice())).map(Tuple.mapRight(/* result -> "return " + result */)));
 }
-/* private static */ template Option<(struct CompileState, char*)> value(struct CompileState state, char* input){
-	return or(state, input, Lists.of(/* 
-                (BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>) Main::stringNode */, /* 
+/* private static */ template Option<(struct CompileState, struct Value)> value(struct CompileState state, char* input){
+	return Main.or(state, input, Lists.of(/* 
+                Main::stringNode */, /* 
                 Main::invocation */, /* 
                 Main::dataAccess */, /* 
-                Main::symbol */, /* (state1, input1) -> content */(state1, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
+                Main::symbol */, /* (state1, input1) -> content */(state1, input1).map(Tuple.mapRight(/* right -> right */))));
 }
-/* private static */ template Option<(struct CompileState, char*)> stringNode(struct CompileState state, char* s){
-	auto stripped = s.strip();/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some<>(new Tuple<>(state, stripped));
+/* private static */ template Option<(struct CompileState, struct Value)> stringNode(struct CompileState state, char* input){
+	auto stripped = input.strip();/* if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, new StringNode(stripped.substring(1, stripped.length() - 1))));
         } *//* else {
             return new None<>();
         } */
 }
-/* private static */ template Option<(struct CompileState, char*)> dataAccess(struct CompileState state, char* input){
+/* private static */ template Option<(struct CompileState, struct Value)> dataAccess(struct CompileState state, char* input){
 	return split(input, /* new InfixSplitter */(".", /*  Main::lastIndexOfSlice */), /* (parent, property) -> {
             return value */(state, parent).map(tuple -> {
-                return new Tuple<>(tuple.left, tuple.right + "." + property);
+                return new Tuple<>(tuple.left, new DataAccess(property, tuple.right));
             });
         });
 }

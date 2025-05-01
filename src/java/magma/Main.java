@@ -88,6 +88,9 @@ public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
     }
 
+    private interface Value extends Node {
+    }
+
     private static class Strings {
         @Actual
         private static String_ from(String value) {
@@ -547,14 +550,10 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements Type, Parameter {
+    private record Content(String input) implements Type, Parameter, Value {
         @Override
         public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return generatePlaceholder(this.input);
+            return Strings.from(generatePlaceholder(this.input));
         }
     }
 
@@ -675,6 +674,40 @@ public class Main {
                 var right = divisions.right;
                 return new Tuple<>(left, right);
             });
+        }
+    }
+
+    private record Symbol(String value) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.value);
+        }
+    }
+
+    private record StringNode(String value) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from("\"").appendSlice(this.value).appendSlice("\"");
+        }
+    }
+
+    private record Invocation(Value caller, List<Value> arguments) implements Value {
+        @Override
+        public String_ generate() {
+            var joined = this.arguments().iterate()
+                    .map(Node::generate)
+                    .map(String_::toSlice)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return Strings.from(this.caller().generate().toSlice() + "(" + joined + ")");
+        }
+    }
+
+    public record DataAccess(String property, Value parent) implements Value {
+        @Override
+        public String_ generate() {
+            return Strings.from(this.parent().generate().toSlice() + "." + this.property());
         }
     }
 
@@ -822,16 +855,16 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithVariants(String type, CompileState state, String beforeKeyword, String beforeContent, String withEnd) {
         return first(beforeContent, " permits ", (beforePermits, variantsString) -> {
-            return parseValues(state, variantsString, Main::symbol).flatMap(params -> {
+            return parseValues(state, variantsString, (state1, value) -> symbol(state1, value).map(Tuple.mapRight((Value node) -> node.generate().toSlice()))).flatMap(params -> {
                 return structureWithoutVariants(type, params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> symbol(CompileState state, String value) {
+    private static Option<Tuple<CompileState, Value>> symbol(CompileState state, String value) {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new Symbol(stripped)));
         }
         else {
             return new None<>();
@@ -909,7 +942,7 @@ public class Main {
     ) {
         return suffix(beforeParams0.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (name, typeParamString) -> {
-                return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
+                return parseValues(state, typeParamString, (state1, value) -> symbol(state1, value).map(Tuple.mapRight((Value node) -> node.generate().toSlice()))).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
                 });
             });
@@ -1301,28 +1334,24 @@ public class Main {
         return Main.or(state, input, Lists.of(
                 Main::returns,
                 Main::initialization,
-                Main::invocation
+                (state1, s) -> invocation(state1, s).map(Tuple.mapRight(right -> right.generate().toSlice()))
         ));
     }
 
     private static Option<Tuple<CompileState, String>> initialization(CompileState state, String s) {
         return first(s, "=", (s1, s2) -> definition(state, s1).flatMap(result0 -> {
-            return value(result0.left, s2).map(result1 -> {
+            return value(result0.left, s2).map(Tuple.mapRight(result -> result.generate().toSlice())).map(result1 -> {
                 return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
             });
         }));
     }
 
-    private static Option<Tuple<CompileState, String>> invocation(CompileState state0, String input) {
+    private static Option<Tuple<CompileState, Value>> invocation(CompileState state0, String input) {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
                 return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
-                        var joined = argumentsTuple.right.iterate()
-                                .collect(new Joiner(", "))
-                                .orElse("");
-
-                        return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
+                        return new Tuple<>(argumentsTuple.left, new Invocation(callerTuple.right, argumentsTuple.right));
                     });
                 }));
             });
@@ -1342,33 +1371,33 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> returns(CompileState state, String input) {
-        return prefix(input.strip(), "return ", slice -> value(state, slice).map(Tuple.mapRight(result -> "return " + result)));
+        return prefix(input.strip(), "return ", slice -> value(state, slice).map(Tuple.mapRight(result1 -> result1.generate().toSlice())).map(Tuple.mapRight(result -> "return " + result)));
     }
 
-    private static Option<Tuple<CompileState, String>> value(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                (BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>) Main::stringNode,
+    private static Option<Tuple<CompileState, Value>> value(CompileState state, String input) {
+        return Main.or(state, input, Lists.of(
+                Main::stringNode,
                 Main::invocation,
                 Main::dataAccess,
                 Main::symbol,
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(right -> right))
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> stringNode(CompileState state, String s) {
-        var stripped = s.strip();
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some<>(new Tuple<>(state, stripped));
+    private static Option<Tuple<CompileState, Value>> stringNode(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, new StringNode(stripped.substring(1, stripped.length() - 1))));
         }
         else {
             return new None<>();
         }
     }
 
-    private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Value>> dataAccess(CompileState state, String input) {
         return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> {
             return value(state, parent).map(tuple -> {
-                return new Tuple<>(tuple.left, tuple.right + "." + property);
+                return new Tuple<>(tuple.left, new DataAccess(property, tuple.right));
             });
         });
     }
