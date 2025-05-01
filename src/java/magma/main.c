@@ -12,32 +12,39 @@ union OptionValue<T> {
 };
 /* private */struct Head<S, T> {
 	S _super;
-	template Option</* T */> next();
+	template Option</* T */> (*next)();
 };
 /* private */struct List<S, T> {
 	S _super;
-	template List</* T */> addLast(/* T */ element);
-	template Iterator</* T */> iterate();
-	template Option<template Tuple<template List</* T */>, /*  T */>> removeLast();
-	int isEmpty();
-	/* T */ get(/* int */ index);
-	template List</* T */> addFirst(/* T */ element);
+	template List</* T */> (*addLast)(/* T */);
+	template Iterator</* T */> (*iterate)();
+	template Option<template Tuple<template List</* T */>, /*  T */>> (*removeLast)();
+	int (*isEmpty)();
+	/* T */ (*get)(/* int */);
+	template List</* T */> (*addFirst)(/* T */);
 };
 /* private */struct Collector<S, T, C> {
 	S _super;
-	/* C */ createInitial();
-	/* C */ fold(/* C */ current, /* T */ element);
+	/* C */ (*createInitial)();
+	/* C */ (*fold)(/* C */, /* T */);
 };
 /* private @ */struct External<S> {
 	S _super;
 };
 /* private */struct Splitter<S> {
 	S _super;
-	template Option<template Tuple</* String */, /*  String */>> split(/* String */ input);
+	template Option<template Tuple</* String */, /*  String */>> (*split)(/* String */);
 };
 /* private */struct Type<S> {
 	S _super;
-	/* String */ generate();
+	/* String */ (*generate)();
+};
+/* private */struct Parameter extends Node<S> {
+	S _super;
+};
+/* private */struct Node<S> {
+	S _super;
+	/* String */ (*generate)();
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -47,7 +54,7 @@ union OptionValue<T> {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
-/* private */struct StructurePrototype {/* String */ typetemplate List</* String */> variants
+/* private */struct StructurePrototype {/* String */ type/* String */ nametemplate List</* String */> variants
 };
 /* private */struct CompileState {template List</* String */> structstemplate List</* String */> functionstemplate Option</* StructurePrototype */> maybeStructureType
 };
@@ -58,9 +65,9 @@ union OptionValue<T> {
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
 };
-/* private */struct Definition {template Option</* String */> maybeBeforeType/* Type */ type/* String */ name
+/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
 };
-/* private */struct Content(String input) implements Type {
+/* private */struct Content(String input) implements Type, Parameter {
 };
 /* private */struct Functional(List<Type> arguments, Type returns) implements Type {
 };
@@ -120,7 +127,8 @@ union OptionValue<T> {
     } *//* 
 
     private enum Primitive implements Type {
-        I32("int");
+        I32("int"),
+        Auto("auto");
         private final String value;
 
         Primitive(String value) {
@@ -327,7 +335,10 @@ private static class TypeSeparatorSplitter implements Splitter {
                 return appended.exit();
             } *//* return appended; *//* } */
 }
-private /* String */ generate(){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse(""); *//* return beforeTypeString + this.type.generateWithName(this.name); *//*  */
+/* public */ Definition(/* Type */ type, /* String */ name){/* this(new None<>(), type, name); *//*  */
+}
+@Override
+ public /* String */ generate(){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse(""); *//* return beforeTypeString + this.type.generateWithName(this.name); *//*  */
 }
 @Override
  public /* String */ generate(){/* return generatePlaceholder(this.input); *//*  */
@@ -347,6 +358,14 @@ private /* String */ generate(){/* var beforeTypeString = this.maybeBeforeType.m
                     .collect(new Joiner(", "))
                     .orElse(""); *//* return "template " + this.base() + "<" + generatedTuple + ">"; *//*  */
 }
+private static class ListCollector<T> implements Collector<T, List<T>> {
+ @Override
+ public template List</* T */> createInitial(){/* return Lists.empty(); *//* }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.addLast(element); *//* } */
+}
 public static /* void */ main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -364,68 +383,7 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> all(/* CompileState */ initial, /* String */ input, template BiFunction</* DivideState */, /*  Character */, /*  DivideState */> folder, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  String */>>> mapper, template BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger){/* return parseAll(initial, input, folder, mapper).map(tuple -> new Tuple<>(tuple.left, generateAll(merger, tuple.right))); *//*  */
 }
-private static /* String */ generateAll(template BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger, template List</* String */> right){/* return right.iterate().fold(new StringBuilder(), merger).toString(); *//*  */
-}
-private static <T> template Option<template Tuple</* CompileState */, template List</* T */>>> parseAll(/* CompileState */ initial, /* String */ input, template BiFunction</* DivideState */, /*  Character */, /*  DivideState */> folder, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> mapper){/* return divide(input, folder)
-                .iterate()
-                .<Option<Tuple<CompileState, List<T>>>>fold(new Some<>(new Tuple<CompileState, List<T>>(initial, Lists.empty())),
-                        (maybeCurrent, segment) -> maybeCurrent.flatMap(
-                                state -> foldElement(state, segment, mapper))); *//*  */
-}
-private static <T> template Option<template Tuple</* CompileState */, template List</* T */>>> foldElement(template Tuple</* CompileState */, template List</* T */>> state, /* String */ segment, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> mapper){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
-            var newState = result.left;
-            var newElement = result.right;
-            return new Tuple<>(newState, oldCache.addLast(newElement));
-        } *//* ); *//*  */
-}
 private static /* StringBuilder */ mergeStatements(/* StringBuilder */ output, /* String */ right){/* return output.append(right); *//*  */
-}
-private static template List</* String */> divide(/* String */ input, template BiFunction</* DivideState */, /*  Character */, /*  DivideState */> folder){/* DivideState current = new DivideState(input); *//* while (true) {
-            var maybePopped = current.pop();
-            if (maybePopped.isEmpty()) {
-                break;
-            }
-
-            var popped = maybePopped.orElse(null);
-            var c = popped.left;
-            var state = popped.right;
-            current = foldSingleQuotes(state, c)
-                    .or(() -> foldDoubleQuotes(state, c))
-                    .orElseGet(() -> folder.apply(state, c));
-        } *//* return current.advance().segments; *//*  */
-}
-private static template Option</* DivideState */> foldDoubleQuotes(/* DivideState */ state, /* char */ c){/* if (c != '\"') {
-            return new None<>();
-        } *//* var appended = state.append(c); *//* while (true) {
-            var maybeTuple = appended.popAndAppendToTuple();
-            if (maybeTuple.isEmpty()) {
-                break;
-            }
-
-            var nextTuple = maybeTuple.orElse(null);
-            var next = nextTuple.left;
-            appended = nextTuple.right;
-
-            if (next == '\\') {
-                appended = appended.popAndAppend().orElse(appended);
-            }
-            if (next == '\"') {
-                break;
-            }
-        } *//* return new Some<>(appended); *//*  */
-}
-private static template Option</* DivideState */> foldSingleQuotes(/* DivideState */ state, /* char */ c){/* if (c != '\'') {
-            return new None<>();
-        } *//* return state.append(c).pop().map(maybeNextTuple -> {
-            var nextChar = maybeNextTuple.left;
-            var nextState = maybeNextTuple.right.append(nextChar);
-
-            var withEscaped = nextChar == '\\'
-                    ? nextState.popAndAppend().orElse(nextState)
-                    : nextState;
-
-            return withEscaped.popAndAppend().orElse(withEscaped);
-        } *//* ); *//*  */
 }
 private static /* DivideState */ foldStatementChar(/* DivideState */ state, /* char */ c){/* var appended = state.append(c); *//* if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -476,35 +434,22 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
         )); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithParams(/* String */ type, /* CompileState */ instance, /* String */ beforeKeyword, /* String */ beforeContent, template List</* String */> variants, /* String */ withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
+            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(Parameter::generate)), Main::mergeStatements).flatMap(params -> {
                 return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         } *//* )); *//*  */
 }
-private static /* StringBuilder */ mergeValues(/* StringBuilder */ buffer, /* String */ element){/* if (buffer.isEmpty()) {
-            return buffer.append(element);
-        } *//* return buffer.append(", ").append(element); *//*  */
-}
-private static template Option<template Tuple</* CompileState */, /*  String */>> compileParameter(/* CompileState */ instance, /* String */ paramString){/* return or(instance, paramString, Lists.of(
-                (state, input) -> definition(state, input).map(Tuple.mapRight(Definition::generate)),
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+private static template Option<template Tuple</* CompileState */, /*  Parameter */>> parameter(/* CompileState */ instance, /* String */ paramString){/* return Main.or(instance, paramString, Lists.of(
+                wrap(Main::definition),
+                wrap(Main::content)
         )); *//*  */
-}
-private static /* DivideState */ foldValueChar(/* DivideState */ state, /* char */ c){/* if (c == ',' && state.isLevel()) {
-            return state.advance();
-        } *//* var appended = state.append(c); *//* if (c == '<') {
-            return appended.enter();
-        } *//* if (c == '>') {
-            return appended.exit();
-        } *//* return appended; *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithMaybeTypeParams(/* String */ type, /* CompileState */ state, /* String */ beforeKeyword, /* String */ beforeParams, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return or(state, beforeParams, Lists.of(
                 (state0, beforeParams0) -> structureWithTypeParams(type, state0, beforeParams0, beforeKeyword, params, variants, withEnd),
                 (state0, name) -> structureWithName(type, state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
         )); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithTypeParams(/* String */ type, /* CompileState */ state, /* 
-            String beforeParams0 */, /* String */ beforeKeyword, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
+private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithTypeParams(/* String */ type, /* CompileState */ state, /* String */ beforeKeyword, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (name, typeParamString) -> {
                 return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
@@ -513,7 +458,7 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
         } *//* ); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithName(/* String */ type, /* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state.withStructType(new StructurePrototype(type, variants)), content, Main::structSegment).flatMap(tuple -> {
+            return compileAll(state.withStructType(new StructurePrototype(type, name, variants)), content, Main::structSegment).flatMap(tuple -> {
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         } *//* ); *//*  */
@@ -580,50 +525,150 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
         } *//* return new None<>(); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> method(/* CompileState */ state, /* String */ input){/* return first(input, "(", (inputDefinition, withParams) -> {
-            return first(withParams, ")", (params, withBraces) -> {
+            return first(withParams, ")", (paramsString, withBraces) -> {
                 return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                    return values(outputDefinition.left, params, Main::compileParameter).flatMap(outputParams -> {
+                    return parseValues(outputDefinition.left, paramsString, Main::parameter).flatMap(outputParams -> {
+                        var params = outputParams.right
+                                .iterate()
+                                .map(Main::retainDefinition)
+                                .flatMap(Iterators::fromOptions)
+                                .collect(new ListCollector<>());
+
                         return or(outputParams.left, withBraces, Lists.of(
-                                (state0, element) -> methodWithoutContent(state0, outputDefinition.right, outputParams.right, element),
-                                (state0, element) -> methodWithContent(state0, outputDefinition.right, outputParams.right, element)));
+                                (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
+                                (state0, element) -> methodWithContent(state0, outputDefinition.right, params, element)));
                     });
                 });
             });
         } *//* ); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  String */>> values(/* CompileState */ state, /* String */ input, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  String */>>> compiler){/* return parseValues(state, input, compiler).map(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right))); *//*  */
-}
-private static /* String */ generateValues(template List</* String */> values){/* return generateAll(Main::mergeValues, values); *//*  */
+private static template Option</* Definition */> retainDefinition(/* Parameter */ param){/* if (param instanceof Definition definition) {
+            return new Some<>(definition);
+        } *//* else {
+            return new None<>();
+        } *//*  */
 }
 private static <T> template Option<template Tuple</* CompileState */, template List</* T */>>> parseValues(/* CompileState */ state, /* String */ input, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> compiler){/* return parseAll(state, input, Main::foldValueChar, compiler); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  String */>> methodWithoutContent(/* CompileState */ state, /* String */ definition, /* String */ params, /* String */ content){/* if (!content.equals(";")) {
+private static <T> template Option<template Tuple</* CompileState */, template List</* T */>>> parseAll(/* CompileState */ initial, /* String */ input, template BiFunction</* DivideState */, /*  Character */, /*  DivideState */> folder, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> mapper){/* return divide(input, folder)
+                .iterate()
+                .<Option<Tuple<CompileState, List<T>>>>fold(new Some<>(new Tuple<CompileState, List<T>>(initial, Lists.empty())),
+                        (maybeCurrent, segment) -> maybeCurrent.flatMap(
+                                state -> foldElement(state, segment, mapper))); *//*  */
+}
+private static <T> template Option<template Tuple</* CompileState */, template List</* T */>>> foldElement(template Tuple</* CompileState */, template List</* T */>> state, /* String */ segment, template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> mapper){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
+            var newState = result.left;
+            var newElement = result.right;
+            return new Tuple<>(newState, oldCache.addLast(newElement));
+        } *//* ); *//*  */
+}
+private static template List</* String */> divide(/* String */ input, template BiFunction</* DivideState */, /*  Character */, /*  DivideState */> folder){/* DivideState current = new DivideState(input); *//* while (true) {
+            var maybePopped = current.pop();
+            if (maybePopped.isEmpty()) {
+                break;
+            }
+
+            var popped = maybePopped.orElse(null);
+            var c = popped.left;
+            var state = popped.right;
+            current = foldSingleQuotes(state, c)
+                    .or(() -> foldDoubleQuotes(state, c))
+                    .orElseGet(() -> folder.apply(state, c));
+        } *//* return current.advance().segments; *//*  */
+}
+private static template Option</* DivideState */> foldDoubleQuotes(/* DivideState */ state, /* char */ c){/* if (c != '\"') {
+            return new None<>();
+        } *//* var appended = state.append(c); *//* while (true) {
+            var maybeTuple = appended.popAndAppendToTuple();
+            if (maybeTuple.isEmpty()) {
+                break;
+            }
+
+            var nextTuple = maybeTuple.orElse(null);
+            var next = nextTuple.left;
+            appended = nextTuple.right;
+
+            if (next == '\\') {
+                appended = appended.popAndAppend().orElse(appended);
+            }
+            if (next == '\"') {
+                break;
+            }
+        } *//* return new Some<>(appended); *//*  */
+}
+private static template Option</* DivideState */> foldSingleQuotes(/* DivideState */ state, /* char */ c){/* if (c != '\'') {
+            return new None<>();
+        } *//* return state.append(c).pop().map(maybeNextTuple -> {
+            var nextChar = maybeNextTuple.left;
+            var nextState = maybeNextTuple.right.append(nextChar);
+
+            var withEscaped = nextChar == '\\'
+                    ? nextState.popAndAppend().orElse(nextState)
+                    : nextState;
+
+            return withEscaped.popAndAppend().orElse(withEscaped);
+        } *//* ); *//*  */
+}
+private static /* DivideState */ foldValueChar(/* DivideState */ state, /* char */ c){/* if (c == ',' && state.isLevel()) {
+            return state.advance();
+        } *//* var appended = state.append(c); *//* if (c == '<') {
+            return appended.enter();
+        } *//* if (c == '>') {
+            return appended.exit();
+        } *//* return appended; *//*  */
+}
+private static <T extends Node> /* String */ generateNodesAsValues(template List</* T */> params){/* return params.iterate()
+                .map(Node::generate)
+                .collect(new Joiner(", "))
+                .orElse(""); *//*  */
+}
+private static /* String */ generateAll(template BiFunction</* StringBuilder */, /*  String */, /*  StringBuilder */> merger, template List</* String */> right){/* return right.iterate().fold(new StringBuilder(), merger).toString(); *//*  */
+}
+private static template Option<template Tuple</* CompileState */, /*  String */>> methodWithoutContent(/* CompileState */ state, /* Definition */ definition, template List</* Definition */> params, /* String */ content){/* if (!content.equals(";")) {
             return new None<>();
         } *//* String generated; *//* if (state.maybeStructureType.filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
-            generated = "\n\t" + definition + "(" + params + ");";
+            var returnType = definition.type;
+            var name = definition.name;
+            var argumentTypes = params.iterate()
+                    .map(Definition::type)
+                    .collect(new ListCollector<>());
+
+            var functionalType = new Functional(argumentTypes, returnType);
+            var definition0 = new Definition(functionalType, name);
+            generated = "\n\t" + definition0.generate() + ";";
         } *//* else {
             generated = "";
         } *//* return new Some<>(new Tuple<CompileState, String>(state, generated)); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  String */>> methodWithContent(/* CompileState */ state, /* String */ outputDefinition, /* String */ params, /* String */ withBraces){/* return prefix(withBraces.strip(), "{", withoutStart1 -> {
+private static template Option<template Tuple</* CompileState */, /*  String */>> methodWithContent(/* CompileState */ state, /* Definition */ definition, template List</* Definition */> params, /* String */ withBraces){/* return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
-                    var generated = outputDefinition + "(" + params + "){" + tuple.right + "\n}\n";
+                    var paramStrings = generateNodesAsValues(params);
+
+                    var generated = definition.generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
         } *//* ); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  String */>> compileMethodHeader(/* CompileState */ state, /* String */ definition){/* return or(state, definition, Lists.of(
-                (state1, input) -> definition(state1, input).map(Tuple.mapRight(Definition::generate)),
-                (state2, input1) -> content(state2, input1).map(Tuple.mapRight(Content::generate))
+private static template Option<template Tuple</* CompileState */, /*  Definition */>> compileMethodHeader(/* CompileState */ state, /* String */ definition){/* return or(state, definition, Lists.of(
+                Main::definition,
+                Main::constructor
         )); *//*  */
+}
+private static template Option<template Tuple</* CompileState */, /*  Definition */>> constructor(/* CompileState */ state, /* String */ input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
+            if (!structureType.name.equals(name)) {
+                return new None<>();
+            }
+
+            return new Some<>(new Tuple<>(state, new Definition(Primitive.Auto, name)));
+        } *//* )); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> compileFunctionSegment(/* CompileState */ state, /* String */ input){/* return or(state, input.strip(), Lists.of(
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         )); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  Definition */>> definition(/* CompileState */ state, /* String */ input){/* return infix(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
+private static template Option<template Tuple</* CompileState */, /*  Definition */>> definition(/* CompileState */ state, /* String */ input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
@@ -647,7 +692,7 @@ private static template Option<template Tuple</* CompileState */, /*  Definition
             return new Some<>(new Tuple<>(typeTuple.left, definition));
         } *//* ); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  Definition */>> definitionWithTypeSeparator(/* CompileState */ state, /* String */ beforeName, /* String */ name){/* return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
+private static template Option<template Tuple</* CompileState */, /*  Definition */>> definitionWithTypeSeparator(/* CompileState */ state, /* String */ beforeName, /* String */ name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
                 return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
             });
@@ -698,9 +743,9 @@ private static <T> template Option</* T */> suffix(/* String */ input, /* String
 }
 private static /* String */ generatePlaceholder(/* String */ input){/* return "/* " + input + " */"; *//*  */
 }
-private static <T> template Option</* T */> first(/* String */ input, /* String */ infix, template BiFunction</* String */, /*  String */, template Option</* T */>> mapper){/* return infix(input, new InfixSplitter(infix, Main::firstIndexOfSlice), mapper); *//*  */
+private static <T> template Option</* T */> first(/* String */ input, /* String */ infix, template BiFunction</* String */, /*  String */, template Option</* T */>> mapper){/* return split(input, new InfixSplitter(infix, Main::firstIndexOfSlice), mapper); *//*  */
 }
-private static <T> template Option</* T */> infix(/* String */ input, /* Splitter */ splitter, template BiFunction</* String */, /*  String */, template Option</* T */>> mapper){/* return splitter.split(input).flatMap(tuple -> {
+private static <T> template Option</* T */> split(/* String */ input, /* Splitter */ splitter, template BiFunction</* String */, /*  String */, template Option</* T */>> mapper){/* return splitter.split(input).flatMap(tuple -> {
             return mapper.apply(tuple.left, tuple.right);
         } *//* ); *//*  */
 }
