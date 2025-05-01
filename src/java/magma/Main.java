@@ -1281,8 +1281,17 @@ public class Main {
     private static Option<Tuple<CompileState, String>> statementValue(CompileState state, String input) {
         return Main.or(state, input, Lists.of(
                 Main::returns,
+                Main::initialization,
                 Main::invocation
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> initialization(CompileState state, String s) {
+        return first(s, "=", (s1, s2) -> definition(state, s1).flatMap(result0 -> {
+            return value(result0.left, s2).map(result1 -> {
+                return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
+            });
+        }));
     }
 
     private static Option<Tuple<CompileState, String>> invocation(CompileState state0, String input) {
@@ -1426,6 +1435,7 @@ public class Main {
         return switch (stripped) {
             case "boolean", "Boolean", "int", "Integer" -> new Some<>(new Tuple<>(state, Primitive.I32));
             case "char", "Character" -> new Some<>(new Tuple<>(state, Primitive.I8));
+            case "var" -> new Some<>(new Tuple<>(state, Primitive.Auto));
             case "void" -> new Some<>(new Tuple<>(state, Primitive.Void));
             default -> new None<>();
         };

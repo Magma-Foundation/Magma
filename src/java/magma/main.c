@@ -251,7 +251,8 @@ union ResultValue<T, X> {
 /* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, struct C> collector){
 	return this.fold(collector.createInitial(), /*  collector::fold */);
 }
-/* private <C> */ struct C Iterator::fold(struct Iterator<T> this, struct C initial, struct C (*folder)(struct C, T)){/* var current = initial; *//* while (true) {
+/* private <C> */ struct C Iterator::fold(struct Iterator<T> this, struct C initial, struct C (*folder)(struct C, T)){
+	auto current = initial;/* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -279,7 +280,8 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 /* @Override
  public */ template Option<int> RangeHead::next(struct RangeHead this){/* if (this.counter >= this.length) {
                 return new None<>();
-            } *//* var value = this.counter; *//* this.counter++; */
+            } */
+	auto value = this.counter;/* this.counter++; */
 	return /* new Some<> */(value);
 }
 /* public static <T> */ template List<struct T> Lists::of(struct Lists this, /* T... */ elements){
@@ -347,7 +349,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
             } */
 }
 /* private */ struct DivideState DivideState::advance(struct DivideState this){
-	/* var withBuffer = this */.buffer.isEmpty() ? this.segments : this.segments.addLast(this.buffer.toString());
+	auto withBuffer = this.buffer.isEmpty() ? this.segments : this.segments.addLast(this.buffer.toString());
 	return /* new DivideState */(this.input, withBuffer, /* new StringBuilder */(), this.index, this.depth);
 }
 /* public */ struct DivideState DivideState::exit(struct DivideState this){
@@ -410,7 +412,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
 /* private static */ struct DivideState TypeSeparatorSplitter::fold(struct TypeSeparatorSplitter this, struct DivideState state, char c){/* if (c == ' ' && state.isLevel()) {
                 return state.advance();
             } */
-	/* var appended = state */.append(c);/* if (c == '<') {
+	auto appended = state.append(c);/* if (c == '<') {
                 return appended.enter();
             } *//* if (c == '>') {
                 return appended.exit();
@@ -428,7 +430,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return Strings.from(this.generate0());
 }
 /* private */ char* Definition::generate0(struct Definition this){
-	/* var beforeTypeString = this */.maybeBeforeType.map(/* beforeType -> generatePlaceholder(beforeType) + " " */).orElse(/* "" */);
+	auto beforeTypeString = this.maybeBeforeType.map(/* beforeType -> generatePlaceholder(beforeType) + " " */).orElse(/* "" */);
 	return /* beforeTypeString + this */.type.generateWithName(this.name).toSlice();
 }
 /* @Override
@@ -444,7 +446,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* @Override
  public */ struct String_ Functional::generateWithName(struct Functional this, char* name){
-	/* var joinedArguments = this */.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
+	auto joinedArguments = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
 	return this.returns.generate().appendSlice(/* " (*" */).appendSlice(name).appendSlice(/* ")(" */).appendSlice(joinedArguments).appendSlice(/* ")" */);
 }
 /* @Override
@@ -452,7 +454,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return Strings.from(this.generate0());
 }
 /* private */ char* Template::generate0(struct Template this){
-	/* var generatedTuple = this */.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
+	auto generatedTuple = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
 	return /* "template " + this */.base() + "<" + generatedTuple + ">";
 }
 /* @Override
@@ -486,7 +488,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* @Override
  public */ struct String_ StructRef::generate(struct StructRef this){
-	/* var typeParamString = this */.typeParams.iterate().collect(/* new Joiner */(/* ", " */)).map(/* inner -> "<" + inner + ">" */).orElse(/* "" */);
+	auto typeParamString = this.typeParams.iterate().collect(/* new Joiner */(/* ", " */)).map(/* inner -> "<" + inner + ">" */).orElse(/* "" */);
 	return Strings.from(/* "struct " */).appendSlice(this.input).appendSlice(typeParamString);
 }
 /* @Override
@@ -536,8 +538,8 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 }
 /* private static */ char* compileRoot(char* input){
-	/* var state = new CompileState */();
-	/* var tuple = compileAll */(state, input, /*  Main::compileRootSegment */).orElse(/* new Tuple<>(state */, /*  "") */);
+	auto state = /* new CompileState */();
+	auto tuple = compileAll(state, input, /*  Main::compileRootSegment */).orElse(/* new Tuple<>(state */, /*  "") */);
 	return tuple.right + tuple.left.generate();
 }
 /* private static */ template Option<(struct CompileState, char*)> compileAll(struct CompileState initial, char* input, template Option<(struct CompileState, char*)> (*mapper)(struct CompileState, char*)){
@@ -550,7 +552,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return output.append(right);
 }
 /* private static */ struct DivideState foldStatementChar(struct DivideState state, char c){
-	/* var appended = state */.append(c);/* if (c == ';' && appended.isLevel()) {
+	auto appended = state.append(c);/* if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == '}' && appended.isShallow()) {
             var exit = appended.exit();
@@ -601,7 +603,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } *//* ); */
 }
 /* private static */ template Option<(struct CompileState, char*)> symbol(struct CompileState state, char* value){
-	/* var stripped = value */.strip();/* if (isSymbol(stripped)) {
+	auto stripped = value.strip();/* if (isSymbol(stripped)) {
             return new Some<>(new Tuple<>(state, stripped));
         } *//* else {
             return new None<>();
@@ -696,7 +698,8 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
 }
 /* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){
-	/* var paramsString = params */.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).map(/* value -> "\n\t" + value + ";" */).collect(/* new Joiner */()).orElse(/* "" */);/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
+	auto paramsString = params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).map(/* value -> "\n\t" + value + ";" */).collect(/* new Joiner */()).orElse(/* "" */);
+	auto generatedStruct = /*  generatePlaceholder(beforeKeyword */.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n";
 	return /* new Tuple<CompileState, String> */(state.addStruct(generatedStruct), /*  "" */);
 }
 /* private static */ char* generateTypeParams(template List<char*> typeParams){
@@ -768,14 +771,16 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                         (maybeCurrent */, /* segment) -> maybeCurrent */.flatMap(
                                 state -> foldElement(state, segment, /*  mapper) */));
 }
-/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> foldElement((struct CompileState, template List<struct T>) state, char* segment, template Option<(struct CompileState, struct T)> (*mapper)(struct CompileState, char*)){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
+/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> foldElement((struct CompileState, template List<struct T>) state, char* segment, template Option<(struct CompileState, struct T)> (*mapper)(struct CompileState, char*)){
+	auto oldState = state.left;
+	auto oldCache = state.right;/* return mapper.apply(oldState, segment).map(result -> {
             var newState = result.left;
             var newElement = result.right;
             return new Tuple<>(newState, oldCache.addLast(newElement));
         } *//* ); */
 }
 /* private static */ template List<char*> divide(char* input, struct DivideState (*folder)(struct DivideState, char)){
-	/* DivideState current = new DivideState */(input);/* while (true) {
+	struct DivideState current = /* new DivideState */(input);/* while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
                 break;
@@ -793,7 +798,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ template Option<struct DivideState> foldDoubleQuotes(struct DivideState state, char c){/* if (c != '\"') {
             return new None<>();
         } */
-	/* var appended = state */.append(c);/* while (true) {
+	auto appended = state.append(c);/* while (true) {
             var maybeTuple = appended.popAndAppendToTuple();
             if (maybeTuple.isEmpty()) {
                 break;
@@ -828,7 +833,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ struct DivideState foldValueChar(struct DivideState state, char c){/* if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
-	/* var appended = state */.append(c);/* if (c == '<') {
+	auto appended = state.append(c);/* if (c == '<') {
             return appended.enter();
         } *//* if (c == '>') {
             return appended.exit();
@@ -897,8 +902,15 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ template Option<(struct CompileState, char*)> statementValue(struct CompileState state, char* input){
 	return Main.or(state, input, Lists.of(
                 Main::returns, /* 
+                Main::initialization */, /* 
                 Main::invocation
         ) */);
+}
+/* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){/* return first(s, "=", (s1, s2) -> definition(state, s1).flatMap(result0 -> {
+            return value(result0.left, s2).map(result1 -> {
+                return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
+            });
+        } *//* )); */
 }
 /* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){/* return suffix(input.strip(), ")", withoutEnd -> {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
@@ -915,7 +927,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } *//* ); */
 }
 /* private static */ struct DivideState foldInvocationStart(struct DivideState state, char c){
-	/* var appended = state */.append(c);/* if (c == '(') {
+	auto appended = state.append(c);/* if (c == '(') {
             var enter = appended.enter();
             return appended.isLevel() ? enter.advance() : enter;
         } *//* if (c == ')') {
@@ -950,7 +962,8 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             ));
         } *//* ); */
 }
-/* private static */ int isSymbol(char* value){/* for (var i = 0; */
+/* private static */ int isSymbol(char* value){
+	/* for */ /* (var */ i = /*  0 */;
 	/* i < value */.length();/* i++) {
             var c = value.charAt(i);
             if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
@@ -965,7 +978,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } *//* ); */
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> assemble(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){
-	/* var definition = new Definition */(maybeBeforeType, type, name.strip());
+	auto definition = /* new Definition */(maybeBeforeType, type, name.strip());
 	return /* new Some<> */(/* new Tuple<>(state */, /*  definition) */);
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
@@ -984,7 +997,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
          */));
 }
 /* private static */ template Option<(struct CompileState, struct Type)> structureType(struct CompileState state, char* input){
-	/* var stripped = input */.strip();/* if (isSymbol(stripped)) {
+	auto stripped = input.strip();/* if (isSymbol(stripped)) {
             return new Some<>(new Tuple<>(state, new StructRef(stripped, Lists.empty())));
         } *//* else {
             return new None<>();
@@ -1008,10 +1021,11 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return /* (state, input) -> content */.apply(state, input).map(Tuple.mapRight(/* value -> value */));
 }
 /* private static */ template Option<(struct CompileState, struct Type)> primitive(struct CompileState state, char* input){
-	/* var stripped = input */.strip();
+	auto stripped = input.strip();
 	return /* switch (stripped) {
             case "boolean", "Boolean", "int", "Integer" -> new Some<>(new Tuple<>(state, Primitive */.I32));
             case "char", "Character" -> new Some<>(new Tuple<>(state, Primitive.I8));
+            case "var" -> new Some<>(new Tuple<>(state, Primitive.Auto));
             case "void" -> new Some<>(new Tuple<>(state, Primitive.Void));
             default -> new None<>();
         };
@@ -1036,19 +1050,19 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } *//* ); */
 }
 /* private static */ template Option<int> lastIndexOfSlice(char* input, char* infix){
-	/* var index = input */.lastIndexOf(infix);
+	auto index = input.lastIndexOf(infix);
 	return /* index == -1 ? new None<Integer>() : new Some<> */(index);
 }
 /* private static */ template Option<(struct CompileState, char*)> prefix(char* input, char* prefix, template Option<(struct CompileState, char*)> (*mapper)(char*)){/* if (!input.startsWith(prefix)) {
             return new None<>();
         } */
-	/* var slice = input */.substring(prefix.length());
+	auto slice = input.substring(prefix.length());
 	return mapper.apply(slice);
 }
 /* private static <T> */ template Option<struct T> suffix(char* input, char* suffix, template Option<struct T> (*mapper)(char*)){/* if (!input.endsWith(suffix)) {
             return new None<>();
         } */
-	/* var slice = input */.substring(/* 0 */, input.length(/* ) - suffix */.length());
+	auto slice = input.substring(/* 0 */, input.length(/* ) - suffix */.length());
 	return mapper.apply(slice);
 }
 /* private static */ char* generatePlaceholder(char* input){
@@ -1062,6 +1076,6 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } *//* ); */
 }
 /* private static */ template Option<int> firstIndexOfSlice(char* input, char* infix){
-	/* var index = input */.indexOf(infix);
+	auto index = input.indexOf(infix);
 	return /* index == -1 ? new None<Integer>() : new Some<> */(index);
 }
