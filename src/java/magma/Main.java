@@ -598,6 +598,13 @@ public class Main {
         }
     }
 
+    private record StructRef(String input) implements Type {
+        @Override
+        public String_ generate() {
+            return new String_("struct ").appendSlice(this.input);
+        }
+    }
+
     private enum Primitive implements Type {
         Auto("auto"),
         I8("char"),
@@ -1161,10 +1168,20 @@ public class Main {
         return Main.or(state, input, Lists.of(
                 Main::primitive,
                 Main::template,
-                Main::typeParam,
+                Main::typeParameter,
                 Main::string,
+                Main::structureType,
                 wrap(Main::content)
         ));
+    }
+
+    private static Option<Tuple<CompileState, Type>> structureType(CompileState state, String input) {
+        if (isSymbol(input)) {
+            return new Some<>(new Tuple<>(state, new StructRef(input)));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Option<Tuple<CompileState, Type>> string(CompileState state, String input) {
@@ -1176,7 +1193,7 @@ public class Main {
         }
     }
 
-    private static Option<Tuple<CompileState, Type>> typeParam(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> typeParameter(CompileState state, String input) {
         if (state.maybeStructureType instanceof Some(var structureType)) {
             var stripped = input.strip();
             if (structureType.typeParams.contains(stripped)) {
