@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Main {
     private record CompileState(JavaList<String> structs, JavaList<String> functions) {
@@ -178,19 +177,31 @@ public class Main {
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                () -> compileWhitespace(state, input),
-                () -> compileNamespaced(state, input),
-                () -> compileStructure(state, input, "class ")
+                Main::compileWhitespace,
+                Main::compileNamespaced,
+                structure("class ")
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> structure(String infix) {
+        return (state, input) -> compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content -> {
+                    var tuple = compileAll(state, content, Main::compileStructSegment);
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name.strip() + " {" + tuple.right + "\n};\n";
+                    return Optional.of(new Tuple<>(tuple.left.addStruct(generated), ""));
+                });
+            });
+        });
     }
 
     private static Tuple<CompileState, String> compileOr(
             CompileState state,
             String input,
-            List<Supplier<Optional<Tuple<CompileState, String>>>> actions
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions
     ) {
         for (var action : actions) {
-            var result = action.get();
+            var result = action.apply(state, input);
             if (result.isPresent()) {
                 return result.get();
             }
@@ -206,23 +217,11 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
-        return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", content -> {
-                    var tuple = compileAll(state, content, Main::compileStructSegment);
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name.strip() + " {" + tuple.right + "\n};\n";
-                    return Optional.of(new Tuple<>(tuple.left.addStruct(generated), ""));
-                });
-            });
-        });
-    }
-
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                () -> compileWhitespace(state, input),
-                () -> compileStructure(state, input, "record "),
-                () -> compileMethod(state, input)
+                Main::compileWhitespace,
+                structure("record "),
+                Main::compileMethod
         ));
     }
 
