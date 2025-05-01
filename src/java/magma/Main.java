@@ -1422,15 +1422,13 @@ public class Main {
 
     private static Option<Tuple<CompileState, Type>> primitive(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.equals("boolean") || stripped.equals("int")) {
-            return new Some<>(new Tuple<>(state, Primitive.I32));
-        }
+        return switch (stripped) {
+            case "boolean", "Boolean", "int", "Integer" -> new Some<>(new Tuple<>(state, Primitive.I32));
+            case "char", "Character" -> new Some<>(new Tuple<>(state, Primitive.I8));
+            case "void" -> new Some<>(new Tuple<>(state, Primitive.Void));
+            default -> new None<>();
+        };
 
-        if (stripped.equals("void")) {
-            return new Some<>(new Tuple<>(state, Primitive.Void));
-        }
-
-        return new None<>();
     }
 
     private static Option<Tuple<CompileState, Type>> template(CompileState state, String input) {
@@ -1439,19 +1437,14 @@ public class Main {
                 return parseValues(state, argumentsString, Main::type).flatMap(argumentsTuple -> {
                     var arguments = argumentsTuple.right;
 
-                    Type generated;
-                    if (base.equals("Function")) {
-                        generated = new Functional(Lists.of(arguments.get(0)), arguments.get(1));
-                    }
-                    else if (base.equals("Supplier")) {
-                        generated = new Functional(Lists.empty(), arguments.get(0));
-                    }
-                    else if (base.equals("Tuple")) {
-                        generated = new TupleType(arguments);
-                    }
-                    else {
-                        generated = new Template(base, arguments);
-                    }
+                    Type generated = switch (base) {
+                        case "Function" -> new Functional(Lists.of(arguments.get(0)), arguments.get(1));
+                        case "BiFunction" ->
+                                new Functional(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2));
+                        case "Supplier" -> new Functional(Lists.empty(), arguments.get(0));
+                        case "Tuple" -> new TupleType(arguments);
+                        default -> new Template(base, arguments);
+                    };
 
                     return new Some<>(new Tuple<>(argumentsTuple.left, generated));
                 });
