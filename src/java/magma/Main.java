@@ -778,10 +778,10 @@ public class Main {
                 return exit.advance();
             }
         }
-        if (c == '{') {
+        if (c == '{' || c == '(') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '}' || c == ')') {
             return appended.exit();
         }
         return appended;

@@ -332,11 +332,12 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 /* private */ template Option<struct DivideState> DivideState::popAndAppend(struct DivideState this){
 	return this.popAndAppendToTuple().map(/* Tuple::right */);
 }
-/* private */ template Option<(char, struct DivideState)> DivideState::popAndAppendToTuple(struct DivideState this){/* return this.pop().map(tuple -> {
-                var c = tuple.left;
+/* private */ template Option<(char, struct DivideState)> DivideState::popAndAppendToTuple(struct DivideState this){
+	return this.pop().map(/* tuple -> {
+                var c = tuple */.left;
                 var state = tuple.right;
                 return new Tuple<>(c, state.append(c));
-            } *//* ); */
+            });
 }
 /* private */ struct DivideState DivideState::append(struct DivideState this, char c){
 	return /* new DivideState */(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
@@ -385,11 +386,12 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
 	return /* new Some<> */(this.value);
 }
 /* @Override
- public */ template Option<(char*, char*)> InfixSplitter::split(struct InfixSplitter this, char* input){/* return this.apply(input).map(classIndex -> {
-                var beforeKeyword = input.substring(0, classIndex);
+ public */ template Option<(char*, char*)> InfixSplitter::split(struct InfixSplitter this, char* input){
+	return this.apply(input).map(/* classIndex -> {
+                var beforeKeyword = input */.substring(0, classIndex);
                 var afterKeyword = input.substring(classIndex + this.length());
                 return new Tuple<>(beforeKeyword, afterKeyword);
-            } *//* ); */
+            });
 }
 /* private */ int InfixSplitter::length(struct InfixSplitter this){
 	return this.infix.length();
@@ -398,16 +400,17 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
 	return this.locator().apply(input, this.infix);
 }
 /* @Override
- public */ template Option<(char*, char*)> TypeSeparatorSplitter::split(struct TypeSeparatorSplitter this, char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
-                var left = segments.left;
+ public */ template Option<(char*, char*)> TypeSeparatorSplitter::split(struct TypeSeparatorSplitter this, char* input){
+	return divide(input, /*  TypeSeparatorSplitter::fold) */.removeLast().flatMap(/* segments -> {
+                var left = segments */.left;
                 if (left.isEmpty()) {
-                    return new None<>();
+                    return new None<>(/* );
                 }
 
-                var beforeType = left.iterate().collect(new Joiner(" ")).orElse("");
+                var beforeType = left */.iterate().collect(/* new Joiner */(/* " " */)).orElse("");
                 var type = segments.right;
                 return new Some<>(new Tuple<>(beforeType, type));
-            } *//* ); */
+            });
 }
 /* private static */ struct DivideState TypeSeparatorSplitter::fold(struct TypeSeparatorSplitter this, struct DivideState state, char c){/* if (c == ' ' && state.isLevel()) {
                 return state.advance();
@@ -492,16 +495,17 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return Strings.from(/* "struct " */).appendSlice(this.input).appendSlice(typeParamString);
 }
 /* @Override
- public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){/* return divide(input, this.folder).removeLast().map(divisions -> {
-                var left1 = divisions.left;
+ public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){
+	return divide(input, this.folder).removeLast().map(/* divisions -> {
+                var left1 = divisions */.left;
                 if (left1.isEmpty()) {
-                    return new Tuple<>(divisions.right, "");
+                    return new Tuple<>(divisions.right, /*  "");
                 }
 
-                var left = left1.iterate().collect(new Joiner()).orElse("");
+                var left = left1 */.iterate().collect(/* new Joiner */()).orElse("");
                 var right = divisions.right;
                 return new Tuple<>(left, right);
-            } *//* ); */
+            });
 }
 /* @Override
  public */ struct String_ Primitive::generate(struct Primitive this){
@@ -562,9 +566,9 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             else {
                 return exit.advance();
             }
-        } *//* if (c == '{') {
+        } *//* if (c == '{' || c == '(') {
             return appended.enter();
-        } *//* if (c == '}') {
+        } *//* if (c == '}' || c == ')') {
             return appended.exit();
         } */
 	return appended;
@@ -578,11 +582,10 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ template Option<(struct CompileState, char*)> (*parseClass)(struct CompileState, char*)(){
 	return structure(/* "class" */, /*  "class " */);
 }
-/* private static */ template Option<(struct CompileState, char*)> (*structure)(struct CompileState, char*)(char* type, char* infix){/* return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
-            var slices = Arrays.stream(beforeKeyword.split(" "))
-                    .map(String::strip)
-                    .filter(value -> !value.isEmpty())
-                    .toList();
+/* private static */ template Option<(struct CompileState, char*)> (*structure)(struct CompileState, char*)(char* type, char* infix){
+	return /* (state, input) -> first */(input, infix, /*  (beforeKeyword */, /* afterKeyword) -> {
+            var slices = Arrays */.stream(beforeKeyword.split(/* " "))
+                     */.map(String::strip).filter(value -> !value.isEmpty(/* ) */).toList();
 
             if (slices.contains("@Actual")) {
                 return new Some<>(new Tuple<>(state, ""));
@@ -594,13 +597,14 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                         (state0, beforeContent0) -> structureWithoutVariants(type, state0, beforeKeyword, beforeContent0, Lists.empty(), withEnd)
                 ));
             });
-        } *//* ); */
+        });
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){/* return first(beforeContent, " permits ", (beforePermits, variantsString) -> {
-            return parseValues(state, variantsString, Main::symbol).flatMap(params -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){
+	return first(beforeContent, /*  " permits " */, /*  (beforePermits */, /*  variantsString) -> {
+            return parseValues(state, variantsString, Main::symbol) */.flatMap(params -> {
                 return structureWithoutVariants(type, params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
-        } *//* ); */
+        });
 }
 /* private static */ template Option<(struct CompileState, char*)> symbol(struct CompileState state, char* value){
 	auto stripped = value.strip();/* if (isSymbol(stripped)) {
@@ -633,12 +637,13 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before */.strip(), Lists.empty(/* ) */, variants, /*  withEnd)
          */));
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithParams(char* type, struct CompileState instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithParams(char* type, struct CompileState instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
+	return suffix(beforeContent.strip(), /*  ")" */, /* withoutEnd -> first */(withoutEnd, /*  "(" */, /*  (name */, /*  paramString) -> {
             return parseAll(instance, paramString, Main::foldValueChar, Main::parameter)
-                    .flatMap(params -> {
+                     */.flatMap(params -> {
                         return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
                     });
-        } *//* )); */
+        }));
 }
 /* private static */ template Option<(struct CompileState, struct Parameter)> parameter(struct CompileState instance, char* paramString){
 	return Main.or(instance, paramString, Lists.of(/* 
@@ -651,22 +656,24 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 (state0, name) -> structureWithName(type, state0, beforeKeyword, name, Lists */.empty(/* ) */, params, variants, /*  withEnd)
          */));
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, template List<struct Parameter> params, template List<char*> variants, char* withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
-            return first(withoutEnd, "<", (name, typeParamString) -> {
-                return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
+	return suffix(beforeParams0.strip(), /*  ">" */, /* withoutEnd -> {
+            return first */(withoutEnd, /*  "<" */, /*  (name */, /*  typeParamString) -> {
+                return parseValues(state, typeParamString, Main::symbol */).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
                 });
             });
-        } *//* ); */
+        });
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){/* return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state.withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
+	return suffix(withEnd.strip(), /*  "}" */, /* content -> {
+            return compileAll */(state.withStructType(new StructurePrototype(type, name, typeParams, /*  variants)) */, content, /*  Main::structSegment */).flatMap(/* tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }
-                return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
+                return new Some<>(assembleStruct(type, tuple */.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
-        } *//* ); */
+        });
 }
 /* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
             var enumName = name + "Variant";
@@ -725,10 +732,11 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 Main::definitionStatement */, /* 
                 (state1 */, /* input1) -> content(state1, input1) */.map(Tuple.mapRight(/* content -> content */.generate().toSlice(/* )) */)));
 }
-/* private static */ template Option<(struct CompileState, char*)> definitionStatement(struct CompileState state, char* input){/* return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(definition -> definition.generate().toSlice())).map(value -> {
-            var generated = "\n\t" + value.right + ";";
+/* private static */ template Option<(struct CompileState, char*)> definitionStatement(struct CompileState state, char* input){
+	return suffix(input.strip(), /*  ";" */, /* withoutEnd -> definition */(state, withoutEnd).map(Tuple.mapRight(/* definition -> definition */.generate(/* ) */.toSlice())).map(/* value -> {
+            var generated = "\n\t" + value */.right + ";";
             return new Tuple<>(value.left, generated);
-        } *//* )); */
+        }));
 }
 /* private static */ template Option<(struct CompileState, struct Content)> content(struct CompileState state, char* input){
 	return /* new Some<> */(/* new Tuple<CompileState, Content>(state */, /* new Content */(/* input) */));
@@ -738,15 +746,13 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 	return /* new None<> */();
 }
-/* private static */ template Option<(struct CompileState, char*)> method(struct CompileState state, char* input){/* return first(input, "(", (inputDefinition, withParams) -> {
+/* private static */ template Option<(struct CompileState, char*)> method(struct CompileState state, char* input){
+	return first(input, /*  "(" */, /*  (inputDefinition */, /* withParams) -> {
             return first(withParams, ")", (paramsString, withBraces) -> {
-                return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                    return parseValues(outputDefinition.left, paramsString, Main::parameter).flatMap(outputParams -> {
-                        var params = outputParams.right
-                                .iterate()
-                                .map(Main::retainDefinition)
-                                .flatMap(Iterators::fromOptions)
-                                .collect(new ListCollector<>());
+                return compileMethodHeader */(state, inputDefinition).flatMap(/* outputDefinition -> {
+                    return parseValues */(outputDefinition.left, paramsString, /*  Main::parameter */).flatMap(/* outputParams -> {
+                        var params = outputParams */.right
+                                .iterate().map(Main::retainDefinition).flatMap(Iterators::fromOptions).collect(new ListCollector<>());
 
                         return or(outputParams.left, withBraces, Lists.of(
                                 (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
@@ -754,7 +760,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                     });
                 });
             });
-        } *//* ); */
+        });
 }
 /* private static */ template Option<struct Definition> retainDefinition(struct Parameter param){/* if (param instanceof Definition definition) {
             return new Some<>(definition);
@@ -773,11 +779,12 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* private static <T> */ template Option<(struct CompileState, template List<struct T>)> foldElement((struct CompileState, template List<struct T>) state, char* segment, template Option<(struct CompileState, struct T)> (*mapper)(struct CompileState, char*)){
 	auto oldState = state.left;
-	auto oldCache = state.right;/* return mapper.apply(oldState, segment).map(result -> {
-            var newState = result.left;
+	auto oldCache = state.right;
+	return mapper.apply(oldState, segment).map(/* result -> {
+            var newState = result */.left;
             var newElement = result.right;
             return new Tuple<>(newState, oldCache.addLast(newElement));
-        } *//* ); */
+        });
 }
 /* private static */ template List<char*> divide(char* input, struct DivideState (*folder)(struct DivideState, char)){
 	struct DivideState current = /* new DivideState */(input);/* while (true) {
@@ -819,16 +826,17 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* private static */ template Option<struct DivideState> foldSingleQuotes(struct DivideState state, char c){/* if (c != '\'') {
             return new None<>();
-        } *//* return state.append(c).pop().map(maybeNextTuple -> {
-            var nextChar = maybeNextTuple.left;
-            var nextState = maybeNextTuple.right.append(nextChar);
+        } */
+	return state.append(/* c) */.pop().map(/* maybeNextTuple -> {
+            var nextChar = maybeNextTuple */.left;
+            var nextState = maybeNextTuple.right.append(/* nextChar);
 
             var withEscaped = nextChar == '\\'
-                    ? nextState.popAndAppend().orElse(nextState)
+                    ? nextState */.popAndAppend().orElse(/* nextState)
                     : nextState;
 
-            return withEscaped.popAndAppend().orElse(withEscaped);
-        } *//* ); */
+            return withEscaped */.popAndAppend().orElse(withEscaped);
+        });
 }
 /* private static */ struct DivideState foldValueChar(struct DivideState state, char c){/* if (c == ',' && state.isLevel()) {
             return state.advance();
@@ -864,20 +872,20 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 	return /* new Some<> */(/* new Tuple<CompileState, String>(state */, /*  generated) */);
 }
-/* private static */ template Option<(struct CompileState, char*)> methodWithContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* withBraces){/* return prefix(withBraces.strip(), "{", withoutStart1 -> {
-            return suffix(withoutStart1, "}", content -> {
-                return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
-                    var newParameters = state.maybeStructureType
-                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name, structType.typeParams), "this")))
-                            .orElse(params);
+/* private static */ template Option<(struct CompileState, char*)> methodWithContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* withBraces){
+	return prefix(withBraces.strip(), /*  "{" */, /* withoutStart1 -> {
+            return suffix */(withoutStart1, /*  "}" */, /* content -> {
+                return compileAll */(state, content, /*  Main::functionSegment */).flatMap(/* tuple -> {
+                    var newParameters = state */.maybeStructureType
+                            .map(/* structType -> params */.addFirst(/* new Definition(new StructRef(structType */.name, structType.typeParams), /*  "this") */)).orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
-                            .mapName(name -> state.maybeStructureType.map(structureType -> structureType.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            .mapName(/* name -> state */.maybeStructureType.map(/* structureType -> structureType */.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
-        } *//* ); */
+        });
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> compileMethodHeader(struct CompileState state, char* definition){
 	return or(state, definition, Lists.of(
@@ -885,13 +893,14 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 Main::constructor
         ) */);
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> constructor(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> constructor(struct CompileState state, char* input){
+	return split(input.strip(), /*  new InfixSplitter(" " */, /*  Main::lastIndexOfSlice) */, /*  (_ */, /* name) -> state */.maybeStructureType.flatMap(structureType -> {
             if (!structureType.name.equals(name)) {
                 return new None<>();
             }
 
-            return new Some<>(new Tuple<>(state, new Definition(Primitive.Auto, name)));
-        } *//* )); */
+            return new Some<>(/* new Tuple<>(state */, /*  new Definition(Primitive */.Auto, /*  name)));
+        } */));
 }
 /* private static */ template Option<(struct CompileState, char*)> functionSegment(struct CompileState state, char* input){
 	return or(state, input.strip(), Lists.of(
@@ -906,25 +915,25 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 Main::invocation
         ) */);
 }
-/* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){/* return first(s, "=", (s1, s2) -> definition(state, s1).flatMap(result0 -> {
-            return value(result0.left, s2).map(result1 -> {
-                return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
+/* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){
+	return first(s, /*  "=" */, /*  (s1 */, /* s2) -> definition(state, s1) */.flatMap(result0 -> {
+            return value(result0.left, s2).map(/* result1 -> {
+                return new Tuple<>(result1 */.left, result0.right.generate0() + " = " + result1.right());
             });
-        } *//* )); */
+        }));
 }
-/* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){/* return suffix(input.strip(), ")", withoutEnd -> {
-            return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
-                return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
-                    return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
-                        var joined = argumentsTuple.right.iterate()
-                                .collect(new Joiner(", "))
-                                .orElse("");
+/* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){
+	return suffix(input.strip(), /*  ")" */, /* withoutEnd -> {
+            return split */(withoutEnd, /* new DividingSplitter */(/* Main::foldInvocationStart */), /*  (withEnd */, /* argumentsString) -> {
+                return suffix(withEnd */.strip(), "(", callerString -> value(state0, callerString).flatMap(/* callerTuple -> {
+                    return Main */.parseValues(callerTuple.left, argumentsString, /*  Main::value */).map(/* argumentsTuple -> {
+                        var joined = argumentsTuple */.right.iterate().collect(new Joiner(", ")).orElse("");
 
                         return new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + joined + ")");
                     });
                 }));
             });
-        } *//* ); */
+        });
 }
 /* private static */ struct DivideState foldInvocationStart(struct DivideState state, char c){
 	auto appended = state.append(c);/* if (c == '(') {
@@ -945,26 +954,26 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 Main::symbol */, /* 
                 (state1 */, /* input1) -> content(state1, input1) */.map(Tuple.mapRight(/* content -> content */.generate().toSlice(/* )) */)));
 }
-/* private static */ template Option<(struct CompileState, char*)> dataAccess(struct CompileState state, char* input){/* return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> {
-            return value(state, parent).map(tuple -> {
+/* private static */ template Option<(struct CompileState, char*)> dataAccess(struct CompileState state, char* input){
+	return split(input, /*  new InfixSplitter(" */.", /*  Main::lastIndexOfSlice) */, /*  (parent */, /*  property) -> {
+            return value(state, parent) */.map(tuple -> {
                 return new Tuple<>(tuple.left, tuple.right + "." + property);
             });
-        } *//* ); */
+        });
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> definition(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> definition(struct CompileState state, char* input){
+	return split(input.strip(), /*  new InfixSplitter(" " */, /*  Main::lastIndexOfSlice) */, /*  (beforeName */, /*  name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
 
-            return Main.or(state, beforeName.strip(), Lists.of(
+            return Main */.or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> definitionWithTypeSeparator(instance, beforeName0, name),
                     (instance, beforeName0) -> definitionWithoutTypeSeparator(instance, beforeName0, name)
             ));
-        } *//* ); */
+        });
 }
-/* private static */ int isSymbol(char* value){
-	/* for */ /* (var */ i = /*  0 */;
-	/* i < value */.length();/* i++) {
+/* private static */ int isSymbol(char* value){/* for (var i = 0; i < value.length(); i++) {
             var c = value.charAt(i);
             if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
                 continue;
@@ -973,19 +982,21 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 	return true;
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){/* return type(state, type).flatMap(typeTuple -> {
-            return assemble(typeTuple.left, new None<String>(), typeTuple.right, name);
-        } *//* ); */
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){
+	return type(state, type).flatMap(/* typeTuple -> {
+            return assemble(typeTuple */.left, new None<String>(), typeTuple.right, name);
+        });
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> assemble(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){
 	auto definition = /* new Definition */(maybeBeforeType, type, name.strip());
 	return /* new Some<> */(/* new Tuple<>(state */, /*  definition) */);
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            return type(state, typeString).flatMap(typeTuple -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){
+	return split(beforeName, /* new TypeSeparatorSplitter */(), /*  (beforeType */, /*  typeString) -> {
+            return type(state, typeString) */.flatMap(typeTuple -> {
                 return assemble(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
             });
-        } *//* ); */
+        });
 }
 /* private static */ template Option<(struct CompileState, struct Type)> type(struct CompileState state, char* input){
 	return Main.or(state, input, Lists.of(
@@ -1030,9 +1041,10 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             default -> new None<>();
         };
 }
-/* private static */ template Option<(struct CompileState, struct Type)> template(struct CompileState state, char* input){/* return suffix(input.strip(), ">", withoutEnd -> {
-            return first(withoutEnd, "<", (base, argumentsString) -> {
-                return parseValues(state, argumentsString, Main::type).flatMap(argumentsTuple -> {
+/* private static */ template Option<(struct CompileState, struct Type)> template(struct CompileState state, char* input){
+	return suffix(input.strip(), /*  ">" */, /* withoutEnd -> {
+            return first */(withoutEnd, /*  "<" */, /*  (base */, /*  argumentsString) -> {
+                return parseValues(state, argumentsString, Main::type */).flatMap(argumentsTuple -> {
                     var arguments = argumentsTuple.right;
 
                     Type generated = switch (base) {
@@ -1047,7 +1059,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                     return new Some<>(new Tuple<>(argumentsTuple.left, generated));
                 });
             });
-        } *//* ); */
+        });
 }
 /* private static */ template Option<int> lastIndexOfSlice(char* input, char* infix){
 	auto index = input.lastIndexOf(infix);
@@ -1071,9 +1083,10 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static <T> */ template Option<struct T> first(char* input, char* infix, template Option<struct T> (*mapper)(char*, char*)){
 	return split(input, /*  new InfixSplitter(infix */, /*  Main::firstIndexOfSlice) */, mapper);
 }
-/* private static <T> */ template Option<struct T> split(char* input, struct Splitter splitter, template Option<struct T> (*mapper)(char*, char*)){/* return splitter.split(input).flatMap(tuple -> {
-            return mapper.apply(tuple.left, tuple.right);
-        } *//* ); */
+/* private static <T> */ template Option<struct T> split(char* input, struct Splitter splitter, template Option<struct T> (*mapper)(char*, char*)){
+	return splitter.split(input).flatMap(/* tuple -> {
+            return mapper */.apply(tuple.left, tuple.right);
+        });
 }
 /* private static */ template Option<int> firstIndexOfSlice(char* input, char* infix){
 	auto index = input.indexOf(infix);
