@@ -732,7 +732,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
-        return compileType(type, state).flatMap(typeTuple -> {
+        return compileType(state, type).flatMap(typeTuple -> {
             var generated = typeTuple.right + " " + name.strip();
             return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
         });
@@ -740,17 +740,26 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            return compileType(typeString, state).flatMap(typeTuple -> {
+            return compileType(state, typeString).flatMap(typeTuple -> {
                 var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + name.strip();
                 return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileType(String input, CompileState state) {
+    private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
         return or(state, input, Lists.of(
+                Main::template,
                 Main::content
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (base, argumentsString) -> {
+                return new Some<>(new Tuple<>(state, "template " + base + "<" + generatePlaceholder(argumentsString) + ">"));
+            });
+        });
     }
 
     private static Option<Integer> lastIndexOfSlice(String input, String infix) {
@@ -770,8 +779,8 @@ public class Main {
         if (!input.endsWith(suffix)) {
             return new None<>();
         }
-        var content = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(content);
+        var slice = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(slice);
     }
 
     private static String generatePlaceholder(String input) {
