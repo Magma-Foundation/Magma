@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
@@ -22,6 +23,10 @@ public class Main {
         T orElseGet(Supplier<T> other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        Option<T> filter(Predicate<T> predicate);
+
+        boolean isPresent();
     }
 
     private interface Head<T> {
@@ -84,8 +89,14 @@ public class Main {
             return mapper.apply(this.value);
         }
 
-        public T get() {
-            return this.value;
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
         }
     }
 
@@ -118,6 +129,16 @@ public class Main {
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
         }
     }
 
@@ -249,9 +270,17 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structs, List<String> functions) {
+    private record StructurePrototype(String type, List<String> variants) {
+
+    }
+
+    private record CompileState(
+            List<String> structs,
+            List<String> functions,
+            Option<StructurePrototype> maybeStructureType
+    ) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), new None<>());
         }
 
         private String generate() {
@@ -263,11 +292,19 @@ public class Main {
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.functions);
+            return new CompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType);
         }
 
         public CompileState addFunction(String function) {
-            return new CompileState(this.structs, this.functions.addLast(function));
+            return new CompileState(this.structs, this.functions.addLast(function), this.maybeStructureType);
+        }
+
+        public CompileState withStructType(StructurePrototype type) {
+            return new CompileState(this.structs, this.functions, new Some<>(type));
+        }
+
+        public CompileState withoutStructType() {
+            return new CompileState(this.structs, this.functions, new None<>());
         }
     }
 
@@ -436,26 +473,25 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        return parseAll(initial, input, folder, mapper, merger).map(tuple -> new Tuple<>(tuple.left, generateAll(merger, tuple.right)));
+        return parseAll(initial, input, folder, mapper).map(tuple -> new Tuple<>(tuple.left, generateAll(merger, tuple.right)));
     }
 
     private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> right) {
         return right.iterate().fold(new StringBuilder(), merger).toString();
     }
 
-    private static Option<Tuple<CompileState, List<String>>> parseAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Option<Tuple<CompileState, List<String>>> parseAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper) {
         return divide(input, folder)
                 .iterate()
                 .<Option<Tuple<CompileState, List<String>>>>fold(new Some<>(new Tuple<CompileState, List<String>>(initial, Lists.empty())),
                         (maybeCurrent, segment) -> maybeCurrent.flatMap(
-                                state -> foldElement(state, segment, mapper, merger)));
+                                state -> foldElement(state, segment, mapper)));
     }
 
     private static Option<Tuple<CompileState, List<String>>> foldElement(
             Tuple<CompileState, List<String>> state,
             String segment,
-            BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper,
-            BiFunction<StringBuilder, String, StringBuilder> merger
+            BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper
     ) {
         var oldState = state.left;
         var oldCache = state.right;
@@ -553,12 +589,12 @@ public class Main {
         return or(state, input, Lists.of(
                 Main::whitespace,
                 Main::compileNamespaced,
-                structure("class "),
+                structure("class", "class "),
                 Main::content
         ));
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String infix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String type, String infix) {
         return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
             var slices = Arrays.stream(beforeKeyword.split(" "))
                     .map(String::strip)
@@ -571,17 +607,17 @@ public class Main {
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, Lists.of(
-                        (state3, beforeContent0) -> structureWithVariants(beforeKeyword, withEnd, state3, beforeContent0),
-                        (state1, s) -> structureWithoutVariants(state1, beforeKeyword, s, Lists.empty(), withEnd)
+                        (state0, beforeContent0) -> structureWithVariants(type, state0, beforeKeyword, beforeContent0, withEnd),
+                        (state0, beforeContent0) -> structureWithoutVariants(type, state0, beforeKeyword, beforeContent0, Lists.empty(), withEnd)
                 ));
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithVariants(String beforeKeyword, String withEnd, CompileState state3, String beforeContent0) {
-        return first(beforeContent0, " permits ", (beforePermits, variantsString) -> {
-            return parseValues(state3, variantsString, Main::symbol).flatMap(params -> {
-                return structureWithoutVariants(params.left, beforeKeyword, beforePermits, params.right, withEnd);
+    private static Option<Tuple<CompileState, String>> structureWithVariants(String type, CompileState state, String beforeKeyword, String beforeContent, String withEnd) {
+        return first(beforeContent, " permits ", (beforePermits, variantsString) -> {
+            return parseValues(state, variantsString, Main::symbol).flatMap(params -> {
+                return structureWithoutVariants(type, params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
         });
     }
@@ -590,17 +626,17 @@ public class Main {
         return new Some<>(new Tuple<>(state, value.strip()));
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithoutVariants(CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
+    private static Option<Tuple<CompileState, String>> structureWithoutVariants(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
-                (instance, before) -> structureWithParams(instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithMaybeTypeParams(instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
+                (instance, before) -> structureWithMaybeTypeParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithParams(CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
+    private static Option<Tuple<CompileState, String>> structureWithParams(String type, CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
-                return structureWithMaybeTypeParams(params.left, beforeKeyword, name, params.right, variants, withEnd);
+                return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         }));
     }
@@ -634,6 +670,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> structureWithMaybeTypeParams(
+            String type,
             CompileState state,
             String beforeKeyword,
             String beforeParams,
@@ -642,12 +679,13 @@ public class Main {
             String withEnd
     ) {
         return or(state, beforeParams, Lists.of(
-                (state0, beforeParams0) -> structureWithTypeParams(state0, beforeParams0, beforeKeyword, params, variants, withEnd),
-                (state0, name) -> structureWithName(state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
+                (state0, beforeParams0) -> structureWithTypeParams(type, state0, beforeParams0, beforeKeyword, params, variants, withEnd),
+                (state0, name) -> structureWithName(type, state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
         ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithTypeParams(
+            String type,
             CompileState state,
             String beforeParams0,
             String beforeKeyword,
@@ -658,17 +696,26 @@ public class Main {
         return suffix(beforeParams0.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (name, typeParamString) -> {
                 return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
-                    return structureWithName(values.left, beforeKeyword, name, values.right, params, variants, withEnd);
+                    return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
                 });
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithName(CompileState state, String beforeKeyword, String name, List<String> typeParams, String params, List<String> variants, String withEnd) {
+    private static Option<Tuple<CompileState, String>> structureWithName(
+            String type,
+            CompileState state,
+            String beforeKeyword,
+            String name,
+            List<String> typeParams,
+            String params,
+            List<String> variants,
+            String withEnd
+    ) {
         return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
+            return compileAll(state.withStructType(new StructurePrototype(type, variants)), content, Main::structSegment).flatMap(tuple -> {
                 return new Some<>(assembleStruct(tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
-            });
+            }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         });
     }
 
@@ -745,8 +792,8 @@ public class Main {
     private static Option<Tuple<CompileState, String>> structSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
                 Main::whitespace,
-                structure("record "),
-                structure("interface "),
+                structure("record", "record "),
+                structure("interface", "interface "),
                 Main::method,
                 Main::definitionStatement,
                 Main::content
@@ -794,17 +841,22 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, List<String>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
-        return parseAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+        return parseAll(state, input, Main::foldValueChar, compiler);
     }
 
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
-        if (content.equals(";")) {
-            var generated = "\n\t" + definition + "(" + params + ");";
-            return new Some<>(new Tuple<CompileState, String>(state, ""));
-        }
-        else {
+        if (!content.equals(";")) {
             return new None<>();
         }
+
+        String generated;
+        if (state.maybeStructureType.filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
+            generated = "\n\t" + definition + "(" + params + ");";
+        }
+        else {
+            generated = "";
+        }
+        return new Some<>(new Tuple<CompileState, String>(state, generated));
     }
 
     private static Option<Tuple<CompileState, String>> methodWithContent(CompileState state, String outputDefinition, String params, String withBraces) {
