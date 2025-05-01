@@ -507,7 +507,7 @@ public class Main {
         return or(instance, paramString, Lists.of(
                 Main::definition,
                 Main::content
-        )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";"));
+        ));
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
@@ -589,7 +589,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
         if (content.equals(";")) {
-            var generated = "\n\t" + definition + "(" + generatePlaceholder(params) + ");";
+            var generated = "\n\t" + definition + "(" + params + ");";
             return new Some<>(new Tuple<CompileState, String>(state, generated));
         }
         else {
