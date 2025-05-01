@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
     private record CompileState(JavaList<String> structs, JavaList<String> functions) {
@@ -176,10 +177,26 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return compileNamespaced(state, input)
-                .or(() -> compileWhitespace(state, input))
-                .or(() -> compileStructure(state, input, "class "))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileOr(state, input, List.of(
+                () -> compileWhitespace(state, input),
+                () -> compileNamespaced(state, input),
+                () -> compileStructure(state, input, "class ")
+        ));
+    }
+
+    private static Tuple<CompileState, String> compileOr(
+            CompileState state,
+            String input,
+            List<Supplier<Optional<Tuple<CompileState, String>>>> actions
+    ) {
+        for (var action : actions) {
+            var result = action.get();
+            if (result.isPresent()) {
+                return result.get();
+            }
+        }
+
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
@@ -202,10 +219,11 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
-        return compileWhitespace(state, input)
-                .or(() -> compileStructure(state, input, "record "))
-                .or(() -> compileMethod(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileOr(state, input, List.of(
+                () -> compileWhitespace(state, input),
+                () -> compileStructure(state, input, "record "),
+                () -> compileMethod(state, input)
+        ));
     }
 
     private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
