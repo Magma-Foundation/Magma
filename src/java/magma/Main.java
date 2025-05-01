@@ -241,8 +241,8 @@ public class Main {
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> structure(String infix) {
-        return (state, input) -> compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
+        return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
+            return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, List.of(
                         (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
                         (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
@@ -252,7 +252,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
-        return compileSuffix(before.strip(), ")", withoutEnd -> compileInfix(withoutEnd, "(", (name, paramString) -> {
+        return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return compileAll(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::foldValues).flatMap(params -> {
                 return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
             });
@@ -281,7 +281,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> structureWithName(String beforeKeyword, String withEnd, String name, CompileState state, String params) {
-        return compileSuffix(withEnd.strip(), "}", content -> {
+        return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::compileStructSegment).flatMap(tuple -> {
                 var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
                 return Optional.of(new Tuple<>(tuple.left.addStruct(generated), ""));
@@ -328,10 +328,10 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileInfix(input, "(", (inputDefinition, withParams) -> {
-            return compileInfix(withParams, ")", (params, withBraces) -> {
-                return compilePrefix(withBraces.strip(), withoutStart1 -> {
-                    return compileSuffix(withoutStart1, "}", content -> {
+        return first(input, "(", (inputDefinition, withParams) -> {
+            return first(withParams, ")", (params, withBraces) -> {
+                return prefix(withBraces.strip(), withoutStart1 -> {
+                    return suffix(withoutStart1, "}", content -> {
                         return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
                             return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
                                 var generated = outputDefinition.right + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
@@ -358,24 +358,20 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
-        var stripped = input.strip();
-        var nameSeparator = stripped.lastIndexOf(" ");
-        if (nameSeparator >= 0) {
-            var beforeName = stripped.substring(0, nameSeparator);
-            var name = stripped.substring(nameSeparator + " ".length());
-            var typeSeparator = beforeName.indexOf(" ");
-            if (typeSeparator >= 0) {
-                var beforeType = beforeName.substring(0, typeSeparator);
-                var type = beforeName.substring(typeSeparator + " ".length());
-                var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name;
+        return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
+            return infix(beforeName.strip(), " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
+                var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
                 return Optional.of(new Tuple<>(state, generated));
-            }
-        }
-
-        return Optional.empty();
+            });
+        });
     }
 
-    private static Optional<Tuple<CompileState, String>> compilePrefix(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
+    private static Optional<Integer> lastIndexOfSlice(String input, String infix) {
+        var index = input.lastIndexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
+    }
+
+    private static Optional<Tuple<CompileState, String>> prefix(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
         if (!input.startsWith("{")) {
             return Optional.empty();
         }
@@ -383,7 +379,7 @@ public class Main {
         return mapper.apply(slice);
     }
 
-    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+    private static <T> Optional<T> suffix(String input, String suffix, Function<String, Optional<T>> mapper) {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
@@ -395,13 +391,20 @@ public class Main {
         return "/* " + input + " */";
     }
 
-    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
+    private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        return infix(input, infix, Main::firstIndexOfSlice, mapper);
+    }
+
+    private static <T> Optional<T> infix(String input, String infix, BiFunction<String, String, Optional<Integer>> locator, BiFunction<String, String, Optional<T>> mapper) {
+        return locator.apply(input, infix).flatMap(classIndex -> {
             var beforeKeyword = input.substring(0, classIndex);
             var afterKeyword = input.substring(classIndex + infix.length());
             return mapper.apply(beforeKeyword, afterKeyword);
-        }
-        return Optional.empty();
+        });
+    }
+
+    private static Optional<Integer> firstIndexOfSlice(String input, String infix) {
+        var index = input.indexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     }
 }
