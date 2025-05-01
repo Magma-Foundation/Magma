@@ -90,7 +90,7 @@ public class Main {
         }
 
         public JavaList<T> addLast(T element) {
-            var copy = new ArrayList<T>(this.list);
+            var copy =  new ArrayList<>(this.list);
             copy.add(element);
             return new JavaList<>(copy);
         }
@@ -273,12 +273,19 @@ public class Main {
             return compileInfix(withParams, ")", (params, withBraces) -> {
                 return compilePrefix(withBraces.strip(), withoutStart1 -> {
                     return compileSuffix(withoutStart1, "}", content -> {
-                        var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
-                        return Optional.of(new Tuple<>(state.addFunction(generated), ""));
+                        var tuple = compileAll(state, content, Main::compileFunctionSegment);
+                        var generated = compileDefinition(definition) + "(" + generatePlaceholder(params) + "){" + tuple.right + "}";
+                        return Optional.of(new Tuple<>(tuple.left.addFunction(generated), ""));
                     });
                 });
             });
         });
+    }
+
+    private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
+        return compileOr(state, input, List.of(
+
+        ));
     }
 
     private static String compileDefinition(String input) {
