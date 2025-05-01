@@ -12,21 +12,22 @@ union OptionValue<T> {
 };
 /* private */struct Head<S, T> {
 	S _super;
-	template Option</* T */> (*next)(S);
+	template Option<T> (*next)(S);
 };
 /* private */struct List<S, T> {
 	S _super;
-	template List</* T */> (*addLast)(S, /* T */);
-	template Iterator</* T */> (*iterate)(S);
-	template Option<template Tuple<template List</* T */>, /*  T */>> (*removeLast)(S);
+	template List<T> (*addLast)(S, T);
+	template Iterator<T> (*iterate)(S);
+	template Option<template Tuple<template List<T>, /*  T */>> (*removeLast)(S);
 	int (*isEmpty)(S);
-	/* T */ (*get)(S, /* int */);
-	template List</* T */> (*addFirst)(S, /* T */);
+	T (*get)(S, /* int */);
+	template List<T> (*addFirst)(S, T);
+	int (*contains)(S, T);
 };
 /* private */struct Collector<S, T, C> {
 	S _super;
-	/* C */ (*createInitial)(S);
-	/* C */ (*fold)(S, /* C */, /* T */);
+	C (*createInitial)(S);
+	C (*fold)(S, C, T);
 };
 /* private @ */struct External<S> {
 	S _super;
@@ -54,7 +55,7 @@ union OptionValue<T> {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
-/* private */struct StructurePrototype {/* String */ type/* String */ nametemplate List</* String */> variants
+/* private */struct StructurePrototype {/* String */ type/* String */ nametemplate List</* String */> typeParamstemplate List</* String */> variants
 };
 /* private */struct CompileState {template List</* String */> structstemplate List</* String */> functionstemplate Option</* StructurePrototype */> maybeStructureType
 };
@@ -121,6 +122,11 @@ union OptionValue<T> {
             var copy = this.copy();
             copy.addFirst(element);
             return new JavaList<>(copy);
+        }
+
+        @Override
+        public boolean contains(T element) {
+            return this.elements.contains(element);
         }
 
         private java.util.List<T> copy() {
@@ -193,7 +199,7 @@ default /* String */ generateWithName(/* String */ name){/* return this.generate
 @Override
  public int isPresent(){/* return false; *//*  */
 }
-public <C> /* C */ collect(template Collector</* T */, /*  C */> collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
+public <C> /* C */ collect(template Collector<T, /*  C */> collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
 }
 private <C> /* C */ fold(/* C */ initial, template BiFunction</* C */, /*  T */, /*  C */> folder){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
@@ -206,13 +212,13 @@ private <C> /* C */ fold(/* C */ initial, template BiFunction</* C */, /*  T */,
                 }
             } *//*  */
 }
-public <R> template Iterator</* R */> flatMap(template Iterator</* R */> (*mapper)(/* T */)){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
+public <R> template Iterator</* R */> flatMap(template Iterator</* R */> (*mapper)(T)){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
 }
-public <R> template Iterator</* R */> map(/*  R */ (*mapper)(/* T */)){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
+public <R> template Iterator</* R */> map(/*  R */ (*mapper)(T)){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
 }
-private template Iterator</* T */> concat(template Iterator</* T */> other){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
+private template Iterator<T> concat(template Iterator<T> other){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
 }
-public template Option</* T */> next(){/* return this.head.next(); *//*  */
+public template Option<T> next(){/* return this.head.next(); *//*  */
 }
 private static final class RangeHead implements Head<Integer> {
  private final int length;
@@ -239,10 +245,10 @@ private static class EmptyHead<T> implements Head<T> {
 /* public */ Joiner(){/* this(""); *//*  */
 }
 @Override
- public template Option</* String */> createInitial(){/* return new None<>(); *//*  */
+ public template Option<String> createInitial(){/* return new None<>(); *//*  */
 }
 @Override
- public template Option</* String */> fold(template Option</* String */> current, /* String */ element){/* return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)); *//*  */
+ public template Option<String> fold(template Option<String> current, String element){/* return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)); *//*  */
 }
 /* public */ CompileState(){/* this(Lists.empty(), Lists.empty(), new None<>()); *//*  */
 }
@@ -287,7 +293,7 @@ public /* DivideState */ enter(){/* return new DivideState(this.input, this.segm
 }
 public int isShallow(){/* return this.depth == 1; *//*  */
 }
-public static <A, B, C> template Tuple</* A */, /*  C */> (*mapRight)(template Tuple</* A */, /*  B */>)(/*  C */ (*mapper)(/* B */)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
+public static <A, B, C> template Tuple<A, /*  C */> (*mapRight)(template Tuple<A, /*  B */>)(/*  C */ (*mapper)(B)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
 }
 private static class Iterators {
  public static <T> template Iterator</* T */> fromOptions(template Option</* T */> option){/* return new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)); *//* } */
@@ -463,7 +469,7 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
         } *//* ); *//*  */
 }
 private static template Option<template Tuple</* CompileState */, /*  String */>> structureWithName(/* String */ type, /* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state.withStructType(new StructurePrototype(type, name, variants)), content, Main::structSegment).flatMap(tuple -> {
+            return compileAll(state.withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         } *//* ); *//*  */
@@ -707,8 +713,15 @@ private static template Option<template Tuple</* CompileState */, /*  Definition
 private static template Option<template Tuple</* CompileState */, /*  Type */>> type(/* CompileState */ state, /* String */ input){/* return Main.or(state, input, Lists.of(
                 Main::primitive,
                 Main::template,
+                Main::typeParam,
                 wrap(Main::content)
         )); *//*  */
+}
+private static template Option<template Tuple</* CompileState */, /*  Type */>> typeParam(/* CompileState */ state, /* String */ input){/* if (state.maybeStructureType instanceof Some(var structureType)) {
+            if (structureType.typeParams.contains(input)) {
+                return new Some<>(new Tuple<>(state, new TypeParameter(input)));
+            }
+        } *//* return new None<>(); *//*  */
 }
 private static <S, T extends S> template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  S */>>> wrap(template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> content){/* return (state, input) -> content.apply(state, input).map(Tuple.mapRight(value -> value)); *//*  */
 }

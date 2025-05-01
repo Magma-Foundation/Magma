@@ -45,6 +45,8 @@ public class Main {
         T get(int index);
 
         List<T> addFirst(T element);
+
+        boolean contains(T element);
     }
 
     private interface Collector<T, C> {
@@ -260,6 +262,11 @@ public class Main {
             return new JavaList<>(copy);
         }
 
+        @Override
+        public boolean contains(T element) {
+            return this.elements.contains(element);
+        }
+
         private java.util.List<T> copy() {
             return new ArrayList<T>(this.elements);
         }
@@ -298,8 +305,7 @@ public class Main {
         }
     }
 
-    private record StructurePrototype(String type, String name, List<String> variants) {
-
+    private record StructurePrototype(String type, String name, List<String> typeParams, List<String> variants) {
     }
 
     private record CompileState(
@@ -717,7 +723,7 @@ public class Main {
             String withEnd
     ) {
         return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state.withStructType(new StructurePrototype(type, name, variants)), content, Main::structSegment).flatMap(tuple -> {
+            return compileAll(state.withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         });
@@ -1089,8 +1095,18 @@ public class Main {
         return Main.or(state, input, Lists.of(
                 Main::primitive,
                 Main::template,
+                Main::typeParam,
                 wrap(Main::content)
         ));
+    }
+
+    private static Option<Tuple<CompileState, Type>> typeParam(CompileState state, String input) {
+        if (state.maybeStructureType instanceof Some(var structureType)) {
+            if (structureType.typeParams.contains(input)) {
+                return new Some<>(new Tuple<>(state, new TypeParameter(input)));
+            }
+        }
+        return new None<>();
     }
 
     private static <S, T extends S> BiFunction<CompileState, String, Option<Tuple<CompileState, S>>> wrap(BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> content) {
