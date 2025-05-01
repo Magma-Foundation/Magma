@@ -450,6 +450,12 @@ struct public DivideState::DivideState(struct DivideState this, char* input){/* 
 /* public */ int DivideState::isShallow(struct DivideState this){
 	return /* this.depth == 1 */;
 }
+/* public */ template Option<struct Character> DivideState::peek(struct DivideState this){/* if (this.index < this.input.length()) {
+                return new Some<>(this.input.charAt(this.index));
+            } *//* else {
+                return new None<>();
+            } */
+}
 /* public static <A, B, C> */ (A, /*  C */) (*Tuple::mapRight)((A, B))(struct Tuple<A, B> this, /*  C */ (*mapper)(B)){
 	return /* tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)) */;
 }
@@ -497,13 +503,14 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 }
 /* public static */ void main(){/* run().ifPresent(Throwable::printStackTrace); */
 }
-/* private static */ template Option<struct IOException> run(){/* return switch (readString()) {
+/* private static */ template Option<struct IOException> run(){
+	return /* switch (readString()) {
             case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
                 yield writeString(output);
             }
-        } *//* ; */
+        } */;
 }
 /* private static */ template Option<struct IOException> writeString(char* output){/* try {
             Files.writeString(TARGET, output);
@@ -534,7 +541,12 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 /* private static */ struct DivideState foldStatementChar(struct DivideState state, struct char c){/* var appended = state.append(c); *//* if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == '}' && appended.isShallow()) {
-            return appended.advance().exit();
+            var exit = appended.exit();
+            if (exit.peek() instanceof Some(var temp) && temp == ';') {
+                return exit.popAndAppend().orElse(exit).advance();
+            } else {
+                return exit.advance();
+            }
         } *//* if (c == '{') {
             return appended.enter();
         } *//* if (c == '}') {

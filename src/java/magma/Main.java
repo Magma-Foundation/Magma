@@ -433,6 +433,15 @@ public class Main {
         public boolean isShallow() {
             return this.depth == 1;
         }
+
+        public Option<Character> peek() {
+            if (this.index < this.input.length()) {
+                return new Some<>(this.input.charAt(this.index));
+            }
+            else {
+                return new None<>();
+            }
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -740,7 +749,12 @@ public class Main {
             return appended.advance();
         }
         if (c == '}' && appended.isShallow()) {
-            return appended.advance().exit();
+            var exit = appended.exit();
+            if (exit.peek() instanceof Some(var temp) && temp == ';') {
+                return exit.popAndAppend().orElse(exit).advance();
+            } else {
+                return exit.advance();
+            }
         }
         if (c == '{') {
             return appended.enter();
