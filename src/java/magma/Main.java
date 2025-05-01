@@ -10,17 +10,22 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private record CompileState(JavaList<String> structs) {
+    private record CompileState(JavaList<String> structs, JavaList<String> functions) {
         public CompileState() {
-            this(new JavaList<>());
+            this(new JavaList<>(), new JavaList<>());
         }
 
         private String generate() {
-            return String.join("", this.structs.list);
+            return String.join("", this.structs.list)
+                    + String.join("", this.functions.list);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct));
+            return new CompileState(this.structs.addLast(struct), this.functions);
+        }
+
+        public CompileState addFunction(String function) {
+            return new CompileState(this.structs, this.functions.addLast(function));
         }
     }
 
@@ -202,7 +207,8 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileInfix(input, "(", (s, s2) -> {
-            return Optional.of(new Tuple<>(state, generatePlaceholder(s) + "(" + generatePlaceholder(s2)));
+            var generated = generatePlaceholder(s) + "(" + generatePlaceholder(s2);
+            return Optional.of(new Tuple<>(state.addFunction(generated), ""));
         });
     }
 

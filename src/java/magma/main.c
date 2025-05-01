@@ -1,17 +1,29 @@
-/*  *//* private  */struct CompileState(JavaList<String> structs) {/* public CompileState */(/* ) {
-            this(new JavaList<>());
+/*  *//* private  */struct CompileState(JavaList<String> structs, JavaList<String> functions) {/* 
+     */}/* 
+
+    private  */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* 
+     */}/* 
+
+    private  */struct Tuple<A, B>(A left, B right) {/*  */}/* 
+
+    private  */struct JavaList<T>(List<T> list) {/* 
+     */}/* public  */struct Main {/* 
+ */}/* public CompileState */(/* ) {
+            this(new JavaList<>(), new JavaList<>());
         } *//* 
 
         private String generate */(/* ) {
-            return String.join("", this.structs.list);
+            return String.join("", this.structs.list)
+                    + String.join("", this.functions.list);
         } *//* 
 
         public CompileState addStruct */(/* String struct) {
-            return new CompileState(this.structs.addLast(struct));
+            return new CompileState(this.structs.addLast(struct), this.functions);
         } *//* 
-     */}/* 
 
-    private  */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* public DivideState */(/* String input) {
+        public CompileState addFunction */(/* String function) {
+            return new CompileState(this.structs, this.functions.addLast(function));
+        } *//* public DivideState */(/* String input) {
             this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         } *//* 
 
@@ -51,12 +63,7 @@
 
         public boolean isShallow */(/* ) {
             return this.depth == 1;
-        } *//* 
-     */}/* 
-
-    private  */struct Tuple<A, B>(A left, B right) {/*  */}/* 
-
-    private  */struct JavaList<T>(List<T> list) {/* public JavaList */(/* ) {
+        } *//* public JavaList */(/* ) {
             this(new ArrayList<>());
         } *//* 
 
@@ -65,7 +72,6 @@
             copy.add(element);
             return new JavaList<>(copy);
         } *//* 
-     */}/* public  */struct Main {/* 
 
     public static void main */(/* ) {
         try {
@@ -186,7 +192,8 @@
 
     private static Optional<Tuple<CompileState, String>> compileMethod */(/* CompileState state, String input) {
         return compileInfix(input, "(", (s, s2) -> {
-            return Optional.of(new Tuple<>(state, generatePlaceholder(s) + "(" + generatePlaceholder(s2)));
+            var generated = generatePlaceholder(s) + "(" + generatePlaceholder(s2);
+            return Optional.of(new Tuple<>(state.addFunction(generated), ""));
         });
     } *//* 
 
@@ -210,5 +217,4 @@
             return mapper.apply(beforeKeyword, afterKeyword);
         }
         return Optional.empty();
-    } *//* 
- */}
+    } */
