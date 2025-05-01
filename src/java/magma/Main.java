@@ -580,27 +580,27 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithVariants(String beforeKeyword, String withEnd, CompileState state3, String beforeContent0) {
         return first(beforeContent0, " permits ", (beforePermits, variantsString) -> {
-            return parseValues(state3, variantsString, Main::structureVariant).flatMap(params -> {
+            return parseValues(state3, variantsString, Main::symbol).flatMap(params -> {
                 return structureWithoutVariants(params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
         });
     }
 
-    private static Some<Tuple<CompileState, String>> structureVariant(CompileState state, String value) {
+    private static Option<Tuple<CompileState, String>> symbol(CompileState state, String value) {
         return new Some<>(new Tuple<>(state, value.strip()));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
                 (instance, before) -> structureWithParams(instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithName(instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithMaybeTypeParams(instance, beforeKeyword, before.strip(), "", variants, withEnd)
         ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithParams(CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
-                return structureWithName(params.left, beforeKeyword, name, params.right, variants, withEnd);
+                return structureWithMaybeTypeParams(params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         }));
     }
@@ -633,24 +633,56 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithName(CompileState state, String beforeKeyword, String name, String params, List<String> variants, String withEnd) {
-        return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
-                return new Some<>(getCompileStateStringTuple(tuple.left, beforeKeyword, name, params, variants, tuple.right));
+    private static Option<Tuple<CompileState, String>> structureWithMaybeTypeParams(
+            CompileState state,
+            String beforeKeyword,
+            String beforeParams,
+            String params,
+            List<String> variants,
+            String withEnd
+    ) {
+        return or(state, beforeParams, Lists.of(
+                (state0, beforeParams0) -> structureWithTypeParams(state0, beforeParams0, beforeKeyword, params, variants, withEnd),
+                (state0, name) -> structureWithName(state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
+        ));
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithTypeParams(
+            CompileState state,
+            String beforeParams0,
+            String beforeKeyword,
+            String params,
+            List<String> variants,
+            String withEnd
+    ) {
+        return suffix(beforeParams0.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (name, typeParamString) -> {
+                return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
+                    return structureWithName(values.left, beforeKeyword, name, values.right, params, variants, withEnd);
+                });
             });
         });
     }
 
-    private static Tuple<CompileState, String> getCompileStateStringTuple(
+    private static Option<Tuple<CompileState, String>> structureWithName(CompileState state, String beforeKeyword, String name, List<String> typeParams, String params, List<String> variants, String withEnd) {
+        return suffix(withEnd.strip(), "}", content -> {
+            return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
+                return new Some<>(assembleStruct(tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
+            });
+        });
+    }
+
+    private static Tuple<CompileState, String> assembleStruct(
             CompileState state,
             String beforeKeyword,
             String name,
+            List<String> typeParams,
             String params,
             List<String> variants,
             String content
     ) {
         if (variants.isEmpty()) {
-            return generateStruct(state, beforeKeyword, name, params, content);
+            return generateStruct(state, beforeKeyword, name, typeParams, params, content);
         }
 
         var enumName = name + "Variant";
@@ -661,17 +693,25 @@ public class Main {
 
         var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n";
         var compileState = state.addStruct(generatedEnum);
-        return generateStruct(compileState, beforeKeyword, name, params, "\n\t" + enumName + " _variant;" + content);
+        return generateStruct(compileState, beforeKeyword, name, typeParams, params, "\n\t" + enumName + " _variant;" + content);
     }
 
     private static Tuple<CompileState, String> generateStruct(
             CompileState state,
             String beforeKeyword,
             String name,
+            List<String> typeParams,
             String params,
             String content
     ) {
-        var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + content + "\n};\n";
+        String typeParamString;
+        if (typeParams.isEmpty()) {
+            typeParamString = "";
+        }
+        else {
+            typeParamString = "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">";
+        }
+        var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n";
         return new Tuple<CompileState, String>(state.addStruct(generatedStruct), "");
     }
 
