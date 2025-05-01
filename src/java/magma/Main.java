@@ -462,10 +462,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileRootSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                Main::compileWhitespace,
+                Main::whitespace,
                 Main::compileNamespaced,
                 structure("class "),
-                Main::compileContent
+                Main::content
         ));
     }
 
@@ -506,8 +506,8 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState instance, String paramString) {
         return or(instance, paramString, Lists.of(
-                Main::compileDefinition,
-                Main::compileContent
+                Main::definition,
+                Main::content
         )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";"));
     }
 
@@ -520,7 +520,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithName(String beforeKeyword, String withEnd, String name, CompileState state, String params) {
         return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state, content, Main::compileStructSegment).flatMap(tuple -> {
+            return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
                 var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
                 return Option.of(new Tuple<>(tuple.left.addStruct(generated), ""));
             });
@@ -545,28 +545,36 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> compileStructSegment(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> structSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                Main::compileWhitespace,
+                Main::whitespace,
                 structure("record "),
                 structure("interface "),
-                Main::compileMethod,
-                Main::compileContent
+                Main::method,
+                Main::definitionStatement,
+                Main::content
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileContent(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> definitionStatement(CompileState state, String input) {
+        return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(value -> {
+            var generated = "\n\t" + value.right + ";";
+            return new Tuple<>(value.left, generated);
+        }));
+    }
+
+    private static Option<Tuple<CompileState, String>> content(CompileState state, String input) {
         return Option.of(new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> whitespace(CompileState state, String input) {
         if (input.isBlank()) {
             return Option.of(new Tuple<>(state, ""));
         }
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> method(CompileState state, String input) {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (params, withBraces) -> {
                 return prefix(withBraces.strip(), withoutStart1 -> {
@@ -585,18 +593,18 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String definition) {
         return or(state, definition, Lists.of(
-                Main::compileDefinition,
-                Main::compileContent
+                Main::definition,
+                Main::content
         ));
     }
 
     private static Option<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
         return or(state, input.strip(), Lists.of(
-                Main::compileContent
+                Main::content
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> definition(CompileState state, String input) {
         return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
             return or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
