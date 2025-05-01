@@ -239,10 +239,11 @@ public class Main {
 
     private static final class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter = 0;
+        private int counter;
 
         private RangeHead(int length) {
             this.length = length;
+            this.counter = 0;
         }
 
         @Override

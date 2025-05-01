@@ -71,8 +71,8 @@ union ResultValue<T, X> {
 	template Head<struct T> head;
 };
 /* private static final */struct RangeHead {
-	/* private final */ int length;/* 
-        private int counter = 0; */
+	/* private final */ int length;
+	/* private */ int counter;
 };
 /* private static */struct Lists {
 };
@@ -274,7 +274,7 @@ union ResultValue<T, X> {
 /* public */ template Option<T> Iterator::next(struct Iterator<T> this){
 	return this.head.next();
 }
-struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.length = length; */
+struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.length = length; *//* this.counter = 0; */
 }
 /* @Override
  public */ template Option<struct Integer> RangeHead::next(struct RangeHead this){/* if (this.counter >= this.length) {
