@@ -61,6 +61,10 @@ public class Main {
     }
 
     private interface Type {
+        default String generateWithName(String name) {
+            return this.generate() + " " + name;
+        }
+
         String generate();
     }
 
@@ -462,7 +466,7 @@ public class Main {
     private record Definition(Option<String> maybeBeforeType, Type type, String name) {
         private String generate() {
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-            return beforeTypeString + this.type.generate() + " " + this.name;
+            return beforeTypeString + this.type.generateWithName(this.name);
         }
     }
 
@@ -476,12 +480,17 @@ public class Main {
     private record Functional(List<Type> arguments, Type returns) implements Type {
         @Override
         public String generate() {
+            return this.generateWithName("");
+        }
+
+        @Override
+        public String generateWithName(String name) {
             var joinedArguments = this.arguments().iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.returns().generate() + " (*)(" + joinedArguments + ")";
+            return this.returns().generate() + " (*" + name + ")(" + joinedArguments + ")";
         }
     }
 
