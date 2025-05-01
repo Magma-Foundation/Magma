@@ -688,17 +688,17 @@ public class Main {
     }
 
     private static Option<IOException> run() {
-        return switch (readString()) {
+        return switch (readInput()) {
             case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {
                 var output = compileRoot(input);
-                yield writeString(output);
+                yield writeOutput(output);
             }
         };
     }
 
     @Actual
-    private static Option<IOException> writeString(String output) {
+    private static Option<IOException> writeOutput(String output) {
         try {
             Files.writeString(TARGET, output);
             return new None<>();
@@ -708,7 +708,7 @@ public class Main {
     }
 
     @Actual
-    private static Result<String, IOException> readString() {
+    private static Result<String, IOException> readInput() {
         try {
             return new Ok<>(Files.readString(SOURCE));
         } catch (IOException e) {
