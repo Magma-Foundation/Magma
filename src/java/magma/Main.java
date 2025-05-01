@@ -34,6 +34,8 @@ public class Main {
         Iterator<T> iterate();
 
         Option<Tuple<List<T>, T>> removeLast();
+
+        boolean isEmpty();
     }
 
     private interface Collector<T, C> {
@@ -45,7 +47,7 @@ public class Main {
     private @interface External {
     }
 
-    private interface Locator {
+    private interface Splitter {
         Option<Tuple<String, String>> split(String input);
     }
 
@@ -200,6 +202,11 @@ public class Main {
             var last = this.list.getLast();
             return new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last));
         }
+
+        @Override
+        public boolean isEmpty() {
+            return this.list.isEmpty();
+        }
     }
 
     private static class Lists {
@@ -289,7 +296,8 @@ public class Main {
         }
 
         private DivideState advance() {
-            return new DivideState(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
+            var withBuffer = this.buffer.isEmpty() ? this.segments : this.segments.addLast(this.buffer.toString());
+            return new DivideState(this.input, withBuffer, new StringBuilder(), this.index, this.depth);
         }
 
         public DivideState exit() {
@@ -337,7 +345,8 @@ public class Main {
         }
     }
 
-    private record InfixLocator(String infix, BiFunction<String, String, Option<Integer>> locator) implements Locator {
+    private record InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter {
         @Override
         public Option<Tuple<String, String>> split(String input) {
             return this.apply(input).map(classIndex -> {
@@ -356,13 +365,18 @@ public class Main {
         }
     }
 
-    private static class TypeSeparatorLocator implements Locator {
+    private static class TypeSeparatorSplitter implements Splitter {
         @Override
         public Option<Tuple<String, String>> split(String input) {
-            return divide(input, TypeSeparatorLocator::fold).removeLast().map(segments -> {
-                var beforeType = segments.left.iterate().collect(new Joiner(" ")).orElse("");
+            return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
+                var left = segments.left;
+                if (left.isEmpty()) {
+                    return new None<>();
+                }
+
+                var beforeType = left.iterate().collect(new Joiner(" ")).orElse("");
                 var type = segments.right;
-                return new Tuple<>(beforeType, type);
+                return new Some<>(new Tuple<>(beforeType, type));
             });
         }
 
@@ -694,7 +708,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definition(CompileState state, String input) {
-        return infix(input.strip(), new InfixLocator(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
+        return infix(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
@@ -723,7 +737,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definitionWithTypeSeparator(CompileState instance, String beforeName, String name) {
-        return infix(beforeName, new TypeSeparatorLocator(), (beforeType, typeString) -> {
+        return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
             return new Some<>(new Tuple<CompileState, String>(instance, generated));
         });
@@ -755,11 +769,11 @@ public class Main {
     }
 
     private static <T> Option<T> first(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return infix(input, new InfixLocator(infix, Main::firstIndexOfSlice), mapper);
+        return infix(input, new InfixSplitter(infix, Main::firstIndexOfSlice), mapper);
     }
 
-    private static <T> Option<T> infix(String input, Locator locator, BiFunction<String, String, Option<T>> mapper) {
-        return locator.split(input).flatMap(tuple -> {
+    private static <T> Option<T> infix(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
+        return splitter.split(input).flatMap(tuple -> {
             return mapper.apply(tuple.left, tuple.right);
         });
     }
