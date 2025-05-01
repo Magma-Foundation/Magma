@@ -10,12 +10,8 @@ enum Option<T>Variant {
 	/* T */ orElseGet(/* T */ (*)() other);
 	/* <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper);
 };
-enum Head<T>Variant {
-};
 /* private */struct Head<T> {
 	template Option</* T */> next();
-};
-enum List<T>Variant {
 };
 /* private */struct List<T> {
 	template List</* T */> addLast(/* T */ element);
@@ -24,56 +20,31 @@ enum List<T>Variant {
 	int isEmpty();
 	/* T */ get(/* int */ index);
 };
-enum Collector<T, C>Variant {
-};
 /* private */struct Collector<T, C> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
 };
-enum ExternalVariant {
-};
 /* private @ */struct External {
-};
-enum SplitterVariant {
 };
 /* private */struct Splitter {
 	template Option<template Tuple</* String */, /*  String */>> split(/* String */ input);
 };
-enum Some<T>(T value) implements Option<T>Variant {
-};
 /* private */struct Some<T>(T value) implements Option<T> {
-};
-enum None<T>() implements Option<T>Variant {
 };
 /* private */struct None<T>() implements Option<T> {
 };
-enum Iterator<T>Variant {
-};
 /* private */struct Iterator<T> {template Head</* T */> head
-};
-enum Joiner(String delimiter) implements Collector<String, Option<String>>Variant {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
-enum CompileStateVariant {
-};
 /* private */struct CompileState {template List</* String */> structstemplate List</* String */> functions
-};
-enum DivideStateVariant {
 };
 /* private */struct DivideState {/* String */ inputtemplate List</* String */> segments/* StringBuilder */ buffer/* int */ index/* int */ depth
 };
-enum Tuple<A, B>Variant {
-};
 /* private */struct Tuple<A, B> {/* A */ left/* B */ right
-};
-enum InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements SplitterVariant {
 };
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
-};
-enum MainVariant {
 };
 /* public */struct Main {/* 
 
@@ -446,18 +417,18 @@ enum MainVariant {
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithName(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
-                var variantsString = variants.iterate()
-                        .map(variant -> "\n\t" + variant)
-                        .collect(new Joiner(","))
-                        .orElse("");
-
-                var generatedEnum = "enum " + name + "Variant {" + variantsString + "\n};\n";
-                var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
-                return new Some<>(new Tuple<CompileState, String>(tuple.left
-                        .addStruct(generatedEnum)
-                        .addStruct(generatedStruct), ""));
+                return new Some<>(getCompileStateStringTuple(tuple.left, beforeKeyword, name, params, variants, tuple.right));
             });
         } *//* ); *//*  */
+}
+/* private static */ template Tuple</* CompileState */, /*  String */> getCompileStateStringTuple(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ params, template List</* String */> variants, /* String */ content){/* if (variants.isEmpty()) {
+            return generateStruct(state, beforeKeyword, name, params, content);
+        } *//* var enumName = name + "Variant"; *//* var variantsString = variants.iterate()
+                .map(variant -> "\n\t" + variant)
+                .collect(new Joiner(","))
+                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum); *//* return generateStruct(compileState, beforeKeyword, name, params, content); *//*  */
+}
+/* private static */ template Tuple</* CompileState */, /*  String */> generateStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ params, /* String */ content){/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + content + "\n};\n"; *//* return new Tuple<CompileState, String>(state.addStruct(generatedStruct), ""); *//*  */
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> or(/* CompileState */ state, /* String */ input, template List<template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  String */>>>> actions){/* return actions.iterate()
                 .map(action -> action.apply(state, input))

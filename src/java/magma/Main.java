@@ -636,18 +636,43 @@ public class Main {
     private static Option<Tuple<CompileState, String>> structureWithName(CompileState state, String beforeKeyword, String name, String params, List<String> variants, String withEnd) {
         return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
-                var variantsString = variants.iterate()
-                        .map(variant -> "\n\t" + variant)
-                        .collect(new Joiner(","))
-                        .orElse("");
-
-                var generatedEnum = "enum " + name + "Variant {" + variantsString + "\n};\n";
-                var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
-                return new Some<>(new Tuple<CompileState, String>(tuple.left
-                        .addStruct(generatedEnum)
-                        .addStruct(generatedStruct), ""));
+                return new Some<>(getCompileStateStringTuple(tuple.left, beforeKeyword, name, params, variants, tuple.right));
             });
         });
+    }
+
+    private static Tuple<CompileState, String> getCompileStateStringTuple(
+            CompileState state,
+            String beforeKeyword,
+            String name,
+            String params,
+            List<String> variants,
+            String content
+    ) {
+        if (variants.isEmpty()) {
+            return generateStruct(state, beforeKeyword, name, params, content);
+        }
+
+        var enumName = name + "Variant";
+        var variantsString = variants.iterate()
+                .map(variant -> "\n\t" + variant)
+                .collect(new Joiner(","))
+                .orElse("");
+
+        var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n";
+        var compileState = state.addStruct(generatedEnum);
+        return generateStruct(compileState, beforeKeyword, name, params, content);
+    }
+
+    private static Tuple<CompileState, String> generateStruct(
+            CompileState state,
+            String beforeKeyword,
+            String name,
+            String params,
+            String content
+    ) {
+        var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + content + "\n};\n";
+        return new Tuple<CompileState, String>(state.addStruct(generatedStruct), "");
     }
 
     private static Option<Tuple<CompileState, String>> or(
