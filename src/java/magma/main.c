@@ -1,4 +1,8 @@
-/* private sealed */struct Option<T> permits Some, None {
+enum Option<T>Variant {
+	Some,
+	None
+};
+/* private sealed */struct Option<T> {
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
 	int isEmpty();
 	/* T */ orElse(/* T */ other);
@@ -6,8 +10,12 @@
 	/* T */ orElseGet(/* T */ (*)() other);
 	/* <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper);
 };
+enum Head<T>Variant {
+};
 /* private */struct Head<T> {
 	template Option</* T */> next();
+};
+enum List<T>Variant {
 };
 /* private */struct List<T> {
 	template List</* T */> addLast(/* T */ element);
@@ -16,31 +24,56 @@
 	int isEmpty();
 	/* T */ get(/* int */ index);
 };
+enum Collector<T, C>Variant {
+};
 /* private */struct Collector<T, C> {
 	/* C */ createInitial();
 	/* C */ fold(/* C */ current, /* T */ element);
 };
+enum ExternalVariant {
+};
 /* private @ */struct External {
+};
+enum SplitterVariant {
 };
 /* private */struct Splitter {
 	template Option<template Tuple</* String */, /*  String */>> split(/* String */ input);
 };
+enum Some<T>(T value) implements Option<T>Variant {
+};
 /* private */struct Some<T>(T value) implements Option<T> {
+};
+enum None<T>() implements Option<T>Variant {
 };
 /* private */struct None<T>() implements Option<T> {
 };
+enum Iterator<T>Variant {
+};
 /* private */struct Iterator<T> {template Head</* T */> head
+};
+enum Joiner(String delimiter) implements Collector<String, Option<String>>Variant {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
+enum CompileStateVariant {
+};
 /* private */struct CompileState {template List</* String */> structstemplate List</* String */> functions
+};
+enum DivideStateVariant {
 };
 /* private */struct DivideState {/* String */ inputtemplate List</* String */> segments/* StringBuilder */ buffer/* int */ index/* int */ depth
 };
+enum Tuple<A, B>Variant {
+};
 /* private */struct Tuple<A, B> {/* A */ left/* B */ right
+};
+enum InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements SplitterVariant {
 };
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
+};
+enum MainVariant {
 };
 /* public */struct Main {/* 
 
@@ -369,15 +402,28 @@
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, Lists.of(
-                        (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
-                        (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
+                        (state3, beforeContent0) -> structureWithVariants(beforeKeyword, withEnd, state3, beforeContent0),
+                        (state1, s) -> structureWithoutVariants(state1, beforeKeyword, s, Lists.empty(), withEnd)
                 ));
             });
         } *//* ); *//*  */
 }
-/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithParams(/* String */ beforeKeyword, /* String */ withEnd, /* CompileState */ instance, /* String */ before){/* return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
+/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithVariants(/* String */ beforeKeyword, /* String */ withEnd, /*  CompileState state3 */, /*  String beforeContent0 */){/* return first(beforeContent0, " permits ", (beforePermits, variantsString) -> {
+            return parseValues(state3, variantsString, Main::structureVariant).flatMap(params -> {
+                return structureWithoutVariants(params.left, beforeKeyword, beforePermits, params.right, withEnd);
+            });
+        } *//* ); *//*  */
+}
+/* private static */ template Some<template Tuple</* CompileState */, /*  String */>> structureVariant(/* CompileState */ state, /* String */ value){/* return new Some<>(new Tuple<>(state, value.strip())); *//*  */
+}
+/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithoutVariants(/* CompileState */ state, /* String */ beforeKeyword, /* String */ beforeContent, template List</* String */> variants, /* String */ withEnd){/* return or(state, beforeContent, Lists.of(
+                (instance, before) -> structureWithParams(instance, beforeKeyword, before, variants, withEnd),
+                (instance, before) -> structureWithName(instance, beforeKeyword, before.strip(), "", variants, withEnd)
+        )); *//*  */
+}
+/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithParams(/* CompileState */ instance, /* String */ beforeKeyword, /* String */ beforeContent, template List</* String */> variants, /* String */ withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
-                return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
+                return structureWithName(params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         } *//* )); *//*  */
 }
@@ -398,10 +444,18 @@
             return appended.exit();
         } *//* return appended; *//*  */
 }
-/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithName(/* String */ beforeKeyword, /* String */ withEnd, /* String */ name, /* CompileState */ state, /* String */ params){/* return suffix(withEnd.strip(), "}", content -> {
+/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> structureWithName(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, /* String */ params, template List</* String */> variants, /* String */ withEnd){/* return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
-                var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
-                return new Some<>(new Tuple<CompileState, String>(tuple.left.addStruct(generated), ""));
+                var variantsString = variants.iterate()
+                        .map(variant -> "\n\t" + variant)
+                        .collect(new Joiner(","))
+                        .orElse("");
+
+                var generatedEnum = "enum " + name + "Variant {" + variantsString + "\n};\n";
+                var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
+                return new Some<>(new Tuple<CompileState, String>(tuple.left
+                        .addStruct(generatedEnum)
+                        .addStruct(generatedStruct), ""));
             });
         } *//* ); *//*  */
 }

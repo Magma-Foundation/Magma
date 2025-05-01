@@ -592,15 +592,15 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
-                (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
-                (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
+                (instance, before) -> structureWithParams(instance, beforeKeyword, before, variants, withEnd),
+                (instance, before) -> structureWithName(instance, beforeKeyword, before.strip(), "", variants, withEnd)
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
-        return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
+    private static Option<Tuple<CompileState, String>> structureWithParams(CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
+        return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
             return all(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
-                return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
+                return structureWithName(params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         }));
     }
@@ -633,11 +633,19 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> structureWithName(String beforeKeyword, String withEnd, String name, CompileState state, String params) {
+    private static Option<Tuple<CompileState, String>> structureWithName(CompileState state, String beforeKeyword, String name, String params, List<String> variants, String withEnd) {
         return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
-                var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
-                return new Some<>(new Tuple<CompileState, String>(tuple.left.addStruct(generated), ""));
+                var variantsString = variants.iterate()
+                        .map(variant -> "\n\t" + variant)
+                        .collect(new Joiner(","))
+                        .orElse("");
+
+                var generatedEnum = "enum " + name + "Variant {" + variantsString + "\n};\n";
+                var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
+                return new Some<>(new Tuple<CompileState, String>(tuple.left
+                        .addStruct(generatedEnum)
+                        .addStruct(generatedStruct), ""));
             });
         });
     }
