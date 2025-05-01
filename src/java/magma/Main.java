@@ -577,15 +577,31 @@ public class Main {
     private static Option<Tuple<CompileState, String>> method(CompileState state, String input) {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (params, withBraces) -> {
-                return prefix(withBraces.strip(), withoutStart1 -> {
-                    return suffix(withoutStart1, "}", content -> {
-                        return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
-                            return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                                var generated = outputDefinition.right + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
-                                return Option.of(new Tuple<>(outputDefinition.left.addFunction(generated), ""));
-                            });
-                        });
-                    });
+                return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
+                    return or(outputDefinition.left, withBraces, Lists.of(
+                            (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
+                            (state0, element) -> methodWithContent(state0, outputDefinition.right, params, element)));
+                });
+            });
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
+        if (content.equals(";")) {
+            var generated = "\n\t" + definition + "(" + generatePlaceholder(params) + ");";
+            return Option.of(new Tuple<>(state, generated));
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static Option<Tuple<CompileState, String>> methodWithContent(CompileState state, String outputDefinition, String params, String withBraces) {
+        return prefix(withBraces.strip(), "{", withoutStart1 -> {
+            return suffix(withoutStart1, "}", content -> {
+                return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
+                    var generated = outputDefinition + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
+                    return Option.of(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
         });
@@ -630,11 +646,11 @@ public class Main {
         return index == -1 ? new None<Integer>() : Option.of(index);
     }
 
-    private static Option<Tuple<CompileState, String>> prefix(String input, Function<String, Option<Tuple<CompileState, String>>> mapper) {
-        if (!input.startsWith("{")) {
+    private static Option<Tuple<CompileState, String>> prefix(String input, String prefix, Function<String, Option<Tuple<CompileState, String>>> mapper) {
+        if (!input.startsWith(prefix)) {
             return new None<>();
         }
-        var slice = input.substring("{".length());
+        var slice = input.substring(prefix.length());
         return mapper.apply(slice);
     }
 

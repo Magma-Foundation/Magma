@@ -1,21 +1,21 @@
 /* private */struct Option<T> {
-	/* <R> Option<R> map(Function<T, */ /* R> */ mapper);
-	/* boolean */ isEmpty();
-	/* T */ /* orElse(T */ other);
-	/* Option<T> */ /* or(Supplier<Option<T>> */ other);
-	/* T */ /* orElseGet(Supplier<T> */ other);
-	/* <R> Option<R> flatMap(Function<T, */ /* Option<R>> */ mapper);
+	/* <R> */ /* Option<R> */ map(/* Function<T, R> mapper */);
+	/* boolean */ isEmpty(/*  */);
+	/* T */ orElse(/* T other */);
+	/* Option<T> */ or(/* Supplier<Option<T>> other */);
+	/* T */ orElseGet(/* Supplier<T> other */);
+	/* <R> */ /* Option<R> */ flatMap(/* Function<T, Option<R>> mapper */);
 };
 /* private */struct Head<T> {
-	/* Option<T> */ next();
+	/* Option<T> */ next(/*  */);
 };
 /* private */struct List<T> {
-	/* List<T> */ /* addLast(T */ element);
-	/* Iterator<T> */ iterate();
+	/* List<T> */ addLast(/* T element */);
+	/* Iterator<T> */ iterate(/*  */);
 };
 /* private */struct Collector<T, C> {
-	/* C */ createInitial();
-	/* C fold(C current, */ /* T */ element);
+	/* C */ createInitial(/*  */);
+	/* C */ fold(/* C current, T element */);
 };
 /* private @ */struct External {
 };
@@ -391,15 +391,26 @@
 }
 /* private static Option<Tuple<CompileState, */ /* String>> */ method(/* CompileState state, String input */){/* return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (params, withBraces) -> {
-                return prefix(withBraces.strip(), withoutStart1 -> {
-                    return suffix(withoutStart1, "}", content -> {
-                        return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
-                            return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                                var generated = outputDefinition.right + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
-                                return Option.of(new Tuple<>(outputDefinition.left.addFunction(generated), ""));
-                            });
-                        });
-                    });
+                return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
+                    return or(outputDefinition.left, withBraces, Lists.of(
+                            (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
+                            (state0, element) -> methodWithContent(state0, outputDefinition.right, params, element)));
+                });
+            });
+        } *//* ); *//*  */
+}
+/* private static Option<Tuple<CompileState, */ /* String>> */ methodWithoutContent(/* CompileState state, String definition, String params, String content */){/* if (content.equals(";")) {
+            var generated = "\n\t" + definition + "(" + generatePlaceholder(params) + ");";
+            return Option.of(new Tuple<>(state, generated));
+        } *//* else {
+            return new None<>();
+        } *//*  */
+}
+/* private static Option<Tuple<CompileState, */ /* String>> */ methodWithContent(/* CompileState state, String outputDefinition, String params, String withBraces */){/* return prefix(withBraces.strip(), "{", withoutStart1 -> {
+            return suffix(withoutStart1, "}", content -> {
+                return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
+                    var generated = outputDefinition + "(" + generatePlaceholder(params) + "){" + tuple.right + "\n}\n";
+                    return Option.of(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
         } *//* ); *//*  */
@@ -429,9 +440,9 @@
 }
 /* private static */ /* Option<Integer> */ lastIndexOfSlice(/* String input, String infix */){/* var index = input.lastIndexOf(infix); *//* return index == -1 ? new None<Integer>() : Option.of(index); *//*  */
 }
-/* private static Option<Tuple<CompileState, */ /* String>> */ prefix(/* String input, Function<String, Option<Tuple<CompileState, String>>> mapper */){/* if (!input.startsWith("{")) {
+/* private static Option<Tuple<CompileState, */ /* String>> */ prefix(/* String input, String prefix, Function<String, Option<Tuple<CompileState, String>>> mapper */){/* if (!input.startsWith(prefix)) {
             return new None<>();
-        } *//* var slice = input.substring("{".length()); *//* return mapper.apply(slice); *//*  */
+        } *//* var slice = input.substring(prefix.length()); *//* return mapper.apply(slice); *//*  */
 }
 /* private static <T> */ /* Option<T> */ suffix(/* String input, String suffix, Function<String, Option<T>> mapper */){/* if (!input.endsWith(suffix)) {
             return new None<>();
