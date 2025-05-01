@@ -43,6 +43,8 @@ public class Main {
         boolean isEmpty();
 
         T get(int index);
+
+        List<T> addFirst(T element);
     }
 
     private interface Collector<T, C> {
@@ -198,42 +200,53 @@ public class Main {
     }
 
     @External
-    private record JavaList<T>(java.util.List<T> list) implements List<T> {
+    private record JavaList<T>(java.util.List<T> elements) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
         }
 
         @Override
         public List<T> addLast(T element) {
-            var copy = new ArrayList<>(this.list);
+            var copy = new ArrayList<>(this.elements);
             copy.add(element);
             return new JavaList<>(copy);
         }
 
         @Override
         public Iterator<T> iterate() {
-            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
+            return new Iterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
         }
 
         @Override
         public Option<Tuple<List<T>, T>> removeLast() {
-            if (this.list.isEmpty()) {
+            if (this.elements.isEmpty()) {
                 return new None<>();
             }
 
-            var slice = this.list.subList(0, this.list.size() - 1);
-            var last = this.list.getLast();
+            var slice = this.elements.subList(0, this.elements.size() - 1);
+            var last = this.elements.getLast();
             return new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last));
         }
 
         @Override
         public boolean isEmpty() {
-            return this.list.isEmpty();
+            return this.elements.isEmpty();
         }
 
         @Override
         public T get(int index) {
-            return this.list.get(index);
+            return this.elements.get(index);
+        }
+
+        @Override
+        public List<T> addFirst(T element) {
+            var copy = this.copy();
+            copy.addFirst(element);
+            return new JavaList<>(copy);
+        }
+
+        private java.util.List<T> copy() {
+            return new ArrayList<T>(this.elements);
         }
     }
 
@@ -714,12 +727,13 @@ public class Main {
     ) {
         return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state.withStructType(new StructurePrototype(type, variants)), content, Main::structSegment).flatMap(tuple -> {
-                return new Some<>(assembleStruct(tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
+                return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         });
     }
 
     private static Tuple<CompileState, String> assembleStruct(
+            String type,
             CompileState state,
             String beforeKeyword,
             String name,
@@ -728,31 +742,37 @@ public class Main {
             List<String> variants,
             String oldContent
     ) {
-        if (variants.isEmpty()) {
-            return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
+        if (!variants.isEmpty()) {
+            var enumName = name + "Variant";
+            var enumFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant)
+                    .collect(new Joiner(","))
+                    .orElse("");
+            var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n";
+
+            var typeParamString = generateTypeParams(typeParams);
+            var unionName = name + "Value" + typeParamString;
+            var unionFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
+                    .collect(new Joiner(""))
+                    .orElse("");
+            var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
+
+            var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
+            var newContent = "\n\t" + enumName + " _variant;"
+                    + "\n\t" + unionName + " _value;"
+                    + oldContent;
+
+            return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
         }
 
-        var enumName = name + "Variant";
-        var enumFields = variants.iterate()
-                .map(variant -> "\n\t" + variant)
-                .collect(new Joiner(","))
-                .orElse("");
-        var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n";
+        if (type.equals("interface")) {
+            var typeParamString = generateTypeParams(typeParams.addFirst("S"));
+            var newContent = "\n\tS _super;" + oldContent;
+            return generateStruct(state, beforeKeyword, name, typeParamString, params, newContent);
+        }
 
-        var typeParamString = generateTypeParams(typeParams);
-        var unionName = name + "Value" + typeParamString;
-        var unionFields = variants.iterate()
-                .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
-                .collect(new Joiner(""))
-                .orElse("");
-        var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
-
-        var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
-        var newContent = "\n\t" + enumName + " _variant;"
-                + "\n\t" + unionName + " _value;"
-                + oldContent;
-
-        return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
+        return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
     }
 
     private static Tuple<CompileState, String> generateStruct(
