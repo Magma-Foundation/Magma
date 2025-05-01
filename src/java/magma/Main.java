@@ -11,34 +11,135 @@ import java.util.function.Function;
 
 public class Main {
     private interface List<T> {
+        List<T> addLast(T element);
+
+        Iterator<T> iterate();
     }
 
-    private record JavaList<T>(java.util.List<T> list) {
+    private interface Head<T> {
+        Optional<T> next();
+    }
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private static final class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        private RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            }
+            var value = this.counter;
+            this.counter++;
+            return Optional.of(value);
+        }
+    }
+
+    private record JavaList<T>(java.util.List<T> list) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
         }
 
-        public JavaList<T> addLast(T element) {
+        @Override
+        public List<T> addLast(T element) {
             var copy = new ArrayList<>(this.list);
             copy.add(element);
             return new JavaList<>(copy);
         }
+
+        @Override
+        public Iterator<T> iterate() {
+            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
+        }
     }
 
     private static class Lists {
-        public static <T> JavaList<T> of(T... elements) {
+        public static <T> List<T> of(T... elements) {
             return new JavaList<>(Arrays.asList(elements));
+        }
+
+        public static <T> List<T> empty() {
+            return new JavaList<>(new ArrayList<>());
         }
     }
 
-    private record CompileState(JavaList<String> structs, JavaList<String> functions) {
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Optional<T> next() {
+            return Optional.empty();
+        }
+    }
+
+    private record Iterator<T>(Head<T> head) {
+
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
+            var current = initial;
+            while (true) {
+                C finalCurrent = current;
+                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (maybeNext.isEmpty()) {
+                    return current;
+                }
+                else {
+                    current = maybeNext.get();
+                }
+            }
+        }
+
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other::next));
+        }
+
+        public Optional<T> next() {
+            return this.head.next();
+        }
+    }
+
+    private static class Joiner implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        }
+    }
+
+    private record CompileState(List<String> structs, List<String> functions) {
         public CompileState() {
-            this(new JavaList<>(), new JavaList<>());
+            this(Lists.empty(), Lists.empty());
         }
 
         private String generate() {
-            return String.join("", this.structs.list)
-                    + String.join("", this.functions.list);
+            return this.getJoin(this.structs) + this.getJoin(this.functions);
+        }
+
+        private String getJoin(List<String> lists) {
+            return lists.iterate().collect(new Joiner()).orElse("");
         }
 
         public CompileState addStruct(String struct) {
@@ -50,7 +151,7 @@ public class Main {
         }
     }
 
-    private record DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {
+    private record DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
         public DivideState(String input) {
             this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         }
@@ -105,6 +206,31 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
+    private static class Iterators {
+        public static <T> Iterator<T> fromOptions(Optional<T> optional) {
+            return new Iterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            }
+
+            this.retrieved = true;
+            return Optional.of(this.value);
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -141,27 +267,31 @@ public class Main {
     ) {
         var segments = divide(input, folder);
 
-        Optional<Tuple<CompileState, StringBuilder>> maybeState = Optional.of(new Tuple<>(initial, new StringBuilder()));
-        for (var segment : segments.list) {
-            maybeState = maybeState.flatMap(state -> {
-                var oldState = state.left;
-                var oldCache = state.right;
-                return mapper.apply(oldState, segment).map(result -> {
-                    var newState = result.left;
-                    var newElement = result.right;
-                    return new Tuple<>(newState, merger.apply(oldCache, newElement));
-                });
-            });
-        }
+        return segments.iterate()
+                .fold(Optional.of(new Tuple<>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
+                .map(result -> new Tuple<>(result.left, result.right.toString()));
+    }
 
-        return maybeState.map(result -> new Tuple<>(result.left, result.right.toString()));
+    private static Optional<Tuple<CompileState, StringBuilder>> foldElement(
+            Tuple<CompileState, StringBuilder> state,
+            String segment,
+            BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> mapper,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        var oldState = state.left;
+        var oldCache = state.right;
+        return mapper.apply(oldState, segment).map(result -> {
+            var newState = result.left;
+            var newElement = result.right;
+            return new Tuple<>(newState, merger.apply(oldCache, newElement));
+        });
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String right) {
         return output.append(right);
     }
 
-    private static JavaList<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         DivideState current = new DivideState(input);
         while (true) {
             var maybePopped = current.pop();
@@ -301,15 +431,12 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> or(
             CompileState state,
             String input,
-            JavaList<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions) {
-        for (var action : actions.list) {
-            var result = action.apply(state, input);
-            if (result.isPresent()) {
-                return result;
-            }
-        }
-
-        return Optional.empty();
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions
+    ) {
+        return actions.iterate()
+                .map(action -> action.apply(state, input))
+                .flatMap(Iterators::fromOptions)
+                .next();
     }
 
     private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {

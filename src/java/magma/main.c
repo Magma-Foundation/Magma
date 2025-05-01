@@ -1,13 +1,15 @@
-/* private */struct JavaList<T> {
-	/* List<T> */ list;
+/* private */struct JavaList<T>(java.util.List<T> list) implements List<T> {
+};
+/* private */struct Iterator<T> {
+	/* Head<T> */ head;
 };
 /* private */struct CompileState {
-	/* JavaList<String> */ structs;
-	/* JavaList<String> */ functions;
+	/* List<String> */ structs;
+	/* List<String> */ functions;
 };
 /* private */struct DivideState {
 	/* String */ input;
-	/* JavaList<String> */ segments;
+	/* List<String> */ segments;
 	/* StringBuilder */ buffer;
 	/* int */ index;
 	/* int */ depth;
@@ -16,16 +18,86 @@
 	/* A */ left;
 	/* B */ right;
 };
-/* public */struct Main {
+/* public */struct Main {/* private interface List<T> {
+        List<T> addLast(T element);
+
+        Iterator<T> iterate();
+    } *//* 
+
+    private interface Head<T> {
+        Optional<T> next();
+    } *//* 
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    } */
 };
+/* private static final class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        */ /* private */ RangeHead(/* int length */){/* this.length = length; *//* }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            } *//* var value = this.counter; *//* this.counter++; *//* return Optional.of(value); *//* } */
+}
 /* public */ JavaList(/*  */){/* this(new ArrayList<>()); *//*  */
 }
-/* public */ /* JavaList<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
+/* @Override
+        public */ /* List<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
 }
-/* public */ CompileState(/*  */){/* this(new JavaList<>(), new JavaList<>()); *//*  */
+/* @Override
+        public */ /* Iterator<T> */ iterate(/*  */){/* return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get); *//*  */
 }
-/* private */ /* String */ generate(/*  */){/* return String.join("", this.structs.list)
-                    + String.join("", this.functions.list); *//*  */
+/* private static class Lists {
+        public static <T> */ /* List<T> */ of(/* T... elements */){/* return new JavaList<>(Arrays.asList(elements)); *//* }
+
+        public static <T> List<T> empty() {
+            return new JavaList<>(new ArrayList<>()); *//* } */
+}
+/* private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public */ /* Optional<T> */ next(/*  */){/* return Optional.empty(); *//* } */
+}
+/* public <C> */ /* C */ collect(/* Collector<T, C> collector */){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
+}
+/* private <C> */ /* C */ fold(/* C initial, BiFunction<C, T, C> folder */){/* var current = initial; *//* while (true) {
+                C finalCurrent = current;
+                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (maybeNext.isEmpty()) {
+                    return current;
+                }
+                else {
+                    current = maybeNext.get();
+                }
+            } *//*  */
+}
+/* public <R> */ /* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
+}
+/* public <R> */ /* Iterator<R> */ map(/* Function<T, R> mapper */){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
+}
+/* private */ /* Iterator<T> */ concat(/* Iterator<T> other */){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
+}
+/* public */ /* Optional<T> */ next(/*  */){/* return this.head.next(); *//*  */
+}
+/* private static class Joiner implements Collector<String, Optional<String>> {
+        @Override
+        public */ /* Optional<String> */ createInitial(/*  */){/* return Optional.empty(); *//* }
+
+        @Override
+        public Optional<String> fold(Optional<String> current, String element) {
+            return Optional.of(current.map(inner -> inner + element).orElse(element)); *//* } */
+}
+/* public */ CompileState(/*  */){/* this(Lists.empty(), Lists.empty()); *//*  */
+}
+/* private */ /* String */ generate(/*  */){/* return this.getJoin(this.structs) + this.getJoin(this.functions); *//*  */
+}
+/* private */ /* String */ getJoin(/* List<String> lists */){/* return lists.iterate().collect(new Joiner()).orElse(""); *//*  */
 }
 /* public */ /* CompileState */ addStruct(/* String struct */){/* return new CompileState(this.structs.addLast(struct), this.functions); *//*  */
 }
@@ -60,6 +132,21 @@
 }
 /* public */ /* boolean */ isShallow(/*  */){/* return this.depth == 1; *//*  */
 }
+/* private static class Iterators {
+        public static <T> */ /* Iterator<T> */ fromOptions(/* Optional<T> optional */){/* return new Iterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)); *//* } */
+}
+/* private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        */ /* public */ SingleHead(/* T value */){/* this.value = value; *//* }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            } *//* this.retrieved = true; *//* return Optional.of(this.value); *//* } */
+}
 /* public static */ /* void */ main(/*  */){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -84,21 +171,24 @@
             String input,
             BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> mapper,
             BiFunction<StringBuilder, String, StringBuilder> merger
-     */){/* var segments = divide(input, folder); *//* Optional<Tuple<CompileState, StringBuilder>> maybeState = Optional.of(new Tuple<>(initial, new StringBuilder())); *//* for (var segment : segments.list) {
-            maybeState = maybeState.flatMap(state -> {
-                var oldState = state.left;
-                var oldCache = state.right;
-                return mapper.apply(oldState, segment).map(result -> {
-                    var newState = result.left;
-                    var newElement = result.right;
-                    return new Tuple<>(newState, merger.apply(oldCache, newElement));
-                });
-            });
-        } *//* return maybeState.map(result -> new Tuple<>(result.left, result.right.toString())); *//*  */
+     */){/* var segments = divide(input, folder); *//* return segments.iterate()
+                .fold(Optional.of(new Tuple<>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
+                .map(result -> new Tuple<>(result.left, result.right.toString())); *//*  */
+}
+/* private static Optional<Tuple<CompileState, */ /* StringBuilder>> */ foldElement(/* 
+            Tuple<CompileState, StringBuilder> state,
+            String segment,
+            BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> mapper,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+     */){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
+            var newState = result.left;
+            var newElement = result.right;
+            return new Tuple<>(newState, merger.apply(oldCache, newElement));
+        } *//* ); *//*  */
 }
 /* private static */ /* StringBuilder */ mergeStatements(/* StringBuilder output, String right */){/* return output.append(right); *//*  */
 }
-/* private static */ /* JavaList<String> */ divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */){/* DivideState current = new DivideState(input); *//* while (true) {
+/* private static */ /* List<String> */ divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */){/* DivideState current = new DivideState(input); *//* while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
                 break;
@@ -155,7 +245,7 @@
             return appended.exit();
         } *//* return appended; *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileRootSegment(/* CompileState state, String input */){/* return or(state, input, List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileRootSegment(/* CompileState state, String input */){/* return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileNamespaced,
                 structure("class "),
@@ -164,7 +254,7 @@
 }
 /* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, */ /* String>>> */ structure(/* String infix */){/* return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
-                return or(state, beforeContent, List.of(
+                return or(state, beforeContent, Lists.of(
                         (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
                         (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
                 ));
@@ -181,7 +271,7 @@
             return buffer.append(element);
         } *//* return buffer.append(", ").append(element); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileParameter(/* CompileState instance, String paramString */){/* return or(instance, paramString, List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileParameter(/* CompileState instance, String paramString */){/* return or(instance, paramString, Lists.of(
                 Main::compileDefinition,
                 Main::compileContent
         )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";")); *//*  */
@@ -197,18 +287,20 @@
             });
         } *//* ); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ or(/* CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions */){/* for (var action : actions) {
-            var result = action.apply(state, input);
-            if (result.isPresent()) {
-                return result;
-            }
-        } *//* return Optional.empty(); *//*  */
+/* private static Optional<Tuple<CompileState, */ /* String>> */ or(/* 
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions
+     */){/* return actions.iterate()
+                .map(action -> action.apply(state, input))
+                .flatMap(Iterators::fromOptions)
+                .next(); *//*  */
 }
 /* private static Optional<Tuple<CompileState, */ /* String>> */ compileNamespaced(/* CompileState state, String input */){/* if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
             return Optional.of(new Tuple<>(state, ""));
         } *//* return Optional.empty(); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileStructSegment(/* CompileState state, String input */){/* return or(state, input, List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileStructSegment(/* CompileState state, String input */){/* return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 structure("record "),
                 Main::compileMethod,
@@ -236,17 +328,17 @@
             });
         } *//* ); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileMethodHeader(/* CompileState state, String definition */){/* return or(state, definition, List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileMethodHeader(/* CompileState state, String definition */){/* return or(state, definition, Lists.of(
                 Main::compileDefinition,
                 Main::compileContent
         )); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileFunctionSegment(/* CompileState state, String input */){/* return or(state, input.strip(), List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileFunctionSegment(/* CompileState state, String input */){/* return or(state, input.strip(), Lists.of(
                 Main::compileContent
         )); *//*  */
 }
 /* private static Optional<Tuple<CompileState, */ /* String>> */ compileDefinition(/* CompileState state, String input */){/* return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
-            return or(state, beforeName.strip(), List.of(
+            return or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
                     (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
             ));
