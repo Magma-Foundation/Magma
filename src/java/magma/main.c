@@ -1,4 +1,4 @@
-/* public  */struct Main {/* 
+/* public class Main {
     private record State(List<String> segments, StringBuilder buffer) {
         public State() {
             this(new ArrayList<>(), new StringBuilder()); *//* }
@@ -26,17 +26,25 @@
         var stripped = input.strip(); *//* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return ""; *//* }
 
-        return compileInfix(stripped, " */struct ", (beforeKeyword, afterKeyword) -> {/* 
+        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(withEnd)); *//* }); *//* }).orElseGet(() -> generatePlaceholder(stripped)); *//* }
+                return compileSuffix(withEnd.strip(), "}", content1 -> getString(beforeKeyword, name, content1)); *//* }); *//* }).orElseGet(() -> generatePlaceholder(stripped)); *//* }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty(); *//* }
+        var content = input.substring(0, input.length() - suffix.length()); *//* return mapper.apply(content); *//* }
+
+    private static Optional<String> getString(String beforeKeyword, String name, String content) {
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(content) + "}"); *//* }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */"; *//* }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         var classIndex = input.indexOf(infix); *//* if (classIndex >= 0) {
             var beforeKeyword = input.substring(0, classIndex); *//* var afterKeyword = input.substring(classIndex + infix.length()); *//* return mapper.apply(beforeKeyword, afterKeyword); *//* }
         return Optional.empty(); *//* }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */"; *//* }
 
     private static List<String> divide(String input) {
         State current = new State(); *//* for (var i = 0; *//* i < input.length(); *//* i++) {

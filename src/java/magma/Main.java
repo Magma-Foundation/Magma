@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     private record State(List<String> segments, StringBuilder buffer) {
@@ -56,10 +57,26 @@ public class Main {
 
         return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(withEnd));
+                return compileSuffix(withEnd.strip(), "}", content -> getString(beforeKeyword, name, content));
             });
         }).orElseGet(() -> generatePlaceholder(stripped));
 
+    }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        var content = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(content);
+    }
+
+    private static Optional<String> getString(String beforeKeyword, String name, String content) {
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(content) + "}");
+    }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
     }
 
     private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
@@ -70,10 +87,6 @@ public class Main {
             return mapper.apply(beforeKeyword, afterKeyword);
         }
         return Optional.empty();
-    }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
     }
 
     private static List<String> divide(String input) {
