@@ -10,19 +10,31 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private record State(List<String> segments, StringBuilder buffer) {
+    private record State(List<String> segments, StringBuilder buffer, int depth) {
         public State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State advance() {
             var copy = new ArrayList<String>(this.segments);
             copy.add(this.buffer.toString());
-            return new State(copy, new StringBuilder());
+            return new State(copy, new StringBuilder(), this.depth);
         }
 
         private State append(char c) {
-            return new State(this.segments, this.buffer.append(c));
+            return new State(this.segments, this.buffer.append(c), this.depth);
+        }
+
+        public State exit() {
+            return new State(this.segments, this.buffer, this.depth - 1);
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State enter() {
+            return new State(this.segments, this.buffer, this.depth + 1);
         }
     }
 
@@ -100,8 +112,14 @@ public class Main {
 
     private static State foldStatementChar(State state, char c) {
         var appended = state.append(c);
-        if (c == ';') {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '}') {
+            return appended.exit();
         }
         return appended;
     }
