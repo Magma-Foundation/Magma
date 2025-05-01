@@ -41,7 +41,9 @@ union OptionValue<T> {
 };
 /* private */struct Node<S> {
 	S _super;
-	char* (*generate)(S);
+	/* String_ */ (*generate)(S);
+};
+/* private */struct String_ {char* slice
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -62,19 +64,53 @@ union OptionValue<T> {
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
 };
-/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
+/* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {/* 
+
+        private String generate0() {
+            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
+            return beforeTypeString + this.type.generateWithName(this.name);
+        } */
 };
-/* private */struct Content(String input) implements Type, Parameter {
+/* private */struct Content(String input) implements Type, Parameter {/* 
+
+        private String generate0() {
+            return generatePlaceholder(this.input);
+        } */
 };
-/* private */struct Functional(List<Type> arguments, Type returns) implements Type {
+/* private */struct Functional(List<Type> arguments, Type returns) implements Type {/* 
+
+        private String generate0() {
+            return this.generateWithName("");
+        } */
 };
-/* private */struct Template(String base, List<Type> arguments) implements Type {
+/* private */struct Template(String base, List<Type> arguments) implements Type {/* 
+
+        private String generate0() {
+            var generatedTuple = this.arguments().iterate()
+                    .map(type -> type.generate().toSlice())
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "template " + this.base() + "<" + generatedTuple + ">";
+        } */
 };
-/* private */struct TypeParameter(String value) implements Type {
+/* private */struct TypeParameter(String value) implements Type {/* 
+
+        private String generate0() {
+            return this.value;
+        } */
 };
-/* private */struct Ref(Type type) implements Type {
+/* private */struct Ref(Type type) implements Type {/* 
+
+        private String generate0() {
+            return this.type.generate().toSlice() + "*";
+        } */
 };
-/* private */struct TupleType(List<Type> arguments) implements Type {
+/* private */struct TupleType(List<Type> arguments) implements Type {/* 
+
+        private String generate0() {
+            return "(" + generateNodesAsValues(this.arguments) + ")";
+        } */
 };
 /* public */struct Main {/* 
 
@@ -145,12 +181,18 @@ union OptionValue<T> {
         }
 
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return this.value;
         }
     } */
 };
-/* default */ char* generateWithName_Type extends Node(char* name){/* return this.generate() + " " + name; *//*  */
+/* default */ char* generateWithName_Type extends Node(char* name){/* return this.generate().toSlice() + " " + name; *//*  */
+}
+/* public */ char* toSlice_String_(){/* return this.slice; *//*  */
 }
 /* @Override
  public <R> */ template Option</* R */> map_Some(/*  R */ (*mapper)(/* T */)){/* return new Some<>(mapper.apply(this.value)); *//*  */
@@ -349,28 +391,25 @@ union OptionValue<T> {
 }
 /* public */ Definition_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(/* Type */ type, char* name){/* this(new None<>(), type, name); *//*  */
 }
-/* @Override
- public */ char* generate_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse(""); *//* return beforeTypeString + this.type.generateWithName(this.name); *//*  */
-}
 /* public */ /* Definition */ mapName_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(char* (*mapper)(char*)){/* return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name)); *//*  */
 }
 /* @Override
- public */ char* generate_Content(String input) implements Type, Parameter(){/* return generatePlaceholder(this.input); *//*  */
+ public */ /* String_ */ generate_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(){/* return new String_(this.generate0()); *//*  */
 }
 /* @Override
- public */ char* generate_Functional(List<Type> arguments, Type returns) implements Type(){/* return this.generateWithName(""); *//*  */
+ public */ /* String_ */ generate_Content(String input) implements Type, Parameter(){/* return new String_(this.generate0()); *//*  */
+}
+/* @Override
+ public */ /* String_ */ generate_Functional(List<Type> arguments, Type returns) implements Type(){/* return new String_(this.generate0()); *//*  */
 }
 /* @Override
  public */ char* generateWithName_Functional(List<Type> arguments, Type returns) implements Type(char* name){/* var joinedArguments = this.arguments().iterate()
-                    .map(Type::generate)
+                    .map(type -> type.generate().toSlice())
                     .collect(new Joiner(", "))
-                    .orElse(""); *//* return this.returns().generate() + " (*" + name + ")(" + joinedArguments + ")"; *//*  */
+                    .orElse(""); *//* return this.returns().generate().toSlice() + " (*" + name + ")(" + joinedArguments + ")"; *//*  */
 }
 /* @Override
- public */ char* generate_Template(String base, List<Type> arguments) implements Type(){/* var generatedTuple = this.arguments().iterate()
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .orElse(""); *//* return "template " + this.base() + "<" + generatedTuple + ">"; *//*  */
+ public */ /* String_ */ generate_Template(String base, List<Type> arguments) implements Type(){/* return new String_(this.generate0()); *//*  */
 }
 /* private static class ListCollector<T> implements Collector<T, List<T>> {
  @Override
@@ -381,13 +420,13 @@ union OptionValue<T> {
             return current.addLast(element); *//* } */
 }
 /* @Override
- public */ char* generate_TypeParameter(String value) implements Type(){/* return this.value; *//*  */
+ public */ /* String_ */ generate_TypeParameter(String value) implements Type(){/* return new String_(this.generate0()); *//*  */
 }
 /* @Override
- public */ char* generate_Ref(Type type) implements Type(){/* return this.type.generate() + "*"; *//*  */
+ public */ /* String_ */ generate_Ref(Type type) implements Type(){/* return new String_(this.generate0()); *//*  */
 }
 /* @Override
- public */ char* generate_TupleType(List<Type> arguments) implements Type(){/* return "(" + generateNodesAsValues(this.arguments) + ")"; *//*  */
+ public */ /* String_ */ generate_TupleType(List<Type> arguments) implements Type(){/* return new String_(this.generate0()); *//*  */
 }
 /* public static */ /* void */ main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -422,7 +461,7 @@ union OptionValue<T> {
                 Main::whitespace,
                 Main::compileNamespaced,
                 structure("class", "class "),
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         )); *//*  */
 }
 /* private static */ template BiFunction</* CompileState */, char*, template Option<(/* CompileState */, char*)>> structure(char* type, char* infix){/* return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
@@ -457,7 +496,7 @@ union OptionValue<T> {
         )); *//*  */
 }
 /* private static */ template Option<(/* CompileState */, char*)> structureWithParams(char* type, /* CompileState */ instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(Parameter::generate)), Main::mergeStatements).flatMap(params -> {
+            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
                 return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         } *//* )); *//*  */
@@ -534,10 +573,10 @@ union OptionValue<T> {
                 structure("interface", "interface "),
                 Main::method,
                 Main::definitionStatement,
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         )); *//*  */
 }
-/* private static */ template Option<(/* CompileState */, char*)> definitionStatement(/* CompileState */ state, char* input){/* return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(Definition::generate)).map(value -> {
+/* private static */ template Option<(/* CompileState */, char*)> definitionStatement(/* CompileState */ state, char* input){/* return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(definition -> definition.generate().toSlice())).map(value -> {
             var generated = "\n\t" + value.right + ";";
             return new Tuple<>(value.left, generated);
         } *//* )); *//*  */
@@ -642,7 +681,7 @@ union OptionValue<T> {
         } *//* return appended; *//*  */
 }
 /* private static <T extends Node> */ char* generateNodesAsValues(template List</* T */> params){/* return params.iterate()
-                .map(Node::generate)
+                .map(t -> t.generate().toSlice())
                 .collect(new Joiner(", "))
                 .orElse(""); *//*  */
 }
@@ -660,7 +699,7 @@ union OptionValue<T> {
 
             var functionalType = new Functional(argumentTypes, returnType);
             var definition0 = new Definition(functionalType, name);
-            generated = "\n\t" + definition0.generate() + ";";
+            generated = "\n\t" + definition0.generate().toSlice() + ";";
         } *//* else {
             generated = "";
         } *//* return new Some<>(new Tuple<CompileState, String>(state, generated)); *//*  */
@@ -671,8 +710,7 @@ union OptionValue<T> {
                     var paramStrings = generateNodesAsValues(params);
 
                     var generated = definition
-                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name))
-                            .generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
@@ -692,7 +730,7 @@ union OptionValue<T> {
         } *//* )); *//*  */
 }
 /* private static */ template Option<(/* CompileState */, char*)> compileFunctionSegment(/* CompileState */ state, char* input){/* return or(state, input.strip(), Lists.of(
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         )); *//*  */
 }
 /* private static */ template Option<(/* CompileState */, /*  Definition */)> definition(/* CompileState */ state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
@@ -708,7 +746,7 @@ union OptionValue<T> {
 }
 /* private static */ int isSymbol(char* value){/* for (var i = 0; *//* i < value.length(); *//* i++) {
             var c = value.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;

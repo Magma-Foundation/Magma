@@ -64,7 +64,7 @@ public class Main {
 
     private interface Type extends Node {
         default String generateWithName(String name) {
-            return this.generate() + " " + name;
+            return this.generate().toSlice() + " " + name;
         }
     }
 
@@ -72,7 +72,13 @@ public class Main {
     }
 
     private interface Node {
-        String generate();
+        String_ generate();
+    }
+
+    private record String_(String slice) {
+        public String toSlice() {
+            return this.slice;
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -479,46 +485,62 @@ public class Main {
             this(new None<>(), type, name);
         }
 
-        @Override
-        public String generate() {
-            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name);
-        }
-
         public Definition mapName(Function<String, String> mapper) {
             return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name));
+        }
+
+        @Override
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
+            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
+            return beforeTypeString + this.type.generateWithName(this.name);
         }
     }
 
     private record Content(String input) implements Type, Parameter {
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return generatePlaceholder(this.input);
         }
     }
 
     private record Functional(List<Type> arguments, Type returns) implements Type {
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return this.generateWithName("");
         }
 
         @Override
         public String generateWithName(String name) {
             var joinedArguments = this.arguments().iterate()
-                    .map(Type::generate)
+                    .map(type -> type.generate().toSlice())
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.returns().generate() + " (*" + name + ")(" + joinedArguments + ")";
+            return this.returns().generate().toSlice() + " (*" + name + ")(" + joinedArguments + ")";
         }
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             var generatedTuple = this.arguments().iterate()
-                    .map(Type::generate)
+                    .map(type -> type.generate().toSlice())
                     .collect(new Joiner(", "))
                     .orElse("");
 
@@ -540,21 +562,33 @@ public class Main {
 
     private record TypeParameter(String value) implements Type {
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return this.value;
         }
     }
 
     private record Ref(Type type) implements Type {
         @Override
-        public String generate() {
-            return this.type.generate() + "*";
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
+            return this.type.generate().toSlice() + "*";
         }
     }
 
     private record TupleType(List<Type> arguments) implements Type {
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return "(" + generateNodesAsValues(this.arguments) + ")";
         }
     }
@@ -570,7 +604,11 @@ public class Main {
         }
 
         @Override
-        public String generate() {
+        public String_ generate() {
+            return new String_(this.generate0());
+        }
+
+        private String generate0() {
             return this.value;
         }
     }
@@ -638,7 +676,7 @@ public class Main {
                 Main::whitespace,
                 Main::compileNamespaced,
                 structure("class", "class "),
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
 
@@ -683,7 +721,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String type, CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(Parameter::generate)), Main::mergeStatements).flatMap(params -> {
+            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
                 return structureWithMaybeTypeParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
             });
         }));
@@ -831,7 +869,7 @@ public class Main {
                 structure("interface", "interface "),
                 Main::method,
                 Main::definitionStatement,
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
 
@@ -840,7 +878,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definitionStatement(CompileState state, String input) {
-        return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(Definition::generate)).map(value -> {
+        return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(definition -> definition.generate().toSlice())).map(value -> {
             var generated = "\n\t" + value.right + ";";
             return new Tuple<>(value.left, generated);
         }));
@@ -999,7 +1037,7 @@ public class Main {
 
     private static <T extends Node> String generateNodesAsValues(List<T> params) {
         return params.iterate()
-                .map(Node::generate)
+                .map(t -> t.generate().toSlice())
                 .collect(new Joiner(", "))
                 .orElse("");
     }
@@ -1029,7 +1067,7 @@ public class Main {
 
             var functionalType = new Functional(argumentTypes, returnType);
             var definition0 = new Definition(functionalType, name);
-            generated = "\n\t" + definition0.generate() + ";";
+            generated = "\n\t" + definition0.generate().toSlice() + ";";
         }
         else {
             generated = "";
@@ -1045,8 +1083,7 @@ public class Main {
                     var paramStrings = generateNodesAsValues(params);
 
                     var generated = definition
-                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name))
-                            .generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
@@ -1072,7 +1109,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
         return or(state, input.strip(), Lists.of(
-                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
     }
 
@@ -1092,7 +1129,7 @@ public class Main {
     private static boolean isSymbol(String value) {
         for (var i = 0; i < value.length(); i++) {
             var c = value.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;
