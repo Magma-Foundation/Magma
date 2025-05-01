@@ -686,17 +686,19 @@ public class Main {
         }
 
         var enumName = name + "Variant";
-        var variantsString = variants.iterate()
+        var enumFields = variants.iterate()
                 .map(variant -> "\n\t" + variant)
                 .collect(new Joiner(","))
                 .orElse("");
-
-        var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n";
-
+        var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n";
 
         var typeParamString = generateTypeParams(typeParams);
         var unionName = name + "Value" + typeParamString;
-        var generateUnion = "union " + unionName + " {" + variantsString + "\n};\n";
+        var unionFields = variants.iterate()
+                .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
+                .collect(new Joiner(""))
+                .orElse("");
+        var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
 
         var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
         var newContent = "\n\t" + enumName + " _variant;"

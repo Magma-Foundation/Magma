@@ -3,8 +3,8 @@ enum OptionVariant {
 	None
 };
 union OptionValue<T> {
-	Some,
-	None
+	Some<T> some;
+	None<T> none;
 };
 /* private sealed */struct Option<T> {
 	OptionVariant _variant;
@@ -443,10 +443,13 @@ union OptionValue<T> {
 }
 /* private static */ template Tuple</* CompileState */, /*  String */> assembleStruct(/* CompileState */ state, /* String */ beforeKeyword, /* String */ name, template List</* String */> typeParams, /* String */ params, template List</* String */> variants, /* String */ oldContent){/* if (variants.isEmpty()) {
             return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
-        } *//* var enumName = name + "Variant"; *//* var variantsString = variants.iterate()
+        } *//* var enumName = name + "Variant"; *//* var enumFields = variants.iterate()
                 .map(variant -> "\n\t" + variant)
                 .collect(new Joiner(","))
-                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + variantsString + "\n};\n"; *//* var typeParamString = generateTypeParams(typeParams); *//* var unionName = name + "Value" + typeParamString; *//* var generateUnion = "union " + unionName + " {" + variantsString + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum).addStruct(generateUnion); *//* var newContent = "\n\t" + enumName + " _variant;"
+                .orElse(""); *//* var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n"; *//* var typeParamString = generateTypeParams(typeParams); *//* var unionName = name + "Value" + typeParamString; *//* var unionFields = variants.iterate()
+                .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
+                .collect(new Joiner(""))
+                .orElse(""); *//* var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n"; *//* var compileState = state.addStruct(generatedEnum).addStruct(generateUnion); *//* var newContent = "\n\t" + enumName + " _variant;"
                 + "\n\t" + unionName + " _value;"
                 + oldContent; *//* return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent); *//*  */
 }
