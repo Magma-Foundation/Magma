@@ -1,11 +1,38 @@
-/* public  */struct Main {/* private  */struct State(List<String> segments, StringBuilder buffer, int depth) {/* public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+/* private static Optional<Tuple<JavaList<String>, String>> compileStructure(JavaList<String> state, String input, String infix) {
+        return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content -> {
+                    var tuple = compileAll(state, content, Main::compileStructSegment);
+                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + tuple.right + "}";
+                    return Optional.of(new Tuple<>(tuple.left.addLast(generated), ""));
+                });
+            });
+        });
+    } *//* private static Tuple<JavaList<String>, String> compileStructSegment(JavaList<String> state, String input) {
+        return compileStructure(state, input, "record ")
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    } *//* private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
+        }
+        var content = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(content);
+    } *//* private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
+    } *//* private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex);
+            var afterKeyword = input.substring(classIndex + infix.length());
+            return mapper.apply(beforeKeyword, afterKeyword);
+        }
+        return Optional.empty();
+    } *//* } *//* private  */struct State(JavaList<String> segments, StringBuilder buffer, int depth) {/* public State() {
+            this(new JavaList<>(), new StringBuilder(), 0);
         } *//* 
 
         private State advance() {
-            var copy = new ArrayList<String>(this.segments);
-            copy.add(this.buffer.toString());
-            return new State(copy, new StringBuilder(), this.depth);
+            return new State(this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.depth);
         } *//* 
 
         private State append(char c) {
@@ -29,6 +56,19 @@
         } *//* 
      */}/* 
 
+    private  */struct Tuple<A, B>(A left, B right) {/*  */}/* 
+
+    private  */struct JavaList<T>(List<T> list) {/* public JavaList() {
+            this(new ArrayList<>());
+        } *//* 
+
+        public JavaList<T> addLast(T element) {
+            var copy = new ArrayList<T>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        } *//* 
+     */}/* public  */struct Main {/* 
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -42,21 +82,30 @@
     } *//* 
 
     private static String compileRoot(String input) {
-        return compileAll(input, Main::compileRootSegment);
+        var state = new JavaList<String>();
+        var tuple = compileAll(state, input, Main::compileRootSegment);
+        return tuple.right + String.join("", tuple.left.list);
     } *//* 
 
-    private static String compileAll(String input, Function<String, String> mapper) {
+    private static Tuple<JavaList<String>, String> compileAll(
+            JavaList<String> initial,
+            String input,
+            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> mapper
+    ) {
         var segments = divide(input);
 
+        JavaList<String> state = initial;
         var output = new StringBuilder();
-        for (var segment : segments) {
-            output.append(mapper.apply(segment));
+        for (var segment : segments.list) {
+            var tuple = mapper.apply(state, segment);
+            state = tuple.left;
+            output.append(tuple.right);
         }
 
-        return output.toString();
+        return new Tuple<>(state, output.toString());
     } *//* 
 
-    private static List<String> divide(String input) {
+    private static JavaList<String> divide(String input) {
         State current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -80,39 +129,12 @@
             return appended.exit();
         } *//* 
         return appended; *//* 
-     */}/* private static String compileRootSegment(String input) {
+     */}/* private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
+            return new Tuple<>(state, "");
         }
 
-        return compileStructure(stripped, "class ").orElseGet(() -> generatePlaceholder(stripped));
-
-    } *//* private static Optional<String> compileStructure(String stripped, String infix) {
-        return compileInfix(stripped, infix, (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", content -> {
-                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + compileAll(content, Main::compileStructSegment) + "}");
-                });
-            });
+        return compileStructure(state, stripped, " */struct ").orElseGet(() -> {/* return new Tuple<>(state, generatePlaceholder(stripped)); *//* 
         });
-    } *//* private static String compileStructSegment(String input) {
-        return compileStructure(input, "record ")
-                .orElseGet(() -> generatePlaceholder(input));
-    } *//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
-        if (!input.endsWith(suffix)) {
-            return Optional.empty();
-        }
-        var content = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(content);
-    } *//* private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    } *//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var beforeKeyword = input.substring(0, classIndex);
-            var afterKeyword = input.substring(classIndex + infix.length());
-            return mapper.apply(beforeKeyword, afterKeyword);
-        }
-        return Optional.empty();
-    } *//* } */
+     */}
