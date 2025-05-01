@@ -463,6 +463,7 @@ public class Main {
         return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 structure("record "),
+                structure("interface "),
                 Main::compileMethod,
                 Main::compileContent
         ));

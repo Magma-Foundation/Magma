@@ -1,3 +1,15 @@
+/* private */struct List<T> {/* List<T> addLast(T element); *//* 
+
+        Iterator<T> iterate(); */
+};
+/* private */struct Head<T> {/* Optional<T> next(); */
+};
+/* private */struct Collector<T, C> {/* C createInitial(); *//* 
+
+        C fold(C current, T element); */
+};
+/* private @ */struct External {
+};
 /* private */struct Iterator<T> {
 	/* Head<T> */ head;
 };
@@ -16,24 +28,7 @@
 	/* A */ left;
 	/* B */ right;
 };
-/* public */struct Main {/* private interface List<T> {
-        List<T> addLast(T element);
-
-        Iterator<T> iterate();
-    } *//* 
-
-    private interface Head<T> {
-        Optional<T> next();
-    } *//* 
-
-    private interface Collector<T, C> {
-        C createInitial();
-
-        C fold(C current, T element);
-    } *//* 
-
-    private @interface External {
-    } *//* 
+/* public */struct Main {/* 
 
     @External
     private record JavaList<T>(java.util.List<T> list) implements List<T> {
@@ -324,6 +319,7 @@
 /* private static Optional<Tuple<CompileState, */ /* String>> */ compileStructSegment(/* CompileState state, String input */){/* return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 structure("record "),
+                structure("interface "),
                 Main::compileMethod,
                 Main::compileContent
         )); *//*  */
