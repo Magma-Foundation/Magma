@@ -62,6 +62,9 @@ union ResultValue<T, X> {
 };
 /* private */struct Iterator<T> {template Head<struct T> head
 };
+/* @Actual
+    private */struct JavaList<T>(java.util.List<T> elements) implements List<T> {
+};
 /* private static */struct Lists {
 };
 /* private static */struct EmptyHead<T> implements Head<T> {
@@ -89,6 +92,19 @@ union ResultValue<T, X> {
 /* public */struct Main {/* 
 
     private interface Parameter extends Node {
+    } *//* 
+
+    @Actual
+    private record JavaString(String value) implements String_ {
+        @Override
+        public String toSlice() {
+            return this.value;
+        }
+
+        @Override
+        public String_ appendSlice(String slice) {
+            return Strings.from(this.value + slice);
+        }
     } *//* 
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
@@ -271,7 +287,7 @@ union ResultValue<T, X> {
  default */ struct String_ generateWithName(char* name){
 	return /* this.generate().appendSlice(" ").appendSlice(name) */;/* } */
 }
-/* @External
+/* @Actual
  private static */ struct String_ Strings::from(struct Strings this, char* value){
 	return /* new JavaString(value) */;
 }
@@ -383,6 +399,41 @@ union ResultValue<T, X> {
                 return new None<>();
             } *//* var value = this.counter; *//* this.counter++; */
 	return /* new Some<>(value) */;/* } */
+}
+struct public JavaList::JavaList(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){/* this(new ArrayList<>()); */
+}
+/* @Override
+ public */ template List<struct T> JavaList::addLast(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, struct T element){/* var copy = new ArrayList<>(this.elements); *//* copy.add(element); */
+	return /* new JavaList<>(copy) */;
+}
+/* @Override
+ public */ template Iterator<struct T> JavaList::iterate(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){
+	return /* new Iterator<>(new RangeHead(this.elements.size())).map(this.elements::get) */;
+}
+/* @Override
+ public */ template Option<(template List<struct T>, /*  T */)> JavaList::removeLast(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){/* if (this.elements.isEmpty()) {
+                return new None<>();
+            } *//* var slice = this.elements.subList(0, this.elements.size() - 1); *//* var last = this.elements.getLast(); */
+	return /* new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last)) */;
+}
+/* @Override
+ public */ int JavaList::isEmpty(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){
+	return /* this.elements.isEmpty() */;
+}
+/* @Override
+ public */ struct T JavaList::get(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, int index){
+	return /* this.elements.get(index) */;
+}
+/* @Override
+ public */ template List<struct T> JavaList::addFirst(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, struct T element){/* var copy = this.copy(); *//* copy.addFirst(element); */
+	return /* new JavaList<>(copy) */;
+}
+/* @Override
+ public */ int JavaList::contains(struct JavaList<T>(java.util.List<T> elements) implements List<T> this, struct T element){
+	return /* this.elements.contains(element) */;
+}
+/* private */ template java.util.List<struct T> JavaList::copy(struct JavaList<T>(java.util.List<T> elements) implements List<T> this){
+	return /* new ArrayList<T>(this.elements) */;
 }
 /* public static <T> */ template List<struct T> Lists::of(struct Lists this, /* T... */ elements){
 	return /* new JavaList<>(Arrays.asList(elements)) */;
@@ -512,7 +563,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             }
         } */;
 }
-/* @External
+/* @Actual
  private static */ template Option<struct IOException> writeString(char* output){/* try {
             Files.writeString(TARGET, output);
             return new None<>();
@@ -520,7 +571,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             return new Some<>(e);
         } */
 }
-/* @External
+/* @Actual
  private static */ template Result<char*, /*  IOException */> readString(){/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
@@ -546,7 +597,8 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             var exit = appended.exit();
             if (exit.peek() instanceof Some(var temp) && temp == ';') {
                 return exit.popAndAppend().orElse(exit).advance();
-            } else {
+            }
+            else {
                 return exit.advance();
             }
         } *//* if (c == '{') {

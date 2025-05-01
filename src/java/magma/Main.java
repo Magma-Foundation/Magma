@@ -59,7 +59,7 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private @interface External {
+    private @interface Actual {
     }
 
     private interface Splitter {
@@ -89,13 +89,13 @@ public class Main {
     }
 
     private static class Strings {
-        @External
+        @Actual
         private static String_ from(String value) {
             return new JavaString(value);
         }
     }
 
-    @External
+    @Actual
     private record JavaString(String value) implements String_ {
         @Override
         public String toSlice() {
@@ -256,7 +256,7 @@ public class Main {
         }
     }
 
-    @External
+    @Actual
     private record JavaList<T>(java.util.List<T> elements) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
@@ -697,7 +697,7 @@ public class Main {
         };
     }
 
-    @External
+    @Actual
     private static Option<IOException> writeString(String output) {
         try {
             Files.writeString(TARGET, output);
@@ -707,7 +707,7 @@ public class Main {
         }
     }
 
-    @External
+    @Actual
     private static Result<String, IOException> readString() {
         try {
             return new Ok<>(Files.readString(SOURCE));
@@ -754,7 +754,8 @@ public class Main {
             var exit = appended.exit();
             if (exit.peek() instanceof Some(var temp) && temp == ';') {
                 return exit.popAndAppend().orElse(exit).advance();
-            } else {
+            }
+            else {
                 return exit.advance();
             }
         }
