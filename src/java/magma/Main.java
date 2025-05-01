@@ -1351,7 +1351,17 @@ public class Main {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
                 return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
-                        return new Tuple<>(argumentsTuple.left, new Invocation(callerTuple.right, argumentsTuple.right));
+                        var caller = callerTuple.right;
+
+                        List<Value> newArguments;
+                        if (caller instanceof DataAccess access) {
+                            newArguments = argumentsTuple.right.addFirst(access.parent);
+                        }
+                        else {
+                            newArguments = argumentsTuple.right;
+                        }
+
+                        return new Tuple<>(argumentsTuple.left, new Invocation(caller, newArguments));
                     });
                 }));
             });
