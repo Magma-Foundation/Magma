@@ -150,59 +150,59 @@ union OptionValue<T> {
         }
     } */
 };
-/* default */ char* generateWithName(char* name){/* return this.generate() + " " + name; *//*  */
+/* default */ char* generateWithName_Type extends Node(char* name){/* return this.generate() + " " + name; *//*  */
 }
 /* @Override
- public <R> */ template Option</* R */> map(/*  R */ (*mapper)(/* T */)){/* return new Some<>(mapper.apply(this.value)); *//*  */
+ public <R> */ template Option</* R */> map_Some(/*  R */ (*mapper)(/* T */)){/* return new Some<>(mapper.apply(this.value)); *//*  */
 }
 /* @Override
- public */ int isEmpty(){/* return false; *//*  */
+ public */ int isEmpty_Some(){/* return false; *//*  */
 }
 /* @Override
- public */ /* T */ orElse(/* T */ other){/* return this.value; *//*  */
+ public */ /* T */ orElse_Some(/* T */ other){/* return this.value; *//*  */
 }
 /* @Override
- public */ template Option</* T */> or(template Option</* T */> (*other)()){/* return this; *//*  */
+ public */ template Option</* T */> or_Some(template Option</* T */> (*other)()){/* return this; *//*  */
 }
 /* @Override
- public */ /* T */ orElseGet(/* T */ (*other)()){/* return this.value; *//*  */
+ public */ /* T */ orElseGet_Some(/* T */ (*other)()){/* return this.value; *//*  */
 }
 /* @Override
- public <R> */ template Option</* R */> flatMap(template Option</* R */> (*mapper)(/* T */)){/* return mapper.apply(this.value); *//*  */
+ public <R> */ template Option</* R */> flatMap_Some(template Option</* R */> (*mapper)(/* T */)){/* return mapper.apply(this.value); *//*  */
 }
 /* @Override
- public */ template Option</* T */> filter(template Predicate</* T */> predicate){/* return predicate.test(this.value) ? this : new None<>(); *//*  */
+ public */ template Option</* T */> filter_Some(template Predicate</* T */> predicate){/* return predicate.test(this.value) ? this : new None<>(); *//*  */
 }
 /* @Override
- public */ int isPresent(){/* return true; *//*  */
+ public */ int isPresent_Some(){/* return true; *//*  */
 }
 /* @Override
- public <R> */ template Option</* R */> map(/*  R */ (*mapper)(/* T */)){/* return new None<>(); *//*  */
+ public <R> */ template Option</* R */> map_None(/*  R */ (*mapper)(/* T */)){/* return new None<>(); *//*  */
 }
 /* @Override
- public */ int isEmpty(){/* return true; *//*  */
+ public */ int isEmpty_None(){/* return true; *//*  */
 }
 /* @Override
- public */ /* T */ orElse(/* T */ other){/* return other; *//*  */
+ public */ /* T */ orElse_None(/* T */ other){/* return other; *//*  */
 }
 /* @Override
- public */ template Option</* T */> or(template Option</* T */> (*other)()){/* return other.get(); *//*  */
+ public */ template Option</* T */> or_None(template Option</* T */> (*other)()){/* return other.get(); *//*  */
 }
 /* @Override
- public */ /* T */ orElseGet(/* T */ (*other)()){/* return other.get(); *//*  */
+ public */ /* T */ orElseGet_None(/* T */ (*other)()){/* return other.get(); *//*  */
 }
 /* @Override
- public <R> */ template Option</* R */> flatMap(template Option</* R */> (*mapper)(/* T */)){/* return new None<>(); *//*  */
+ public <R> */ template Option</* R */> flatMap_None(template Option</* R */> (*mapper)(/* T */)){/* return new None<>(); *//*  */
 }
 /* @Override
- public */ template Option</* T */> filter(template Predicate</* T */> predicate){/* return new None<>(); *//*  */
+ public */ template Option</* T */> filter_None(template Predicate</* T */> predicate){/* return new None<>(); *//*  */
 }
 /* @Override
- public */ int isPresent(){/* return false; *//*  */
+ public */ int isPresent_None(){/* return false; *//*  */
 }
-/* public <C> */ /* C */ collect(template Collector<T, /*  C */> collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
+/* public <C> */ /* C */ collect_Iterator(template Collector<T, /*  C */> collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
 }
-/* private <C> */ /* C */ fold(/* C */ initial, template BiFunction</* C */, T, /*  C */> folder){/* var current = initial; *//* while (true) {
+/* private <C> */ /* C */ fold_Iterator(/* C */ initial, template BiFunction</* C */, T, /*  C */> folder){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -213,13 +213,13 @@ union OptionValue<T> {
                 }
             } *//*  */
 }
-/* public <R> */ template Iterator</* R */> flatMap(template Iterator</* R */> (*mapper)(T)){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
+/* public <R> */ template Iterator</* R */> flatMap_Iterator(template Iterator</* R */> (*mapper)(T)){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
 }
-/* public <R> */ template Iterator</* R */> map(/*  R */ (*mapper)(T)){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
+/* public <R> */ template Iterator</* R */> map_Iterator(/*  R */ (*mapper)(T)){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
 }
-/* private */ template Iterator<T> concat(template Iterator<T> other){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
+/* private */ template Iterator<T> concat_Iterator(template Iterator<T> other){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
 }
-/* public */ template Option<T> next(){/* return this.head.next(); *//*  */
+/* public */ template Option<T> next_Iterator(){/* return this.head.next(); *//*  */
 }
 /* private static final class RangeHead implements Head<Integer> {
  private final int length;
@@ -243,58 +243,58 @@ union OptionValue<T> {
  @Override
  public */ template Option</* T */> next(){/* return new None<>(); *//* } */
 }
-/* public */ Joiner(){/* this(""); *//*  */
+/* public */ Joiner_Joiner(String delimiter) implements Collector(){/* this(""); *//*  */
 }
 /* @Override
- public */ template Option<String> createInitial(){/* return new None<>(); *//*  */
+ public */ template Option<String> createInitial_Joiner(String delimiter) implements Collector(){/* return new None<>(); *//*  */
 }
 /* @Override
- public */ template Option<String> fold(template Option<String> current, String element){/* return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)); *//*  */
+ public */ template Option<String> fold_Joiner(String delimiter) implements Collector(template Option<String> current, String element){/* return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)); *//*  */
 }
-/* public */ CompileState(){/* this(Lists.empty(), Lists.empty(), new None<>()); *//*  */
+/* public */ CompileState_CompileState(){/* this(Lists.empty(), Lists.empty(), new None<>()); *//*  */
 }
-/* private */ char* generate(){/* return this.getJoin(this.structs) + this.getJoin(this.functions); *//*  */
+/* private */ char* generate_CompileState(){/* return this.getJoin(this.structs) + this.getJoin(this.functions); *//*  */
 }
-/* private */ char* getJoin(template List<char*> lists){/* return lists.iterate().collect(new Joiner()).orElse(""); *//*  */
+/* private */ char* getJoin_CompileState(template List<char*> lists){/* return lists.iterate().collect(new Joiner()).orElse(""); *//*  */
 }
-/* public */ /* CompileState */ addStruct(char* struct){/* return new CompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType); *//*  */
+/* public */ /* CompileState */ addStruct_CompileState(char* struct){/* return new CompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType); *//*  */
 }
-/* public */ /* CompileState */ addFunction(char* function){/* return new CompileState(this.structs, this.functions.addLast(function), this.maybeStructureType); *//*  */
+/* public */ /* CompileState */ addFunction_CompileState(char* function){/* return new CompileState(this.structs, this.functions.addLast(function), this.maybeStructureType); *//*  */
 }
-/* public */ /* CompileState */ withStructType(/* StructurePrototype */ type){/* return new CompileState(this.structs, this.functions, new Some<>(type)); *//*  */
+/* public */ /* CompileState */ withStructType_CompileState(/* StructurePrototype */ type){/* return new CompileState(this.structs, this.functions, new Some<>(type)); *//*  */
 }
-/* public */ /* CompileState */ withoutStructType(){/* return new CompileState(this.structs, this.functions, new None<>()); *//*  */
+/* public */ /* CompileState */ withoutStructType_CompileState(){/* return new CompileState(this.structs, this.functions, new None<>()); *//*  */
 }
-/* public */ DivideState(char* input){/* this(input, new JavaList<>(), new StringBuilder(), 0, 0); *//*  */
+/* public */ DivideState_DivideState(char* input){/* this(input, new JavaList<>(), new StringBuilder(), 0, 0); *//*  */
 }
-/* private */ template Option</* DivideState */> popAndAppend(){/* return this.popAndAppendToTuple().map(Tuple::right); *//*  */
+/* private */ template Option</* DivideState */> popAndAppend_DivideState(){/* return this.popAndAppendToTuple().map(Tuple::right); *//*  */
 }
-/* private */ template Option<(/* Character */, /*  DivideState */)> popAndAppendToTuple(){/* return this.pop().map(tuple -> {
+/* private */ template Option<(/* Character */, /*  DivideState */)> popAndAppendToTuple_DivideState(){/* return this.pop().map(tuple -> {
                 var c = tuple.left;
                 var state = tuple.right;
                 return new Tuple<>(c, state.append(c));
             } *//* ); *//*  */
 }
-/* private */ /* DivideState */ append(/* char */ c){/* return new DivideState(this.input, this.segments, this.buffer.append(c), this.index, this.depth); *//*  */
+/* private */ /* DivideState */ append_DivideState(/* char */ c){/* return new DivideState(this.input, this.segments, this.buffer.append(c), this.index, this.depth); *//*  */
 }
-/* public */ template Option<(/* Character */, /*  DivideState */)> pop(){/* if (this.index < this.input.length()) {
+/* public */ template Option<(/* Character */, /*  DivideState */)> pop_DivideState(){/* if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
                 return new Some<>(new Tuple<Character, DivideState>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
             } *//* else {
                 return new None<>();
             } *//*  */
 }
-/* private */ /* DivideState */ advance(){/* var withBuffer = this.buffer.isEmpty() ? this.segments : this.segments.addLast(this.buffer.toString()); *//* return new DivideState(this.input, withBuffer, new StringBuilder(), this.index, this.depth); *//*  */
+/* private */ /* DivideState */ advance_DivideState(){/* var withBuffer = this.buffer.isEmpty() ? this.segments : this.segments.addLast(this.buffer.toString()); *//* return new DivideState(this.input, withBuffer, new StringBuilder(), this.index, this.depth); *//*  */
 }
-/* public */ /* DivideState */ exit(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1); *//*  */
+/* public */ /* DivideState */ exit_DivideState(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1); *//*  */
 }
-/* public */ int isLevel(){/* return this.depth == 0; *//*  */
+/* public */ int isLevel_DivideState(){/* return this.depth == 0; *//*  */
 }
-/* public */ /* DivideState */ enter(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
+/* public */ /* DivideState */ enter_DivideState(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
 }
-/* public */ int isShallow(){/* return this.depth == 1; *//*  */
+/* public */ int isShallow_DivideState(){/* return this.depth == 1; *//*  */
 }
-/* public static <A, B, C> */ (A, /*  C */) (*mapRight)((A, B))(/*  C */ (*mapper)(B)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
+/* public static <A, B, C> */ (A, /*  C */) (*mapRight_Tuple)((A, B))(/*  C */ (*mapper)(B)){/* return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)); *//*  */
 }
 /* private static class Iterators {
  public static <T> */ template Iterator</* T */> fromOptions(template Option</* T */> option){/* return new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)); *//* } */
@@ -312,15 +312,18 @@ union OptionValue<T> {
             } *//* this.retrieved = true; *//* return new Some<>(this.value); *//* } */
 }
 /* @Override
- public */ template Option<(char*, char*)> split(char* input){/* return this.apply(input).map(classIndex -> {
+ public */ template Option<(char*, char*)> split_InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter(char* input){/* return this.apply(input).map(classIndex -> {
                 var beforeKeyword = input.substring(0, classIndex);
                 var afterKeyword = input.substring(classIndex + this.length());
                 return new Tuple<>(beforeKeyword, afterKeyword);
             } *//* ); *//*  */
 }
-/* private */ int length(){/* return this.infix.length(); *//*  */
+/* private */ int length_InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter(){/* return this.infix.length(); *//*  */
 }
-/* private */ template Option</* Integer */> apply(char* input){/* return this.locator().apply(input, this.infix); *//*  */
+/* private */ template Option</* Integer */> apply_InfixSplitter(String infix,
+                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter(char* input){/* return this.locator().apply(input, this.infix); *//*  */
 }
 /* private static class TypeSeparatorSplitter implements Splitter {
  @Override
@@ -344,25 +347,27 @@ union OptionValue<T> {
                 return appended.exit();
             } *//* return appended; *//* } */
 }
-/* public */ Definition(/* Type */ type, char* name){/* this(new None<>(), type, name); *//*  */
+/* public */ Definition_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(/* Type */ type, char* name){/* this(new None<>(), type, name); *//*  */
 }
 /* @Override
- public */ char* generate(){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse(""); *//* return beforeTypeString + this.type.generateWithName(this.name); *//*  */
+ public */ char* generate_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(){/* var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse(""); *//* return beforeTypeString + this.type.generateWithName(this.name); *//*  */
+}
+/* public */ /* Definition */ mapName_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(char* (*mapper)(char*)){/* return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name)); *//*  */
 }
 /* @Override
- public */ char* generate(){/* return generatePlaceholder(this.input); *//*  */
+ public */ char* generate_Content(String input) implements Type, Parameter(){/* return generatePlaceholder(this.input); *//*  */
 }
 /* @Override
- public */ char* generate(){/* return this.generateWithName(""); *//*  */
+ public */ char* generate_Functional(List<Type> arguments, Type returns) implements Type(){/* return this.generateWithName(""); *//*  */
 }
 /* @Override
- public */ char* generateWithName(char* name){/* var joinedArguments = this.arguments().iterate()
+ public */ char* generateWithName_Functional(List<Type> arguments, Type returns) implements Type(char* name){/* var joinedArguments = this.arguments().iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .orElse(""); *//* return this.returns().generate() + " (*" + name + ")(" + joinedArguments + ")"; *//*  */
 }
 /* @Override
- public */ char* generate(){/* var generatedTuple = this.arguments().iterate()
+ public */ char* generate_Template(String base, List<Type> arguments) implements Type(){/* var generatedTuple = this.arguments().iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .orElse(""); *//* return "template " + this.base() + "<" + generatedTuple + ">"; *//*  */
@@ -376,13 +381,13 @@ union OptionValue<T> {
             return current.addLast(element); *//* } */
 }
 /* @Override
- public */ char* generate(){/* return this.value; *//*  */
+ public */ char* generate_TypeParameter(String value) implements Type(){/* return this.value; *//*  */
 }
 /* @Override
- public */ char* generate(){/* return this.type.generate() + "*"; *//*  */
+ public */ char* generate_Ref(Type type) implements Type(){/* return this.type.generate() + "*"; *//*  */
 }
 /* @Override
- public */ char* generate(){/* return "(" + generateNodesAsValues(this.arguments) + ")"; *//*  */
+ public */ char* generate_TupleType(List<Type> arguments) implements Type(){/* return "(" + generateNodesAsValues(this.arguments) + ")"; *//*  */
 }
 /* public static */ /* void */ main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -665,7 +670,9 @@ union OptionValue<T> {
                 return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
                     var paramStrings = generateNodesAsValues(params);
 
-                    var generated = definition.generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                    var generated = definition
+                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name))
+                            .generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });

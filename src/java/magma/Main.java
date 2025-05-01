@@ -484,6 +484,10 @@ public class Main {
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
             return beforeTypeString + this.type.generateWithName(this.name);
         }
+
+        public Definition mapName(Function<String, String> mapper) {
+            return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name));
+        }
     }
 
     private record Content(String input) implements Type, Parameter {
@@ -1040,7 +1044,9 @@ public class Main {
                 return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
                     var paramStrings = generateNodesAsValues(params);
 
-                    var generated = definition.generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                    var generated = definition
+                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name))
+                            .generate() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
