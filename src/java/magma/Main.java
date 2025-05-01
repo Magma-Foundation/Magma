@@ -1347,11 +1347,22 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> value(CompileState state, String input) {
         return or(state, input, Lists.of(
+                (BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>) Main::stringNode,
                 Main::invocation,
                 Main::dataAccess,
                 Main::symbol,
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> stringNode(CompileState state, String s) {
+        var stripped = s.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {

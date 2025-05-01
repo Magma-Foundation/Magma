@@ -167,7 +167,7 @@ union ResultValue<T, X> {
     public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 };
 /* default */ struct String_ Type::generateWithName(struct Type this, char* name){
-	return this.generate().appendSlice(/* " " */).appendSlice(name);
+	return this.generate().appendSlice(" ").appendSlice(name);
 }
 /* @Actual
  private static */ struct String_ Strings::from(struct Strings this, char* value){
@@ -291,7 +291,7 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 	return /* new None<> */();
 }
 struct public Joiner::Joiner(struct Joiner this){
-	this(/* "" */);
+	this("");
 }
 /* @Override
  public */ template Option<char*> Joiner::createInitial(struct Joiner this){
@@ -308,7 +308,7 @@ struct public CompileState::CompileState(struct CompileState this){
 	return this.getJoin(this.structs) + this.getJoin(this.functions);
 }
 /* private */ char* CompileState::getJoin(struct CompileState this, template List<char*> lists){
-	return lists.iterate().collect(/* new Joiner */()).orElse(/* "" */);
+	return lists.iterate().collect(/* new Joiner */()).orElse("");
 }
 /* public */ struct CompileState CompileState::addStruct(struct CompileState this, char* struct){
 	return /* new CompileState */(this.structs.addLast(struct), this.functions, this.maybeStructureType);
@@ -403,7 +403,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
                     return new None<>(/* );
                 }
 
-                var beforeType = left */.iterate().collect(/* new Joiner */(/* " " */)).orElse("");
+                var beforeType = left */.iterate().collect(/* new Joiner */(" ")).orElse("");
                 var type = segments.right;
                 return new Some<>(new Tuple<>(beforeType, type));
             });
@@ -429,7 +429,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return Strings.from(this.generate0());
 }
 /* private */ char* Definition::generate0(struct Definition this){
-	auto beforeTypeString = this.maybeBeforeType.map(/* beforeType -> generatePlaceholder(beforeType) + " " */).orElse(/* "" */);
+	auto beforeTypeString = this.maybeBeforeType.map(/* beforeType -> generatePlaceholder(beforeType) + " " */).orElse("");
 	return /* beforeTypeString + this */.type.generateWithName(this.name).toSlice();
 }
 /* @Override
@@ -441,20 +441,20 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 }
 /* @Override
  public */ struct String_ Functional::generate(struct Functional this){
-	return this.generateWithName(/* "" */);
+	return this.generateWithName("");
 }
 /* @Override
  public */ struct String_ Functional::generateWithName(struct Functional this, char* name){
-	auto joinedArguments = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
-	return this.returns.generate().appendSlice(/* " (*" */).appendSlice(name).appendSlice(/* ")(" */).appendSlice(joinedArguments).appendSlice(/* ")" */);
+	auto joinedArguments = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(", ")).orElse("");
+	return this.returns.generate().appendSlice(" (*").appendSlice(name).appendSlice(")(").appendSlice(joinedArguments).appendSlice(")");
 }
 /* @Override
  public */ struct String_ Template::generate(struct Template this){
 	return Strings.from(this.generate0());
 }
 /* private */ char* Template::generate0(struct Template this){
-	auto generatedTuple = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
-	return /* "template " + this */.base() + "<" + generatedTuple + ">";
+	auto generatedTuple = this.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(", ")).orElse("");
+	return "template " + this.base() + "<" + generatedTuple + ">";
 }
 /* @Override
  public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
@@ -483,12 +483,12 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	return Strings.from(this.generate0());
 }
 /* private */ char* TupleType::generate0(struct TupleType this){
-	return /* "(" + generateNodesAsValues(this */.arguments) + ")";
+	return "(" + generateNodesAsValues(this.arguments) + ")";
 }
 /* @Override
  public */ struct String_ StructRef::generate(struct StructRef this){
-	auto typeParamString = this.typeParams.iterate().collect(/* new Joiner */(/* ", " */)).map(/* inner -> "<" + inner + ">" */).orElse(/* "" */);
-	return Strings.from(/* "struct " */).appendSlice(this.input).appendSlice(typeParamString);
+	auto typeParamString = this.typeParams.iterate().collect(/* new Joiner */(", ")).map(/* inner -> "<" + inner + ">" */).orElse("");
+	return Strings.from("struct ").appendSlice(this.input).appendSlice(typeParamString);
 }
 /* @Override
  public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){
@@ -541,7 +541,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ char* compileRoot(char* input){
 	auto state = /* new CompileState */();
-	auto tuple = compileAll(state, input, /*  Main::compileRootSegment */).orElse(/* new Tuple<> */(state, /*  "" */));
+	auto tuple = compileAll(state, input, /*  Main::compileRootSegment */).orElse(/* new Tuple<> */(state, ""));
 	return tuple.right + tuple.left.generate();
 }
 /* private static */ template Option<(struct CompileState, char*)> compileAll(struct CompileState initial, char* input, template Option<(struct CompileState, char*)> (*mapper)(struct CompileState, char*)){
@@ -577,11 +577,11 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
                 Main::compileNamespaced */, parseClass(), /* (state1, input1) -> content */(state1, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> (*parseClass)(struct CompileState, char*)(){
-	return structure(/* "class" */, /*  "class " */);
+	return structure("class", "class ");
 }
 /* private static */ template Option<(struct CompileState, char*)> (*structure)(struct CompileState, char*)(char* type, char* infix){
 	return /* (state, input) -> first */(input, infix, /* (beforeKeyword, afterKeyword) -> {
-            var slices = Arrays */.stream(beforeKeyword.split(/* " " */)).map(/* String::strip */).filter(/* value -> !value */.isEmpty()).toList();
+            var slices = Arrays */.stream(beforeKeyword.split(" ")).map(/* String::strip */).filter(/* value -> !value */.isEmpty()).toList();
 
             if (slices.contains("@Actual")) {
                 return new Some<>(new Tuple<>(state, ""));
@@ -596,7 +596,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         });
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){
-	return first(beforeContent, /*  " permits " */, /* (beforePermits, variantsString) -> {
+	return first(beforeContent, " permits ", /* (beforePermits, variantsString) -> {
             return parseValues */(state, variantsString, /*  Main::symbol */).flatMap(params -> {
                 return structureWithoutVariants(type, params.left, beforeKeyword, beforePermits, params.right, withEnd);
             });
@@ -613,19 +613,19 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return or(state, beforeContent, Lists.of(/* (state0, s) -> structureWithImplements */(type, state0, beforeKeyword, s, variants, withEnd), /* (state0, s) -> structureWithoutImplements */(type, state0, beforeKeyword, s, variants, withEnd)));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithImplements(char* type, struct CompileState state0, char* beforeKeyword, char* s, template List<char*> variants, char* withEnd){
-	return first(s, /*  " implements " */, /* (s1, s2) -> structureWithoutImplements */(type, state0, beforeKeyword, s1, variants, withEnd));
+	return first(s, " implements ", /* (s1, s2) -> structureWithoutImplements */(type, state0, beforeKeyword, s1, variants, withEnd));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutImplements(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return or(state, beforeContent, Lists.of(/* (state1, s) -> structureWithExtends */(type, beforeKeyword, beforeContent, variants, withEnd, state1), /* (state2, s) -> structureWithoutExtends */(type, state2, beforeKeyword, s, variants, withEnd)));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithExtends(char* type, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd, struct CompileState state1){
-	return first(beforeContent, /*  " extends " */, /* (s1, s2) -> structureWithoutExtends */(type, state1, beforeKeyword, s1, variants, withEnd));
+	return first(beforeContent, " extends ", /* (s1, s2) -> structureWithoutExtends */(type, state1, beforeKeyword, s1, variants, withEnd));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutExtends(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return or(state, beforeContent, Lists.of(/* (instance, before) -> structureWithParams */(type, instance, beforeKeyword, before, variants, withEnd), /* (instance, before) -> structureWithoutParams */(type, instance, beforeKeyword, before.strip(), Lists.empty(), variants, withEnd)));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithParams(char* type, struct CompileState instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
-	return suffix(beforeContent.strip(), /*  ")" */, /* withoutEnd -> first */(withoutEnd, /*  "(" */, /* (name, paramString) -> {
+	return suffix(beforeContent.strip(), ")", /* withoutEnd -> first */(withoutEnd, "(", /* (name, paramString) -> {
             return parseAll */(instance, paramString, /*  Main::foldValueChar */, /*  Main::parameter */).flatMap(params -> {
                         return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
                     });
@@ -638,8 +638,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return or(state, beforeParams, Lists.of(/* (state0, beforeParams0) -> structureWithTypeParams */(type, state0, beforeParams0, beforeKeyword, params, variants, withEnd), /* (state0, name) -> structureWithName */(type, state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
-	return suffix(beforeParams0.strip(), /*  ">" */, /* withoutEnd -> {
-            return first */(withoutEnd, /*  "<" */, /*  (name, typeParamString) -> {
+	return suffix(beforeParams0.strip(), ">", /* withoutEnd -> {
+            return first */(withoutEnd, "<", /*  (name, typeParamString) -> {
                 return parseValues(state, typeParamString, Main::symbol */).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
                 });
@@ -647,7 +647,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         });
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
-	return suffix(withEnd.strip(), /*  "}" */, /* content -> {
+	return suffix(withEnd.strip(), "}", /* content -> {
             return compileAll */(state.withStructType(/* new StructurePrototype */(type, name, typeParams, variants)), content, /*  Main::structSegment */).flatMap(/* tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
@@ -686,12 +686,12 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
 }
 /* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){
-	auto paramsString = params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).map(/* value -> "\n\t" + value + ";" */).collect(/* new Joiner */()).orElse(/* "" */);
+	auto paramsString = params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).map(/* value -> "\n\t" + value + ";" */).collect(/* new Joiner */()).orElse("");
 	auto generatedStruct = /*  generatePlaceholder(beforeKeyword */.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n";
-	return /* new Tuple<CompileState, String> */(state.addStruct(generatedStruct), /*  "" */);
+	return /* new Tuple<CompileState, String> */(state.addStruct(generatedStruct), "");
 }
 /* private static */ char* generateTypeParams(template List<char*> typeParams){
-	return typeParams.isEmpty(/* ) ? "" : "<" + typeParams */.iterate().collect(/* new Joiner */(/* ", " */)).orElse("") + ">";
+	return typeParams.isEmpty(/* ) ? "" : "<" + typeParams */.iterate().collect(/* new Joiner */(", ")).orElse("") + ">";
 }
 /* private static <T> */ template Option<(struct CompileState, struct T)> or(struct CompileState state, char* input, template List<template Option<(struct CompileState, struct T)> (*)(struct CompileState, char*)> actions){
 	return actions.iterate().map(/* action -> action */.apply(state, input)).flatMap(/* Iterators::fromOptions)
@@ -705,12 +705,12 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 /* private static */ template Option<(struct CompileState, char*)> structSegment(struct CompileState state, char* input){
 	return or(state, input, Lists.of(/* 
                 Main::whitespace */, /* 
-                Main::annotation */, structure(/* "enum" */, /*  "enum " */), parseClass(), structure(/* "record" */, /*  "record " */), structure(/* "interface" */, /*  "interface " */), /* 
+                Main::annotation */, structure("enum", "enum "), parseClass(), structure("record", "record "), structure("interface", "interface "), /* 
                 Main::method */, /* 
                 Main::definitionStatement */, /* (state1, input1) -> content */(state1, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> definitionStatement(struct CompileState state, char* input){
-	return suffix(input.strip(), /*  ";" */, /* withoutEnd -> definition */(state, withoutEnd).map(Tuple.mapRight(/* definition -> definition */.generate(/* ) */.toSlice())).map(/* value -> {
+	return suffix(input.strip(), ";", /* withoutEnd -> definition */(state, withoutEnd).map(Tuple.mapRight(/* definition -> definition */.generate(/* ) */.toSlice())).map(/* value -> {
             var generated = "\n\t" + value */.right + ";";
             return new Tuple<>(value.left, generated);
         }));
@@ -724,8 +724,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new None<> */();
 }
 /* private static */ template Option<(struct CompileState, char*)> method(struct CompileState state, char* input){
-	return first(input, /*  "(" */, /* (inputDefinition, withParams) -> {
-            return first */(withParams, /*  ")" */, /* (paramsString, withBraces) -> {
+	return first(input, "(", /* (inputDefinition, withParams) -> {
+            return first */(withParams, ")", /* (paramsString, withBraces) -> {
                 return compileMethodHeader */(state, inputDefinition).flatMap(/* outputDefinition -> {
                     return parseValues */(outputDefinition.left, paramsString, /*  Main::parameter */).flatMap(/* outputParams -> {
                         var params = outputParams */.right
@@ -826,7 +826,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return appended;
 }
 /* private static <T extends Node> */ char* generateNodesAsValues(template List<struct T> params){
-	return params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
+	return params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).collect(/* new Joiner */(", ")).orElse("");
 }
 /* private static */ char* generateAll(struct StringBuilder (*merger)(struct StringBuilder, char*), template List<char*> right){
 	return right.iterate().fold(/* new StringBuilder */(), /*  merger) */.toString();
@@ -850,11 +850,11 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new Some<> */(/* new Tuple<CompileState, String> */(state, generated));
 }
 /* private static */ template Option<(struct CompileState, char*)> methodWithContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* withBraces){
-	return prefix(withBraces.strip(), /*  "{" */, /* withoutStart1 -> {
-            return suffix */(withoutStart1, /*  "}" */, /* content -> {
+	return prefix(withBraces.strip(), "{", /* withoutStart1 -> {
+            return suffix */(withoutStart1, "}", /* content -> {
                 return compileAll */(state, content, /*  Main::functionSegment */).flatMap(/* tuple -> {
                     var newParameters = state */.maybeStructureType
-                            .map(/* structType -> params */.addFirst(/* new Definition */(/* new StructRef */(structType.name, structType.typeParams), /*  "this" */))).orElse(params);
+                            .map(/* structType -> params */.addFirst(/* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
@@ -883,7 +883,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new None<> */();
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> constructorWithType(struct CompileState state, char* input){
-	return split(input.strip(), /* new InfixSplitter */(/* " " */, /*  Main::lastIndexOfSlice */), /* (_, name) -> state */.maybeStructureType.flatMap(/* structureType -> {
+	return split(input.strip(), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), /* (_, name) -> state */.maybeStructureType.flatMap(/* structureType -> {
             if (!structureType */.name.equals(name)) {
                 return new None<>();
             }
@@ -893,7 +893,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> functionSegment(struct CompileState state, char* input){
 	return or(state, input.strip(), Lists.of(/* 
-                Main::whitespace */, /* (state0, input1) -> suffix */(input1.strip(), /*  ";" */, /* slice -> statementValue */(state0, slice).map(Tuple.mapRight(/* slice0 -> "\n\t" + slice0 + ";" */))), /* (state0a, input1) -> content */(state0a, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
+                Main::whitespace */, /* (state0, input1) -> suffix */(input1.strip(), ";", /* slice -> statementValue */(state0, slice).map(Tuple.mapRight(/* slice0 -> "\n\t" + slice0 + ";" */))), /* (state0a, input1) -> content */(state0a, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> statementValue(struct CompileState state, char* input){
 	return Main.or(state, input, Lists.of(/* 
@@ -903,16 +903,16 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
          */));
 }
 /* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){
-	return first(s, /*  "=" */, /* (s1, s2) -> definition */(state, s1).flatMap(/* result0 -> {
+	return first(s, "=", /* (s1, s2) -> definition */(state, s1).flatMap(/* result0 -> {
             return value */(result0.left, s2).map(result1 -> {
                 return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
             });
         }));
 }
 /* private static */ template Option<(struct CompileState, char*)> invocation(struct CompileState state0, char* input){
-	return suffix(input.strip(), /*  ")" */, /* withoutEnd -> {
+	return suffix(input.strip(), ")", /* withoutEnd -> {
             return split */(withoutEnd, /* new DividingSplitter */(/* Main::foldInvocationStart */), /* (withEnd, argumentsString) -> {
-                return suffix */(withEnd.strip(), /*  "(" */, /* callerString -> value */(state0, callerString).flatMap(/* callerTuple -> {
+                return suffix */(withEnd.strip(), "(", /* callerString -> value */(state0, callerString).flatMap(/* callerTuple -> {
                     return Main */.parseValues(callerTuple.left, argumentsString, /*  Main::value */).map(argumentsTuple -> {
                         var joined = argumentsTuple.right.iterate().collect(new Joiner(", ")).orElse("");
 
@@ -932,23 +932,31 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return appended;
 }
 /* private static */ template Option<(struct CompileState, char*)> returns(struct CompileState state, char* input){
-	return prefix(input.strip(), /*  "return " */, /* slice -> value */(state, slice).map(Tuple.mapRight(/* result -> "return " + result */)));
+	return prefix(input.strip(), "return ", /* slice -> value */(state, slice).map(Tuple.mapRight(/* result -> "return " + result */)));
 }
 /* private static */ template Option<(struct CompileState, char*)> value(struct CompileState state, char* input){
 	return or(state, input, Lists.of(/* 
+                (BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>) Main::stringNode */, /* 
                 Main::invocation */, /* 
                 Main::dataAccess */, /* 
                 Main::symbol */, /* (state1, input1) -> content */(state1, input1).map(Tuple.mapRight(/* content -> content */.generate(/* ) */.toSlice()))));
 }
+/* private static */ template Option<(struct CompileState, char*)> stringNode(struct CompileState state, char* s){
+	auto stripped = s.strip();/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } *//* else {
+            return new None<>();
+        } */
+}
 /* private static */ template Option<(struct CompileState, char*)> dataAccess(struct CompileState state, char* input){
-	return split(input, /* new InfixSplitter */(/* " */.", /*  Main::lastIndexOfSlice */), /* (parent, property) -> {
+	return split(input, /* new InfixSplitter */(".", /*  Main::lastIndexOfSlice */), /* (parent, property) -> {
             return value */(state, parent).map(tuple -> {
                 return new Tuple<>(tuple.left, tuple.right + "." + property);
             });
         });
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> definition(struct CompileState state, char* input){
-	return split(input.strip(), /* new InfixSplitter */(/* " " */, /*  Main::lastIndexOfSlice */), /*  (beforeName, name) -> {
+	return split(input.strip(), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), /*  (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
@@ -1027,8 +1035,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         };
 }
 /* private static */ template Option<(struct CompileState, struct Type)> template(struct CompileState state, char* input){
-	return suffix(input.strip(), /*  ">" */, /* withoutEnd -> {
-            return first */(withoutEnd, /*  "<" */, /*  (base, argumentsString) -> {
+	return suffix(input.strip(), ">", /* withoutEnd -> {
+            return first */(withoutEnd, "<", /*  (base, argumentsString) -> {
                 return parseValues(state, argumentsString, Main::type */).flatMap(argumentsTuple -> {
                     var arguments = argumentsTuple.right;
 
@@ -1063,7 +1071,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return mapper.apply(slice);
 }
 /* private static */ char* generatePlaceholder(char* input){
-	return /* "/* " + input + " */" */;
+	return "/* " + input + " */";
 }
 /* private static <T> */ template Option<struct T> first(char* input, char* infix, template Option<struct T> (*mapper)(char*, char*)){
 	return split(input, /* new InfixSplitter */(infix, /*  Main::firstIndexOfSlice */), mapper);
