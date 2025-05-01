@@ -512,14 +512,16 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
             }
         } */;
 }
-/* private static */ template Option<struct IOException> writeString(char* output){/* try {
+/* @External
+ private static */ template Option<struct IOException> writeString(char* output){/* try {
             Files.writeString(TARGET, output);
             return new None<>();
         } *//* catch (IOException e) {
             return new Some<>(e);
         } */
 }
-/* private static */ template Result<char*, /*  IOException */> readString(){/* try {
+/* @External
+ private static */ template Result<char*, /*  IOException */> readString(){/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
             return new Err<>(e);

@@ -697,6 +697,7 @@ public class Main {
         };
     }
 
+    @External
     private static Option<IOException> writeString(String output) {
         try {
             Files.writeString(TARGET, output);
@@ -706,6 +707,7 @@ public class Main {
         }
     }
 
+    @External
     private static Result<String, IOException> readString() {
         try {
             return new Ok<>(Files.readString(SOURCE));
