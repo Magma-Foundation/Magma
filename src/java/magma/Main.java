@@ -60,6 +60,10 @@ public class Main {
         Option<Tuple<String, String>> split(String input);
     }
 
+    private interface Type {
+        String generate();
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -462,6 +466,51 @@ public class Main {
         }
     }
 
+    private record Content(String input) implements Type {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
+        }
+    }
+
+    private record Functional(List<Type> arguments, Type returns) implements Type {
+        @Override
+        public String generate() {
+            var joinedArguments = this.arguments().iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returns().generate() + " (*)(" + joinedArguments + ")";
+        }
+    }
+
+    private record Template(String base, List<Type> arguments) implements Type {
+        @Override
+        public String generate() {
+            var generatedTuple = this.arguments().iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "template " + this.base() + "<" + generatedTuple + ">";
+        }
+    }
+
+    private enum Primitive implements Type {
+        I32("int");
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -503,18 +552,23 @@ public class Main {
         return right.iterate().fold(new StringBuilder(), merger).toString();
     }
 
-    private static Option<Tuple<CompileState, List<String>>> parseAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper) {
+    private static <T> Option<Tuple<CompileState, List<T>>> parseAll(
+            CompileState initial,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
+    ) {
         return divide(input, folder)
                 .iterate()
-                .<Option<Tuple<CompileState, List<String>>>>fold(new Some<>(new Tuple<CompileState, List<String>>(initial, Lists.empty())),
+                .<Option<Tuple<CompileState, List<T>>>>fold(new Some<>(new Tuple<CompileState, List<T>>(initial, Lists.empty())),
                         (maybeCurrent, segment) -> maybeCurrent.flatMap(
                                 state -> foldElement(state, segment, mapper)));
     }
 
-    private static Option<Tuple<CompileState, List<String>>> foldElement(
-            Tuple<CompileState, List<String>> state,
+    private static <T> Option<Tuple<CompileState, List<T>>> foldElement(
+            Tuple<CompileState, List<T>> state,
             String segment,
-            BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
     ) {
         var oldState = state.left;
         var oldCache = state.right;
@@ -613,7 +667,7 @@ public class Main {
                 Main::whitespace,
                 Main::compileNamespaced,
                 structure("class", "class "),
-                Main::content
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         ));
     }
 
@@ -674,7 +728,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState instance, String paramString) {
         return or(instance, paramString, Lists.of(
                 (state, input) -> definition(state, input).map(Tuple.mapRight(Definition::generate)),
-                Main::content
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         ));
     }
 
@@ -826,7 +880,7 @@ public class Main {
                 structure("interface", "interface "),
                 Main::method,
                 Main::definitionStatement,
-                Main::content
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         ));
     }
 
@@ -837,8 +891,8 @@ public class Main {
         }));
     }
 
-    private static Option<Tuple<CompileState, String>> content(CompileState state, String input) {
-        return new Some<>(new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    private static Option<Tuple<CompileState, Content>> content(CompileState state, String input) {
+        return new Some<>(new Tuple<CompileState, Content>(state, new Content(input)));
     }
 
     private static Option<Tuple<CompileState, String>> whitespace(CompileState state, String input) {
@@ -870,7 +924,11 @@ public class Main {
         return generateAll(Main::mergeValues, values);
     }
 
-    private static Option<Tuple<CompileState, List<String>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
+    private static <T> Option<Tuple<CompileState, List<T>>> parseValues(
+            CompileState state,
+            String input,
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> compiler
+    ) {
         return parseAll(state, input, Main::foldValueChar, compiler);
     }
 
@@ -903,13 +961,13 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String definition) {
         return or(state, definition, Lists.of(
                 (state1, input) -> definition(state1, input).map(Tuple.mapRight(Definition::generate)),
-                Main::content
+                (state2, input1) -> content(state2, input1).map(Tuple.mapRight(Content::generate))
         ));
     }
 
     private static Option<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
         return or(state, input.strip(), Lists.of(
-                Main::content
+                (state1, input1) -> content(state1, input1).map(Tuple.mapRight(Content::generate))
         ));
     }
 
@@ -938,7 +996,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
-        return type(state, type).flatMap(typeTuple -> {
+        return type(state, type).map(Tuple.mapRight(Type::generate)).flatMap(typeTuple -> {
             var definition = new Definition(new None<>(), typeTuple.right, name.strip());
             return new Some<>(new Tuple<>(typeTuple.left, definition));
         });
@@ -946,55 +1004,54 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            return type(state, typeString).flatMap(typeTuple -> {
+            return type(state, typeString).map(Tuple.mapRight(Type::generate)).flatMap(typeTuple -> {
                 return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> type(CompileState state, String input) {
-        return or(state, input, Lists.of(
+    private static Option<Tuple<CompileState, Type>> type(CompileState state, String input) {
+        return Main.or(state, input, Lists.of(
                 Main::primitive,
                 Main::template,
-                Main::content
+                wrap(Main::content)
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> primitive(CompileState state, String input) {
+    private static <S, T extends S> BiFunction<CompileState, String, Option<Tuple<CompileState, S>>> wrap(BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> content) {
+        return (state, input) -> content.apply(state, input).map(Tuple.mapRight(value -> value));
+    }
+
+    private static Option<Tuple<CompileState, Type>> primitive(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("boolean")) {
-            return new Some<>(new Tuple<>(state, "int"));
+            return new Some<>(new Tuple<>(state, Primitive.I32));
         }
 
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> template(CompileState state, String input) {
         return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {
                 return parseValues(state, argumentsString, Main::type).flatMap(argumentsTuple -> {
                     var arguments = argumentsTuple.right;
 
-                    String generated;
+                    Type generated;
                     if (base.equals("Function")) {
-                        generated = generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1));
+                        generated = new Functional(Lists.of(arguments.get(0)), arguments.get(1));
                     }
                     else if (base.equals("Supplier")) {
-                        generated = generateFunctionalType(Lists.empty(), arguments.get(0));
+                        generated = new Functional(Lists.empty(), arguments.get(0));
                     }
                     else {
-                        var generatedTuple = generateValues(arguments);
-                        generated = "template " + base + "<" + generatedTuple + ">";
+                        generated = new Template(base, arguments);
                     }
 
                     return new Some<>(new Tuple<>(argumentsTuple.left, generated));
                 });
             });
         });
-    }
-
-    private static String generateFunctionalType(List<String> arguments, String returns) {
-        return returns + " (*)(" + generateValues(arguments) + ")";
     }
 
     private static Option<Integer> lastIndexOfSlice(String input, String infix) {
