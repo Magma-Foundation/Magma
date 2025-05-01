@@ -82,6 +82,7 @@ public class Main {
     }
 
     private static class Strings {
+        @External
         private static String_ from(String value) {
             return new JavaString(value);
         }

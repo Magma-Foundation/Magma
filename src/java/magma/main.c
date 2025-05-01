@@ -160,7 +160,8 @@ union OptionValue<T> {
 /* default */ struct String_ generateWithName_Type extends Node(struct Type extends Node this, char* name){
 	return /* this.generate().appendSlice(" ").appendSlice(name) */;
 }
-/* private static */ struct String_ from_Strings(struct Strings this, char* value){
+/* @External
+ private static */ struct String_ from_Strings(struct Strings this, char* value){
 	return /* new JavaString(value) */;
 }
 /* @Override
