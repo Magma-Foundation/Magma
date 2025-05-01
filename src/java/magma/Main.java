@@ -830,7 +830,8 @@ public class Main {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
             return new Some<>(new Tuple<>(state, stripped));
-        } else {
+        }
+        else {
             return new None<>();
         }
     }
@@ -973,7 +974,12 @@ public class Main {
             List<Parameter> params,
             String content
     ) {
-        var paramsString = generateNodesAsValues(params);
+        var paramsString = params.iterate()
+                .map(t -> t.generate().toSlice())
+                .map(value -> "\n\t" + value + ";")
+                .collect(new Joiner())
+                .orElse("");
+
         var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n";
         return new Tuple<CompileState, String>(state.addStruct(generatedStruct), "");
     }

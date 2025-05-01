@@ -62,17 +62,32 @@ union ResultValue<T, X> {
 };
 /* private static */struct Strings {
 };
-/* private */struct Iterator<T> {template Head<struct T> head
+/* private */struct Iterator<T> {
+	template Head<struct T> head;
 };
 /* private static */struct Lists {
 };
-/* private */struct StructurePrototype {char* type, char* name, template List<char*> typeParams, template List<char*> variants
+/* private */struct StructurePrototype {
+	char* type;
+	char* name;
+	template List<char*> typeParams;
+	template List<char*> variants;
 };
-/* private */struct CompileState {template List<char*> structs, template List<char*> functions, template Option<struct StructurePrototype> maybeStructureType
+/* private */struct CompileState {
+	template List<char*> structs;
+	template List<char*> functions;
+	template Option<struct StructurePrototype> maybeStructureType;
 };
-/* private */struct DivideState {char* input, template List<char*> segments, struct StringBuilder buffer, int index, int depth
+/* private */struct DivideState {
+	char* input;
+	template List<char*> segments;
+	struct StringBuilder buffer;
+	int index;
+	int depth;
 };
-/* private */struct Tuple<A, B> {struct A left, struct B right
+/* private */struct Tuple<A, B> {
+	struct A left;
+	struct B right;
 };
 /* private static */struct Iterators {
 };
@@ -724,7 +739,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 	return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
 }
 /* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){
-	/* var paramsString = generateNodesAsValues */(params);/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
+	/* var paramsString = params */.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).map(/* value -> "\n\t" + value + ";" */).collect(/* new Joiner */()).orElse(/* "" */);/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
 	return /* new Tuple<CompileState, String> */(state.addStruct(generatedStruct), /*  "" */);
 }
 /* private static */ char* generateTypeParams(template List<char*> typeParams){
