@@ -62,12 +62,10 @@ public class Main {
         Option<Tuple<String, String>> split(String input);
     }
 
-    private interface Type {
+    private interface Type extends Node {
         default String generateWithName(String name) {
             return this.generate() + " " + name;
         }
-
-        String generate();
     }
 
     private interface Parameter extends Node {
@@ -547,6 +545,13 @@ public class Main {
         @Override
         public String generate() {
             return this.type.generate() + "*";
+        }
+    }
+
+    private record TupleType(List<Type> arguments) implements Type {
+        @Override
+        public String generate() {
+            return "(" + generateNodesAsValues(this.arguments) + ")";
         }
     }
 
@@ -1158,6 +1163,9 @@ public class Main {
                     }
                     else if (base.equals("Supplier")) {
                         generated = new Functional(Lists.empty(), arguments.get(0));
+                    }
+                    else if (base.equals("Tuple")) {
+                        generated = new TupleType(arguments);
                     }
                     else {
                         generated = new Template(base, arguments);
