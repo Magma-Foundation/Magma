@@ -123,8 +123,4 @@ public class Main {
         }
         return appended;
     }
-
-    private static Optional<String> getString(String beforeKeyword, String afterKeyword) {
-        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword));
-    }
 }
