@@ -752,7 +752,7 @@ public class Main {
         }
     }
 
-    private record DataAccess(String property, Value parent) implements Value {
+    private record DataAccess(Value parent, String property) implements Value {
         @Override
         public String_ generate() {
             return Strings.from(this.parent().generate().toSlice() + "." + this.property());
@@ -1405,23 +1405,27 @@ public class Main {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
                 return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
-                        var caller = callerTuple.right;
+                        var oldCaller = callerTuple.right;
 
-                        CompileState oldState;
+                        var oldState = argumentsTuple.left;
                         var oldArguments = argumentsTuple.right;
-                        List<Value> newArguments;
-                        if (caller instanceof DataAccess access) {
-                            var localName = argumentsTuple.left.createLocalName();
-                            var name = localName.left;
-                            oldState = localName.right.addStatement("\n\tauto " + name + " = " + access.parent.generate().toSlice() + ";");
-                            newArguments = oldArguments.addFirst(access.parent);
-                        }
-                        else {
-                            oldState = argumentsTuple.left;
-                            newArguments = oldArguments;
+                        if (!(oldCaller instanceof DataAccess access)) {
+                            return new Tuple<>(oldState, new Invocation(oldCaller, oldArguments));
                         }
 
-                        return new Tuple<>(oldState, new Invocation(caller, newArguments));
+                        var parent = access.parent;
+                        if(parent instanceof Symbol) {
+                            return new Tuple<>(oldState, new Invocation(oldCaller, oldArguments.addFirst(parent)));
+                        }
+
+                        var localName = oldState.createLocalName();
+                        var name = localName.left;
+                        var right = localName.right;
+                        var newState = right.addStatement("\n\tauto " + name + " = " + parent.generate().toSlice() + ";");
+                        var element = new Symbol(name);
+                        var newArguments = oldArguments.addFirst(element);
+                        var newCaller = new DataAccess(element, access.property);
+                        return new Tuple<>(newState, new Invocation(newCaller, newArguments));
                     });
                 }));
             });
@@ -1467,7 +1471,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> dataAccess(CompileState state, String input) {
         return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> {
             return value(state, parent).map(tuple -> {
-                return new Tuple<>(tuple.left, new DataAccess(property, tuple.right));
+                return new Tuple<>(tuple.left, new DataAccess(tuple.right, property));
             });
         });
     }
