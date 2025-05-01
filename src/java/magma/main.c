@@ -1,3 +1,6 @@
+/* private */struct JavaList<T> {
+	/* List<T> */ list;
+};
 /* private */struct CompileState {
 	/* JavaList<String> */ structs;
 	/* JavaList<String> */ functions;
@@ -13,11 +16,12 @@
 	/* A */ left;
 	/* B */ right;
 };
-/* private */struct JavaList<T> {
-	/* List<T> */ list;
-};
 /* public */struct Main {
 };
+/* public */ JavaList(/*  */){/* this(new ArrayList<>()); *//*  */
+}
+/* public */ /* JavaList<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
+}
 /* public */ CompileState(/*  */){/* this(new JavaList<>(), new JavaList<>()); *//*  */
 }
 /* private */ /* String */ generate(/*  */){/* return String.join("", this.structs.list)
@@ -55,10 +59,6 @@
 /* public */ /* DivideState */ enter(/*  */){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
 }
 /* public */ /* boolean */ isShallow(/*  */){/* return this.depth == 1; *//*  */
-}
-/* public */ JavaList(/*  */){/* this(new ArrayList<>()); *//*  */
-}
-/* public */ /* JavaList<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
 }
 /* public static */ /* void */ main(/*  */){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");

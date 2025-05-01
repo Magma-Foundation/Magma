@@ -10,6 +10,18 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
+    private record JavaList<T>(List<T> list) {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        public JavaList<T> addLast(T element) {
+            var copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        }
+    }
+
     private record CompileState(JavaList<String> structs, JavaList<String> functions) {
         public CompileState() {
             this(new JavaList<>(), new JavaList<>());
@@ -82,18 +94,6 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
-    }
-
-    private record JavaList<T>(List<T> list) {
-        public JavaList() {
-            this(new ArrayList<>());
-        }
-
-        public JavaList<T> addLast(T element) {
-            var copy = new ArrayList<>(this.list);
-            copy.add(element);
-            return new JavaList<>(copy);
-        }
     }
 
     public static void main() {
