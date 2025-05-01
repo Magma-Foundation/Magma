@@ -742,15 +742,16 @@ public class Main {
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
                 (instance, before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), Lists.empty(), variants, withEnd)
         ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithParams(String type, CompileState instance, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
-                return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
-            });
+            return parseAll(instance, paramString, Main::foldValueChar, Main::parameter)
+                    .flatMap(params -> {
+                        return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
+                    });
         }));
     }
 
@@ -766,7 +767,7 @@ public class Main {
             CompileState state,
             String beforeKeyword,
             String beforeParams,
-            String params,
+            List<Parameter> params,
             List<String> variants,
             String withEnd
     ) {
@@ -781,7 +782,7 @@ public class Main {
             CompileState state,
             String beforeParams0,
             String beforeKeyword,
-            String params,
+            List<Parameter> params,
             List<String> variants,
             String withEnd
     ) {
@@ -800,7 +801,7 @@ public class Main {
             String beforeKeyword,
             String name,
             List<String> typeParams,
-            String params,
+            List<Parameter> params,
             List<String> variants,
             String withEnd
     ) {
@@ -817,7 +818,7 @@ public class Main {
             String beforeKeyword,
             String name,
             List<String> typeParams,
-            String params,
+            List<Parameter> params,
             List<String> variants,
             String oldContent
     ) {
@@ -859,10 +860,11 @@ public class Main {
             String beforeKeyword,
             String name,
             String typeParamString,
-            String params,
+            List<Parameter> params,
             String content
     ) {
-        var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n";
+        var paramsString = generateNodesAsValues(params);
+        var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n";
         return new Tuple<CompileState, String>(state.addStruct(generatedStruct), "");
     }
 

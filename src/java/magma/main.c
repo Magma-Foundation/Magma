@@ -56,13 +56,13 @@ union OptionValue<T> {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
-/* private */struct StructurePrototype {char* typechar* nametemplate List<char*> typeParamstemplate List<char*> variants
+/* private */struct StructurePrototype {char* type, char* name, template List<char*> typeParams, template List<char*> variants
 };
-/* private */struct CompileState {template List<char*> structstemplate List<char*> functionstemplate Option<struct StructurePrototype> maybeStructureType
+/* private */struct CompileState {template List<char*> structs, template List<char*> functions, template Option<struct StructurePrototype> maybeStructureType
 };
-/* private */struct DivideState {char* inputtemplate List<char*> segmentsstruct StringBuilder bufferint indexint depth
+/* private */struct DivideState {char* input, template List<char*> segments, struct StringBuilder buffer, int index, int depth
 };
-/* private */struct Tuple<A, B> {struct A leftstruct B right
+/* private */struct Tuple<A, B> {struct A left, struct B right
 };
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
@@ -575,13 +575,14 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return /* or(state, beforeContent, Lists.of(
                 (instance, before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
-                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), "", variants, withEnd)
+                (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before.strip(), Lists.empty(), variants, withEnd)
         )) */;
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithParams(char* type, struct CompileState instance, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){/* return suffix(beforeContent.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return all(instance, paramString, Main::foldValueChar, (instance1, paramString1) -> parameter(instance1, paramString1).map(Tuple.mapRight(parameter -> parameter.generate().toSlice())), Main::mergeStatements).flatMap(params -> {
-                return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
-            });
+            return parseAll(instance, paramString, Main::foldValueChar, Main::parameter)
+                    .flatMap(params -> {
+                        return structureWithoutParams(type, params.left, beforeKeyword, name, params.right, variants, withEnd);
+                    });
         } *//* )); */
 }
 /* private static */ template Option<(struct CompileState, /*  Parameter */)> parameter(struct CompileState instance, char* paramString){
@@ -590,13 +591,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
                 wrap(Main::content)
         )) */;
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithoutParams(char* type, struct CompileState state, char* beforeKeyword, char* beforeParams, char* params, template List<char*> variants, char* withEnd){
+/* private static */ template Option<(struct CompileState, char*)> structureWithoutParams(char* type, struct CompileState state, char* beforeKeyword, char* beforeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
 	return /* or(state, beforeParams, Lists.of(
                 (state0, beforeParams0) -> structureWithTypeParams(type, state0, beforeParams0, beforeKeyword, params, variants, withEnd),
                 (state0, name) -> structureWithName(type, state0, beforeKeyword, name, Lists.empty(), params, variants, withEnd)
         )) */;
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, char* params, template List<char*> variants, char* withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithTypeParams(char* type, struct CompileState state, char* beforeParams0, char* beforeKeyword, template List<struct Parameter> params, template List<char*> variants, char* withEnd){/* return suffix(beforeParams0.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (name, typeParamString) -> {
                 return parseValues(state, typeParamString, Main::symbol).flatMap(values -> {
                     return structureWithName(type, values.left, beforeKeyword, name, values.right, params, variants, withEnd);
@@ -604,13 +605,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
             });
         } *//* ); */
 }
-/* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, char* params, template List<char*> variants, char* withEnd){/* return suffix(withEnd.strip(), "}", content -> {
+/* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){/* return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state.withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         } *//* ); */
 }
-/* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, char* params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
+/* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
             var enumName = name + "Variant";
             var enumFields = variants.iterate()
                     .map(variant -> "\n\t" + variant)
@@ -639,7 +640,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
         } */
 	return /* generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent) */;
 }
-/* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, char* params, char* content){/* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + params + content + "\n};\n"; */
+/* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){/* var paramsString = generateNodesAsValues(params); *//* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
 	return /* new Tuple<CompileState, String>(state.addStruct(generatedStruct), "") */;
 }
 /* private static */ char* generateTypeParams(template List<char*> typeParams){
