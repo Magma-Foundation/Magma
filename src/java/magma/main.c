@@ -265,8 +265,8 @@ union ResultValue<T, X> {
         public Option<Tuple<String, String>> split(String input) {
             return divide(input, this.folder).removeLast().map(divisions -> {
                 var left1 = divisions.left;
-                if(left1.isEmpty()) {
-                    return new Tuple<>( divisions.right, "");
+                if (left1.isEmpty()) {
+                    return new Tuple<>(divisions.right, "");
                 }
 
                 var left = left1.iterate().collect(new Joiner()).orElse("");
