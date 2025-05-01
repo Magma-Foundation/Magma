@@ -176,14 +176,17 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Tuple<>(state, "");
-        }
+        return compileNamespaced(state, input)
+                .or(() -> compileWhitespace(state, input))
+                .or(() -> compileStructure(state, input, "class "))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
 
-        return compileWhitespace(state, stripped)
-                .or(() -> compileStructure(state, stripped, "class "))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+    private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
+        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
