@@ -530,6 +530,13 @@ public class Main {
         }
     }
 
+    private record TypeParameter(String value) implements Type {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     private enum Primitive implements Type {
         I32("int"),
         Auto("auto");
@@ -989,7 +996,8 @@ public class Main {
             var name = definition.name;
             var argumentTypes = params.iterate()
                     .map(Definition::type)
-                    .collect(new ListCollector<>());
+                    .collect(new ListCollector<>())
+                    .addFirst(new TypeParameter("S"));
 
             var functionalType = new Functional(argumentTypes, returnType);
             var definition0 = new Definition(functionalType, name);

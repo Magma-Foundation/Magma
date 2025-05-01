@@ -12,39 +12,39 @@ union OptionValue<T> {
 };
 /* private */struct Head<S, T> {
 	S _super;
-	template Option</* T */> (*next)();
+	template Option</* T */> (*next)(S);
 };
 /* private */struct List<S, T> {
 	S _super;
-	template List</* T */> (*addLast)(/* T */);
-	template Iterator</* T */> (*iterate)();
-	template Option<template Tuple<template List</* T */>, /*  T */>> (*removeLast)();
-	int (*isEmpty)();
-	/* T */ (*get)(/* int */);
-	template List</* T */> (*addFirst)(/* T */);
+	template List</* T */> (*addLast)(S, /* T */);
+	template Iterator</* T */> (*iterate)(S);
+	template Option<template Tuple<template List</* T */>, /*  T */>> (*removeLast)(S);
+	int (*isEmpty)(S);
+	/* T */ (*get)(S, /* int */);
+	template List</* T */> (*addFirst)(S, /* T */);
 };
 /* private */struct Collector<S, T, C> {
 	S _super;
-	/* C */ (*createInitial)();
-	/* C */ (*fold)(/* C */, /* T */);
+	/* C */ (*createInitial)(S);
+	/* C */ (*fold)(S, /* C */, /* T */);
 };
 /* private @ */struct External<S> {
 	S _super;
 };
 /* private */struct Splitter<S> {
 	S _super;
-	template Option<template Tuple</* String */, /*  String */>> (*split)(/* String */);
+	template Option<template Tuple</* String */, /*  String */>> (*split)(S, /* String */);
 };
 /* private */struct Type<S> {
 	S _super;
-	/* String */ (*generate)();
+	/* String */ (*generate)(S);
 };
 /* private */struct Parameter extends Node<S> {
 	S _super;
 };
 /* private */struct Node<S> {
 	S _super;
-	/* String */ (*generate)();
+	/* String */ (*generate)(S);
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -72,6 +72,8 @@ union OptionValue<T> {
 /* private */struct Functional(List<Type> arguments, Type returns) implements Type {
 };
 /* private */struct Template(String base, List<Type> arguments) implements Type {
+};
+/* private */struct TypeParameter(String value) implements Type {
 };
 /* public */struct Main {/* 
 
@@ -366,6 +368,9 @@ private static class ListCollector<T> implements Collector<T, List<T>> {
         public List<T> fold(List<T> current, T element) {
             return current.addLast(element); *//* } */
 }
+@Override
+ public /* String */ generate(){/* return this.value; *//*  */
+}
 public static /* void */ main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -631,7 +636,8 @@ private static template Option<template Tuple</* CompileState */, /*  String */>
             var name = definition.name;
             var argumentTypes = params.iterate()
                     .map(Definition::type)
-                    .collect(new ListCollector<>());
+                    .collect(new ListCollector<>())
+                    .addFirst(new TypeParameter("S"));
 
             var functionalType = new Functional(argumentTypes, returnType);
             var definition0 = new Definition(functionalType, name);
