@@ -576,10 +576,17 @@ public class Main {
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Option<Tuple<CompileState, String>> structureWithName(String beforeKeyword, String withEnd, String name, CompileState state, String params) {

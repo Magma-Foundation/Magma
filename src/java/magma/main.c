@@ -1,10 +1,10 @@
 /* private */struct Option<T> {
-	/* <R> */ /* Option<R> */ map(/* Function<T */, /*  */ /* R> */ mapper);
+	/* <R> */ /* Option<R> */ map(/*  */ /* Function<T, R> */ mapper);
 	/*  */ /* boolean */ isEmpty(/*  */);
 	/*  */ /* T */ orElse(/*  */ /* T */ other);
 	/*  */ /* Option<T> */ or(/*  */ /* Supplier<Option<T>> */ other);
 	/*  */ /* T */ orElseGet(/*  */ /* Supplier<T> */ other);
-	/* <R> */ /* Option<R> */ flatMap(/* Function<T */, /*  */ /* Option<R>> */ mapper);
+	/* <R> */ /* Option<R> */ flatMap(/*  */ /* Function<T, Option<R>> */ mapper);
 };
 /* private */struct Head<T> {
 	/*  */ /* Option<T> */ next(/*  */);
@@ -72,7 +72,7 @@
     } */
 };
 /* @Override
-        public <R> */ /* Option<R> */ map(/* Function<T */, /*  */ /* R> */ mapper){/* return new Some<>(mapper.apply(this.value)); *//*  */
+        public <R> */ /* Option<R> */ map(/*  */ /* Function<T, R> */ mapper){/* return new Some<>(mapper.apply(this.value)); *//*  */
 }
 /* @Override
         public */ /* boolean */ isEmpty(/*  */){/* return false; *//*  */
@@ -87,12 +87,12 @@
         public */ /* T */ orElseGet(/*  */ /* Supplier<T> */ other){/* return this.value; *//*  */
 }
 /* @Override
-        public <R> */ /* Option<R> */ flatMap(/* Function<T */, /*  */ /* Option<R>> */ mapper){/* return mapper.apply(this.value); *//*  */
+        public <R> */ /* Option<R> */ flatMap(/*  */ /* Function<T, Option<R>> */ mapper){/* return mapper.apply(this.value); *//*  */
 }
 /* public */ /* T */ get(/*  */){/* return this.value; *//*  */
 }
 /* @Override
-        public <R> */ /* Option<R> */ map(/* Function<T */, /*  */ /* R> */ mapper){/* return new None<>(); *//*  */
+        public <R> */ /* Option<R> */ map(/*  */ /* Function<T, R> */ mapper){/* return new None<>(); *//*  */
 }
 /* @Override
         public */ /* boolean */ isEmpty(/*  */){/* return true; *//*  */
@@ -107,11 +107,11 @@
         public */ /* T */ orElseGet(/*  */ /* Supplier<T> */ other){/* return other.get(); *//*  */
 }
 /* @Override
-        public <R> */ /* Option<R> */ flatMap(/* Function<T */, /*  */ /* Option<R>> */ mapper){/* return new None<>(); *//*  */
+        public <R> */ /* Option<R> */ flatMap(/*  */ /* Function<T, Option<R>> */ mapper){/* return new None<>(); *//*  */
 }
-/* public <C> */ /* C */ collect(/* Collector<T */, /*  */ /* C> */ collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
+/* public <C> */ /* C */ collect(/*  */ /* Collector<T, C> */ collector){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
 }
-/* private <C> */ /* C */ fold(/*  */ /* C */ initial, /*  BiFunction<C */, /*  T */, /*  */ /* C> */ folder){/* var current = initial; *//* while (true) {
+/* private <C> */ /* C */ fold(/*  */ /* C */ initial, /*  */ /* BiFunction<C, T, C> */ folder){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -122,9 +122,9 @@
                 }
             } *//*  */
 }
-/* public <R> */ /* Iterator<R> */ flatMap(/* Function<T */, /*  */ /* Iterator<R>> */ mapper){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
+/* public <R> */ /* Iterator<R> */ flatMap(/*  */ /* Function<T, Iterator<R>> */ mapper){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
 }
-/* public <R> */ /* Iterator<R> */ map(/* Function<T */, /*  */ /* R> */ mapper){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
+/* public <R> */ /* Iterator<R> */ map(/*  */ /* Function<T, R> */ mapper){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
 }
 /* private */ /* Iterator<T> */ concat(/*  */ /* Iterator<T> */ other){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
 }
@@ -255,19 +255,13 @@
 /* private static */ /* String */ compileRoot(/*  */ /* String */ input){/* var state = new CompileState(); *//* var tuple = compileAll(state, input, Main::compileRootSegment)
                 .orElse(new Tuple<>(state, "")); *//* return tuple.right + tuple.left.generate(); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ compileAll(/*  */ /* CompileState */ initial, /*  */ /* String */ input, /* 
-            BiFunction<CompileState */, /*  String */, /*  Option<Tuple<CompileState */, /*  */ /* String>>> */ mapper){/* return compileAll(initial, input, Main::foldStatementChar, mapper, Main::mergeStatements); *//*  */
+/* private static */ /* Option<Tuple<CompileState, String>> */ compileAll(/*  */ /* CompileState */ initial, /*  */ /* String */ input, /*  */ /* BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> */ mapper){/* return compileAll(initial, input, Main::foldStatementChar, mapper, Main::mergeStatements); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ compileAll(/*  */ /* CompileState */ initial, /*  */ /* String */ input, /* 
-            BiFunction<DivideState */, /*  Character */, /*  */ /* DivideState> */ folder, /*  BiFunction<CompileState */, /*  String */, /*  Option<Tuple<CompileState */, /*  */ /* String>>> */ mapper, /* 
-            BiFunction<StringBuilder */, /*  String */, /*  */ /* StringBuilder> */ merger){/* var segments = divide(input, folder); *//* return segments.iterate()
+/* private static */ /* Option<Tuple<CompileState, String>> */ compileAll(/*  */ /* CompileState */ initial, /*  */ /* String */ input, /*  */ /* BiFunction<DivideState, Character, DivideState> */ folder, /*  */ /* BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> */ mapper, /*  */ /* BiFunction<StringBuilder, String, StringBuilder> */ merger){/* var segments = divide(input, folder); *//* return segments.iterate()
                 .<Option<Tuple<CompileState, StringBuilder>>>fold(new Some<>(new Tuple<CompileState, StringBuilder>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
                 .map(result -> new Tuple<CompileState, String>(result.left, result.right.toString())); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, StringBuilder>> */ foldElement(/* 
-            Tuple<CompileState */, /*  */ /* StringBuilder> */ state, /*  */ /* String */ segment, /* 
-            BiFunction<CompileState */, /*  String */, /*  Option<Tuple<CompileState */, /*  */ /* String>>> */ mapper, /* 
-            BiFunction<StringBuilder */, /*  String */, /*  */ /* StringBuilder> */ merger){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
+/* private static */ /* Option<Tuple<CompileState, StringBuilder>> */ foldElement(/*  */ /* Tuple<CompileState, StringBuilder> */ state, /*  */ /* String */ segment, /*  */ /* BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> */ mapper, /*  */ /* BiFunction<StringBuilder, String, StringBuilder> */ merger){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
             var newState = result.left;
             var newElement = result.right;
             return new Tuple<>(newState, merger.apply(oldCache, newElement));
@@ -275,7 +269,7 @@
 }
 /* private static */ /* StringBuilder */ mergeStatements(/*  */ /* StringBuilder */ output, /*  */ /* String */ right){/* return output.append(right); *//*  */
 }
-/* private static */ /* List<String> */ divide(/*  */ /* String */ input, /*  BiFunction<DivideState */, /*  Character */, /*  */ /* DivideState> */ folder){/* DivideState current = new DivideState(input); *//* while (true) {
+/* private static */ /* List<String> */ divide(/*  */ /* String */ input, /*  */ /* BiFunction<DivideState, Character, DivideState> */ folder){/* DivideState current = new DivideState(input); *//* while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
                 break;
@@ -363,7 +357,7 @@
             });
         } *//* )); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ params(/*  */ /* CompileState */ state, /*  */ /* String */ input, /*  BiFunction<StringBuilder */, /*  String */, /*  */ /* StringBuilder> */ merger){/* return compileAll(state, input, Main::foldValueChar, Main::compileParameter, merger); *//*  */
+/* private static */ /* Option<Tuple<CompileState, String>> */ params(/*  */ /* CompileState */ state, /*  */ /* String */ input, /*  */ /* BiFunction<StringBuilder, String, StringBuilder> */ merger){/* return compileAll(state, input, Main::foldValueChar, Main::compileParameter, merger); *//*  */
 }
 /* private static */ /* StringBuilder */ mergeValues(/*  */ /* StringBuilder */ buffer, /*  */ /* String */ element){/* if (buffer.isEmpty()) {
             return buffer.append(element);
@@ -374,9 +368,13 @@
                 Main::content
         )); *//*  */
 }
-/* private static */ /* DivideState */ foldValueChar(/*  */ /* DivideState */ state, /*  */ /* char */ c){/* if (c == ',') {
+/* private static */ /* DivideState */ foldValueChar(/*  */ /* DivideState */ state, /*  */ /* char */ c){/* if (c == ',' && state.isLevel()) {
             return state.advance();
-        } *//* return state.append(c); *//*  */
+        } *//* var appended = state.append(c); *//* if (c == '<') {
+            return appended.enter();
+        } *//* if (c == '>') {
+            return appended.exit();
+        } *//* return appended; *//*  */
 }
 /* private static */ /* Option<Tuple<CompileState, String>> */ structureWithName(/*  */ /* String */ beforeKeyword, /*  */ /* String */ withEnd, /*  */ /* String */ name, /*  */ /* CompileState */ state, /*  */ /* String */ params){/* return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
@@ -385,8 +383,7 @@
             });
         } *//* ); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ or(/*  */ /* CompileState */ state, /*  */ /* String */ input, /* 
-            List<BiFunction<CompileState */, /*  String */, /*  Option<Tuple<CompileState */, /*  */ /* String>>>> */ actions){/* return actions.iterate()
+/* private static */ /* Option<Tuple<CompileState, String>> */ or(/*  */ /* CompileState */ state, /*  */ /* String */ input, /*  */ /* List<BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>> */ actions){/* return actions.iterate()
                 .map(action -> action.apply(state, input))
                 .flatMap(Iterators::fromOptions)
                 .next(); *//*  */
@@ -480,19 +477,19 @@
 }
 /* private static */ /* Option<Integer> */ lastIndexOfSlice(/*  */ /* String */ input, /*  */ /* String */ infix){/* var index = input.lastIndexOf(infix); *//* return index == -1 ? new None<Integer>() : new Some<>(index); *//*  */
 }
-/* private static */ /* Option<Tuple<CompileState, String>> */ prefix(/*  */ /* String */ input, /*  */ /* String */ prefix, /*  Function<String */, /*  Option<Tuple<CompileState */, /*  */ /* String>>> */ mapper){/* if (!input.startsWith(prefix)) {
+/* private static */ /* Option<Tuple<CompileState, String>> */ prefix(/*  */ /* String */ input, /*  */ /* String */ prefix, /*  */ /* Function<String, Option<Tuple<CompileState, String>>> */ mapper){/* if (!input.startsWith(prefix)) {
             return new None<>();
         } *//* var slice = input.substring(prefix.length()); *//* return mapper.apply(slice); *//*  */
 }
-/* private static <T> */ /* Option<T> */ suffix(/*  */ /* String */ input, /*  */ /* String */ suffix, /*  Function<String */, /*  */ /* Option<T>> */ mapper){/* if (!input.endsWith(suffix)) {
+/* private static <T> */ /* Option<T> */ suffix(/*  */ /* String */ input, /*  */ /* String */ suffix, /*  */ /* Function<String, Option<T>> */ mapper){/* if (!input.endsWith(suffix)) {
             return new None<>();
         } *//* var content = input.substring(0, input.length() - suffix.length()); *//* return mapper.apply(content); *//*  */
 }
 /* private static */ /* String */ generatePlaceholder(/*  */ /* String */ input){/* return "/* " + input + " */"; *//*  */
 }
-/* private static <T> */ /* Option<T> */ first(/*  */ /* String */ input, /*  */ /* String */ infix, /*  BiFunction<String */, /*  String */, /*  */ /* Option<T>> */ mapper){/* return infix(input, new InfixLocator(infix, Main::firstIndexOfSlice), mapper); *//*  */
+/* private static <T> */ /* Option<T> */ first(/*  */ /* String */ input, /*  */ /* String */ infix, /*  */ /* BiFunction<String, String, Option<T>> */ mapper){/* return infix(input, new InfixLocator(infix, Main::firstIndexOfSlice), mapper); *//*  */
 }
-/* private static <T> */ /* Option<T> */ infix(/*  */ /* String */ input, /*  */ /* Locator */ locator, /*  BiFunction<String */, /*  String */, /*  */ /* Option<T>> */ mapper){/* return locator.split(input).flatMap(tuple -> {
+/* private static <T> */ /* Option<T> */ infix(/*  */ /* String */ input, /*  */ /* Locator */ locator, /*  */ /* BiFunction<String, String, Option<T>> */ mapper){/* return locator.split(input).flatMap(tuple -> {
             return mapper.apply(tuple.left, tuple.right);
         } *//* ); *//*  */
 }
