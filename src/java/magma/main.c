@@ -1,4 +1,4 @@
-/* public  */struct /* Main {
+/* public  */struct Main {/* 
     private record State(List<String> segments, StringBuilder buffer) {
         public State() {
             this(new ArrayList<>(), new StringBuilder()); *//* }
@@ -26,10 +26,14 @@
         var stripped = input.strip(); *//* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return ""; *//* }
 
-        var classIndex = stripped.indexOf(" */struct /* "); *//* if (classIndex >= 0) {
-            var beforeKeyword = stripped.substring(0, classIndex); *//* var afterKeyword = stripped.substring(classIndex + " */struct /* ".length()); *//* return generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword); *//* }
+        return compileInfix(stripped, " */struct ", (beforeKeyword, afterKeyword) -> {/* 
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(withEnd)); *//* }); *//* }).orElseGet(() -> generatePlaceholder(stripped)); *//* }
 
-        return generatePlaceholder(stripped); *//* }
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = input.indexOf(infix); *//* if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex); *//* var afterKeyword = input.substring(classIndex + infix.length()); *//* return mapper.apply(beforeKeyword, afterKeyword); *//* }
+        return Optional.empty(); *//* }
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */"; *//* }
@@ -43,4 +47,7 @@
         var appended = state.append(c); *//* if (c == '; *//* ') {
             return appended.advance(); *//* }
         return appended; *//* }
+
+    private static Optional<String> getString(String beforeKeyword, String afterKeyword) {
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword)); *//* }
 } */

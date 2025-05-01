@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class Main {
     private record State(List<String> segments, StringBuilder buffer) {
@@ -52,14 +54,22 @@ public class Main {
             return "";
         }
 
-        var classIndex = stripped.indexOf("class ");
-        if (classIndex >= 0) {
-            var beforeKeyword = stripped.substring(0, classIndex);
-            var afterKeyword = stripped.substring(classIndex + "class ".length());
-            return generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword);
-        }
+        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (name, withEnd) -> {
+                return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + generatePlaceholder(withEnd));
+            });
+        }).orElseGet(() -> generatePlaceholder(stripped));
 
-        return generatePlaceholder(stripped);
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var beforeKeyword = input.substring(0, classIndex);
+            var afterKeyword = input.substring(classIndex + infix.length());
+            return mapper.apply(beforeKeyword, afterKeyword);
+        }
+        return Optional.empty();
     }
 
     private static String generatePlaceholder(String input) {
@@ -81,5 +91,9 @@ public class Main {
             return appended.advance();
         }
         return appended;
+    }
+
+    private static Optional<String> getString(String beforeKeyword, String afterKeyword) {
+        return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + generatePlaceholder(afterKeyword));
     }
 }
