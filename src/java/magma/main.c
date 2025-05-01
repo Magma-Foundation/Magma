@@ -48,11 +48,21 @@ union OptionValue<T> {
 	char* (*toSlice)(S);
 	struct String_ (*appendSlice)(S, char*);
 };
+/* private static */struct Strings {
+};
 /* private */struct Some<T>(T value) implements Option<T> {
 };
 /* private */struct None<T>() implements Option<T> {
 };
 /* private */struct Iterator<T> {template Head<struct T> head
+};
+/* private static final */struct RangeHead implements Head<Integer> {
+	/* private final */ int length;/* 
+        private int counter = 0; */
+};
+/* private static */struct Lists {
+};
+/* private static */struct EmptyHead<T> implements Head<T> {
 };
 /* private */struct Joiner(String delimiter) implements Collector<String, Option<String>> {
 };
@@ -64,8 +74,16 @@ union OptionValue<T> {
 };
 /* private */struct Tuple<A, B> {struct A left, struct B right
 };
+/* private static */struct Iterators {
+};
+/* private static */struct SingleHead<T> implements Head<T> {
+	/* private final */ struct T value;
+	/* private boolean retrieved */ /* = */ false;
+};
 /* private */struct InfixSplitter(String infix,
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter {
+};
+/* private static */struct TypeSeparatorSplitter implements Splitter {
 };
 /* private */struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
 };
@@ -74,6 +92,8 @@ union OptionValue<T> {
 /* private */struct Functional(List<Type> arguments, Type returns) implements Type {
 };
 /* private */struct Template(String base, List<Type> arguments) implements Type {
+};
+/* private static */struct ListCollector<T> implements Collector<T, List<T>> {
 };
 /* private */struct TypeParameter(String value) implements Type {
 };
@@ -140,9 +160,8 @@ union OptionValue<T> {
 /* default */ struct String_ generateWithName_Type extends Node(struct Type extends Node this, char* name){
 	return /* this.generate().appendSlice(" ").appendSlice(name) */;
 }
-/* private static class Strings {
- private static */ struct String_ from(char* value){
-	return /* new JavaString(value) */;/* } */
+/* private static */ struct String_ from_Strings(struct Strings this, char* value){
+	return /* new JavaString(value) */;
 }
 /* @Override
  public <R> */ template Option<struct R> map_Some(struct Some this, /*  R */ (*mapper)(struct T)){
@@ -234,30 +253,23 @@ union OptionValue<T> {
 /* public */ template Option<T> next_Iterator(struct Iterator this){
 	return /* this.head.next() */;
 }
-/* private static final class RangeHead implements Head<Integer> {
- private final int length;
- private int counter = 0;
-
- */ struct private RangeHead(int length){/* this.length = length; *//* }
-
-        @Override
-        public Option<Integer> next() {
-            if (this.counter >= this.length) {
+struct private RangeHead_RangeHead implements Head(struct RangeHead implements Head this, int length){/* this.length = length; */
+}
+/* @Override
+ public */ template Option<Integer> next_RangeHead implements Head(struct RangeHead implements Head this){/* if (this.counter >= this.length) {
                 return new None<>();
             } *//* var value = this.counter; *//* this.counter++; */
-	return /* new Some<>(value) */;/* } */
+	return /* new Some<>(value) */;
 }
-/* private static class Lists {
- public static <T> */ template List<struct T> of(/* T... */ elements){
-	return /* new JavaList<>(Arrays.asList(elements)) */;/* }
-
-        public static <T> List<T> empty() {
-            return new JavaList<>(new ArrayList<>()); *//* } */
+/* public static <T> */ template List<struct T> of_Lists(struct Lists this, /* T... */ elements){
+	return /* new JavaList<>(Arrays.asList(elements)) */;
 }
-/* private static class EmptyHead<T> implements Head<T> {
- @Override
- public */ template Option<struct T> next(){
-	return /* new None<>() */;/* } */
+/* public static <T> */ template List<struct T> empty_Lists(struct Lists this){
+	return /* new JavaList<>(new ArrayList<>()) */;
+}
+/* @Override
+ public */ template Option<struct T> next_EmptyHead(struct EmptyHead this){
+	return /* new None<>() */;
 }
 struct public Joiner_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector this){/* this(""); */
 }
@@ -328,22 +340,16 @@ struct public DivideState_DivideState(struct DivideState this, char* input){/* t
 /* public static <A, B, C> */ (A, /*  C */) (*mapRight_Tuple)((A, B))(struct Tuple this, /*  C */ (*mapper)(B)){
 	return /* tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)) */;
 }
-/* private static class Iterators {
- public static <T> */ template Iterator<struct T> fromOptions(template Option<struct T> option){
-	return /* new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)) */;/* } */
+/* public static <T> */ template Iterator<struct T> fromOptions_Iterators(struct Iterators this, template Option<struct T> option){
+	return /* new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)) */;
 }
-/* private static class SingleHead<T> implements Head<T> {
- private final T value;
- private boolean retrieved = false;
-
- */ struct public SingleHead(struct T value){/* this.value = value; *//* }
-
-        @Override
-        public Option<T> next() {
-            if (this.retrieved) {
+struct public SingleHead_SingleHead(struct SingleHead this, struct T value){/* this.value = value; */
+}
+/* @Override
+ public */ template Option<struct T> next_SingleHead(struct SingleHead this){/* if (this.retrieved) {
                 return new None<>();
             } *//* this.retrieved = true; */
-	return /* new Some<>(this.value) */;/* } */
+	return /* new Some<>(this.value) */;
 }
 /* @Override
  public */ template Option<(char*, char*)> split_InfixSplitter(String infix,
@@ -364,9 +370,8 @@ struct public DivideState_DivideState(struct DivideState this, char* input){/* t
                                  BiFunction<String, String, Option<Integer>> locator) implements Splitter this, char* input){
 	return /* this.locator().apply(input, this.infix) */;
 }
-/* private static class TypeSeparatorSplitter implements Splitter {
- @Override
- public */ template Option<(char*, char*)> split(char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
+/* @Override
+ public */ template Option<(char*, char*)> split_TypeSeparatorSplitter implements Splitter(struct TypeSeparatorSplitter implements Splitter this, char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
                 var left = segments.left;
                 if (left.isEmpty()) {
                     return new None<>();
@@ -375,17 +380,16 @@ struct public DivideState_DivideState(struct DivideState this, char* input){/* t
                 var beforeType = left.iterate().collect(new Joiner(" ")).orElse("");
                 var type = segments.right;
                 return new Some<>(new Tuple<>(beforeType, type));
-            } *//* ); *//* }
-
-        private static DivideState fold(DivideState state, char c) {
-            if (c == ' ' && state.isLevel()) {
+            } *//* ); */
+}
+/* private static */ struct DivideState fold_TypeSeparatorSplitter implements Splitter(struct TypeSeparatorSplitter implements Splitter this, struct DivideState state, struct char c){/* if (c == ' ' && state.isLevel()) {
                 return state.advance();
             } *//* var appended = state.append(c); *//* if (c == '<') {
                 return appended.enter();
             } *//* if (c == '>') {
                 return appended.exit();
             } */
-	return /* appended */;/* } */
+	return /* appended */;
 }
 struct public Definition_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this, struct Type type, char* name){/* this(new None<>(), type, name); */
 }
@@ -432,14 +436,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
                     .orElse(""); */
 	return /* "template " + this.base() + "<" + generatedTuple + ">" */;
 }
-/* private static class ListCollector<T> implements Collector<T, List<T>> {
- @Override
- public */ template List<struct T> createInitial(){
-	return /* Lists.empty() */;/* }
-
-        @Override
-        public List<T> fold(List<T> current, T element) {
-            return current.addLast(element); *//* } */
+/* @Override
+ public */ template List<struct T> createInitial_ListCollector(struct ListCollector this){
+	return /* Lists.empty() */;
+}
+/* @Override
+ public */ template List<struct T> fold_ListCollector(struct ListCollector this, template List<struct T> current, struct T element){
+	return /* current.addLast(element) */;
 }
 /* @Override
  public */ struct String_ generate_TypeParameter(String value) implements Type(struct TypeParameter(String value) implements Type this){
@@ -511,9 +514,12 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 	return /* or(state, input, Lists.of(
                 Main::whitespace,
                 Main::compileNamespaced,
-                structure("class", "class "),
+                parseClass(),
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         )) */;
+}
+/* private static */ template BiFunction<struct CompileState, char*, template Option<(struct CompileState, char*)>> parseClass(){
+	return /* structure("class", "class ") */;
 }
 /* private static */ template BiFunction<struct CompileState, char*, template Option<(struct CompileState, char*)>> structure(char* type, char* infix){/* return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
             var slices = Arrays.stream(beforeKeyword.split(" "))
@@ -603,6 +609,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
                 Main::whitespace,
                 Main::annotation,
                 structure("enum", "enum "),
+                parseClass(),
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,

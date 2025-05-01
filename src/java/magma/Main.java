@@ -702,9 +702,13 @@ public class Main {
         return or(state, input, Lists.of(
                 Main::whitespace,
                 Main::compileNamespaced,
-                structure("class", "class "),
+                parseClass(),
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
+    }
+
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> parseClass() {
+        return structure("class", "class ");
     }
 
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String type, String infix) {
@@ -895,6 +899,7 @@ public class Main {
                 Main::whitespace,
                 Main::annotation,
                 structure("enum", "enum "),
+                parseClass(),
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,
