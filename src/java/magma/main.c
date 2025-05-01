@@ -1,6 +1,6 @@
 /* private */struct Option<T> {
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
-	/* boolean */ isEmpty();
+	int isEmpty();
 	/* T */ orElse(/* T */ other);
 	template Option</* T */> or(template Option</* T */> (*)() other);
 	/* T */ orElseGet(/* T */ (*)() other);
@@ -13,7 +13,7 @@
 	template List</* T */> addLast(/* T */ element);
 	template Iterator</* T */> iterate();
 	template Option<template Tuple<template List</* T */>, /*  T */>> removeLast();
-	/* boolean */ isEmpty();
+	int isEmpty();
 	/* T */ get(/* int */ index);
 };
 /* private */struct Collector<T, C> {
@@ -88,7 +88,7 @@
  public <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper){/* return new Some<>(mapper.apply(this.value)); *//*  */
 }
 /* @Override
- public */ /* boolean */ isEmpty(){/* return false; *//*  */
+ public */ int isEmpty(){/* return false; *//*  */
 }
 /* @Override
  public */ /* T */ orElse(/* T */ other){/* return this.value; *//*  */
@@ -108,7 +108,7 @@
  public <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper){/* return new None<>(); *//*  */
 }
 /* @Override
- public */ /* boolean */ isEmpty(){/* return true; *//*  */
+ public */ int isEmpty(){/* return true; *//*  */
 }
 /* @Override
  public */ /* T */ orElse(/* T */ other){/* return other; *//*  */
@@ -206,11 +206,11 @@
 }
 /* public */ /* DivideState */ exit(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1); *//*  */
 }
-/* public */ /* boolean */ isLevel(){/* return this.depth == 0; *//*  */
+/* public */ int isLevel(){/* return this.depth == 0; *//*  */
 }
 /* public */ /* DivideState */ enter(){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
 }
-/* public */ /* boolean */ isShallow(){/* return this.depth == 1; *//*  */
+/* public */ int isShallow(){/* return this.depth == 1; *//*  */
 }
 /* private static class Iterators {
  public static <T> */ template Iterator</* T */> fromOptions(template Option</* T */> option){/* return new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)); *//* } */
@@ -488,7 +488,7 @@
             ));
         } *//* ); *//*  */
 }
-/* private static */ /* boolean */ isSymbol(/* String */ value){/* for (var i = 0; *//* i < value.length(); *//* i++) {
+/* private static */ int isSymbol(/* String */ value){/* for (var i = 0; *//* i < value.length(); *//* i++) {
             var c = value.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
@@ -509,9 +509,14 @@
         } *//* ); *//*  */
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> type(/* CompileState */ state, /* String */ input){/* return or(state, input, Lists.of(
+                Main::primitive,
                 Main::template,
                 Main::content
         )); *//*  */
+}
+/* private static */ template Option<template Tuple</* CompileState */, /*  String */>> primitive(/* CompileState */ state, /* String */ input){/* var stripped = input.strip(); *//* if (stripped.equals("boolean")) {
+            return new Some<>(new Tuple<>(state, "int"));
+        } *//* return new None<>(); *//*  */
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> template(/* CompileState */ state, /* String */ input){/* return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {

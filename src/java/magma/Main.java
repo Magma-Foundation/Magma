@@ -772,9 +772,19 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> type(CompileState state, String input) {
         return or(state, input, Lists.of(
+                Main::primitive,
                 Main::template,
                 Main::content
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> primitive(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals("boolean")) {
+            return new Some<>(new Tuple<>(state, "int"));
+        }
+
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
