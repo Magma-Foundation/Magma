@@ -75,13 +75,28 @@ public class Main {
         String_ generate();
     }
 
-    private record String_(String value) {
+    private interface String_ {
+        String toSlice();
+
+        String_ appendSlice(String slice);
+    }
+
+    private static class Strings {
+        private static String_ from(String value) {
+            return new JavaString(value);
+        }
+    }
+
+    @External
+    private record JavaString(String value) implements String_ {
+        @Override
         public String toSlice() {
             return this.value;
         }
 
+        @Override
         public String_ appendSlice(String slice) {
-            return new String_(this.value + slice);
+            return Strings.from(this.value + slice);
         }
     }
 
@@ -495,7 +510,7 @@ public class Main {
 
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -507,7 +522,7 @@ public class Main {
     private record Content(String input) implements Type, Parameter {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -540,7 +555,7 @@ public class Main {
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -568,7 +583,7 @@ public class Main {
     private record TypeParameter(String value) implements Type {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -579,7 +594,7 @@ public class Main {
     private record Ref(Type type) implements Type {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -590,7 +605,7 @@ public class Main {
     private record TupleType(List<Type> arguments) implements Type {
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -601,7 +616,7 @@ public class Main {
     private record StructRef(String input) implements Type {
         @Override
         public String_ generate() {
-            return new String_("struct ").appendSlice(this.input);
+            return Strings.from("struct ").appendSlice(this.input);
         }
     }
 
@@ -617,7 +632,7 @@ public class Main {
 
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {

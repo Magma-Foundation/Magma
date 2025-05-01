@@ -43,7 +43,10 @@ union OptionValue<T> {
 	S _super;
 	struct String_ (*generate)(S);
 };
-/* private */struct String_ {char* value
+/* private */struct String_<S> {
+	S _super;
+	char* (*toSlice)(S);
+	struct String_ (*appendSlice)(S, char*);
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -113,6 +116,19 @@ union OptionValue<T> {
 /* public */struct Main {/* 
 
     @External
+    private record JavaString(String value) implements String_ {
+        @Override
+        public String toSlice() {
+            return this.value;
+        }
+
+        @Override
+        public String_ appendSlice(String slice) {
+            return Strings.from(this.value + slice);
+        }
+    } *//* 
+
+    @External
     private record JavaList<T>(java.util.List<T> elements) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
@@ -180,7 +196,7 @@ union OptionValue<T> {
 
         @Override
         public String_ generate() {
-            return new String_(this.generate0());
+            return Strings.from(this.generate0());
         }
 
         private String generate0() {
@@ -191,11 +207,9 @@ union OptionValue<T> {
 /* default */ struct String_ generateWithName_Type extends Node(struct Type extends Node this, char* name){
 	return /* this.generate().appendSlice(" ").appendSlice(name) */;
 }
-/* public */ char* toSlice_String_(struct String_ this){
-	return /* this.value */;
-}
-/* public */ struct String_ appendSlice_String_(struct String_ this, char* slice){
-	return /* new String_(this.value + slice) */;
+/* private static class Strings {
+ private static */ struct String_ from(char* value){
+	return /* new JavaString(value) */;/* } */
 }
 /* @Override
  public <R> */ template Option<struct R> map_Some(struct Some this, /*  R */ (*mapper)(struct T)){
@@ -447,11 +461,11 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 }
 /* @Override
  public */ struct String_ generate_Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter(struct Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* @Override
  public */ struct String_ generate_Content(String input) implements Type, Parameter(struct Content(String input) implements Type, Parameter this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* @Override
  public */ struct String_ generate_Functional(List<Type> arguments, Type returns) implements Type(struct Functional(List<Type> arguments, Type returns) implements Type this){
@@ -471,7 +485,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 }
 /* @Override
  public */ struct String_ generate_Template(String base, List<Type> arguments) implements Type(struct Template(String base, List<Type> arguments) implements Type this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* private static class ListCollector<T> implements Collector<T, List<T>> {
  @Override
@@ -484,19 +498,19 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 }
 /* @Override
  public */ struct String_ generate_TypeParameter(String value) implements Type(struct TypeParameter(String value) implements Type this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* @Override
  public */ struct String_ generate_Ref(Type type) implements Type(struct Ref(Type type) implements Type this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* @Override
  public */ struct String_ generate_TupleType(List<Type> arguments) implements Type(struct TupleType(List<Type> arguments) implements Type this){
-	return /* new String_(this.generate0()) */;
+	return /* Strings.from(this.generate0()) */;
 }
 /* @Override
  public */ struct String_ generate_StructRef(String input) implements Type(struct StructRef(String input) implements Type this){
-	return /* new String_("struct ").appendSlice(this.input) */;
+	return /* Strings.from("struct ").appendSlice(this.input) */;
 }
 /* public static */ struct void main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
