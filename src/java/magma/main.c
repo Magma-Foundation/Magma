@@ -83,27 +83,59 @@ union OptionValue<T> {
 };
 /* private */struct StructRef(String input) implements Type {
 };
-/* public */struct Main {/* 
-
-    private enum Primitive implements Type {
-        Auto("auto"),
+/* private */struct Primitive implements Type {/* Auto("auto"),
         I8("char"),
-        I32("int");
-        private final String value;
+        I32("int"); */
+	/* private final */ char* value;/* 
 
         Primitive(String value) {
             this.value = value;
+        } */
+};
+/* private static Tuple<CompileState, String> assembleStruct(
+            String type,
+            CompileState state,
+            String beforeKeyword,
+            String name,
+            List<String> typeParams,
+            List<Parameter> params,
+            List<String> variants,
+            String oldContent
+    ) {
+        if (!variants.isEmpty()) {
+            var enumName = name + "Variant";
+            var enumFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant)
+                    .collect(new Joiner(","))
+                    .orElse("");
+            var generatedEnum = " */struct " + enumName + " {/* " + enumFields + "\n};\n";
+
+            var typeParamString = generateTypeParams(typeParams);
+            var unionName = name + "Value" + typeParamString;
+            var unionFields = variants.iterate()
+                    .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
+                    .collect(new Joiner(""))
+                    .orElse("");
+            var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
+
+            var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
+            var newContent = "\n\t" + enumName + " _variant;"
+                    + "\n\t" + unionName + " _value;"
+                    + oldContent;
+
+            return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
         }
 
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
+        if (type.equals("interface")) {
+            var typeParamString = generateTypeParams(typeParams.addFirst("S"));
+            var newContent = "\n\tS _super;" + oldContent;
+            return generateStruct(state, beforeKeyword, name, typeParamString, params, newContent);
         }
 
-        private String generate0() {
-            return this.value;
-        }
-    } */
+        return generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent);
+     */
+};
+/* public */struct Main {
 };
 /* default */ struct String_ generateWithName_Type extends Node(struct Type extends Node this, char* name){
 	return /* this.generate().appendSlice(" ").appendSlice(name) */;
@@ -434,6 +466,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
  public */ struct String_ generate_StructRef(String input) implements Type(struct StructRef(String input) implements Type this){
 	return /* Strings.from("struct ").appendSlice(this.input) */;
 }
+/* @Override
+ public */ struct String_ generate_Primitive implements Type(struct Primitive implements Type this){
+	return /* Strings.from(this.generate0()) */;
+}
+/* private */ char* generate0_Primitive implements Type(struct Primitive implements Type this){
+	return /* this.value */;
+}
 /* public static */ struct void main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -542,35 +581,6 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
             }).map(tuple -> new Tuple<>(tuple.left.withoutStructType(), tuple.right));
         } *//* ); */
 }
-/* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
-            var enumName = name + "Variant";
-            var enumFields = variants.iterate()
-                    .map(variant -> "\n\t" + variant)
-                    .collect(new Joiner(","))
-                    .orElse("");
-            var generatedEnum = "enum " + enumName + " {" + enumFields + "\n};\n";
-
-            var typeParamString = generateTypeParams(typeParams);
-            var unionName = name + "Value" + typeParamString;
-            var unionFields = variants.iterate()
-                    .map(variant -> "\n\t" + variant + typeParamString + " " + variant.toLowerCase() + ";")
-                    .collect(new Joiner(""))
-                    .orElse("");
-            var generateUnion = "union " + unionName + " {" + unionFields + "\n};\n";
-
-            var compileState = state.addStruct(generatedEnum).addStruct(generateUnion);
-            var newContent = "\n\t" + enumName + " _variant;"
-                    + "\n\t" + unionName + " _value;"
-                    + oldContent;
-
-            return generateStruct(compileState, beforeKeyword, name, typeParamString, params, newContent);
-        } *//* if (type.equals("interface")) {
-            var typeParamString = generateTypeParams(typeParams.addFirst("S"));
-            var newContent = "\n\tS _super;" + oldContent;
-            return generateStruct(state, beforeKeyword, name, typeParamString, params, newContent);
-        } */
-	return /* generateStruct(state, beforeKeyword, name, generateTypeParams(typeParams), params, oldContent) */;
-}
 /* private static */ (struct CompileState, char*) generateStruct(struct CompileState state, char* beforeKeyword, char* name, char* typeParamString, template List<struct Parameter> params, char* content){/* var paramsString = generateNodesAsValues(params); *//* var generatedStruct = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + typeParamString + " {" + paramsString + content + "\n};\n"; */
 	return /* new Tuple<CompileState, String>(state.addStruct(generatedStruct), "") */;
 }
@@ -592,6 +602,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 	return /* or(state, input, Lists.of(
                 Main::whitespace,
                 Main::annotation,
+                structure("enum", "enum "),
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,

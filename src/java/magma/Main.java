@@ -894,6 +894,7 @@ public class Main {
         return or(state, input, Lists.of(
                 Main::whitespace,
                 Main::annotation,
+                structure("enum", "enum "),
                 structure("record", "record "),
                 structure("interface", "interface "),
                 Main::method,
