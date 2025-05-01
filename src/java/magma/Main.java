@@ -298,7 +298,7 @@ public class Main {
             if (typeSeparator >= 0) {
                 var beforeType = beforeName.substring(0, typeSeparator);
                 var type = beforeName.substring(typeSeparator + " ".length());
-                return generatePlaceholder(beforeName) + " " + generatePlaceholder(type) + " " + name;
+                return generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name;
             }
         }
 

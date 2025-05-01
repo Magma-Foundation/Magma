@@ -10,47 +10,47 @@
 };
 /* public CompileState */(/*  */){/* this(new JavaList<>(), new JavaList<>()); *//*  */
 }
-/* private String */ /* String */ generate(/*  */){/* return String.join("", this.structs.list)
+/* private */ /* String */ generate(/*  */){/* return String.join("", this.structs.list)
                     + String.join("", this.functions.list); *//*  */
 }
-/* public CompileState */ /* CompileState */ addStruct(/* String struct */){/* return new CompileState(this.structs.addLast(struct), this.functions); *//*  */
+/* public */ /* CompileState */ addStruct(/* String struct */){/* return new CompileState(this.structs.addLast(struct), this.functions); *//*  */
 }
-/* public CompileState */ /* CompileState */ addFunction(/* String function */){/* return new CompileState(this.structs, this.functions.addLast(function)); *//*  */
+/* public */ /* CompileState */ addFunction(/* String function */){/* return new CompileState(this.structs, this.functions.addLast(function)); *//*  */
 }
 /* public DivideState */(/* String input */){/* this(input, new JavaList<>(), new StringBuilder(), 0, 0); *//*  */
 }
-/* private Optional<DivideState> */ /* Optional<DivideState> */ popAndAppend(/*  */){/* return this.popAndAppendToTuple().map(Tuple::right); *//*  */
+/* private */ /* Optional<DivideState> */ popAndAppend(/*  */){/* return this.popAndAppendToTuple().map(Tuple::right); *//*  */
 }
-/* private Optional<Tuple<Character, DivideState>> */ /* Optional<Tuple<Character, DivideState>> */ popAndAppendToTuple(/*  */){/* return this.pop().map(tuple -> {
+/* private */ /* Optional<Tuple<Character, DivideState>> */ popAndAppendToTuple(/*  */){/* return this.pop().map(tuple -> {
                 var c = tuple.left;
                 var state = tuple.right;
                 return new Tuple<>(c, state.append(c));
             } *//* ); *//*  */
 }
-/* private DivideState */ /* DivideState */ append(/* char c */){/* return new DivideState(this.input, this.segments, this.buffer.append(c), this.index, this.depth); *//*  */
+/* private */ /* DivideState */ append(/* char c */){/* return new DivideState(this.input, this.segments, this.buffer.append(c), this.index, this.depth); *//*  */
 }
-/* public Optional<Tuple<Character, DivideState>> */ /* Optional<Tuple<Character, DivideState>> */ pop(/*  */){/* if (this.index < this.input.length()) {
+/* public */ /* Optional<Tuple<Character, DivideState>> */ pop(/*  */){/* if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
                 return Optional.of(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
             } *//* else {
                 return Optional.empty();
             } *//*  */
 }
-/* private DivideState */ /* DivideState */ advance(/*  */){/* return new DivideState(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth); *//*  */
+/* private */ /* DivideState */ advance(/*  */){/* return new DivideState(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth); *//*  */
 }
-/* public DivideState */ /* DivideState */ exit(/*  */){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1); *//*  */
+/* public */ /* DivideState */ exit(/*  */){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1); *//*  */
 }
-/* public boolean */ /* boolean */ isLevel(/*  */){/* return this.depth == 0; *//*  */
+/* public */ /* boolean */ isLevel(/*  */){/* return this.depth == 0; *//*  */
 }
-/* public DivideState */ /* DivideState */ enter(/*  */){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
+/* public */ /* DivideState */ enter(/*  */){/* return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1); *//*  */
 }
-/* public boolean */ /* boolean */ isShallow(/*  */){/* return this.depth == 1; *//*  */
+/* public */ /* boolean */ isShallow(/*  */){/* return this.depth == 1; *//*  */
 }
 /* public JavaList */(/*  */){/* this(new ArrayList<>()); *//*  */
 }
-/* public JavaList<T> */ /* JavaList<T> */ addLast(/* T element */){/* var copy =  new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
+/* public */ /* JavaList<T> */ addLast(/* T element */){/* var copy =  new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
 }
-/* public static void */ /* static void */ main(/*  */){/* try {
+/* public */ /* static void */ main(/*  */){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
 
@@ -60,9 +60,9 @@
             e.printStackTrace();
         } *//*  */
 }
-/* private static String */ /* static String */ compileRoot(/* String input */){/* var state = new CompileState(); *//* var tuple = compileAll(state, input, Main::compileRootSegment); *//* return tuple.right + tuple.left.generate(); *//*  */
+/* private */ /* static String */ compileRoot(/* String input */){/* var state = new CompileState(); *//* var tuple = compileAll(state, input, Main::compileRootSegment); *//* return tuple.right + tuple.left.generate(); *//*  */
 }
-/* private static Tuple<CompileState, String> */ /* static Tuple<CompileState, String> */ compileAll(/* 
+/* private */ /* static Tuple<CompileState, String> */ compileAll(/* 
             CompileState initial,
             String input,
             BiFunction<CompileState, String, Tuple<CompileState, String>> mapper
@@ -72,7 +72,7 @@
             output.append(tuple.right);
         } *//* return new Tuple<>(state, output.toString()); *//*  */
 }
-/* private static JavaList<String> */ /* static JavaList<String> */ divide(/* String input */){/* DivideState current = new DivideState(input); *//* while (true) {
+/* private */ /* static JavaList<String> */ divide(/* String input */){/* DivideState current = new DivideState(input); *//* while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
                 break;
@@ -86,7 +86,7 @@
                     .orElseGet(() -> foldStatementChar(state, c));
         } *//* return current.advance().segments; *//*  */
 }
-/* private static Optional<DivideState> */ /* static Optional<DivideState> */ foldDoubleQuotes(/* DivideState state, char c */){/* if (c != '\"') {
+/* private */ /* static Optional<DivideState> */ foldDoubleQuotes(/* DivideState state, char c */){/* if (c != '\"') {
             return Optional.empty();
         } *//* var appended = state.append(c); *//* while (true) {
             var maybeTuple = appended.popAndAppendToTuple();
@@ -106,7 +106,7 @@
             }
         } *//* return Optional.of(appended); *//*  */
 }
-/* private static Optional<DivideState> */ /* static Optional<DivideState> */ foldSingleQuotes(/* DivideState state, char c */){/* if (c != '\'') {
+/* private */ /* static Optional<DivideState> */ foldSingleQuotes(/* DivideState state, char c */){/* if (c != '\'') {
             return Optional.empty();
         } *//* return state.append(c).pop().map(maybeNextTuple -> {
             var nextChar = maybeNextTuple.left;
@@ -119,7 +119,7 @@
             return withEscaped.popAndAppend().orElse(withEscaped);
         } *//* ); *//*  */
 }
-/* private static DivideState */ /* static DivideState */ foldStatementChar(/* DivideState state, char c */){/* var appended = state.append(c); *//* if (c == ';' && appended.isLevel()) {
+/* private */ /* static DivideState */ foldStatementChar(/* DivideState state, char c */){/* var appended = state.append(c); *//* if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
@@ -129,13 +129,13 @@
             return appended.exit();
         } *//* return appended; *//*  */
 }
-/* private static Tuple<CompileState, String> */ /* static Tuple<CompileState, String> */ compileRootSegment(/* CompileState state, String input */){/* return compileOr(state, input, List.of(
+/* private */ /* static Tuple<CompileState, String> */ compileRootSegment(/* CompileState state, String input */){/* return compileOr(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileNamespaced,
                 structure("class ")
         )); *//*  */
 }
-/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> */ /* static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> */ structure(/* String infix */){/* return (state, input) -> compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
+/* private */ /* static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> */ structure(/* String infix */){/* return (state, input) -> compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     var tuple = compileAll(state, content, Main::compileStructSegment);
@@ -145,7 +145,7 @@
             });
         } *//* ); *//*  */
 }
-/* private static Tuple<CompileState, String> */ /* static Tuple<CompileState, String> */ compileOr(/* 
+/* private */ /* static Tuple<CompileState, String> */ compileOr(/* 
             CompileState state,
             String input,
             List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions
@@ -156,21 +156,21 @@
             }
         } *//* return new Tuple<>(state, generatePlaceholder(input)); *//*  */
 }
-/* private static Optional<Tuple<CompileState, String>> */ /* static Optional<Tuple<CompileState, String>> */ compileNamespaced(/* CompileState state, String input */){/* if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+/* private */ /* static Optional<Tuple<CompileState, String>> */ compileNamespaced(/* CompileState state, String input */){/* if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
             return Optional.of(new Tuple<>(state, ""));
         } *//* return Optional.empty(); *//*  */
 }
-/* private static Tuple<CompileState, String> */ /* static Tuple<CompileState, String> */ compileStructSegment(/* CompileState state, String input */){/* return compileOr(state, input, List.of(
+/* private */ /* static Tuple<CompileState, String> */ compileStructSegment(/* CompileState state, String input */){/* return compileOr(state, input, List.of(
                 Main::compileWhitespace,
                 structure("record "),
                 Main::compileMethod
         )); *//*  */
 }
-/* private static Optional<Tuple<CompileState, String>> */ /* static Optional<Tuple<CompileState, String>> */ compileWhitespace(/* CompileState state, String input */){/* if (input.isBlank()) {
+/* private */ /* static Optional<Tuple<CompileState, String>> */ compileWhitespace(/* CompileState state, String input */){/* if (input.isBlank()) {
             return Optional.of(new Tuple<>(state, ""));
         } *//* return Optional.empty(); *//*  */
 }
-/* private static Optional<Tuple<CompileState, String>> */ /* static Optional<Tuple<CompileState, String>> */ compileMethod(/* CompileState state, String input */){/* return compileInfix(input, "(", (definition, withParams) -> {
+/* private */ /* static Optional<Tuple<CompileState, String>> */ compileMethod(/* CompileState state, String input */){/* return compileInfix(input, "(", (definition, withParams) -> {
             return compileInfix(withParams, ")", (params, withBraces) -> {
                 return compilePrefix(withBraces.strip(), withoutStart1 -> {
                     return compileSuffix(withoutStart1, "}", content -> {
@@ -182,32 +182,32 @@
             });
         } *//* ); *//*  */
 }
-/* private static Tuple<CompileState, String> */ /* static Tuple<CompileState, String> */ compileFunctionSegment(/* CompileState state, String input */){/* return compileOr(state, input.strip(), List.of(
+/* private */ /* static Tuple<CompileState, String> */ compileFunctionSegment(/* CompileState state, String input */){/* return compileOr(state, input.strip(), List.of(
 
         )); *//*  */
 }
-/* private static String */ /* static String */ compileDefinition(/* String input */){/* var stripped = input.strip(); *//* var nameSeparator = stripped.lastIndexOf(" "); *//* if (nameSeparator >= 0) {
+/* private */ /* static String */ compileDefinition(/* String input */){/* var stripped = input.strip(); *//* var nameSeparator = stripped.lastIndexOf(" "); *//* if (nameSeparator >= 0) {
             var beforeName = stripped.substring(0, nameSeparator);
             var name = stripped.substring(nameSeparator + " ".length());
             var typeSeparator = beforeName.indexOf(" ".toString());
             if (typeSeparator >= 0) {
                 var beforeType = beforeName.substring(0, typeSeparator);
                 var type = beforeName.substring(typeSeparator + " ".length());
-                return generatePlaceholder(beforeName) + " " + generatePlaceholder(type) + " " + name;
+                return generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name;
             }
         } *//* return generatePlaceholder(input); *//*  */
 }
-/* private static Optional<Tuple<CompileState, String>> */ /* static Optional<Tuple<CompileState, String>> */ compilePrefix(/* String input, Function<String, Optional<Tuple<CompileState, String>>> mapper */){/* if (!input.startsWith("{")) {
+/* private */ /* static Optional<Tuple<CompileState, String>> */ compilePrefix(/* String input, Function<String, Optional<Tuple<CompileState, String>>> mapper */){/* if (!input.startsWith("{")) {
             return Optional.empty();
         } *//* var slice = input.substring("{".length()); *//* return mapper.apply(slice); *//*  */
 }
-/* private static <T> Optional<T> */ /* static <T> Optional<T> */ compileSuffix(/* String input, String suffix, Function<String, Optional<T>> mapper */){/* if (!input.endsWith(suffix)) {
+/* private */ /* static <T> Optional<T> */ compileSuffix(/* String input, String suffix, Function<String, Optional<T>> mapper */){/* if (!input.endsWith(suffix)) {
             return Optional.empty();
         } *//* var content = input.substring(0, input.length() - suffix.length()); *//* return mapper.apply(content); *//*  */
 }
-/* private static String */ /* static String */ generatePlaceholder(/* String input */){/* return "/* " + input + " */"; *//*  */
+/* private */ /* static String */ generatePlaceholder(/* String input */){/* return "/* " + input + " */"; *//*  */
 }
-/* private static <T> Optional<T> */ /* static <T> Optional<T> */ compileInfix(/* String input, String infix, BiFunction<String, String, Optional<T>> mapper */){/* var classIndex = input.indexOf(infix); *//* if (classIndex >= 0) {
+/* private */ /* static <T> Optional<T> */ compileInfix(/* String input, String infix, BiFunction<String, String, Optional<T>> mapper */){/* var classIndex = input.indexOf(infix); *//* if (classIndex >= 0) {
             var beforeKeyword = input.substring(0, classIndex);
             var afterKeyword = input.substring(classIndex + infix.length());
             return mapper.apply(beforeKeyword, afterKeyword);
