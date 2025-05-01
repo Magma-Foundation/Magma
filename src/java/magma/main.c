@@ -153,7 +153,7 @@ union ResultValue<T, X> {
 	struct X error;
 };
 /* private */struct DividingSplitter {
-	/*  DivideState */ (*folder)(struct DivideState, char);
+	struct DivideState (*folder)(struct DivideState, char);
 };
 /* private */struct Primitive {/* Auto("auto"),
         Void("void"),
@@ -178,7 +178,7 @@ union ResultValue<T, X> {
 	return /* new JavaString */(value);
 }
 /* @Override
- public <R> */ template Option<struct R> Some::map(struct Some<T> this, /*  R */ (*mapper)(T)){
+ public <R> */ template Option<struct R> Some::map(struct Some<T> this, struct R (*mapper)(T)){
 	return /* new Some<> */(mapper.apply(this.value));
 }
 /* @Override
@@ -214,7 +214,7 @@ union ResultValue<T, X> {
 	consumer.accept(this.value);
 }
 /* @Override
- public <R> */ template Option<struct R> None::map(struct None<T> this, /*  R */ (*mapper)(T)){
+ public <R> */ template Option<struct R> None::map(struct None<T> this, struct R (*mapper)(T)){
 	return /* new None<> */();
 }
 /* @Override
@@ -248,10 +248,10 @@ union ResultValue<T, X> {
 /* @Override
  public */ void None::ifPresent(struct None<T> this, template Consumer<T> consumer){
 }
-/* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, /*  C */> collector){
+/* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, struct C> collector){
 	return this.fold(collector.createInitial(), /*  collector::fold */);
 }
-/* private <C> */ struct C Iterator::fold(struct Iterator<T> this, struct C initial, /*  C */ (*folder)(struct C, T)){/* var current = initial; *//* while (true) {
+/* private <C> */ struct C Iterator::fold(struct Iterator<T> this, struct C initial, struct C (*folder)(struct C, T)){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -265,7 +265,7 @@ union ResultValue<T, X> {
 /* public <R> */ template Iterator<struct R> Iterator::flatMap(struct Iterator<T> this, template Iterator<struct R> (*mapper)(T)){
 	return this.map(mapper).fold(/* new Iterator<> */(/* new EmptyHead<> */()), /*  Iterator::concat */);
 }
-/* public <R> */ template Iterator<struct R> Iterator::map(struct Iterator<T> this, /*  R */ (*mapper)(T)){
+/* public <R> */ template Iterator<struct R> Iterator::map(struct Iterator<T> this, struct R (*mapper)(T)){
 	return /* new Iterator<> */((/* ) -> this */.head.next().map(mapper));
 }
 /* private */ template Iterator<T> Iterator::concat(struct Iterator<T> this, template Iterator<T> other){
@@ -330,7 +330,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 /* private */ template Option<struct DivideState> DivideState::popAndAppend(struct DivideState this){
 	return this.popAndAppendToTuple().map(/* Tuple::right */);
 }
-/* private */ template Option<(char, /*  DivideState */)> DivideState::popAndAppendToTuple(struct DivideState this){/* return this.pop().map(tuple -> {
+/* private */ template Option<(char, struct DivideState)> DivideState::popAndAppendToTuple(struct DivideState this){/* return this.pop().map(tuple -> {
                 var c = tuple.left;
                 var state = tuple.right;
                 return new Tuple<>(c, state.append(c));
@@ -339,7 +339,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 /* private */ struct DivideState DivideState::append(struct DivideState this, char c){
 	return /* new DivideState */(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
 }
-/* public */ template Option<(char, /*  DivideState */)> DivideState::pop(struct DivideState this){/* if (this.index < this.input.length()) {
+/* public */ template Option<(char, struct DivideState)> DivideState::pop(struct DivideState this){/* if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
                 return new Some<>(new Tuple<Character, DivideState>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
             } *//* else {
@@ -368,7 +368,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
                 return new None<>();
             } */
 }
-/* public static <A, B, C> */ (A, /*  C */) (*Tuple::mapRight)((A, B))(struct Tuple<A, B> this, /*  C */ (*mapper)(B)){
+/* public static <A, B, C> */ (A, struct C) (*Tuple::mapRight)((A, B))(struct Tuple<A, B> this, struct C (*mapper)(B)){
 	return /* tuple -> new Tuple<> */(tuple.left, mapper.apply(tuple.right));
 }
 /* public static <T> */ template Iterator<struct T> Iterators::fromOptions(struct Iterators this, template Option<struct T> option){
@@ -529,7 +529,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 }
 /* @Actual
- private static */ template Result<char*, /*  IOException */> readInput(){/* try {
+ private static */ template Result<char*, struct IOException> readInput(){/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
             return new Err<>(e);
@@ -543,7 +543,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ template Option<(struct CompileState, char*)> compileAll(struct CompileState initial, char* input, template Option<(struct CompileState, char*)> (*mapper)(struct CompileState, char*)){
 	return all(initial, input, /*  Main::foldStatementChar */, mapper, /*  Main::mergeStatements */);
 }
-/* private static */ template Option<(struct CompileState, char*)> all(struct CompileState initial, char* input, /*  DivideState */ (*folder)(struct DivideState, char), template Option<(struct CompileState, char*)> (*mapper)(struct CompileState, char*), /*  StringBuilder */ (*merger)(struct StringBuilder, char*)){
+/* private static */ template Option<(struct CompileState, char*)> all(struct CompileState initial, char* input, struct DivideState (*folder)(struct DivideState, char), template Option<(struct CompileState, char*)> (*mapper)(struct CompileState, char*), struct StringBuilder (*merger)(struct StringBuilder, char*)){
 	return parseAll(initial, input, folder, mapper).map(/* tuple -> new Tuple<> */(tuple.left, /*  generateAll(merger */, tuple.right)));
 }
 /* private static */ struct StringBuilder mergeStatements(struct StringBuilder output, char* right){
@@ -638,7 +638,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                     });
         } *//* )); */
 }
-/* private static */ template Option<(struct CompileState, /*  Parameter */)> parameter(struct CompileState instance, char* paramString){
+/* private static */ template Option<(struct CompileState, struct Parameter)> parameter(struct CompileState instance, char* paramString){
 	return Main.or(instance, paramString, Lists.of(/* 
                 wrap(Main::definition */), wrap(/* Main::content)
          */));
@@ -702,7 +702,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static */ char* generateTypeParams(template List<char*> typeParams){
 	return typeParams.isEmpty(/* ) ? "" : "<" + typeParams */.iterate().collect(/* new Joiner */(/* ", " */)).orElse("") + ">";
 }
-/* private static <T> */ template Option<(struct CompileState, /*  T */)> or(struct CompileState state, char* input, template List<template Option<(struct CompileState, /*  T */)> (*)(struct CompileState, char*)> actions){
+/* private static <T> */ template Option<(struct CompileState, struct T)> or(struct CompileState state, char* input, template List<template Option<(struct CompileState, struct T)> (*)(struct CompileState, char*)> actions){
 	return actions.iterate().map(/* action -> action */.apply(state, input)).flatMap(/* Iterators::fromOptions)
                  */.next();
 }
@@ -727,7 +727,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             return new Tuple<>(value.left, generated);
         } *//* )); */
 }
-/* private static */ template Option<(struct CompileState, /*  Content */)> content(struct CompileState state, char* input){
+/* private static */ template Option<(struct CompileState, struct Content)> content(struct CompileState state, char* input){
 	return /* new Some<> */(/* new Tuple<CompileState, Content>(state */, /* new Content */(/* input) */));
 }
 /* private static */ template Option<(struct CompileState, char*)> whitespace(struct CompileState state, char* input){/* if (input.isBlank()) {
@@ -759,22 +759,22 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             return new None<>();
         } */
 }
-/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> parseValues(struct CompileState state, char* input, template Option<(struct CompileState, /*  T */)> (*compiler)(struct CompileState, char*)){
+/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> parseValues(struct CompileState state, char* input, template Option<(struct CompileState, struct T)> (*compiler)(struct CompileState, char*)){
 	return parseAll(state, input, /*  Main::foldValueChar */, compiler);
 }
-/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> parseAll(struct CompileState initial, char* input, /*  DivideState */ (*folder)(struct DivideState, char), template Option<(struct CompileState, /*  T */)> (*mapper)(struct CompileState, char*)){
+/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> parseAll(struct CompileState initial, char* input, struct DivideState (*folder)(struct DivideState, char), template Option<(struct CompileState, struct T)> (*mapper)(struct CompileState, char*)){
 	return divide(input, /*  folder)
                  */.iterate().<Option<Tuple<CompileState, List<T>>>>fold(/* new Some<>(new Tuple<CompileState, List<T>>(initial */, Lists.empty(/* )) */), /* 
                         (maybeCurrent */, /* segment) -> maybeCurrent */.flatMap(
                                 state -> foldElement(state, segment, /*  mapper) */));
 }
-/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> foldElement((struct CompileState, template List<struct T>) state, char* segment, template Option<(struct CompileState, /*  T */)> (*mapper)(struct CompileState, char*)){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
+/* private static <T> */ template Option<(struct CompileState, template List<struct T>)> foldElement((struct CompileState, template List<struct T>) state, char* segment, template Option<(struct CompileState, struct T)> (*mapper)(struct CompileState, char*)){/* var oldState = state.left; *//* var oldCache = state.right; *//* return mapper.apply(oldState, segment).map(result -> {
             var newState = result.left;
             var newElement = result.right;
             return new Tuple<>(newState, oldCache.addLast(newElement));
         } *//* ); */
 }
-/* private static */ template List<char*> divide(char* input, /*  DivideState */ (*folder)(struct DivideState, char)){
+/* private static */ template List<char*> divide(char* input, struct DivideState (*folder)(struct DivideState, char)){
 	/* DivideState current = new DivideState */(input);/* while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
@@ -838,7 +838,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 /* private static <T extends Node> */ char* generateNodesAsValues(template List<struct T> params){
 	return params.iterate().map(/* t -> t */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
 }
-/* private static */ char* generateAll(/*  StringBuilder */ (*merger)(struct StringBuilder, char*), template List<char*> right){
+/* private static */ char* generateAll(struct StringBuilder (*merger)(struct StringBuilder, char*), template List<char*> right){
 	return right.iterate().fold(/* new StringBuilder */(), /*  merger) */.toString();
 }
 /* private static */ template Option<(struct CompileState, char*)> methodWithoutContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* content){/* if (!content.equals(";")) {
@@ -874,13 +874,13 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             });
         } *//* ); */
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> compileMethodHeader(struct CompileState state, char* definition){
+/* private static */ template Option<(struct CompileState, struct Definition)> compileMethodHeader(struct CompileState state, char* definition){
 	return or(state, definition, Lists.of(
                 Main::definition, /* 
                 Main::constructor
         ) */);
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> constructor(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> constructor(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
             if (!structureType.name.equals(name)) {
                 return new None<>();
             }
@@ -939,7 +939,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             });
         } *//* ); */
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> definition(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> definition(struct CompileState state, char* input){/* return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
@@ -960,21 +960,21 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 	return true;
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){/* return type(state, type).flatMap(typeTuple -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){/* return type(state, type).flatMap(typeTuple -> {
             return assemble(typeTuple.left, new None<String>(), typeTuple.right, name);
         } *//* ); */
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> assemble(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){
+/* private static */ template Option<(struct CompileState, struct Definition)> assemble(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){
 	/* var definition = new Definition */(maybeBeforeType, type, name.strip());
 	return /* new Some<> */(/* new Tuple<>(state */, /*  definition) */);
 }
-/* private static */ template Option<(struct CompileState, /*  Definition */)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){/* return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
                 return assemble(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
             });
         } *//* ); */
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> type(struct CompileState state, char* input){
+/* private static */ template Option<(struct CompileState, struct Type)> type(struct CompileState state, char* input){
 	return Main.or(state, input, Lists.of(
                 Main::primitive, /* 
                 Main::template */, /* 
@@ -983,19 +983,20 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 Main::structureType */, wrap(/* Main::content)
          */));
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> structureType(struct CompileState state, char* input){/* if (isSymbol(input)) {
-            return new Some<>(new Tuple<>(state, new StructRef(input, Lists.empty())));
+/* private static */ template Option<(struct CompileState, struct Type)> structureType(struct CompileState state, char* input){
+	/* var stripped = input */.strip();/* if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, new StructRef(stripped, Lists.empty())));
         } *//* else {
             return new None<>();
         } */
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> string(struct CompileState state, char* input){/* if (input.strip().equals("String")) {
+/* private static */ template Option<(struct CompileState, struct Type)> string(struct CompileState state, char* input){/* if (input.strip().equals("String")) {
             return new Some<>(new Tuple<>(state, new Ref(Primitive.I8)));
         } *//* else {
             return new None<>();
         } */
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> typeParameter(struct CompileState state, char* input){/* if (state.maybeStructureType instanceof Some(var structureType)) {
+/* private static */ template Option<(struct CompileState, struct Type)> typeParameter(struct CompileState state, char* input){/* if (state.maybeStructureType instanceof Some(var structureType)) {
             var stripped = input.strip();
             if (structureType.typeParams.contains(stripped)) {
                 return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
@@ -1003,10 +1004,10 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
         } */
 	return /* new None<> */();
 }
-/* private static <S, T extends S> */ template Option<(struct CompileState, /*  S */)> (*wrap)(struct CompileState, char*)(template Option<(struct CompileState, /*  T */)> (*content)(struct CompileState, char*)){
+/* private static <S, T extends S> */ template Option<(struct CompileState, struct S)> (*wrap)(struct CompileState, char*)(template Option<(struct CompileState, struct T)> (*content)(struct CompileState, char*)){
 	return /* (state, input) -> content */.apply(state, input).map(Tuple.mapRight(/* value -> value */));
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> primitive(struct CompileState state, char* input){
+/* private static */ template Option<(struct CompileState, struct Type)> primitive(struct CompileState state, char* input){
 	/* var stripped = input */.strip();
 	return /* switch (stripped) {
             case "boolean", "Boolean", "int", "Integer" -> new Some<>(new Tuple<>(state, Primitive */.I32));
@@ -1015,7 +1016,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
             default -> new None<>();
         };
 }
-/* private static */ template Option<(struct CompileState, /*  Type */)> template(struct CompileState state, char* input){/* return suffix(input.strip(), ">", withoutEnd -> {
+/* private static */ template Option<(struct CompileState, struct Type)> template(struct CompileState state, char* input){/* return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {
                 return parseValues(state, argumentsString, Main::type).flatMap(argumentsTuple -> {
                     var arguments = argumentsTuple.right;

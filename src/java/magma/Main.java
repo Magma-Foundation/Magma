@@ -1389,8 +1389,9 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Type>> structureType(CompileState state, String input) {
-        if (isSymbol(input)) {
-            return new Some<>(new Tuple<>(state, new StructRef(input, Lists.empty())));
+        var stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, new StructRef(stripped, Lists.empty())));
         }
         else {
             return new None<>();
