@@ -11,11 +11,6 @@ import java.util.function.Supplier;
 
 public class Main {
     private interface Option<T> {
-
-        static <T> Option<T> of(T value) {
-            return new Some<>(value);
-        }
-
         <R> Option<R> map(Function<T, R> mapper);
 
         boolean isEmpty();
@@ -167,7 +162,7 @@ public class Main {
             }
             var value = this.counter;
             this.counter++;
-            return Option.of(value);
+            return new Some<>(value);
         }
     }
 
@@ -215,7 +210,7 @@ public class Main {
 
         @Override
         public Option<String> fold(Option<String> current, String element) {
-            return Option.of(current.map(inner -> inner + element).orElse(element));
+            return new Some<>(current.map(inner -> inner + element).orElse(element));
         }
     }
 
@@ -265,7 +260,7 @@ public class Main {
         public Option<Tuple<Character, DivideState>> pop() {
             if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
-                return Option.of(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+                return new Some<>(new Tuple<Character, DivideState>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
             }
             else {
                 return new None<>();
@@ -317,7 +312,7 @@ public class Main {
             }
 
             this.retrieved = true;
-            return Option.of(this.value);
+            return new Some<>(this.value);
         }
     }
 
@@ -358,8 +353,8 @@ public class Main {
         var segments = divide(input, folder);
 
         return segments.iterate()
-                .fold(Option.of(new Tuple<>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
-                .map(result -> new Tuple<>(result.left, result.right.toString()));
+                .<Option<Tuple<CompileState, StringBuilder>>>fold(new Some<>(new Tuple<CompileState, StringBuilder>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
+                .map(result -> new Tuple<CompileState, String>(result.left, result.right.toString()));
     }
 
     private static Option<Tuple<CompileState, StringBuilder>> foldElement(
@@ -422,8 +417,8 @@ public class Main {
                 break;
             }
         }
-        return Option.of(appended);
 
+        return new Some<>(appended);
     }
 
     private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
@@ -526,7 +521,7 @@ public class Main {
         return suffix(withEnd.strip(), "}", content -> {
             return compileAll(state, content, Main::structSegment).flatMap(tuple -> {
                 var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + params + tuple.right + "\n};\n";
-                return Option.of(new Tuple<>(tuple.left.addStruct(generated), ""));
+                return new Some<>(new Tuple<CompileState, String>(tuple.left.addStruct(generated), ""));
             });
         });
     }
@@ -544,7 +539,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
         if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
-            return Option.of(new Tuple<>(state, ""));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         }
         return new None<>();
     }
@@ -568,12 +563,12 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> content(CompileState state, String input) {
-        return Option.of(new Tuple<>(state, generatePlaceholder(input)));
+        return new Some<>(new Tuple<CompileState, String>(state, generatePlaceholder(input)));
     }
 
     private static Option<Tuple<CompileState, String>> whitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Option.of(new Tuple<>(state, ""));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         }
         return new None<>();
     }
@@ -595,7 +590,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
         if (content.equals(";")) {
             var generated = "\n\t" + definition + "(" + generatePlaceholder(params) + ");";
-            return Option.of(new Tuple<>(state, generated));
+            return new Some<>(new Tuple<CompileState, String>(state, generated));
         }
         else {
             return new None<>();
@@ -607,7 +602,7 @@ public class Main {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::compileFunctionSegment).flatMap(tuple -> {
                     var generated = outputDefinition + "(" + params + "){" + tuple.right + "\n}\n";
-                    return Option.of(new Tuple<>(state.addFunction(generated), ""));
+                    return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
         });
@@ -628,6 +623,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> definition(CompileState state, String input) {
         return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
+            if (!isSymbol(name)) {
+                return new None<>();
+            }
+
             return or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
                     (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
@@ -635,21 +634,32 @@ public class Main {
         });
     }
 
+    private static boolean isSymbol(String value) {
+        for (var i = 0; i < value.length(); i++) {
+            var c = value.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
     private static Option<Tuple<CompileState, String>> compileDefinitionWithoutTypeSeparator(CompileState instance, String type, String name) {
         var generated = generatePlaceholder(type) + " " + name.strip();
-        return Option.of(new Tuple<>(instance, generated));
+        return new Some<>(new Tuple<CompileState, String>(instance, generated));
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinitionWithTypeSeparator(CompileState instance, String beforeName, String name) {
         return infix(beforeName, " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
             var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
-            return Option.of(new Tuple<>(instance, generated));
+            return new Some<>(new Tuple<CompileState, String>(instance, generated));
         });
     }
 
     private static Option<Integer> lastIndexOfSlice(String input, String infix) {
         var index = input.lastIndexOf(infix);
-        return index == -1 ? new None<Integer>() : Option.of(index);
+        return index == -1 ? new None<Integer>() : new Some<>(index);
     }
 
     private static Option<Tuple<CompileState, String>> prefix(String input, String prefix, Function<String, Option<Tuple<CompileState, String>>> mapper) {
@@ -686,6 +696,6 @@ public class Main {
 
     private static Option<Integer> firstIndexOfSlice(String input, String infix) {
         var index = input.indexOf(infix);
-        return index == -1 ? new None<Integer>() : Option.of(index);
+        return index == -1 ? new None<Integer>() : new Some<>(index);
     }
 }
