@@ -27,20 +27,20 @@
             return mapper.apply(beforeKeyword, afterKeyword);
         }
         return Optional.empty();
-    } *//* } *//* private  */struct State(JavaList<String> segments, StringBuilder buffer, int depth) {/* public State() {
-            this(new JavaList<>(), new StringBuilder(), 0);
+    } *//* } *//* private  */struct State(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {/* public State(String input) {
+            this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         } *//* 
 
         private State advance() {
-            return new State(this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.depth);
+            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
         } *//* 
 
         private State append(char c) {
-            return new State(this.segments, this.buffer.append(c), this.depth);
+            return new State(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
         } *//* 
 
         public State exit() {
-            return new State(this.segments, this.buffer, this.depth - 1);
+            return new State(this.input, this.segments, this.buffer, this.index, this.depth - 1);
         } *//* 
 
         public boolean isLevel() {
@@ -48,11 +48,21 @@
         } *//* 
 
         public State enter() {
-            return new State(this.segments, this.buffer, this.depth + 1);
+            return new State(this.input, this.segments, this.buffer, this.index, this.depth + 1);
         } *//* 
 
         public boolean isShallow() {
             return this.depth == 1;
+        } *//* 
+
+        public Optional<Tuple<Character, State>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+            }
+            else {
+                return Optional.empty();
+            }
         } *//* 
      */}/* 
 
@@ -106,10 +116,17 @@
     } *//* 
 
     private static JavaList<String> divide(String input) {
-        State current = new State();
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = foldStatementChar(current, c);
+        State current = new State(input);
+        while (true) {
+            var maybePopped = current.pop();
+            if (maybePopped.isEmpty()) {
+                break;
+            }
+
+            var popped = maybePopped.get();
+            var c = popped.left;
+            var state = popped.right;
+            current = foldStatementChar(state, c);
         }
         return current.advance().segments;
     } *//* 
