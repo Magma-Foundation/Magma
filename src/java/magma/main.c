@@ -2,8 +2,8 @@
 	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
 	/* boolean */ isEmpty();
 	/* T */ orElse(/* T */ other);
-	template Option</* T */> or(template Supplier<template Option</* T */>> other);
-	/* T */ orElseGet(template Supplier</* T */> other);
+	template Option</* T */> or(template Option</* T */> (*)() other);
+	/* T */ orElseGet(/* T */ (*)() other);
 	/* <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper);
 };
 /* private */struct Head<T> {
@@ -94,10 +94,10 @@
  public */ /* T */ orElse(/* T */ other){/* return this.value; *//*  */
 }
 /* @Override
- public */ template Option</* T */> or(template Supplier<template Option</* T */>> other){/* return this; *//*  */
+ public */ template Option</* T */> or(template Option</* T */> (*)() other){/* return this; *//*  */
 }
 /* @Override
- public */ /* T */ orElseGet(template Supplier</* T */> other){/* return this.value; *//*  */
+ public */ /* T */ orElseGet(/* T */ (*)() other){/* return this.value; *//*  */
 }
 /* @Override
  public <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper){/* return mapper.apply(this.value); *//*  */
@@ -114,10 +114,10 @@
  public */ /* T */ orElse(/* T */ other){/* return other; *//*  */
 }
 /* @Override
- public */ template Option</* T */> or(template Supplier<template Option</* T */>> other){/* return other.get(); *//*  */
+ public */ template Option</* T */> or(template Option</* T */> (*)() other){/* return other.get(); *//*  */
 }
 /* @Override
- public */ /* T */ orElseGet(template Supplier</* T */> other){/* return other.get(); *//*  */
+ public */ /* T */ orElseGet(/* T */ (*)() other){/* return other.get(); *//*  */
 }
 /* @Override
  public <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper){/* return new None<>(); *//*  */
@@ -520,7 +520,10 @@
 
                     String generated;
                     if (base.equals("Function")) {
-                        generated = arguments.get(1) + " (*)(" + arguments.get(0) + ")";
+                        generated = generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1));
+                    }
+                    else if (base.equals("Supplier")) {
+                        generated = generateFunctionalType(Lists.empty(), arguments.get(0));
                     }
                     else {
                         var generatedTuple = generateValues(arguments);
@@ -531,6 +534,8 @@
                 });
             });
         } *//* ); *//*  */
+}
+/* private static */ /* String */ generateFunctionalType(template List</* String */> arguments, /* String */ returns){/* return returns + " (*)(" + generateValues(arguments) + ")"; *//*  */
 }
 /* private static */ template Option</* Integer */> lastIndexOfSlice(/* String */ input, /* String */ infix){/* var index = input.lastIndexOf(infix); *//* return index == -1 ? new None<Integer>() : new Some<>(index); *//*  */
 }

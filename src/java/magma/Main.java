@@ -785,7 +785,10 @@ public class Main {
 
                     String generated;
                     if (base.equals("Function")) {
-                        generated = arguments.get(1) + " (*)(" + arguments.get(0) + ")";
+                        generated = generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1));
+                    }
+                    else if (base.equals("Supplier")) {
+                        generated = generateFunctionalType(Lists.empty(), arguments.get(0));
                     }
                     else {
                         var generatedTuple = generateValues(arguments);
@@ -796,6 +799,10 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static String generateFunctionalType(List<String> arguments, String returns) {
+        return returns + " (*)(" + generateValues(arguments) + ")";
     }
 
     private static Option<Integer> lastIndexOfSlice(String input, String infix) {
