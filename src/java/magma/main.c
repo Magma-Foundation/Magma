@@ -1,17 +1,17 @@
+/* private */struct Head<T> {/* Optional<T> next(); */
+};
+/* private */struct Iterator<T> {
+	/* Head<T> */ head;
+};
 /* private */struct List<T> {/* List<T> addLast(T element); *//* 
 
         Iterator<T> iterate(); */
-};
-/* private */struct Head<T> {/* Optional<T> next(); */
 };
 /* private */struct Collector<T, C> {/* C createInitial(); *//* 
 
         C fold(C current, T element); */
 };
 /* private @ */struct External {
-};
-/* private */struct Iterator<T> {
-	/* Head<T> */ head;
 };
 /* private */struct CompileState {
 	/* List<String> */ structs;
@@ -49,6 +49,27 @@
         }
     } */
 };
+/* public <C> */ /* C */ collect(/* Collector<T, C> collector */){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
+}
+/* private <C> */ /* C */ fold(/* C initial, BiFunction<C, T, C> folder */){/* var current = initial; *//* while (true) {
+                C finalCurrent = current;
+                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (maybeNext.isEmpty()) {
+                    return current;
+                }
+                else {
+                    current = maybeNext.get();
+                }
+            } *//*  */
+}
+/* public <R> */ /* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
+}
+/* public <R> */ /* Iterator<R> */ map(/* Function<T, R> mapper */){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
+}
+/* private */ /* Iterator<T> */ concat(/* Iterator<T> other */){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
+}
+/* public */ /* Optional<T> */ next(/*  */){/* return this.head.next(); *//*  */
+}
 /* private static final class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0;
@@ -70,27 +91,6 @@
 /* private static class EmptyHead<T> implements Head<T> {
         @Override
         public */ /* Optional<T> */ next(/*  */){/* return Optional.empty(); *//* } */
-}
-/* public <C> */ /* C */ collect(/* Collector<T, C> collector */){/* return this.fold(collector.createInitial(), collector::fold); *//*  */
-}
-/* private <C> */ /* C */ fold(/* C initial, BiFunction<C, T, C> folder */){/* var current = initial; *//* while (true) {
-                C finalCurrent = current;
-                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (maybeNext.isEmpty()) {
-                    return current;
-                }
-                else {
-                    current = maybeNext.get();
-                }
-            } *//*  */
-}
-/* public <R> */ /* Iterator<R> */ flatMap(/* Function<T, Iterator<R>> mapper */){/* return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat); *//*  */
-}
-/* public <R> */ /* Iterator<R> */ map(/* Function<T, R> mapper */){/* return new Iterator<>(() -> this.head.next().map(mapper)); *//*  */
-}
-/* private */ /* Iterator<T> */ concat(/* Iterator<T> other */){/* return new Iterator<>(() -> this.head.next().or(other::next)); *//*  */
-}
-/* public */ /* Optional<T> */ next(/*  */){/* return this.head.next(); *//*  */
 }
 /* private static class Joiner implements Collector<String, Optional<String>> {
         @Override

@@ -10,14 +10,50 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
+    private interface Head<T> {
+        Optional<T> next();
+    }
+
+    private record Iterator<T>(Head<T> head) {
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
+            var current = initial;
+            while (true) {
+                C finalCurrent = current;
+                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (maybeNext.isEmpty()) {
+                    return current;
+                }
+                else {
+                    current = maybeNext.get();
+                }
+            }
+        }
+
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other::next));
+        }
+
+        public Optional<T> next() {
+            return this.head.next();
+        }
+    }
+
     private interface List<T> {
         List<T> addLast(T element);
 
         Iterator<T> iterate();
-    }
-
-    private interface Head<T> {
-        Optional<T> next();
     }
 
     private interface Collector<T, C> {
@@ -81,43 +117,6 @@ public class Main {
         @Override
         public Optional<T> next() {
             return Optional.empty();
-        }
-    }
-
-    private record Iterator<T>(Head<T> head) {
-
-        public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
-        }
-
-        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
-            var current = initial;
-            while (true) {
-                C finalCurrent = current;
-                var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (maybeNext.isEmpty()) {
-                    return current;
-                }
-                else {
-                    current = maybeNext.get();
-                }
-            }
-        }
-
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
-        }
-
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new Iterator<>(() -> this.head.next().map(mapper));
-        }
-
-        private Iterator<T> concat(Iterator<T> other) {
-            return new Iterator<>(() -> this.head.next().or(other::next));
-        }
-
-        public Optional<T> next() {
-            return this.head.next();
         }
     }
 
