@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private record JavaList<T>(List<T> list) {
+    private interface List<T> {
+    }
+
+    private record JavaList<T>(java.util.List<T> list) {
         public JavaList() {
             this(new ArrayList<>());
         }
@@ -19,6 +22,12 @@ public class Main {
             var copy = new ArrayList<>(this.list);
             copy.add(element);
             return new JavaList<>(copy);
+        }
+    }
+
+    private static class Lists {
+        public static <T> JavaList<T> of(T... elements) {
+            return new JavaList<>(Arrays.asList(elements));
         }
     }
 
@@ -232,7 +241,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileRootSegment(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileNamespaced,
                 structure("class "),
@@ -243,7 +252,7 @@ public class Main {
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> structure(String infix) {
         return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
-                return or(state, beforeContent, List.of(
+                return or(state, beforeContent, Lists.of(
                         (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
                         (instance, before) -> structureWithName(beforeKeyword, withEnd, before.strip(), instance, "")
                 ));
@@ -267,7 +276,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileParameter(CompileState instance, String paramString) {
-        return or(instance, paramString, List.of(
+        return or(instance, paramString, Lists.of(
                 Main::compileDefinition,
                 Main::compileContent
         )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";"));
@@ -289,8 +298,11 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> or(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions) {
-        for (var action : actions) {
+    private static Optional<Tuple<CompileState, String>> or(
+            CompileState state,
+            String input,
+            JavaList<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions) {
+        for (var action : actions.list) {
             var result = action.apply(state, input);
             if (result.isPresent()) {
                 return result;
@@ -308,7 +320,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileStructSegment(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 Main::compileWhitespace,
                 structure("record "),
                 Main::compileMethod,
@@ -345,21 +357,21 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String definition) {
-        return or(state, definition, List.of(
+        return or(state, definition, Lists.of(
                 Main::compileDefinition,
                 Main::compileContent
         ));
     }
 
     private static Optional<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
-        return or(state, input.strip(), List.of(
+        return or(state, input.strip(), Lists.of(
                 Main::compileContent
         ));
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
-            return or(state, beforeName.strip(), List.of(
+            return or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
                     (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
             ));
