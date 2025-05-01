@@ -10,43 +10,57 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private record State(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {
-        public State(String input) {
+    private record CompileState(JavaList<String> structs) {
+        public CompileState() {
+            this(new JavaList<>());
+        }
+
+        private String generate() {
+            return String.join("", this.structs.list);
+        }
+
+        public CompileState addStruct(String struct) {
+            return new CompileState(this.structs.addLast(struct));
+        }
+    }
+
+    private record DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {
+        public DivideState(String input) {
             this(input, new JavaList<>(), new StringBuilder(), 0, 0);
         }
 
-        private Optional<State> popAndAppend() {
+        private Optional<DivideState> popAndAppend() {
             return this.pop().map(tuple -> tuple.right.append(tuple.left));
         }
 
-        private State append(char c) {
-            return new State(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
+        private DivideState append(char c) {
+            return new DivideState(this.input, this.segments, this.buffer.append(c), this.index, this.depth);
         }
 
-        public Optional<Tuple<Character, State>> pop() {
+        public Optional<Tuple<Character, DivideState>> pop() {
             if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
-                return Optional.of(new Tuple<>(c, new State(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+                return Optional.of(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
             }
             else {
                 return Optional.empty();
             }
         }
 
-        private State advance() {
-            return new State(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
+        private DivideState advance() {
+            return new DivideState(this.input, this.segments.addLast(this.buffer.toString()), new StringBuilder(), this.index, this.depth);
         }
 
-        public State exit() {
-            return new State(this.input, this.segments, this.buffer, this.index, this.depth - 1);
+        public DivideState exit() {
+            return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth - 1);
         }
 
         public boolean isLevel() {
             return this.depth == 0;
         }
 
-        public State enter() {
-            return new State(this.input, this.segments, this.buffer, this.index, this.depth + 1);
+        public DivideState enter() {
+            return new DivideState(this.input, this.segments, this.buffer, this.index, this.depth + 1);
         }
 
         public boolean isShallow() {
@@ -82,19 +96,19 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var state = new JavaList<String>();
+        var state = new CompileState();
         var tuple = compileAll(state, input, Main::compileRootSegment);
-        return tuple.right + String.join("", tuple.left.list);
+        return tuple.right + tuple.left.generate();
     }
 
-    private static Tuple<JavaList<String>, String> compileAll(
-            JavaList<String> initial,
+    private static Tuple<CompileState, String> compileAll(
+            CompileState initial,
             String input,
-            BiFunction<JavaList<String>, String, Tuple<JavaList<String>, String>> mapper
+            BiFunction<CompileState, String, Tuple<CompileState, String>> mapper
     ) {
         var segments = divide(input);
 
-        JavaList<String> state = initial;
+        CompileState state = initial;
         var output = new StringBuilder();
         for (var segment : segments.list) {
             var tuple = mapper.apply(state, segment);
@@ -106,7 +120,7 @@ public class Main {
     }
 
     private static JavaList<String> divide(String input) {
-        State current = new State(input);
+        DivideState current = new DivideState(input);
         while (true) {
             var maybePopped = current.pop();
             if (maybePopped.isEmpty()) {
@@ -122,7 +136,7 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static Optional<State> foldSingleQuotes(State state, char c) {
+    private static Optional<DivideState> foldSingleQuotes(DivideState state, char c) {
         if (c != '\'') {
             return Optional.empty();
         }
@@ -139,7 +153,7 @@ public class Main {
         });
     }
 
-    private static State foldStatementChar(State state, char c) {
+    private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -156,7 +170,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<JavaList<String>, String> compileRootSegment(JavaList<String> state, String input) {
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Tuple<>(state, "");
@@ -167,21 +181,29 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<JavaList<String>, String>> compileStructure(JavaList<String> state, String input, String infix) {
+    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
         return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     var tuple = compileAll(state, content, Main::compileStructSegment);
                     var generated = generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + tuple.right + "}";
-                    return Optional.of(new Tuple<>(tuple.left.addLast(generated), ""));
+                    return Optional.of(new Tuple<>(tuple.left.addStruct(generated), ""));
                 });
             });
         });
     }
 
-    private static Tuple<JavaList<String>, String> compileStructSegment(JavaList<String> state, String input) {
+    private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
         return compileStructure(state, input, "record ")
+                .or(() -> compileMethod(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+
+    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+        return compileInfix(input, "(", (s, s2) -> {
+            return Optional.of(new Tuple<>(state, generatePlaceholder(s) + "(" + generatePlaceholder(s2)));
+        });
     }
 
     private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
