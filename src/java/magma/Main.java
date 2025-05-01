@@ -91,6 +91,20 @@ public class Main {
     private interface Value extends Node {
     }
 
+    private interface CompileState {
+        String generate();
+
+        CompileState addStruct(String struct);
+
+        CompileState addFunction(String function);
+
+        CompileState withStructType(StructurePrototype type);
+
+        CompileState withoutStructType();
+
+        Option<StructurePrototype> findStructureType();
+    }
+
     private static class Strings {
         @Actual
         private static String_ from(String value) {
@@ -352,37 +366,47 @@ public class Main {
     private record StructurePrototype(String type, String name, List<String> typeParams, List<String> variants) {
     }
 
-    private record CompileState(
+    private record ImmutableCompileState(
             List<String> structs,
             List<String> functions,
             Option<StructurePrototype> maybeStructureType
-    ) {
-        public CompileState() {
+    ) implements CompileState {
+        public ImmutableCompileState() {
             this(Lists.empty(), Lists.empty(), new None<>());
         }
 
-        private String generate() {
-            return this.getJoin(this.structs) + this.getJoin(this.functions);
+        @Override
+        public String generate() {
+            return join(this.structs) + join(this.functions);
         }
 
-        private String getJoin(List<String> lists) {
+        private static String join(List<String> lists) {
             return lists.iterate().collect(new Joiner()).orElse("");
         }
 
+        @Override
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType);
+            return new ImmutableCompileState(this.structs.addLast(struct), this.functions, this.maybeStructureType);
         }
 
+        @Override
         public CompileState addFunction(String function) {
-            return new CompileState(this.structs, this.functions.addLast(function), this.maybeStructureType);
+            return new ImmutableCompileState(this.structs, this.functions.addLast(function), this.maybeStructureType);
         }
 
+        @Override
         public CompileState withStructType(StructurePrototype type) {
-            return new CompileState(this.structs, this.functions, new Some<>(type));
+            return new ImmutableCompileState(this.structs, this.functions, new Some<>(type));
         }
 
+        @Override
         public CompileState withoutStructType() {
-            return new CompileState(this.structs, this.functions, new None<>());
+            return new ImmutableCompileState(this.structs, this.functions, new None<>());
+        }
+
+        @Override
+        public Option<StructurePrototype> findStructureType() {
+            return this.maybeStructureType;
         }
     }
 
@@ -704,7 +728,7 @@ public class Main {
         }
     }
 
-    public record DataAccess(String property, Value parent) implements Value {
+    private record DataAccess(String property, Value parent) implements Value {
         @Override
         public String_ generate() {
             return Strings.from(this.parent().generate().toSlice() + "." + this.property());
@@ -769,7 +793,7 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var state = new CompileState();
+        var state = new ImmutableCompileState();
         var tuple = compileAll(state, input, Main::compileRootSegment)
                 .orElse(new Tuple<>(state, ""));
 
@@ -1078,12 +1102,12 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Content>> content(CompileState state, String input) {
-        return new Some<>(new Tuple<CompileState, Content>(state, new Content(input)));
+        return new Some<>(new Tuple<>(state, new Content(input)));
     }
 
     private static Option<Tuple<CompileState, String>> whitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Some<>(new Tuple<CompileState, String>(state, ""));
+            return new Some<>(new Tuple<>(state, ""));
         }
         return new None<>();
     }
@@ -1254,7 +1278,7 @@ public class Main {
         }
 
         String generated;
-        if (state.maybeStructureType.filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
+        if (state.findStructureType().filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
             var returnType = definition.type;
             var name = definition.name;
             var argumentTypes = params.iterate()
@@ -1277,13 +1301,13 @@ public class Main {
         return prefix(withBraces.strip(), "{", withoutStart1 -> {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
-                    var newParameters = state.maybeStructureType
+                    var newParameters = state.findStructureType()
                             .map(structType -> params.addFirst(new Definition(new StructRef(structType.name, structType.typeParams), "this")))
                             .orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
-                            .mapName(name -> state.maybeStructureType.map(structureType -> structureType.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            .mapName(name -> state.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
@@ -1313,7 +1337,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> constructorWithType(CompileState state, String input) {
-        return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.maybeStructureType.flatMap(structureType -> {
+        return split(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (_, name) -> state.findStructureType().flatMap(structureType -> {
             if (!structureType.name.equals(name)) {
                 return new None<>();
             }
@@ -1354,7 +1378,6 @@ public class Main {
                         var caller = callerTuple.right;
 
                         var left = argumentsTuple.left;
-
                         var oldArguments = argumentsTuple.right;
                         List<Value> newArguments;
                         if (caller instanceof DataAccess access) {
@@ -1489,7 +1512,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Type>> typeParameter(CompileState state, String input) {
-        if (state.maybeStructureType instanceof Some(var structureType)) {
+        if (state.findStructureType() instanceof Some(var structureType)) {
             var stripped = input.strip();
             if (structureType.typeParams.contains(stripped)) {
                 return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));

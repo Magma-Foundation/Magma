@@ -63,6 +63,15 @@ union ResultValue<T, X> {
 /* private */struct Value<S> {
 	S _super;
 };
+/* private */struct CompileState<S> {
+	S _super;
+	char* (*generate)(S);
+	struct CompileState (*addStruct)(S, char*);
+	struct CompileState (*addFunction)(S, char*);
+	struct CompileState (*withStructType)(S, struct StructurePrototype);
+	struct CompileState (*withoutStructType)(S);
+	template Option<struct StructurePrototype> (*findStructureType)(S);
+};
 /* private static */struct Strings {
 };
 /* private */struct Some<T> {
@@ -90,7 +99,7 @@ union ResultValue<T, X> {
 	template List<char*> typeParams;
 	template List<char*> variants;
 };
-/* private */struct CompileState {
+/* private */struct ImmutableCompileState {
 	template List<char*> structs;
 	template List<char*> functions;
 	template Option<struct StructurePrototype> maybeStructureType;
@@ -168,7 +177,7 @@ union ResultValue<T, X> {
 	struct Value caller;
 	template List<struct Value> arguments;
 };
-/* public */struct DataAccess {
+/* private */struct DataAccess {
 	char* property;
 	struct Value parent;
 };
@@ -318,26 +327,35 @@ struct public Joiner::Joiner(struct Joiner this){
  public */ template Option<char*> Joiner::fold(struct Joiner this, template Option<char*> current, char* element){
 	return /* new Some<> */(current.map(current, /* inner -> inner + this */.delimiter + element).orElse(current.map(current, /* inner -> inner + this */.delimiter + element), element));
 }
-struct public CompileState::CompileState(struct CompileState this){
+struct public ImmutableCompileState::ImmutableCompileState(struct ImmutableCompileState this){
 	this(Lists.empty(Lists), Lists.empty(Lists), /* new None<> */());
 }
-/* private */ char* CompileState::generate(struct CompileState this){
-	return this.getJoin(this.structs) + this.getJoin(this.getJoin(this.structs) + this, this.functions);
+/* @Override
+ public */ char* ImmutableCompileState::generate(struct ImmutableCompileState this){
+	return /* join(this */.structs) + join(/* join(this */, this.functions);
 }
-/* private */ char* CompileState::getJoin(struct CompileState this, template List<char*> lists){
+/* private static */ char* ImmutableCompileState::join(struct ImmutableCompileState this, template List<char*> lists){
 	return lists.iterate(lists).collect(lists.iterate(lists), /* new Joiner */()).orElse(lists.iterate(lists).collect(lists.iterate(lists), /* new Joiner */()), "");
 }
-/* public */ struct CompileState CompileState::addStruct(struct CompileState this, char* struct){
-	return /* new CompileState */(this.structs.addLast(this.structs, struct), this.functions, this.maybeStructureType);
+/* @Override
+ public */ struct CompileState ImmutableCompileState::addStruct(struct ImmutableCompileState this, char* struct){
+	return /* new ImmutableCompileState */(this.structs.addLast(this.structs, struct), this.functions, this.maybeStructureType);
 }
-/* public */ struct CompileState CompileState::addFunction(struct CompileState this, char* function){
-	return /* new CompileState */(this.structs, this.functions.addLast(this.functions, function), this.maybeStructureType);
+/* @Override
+ public */ struct CompileState ImmutableCompileState::addFunction(struct ImmutableCompileState this, char* function){
+	return /* new ImmutableCompileState */(this.structs, this.functions.addLast(this.functions, function), this.maybeStructureType);
 }
-/* public */ struct CompileState CompileState::withStructType(struct CompileState this, struct StructurePrototype type){
-	return /* new CompileState */(this.structs, this.functions, /* new Some<> */(type));
+/* @Override
+ public */ struct CompileState ImmutableCompileState::withStructType(struct ImmutableCompileState this, struct StructurePrototype type){
+	return /* new ImmutableCompileState */(this.structs, this.functions, /* new Some<> */(type));
 }
-/* public */ struct CompileState CompileState::withoutStructType(struct CompileState this){
-	return /* new CompileState */(this.structs, this.functions, /* new None<> */());
+/* @Override
+ public */ struct CompileState ImmutableCompileState::withoutStructType(struct ImmutableCompileState this){
+	return /* new ImmutableCompileState */(this.structs, this.functions, /* new None<> */());
+}
+/* @Override
+ public */ template Option<struct StructurePrototype> ImmutableCompileState::findStructureType(struct ImmutableCompileState this){
+	return this.maybeStructureType;
 }
 struct public DivideState::DivideState(struct DivideState this, char* input){
 	this(input, /* new JavaList<> */(), /* new StringBuilder */(), /*  0 */, /*  0 */);
@@ -591,7 +609,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         } */
 }
 /* private static */ char* compileRoot(char* input){
-	auto state = /* new CompileState */();
+	auto state = /* new ImmutableCompileState */();
 	auto tuple = compileAll(state, input, /*  Main::compileRootSegment */).orElse(compileAll(state, input, /*  Main::compileRootSegment */), /* new Tuple<> */(state, ""));
 	return tuple.right + tuple.left.generate(tuple.right + tuple.left);
 }
@@ -775,10 +793,10 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         }));
 }
 /* private static */ template Option<(struct CompileState, struct Content)> content(struct CompileState state, char* input){
-	return /* new Some<> */(/* new Tuple<CompileState, Content> */(state, /* new Content */(input)));
+	return /* new Some<> */(/* new Tuple<> */(state, /* new Content */(input)));
 }
 /* private static */ template Option<(struct CompileState, char*)> whitespace(struct CompileState state, char* input){/* if (input.isBlank()) {
-            return new Some<>(new Tuple<CompileState, String>(state, ""));
+            return new Some<>(new Tuple<>(state, ""));
         } */
 	return /* new None<> */();
 }
@@ -904,7 +922,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> methodWithoutContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* content){/* if (!content.equals(";")) {
             return new None<>();
-        } *//* String generated; *//* if (state.maybeStructureType.filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
+        } *//* String generated; *//* if (state.findStructureType().filter(value -> value.type.equals("interface") && value.variants.isEmpty()).isPresent()) {
             var returnType = definition.type;
             var name = definition.name;
             var argumentTypes = params.iterate()
@@ -925,22 +943,22 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
             return suffix */(withoutStart1, "}", /* content -> {
                 return compileAll */(state, content, /*  Main::functionSegment */).flatMap(/* content -> {
                 return compileAll */(state, content, /*  Main::functionSegment */), /* tuple -> {
-                    var newParameters = state */.maybeStructureType
-                            .map(/* tuple -> {
-                    var newParameters = state */.maybeStructureType
-                            , /* structType -> params */.addFirst(/* structType -> params */, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
+                    var newParameters = state */.findStructureType(/* tuple -> {
+                    var newParameters = state */).map(/* tuple -> {
+                    var newParameters = state */.findStructureType(/* tuple -> {
+                    var newParameters = state */), /* structType -> params */.addFirst(/* structType -> params */, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
                             .mapName(/* tuple -> {
-                    var newParameters = state */.maybeStructureType
-                            .map(/* tuple -> {
-                    var newParameters = state */.maybeStructureType
-                            , /* structType -> params */.addFirst(/* structType -> params */, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
+                    var newParameters = state */.findStructureType(/* tuple -> {
+                    var newParameters = state */).map(/* tuple -> {
+                    var newParameters = state */.findStructureType(/* tuple -> {
+                    var newParameters = state */), /* structType -> params */.addFirst(/* structType -> params */, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
-                            , /* name -> state */.maybeStructureType.map(/* name -> state */.maybeStructureType, /* structureType -> structureType */.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            , /* name -> state */.findStructureType(/* name -> state */).map(/* name -> state */.findStructureType(/* name -> state */), /* structureType -> structureType */.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
@@ -965,7 +983,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new None<> */();
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> constructorWithType(struct CompileState state, char* input){
-	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), /* (_, name) -> state */.maybeStructureType.flatMap(/* (_, name) -> state */.maybeStructureType, /* structureType -> {
+	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), (_, /*  name) -> state */.findStructureType().flatMap((_, /*  name) -> state */.findStructureType(), /* structureType -> {
             if (!structureType */.name.equals(name)) {
                 return new None<>();
             }
@@ -996,15 +1014,18 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
                 return suffix */(withEnd.strip(withEnd), "(", /*  callerString -> value(state0, callerString */).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
                         var caller = callerTuple.right;
+
+                        var left = argumentsTuple.left;
+                        var oldArguments = argumentsTuple.right;
                         List<Value> newArguments;
                         if (caller instanceof DataAccess access) {
-                            newArguments = argumentsTuple.right.addFirst(access.parent);
+                            newArguments = oldArguments.addFirst(access.parent);
                         }
                         else {
-                            newArguments = argumentsTuple.right;
+                            newArguments = oldArguments;
                         }
 
-                        return new Tuple<>(argumentsTuple.left, new Invocation(caller, newArguments));
+                        return new Tuple<>(left, new Invocation(caller, newArguments));
                     });
                 }));
             });
@@ -1101,7 +1122,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
             return new None<>();
         } */
 }
-/* private static */ template Option<(struct CompileState, struct Type)> typeParameter(struct CompileState state, char* input){/* if (state.maybeStructureType instanceof Some(var structureType)) {
+/* private static */ template Option<(struct CompileState, struct Type)> typeParameter(struct CompileState state, char* input){/* if (state.findStructureType() instanceof Some(var structureType)) {
             var stripped = input.strip();
             if (structureType.typeParams.contains(stripped)) {
                 return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
