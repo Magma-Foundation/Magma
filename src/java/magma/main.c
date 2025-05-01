@@ -9,31 +9,16 @@ union OptionValue<T> {
 /* private sealed */struct Option<T> {
 	OptionVariant _variant;
 	OptionValue<T> _value;
-	/* <R> */ template Option</* R */> map(/*  R */ (*)(/* T */) mapper);
-	int isEmpty();
-	/* T */ orElse(/* T */ other);
-	template Option</* T */> or(template Option</* T */> (*)() other);
-	/* T */ orElseGet(/* T */ (*)() other);
-	/* <R> */ template Option</* R */> flatMap(template Option</* R */> (*)(/* T */) mapper);
 };
 /* private */struct Head<T> {
-	template Option</* T */> next();
 };
 /* private */struct List<T> {
-	template List</* T */> addLast(/* T */ element);
-	template Iterator</* T */> iterate();
-	template Option<template Tuple<template List</* T */>, /*  T */>> removeLast();
-	int isEmpty();
-	/* T */ get(/* int */ index);
 };
 /* private */struct Collector<T, C> {
-	/* C */ createInitial();
-	/* C */ fold(/* C */ current, /* T */ element);
 };
 /* private @ */struct External {
 };
 /* private */struct Splitter {
-	template Option<template Tuple</* String */, /*  String */>> split(/* String */ input);
 };
 /* private */struct Some<T>(T value) implements Option<T> {
 };
@@ -506,7 +491,7 @@ union OptionValue<T> {
 }
 /* private static */ template Option<template Tuple</* CompileState */, /*  String */>> methodWithoutContent(/* CompileState */ state, /* String */ definition, /* String */ params, /* String */ content){/* if (content.equals(";")) {
             var generated = "\n\t" + definition + "(" + params + ");";
-            return new Some<>(new Tuple<CompileState, String>(state, generated));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         } *//* else {
             return new None<>();
         } *//*  */

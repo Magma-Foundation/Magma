@@ -800,7 +800,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
         if (content.equals(";")) {
             var generated = "\n\t" + definition + "(" + params + ");";
-            return new Some<>(new Tuple<CompileState, String>(state, generated));
+            return new Some<>(new Tuple<CompileState, String>(state, ""));
         }
         else {
             return new None<>();
