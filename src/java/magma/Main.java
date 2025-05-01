@@ -253,13 +253,13 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> structureWithParams(String beforeKeyword, String withEnd, CompileState instance, String before) {
         return suffix(before.strip(), ")", withoutEnd -> first(withoutEnd, "(", (name, paramString) -> {
-            return compileAll(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::foldValues).flatMap(params -> {
+            return compileAll(instance, paramString, Main::foldValueChar, Main::compileParameter, Main::mergeStatements).flatMap(params -> {
                 return structureWithName(beforeKeyword, withEnd, name, params.left, params.right);
             });
         }));
     }
 
-    private static StringBuilder foldValues(StringBuilder buffer, String element) {
+    private static StringBuilder mergeValues(StringBuilder buffer, String element) {
         if (buffer.isEmpty()) {
             return buffer.append(element);
         }
