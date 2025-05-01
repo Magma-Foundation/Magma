@@ -1,10 +1,14 @@
-/*  *//* private  */struct CompileState(JavaList<String> structs, JavaList<String> functions) {}/* 
-
-    private  */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {}/* 
-
-    private  */struct Tuple<A, B>(A left, B right) {}/* 
-
-    private  */struct JavaList<T>(List<T> list) {}/* public  */struct Main {}/* public CompileState */(/* ) {
+/* private */struct CompileState(JavaList<String> structs, JavaList<String> functions) {
+};
+/* private */struct DivideState(String input, JavaList<String> segments, StringBuilder buffer, int index, int depth) {
+};
+/* private */struct Tuple<A, B>(A left, B right) {
+};
+/* private */struct JavaList<T>(List<T> list) {
+};
+/* public */struct Main {
+};
+/* public CompileState */(/* ) {
             this(new JavaList<>(), new JavaList<>());
         } *//* 
 
@@ -162,9 +166,9 @@
             return new Tuple<>(state, "");
         }
 
-        return compileStructure(state, stripped, "class ").orElseGet(() -> {
-            return new Tuple<>(state, generatePlaceholder(stripped));
-        });
+        return compileWhitespace(state, stripped)
+                .or(() -> compileStructure(state, stripped, "class "))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> compileStructure */(/* CompileState state, String input, String infix) {
@@ -172,7 +176,7 @@
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     var tuple = compileAll(state, content, Main::compileStructSegment);
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name.strip() + " {" + tuple.right + "}";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name.strip() + " {" + tuple.right + "\n};\n";
                     return Optional.of(new Tuple<>(tuple.left.addStruct(generated), ""));
                 });
             });
