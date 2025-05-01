@@ -1248,8 +1248,8 @@ public class Main {
     private static Option<Tuple<CompileState, String>> invocation(CompileState state0, String input) {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
-                return suffix(withEnd.strip(), "(", callerString -> compileValue(state0, callerString).flatMap(callerTuple -> {
-                    return Main.parseValues(callerTuple.left, argumentsString, Main::compileValue).map(argumentsTuple -> {
+                return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
+                    return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
                         var joined = argumentsTuple.right.iterate()
                                 .collect(new Joiner(", "))
                                 .orElse("");
@@ -1274,13 +1274,20 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> returns(CompileState state, String input) {
-        return prefix(input.strip(), "return ", slice -> compileValue(state, slice).map(Tuple.mapRight(result -> "return " + result)));
+        return prefix(input.strip(), "return ", slice -> value(state, slice).map(Tuple.mapRight(result -> "return " + result)));
     }
 
-    private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> value(CompileState state, String input) {
         return or(state, input, Lists.of(
+                Main::dataAccess,
                 (state1, input1) -> content(state1, input1).map(Tuple.mapRight(content -> content.generate().toSlice()))
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
+        return split(input, new InfixSplitter(".", Main::lastIndexOfSlice), (parent, property) -> value(state, parent).map(tuple -> {
+            return new Tuple<>(tuple.left, tuple.right + "." + property);
+        }));
     }
 
     private static Option<Tuple<CompileState, Definition>> definition(CompileState state, String input) {
