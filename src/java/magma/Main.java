@@ -234,10 +234,24 @@ public class Main {
 
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileInfix(input, "(", (s, s2) -> {
-            var generated = generatePlaceholder(s) + "(" + generatePlaceholder(s2);
-            return Optional.of(new Tuple<>(state.addFunction(generated), ""));
+        return compileInfix(input, "(", (definition, withParams) -> {
+            return compileInfix(withParams, ")", (params, withBraces) -> {
+                return compilePrefix(withBraces.strip(), withoutStart1 -> {
+                    return compileSuffix(withoutStart1, "}", content -> {
+                        var generated = generatePlaceholder(definition) + "(" + generatePlaceholder(params) + "){" + generatePlaceholder(content) + "}";
+                        return Optional.of(new Tuple<>(state.addFunction(generated), ""));
+                    });
+                });
+            });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compilePrefix(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
+        if (!input.startsWith("{")) {
+            return Optional.empty();
+        }
+        var slice = input.substring("{".length());
+        return mapper.apply(slice);
     }
 
     private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
