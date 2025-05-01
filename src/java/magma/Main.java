@@ -1129,7 +1129,7 @@ public class Main {
                     var paramStrings = generateNodesAsValues(newParameters);
 
                     var generated = definition
-                            .mapName(name -> state.maybeStructureType.map(structureType -> name + "_" + structureType.name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
+                            .mapName(name -> state.maybeStructureType.map(structureType -> structureType.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(state.addFunction(generated), ""));
                 });
             });
