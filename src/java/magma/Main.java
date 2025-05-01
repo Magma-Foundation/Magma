@@ -1116,7 +1116,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Type>> primitive(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.equals("boolean")) {
+        if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Some<>(new Tuple<>(state, Primitive.I32));
         }
 

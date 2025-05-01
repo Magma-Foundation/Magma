@@ -20,7 +20,7 @@ union OptionValue<T> {
 	template Iterator<T> (*iterate)(S);
 	template Option<template Tuple<template List<T>, T>> (*removeLast)(S);
 	int (*isEmpty)(S);
-	T (*get)(S, /* int */);
+	T (*get)(S, int);
 	template List<T> (*addFirst)(S, T);
 	int (*contains)(S, T);
 };
@@ -59,7 +59,7 @@ union OptionValue<T> {
 };
 /* private */struct CompileState {template List</* String */> structstemplate List</* String */> functionstemplate Option</* StructurePrototype */> maybeStructureType
 };
-/* private */struct DivideState {/* String */ inputtemplate List</* String */> segments/* StringBuilder */ buffer/* int */ index/* int */ depth
+/* private */struct DivideState {/* String */ inputtemplate List</* String */> segments/* StringBuilder */ bufferint indexint depth
 };
 /* private */struct Tuple<A, B> {/* A */ left/* B */ right
 };
@@ -224,7 +224,7 @@ private static final class RangeHead implements Head<Integer> {
  private final int length;
  private int counter = 0;
 
- /* private */ RangeHead(/* int */ length){/* this.length = length; *//* }
+ /* private */ RangeHead(int length){/* this.length = length; *//* }
 
         @Override
         public Option<Integer> next() {
@@ -317,7 +317,7 @@ private static class SingleHead<T> implements Head<T> {
                 return new Tuple<>(beforeKeyword, afterKeyword);
             } *//* ); *//*  */
 }
-private /* int */ length(){/* return this.infix.length(); *//*  */
+private int length(){/* return this.infix.length(); *//*  */
 }
 private template Option</* Integer */> apply(/* String */ input){/* return this.locator().apply(input, this.infix); *//*  */
 }
@@ -726,7 +726,7 @@ private static template Option<template Tuple</* CompileState */, /*  Type */>> 
 }
 private static <S, T extends S> template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  S */>>> wrap(template BiFunction</* CompileState */, /*  String */, template Option<template Tuple</* CompileState */, /*  T */>>> content){/* return (state, input) -> content.apply(state, input).map(Tuple.mapRight(value -> value)); *//*  */
 }
-private static template Option<template Tuple</* CompileState */, /*  Type */>> primitive(/* CompileState */ state, /* String */ input){/* var stripped = input.strip(); *//* if (stripped.equals("boolean")) {
+private static template Option<template Tuple</* CompileState */, /*  Type */>> primitive(/* CompileState */ state, /* String */ input){/* var stripped = input.strip(); *//* if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Some<>(new Tuple<>(state, Primitive.I32));
         } *//* return new None<>(); *//*  */
 }
