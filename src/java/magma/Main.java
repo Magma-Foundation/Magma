@@ -838,6 +838,17 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structureWithoutVariants(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
         return or(state, beforeContent, Lists.of(
+                (state0, s) -> structureWithImplements(type, state0, beforeKeyword, s, variants, withEnd),
+                (state0, s) -> structureWithoutImplements(type, state0, beforeKeyword, s, variants, withEnd)
+        ));
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithImplements(String type, CompileState state0, String beforeKeyword, String s, List<String> variants, String withEnd) {
+        return first(s, " implements ", (s1, s2) -> structureWithoutImplements(type, state0, beforeKeyword, s1, variants, withEnd));
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithoutImplements(String type, CompileState state, String beforeKeyword, String beforeContent, List<String> variants, String withEnd) {
+        return or(state, beforeContent, Lists.of(
                 (state1, s) -> structureWithExtends(type, beforeKeyword, beforeContent, variants, withEnd, state1),
                 (state2, s) -> structureWithoutExtends(type, state2, beforeKeyword, s, variants, withEnd)
         ));

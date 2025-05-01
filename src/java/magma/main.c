@@ -62,10 +62,24 @@ union ResultValue<T, X> {
 };
 /* private static */struct Strings {
 };
+/* private */struct Some<T> {
+	struct T value;
+};
+/* private */struct None<T> {
+};
 /* private */struct Iterator<T> {
 	template Head<struct T> head;
 };
+/* private static final */struct RangeHead {
+	/* private final */ int length;/* 
+        private int counter = 0; */
+};
 /* private static */struct Lists {
+};
+/* private static */struct EmptyHead<T> {
+};
+/* private */struct Joiner {
+	char* delimiter;
 };
 /* private */struct StructurePrototype {
 	char* type;
@@ -91,296 +105,67 @@ union ResultValue<T, X> {
 };
 /* private static */struct Iterators {
 };
-/* public */struct Main {/* 
-
-    private record Some<T>(T value) implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
-        @Override
-        public T orElse(T other) {
-            return this.value;
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return this;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return this.value;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return predicate.test(this.value) ? this : new None<>();
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-            consumer.accept(this.value);
-        }
-    } *//* 
-
-    private record None<T>() implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true;
-        }
-
-        @Override
-        public T orElse(T other) {
-            return other;
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other.get();
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return other.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return new None<>();
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-        }
-    } *//* 
-
-    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        public Joiner() {
-            this("");
-        }
-
-        @Override
-        public Option<String> createInitial() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
-        }
-    } *//* 
-
-    private record InfixSplitter(String infix,
-                                 BiFunction<String, String, Option<Integer>> locator) implements Splitter {
-        @Override
-        public Option<Tuple<String, String>> split(String input) {
-            return this.apply(input).map(classIndex -> {
-                var beforeKeyword = input.substring(0, classIndex);
-                var afterKeyword = input.substring(classIndex + this.length());
-                return new Tuple<>(beforeKeyword, afterKeyword);
-            });
-        }
-
-        private int length() {
-            return this.infix.length();
-        }
-
-        private Option<Integer> apply(String input) {
-            return this.locator().apply(input, this.infix);
-        }
-    } *//* 
-
-    private record Definition(Option<String> maybeBeforeType, Type type, String name) implements Parameter {
-        public Definition(Type type, String name) {
-            this(new None<>(), type, name);
-        }
-
-        public Definition mapName(Function<String, String> mapper) {
-            return new Definition(this.maybeBeforeType, this.type, mapper.apply(this.name));
-        }
-
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
-        }
-    } *//* 
-
-    private record Content(String input) implements Type, Parameter {
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return generatePlaceholder(this.input);
-        }
-    } *//* 
-
-    private record Functional(List<Type> arguments, Type returns) implements Type {
-        @Override
-        public String_ generate() {
-            return this.generateWithName("");
-        }
-
-        @Override
-        public String_ generateWithName(String name) {
-            var joinedArguments = this.arguments().iterate()
-                    .map(type -> type.generate().toSlice())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return this.returns.generate()
-                    .appendSlice(" (*")
-                    .appendSlice(name)
-                    .appendSlice(")(")
-                    .appendSlice(joinedArguments)
-                    .appendSlice(")");
-        }
-    } *//* 
-
-    private record Template(String base, List<Type> arguments) implements Type {
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            var generatedTuple = this.arguments().iterate()
-                    .map(type -> type.generate().toSlice())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return "template " + this.base() + "<" + generatedTuple + ">";
-        }
-    } *//* 
-
-    private record TypeParameter(String value) implements Type {
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return this.value;
-        }
-    } *//* 
-
-    private record Ref(Type type) implements Type {
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return this.type.generate().toSlice() + "*";
-        }
-    } *//* 
-
-    private record TupleType(List<Type> arguments) implements Type {
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return "(" + generateNodesAsValues(this.arguments) + ")";
-        }
-    } *//* 
-
-    private record StructRef(String input, List<String> typeParams) implements Type {
-        @Override
-        public String_ generate() {
-            var typeParamString = this.typeParams.iterate()
-                    .collect(new Joiner(", "))
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
-
-            return Strings.from("struct ")
-                    .appendSlice(this.input)
-                    .appendSlice(typeParamString);
-        }
-    } *//* 
-
-    private record Ok<T, X>(T value) implements Result<T, X> {
-    } *//* 
-
-    private record Err<T, X>(X error) implements Result<T, X> {
-    } *//* 
-
-    private record DividingSplitter(
-            BiFunction<DivideState, Character, DivideState> folder) implements Splitter {
-        @Override
-        public Option<Tuple<String, String>> split(String input) {
-            return divide(input, this.folder).removeLast().map(divisions -> {
-                var left1 = divisions.left;
-                if (left1.isEmpty()) {
-                    return new Tuple<>(divisions.right, "");
-                }
-
-                var left = left1.iterate().collect(new Joiner()).orElse("");
-                var right = divisions.right;
-                return new Tuple<>(left, right);
-            });
-        }
-    } *//* 
-
-    private enum Primitive implements Type {
-        Auto("auto"),
+/* private static */struct SingleHead<T> {
+	/* private final */ T value;
+	/* private boolean retrieved */ /* = */ false;
+};
+/* private */struct InfixSplitter {
+	char* infix;
+	template BiFunction<char*, char*, template Option<struct Integer>> locator;
+};
+/* private static */struct TypeSeparatorSplitter {
+};
+/* private */struct Definition {
+	template Option<char*> maybeBeforeType;
+	struct Type type;
+	char* name;
+};
+/* private */struct Content {
+	char* input;
+};
+/* private */struct Functional {
+	template List<struct Type> arguments;
+	struct Type returns;
+};
+/* private */struct Template {
+	char* base;
+	template List<struct Type> arguments;
+};
+/* private static */struct ListCollector<T> {
+};
+/* private */struct TypeParameter {
+	char* value;
+};
+/* private */struct Ref {
+	struct Type type;
+};
+/* private */struct TupleType {
+	template List<struct Type> arguments;
+};
+/* private */struct StructRef {
+	char* input;
+	template List<char*> typeParams;
+};
+/* private */struct Ok<T, X> {
+	struct T value;
+};
+/* private */struct Err<T, X> {
+	struct X error;
+};
+/* private */struct DividingSplitter {
+	template BiFunction<struct DivideState, /*  Character */, /*  DivideState */> folder;
+};
+/* private */struct Primitive {/* Auto("auto"),
         Void("void"),
         I8("char"),
-        I32("int");
-        private final String value;
+        I32("int"); */
+	/* private final */ char* value;/* 
 
         Primitive(String value) {
             this.value = value;
-        }
-
-        @Override
-        public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
-            return this.value;
-        }
-    } *//* 
+        } */
+};
+/* public */struct Main {/* 
 
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
     public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
@@ -391,6 +176,77 @@ union ResultValue<T, X> {
 /* @Actual
  private static */ struct String_ Strings::from(struct Strings this, char* value){
 	return /* new JavaString */(value);
+}
+/* @Override
+ public <R> */ template Option<struct R> Some::map(struct Some<T> this, /*  R */ (*mapper)(T)){
+	return /* new Some<> */(mapper.apply(this.value));
+}
+/* @Override
+ public */ int Some::isEmpty(struct Some<T> this){
+	return false;
+}
+/* @Override
+ public */ T Some::orElse(struct Some<T> this, T other){
+	return this.value;
+}
+/* @Override
+ public */ template Option<T> Some::or(struct Some<T> this, template Option<T> (*other)()){
+	return this;
+}
+/* @Override
+ public */ T Some::orElseGet(struct Some<T> this, T (*other)()){
+	return this.value;
+}
+/* @Override
+ public <R> */ template Option<struct R> Some::flatMap(struct Some<T> this, template Option<struct R> (*mapper)(T)){
+	return mapper.apply(this.value);
+}
+/* @Override
+ public */ template Option<T> Some::filter(struct Some<T> this, template Predicate<T> predicate){
+	return predicate.test(this.value) ? this : new None<>();
+}
+/* @Override
+ public */ int Some::isPresent(struct Some<T> this){
+	return true;
+}
+/* @Override
+ public */ void Some::ifPresent(struct Some<T> this, template Consumer<T> consumer){
+	consumer.accept(this.value);
+}
+/* @Override
+ public <R> */ template Option<struct R> None::map(struct None<T> this, /*  R */ (*mapper)(T)){
+	return /* new None<> */();
+}
+/* @Override
+ public */ int None::isEmpty(struct None<T> this){
+	return true;
+}
+/* @Override
+ public */ T None::orElse(struct None<T> this, T other){
+	return other;
+}
+/* @Override
+ public */ template Option<T> None::or(struct None<T> this, template Option<T> (*other)()){
+	return other.get();
+}
+/* @Override
+ public */ T None::orElseGet(struct None<T> this, T (*other)()){
+	return other.get();
+}
+/* @Override
+ public <R> */ template Option<struct R> None::flatMap(struct None<T> this, template Option<struct R> (*mapper)(T)){
+	return /* new None<> */();
+}
+/* @Override
+ public */ template Option<T> None::filter(struct None<T> this, template Predicate<T> predicate){
+	return /* new None<> */();
+}
+/* @Override
+ public */ int None::isPresent(struct None<T> this){
+	return false;
+}
+/* @Override
+ public */ void None::ifPresent(struct None<T> this, template Consumer<T> consumer){
 }
 /* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, /*  C */> collector){
 	return this.fold(collector.createInitial(), /*  collector::fold */);
@@ -418,18 +274,13 @@ union ResultValue<T, X> {
 /* public */ template Option<T> Iterator::next(struct Iterator<T> this){
 	return this.head.next();
 }
-/* private static final class RangeHead implements Head<Integer> {
- private final int length;
- private int counter = 0;
-
- */ struct private RangeHead(int length){/* this.length = length; *//* }
-
-        @Override
-        public Option<Integer> next() {
-            if (this.counter >= this.length) {
+struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.length = length; */
+}
+/* @Override
+ public */ template Option<struct Integer> RangeHead::next(struct RangeHead this){/* if (this.counter >= this.length) {
                 return new None<>();
             } *//* var value = this.counter; *//* this.counter++; */
-	return /* new Some<> */(value);/* } */
+	return /* new Some<> */(value);
 }
 /* public static <T> */ template List<struct T> Lists::of(struct Lists this, /* T... */ elements){
 	return /* new JavaList<> */(Arrays.asList(elements));
@@ -437,10 +288,20 @@ union ResultValue<T, X> {
 /* public static <T> */ template List<struct T> Lists::empty(struct Lists this){
 	return /* new JavaList<> */(/* new ArrayList<> */());
 }
-/* private static class EmptyHead<T> implements Head<T> {
- @Override
- public */ template Option<struct T> next(){
-	return /* new None<> */();/* } */
+/* @Override
+ public */ template Option<T> EmptyHead::next(struct EmptyHead<T> this){
+	return /* new None<> */();
+}
+struct public Joiner::Joiner(struct Joiner this){
+	this(/* "" */);
+}
+/* @Override
+ public */ template Option<char*> Joiner::createInitial(struct Joiner this){
+	return /* new None<> */();
+}
+/* @Override
+ public */ template Option<char*> Joiner::fold(struct Joiner this, template Option<char*> current, char* element){
+	return /* new Some<> */(current.map(/* inner -> inner + this */.delimiter + element).orElse(element));
 }
 struct public CompileState::CompileState(struct CompileState this){
 	this(Lists.empty(), Lists.empty(), /* new None<> */());
@@ -513,22 +374,29 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 /* public static <T> */ template Iterator<struct T> Iterators::fromOptions(struct Iterators this, template Option<struct T> option){
 	return /* new Iterator<> */(option.<Head<T>>map(/* SingleHead::new */).orElseGet(/* EmptyHead::new */));
 }
-/* private static class SingleHead<T> implements Head<T> {
- private final T value;
- private boolean retrieved = false;
-
- */ struct public SingleHead(struct T value){/* this.value = value; *//* }
-
-        @Override
-        public Option<T> next() {
-            if (this.retrieved) {
+struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; */
+}
+/* @Override
+ public */ template Option<T> SingleHead::next(struct SingleHead<T> this){/* if (this.retrieved) {
                 return new None<>();
             } *//* this.retrieved = true; */
-	return /* new Some<> */(this.value);/* } */
+	return /* new Some<> */(this.value);
 }
-/* private static class TypeSeparatorSplitter implements Splitter {
- @Override
- public */ template Option<(char*, char*)> split(char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
+/* @Override
+ public */ template Option<(char*, char*)> InfixSplitter::split(struct InfixSplitter this, char* input){/* return this.apply(input).map(classIndex -> {
+                var beforeKeyword = input.substring(0, classIndex);
+                var afterKeyword = input.substring(classIndex + this.length());
+                return new Tuple<>(beforeKeyword, afterKeyword);
+            } *//* ); */
+}
+/* private */ int InfixSplitter::length(struct InfixSplitter this){
+	return this.infix.length();
+}
+/* private */ template Option<struct Integer> InfixSplitter::apply(struct InfixSplitter this, char* input){
+	return this.locator().apply(input, this.infix);
+}
+/* @Override
+ public */ template Option<(char*, char*)> TypeSeparatorSplitter::split(struct TypeSeparatorSplitter this, char* input){/* return divide(input, TypeSeparatorSplitter::fold).removeLast().flatMap(segments -> {
                 var left = segments.left;
                 if (left.isEmpty()) {
                     return new None<>();
@@ -537,10 +405,9 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
                 var beforeType = left.iterate().collect(new Joiner(" ")).orElse("");
                 var type = segments.right;
                 return new Some<>(new Tuple<>(beforeType, type));
-            } *//* ); *//* }
-
-        private static DivideState fold(DivideState state, char c) {
-            if (c == ' ' && state.isLevel()) {
+            } *//* ); */
+}
+/* private static */ struct DivideState TypeSeparatorSplitter::fold(struct TypeSeparatorSplitter this, struct DivideState state, struct char c){/* if (c == ' ' && state.isLevel()) {
                 return state.advance();
             } */
 	/* var appended = state */.append(c);/* if (c == '<') {
@@ -548,17 +415,98 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
             } *//* if (c == '>') {
                 return appended.exit();
             } */
-	return appended;/* } */
+	return appended;
 }
-/* private static class ListCollector<T> implements Collector<T, List<T>> {
- @Override
- public */ template List<struct T> createInitial(){
+struct public Definition::Definition(struct Definition this, struct Type type, char* name){
+	this(/* new None<> */(), type, name);
+}
+/* public */ struct Definition Definition::mapName(struct Definition this, char* (*mapper)(char*)){
+	return /* new Definition */(this.maybeBeforeType, this.type, mapper.apply(this.name));
+}
+/* @Override
+ public */ struct String_ Definition::generate(struct Definition this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* Definition::generate0(struct Definition this){
+	/* var beforeTypeString = this */.maybeBeforeType.map(/* beforeType -> generatePlaceholder(beforeType) + " " */).orElse(/* "" */);
+	return /* beforeTypeString + this */.type.generateWithName(this.name).toSlice();
+}
+/* @Override
+ public */ struct String_ Content::generate(struct Content this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* Content::generate0(struct Content this){
+	return generatePlaceholder(this.input);
+}
+/* @Override
+ public */ struct String_ Functional::generate(struct Functional this){
+	return this.generateWithName(/* "" */);
+}
+/* @Override
+ public */ struct String_ Functional::generateWithName(struct Functional this, char* name){
+	/* var joinedArguments = this */.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
+	return this.returns.generate().appendSlice(/* " (*" */).appendSlice(name).appendSlice(/* ")(" */).appendSlice(joinedArguments).appendSlice(/* ")" */);
+}
+/* @Override
+ public */ struct String_ Template::generate(struct Template this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* Template::generate0(struct Template this){
+	/* var generatedTuple = this */.arguments(/* ) */.iterate().map(/* type -> type */.generate(/* ) */.toSlice()).collect(/* new Joiner */(/* ", " */)).orElse(/* "" */);
+	return /* "template " + this */.base() + "<" + generatedTuple + ">";
+}
+/* @Override
+ public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
 	return Lists.empty();
-	/* }
+}
+/* @Override
+ public */ template List<T> ListCollector::fold(struct ListCollector<T> this, template List<T> current, T element){
+	return current.addLast(element);
+}
+/* @Override
+ public */ struct String_ TypeParameter::generate(struct TypeParameter this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* TypeParameter::generate0(struct TypeParameter this){
+	return this.value;
+}
+/* @Override
+ public */ struct String_ Ref::generate(struct Ref this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* Ref::generate0(struct Ref this){
+	return this.type.generate().toSlice() + "*";
+}
+/* @Override
+ public */ struct String_ TupleType::generate(struct TupleType this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* TupleType::generate0(struct TupleType this){
+	return /* "(" + generateNodesAsValues(this */.arguments) + ")";
+}
+/* @Override
+ public */ struct String_ StructRef::generate(struct StructRef this){
+	/* var typeParamString = this */.typeParams.iterate().collect(/* new Joiner */(/* ", " */)).map(/* inner -> "<" + inner + ">" */).orElse(/* "" */);
+	return Strings.from(/* "struct " */).appendSlice(this.input).appendSlice(typeParamString);
+}
+/* @Override
+ public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){/* return divide(input, this.folder).removeLast().map(divisions -> {
+                var left1 = divisions.left;
+                if (left1.isEmpty()) {
+                    return new Tuple<>(divisions.right, "");
+                }
 
-        @Override
-        public List<T> fold(List<T> current, T element) {
-            return current */.addLast(element);/* } */
+                var left = left1.iterate().collect(new Joiner()).orElse("");
+                var right = divisions.right;
+                return new Tuple<>(left, right);
+            } *//* ); */
+}
+/* @Override
+ public */ struct String_ Primitive::generate(struct Primitive this){
+	return Strings.from(this.generate0());
+}
+/* private */ char* Primitive::generate0(struct Primitive this){
+	return this.value;
 }
 /* public static */ void main(){
 	run().ifPresent(/* Throwable::printStackTrace */);
@@ -660,6 +608,15 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
         } */
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
+	return or(state, beforeContent, Lists.of(
+                (state0, /*  s) -> structureWithImplements(type, state0, beforeKeyword, s, variants, withEnd),
+                (state0, s) -> structureWithoutImplements(type, state0, beforeKeyword, s, variants, withEnd)
+        ) */);
+}
+/* private static */ template Option<(struct CompileState, char*)> structureWithImplements(char* type, struct CompileState state0, char* beforeKeyword, char* s, template List<char*> variants, char* withEnd){
+	return first(s, /*  " implements " */, /*  (s1 */, /*  s2) -> structureWithoutImplements(type, state0, beforeKeyword, s1, variants, withEnd) */);
+}
+/* private static */ template Option<(struct CompileState, char*)> structureWithoutImplements(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return or(state, beforeContent, Lists.of(
                 (state1, /*  s) -> structureWithExtends(type, beforeKeyword, beforeContent, variants, withEnd, state1),
                 (state2, s) -> structureWithoutExtends(type, state2, beforeKeyword, s, variants, withEnd)
