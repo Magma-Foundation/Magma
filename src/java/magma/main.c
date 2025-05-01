@@ -229,6 +229,7 @@ union OptionValue<T> {
 
     private enum Primitive implements Type {
         Auto("auto"),
+        Void("void"),
         I8("char"),
         I32("int");
         private final String value;
@@ -469,7 +470,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
  public */ template List<struct T> ListCollector::fold(struct ListCollector<T> implements Collector<T, List<T>> this, template List<struct T> current, struct T element){
 	return /* current.addLast(element) */;
 }
-/* public static */ struct void main(){/* try {
+/* public static */ void main(){/* try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
 
@@ -893,6 +894,8 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 }
 /* private static */ template Option<(struct CompileState, /*  Type */)> primitive(struct CompileState state, char* input){/* var stripped = input.strip(); *//* if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Some<>(new Tuple<>(state, Primitive.I32));
+        } *//* if (stripped.equals("void")) {
+            return new Some<>(new Tuple<>(state, Primitive.Void));
         } */
 	return /* new None<>() */;
 }

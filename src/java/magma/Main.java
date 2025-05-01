@@ -630,6 +630,7 @@ public class Main {
 
     private enum Primitive implements Type {
         Auto("auto"),
+        Void("void"),
         I8("char"),
         I32("int");
         private final String value;
@@ -1264,6 +1265,10 @@ public class Main {
         var stripped = input.strip();
         if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Some<>(new Tuple<>(state, Primitive.I32));
+        }
+
+        if (stripped.equals("void")) {
+            return new Some<>(new Tuple<>(state, Primitive.Void));
         }
 
         return new None<>();
