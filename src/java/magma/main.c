@@ -161,18 +161,15 @@
     } *//* 
 
     private static Tuple<CompileState, String> compileRootSegment */(/* CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Tuple<>(state, "");
-        }
-
-        return compileWhitespace(state, stripped)
-                .or(() -> compileStructure(state, stripped, "class "))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+        return compileOr(state, input, List.of(
+                Main::compileWhitespace,
+                Main::compileNamespaced,
+                structure("class ")
+        ));
     } *//* 
 
-    private static Optional<Tuple<CompileState, String>> compileStructure */(/* CompileState state, String input, String infix) {
-        return compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> structure */(/* String infix) {
+        return (state, input) -> compileInfix(input, infix, (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content -> {
                     var tuple = compileAll(state, content, Main::compileStructSegment);
@@ -183,11 +180,34 @@
         });
     } *//* 
 
+    private static Tuple<CompileState, String> compileOr */(/* 
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> actions
+    ) {
+        for (var action : actions) {
+            var result = action.apply(state, input);
+            if (result.isPresent()) {
+                return result.get();
+            }
+        }
+
+        return new Tuple<>(state, generatePlaceholder(input));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileNamespaced */(/* CompileState state, String input) {
+        if (input.strip().startsWith("package ") || input.strip().startsWith("import ")) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
+    } *//* 
+
     private static Tuple<CompileState, String> compileStructSegment */(/* CompileState state, String input) {
-        return compileWhitespace(state, input)
-                .or(() -> compileStructure(state, input, "record "))
-                .or(() -> compileMethod(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileOr(state, input, List.of(
+                Main::compileWhitespace,
+                structure("record "),
+                Main::compileMethod
+        ));
     } *//* 
 
     private static Optional<Tuple<CompileState, String>> compileWhitespace */(/* CompileState state, String input) {
