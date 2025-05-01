@@ -32,6 +32,8 @@ public class Main {
         List<T> addLast(T element);
 
         Iterator<T> iterate();
+
+        Option<Tuple<List<T>, T>> removeLast();
     }
 
     private interface Collector<T, C> {
@@ -41,6 +43,10 @@ public class Main {
     }
 
     private @interface External {
+    }
+
+    private interface Locator {
+        Option<Tuple<String, String>> split(String input);
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -183,6 +189,17 @@ public class Main {
         public Iterator<T> iterate() {
             return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
         }
+
+        @Override
+        public Option<Tuple<List<T>, T>> removeLast() {
+            if (this.list.isEmpty()) {
+                return new None<>();
+            }
+
+            var slice = this.list.subList(0, this.list.size() - 1);
+            var last = this.list.getLast();
+            return new Some<>(new Tuple<>(new JavaList<>(new ArrayList<>(slice)), last));
+        }
     }
 
     private static class Lists {
@@ -202,7 +219,11 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Option<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        public Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -210,7 +231,7 @@ public class Main {
 
         @Override
         public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + element).orElse(element));
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -313,6 +334,50 @@ public class Main {
 
             this.retrieved = true;
             return new Some<>(this.value);
+        }
+    }
+
+    private record InfixLocator(String infix, BiFunction<String, String, Option<Integer>> locator) implements Locator {
+        @Override
+        public Option<Tuple<String, String>> split(String input) {
+            return this.apply(input).map(classIndex -> {
+                var beforeKeyword = input.substring(0, classIndex);
+                var afterKeyword = input.substring(classIndex + this.length());
+                return new Tuple<>(beforeKeyword, afterKeyword);
+            });
+        }
+
+        private int length() {
+            return this.infix.length();
+        }
+
+        private Option<Integer> apply(String input) {
+            return this.locator().apply(input, this.infix);
+        }
+    }
+
+    private static class TypeSeparatorLocator implements Locator {
+        @Override
+        public Option<Tuple<String, String>> split(String input) {
+            return divide(input, TypeSeparatorLocator::fold).removeLast().map(segments -> {
+                var beforeType = segments.left.iterate().collect(new Joiner(" ")).orElse("");
+                var type = segments.right;
+                return new Tuple<>(beforeType, type);
+            });
+        }
+
+        private static DivideState fold(DivideState state, char c) {
+            if (c == ' ' && state.isLevel()) {
+                return state.advance();
+            }
+            var appended = state.append(c);
+            if (c == '<') {
+                return appended.enter();
+            }
+            if (c == '>') {
+                return appended.exit();
+            }
+            return appended;
         }
     }
 
@@ -622,14 +687,14 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definition(CompileState state, String input) {
-        return infix(input.strip(), " ", Main::lastIndexOfSlice, (beforeName, name) -> {
+        return infix(input.strip(), new InfixLocator(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
 
             return or(state, beforeName.strip(), Lists.of(
-                    (instance, beforeName0) -> compileDefinitionWithTypeSeparator(instance, beforeName0, name),
-                    (instance, beforeName0) -> compileDefinitionWithoutTypeSeparator(instance, beforeName0, name)
+                    (instance, beforeName0) -> definitionWithTypeSeparator(instance, beforeName0, name),
+                    (instance, beforeName0) -> definitionWithoutTypeSeparator(instance, beforeName0, name)
             ));
         });
     }
@@ -645,13 +710,13 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompileState, String>> compileDefinitionWithoutTypeSeparator(CompileState instance, String type, String name) {
+    private static Option<Tuple<CompileState, String>> definitionWithoutTypeSeparator(CompileState instance, String type, String name) {
         var generated = generatePlaceholder(type) + " " + name.strip();
         return new Some<>(new Tuple<CompileState, String>(instance, generated));
     }
 
-    private static Option<Tuple<CompileState, String>> compileDefinitionWithTypeSeparator(CompileState instance, String beforeName, String name) {
-        return infix(beforeName, " ", Main::lastIndexOfSlice, (beforeType, typeString) -> {
+    private static Option<Tuple<CompileState, String>> definitionWithTypeSeparator(CompileState instance, String beforeName, String name) {
+        return infix(beforeName, new TypeSeparatorLocator(), (beforeType, typeString) -> {
             var generated = generatePlaceholder(beforeType) + " " + generatePlaceholder(typeString) + " " + name.strip();
             return new Some<>(new Tuple<CompileState, String>(instance, generated));
         });
@@ -683,14 +748,12 @@ public class Main {
     }
 
     private static <T> Option<T> first(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return infix(input, infix, Main::firstIndexOfSlice, mapper);
+        return infix(input, new InfixLocator(infix, Main::firstIndexOfSlice), mapper);
     }
 
-    private static <T> Option<T> infix(String input, String infix, BiFunction<String, String, Option<Integer>> locator, BiFunction<String, String, Option<T>> mapper) {
-        return locator.apply(input, infix).flatMap(classIndex -> {
-            var beforeKeyword = input.substring(0, classIndex);
-            var afterKeyword = input.substring(classIndex + infix.length());
-            return mapper.apply(beforeKeyword, afterKeyword);
+    private static <T> Option<T> infix(String input, Locator locator, BiFunction<String, String, Option<T>> mapper) {
+        return locator.split(input).flatMap(tuple -> {
+            return mapper.apply(tuple.left, tuple.right);
         });
     }
 
