@@ -266,11 +266,11 @@ public class Main {
         return buffer.append(", ").append(element);
     }
 
-    private static Optional<Tuple<CompileState, String>> compileParameter(CompileState instance, String s) {
-        return or(instance, s, List.of(
+    private static Optional<Tuple<CompileState, String>> compileParameter(CompileState instance, String paramString) {
+        return or(instance, paramString, List.of(
                 Main::compileDefinition,
                 Main::compileContent
-        ));
+        )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";"));
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {

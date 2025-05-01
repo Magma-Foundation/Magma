@@ -1,10 +1,20 @@
-/* private */struct CompileState {/* JavaList<String> */ structs, /* JavaList<String> */ functions
+/* private */struct CompileState {
+	/* JavaList<String> */ structs;, 
+	/* JavaList<String> */ functions;
 };
-/* private */struct DivideState {/* String */ input, /* JavaList<String> */ segments, /* StringBuilder */ buffer, /* int */ index, /* int */ depth
+/* private */struct DivideState {
+	/* String */ input;, 
+	/* JavaList<String> */ segments;, 
+	/* StringBuilder */ buffer;, 
+	/* int */ index;, 
+	/* int */ depth;
 };
-/* private */struct Tuple<A, B> {/* A */ left, /* B */ right
+/* private */struct Tuple<A, B> {
+	/* A */ left;, 
+	/* B */ right;
 };
-/* private */struct JavaList<T> {/* List<T> */ list
+/* private */struct JavaList<T> {
+	/* List<T> */ list;
 };
 /* public */struct Main {
 };
@@ -171,10 +181,10 @@
             return buffer.append(element);
         } *//* return buffer.append(", ").append(element); *//*  */
 }
-/* private static Optional<Tuple<CompileState, */ /* String>> */ compileParameter(/* CompileState instance, String s */){/* return or(instance, s, List.of(
+/* private static Optional<Tuple<CompileState, */ /* String>> */ compileParameter(/* CompileState instance, String paramString */){/* return or(instance, paramString, List.of(
                 Main::compileDefinition,
                 Main::compileContent
-        )); *//*  */
+        )).map(value -> new Tuple<>(value.left, "\n\t" + value.right + ";")); *//*  */
 }
 /* private static */ /* DivideState */ foldValueChar(/* DivideState state, char c */){/* if (c == ',') {
             return state.advance();
