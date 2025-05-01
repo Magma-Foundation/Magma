@@ -40,10 +40,23 @@ public class Main {
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(generatePlaceholder(segment));
+            output.append(compileRootSegment(segment));
         }
 
         return output.toString();
+    }
+
+    private static String compileRootSegment(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return "";
+        }
+
+        return generatePlaceholder(stripped);
+    }
+
+    private static String generatePlaceholder(String input) {
+        return "/* " + input + " */";
     }
 
     private static List<String> divide(String input) {
@@ -61,9 +74,5 @@ public class Main {
             return appended.advance();
         }
         return appended;
-    }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
     }
 }
