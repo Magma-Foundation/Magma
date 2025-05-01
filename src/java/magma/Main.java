@@ -26,6 +26,9 @@ public class Main {
         C fold(C current, T element);
     }
 
+    private @interface External {
+    }
+
     private static final class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0;
@@ -45,6 +48,7 @@ public class Main {
         }
     }
 
+    @External
     private record JavaList<T>(java.util.List<T> list) implements List<T> {
         public JavaList() {
             this(new ArrayList<>());
@@ -381,6 +385,15 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> structure(String infix) {
         return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
+            var slices = Arrays.stream(beforeKeyword.split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
+
+            if (slices.contains("@External")) {
+                return Optional.empty();
+            }
+
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, Lists.of(
                         (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),

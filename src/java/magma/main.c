@@ -1,5 +1,3 @@
-/* private */struct JavaList<T>(java.util.List<T> list) implements List<T> {
-};
 /* private */struct Iterator<T> {
 	/* Head<T> */ head;
 };
@@ -32,6 +30,28 @@
         C createInitial();
 
         C fold(C current, T element);
+    } *//* 
+
+    private @interface External {
+    } *//* 
+
+    @External
+    private record JavaList<T>(java.util.List<T> list) implements List<T> {
+        public JavaList() {
+            this(new ArrayList<>());
+        }
+
+        @Override
+        public List<T> addLast(T element) {
+            var copy = new ArrayList<>(this.list);
+            copy.add(element);
+            return new JavaList<>(copy);
+        }
+
+        @Override
+        public Iterator<T> iterate() {
+            return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get);
+        }
     } */
 };
 /* private static final class RangeHead implements Head<Integer> {
@@ -45,14 +65,6 @@
             if (this.counter >= this.length) {
                 return Optional.empty();
             } *//* var value = this.counter; *//* this.counter++; *//* return Optional.of(value); *//* } */
-}
-/* public */ JavaList(/*  */){/* this(new ArrayList<>()); *//*  */
-}
-/* @Override
-        public */ /* List<T> */ addLast(/* T element */){/* var copy = new ArrayList<>(this.list); *//* copy.add(element); *//* return new JavaList<>(copy); *//*  */
-}
-/* @Override
-        public */ /* Iterator<T> */ iterate(/*  */){/* return new Iterator<>(new RangeHead(this.list.size())).map(this.list::get); *//*  */
 }
 /* private static class Lists {
         public static <T> */ /* List<T> */ of(/* T... elements */){/* return new JavaList<>(Arrays.asList(elements)); *//* }
@@ -253,6 +265,15 @@
         )); *//*  */
 }
 /* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, */ /* String>>> */ structure(/* String infix */){/* return (state, input) -> first(input, infix, (beforeKeyword, afterKeyword) -> {
+            var slices = Arrays.stream(beforeKeyword.split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
+
+            if (slices.contains("@External")) {
+                return Optional.empty();
+            }
+
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return or(state, beforeContent, Lists.of(
                         (instance, before) -> structureWithParams(beforeKeyword, withEnd, instance, before),
