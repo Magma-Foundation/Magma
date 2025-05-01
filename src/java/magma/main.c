@@ -33,6 +33,12 @@ union OptionValue<T> {
 	S _super;
 	template Option<(char*, char*)> (*split)(S, char*);
 };
+/* private */struct Type<S> {
+	S _super;
+};
+/* private */struct Parameter<S> {
+	S _super;
+};
 /* private */struct Node<S> {
 	S _super;
 	struct String_ (*generate)(S);
@@ -87,9 +93,6 @@ union ResultValue<T, X> {
 /* private */struct Err<T, X>(X error) implements Result<T, X> {
 };
 /* public */struct Main {/* 
-
-    private interface Parameter extends Node {
-    } *//* 
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
         public Joiner() {
@@ -284,9 +287,8 @@ union ResultValue<T, X> {
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
     public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 };
-/* private interface Type extends Node {
- default */ struct String_ generateWithName(char* name){
-	return /* this */.generate().appendSlice(/* " " */).appendSlice(/* name */);/* } */
+/* default */ struct String_ Type::generateWithName(struct Type this, char* name){
+	return /* this */.generate().appendSlice(/* " " */).appendSlice(/* name */);
 }
 /* @Actual
  private static */ struct String_ Strings::from(struct Strings this, char* value){
@@ -619,6 +621,15 @@ struct public SingleHead::SingleHead(struct SingleHead<T> implements Head<T> thi
 	return /* new Some<> */(/* new Tuple<>(state */, /* value */.strip(/* ) */));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithoutVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
+	return /* or */(/* state */, /*  beforeContent */, /*  Lists */.of(
+                (state1, /*  s) -> structureWithExtends(type, beforeKeyword, beforeContent, variants, withEnd, state1),
+                (state2, s) -> structureWithoutExtends(type, state2, beforeKeyword, s, variants, withEnd)
+        ) */);
+}
+/* private static */ template Option<(struct CompileState, char*)> structureWithExtends(char* type, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd, struct CompileState state1){
+	return /* first */(/* beforeContent */, /*  " extends " */, /*  (s1 */, /*  s2) -> structureWithoutExtends(type, state1, beforeKeyword, s1, variants, withEnd) */);
+}
+/* private static */ template Option<(struct CompileState, char*)> structureWithoutExtends(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, template List<char*> variants, char* withEnd){
 	return /* or */(/* state */, /*  beforeContent */, /*  Lists */.of(
                 (instance, /* before) -> structureWithParams(type, instance, beforeKeyword, before, variants, withEnd),
                 (instance, before) -> structureWithoutParams(type, instance, beforeKeyword, before */.strip(), Lists.empty(/* ) */, /*  variants */, /*  withEnd)
