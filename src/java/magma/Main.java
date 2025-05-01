@@ -614,10 +614,17 @@ public class Main {
         }
     }
 
-    private record StructRef(String input) implements Type {
+    private record StructRef(String input, List<String> typeParams) implements Type {
         @Override
         public String_ generate() {
-            return Strings.from("struct ").appendSlice(this.input);
+            var typeParamString = this.typeParams.iterate()
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+
+            return Strings.from("struct ")
+                    .appendSlice(this.input)
+                    .appendSlice(typeParamString);
         }
     }
 
@@ -1117,7 +1124,7 @@ public class Main {
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
                     var newParameters = state.maybeStructureType
-                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name), "this")))
+                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name, structType.typeParams), "this")))
                             .orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
@@ -1220,7 +1227,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Type>> structureType(CompileState state, String input) {
         if (isSymbol(input)) {
-            return new Some<>(new Tuple<>(state, new StructRef(input)));
+            return new Some<>(new Tuple<>(state, new StructRef(input, Lists.empty())));
         }
         else {
             return new None<>();

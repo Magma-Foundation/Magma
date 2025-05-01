@@ -101,7 +101,7 @@ union OptionValue<T> {
 };
 /* private */struct TupleType(List<Type> arguments) implements Type {
 };
-/* private */struct StructRef(String input) implements Type {
+/* private */struct StructRef(String input, List<String> typeParams) implements Type {
 };
 /* private */struct Primitive implements Type {/* Auto("auto"),
         I8("char"),
@@ -165,73 +165,73 @@ union OptionValue<T> {
 	return /* new JavaString(value) */;
 }
 /* @Override
- public <R> */ template Option<struct R> map_Some(struct Some this, /*  R */ (*mapper)(struct T)){
+ public <R> */ template Option<struct R> map_Some(struct Some<T>(T value) implements Option<T> this, /*  R */ (*mapper)(struct T)){
 	return /* new Some<>(mapper.apply(this.value)) */;
 }
 /* @Override
- public */ int isEmpty_Some(struct Some this){
+ public */ int isEmpty_Some(struct Some<T>(T value) implements Option<T> this){
 	return /* false */;
 }
 /* @Override
- public */ struct T orElse_Some(struct Some this, struct T other){
+ public */ struct T orElse_Some(struct Some<T>(T value) implements Option<T> this, struct T other){
 	return /* this.value */;
 }
 /* @Override
- public */ template Option<struct T> or_Some(struct Some this, template Option<struct T> (*other)()){
+ public */ template Option<struct T> or_Some(struct Some<T>(T value) implements Option<T> this, template Option<struct T> (*other)()){
 	return /* this */;
 }
 /* @Override
- public */ struct T orElseGet_Some(struct Some this, struct T (*other)()){
+ public */ struct T orElseGet_Some(struct Some<T>(T value) implements Option<T> this, struct T (*other)()){
 	return /* this.value */;
 }
 /* @Override
- public <R> */ template Option<struct R> flatMap_Some(struct Some this, template Option<struct R> (*mapper)(struct T)){
+ public <R> */ template Option<struct R> flatMap_Some(struct Some<T>(T value) implements Option<T> this, template Option<struct R> (*mapper)(struct T)){
 	return /* mapper.apply(this.value) */;
 }
 /* @Override
- public */ template Option<struct T> filter_Some(struct Some this, template Predicate<struct T> predicate){
+ public */ template Option<struct T> filter_Some(struct Some<T>(T value) implements Option<T> this, template Predicate<struct T> predicate){
 	return /* predicate.test(this.value) ? this : new None<>() */;
 }
 /* @Override
- public */ int isPresent_Some(struct Some this){
+ public */ int isPresent_Some(struct Some<T>(T value) implements Option<T> this){
 	return /* true */;
 }
 /* @Override
- public <R> */ template Option<struct R> map_None(struct None this, /*  R */ (*mapper)(struct T)){
+ public <R> */ template Option<struct R> map_None(struct None<T>() implements Option<T> this, /*  R */ (*mapper)(struct T)){
 	return /* new None<>() */;
 }
 /* @Override
- public */ int isEmpty_None(struct None this){
+ public */ int isEmpty_None(struct None<T>() implements Option<T> this){
 	return /* true */;
 }
 /* @Override
- public */ struct T orElse_None(struct None this, struct T other){
+ public */ struct T orElse_None(struct None<T>() implements Option<T> this, struct T other){
 	return /* other */;
 }
 /* @Override
- public */ template Option<struct T> or_None(struct None this, template Option<struct T> (*other)()){
+ public */ template Option<struct T> or_None(struct None<T>() implements Option<T> this, template Option<struct T> (*other)()){
 	return /* other.get() */;
 }
 /* @Override
- public */ struct T orElseGet_None(struct None this, struct T (*other)()){
+ public */ struct T orElseGet_None(struct None<T>() implements Option<T> this, struct T (*other)()){
 	return /* other.get() */;
 }
 /* @Override
- public <R> */ template Option<struct R> flatMap_None(struct None this, template Option<struct R> (*mapper)(struct T)){
+ public <R> */ template Option<struct R> flatMap_None(struct None<T>() implements Option<T> this, template Option<struct R> (*mapper)(struct T)){
 	return /* new None<>() */;
 }
 /* @Override
- public */ template Option<struct T> filter_None(struct None this, template Predicate<struct T> predicate){
+ public */ template Option<struct T> filter_None(struct None<T>() implements Option<T> this, template Predicate<struct T> predicate){
 	return /* new None<>() */;
 }
 /* @Override
- public */ int isPresent_None(struct None this){
+ public */ int isPresent_None(struct None<T>() implements Option<T> this){
 	return /* false */;
 }
-/* public <C> */ struct C collect_Iterator(struct Iterator this, template Collector<T, /*  C */> collector){
+/* public <C> */ struct C collect_Iterator(struct Iterator<T> this, template Collector<T, /*  C */> collector){
 	return /* this.fold(collector.createInitial(), collector::fold) */;
 }
-/* private <C> */ struct C fold_Iterator(struct Iterator this, struct C initial, template BiFunction<struct C, T, /*  C */> folder){/* var current = initial; *//* while (true) {
+/* private <C> */ struct C fold_Iterator(struct Iterator<T> this, struct C initial, template BiFunction<struct C, T, /*  C */> folder){/* var current = initial; *//* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
                 if (maybeNext.isEmpty()) {
@@ -242,22 +242,22 @@ union OptionValue<T> {
                 }
             } */
 }
-/* public <R> */ template Iterator<struct R> flatMap_Iterator(struct Iterator this, template Iterator<struct R> (*mapper)(T)){
+/* public <R> */ template Iterator<struct R> flatMap_Iterator(struct Iterator<T> this, template Iterator<struct R> (*mapper)(T)){
 	return /* this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat) */;
 }
-/* public <R> */ template Iterator<struct R> map_Iterator(struct Iterator this, /*  R */ (*mapper)(T)){
+/* public <R> */ template Iterator<struct R> map_Iterator(struct Iterator<T> this, /*  R */ (*mapper)(T)){
 	return /* new Iterator<>(() -> this.head.next().map(mapper)) */;
 }
-/* private */ template Iterator<T> concat_Iterator(struct Iterator this, template Iterator<T> other){
+/* private */ template Iterator<T> concat_Iterator(struct Iterator<T> this, template Iterator<T> other){
 	return /* new Iterator<>(() -> this.head.next().or(other::next)) */;
 }
-/* public */ template Option<T> next_Iterator(struct Iterator this){
+/* public */ template Option<T> next_Iterator(struct Iterator<T> this){
 	return /* this.head.next() */;
 }
-struct private RangeHead_RangeHead implements Head(struct RangeHead implements Head this, int length){/* this.length = length; */
+struct private RangeHead_RangeHead implements Head(struct RangeHead implements Head<Integer> this, int length){/* this.length = length; */
 }
 /* @Override
- public */ template Option<Integer> next_RangeHead implements Head(struct RangeHead implements Head this){/* if (this.counter >= this.length) {
+ public */ template Option<Integer> next_RangeHead implements Head(struct RangeHead implements Head<Integer> this){/* if (this.counter >= this.length) {
                 return new None<>();
             } *//* var value = this.counter; *//* this.counter++; */
 	return /* new Some<>(value) */;
@@ -269,17 +269,17 @@ struct private RangeHead_RangeHead implements Head(struct RangeHead implements H
 	return /* new JavaList<>(new ArrayList<>()) */;
 }
 /* @Override
- public */ template Option<struct T> next_EmptyHead(struct EmptyHead this){
+ public */ template Option<struct T> next_EmptyHead(struct EmptyHead<T> implements Head<T> this){
 	return /* new None<>() */;
 }
-struct public Joiner_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector this){/* this(""); */
+struct public Joiner_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector<String, Option<String>> this){/* this(""); */
 }
 /* @Override
- public */ template Option<String> createInitial_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector this){
+ public */ template Option<String> createInitial_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector<String, Option<String>> this){
 	return /* new None<>() */;
 }
 /* @Override
- public */ template Option<String> fold_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector this, template Option<String> current, String element){
+ public */ template Option<String> fold_Joiner(String delimiter) implements Collector(struct Joiner(String delimiter) implements Collector<String, Option<String>> this, template Option<String> current, String element){
 	return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */;
 }
 struct public CompileState_CompileState(struct CompileState this){/* this(Lists.empty(), Lists.empty(), new None<>()); */
@@ -338,16 +338,16 @@ struct public DivideState_DivideState(struct DivideState this, char* input){/* t
 /* public */ int isShallow_DivideState(struct DivideState this){
 	return /* this.depth == 1 */;
 }
-/* public static <A, B, C> */ (A, /*  C */) (*mapRight_Tuple)((A, B))(struct Tuple this, /*  C */ (*mapper)(B)){
+/* public static <A, B, C> */ (A, /*  C */) (*mapRight_Tuple)((A, B))(struct Tuple<A, B> this, /*  C */ (*mapper)(B)){
 	return /* tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right)) */;
 }
 /* public static <T> */ template Iterator<struct T> fromOptions_Iterators(struct Iterators this, template Option<struct T> option){
 	return /* new Iterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new)) */;
 }
-struct public SingleHead_SingleHead(struct SingleHead this, struct T value){/* this.value = value; */
+struct public SingleHead_SingleHead(struct SingleHead<T> implements Head<T> this, struct T value){/* this.value = value; */
 }
 /* @Override
- public */ template Option<struct T> next_SingleHead(struct SingleHead this){/* if (this.retrieved) {
+ public */ template Option<struct T> next_SingleHead(struct SingleHead<T> implements Head<T> this){/* if (this.retrieved) {
                 return new None<>();
             } *//* this.retrieved = true; */
 	return /* new Some<>(this.value) */;
@@ -438,11 +438,11 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 	return /* "template " + this.base() + "<" + generatedTuple + ">" */;
 }
 /* @Override
- public */ template List<struct T> createInitial_ListCollector(struct ListCollector this){
+ public */ template List<struct T> createInitial_ListCollector(struct ListCollector<T> implements Collector<T, List<T>> this){
 	return /* Lists.empty() */;
 }
 /* @Override
- public */ template List<struct T> fold_ListCollector(struct ListCollector this, template List<struct T> current, struct T element){
+ public */ template List<struct T> fold_ListCollector(struct ListCollector<T> implements Collector<T, List<T>> this, template List<struct T> current, struct T element){
 	return /* current.addLast(element) */;
 }
 /* @Override
@@ -467,8 +467,13 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
 	return /* "(" + generateNodesAsValues(this.arguments) + ")" */;
 }
 /* @Override
- public */ struct String_ generate_StructRef(String input) implements Type(struct StructRef(String input) implements Type this){
-	return /* Strings.from("struct ").appendSlice(this.input) */;
+ public */ struct String_ generate_StructRef(String input, List<String> typeParams) implements Type(struct StructRef(String input, List<String> typeParams) implements Type this){/* var typeParamString = this.typeParams.iterate()
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse(""); */
+	return /* Strings.from("struct ")
+                    .appendSlice(this.input)
+                    .appendSlice(typeParamString) */;
 }
 /* @Override
  public */ struct String_ generate_Primitive implements Type(struct Primitive implements Type this){
@@ -760,7 +765,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
             return suffix(withoutStart1, "}", content -> {
                 return compileAll(state, content, Main::functionSegment).flatMap(tuple -> {
                     var newParameters = state.maybeStructureType
-                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name), "this")))
+                            .map(structType -> params.addFirst(new Definition(new StructRef(structType.name, structType.typeParams), "this")))
                             .orElse(params);
                     var paramStrings = generateNodesAsValues(newParameters);
 
@@ -845,7 +850,7 @@ struct public Definition_Definition(Option<String> maybeBeforeType, Type type, S
         )) */;
 }
 /* private static */ template Option<(struct CompileState, /*  Type */)> structureType(struct CompileState state, char* input){/* if (isSymbol(input)) {
-            return new Some<>(new Tuple<>(state, new StructRef(input)));
+            return new Some<>(new Tuple<>(state, new StructRef(input, Lists.empty())));
         } *//* else {
             return new None<>();
         } */
