@@ -375,6 +375,9 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
+        public static <A, B, C> Function<Tuple<A, B>, Tuple<A, C>> mapRight(Function<B, C> mapper) {
+            return tuple -> new Tuple<>(tuple.left, mapper.apply(tuple.right));
+        }
     }
 
     private static class Iterators {
@@ -449,6 +452,13 @@ public class Main {
                 return appended.exit();
             }
             return appended;
+        }
+    }
+
+    private record Definition(Option<String> maybeBeforeType, String type, String name) {
+        private String generate() {
+            var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
+            return beforeTypeString + this.type + " " + this.name;
         }
     }
 
@@ -663,7 +673,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState instance, String paramString) {
         return or(instance, paramString, Lists.of(
-                Main::definition,
+                (state, input) -> definition(state, input).map(Tuple.mapRight(Definition::generate)),
                 Main::content
         ));
     }
@@ -791,10 +801,10 @@ public class Main {
         return typeParams.isEmpty() ? "" : "<" + typeParams.iterate().collect(new Joiner(", ")).orElse("") + ">";
     }
 
-    private static Option<Tuple<CompileState, String>> or(
+    private static <T> Option<Tuple<CompileState, T>> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>> actions
+            List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> actions
     ) {
         return actions.iterate()
                 .map(action -> action.apply(state, input))
@@ -821,7 +831,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> definitionStatement(CompileState state, String input) {
-        return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(value -> {
+        return suffix(input.strip(), ";", withoutEnd -> definition(state, withoutEnd).map(Tuple.mapRight(Definition::generate)).map(value -> {
             var generated = "\n\t" + value.right + ";";
             return new Tuple<>(value.left, generated);
         }));
@@ -892,7 +902,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String definition) {
         return or(state, definition, Lists.of(
-                Main::definition,
+                (state1, input) -> definition(state1, input).map(Tuple.mapRight(Definition::generate)),
                 Main::content
         ));
     }
@@ -903,13 +913,13 @@ public class Main {
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> definition(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Definition>> definition(CompileState state, String input) {
         return infix(input.strip(), new InfixSplitter(" ", Main::lastIndexOfSlice), (beforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
 
-            return or(state, beforeName.strip(), Lists.of(
+            return Main.or(state, beforeName.strip(), Lists.of(
                     (instance, beforeName0) -> definitionWithTypeSeparator(instance, beforeName0, name),
                     (instance, beforeName0) -> definitionWithoutTypeSeparator(instance, beforeName0, name)
             ));
@@ -927,18 +937,17 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompileState, String>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
         return type(state, type).flatMap(typeTuple -> {
-            var generated = typeTuple.right + " " + name.strip();
-            return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
+            var definition = new Definition(new None<>(), typeTuple.right, name.strip());
+            return new Some<>(new Tuple<>(typeTuple.left, definition));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
-                var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + name.strip();
-                return new Some<>(new Tuple<CompileState, String>(typeTuple.left, generated));
+                return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
             });
         });
     }
