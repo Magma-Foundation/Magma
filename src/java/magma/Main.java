@@ -36,6 +36,8 @@ public class Main {
         Option<Tuple<List<T>, T>> removeLast();
 
         boolean isEmpty();
+
+        T get(int index);
     }
 
     private interface Collector<T, C> {
@@ -206,6 +208,11 @@ public class Main {
         @Override
         public boolean isEmpty() {
             return this.list.isEmpty();
+        }
+
+        @Override
+        public T get(int index) {
+            return this.list.get(index);
         }
     }
 
@@ -429,15 +436,23 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
-        var segments = divide(input, folder);
-
-        return segments.iterate()
-                .<Option<Tuple<CompileState, StringBuilder>>>fold(new Some<>(new Tuple<CompileState, StringBuilder>(initial, new StringBuilder())), (maybeCurrent, segment) -> maybeCurrent.flatMap(state -> foldElement(state, segment, mapper, merger)))
-                .map(result -> new Tuple<CompileState, String>(result.left, result.right.toString()));
+        return parseAll(initial, input, folder, mapper, merger).map(tuple -> new Tuple<>(tuple.left, generateAll(merger, tuple.right)));
     }
 
-    private static Option<Tuple<CompileState, StringBuilder>> foldElement(
-            Tuple<CompileState, StringBuilder> state,
+    private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> right) {
+        return right.iterate().fold(new StringBuilder(), merger).toString();
+    }
+
+    private static Option<Tuple<CompileState, List<String>>> parseAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return divide(input, folder)
+                .iterate()
+                .<Option<Tuple<CompileState, List<String>>>>fold(new Some<>(new Tuple<CompileState, List<String>>(initial, Lists.empty())),
+                        (maybeCurrent, segment) -> maybeCurrent.flatMap(
+                                state -> foldElement(state, segment, mapper, merger)));
+    }
+
+    private static Option<Tuple<CompileState, List<String>>> foldElement(
+            Tuple<CompileState, List<String>> state,
             String segment,
             BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper,
             BiFunction<StringBuilder, String, StringBuilder> merger
@@ -447,7 +462,7 @@ public class Main {
         return mapper.apply(oldState, segment).map(result -> {
             var newState = result.left;
             var newElement = result.right;
-            return new Tuple<>(newState, merger.apply(oldCache, newElement));
+            return new Tuple<>(newState, oldCache.addLast(newElement));
         });
     }
 
@@ -670,7 +685,15 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> values(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
-        return all(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+        return parseValues(state, input, compiler).map(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
+    }
+
+    private static String generateValues(List<String> values) {
+        return generateAll(Main::mergeValues, values);
+    }
+
+    private static Option<Tuple<CompileState, List<String>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
+        return parseAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static Option<Tuple<CompileState, String>> methodWithoutContent(CompileState state, String definition, String params, String content) {
@@ -757,8 +780,19 @@ public class Main {
     private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
         return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {
-                return values(state, argumentsString, Main::type).flatMap(arguments -> {
-                    return new Some<>(new Tuple<>(arguments.left, "template " + base + "<" + arguments.right + ">"));
+                return parseValues(state, argumentsString, Main::type).flatMap(argumentsTuple -> {
+                    var arguments = argumentsTuple.right;
+
+                    String generated;
+                    if (base.equals("Function")) {
+                        generated = arguments.get(1) + " (*)(" + arguments.get(0) + ")";
+                    }
+                    else {
+                        var generatedTuple = generateValues(arguments);
+                        generated = "template " + base + "<" + generatedTuple + ">";
+                    }
+
+                    return new Some<>(new Tuple<>(argumentsTuple.left, generated));
                 });
             });
         });
