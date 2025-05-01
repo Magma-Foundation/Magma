@@ -459,10 +459,10 @@ public class Main {
         }
     }
 
-    private record Definition(Option<String> maybeBeforeType, String type, String name) {
+    private record Definition(Option<String> maybeBeforeType, Type type, String name) {
         private String generate() {
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-            return beforeTypeString + this.type + " " + this.name;
+            return beforeTypeString + this.type.generate() + " " + this.name;
         }
     }
 
@@ -996,7 +996,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name) {
-        return type(state, type).map(Tuple.mapRight(Type::generate)).flatMap(typeTuple -> {
+        return type(state, type).flatMap(typeTuple -> {
             var definition = new Definition(new None<>(), typeTuple.right, name.strip());
             return new Some<>(new Tuple<>(typeTuple.left, definition));
         });
@@ -1004,7 +1004,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name) {
         return infix(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
-            return type(state, typeString).map(Tuple.mapRight(Type::generate)).flatMap(typeTuple -> {
+            return type(state, typeString).flatMap(typeTuple -> {
                 return new Some<>(new Tuple<>(typeTuple.left, new Definition(new Some<>(beforeType), typeTuple.right, name.strip())));
             });
         });
