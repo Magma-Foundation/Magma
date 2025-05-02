@@ -987,12 +987,17 @@ public class Main {
             }
 
             return first(afterKeyword, "{", (beforeContent, withEnd) -> {
-                return or(state, beforeContent, Lists.of(
-                        (state0, beforeContent0) -> structureWithVariants(type, state0, beforeKeyword, beforeContent0, withEnd),
-                        (state0, beforeContent0) -> structureWithoutVariants(type, state0, beforeKeyword, beforeContent0, Lists.empty(), withEnd)
-                ));
+                return structureWithEnd(type, state, beforeKeyword, beforeContent, withEnd)
+                        .map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
             });
         });
+    }
+
+    private static Option<Tuple<CompileState, String>> structureWithEnd(String type, CompileState state, String beforeKeyword, String beforeContent, String withEnd) {
+        return or(state.enter(), beforeContent, Lists.of(
+                (state0, beforeContent0) -> structureWithVariants(type, state0, beforeKeyword, beforeContent0, withEnd),
+                (state0, beforeContent0) -> structureWithoutVariants(type, state0, beforeKeyword, beforeContent0, Lists.empty(), withEnd)
+        ));
     }
 
     private static Option<Tuple<CompileState, String>> structureWithVariants(String type, CompileState state, String beforeKeyword, String beforeContent, String withEnd) {
@@ -1102,13 +1107,13 @@ public class Main {
             String withEnd
     ) {
         return suffix(withEnd.strip(), "}", content -> {
-            final StructurePrototype type1 = new StructurePrototype(type, name, typeParams, variants);
-            return compileAll(state.enter().mapLastFrame(last -> last.withProto(type1)), content, Main::structSegment).flatMap(tuple -> {
+            final StructurePrototype prototype = new StructurePrototype(type, name, typeParams, variants);
+            return compileAll(state.mapLastFrame(last -> last.withProto(prototype)), content, Main::structSegment).flatMap(tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }
                 return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
-            }).map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
+            });
         });
     }
 

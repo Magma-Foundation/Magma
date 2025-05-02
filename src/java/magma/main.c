@@ -709,19 +709,20 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	auto local1 = local0.stream(local0, beforeKeyword.split(beforeKeyword, " "));
 	auto local2 = /* value -> !value */;
 	auto local3 = local1.map(local1, /* String::strip */);
-	return /* (state, input) -> first */(input, infix, local3.filter(local3, local2.isEmpty(local2)).toList();
+	auto local4 = local3.filter(local3, local2.isEmpty(local2)).toList();
 
-            if (slices.contains("@Actual")) {
+            if (slices;
+	return /* (state, input) -> first */(input, infix, local4.contains("@Actual")) {
                 return new Some<>(new Tuple<>(state, ""));
             }
 
-            return first(afterKeyword, "{", (beforeContent, withEnd) -> {
-                return or(state, beforeContent, Lists.of(
-                        (state0, beforeContent0) -> structureWithVariants(type, state0, beforeKeyword, beforeContent0, withEnd),
-                        (state0, beforeContent0) -> structureWithoutVariants(type, state0, beforeKeyword, beforeContent0, Lists.empty(), withEnd)
-                ));
+            return first(local4, afterKeyword, "{", /*  (beforeContent, withEnd) -> {
+                return structureWithEnd(type, state, beforeKeyword, beforeContent, withEnd */).map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
             });
         });
+}
+/* private static */ template Option<(struct CompileState, char*)> structureWithEnd(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){
+	return or(state.enter(state), beforeContent, Lists.of(Lists, /* (state0, beforeContent0) -> structureWithVariants */(type, state0, beforeKeyword, beforeContent0, withEnd), /* (state0, beforeContent0) -> structureWithoutVariants */(type, state0, beforeKeyword, beforeContent0, Lists.empty(Lists), withEnd)));
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithVariants(char* type, struct CompileState state, char* beforeKeyword, char* beforeContent, char* withEnd){
 	auto local0 = /* (Value node) -> node */;
@@ -779,16 +780,14 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
 	auto local0 = /* last -> last */;
-	auto local1 = state.enter(state);
-	auto local2 = /* content -> {
-            final StructurePrototype type1 = new StructurePrototype(type, name, typeParams, variants);
-            return compileAll */(local1.mapLastFrame(local1, local0.withProto(local0, type1)), content, /*  Main::structSegment */);
-	return suffix(withEnd.strip(withEnd), "}", local2.flatMap(local2, /* tuple -> {
+	return suffix(withEnd.strip(withEnd), "}", /* content -> {
+            final StructurePrototype prototype = new StructurePrototype(type, name, typeParams, variants);
+            return compileAll */(state.mapLastFrame(state, local0.withProto(local0, prototype)), content, /*  Main::structSegment */).flatMap(tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }
-                return new Some<>(assembleStruct(type, tuple */.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
-            }).map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
+                return new Some<>(assembleStruct(type, tuple.left, beforeKeyword, name, typeParams, params, variants, tuple.right));
+            });
         });
 }
 /* private static */ (struct CompileState, char*) assembleStruct(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* oldContent){/* if (!variants.isEmpty()) {
