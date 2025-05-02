@@ -80,6 +80,8 @@ public class Main {
         default String_ generateWithName(String name) {
             return this.generate().appendSlice(" ").appendSlice(name);
         }
+
+        String stringify();
     }
 
     private interface Parameter extends Node {
@@ -711,6 +713,11 @@ public class Main {
         public String_ generate() {
             return Strings.from(generatePlaceholder(this.input));
         }
+
+        @Override
+        public String stringify() {
+            return generatePlaceholder(this.input);
+        }
     }
 
     private record Functional(List<Type> arguments, Type returns) implements Type {
@@ -733,6 +740,18 @@ public class Main {
                     .appendSlice(joinedArguments)
                     .appendSlice(")");
         }
+
+        @Override
+        public String stringify() {
+            var joined = this.arguments.iterate()
+                    .map(Node::generate)
+                    .map(String_::toSlice)
+                    .collect(new Joiner("_"))
+                    .map(value -> "__" + value)
+                    .orElse("");
+
+            return "Func_" + this.returns.stringify() + joined;
+        }
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -748,6 +767,15 @@ public class Main {
                     .orElse("");
 
             return "template " + this.base() + "<" + generatedTuple + ">";
+        }
+
+        @Override
+        public String stringify() {
+            return this.base + this.arguments.iterate()
+                    .map(Node::toString)
+                    .collect(new Joiner("_"))
+                    .map(value -> "_" + value)
+                    .orElse("");
         }
     }
 
@@ -772,6 +800,11 @@ public class Main {
         private String generate0() {
             return this.value;
         }
+
+        @Override
+        public String stringify() {
+            return this.value;
+        }
     }
 
     private record Ref(Type type) implements Type {
@@ -783,6 +816,11 @@ public class Main {
         private String generate0() {
             return this.type.generate().toSlice() + "*";
         }
+
+        @Override
+        public String stringify() {
+            return this.type.stringify() + "_star";
+        }
     }
 
     private record TupleType(List<Type> arguments) implements Type {
@@ -793,6 +831,14 @@ public class Main {
 
         private String generate0() {
             return "(" + generateNodesAsValues(this.arguments) + ")";
+        }
+
+        @Override
+        public String stringify() {
+            return this.arguments.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .orElse("");
         }
     }
 
@@ -807,6 +853,11 @@ public class Main {
             return Strings.from("struct ")
                     .appendSlice(this.input)
                     .appendSlice(typeParamString);
+        }
+
+        @Override
+        public String stringify() {
+            return this.input;
         }
     }
 
@@ -885,6 +936,11 @@ public class Main {
 
         private String generate0() {
             return this.value;
+        }
+
+        @Override
+        public String stringify() {
+            return this.name().toLowerCase();
         }
     }
 
@@ -1542,7 +1598,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> invocation(CompileState state0, String input) {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(withoutEnd, new DividingSplitter(Main::foldInvocationStart), (withEnd, argumentsString) -> {
-                return suffix(withEnd.strip(), "(", callerString -> value(state0, callerString).flatMap(callerTuple -> {
+                return suffix(withEnd.strip(), "(", callerString -> invokableHeader(state0, callerString).flatMap(callerTuple -> {
                     return Main.parseValues(callerTuple.left, argumentsString, Main::value).map(argumentsTuple -> {
                         var oldCaller = callerTuple.right;
 
@@ -1567,6 +1623,23 @@ public class Main {
                         return new Tuple<>(newState, new Invocation(newCaller, newArguments));
                     });
                 }));
+            });
+        });
+    }
+
+    private static Option<Tuple<CompileState, Value>> invokableHeader(CompileState state, String callerString) {
+        return or(state, callerString, Lists.of(
+                Main::construction,
+                Main::value
+        ));
+    }
+
+    private static Option<Tuple<CompileState, Value>> construction(CompileState state1, String input) {
+        return prefix(input.strip(), "new ", s1 -> {
+            return type(state1, s1).map(typeTuple -> {
+                var name = typeTuple.right.stringify();
+                var left = typeTuple.left;
+                return new Tuple<>(left, new Symbol(name));
             });
         });
     }
@@ -1781,7 +1854,7 @@ public class Main {
         return index == -1 ? new None<Integer>() : new Some<>(index);
     }
 
-    private static Option<Tuple<CompileState, String>> prefix(String input, String prefix, Function<String, Option<Tuple<CompileState, String>>> mapper) {
+    private static <T> Option<Tuple<CompileState, T>> prefix(String input, String prefix, Function<String, Option<Tuple<CompileState, T>>> mapper) {
         if (!input.startsWith(prefix)) {
             return new None<>();
         }
